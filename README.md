@@ -3,7 +3,7 @@ Creates and analyzes combat logs in ESO
 
 Pasted from EsoUI description:
 
-[U][FONT=Georgia][SIZE=2][COLOR=Yellow][B]Description[/B][/COLOR][/SIZE][/FONT][/U]
+Description
 
 [COLOR=DarkOrange][B]Please note that the addon is still in beta so don't expect everything to be perfect.[/B][/COLOR]
 
