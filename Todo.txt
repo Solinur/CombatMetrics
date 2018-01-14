@@ -1,0 +1,22 @@
+cleanup end of fight calculations --> delete unused variables
+make calculation visible
+weaving/timing of skills
+make logs safe, prevent saving too much using garbage collector
+make saved logs efficient, allow partial saving
+visual Info on available space
+
+Bug, unconfirmed: Micro stuttering at Target Dummy
+Bug, confirmed: No fight recording at Target Dummy, but only outside of house
+
+add tracking of HP reg
+death counter
+graphs
+select timeframe
+add message events for bosslive ?
+
+detailed skill report
+
+
+
+
+

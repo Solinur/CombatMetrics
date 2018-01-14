@@ -1,0 +1,211 @@
+0.5.6: 3,172 User
+[*]When all data has been deleted the panel will now properly reset.
+[*]You can now choose to hide the background for the live window
+[*]You can no longer save or load fights multiple times. The save button will be greyed out for fights which are already among the saved fights, when trying to load a fight which is already loaded you will jump to the fight instead.
+[*]Skills are now coloured by skill type. (note that this feature only works for new fights. Saved fights which were recorded previously will still shop up in the old way)
+[*]Sometimes long-term buffs were shown to have been active > 100% even if they were active all the time. This has been fixed to a degree but might still appear due to lag. (Thanks to @Scootworks for reporting)
+[*]Attempted to fix an issue with Blade of Woe causing problems with dps calculation
+[*]Attempted to fix an issue where "empty" fights were being recorded. 
+[*]Attempted to fix an issue where the addon gets "stuck" in calculations
+[*]Fixed a bug where the page buttons for the combat log were not hiding properly
+[*]Fixed a bug where a fight would be named after a boss, when a boss was nearby but not participating in the fight.
+
+0.5.7 3,243 (14.06.2016, 1:00)
+[*]Fixed a bug that showed wrong colors for skills in fights with multiple targets
+
+0.5.8 4,407 (22.06.2016, 2:00)
+[*]Fixed a bug that appeared when no fights had been saved and a recent fight was selected in the overview. 
+[*]Combat log now correctly shows blocked and shielded hits. 
+[*]Attempted to fix an issue where the addon gets "stuck" in calculations.
+
+Version 0.5.9 5,757 (29.06.2016, 1:12)
+[*]Attempted to fix a bug that caused the game to crash after bossfights with multiple enemies.
+
+Version 0.5.10 6,774 (02.07.2016, 1:12)
+[*]Fixed an issue where the addon was still "stuck" in calculations for people who experienced this before the fix in version 0.5.8 and couldn't resolve it since (e.g. by resetting the SavedVariables).
+[*]Added a slash command to toggle the main window.
+
+
+0.6
+[*]Added tracking of group buffs and debuffs that you apply to an enemy (It looks to me like it is not possible to track debuffs applied from group members)
+[*]Added detailed tracking of resource drain/gain effects 
+[*]Added two more layouts for the live report ("Horizontal" and "Vertical"), in addition to the standard one which is called "Compact". 
+[*]Added several debug options. Most of them should not be needed for the average player but they might help in identifying bugs/problems.
+[*]Added a scaling option for the live report window
+[*]Added a scaling option for the fight report window
+[*]Added little info tooltips to explain the function of the buttons (hope I didn't miss any)
+[*]Added Major Force, Weapon Enchant Procs and some Set Procs to the Buffs tracking. They had to be added manually because, the tracking for them works different than for the other Buffs, which can be tracked directly via the API. Those Effects were taken from Srendarr, big thanks to @Phinix, check out his fantastic Addon if you haven't)
+[*]Changed the way DPS is posted. There also is a new option which posts Boss DPS in bossfights and the Sum DPS in all other fights.
+[*]Added API Compatibility for the Shadows of the Hist DLC (I have run a Dungeon without problems but I didn't thoroughly test everything yet)
+[*]updated LibAddonMenu to version 2.0r20.2
+
+0.6.1 9,587 (15.07.2016, 22:08)
+[*]add indication when Boss DPS is shown
+[*]Mark bosses in unit overview
+[*]Slight change in Boss DPS post to chat format to indicate when boss dps is shown.
+[*]removed forgotten debug output
+[*]fixed a bug that caused a lua error
+
+0.6.2
+[*]Removed compatability with API 100015
+[*]Updated LibAddonMenu to 2.0r21
+[*]Added a timestamp to the Combat Start/end message in Chatlog
+[*]Added digit grouping to DPS posts
+[*]Fixed a bug that could appear if you were getting into combat but not participating
+[*]Fixed a bug that could appear if you were inviting someone into the group
+
+0.6.3 13,743 (08.08.2016) 22:16
+[*]fixed a bug that appeared when posting damage to chat 
+[*]fixed some issues with the UI scaling (e.g. slider bars hiding some numbers)
+
+0.6.4 15,863 (15.08.2016) 00:30
+[*]implemented japanese translation (if someone wants to do other translations, just go ahead ;) )
+
+0.6.5 ?????? (05.10.2016) 13:40
+[*]API Bump to One Tamriel
+
+0.6.6 29,869 (23.10.2016) 23:21
+[*]Added a light mode option to turn of statistic calculations (and only show dps/hps in the live window)
+[*]Added an option to turn on light mode for cyrodil 
+[*]Added an option to turn all addon activity off for cyrodil
+[*]Fixed an issue where sometimes no outgoing buffs were shown in the "Healing caused" tab
+[*]Attempted to fix an issue where group members were used to name the fight. 
+[*]Fixed a bug where player buffs were recorded twice when in group. 
+[*]Fixed a bug where buffs in combat log wouldn't show other targets then the player. 
+[*]Fixed a bug where player selfheal was not getting filtered properly in combat log 
+[*]Fixed a bug where resource and stat data were not shown in the combat log when the fight was loaded from saved fights.
+[*]Fixed a bug where permanent buffs were not shown in the buff recap. 
+[*]Note: Combat Metrics got moved to Combat Addons since a lot of things are working quite good, I'd say. 
+[*]Note: Some entries in the Outgoing (De-)buffs tab are clearly not related to the player (The passive boni from repentance, Warhorn.. ). Since I have no good way to filter them without impairing functionality I'll leave it as it is. 
+
+0.6.7 31,533 (24.10.2016) 22:40
+[*]Updated Japanese Translation
+
+0.6.8 36,363 (01.11.2016) 21:09
+[*]Updated LibAddonMenu to version 2.0 r23
+
+0.6.9 36,397 (01.11.2016) 21:21
+[*]Fixed a critical error introduced in last patch.
+
+0.6.10 54,086 (09.01.2017) 00:37
+[*]Fixed a bug where an error message appeared when a certain combination of selections was made
+[*]Added Ability IDs for buffs if the respective debug option is switched on
+[*]Added the possibility to replace ability names or icons. Refer to the addon description for more details
+[*]Outgoing Damage that gets absorbed by a shield now contributes towards total damage.
+[*]Added a check to ignore damage from "The Mage" and "The Warrior" when they blow up remaining adds on entering their enrage phase. This was setting the group damage values off. 
+[*]The combat will now reset when The Mage leaves its throne. 
+[*]You can now manually reset the fight (via Keybind or by typing "/cmx reset"). Use with caution, as it may cause issues. 
+
+0.6.11 67,028 (05.02.2017) 15:51
+[*]Add setting to disable group damage monitoring in large groups
+[*]Added keybind to toggle the live damage window
+[*]Added option to turn off the automatic channel selection when posting damage
+[*]Added tracking of Crusher Enchantment
+[*]Replaced the delete icon. (It was confused with one indicating to close a window)
+[*]API Bump to Homestead (100018)
+
+0.6.12
+[*]Removed tracking of effects for other units than the player. This removes debuff tracking for now. This was necessary since all debuff events are broadcasted now which lead to performance issues.
+
+0.6.13 79,843 (08.02.2017) 22:48
+[*]Added a workaround for "better" buff tracking. It's a bit weird, but probably a bit better. You'll see.
+
+0.6.14 90,681 (15.02.2017) 23:55
+[*]While we further wait for the API patch, I implemented a few fixes for stuff that stopped working due to the API change issue. (Group heal/incoming DPS not shown, Fight reset @ Mage ..)
+
+0.6.15 92,620 (16.02.2017) 10:31
+[*]Fixed a critical error introduced in last patch. 
+
+0.6.16 97,770 (17.02.2017) 21:14
+[*]Fixed the broken bufftracking introduced recently.
+
+0.6.17
+[*]fixed missing icons
+
+0.6.18 105,371 (20.02.2017) 21:57
+[*]Changed buff tracking so it should behave more or less like before the Homestead update, with one exception: Enemy debuffs are now tracked globally (so they don't reflect your contribution but the one from the whole group. In a future update I will try to display both)
+
+0.6.19 116,137 (02.03.2017) 00:00
+[*]Added some bugfixes to buff tracking (duplicate events, some buffs not showing)
+[*]Added some slash commands to post dps: /CMX dps, /CMX sdps, /CMX mdps, /CMX alldps for automatic, single-target, multi-target or single + multitarget DPS respectively. /CMX hps to post HPS
+[*]Fixed a typo and some small code improvements (thx @ Ayantir)
+
+0.6.20 130,016 (19.03.2017) 14:27
+[*]Small fixes
+
+0.6.21 201,864 (22.05.2017) 22:40
+[*]API Bump to Morrowind (100019)
+[*]Added warning for upcoming update: At the end of this week, between May 26th and May 28th a new, almost completely rewritten update for Combat Metrics will be released. Due to changes to the data structure, it is neccessary to reset all data. Maybe make a backup or some screenshots of you favorite fights.
+
+0.7.0 218,717 (28.05.2017) 23:41
+[*]Rewrote major parts of the code to improve performance and efficiency. This resulted in a new data structure which makes it neccessary to reset alls saved data, including saved fights and your settings.
+[*]Most of the things are still the same (just done differently in the background) so don't expect any larger changes.
+[*]I will rework the UI code next. I don't plan to change much, but feel free to send me any ideas or comments regarding the interface.
+[*]Posting damage to chat can now be done anytime and is no longer affected by the current calculation status of the fight. You won't accidentially post low DPS numbers anymore.
+[*]Fights will no longer be calculated after the end of the fight. They now will get calculated when you attempt to view them the fight report. The progress of the calculation is now shown, so you no longer have to wonder if the addon got stuck. The calculation is now faster, and also uses a more aggresive setting that might cause minor frame drops.
+[*]Support for stackable buffs: Each number of stacks will show up as a separate buff. This potentially increases the number of buffs. I have ideas how to improve that in the future.
+[*]Support for group buffs: Buff uptime is given for group and player separately. 
+[*]DPS or HPS in the unit window is now shown as the damage per second between the first and the last hit or heal to that unit. This means, the total DPS/HPS will not be the sum of the individual unit DPS/HPS.
+[*]Fights are now saved accountwide so you can review them on any of your chars. The overview shows the Character that you played with in the fight. 
+[*]Since the introduction of group buffs tracking in Homestead, fights are quite large so only a few could be saved before reaching the file size limit (64MB). If you normally save a fight now by clicking the save button you will no longer save the combat log. This allows to save a lot more fights. If you wish to save a fight including the log, press Shift+Click. This is also explained by the tooltip.
+
+0.7.1 226,373 (30.05.2017) 01:34
+[*]Added a fix for the "Turn off in Cyrodil" setting
+[*]Added a fix to correctly hide the Live Report Window according to the respective setting
+[*]Added a fix to correctly set group tracking
+[*]Added a fix where posting DPS didn't work corectly when using options involving bosses
+[*]Fixed streaming combat log into chat window.
+[*]Added option to rename the chat tab where combat log data gets streamed to. 
+
+0.7.2 233,499 (30.05.2017) 23:55
+[*]Added a fix to posting damage via slash commands
+[*]Added a fix to showing crit % in the ability panel
+[*]Added a fix to combat log text when receiving damage.
+
+0.7.3 240,202 (31.05.2017) 23:10
+[*]Removed a spammy debug message that got lost.
+[*]Fixed a bug that caused more fights to be kept in the recent fight list than it was specified in the settings.
+
+0.7.4 264,095 (19.06.2017) 23:38
+[*]Fixed Ultimate reg and drain tracking
+[*]Fixed a bug that threw an error message when the player didn't do anything
+[*]Added an option to turn off display of stacks
+[*]Some minor changes for integration of a new addon (coming soon)
+
+0.7.5 282,933 (02.07.2017) 22:49
+[*]Fixed fight reset at the Mage
+
+0.7.6 307,157 (27.07.2017) 21:43
+[*]Fixed issue that could trigger a lua error under rare conditions
+[*]Added (most likely temporary) workaround for Minor Magickasteal. Every magicka regeneration tick that is exactly 300 is attributed to Minor Magickasteal for now.
+
+0.7.7 321,451 (05.08.2017) 18:40
+[*]Replaced workaround for Minor Magickasteal with a proper fix. This was not a bug by ZOS, but a mistake in my code.
+
+0.7.8 335,653 (13.08.2017) 20:40
+[*]API Bump to Horns of the Reach (100020)
+[*]Fixed some leaked global variables. 
+
+0.7.9 419,983 (05.01.2018) 19:50
+[*]API Bump to Clockwork City (100021)
+[*]Note: I'm still working on version 0.8.0, but there may be a beta soon. 
+
+0.7.10 425,912 (06.01.2018) 15:07
+[*]Updated LibAddonMenu to version 2.0 r25 to fix an issue (for real this time)
+
+0.7.10 442,014 (11.01.2018) 22:27
+[*]API Bump to Dragon Bones (100022)
+[*]Bugfix for an arror that prevented to open the report window on PTS.
+
+0.8
+[*] The UI has been completely rewritten. It mostly still works the same, but the coed behind it is cleaner. Hopefully I didn't introduce too many bugs :D.
+[*] Added "Critical Damage Done" to the respective stats panels. (Separately for Spell/Weapon Attacks)
+[*] Added "Spell Penetration" and "Physical Penetration" to the respective stats panels. It will update based on the targets selected in the unit panel. A Setting in the settings menu allows you to change the assumed resistance of your targets and the assumed value for crusher as I cannot read it from the API.
+[*] Reworked how average values of stats are calculated. Before all damage effects would be used to weight the stats. Now magicka related stats are only weighted by magicka damage effects. "Critical Damage Done" is only weighted by crits.
+[*] Buffs and Debuffs cast before the start of the fight will now be tracked.
+[*] The fight label can now be edited. Just double click it!
+[*] Added an option to prioritize keeping boss fights when deleting recent fights due to reaching the limit.
+[*] Added an option to mark buffs/debuffs as favourite. Just right-click on one in the buff panel. They will then be shown on the top of the List.
+[*] The fightlist (when you "load" a fight) shows a few more bits of information about the fight, like zone, character, time. Depending on the Selected Category, (e.g. "Damage Caused", "Healing Done") DPS or HPS will be shown.
+[*] Fixed an issue where the name of the fight was not set in the fightlist if the fight had not been calculated yet.
+[*] Fixed an issue when a unit and a debuff were selected that nothing got shown in the combat log.

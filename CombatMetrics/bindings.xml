@@ -1,0 +1,30 @@
+<Bindings>
+	<Layer name="SI_KEYBINDINGS_LAYER_GENERAL">
+		<Category name="CombatMetrics">
+			<Action name="CMX_REPORT_TOGGLE">
+				<Up>CombatMetrics_Report:Toggle()</Up>
+			</Action>
+			<Action name="CMX_POST_DPS">
+				<Up>CMX.PosttoChat("DPST")</Up>
+			</Action>
+			<Action name="CMX_POST_DPS_SMART">
+				<Up>CMX.PosttoChat("SmartDPS")</Up>
+			</Action>
+			<Action name="CMX_POST_DPS_SINGLE">
+				<Up>CMX.PosttoChat("DPSS")</Up>
+			</Action>
+			<Action name="CMX_POST_DPS_MULTI">
+				<Up>CMX.PosttoChat("DPSM")</Up>
+			</Action>
+			<Action name="CMX_POST_HPS">
+				<Up>CMX.PosttoChat("HPS")</Up>
+			</Action>
+			<Action name="CMX_RESET_FIGHT">
+				<Up>CMX.ResetFight()</Up>
+			</Action>
+			<Action name="CMX_LIVEREPORT_TOGGLE">
+				<Up>CombatMetrics_LiveReport:Toggle()</Up>
+			</Action>
+		</Category>
+	</Layer>
+</Bindings>
