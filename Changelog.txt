@@ -198,7 +198,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*]Bugfix for an arror that prevented to open the report window on PTS.
 
 0.8
-[*] The UI has been completely rewritten. It mostly still works the same, but the coed behind it is cleaner. Hopefully I didn't introduce too many bugs :D.
+[*] The UI has been completely rewritten. It mostly still works the same, but the code behind it is cleaner. Hopefully I didn't introduce too many bugs :D.
 [*] Added "Critical Damage Done" to the respective stats panels. (Separately for Spell/Weapon Attacks)
 [*] Added "Spell Penetration" and "Physical Penetration" to the respective stats panels. It will update based on the targets selected in the unit panel. A Setting in the settings menu allows you to change the assumed resistance of your targets and the assumed value for crusher as I cannot read it from the API.
 [*] Reworked how average values of stats are calculated. Before all damage effects would be used to weight the stats. Now magicka related stats are only weighted by magicka damage effects. "Critical Damage Done" is only weighted by crits.
