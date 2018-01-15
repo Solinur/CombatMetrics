@@ -25,7 +25,6 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*]Fixed an issue where the addon was still "stuck" in calculations for people who experienced this before the fix in version 0.5.8 and couldn't resolve it since (e.g. by resetting the SavedVariables).
 [*]Added a slash command to toggle the main window.
 
-
 0.6
 [*]Added tracking of group buffs and debuffs that you apply to an enemy (It looks to me like it is not possible to track debuffs applied from group members)
 [*]Added detailed tracking of resource drain/gain effects 
@@ -198,7 +197,10 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*]Bugfix for an arror that prevented to open the report window on PTS.
 
 0.8
-[*] The UI has been completely rewritten. It mostly still works the same, but the code behind it is cleaner. Hopefully I didn't introduce too many bugs :D.
+[*] Combat Metrics can now be found on Github: https://github.com/Solinur/CombatMetrics. 
+[*] The UI has been completely rewritten. It still works the same for most parts, but the code behind it is cleaner and more performant. Hopefully I didn't introduce too many bugs :D.
+[*] Added Character Info to the report panel
+[*] Added the current version of the ESO client to the report panel (lower right)
 [*] Added "Critical Damage Done" to the respective stats panels. (Separately for Spell/Weapon Attacks)
 [*] Added "Spell Penetration" and "Physical Penetration" to the respective stats panels. It will update based on the targets selected in the unit panel. A Setting in the settings menu allows you to change the assumed resistance of your targets and the assumed value for crusher as I cannot read it from the API.
 [*] Reworked how average values of stats are calculated. Before all damage effects would be used to weight the stats. Now magicka related stats are only weighted by magicka damage effects. "Critical Damage Done" is only weighted by crits.
@@ -209,3 +211,4 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] The fightlist (when you "load" a fight) shows a few more bits of information about the fight, like zone, character, time. Depending on the Selected Category, (e.g. "Damage Caused", "Healing Done") DPS or HPS will be shown.
 [*] Fixed an issue where the name of the fight was not set in the fightlist if the fight had not been calculated yet.
 [*] Fixed an issue when a unit and a debuff were selected that nothing got shown in the combat log.
+[*] Added an option to change opacity of the live report.
