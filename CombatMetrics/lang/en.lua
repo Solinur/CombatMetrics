@@ -169,6 +169,7 @@
 	SI_COMBAT_METRICS_FAVOURITE_REMOVE = "Remove from Favourites", -- Remove from Favourites NEW
 
 -- Menus
+
 	SI_COMBAT_METRICS_MENU_PROFILES = "Profiles",  -- Profiles
 
 	SI_COMBAT_METRICS_MENU_AC_NAME = "Use accountwide settings",  -- Use accountwide settings
@@ -276,6 +277,7 @@
 	SI_COMBAT_METRICS_MENU_DEBUG_SPECIAL_TOOLTIP = "Print certain special events to the system chat window",  -- Print some other events to the system chat window
 
 -- make a label for keybinding
+
 	SI_BINDING_NAME_CMX_REPORT_TOGGLE = "Toggle Fight Report",
 	SI_BINDING_NAME_CMX_LIVEREPORT_TOGGLE = "Toggle Live Report",
 	SI_BINDING_NAME_CMX_POST_DPS_SMART = "Post Boss or Total DPS",
