@@ -192,7 +192,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 0.7.10 425,912 (06.01.2018) 15:07
 [*]Updated LibAddonMenu to version 2.0 r25 to fix an issue (for real this time)
 
-0.7.10 442,014 (11.01.2018) 22:27
+0.7.11 442,014 (11.01.2018) 22:27
 [*]API Bump to Dragon Bones (100022)
 [*]Bugfix for an arror that prevented to open the report window on PTS.
 
