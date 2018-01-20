@@ -858,9 +858,14 @@ local function toggleFightReport()
 		
 		CombatMetrics_Report:Update(#CMX.lastfights>0 and #CMX.lastfights or nil)
 		
-		SetGameCameraUIMode(true)
+		SCENE_MANAGER:SetInUIMode(true)
 		
 		if #CMX.lastfights>0 and not CMX.inCombat and db.autoscreenshot and (db.autoscreenshotmintime ==0 or CMX.lastfights[#CMX.lastfights]["combattime"]>db.autoscreenshotmintime) then zo_callLater(TakeScreenshot, 400) end
+	
+	else
+	
+		SCENE_MANAGER:Toggle("CMX_REPORT_SCENE")
+	
 	end
 end
 
