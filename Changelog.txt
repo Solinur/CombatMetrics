@@ -200,6 +200,9 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*]Fixed scene toggle for main window
 [*]Fixed issue preventing the loading of japanese locale
 
+0.7.13 480,303 (26.01.2018) 23:14
+[*]Fixed an issue where the LiveReport window could show after the loading screen even if the option to turn Combat Metrics off in Cyrodil was active.
+
 0.8
 [*] Combat Metrics can now be found on Github: https://github.com/Solinur/CombatMetrics. 
 [*] The UI has been completely rewritten. It still works the same for most parts, but the code behind it is cleaner and more performant. Hopefully I didn't introduce too many bugs :D.

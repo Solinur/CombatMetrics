@@ -1374,8 +1374,8 @@ local CMX_STATUS_DISABLED = 0
 local CMX_STATUS_LIGHTMODE = 1
 local CMX_STATUS_ENABLED = 2
 
-local registrationStatus = CMX_STATUS_DISABLED
-local registeredGroup = false
+local registrationStatus
+local registeredGroup
 
 local function UpdateEvents()
 
@@ -1386,6 +1386,8 @@ local function UpdateEvents()
 	local isOff = ava == true and db.offincyrodil == true
 	
 	local newstatus = (isOff and CMX_STATUS_DISABLED) or (IsLightMode and CMX_STATUS_LIGHTMODE) or CMX_STATUS_ENABLED
+	
+	CombatMetrics_LiveReport:Toggle(newstatus ~= CMX_STATUS_DISABLED and db.liveReport.enabled)
 	
 	if registrationStatus ~= newstatus then 
 	
@@ -1398,8 +1400,6 @@ local function UpdateEvents()
 			LC:UnregisterCallbackType(LIBCOMBAT_EVENT_UNITS, UnitsCallback, CMX.name)
 			LC:UnregisterCallbackType(LIBCOMBAT_EVENT_FIGHTRECAP, FightRecapCallback, CMX.name)
 			LC:UnregisterCallbackType(LIBCOMBAT_EVENT_FIGHTSUMMARY, FightSummaryCallback, CMX.name)
-			
-			CombatMetrics_LiveReport:Toggle(false)
 	
 		elseif newstatus == CMX_STATUS_LIGHTMODE then 
 		
@@ -1412,8 +1412,6 @@ local function UpdateEvents()
 			LC:RegisterCallbackType(LIBCOMBAT_EVENT_UNITS, UnitsCallback, CMX.name)
 			LC:RegisterCallbackType(LIBCOMBAT_EVENT_FIGHTRECAP, FightRecapCallback, CMX.name)
 			
-			CombatMetrics_LiveReport:Toggle(db.liveReport.enabled)
-			
 		elseif newstatus == CMX_STATUS_ENABLED then 
 		
 			for i = LIBCOMBAT_EVENT_DAMAGE_OUT,LIBCOMBAT_EVENT_MESSAGES do
@@ -1425,8 +1423,6 @@ local function UpdateEvents()
 			LC:RegisterCallbackType(LIBCOMBAT_EVENT_UNITS, UnitsCallback, CMX.name)
 			LC:RegisterCallbackType(LIBCOMBAT_EVENT_FIGHTRECAP, FightRecapCallback, CMX.name)
 			LC:RegisterCallbackType(LIBCOMBAT_EVENT_FIGHTSUMMARY, FightSummaryCallback, CMX.name)
-			
-			CombatMetrics_LiveReport:Toggle(db.liveReport.enabled)
 	
 		end 
 		
