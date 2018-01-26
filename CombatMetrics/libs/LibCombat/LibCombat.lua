@@ -92,13 +92,13 @@ local critbonusabilities = {
 
 	{
 		["type"] = SKILL_TYPE_CLASS, 
-		["line"] = 1, 
+		["line"] = GetAPIVersion() == 100022 and 13 or 1, 
 		["skill"] = 7, 
 		["effect"] = {[31698] = 5, [44046] = 10	}	-- Templar: Piercing Spear
 	},
 	{
 		["type"] = SKILL_TYPE_CLASS, 
-		["line"] = 1, 
+		["line"] = GetAPIVersion() == 100022 and 9 or 1, 
 		["skill"] = 10, 
 		["effect"] = {[36641] = 5, [45060] = 10	}	-- Nightblade: Hemorrhage
 	},
@@ -349,8 +349,6 @@ local function GetCritBonusFromPassives()
 	
 		local skilled = GetSkillAbilityId(skillType, line, skill)
 		
-		local value = 0
-		
 		for id, effect in pairs(ability.effect) do
 		
 			if skilled == id then bonus = effect end
@@ -486,7 +484,7 @@ local function GetCritbonus()
 	
 		for i = 1, 6 do
 		
-			if GetAssignedSlotFromSkillAbility(skillType, line, i) ~= nil then 
+			if GetAssignedSlotFromSkillAbility(skillType, line, i) ~= nil then 		-- Determines if an ability is equiped which "activates" the passive. Works both for templars and nightblades.
 				
 				isactive = true 
 				break 
