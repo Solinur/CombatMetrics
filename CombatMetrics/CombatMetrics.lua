@@ -1032,7 +1032,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 	
 	if iend >= #logdata then
 	
-		Print(db.debuginfo.calculationtime, "Start end routine")
+		Print("calculationtime", "Start end routine")
 		
 		local data = fight.calculated
 		
@@ -1213,7 +1213,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		fight.calculating = false
 		fight.cindex = nil
 		
-		Print(db.debuginfo.calculationtime, "Time for final calculations: %d ms", GetGameTimeMilliseconds() - scalcms)
+		Print("calculationtime", "Time for final calculations: %d ms", GetGameTimeMilliseconds() - scalcms)
 
 		return
 	else
@@ -1227,7 +1227,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 	local newchunksize = math.min(math.ceil(desiredtime/math.max(chunktime,1)*db.chunksize/stepsize)*stepsize,10000)
 	
-	Print(db.debuginfo.calculationtime, "Chunk calculation time: %d ms, new chunk size: %d", chunktime, newchunksize)
+	Print("calculationtime", "Chunk calculation time: %d ms, new chunk size: %d", chunktime, newchunksize)
 	
 	db.chunksize = newchunksize
 	
@@ -1443,7 +1443,7 @@ local function UpdateEvents()
 		registeredGroup = false
 	end
 	
-	Print(db.debuginfo.special, "State: %d, Group: %d", registrationStatus, registeredGroup)
+	Print("special", "State: %d, Group: %d", registrationStatus, registeredGroup)
 end
 
 do

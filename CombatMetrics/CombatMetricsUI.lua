@@ -141,8 +141,8 @@ local function checkSaveLimit(fight)
 
 	local size, constants = SVHandler.Check(fight)
 	
-	Print(db.debuginfo.save, "SV Size: %.3f MB, %.1f%%", size, size*100/db.maxSVsize)
-	Print(db.debuginfo.save, "SV Keys: %d, %.1f%%", constants, constants/1310.71) --131071 is the maximum possible number of constants
+	CMX.Print("save", "SV Size: %.3f MB, %.1f%%", size, size*100/db.maxSVsize)
+	CMX.Print("save", "SV Keys: %d, %.1f%%", constants, constants/1310.71) --131071 is the maximum possible number of constants
 
 	local isvalid = (size < db.maxSVsize and constants < 131071)
 	
@@ -888,7 +888,7 @@ end
 
 local function updateTitlePanel(panel)
 
-	Print("dev", "Updating TitlePanel")
+	CMX.Print("dev", "Updating TitlePanel")
 
 	-- update character info
 	
@@ -1057,7 +1057,7 @@ local CountStrings = {
 
 local function updateFightStatsPanelLeft(panel)
 
-	Print("dev", "Updating FightStatsPanelLeft")
+	CMX.Print("dev", "Updating FightStatsPanelLeft")
 
 	local data = fightData and fightData.calculated or {}
 	local category = db.FightReport.category
@@ -1247,7 +1247,7 @@ local attackStatsKeys = { 			-- {label, format, convert}
 
 local function updateFightStatsPanelRight(panel)
 
-	Print("dev", "Updating FightStatsPanelRight")
+	CMX.Print("dev", "Updating FightStatsPanelRight")
 
 	local data = fightData or {} 
 	local powerType = db.FightReport.fightstatspanel
@@ -1382,7 +1382,7 @@ end
 
 local function updateFightStatsPanel(control)
 
-	Print("dev", "Updating FightStatsPanel")
+	CMX.Print("dev", "Updating FightStatsPanel")
 
 	control:GetNamedChild("Left"):Update(fightData, selectionData)
 	control:GetNamedChild("Right"):Update(fightData)
@@ -1391,7 +1391,7 @@ end
 
 local function updateMainPanel(mainpanel, fightData, selectionData)
 
-	Print("dev", "Updating MainPanel")
+	CMX.Print("dev", "Updating MainPanel")
 
 	mainpanel.active:Update(fightData, selectionData)
 
@@ -1472,7 +1472,7 @@ end
 
 local function updateBuffPanel(panel)
 
-	Print("dev", "Updating BuffPanel")
+	CMX.Print("dev", "Updating BuffPanel")
 
 	ResetBars(panel)
 	
@@ -1636,7 +1636,7 @@ end
 
 local function updateResourcePanel(panel)
 
-	Print("dev", "Updating ResourcePanel")
+	CMX.Print("dev", "Updating ResourcePanel")
 	
 	local subpanel1 = panel:GetNamedChild("Gains")
 	local subpanel2 = panel:GetNamedChild("Drains")
@@ -1682,7 +1682,7 @@ end
 
 local function updateRightPanel(rightPanel)
 
-	Print("dev", "Updating RightPanel")
+	CMX.Print("dev", "Updating RightPanel")
 
 	rightPanel.active:Update()
 
@@ -1701,7 +1701,7 @@ end
 
 local function updateUnitPanel(panel)
 
-	Print("dev", "Updating UnitPanel")
+	CMX.Print("dev", "Updating UnitPanel")
 
 	ResetBars(panel)
 	
@@ -1807,7 +1807,7 @@ end
 
 local function updateAbilityPanel(panel)
 
-	Print("dev", "Updating AbilityPanel")
+	CMX.Print("dev", "Updating AbilityPanel")
 
 	ResetBars(panel)
 	
@@ -1982,7 +1982,7 @@ end
 
 local function updateCombatLog(panel)
 
-	Print("dev", "Updating CombatLog")
+	CMX.Print("dev", "Updating CombatLog")
 	
 	local CLSelection = db.FightReport.CLSelection	
 	
@@ -2137,7 +2137,7 @@ end
 
 local function updateInfoRowPanel(panel)
 
-	Print("dev", "Updating InfoRow")
+	CMX.Print("dev", "Updating InfoRow")
 
 	local datetimecontrol = panel:GetNamedChild("DateTime")
 	local versioncontrol = panel:GetNamedChild("ESOVersion")
@@ -2163,7 +2163,7 @@ end
 
 local function updateFightReport(control, fightId)
 
-	Print("dev", "Updating FightReport")
+	CMX.Print("dev", "Updating FightReport")
 
 	em:UnregisterForUpdate("CMX_Report_Update_Delay")
 	
@@ -2302,7 +2302,7 @@ end
 
 local function updateFightList(panel)
 
-	Print("dev", "Updating FightListPanel")
+	CMX.Print("dev", "Updating FightListPanel")
 
 	if panel:IsHidden() then return end
 	
