@@ -1432,7 +1432,7 @@ local function UpdateEvents()
 	
 	local loadgroupevents = isGrouped and db.recordgrp == true and (GetGroupSize()<5 or db.recordgrpinlarge==true) and newstatus ~= CMX_STATUS_DISABLED
 	
-	if loadgroupevents and registeredGroup == false then 
+	if loadgroupevents and registeredGroup ~= true then 
 	
 		LC:RegisterCallbackType(LIBCOMBAT_EVENT_GROUPRECAP, GroupFightRecapCallback, CMX.name) 		
 		registeredGroup = true
