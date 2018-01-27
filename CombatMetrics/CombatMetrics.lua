@@ -21,11 +21,11 @@ CMX.version = "0.8.0"
 CMX.CustomAbilityIcon = {}
 CMX.CustomAbilityName = {}
 
-function CMX.Print(category, message, ...)
+local function Print(category, message, ...)
 	if db.debuginfo[category] then df("[%s] %s", "CMX", message:format(...)) end
 end
 
-local Print=CMX.Print
+CMX.Print = Print
 
 local offstatlist= {
 	"maxmagicka", 
@@ -1032,7 +1032,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 	
 	if iend >= #logdata then
 	
-		if db.debuginfo.calculationtime then d("Start end routine") end
+		Print(db.debuginfo.calculationtime, "Start end routine")
 		
 		local data = fight.calculated
 		
@@ -1212,7 +1212,8 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 		fight.calculating = false
 		fight.cindex = nil
-		if db.debuginfo.calculationtime then d("Chunktime End:"..GetGameTimeMilliseconds()-scalcms) end
+		
+		Print(db.debuginfo.calculationtime, "Time for final calculations: %d ms", GetGameTimeMilliseconds() - scalcms)
 
 		return
 	else
@@ -1226,7 +1227,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 	local newchunksize = math.min(math.ceil(desiredtime/math.max(chunktime,1)*db.chunksize/stepsize)*stepsize,10000)
 	
-	if db.debuginfo.calculationtime then d("Chunktime:"..chunktime..", new size: ".. newchunksize) end
+	Print(db.debuginfo.calculationtime, "Chunk calculation time: %d ms, new chunk size: %d", chunktime, newchunksize)
 	
 	db.chunksize = newchunksize
 	
@@ -1441,8 +1442,8 @@ local function UpdateEvents()
 		LC:UnregisterCallbackType(LIBCOMBAT_EVENT_GROUPRECAP, GroupFightRecapCallback, CMX.name)
 		registeredGroup = false
 	end
-		
-	if db.debuginfo.special then d("New: "..registrationStatus, "Group: "..tostring(registeredGroup)) end
+	
+	Print(db.debuginfo.special, "State: %d, Group: %d", registrationStatus, registeredGroup)
 end
 
 do
@@ -1541,6 +1542,7 @@ local svdefaults = {
 	["accountwide"] = false,
 	
 	["fighthistory"] = 25,
+	["maxSVsize"] = 10,
 	["keepbossfights"] = false,
 	["chunksize"] = 1000,
 	
@@ -1626,6 +1628,7 @@ local svdefaults = {
 		["group"] = false, 
 		["misc"] = false, 
 		["special"] = false,
+		["save"] = false,
 		["dev"] = false, 
 		
 	},
@@ -1656,7 +1659,7 @@ local function Initialize(event, addon)
 	CMX.db = ZO_SavedVars:NewAccountWide(CombatMetrics_Save, 5, "Settings", svdefaults)
 	if not CMX.db.accountwide then CMX.db = ZO_SavedVars:NewCharacterIdSettings(CombatMetrics_Save, 5, "Settings", svdefaults) end
 	
-	local fightdata = CMX_GetFightDB()
+	local fightdata = CombatMetricsFightData
 	
 	-- convert legacy data into new format 
 	
@@ -1664,18 +1667,17 @@ local function Initialize(event, addon)
 	
 	local olddata = oldsv["Fights"]
 	
-	local temptable = {}
-
-	if olddata ~= nil then 
-	
-		ZO_DeepTableCopy(olddata.fights, temptable)
+	if olddata ~= nil and olddata.fights ~= nil then 
+		
+		for id, fight in ipairs(olddata.fights) do
+		
+			fightdata.Save(fight)		-- TODO: test if this works with old format !
+		
+		end
+		
 		oldsv["Fights"] = nil
-		ZO_DeepTableCopy(temptable, fightdata)
-		temptable = nil
 		
 	end
-
-	fightdata:Check()
 	
 	--
 	

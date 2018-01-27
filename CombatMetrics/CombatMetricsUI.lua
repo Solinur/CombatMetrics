@@ -9,17 +9,12 @@ local fightData, selectionData
 local currentCLPage
 local selections, lastSelections
 local savedFights
+local SVHandler
 
 local CMX = CMX
 if CMX == nil then CMX = {} end
 local _
 local db
-
-function CMX.Print(category,message, ...)
-	if category == true or db.debuginfo[category] then df("[%s] %s", "CMX", message:format(...)) end
-end
-
-local Print = CMX.Print
 
 function CMX.GetAbilityStats()
 	return abilitystats
@@ -142,17 +137,17 @@ function NavButtonFunctions.load(control)
 
 end
 
-local function checkSaveLimit(new)
+local function checkSaveLimit(fight)
+
+	local size, constants = SVHandler.Check(fight)
 	
-	local totallines = new or 0
+	Print(db.debuginfo.save, "SV Size: %.3f MB, %.1f%%", size, size*100/db.maxSVsize)
+	Print(db.debuginfo.save, "SV Keys: %d, %.1f%%", constants, constants/1310.71) --131071 is the maximum possible number of constants
+
+	local isvalid = (size < db.maxSVsize and constants < 131071)
 	
-	for id,fight in pairs(savedFights) do
-		if type(fight) == "table" and fight.log then totallines = totallines + #fight.log + 300 end-- get the total length of logs to etimate the used space. Tests resulted in an equivalent of 250 lines per new fight table
-	end
+	return isvalid, size, constants
 	
-	if db.debuginfo.misc then d("Saving. Space:".. math.floor(totallines/130000*100).."%") end
-	
-	return totallines < 130000
 end
 
 function NavButtonFunctions.save(control, _, _, _, _, shiftkey )
@@ -167,21 +162,19 @@ function NavButtonFunctions.save(control, _, _, _, _, shiftkey )
 	
 		if lastsaved ~= nil and lastsaved.date == fightData.date then return end --bail out if fight is already saved
 		
-		local fightToSave = {}
+		SVHandler.Save(fightData, shiftkey)
 		
-		ZO_DeepTableCopy(fightData, fightToSave)
-		
-		if shiftkey == false then fightToSave.log = {} end
-		
-		if checkSaveLimit(#fightToSave.log + 300) then 
-		
-			table.insert(savedFights, fightToSave) 
+		if checkSaveLimit() then 
 			
 			CombatMetrics_Report:Update()
 			
 		else 
-		
-			assert(false, GetString(SI_COMBAT_METRICS_STORAGE_FULL)) 
+			
+			local removed = table.remove(savedFights)
+			local size, constants = SVHandler.Check(removed)
+			
+			errorstring = zo_strformat(SI_COMBAT_METRICS_STORAGE_FULL, size, constants)
+			assert(false, errorstring) 
 			
 		end
 	end
@@ -601,7 +594,7 @@ function CMX.LoadItem(listitem)
 	
 	if issaved and not (searchtable(CMX.lastfights, "date", savedFights[id]["date"])) then
 		
-		table.insert(CMX.lastfights, savedFights[id])
+		table.insert(CMX.lastfights, SVHandler.Load(id))
 		CombatMetrics_Report:Update(#CMX.lastfights)
 		
 	else
@@ -649,7 +642,7 @@ function CMX.DeleteItemLog(control)
 	local id = row.id
 
 	if issaved then
-		savedFights[id]["log"]={}
+		savedFights[id]["stringlog"]={}
 	else
 		CMX.lastfights[id]["log"]={}
 	end
@@ -2257,7 +2250,7 @@ local function updateFightListPanel(panel, data, issaved)
 			local datestring = type(fight.date) == "number" and GetDateStringFromTimestamp(fight.date) or fight.date
 			local timestring = string.format("%s, %s", datestring, fight.time)
 		
-			local fightlog = fight.log
+			local fightlog = fight.stringlog
 			local logState = fightlog and #fightlog>0
 			
 			local dpstime = fight.dpstime
@@ -2735,7 +2728,10 @@ function CMX.InitializeUI()
 
 	db = CMX.db
 	
-	savedFights = CMX_GetFightDB()
+	SVHandler = CombatMetricsFightData
+	savedFights = SVHandler.GetFights()
+	
+	checkSaveLimit()
 
 	selections = {
 		["ability"]		= {}, 

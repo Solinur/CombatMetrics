@@ -1,5 +1,7 @@
 local _
 local em = GetEventManager()
+local sv
+CombatMetricsFightData = {}
  
 local AddonName = "CombatMetricsFightData"
 local AddonVersion = 2
@@ -70,14 +72,6 @@ local function Decode(logstring, layout)
 	end
 	
 	return line
-end
-
-function CMX_TestEncoder(line, layout)
-
-	local s = Encode(line, layout)
-	
-	d(s, Decode(s, layout))
-	
 end
 
 local CombatResultTableLoad = {
@@ -196,7 +190,7 @@ local function encodeCombatLogLine(line, unitConversion)
 	
 	elseif layoutId == LAYOUT_EVENT then			-- type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType
 		
-		line[3] = unitConversion[line[3]]
+		line[3] = unitConversion[line[3]] or 0
 		line[8] = line[8] or 0
 		
 	elseif layoutId == LAYOUT_STATS then			-- type, timems, statchange, newvalue, statname
@@ -238,6 +232,8 @@ local function decodeCombatLogLine(line)
 		
 	layout = layouts[layoutId]
 	
+	if CMX.db.debuginfo.save then df("%d, %s", linetype, line) end
+	
 	local logdata = Decode(line, layout)
 		
 	if layoutId == LAYOUT_COMBAT then						-- type, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType
@@ -246,6 +242,7 @@ local function decodeCombatLogLine(line)
 	
 	elseif layoutId == LAYOUT_EVENT then					-- type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType
 		
+		if logdata[3] == 0 then logdata[3] = nil end
 		if logdata[8] == 0 then logdata[8] = nil end
 		
 	elseif layoutId == LAYOUT_STATS then					-- type, timems, statchange, newvalue, statname
@@ -263,23 +260,24 @@ local function decodeCombatLogLine(line)
 	
 	end	
 	
-	limiter = limiter + 1
-	
-	if limiter > 50 and limiter < 60 then 
-	
-		d(logdata, "---")
-		
-	end
-
 	return logdata
 
 end
 	
 local function convertCombatLog(savedFight, filters)
 
-	if filters == nil then filters = true end
-	
 	local combatlog = savedFight.log
+	savedFight.log = nil 
+
+	if filters == false or combatlog == nil or #combatlog == 0 then 
+	
+		return 	
+		
+	elseif filters == nil then 
+	
+		filters = true 
+		
+	end
 	
 	savedFight.starttime = combatlog[1][2] or 0 -- use this to store only times relative to the first time entry.
 	local starttime = savedFight.starttime
@@ -295,7 +293,7 @@ local function convertCombatLog(savedFight, filters)
 		for i, line in ipairs(combatlog) do
 			
 			line[2] = line[2] - starttime	
-
+			
 			local logstring, size = encodeCombatLogLine(line, unitConversion)
 			
 			if logstring then 
@@ -314,29 +312,36 @@ local function convertCombatLog(savedFight, filters)
 				tempLog = {}
 				currentsize = 0
 				
-			end				
+			end
 		end	
-	else
+		
+	elseif type(filters) == "table" then
 	
 		for i, line in ipairs(combatlog) do
 		
 			if filters[line[1]] == true then 
 			
 				line[2] = line[2] - starttime	
-	
+			
 				local logstring, size = encodeCombatLogLine(line, unitConversion)
-				table.insert(tempLog, logstring)
 				
-				currentsize = currentsize + size
+				if logstring then 
 				
-				if currentsize > 950 then
+					table.insert(tempLog, logstring)
+					
+					currentsize = currentsize + size
+					
+				end
+				
+				if currentsize > 975 then
 				
 					local longstring = table.concat(tempLog, ",")
 					table.insert(tempLogTable, longstring)
+					
 					tempLog = {}
 					currentsize = 0
 					
-				end	
+				end
 				
 			end
 		end
@@ -349,13 +354,15 @@ local function convertCombatLog(savedFight, filters)
 		
 	end
 	
-	savedFight.log = nil 
 	savedFight.stringlog = tempLogTable	-- pin converted log on saved fight 
 end
 
 local function recoverCombatLog(loadedFight)
 
 	local strings = loadedFight.stringlog
+	
+	if strings == nil or #strings == 0 then return end
+	
 	local combatlog = {}
 	local starttime = loadedFight.starttime
 	
@@ -402,7 +409,7 @@ local function reduceUnitIds(fight)
 end
 
 
-local function getSavedVariableSize(savedVariableGlobal)
+local function getSavedVariableSize(sv)
 
 	local copy = {}
 	
@@ -410,7 +417,7 @@ local function getSavedVariableSize(savedVariableGlobal)
 		
 	local before = collectgarbage("count")
 		
-	ZO_DeepTableCopy(savedVariableGlobal, copy)
+	ZO_DeepTableCopy(sv, copy)
 		
 	local after = collectgarbage("count")
 		
@@ -426,7 +433,7 @@ local function getSavedVariableSize(savedVariableGlobal)
 	
 end
 
-local function countSavedVariableConstants(savedVariableGlobal, constantTable)
+local function countSavedVariableConstants(sv)
 
 	if constantTable == nil then 
 	
@@ -435,9 +442,9 @@ local function countSavedVariableConstants(savedVariableGlobal, constantTable)
 		
 	end
 
-	if type(savedVariableGlobal) ~= "table" then return 1 end
+	if type(sv) ~= "table" then return 1 end
 	
-	for key, value in pairs(savedVariableGlobal) do
+	for key, value in pairs(sv) do
 	
 		if constantTable[key] == nil then 
 		
@@ -460,55 +467,77 @@ local function countSavedVariableConstants(savedVariableGlobal, constantTable)
 		end
 	end
 	
-	return constants, constantTable
+	return constants
 end
 
-local function checkSavedVariable(savedVariableGlobal)
+local function checkSavedVariable(data)
 
-	local size = getSavedVariableSize(savedVariableGlobal)
-	
-	df("SV Size: %.3f MB", size)
-	
-	constantTable = {} 
-	constants = 0
-	
-	local constants, constantTable = countSavedVariableConstants(savedVariableGlobal, constantTable)
-	
-	df("SV Keys: %d, %.1f%%", constants, constants/1310.72)
+	data = data or sv
+
+	local size = getSavedVariableSize(data)
+		
+	local constants = countSavedVariableConstants(data)
 	
 	return size, constants
 	
 end
 
-local function saveFight(savedVariableGlobal, fight, filters)
+local function saveFight(fight, filters)
 
 	newSavedFight = {}
 
 	ZO_DeepTableCopy(fight, newSavedFight)
 	
+	newSavedFight.svversion = AddonVersion
+	
 	reduceUnitIds(newSavedFight)
 	
 	convertCombatLog(newSavedFight, filters)
 	
-	table.insert(savedVariableGlobal, newSavedFight)
+	table.insert(sv, newSavedFight)
 end
 
-local function loadFight(savedVariableGlobal, id)
+local function loadFight(id)
 
 	loadedFight = {}
 
-	ZO_DeepTableCopy(savedVariableGlobal[id], loadedFight)
+	ZO_DeepTableCopy(sv[id], loadedFight)
 	
 	recoverCombatLog(loadedFight)
+	
+	loadedFight.svversion = nil
 	
 	return loadedFight
 end
 
-function CMX_GetFightDB()
+local function GetFights()
 
-	return CombatMetricsFightData_Save
+	return sv
 	
 end
+
+local function ConvertSV(version)
+
+	if version < 2 then -- convert format if coming from CombatMetrics < 0.8
+
+		for i = 1, #sv do
+		
+			saveFight(sv[1])
+			table.remove(sv, 1)
+			
+		end
+	
+	end
+	
+	sv.version = version
+
+end
+
+CombatMetricsFightData.Check = checkSavedVariable
+CombatMetricsFightData.Save = saveFight
+CombatMetricsFightData.Load = loadFight
+CombatMetricsFightData.Convert = ConvertSV
+CombatMetricsFightData.GetFights = GetFights
 
 local function Initialize(event, addon)
 
@@ -516,17 +545,13 @@ local function Initialize(event, addon)
 	
 	em:UnregisterForEvent(AddonName, EVENT_ADD_ON_LOADED)
 	
-	if CombatMetricsFightData_Save == nil then CombatMetricsFightData_Save = {["version"] = AddonVersion} end
+	sv = CombatMetricsFightDataSV
 	
-	if CombatMetricsFightData_Save["version"] == 1 then
+	if sv == nil or sv.version == nil then sv = {["version"] = AddonVersion} end
 	
-		
-		
-	end
+	local svversion = sv.version
 	
-	CombatMetricsFightData_Save.Check = checkSavedVariable
-	CombatMetricsFightData_Save.Save = saveFight
-	CombatMetricsFightData_Save.Load = loadFight
+	if svversion ~= AddonVersion then ConvertSV(svversion) end
 	
 end
 

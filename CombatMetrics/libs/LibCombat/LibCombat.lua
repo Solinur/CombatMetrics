@@ -3,9 +3,11 @@ This lib is supposed to act as an interface between the API of Eso and potential
 I extracted it from Combat Metrics, for which most of the functions are designed. I believe however that it's possible that others can use it. 
 
 Todo: 
-*work on the addon description 
+work on the addon description 
 
+Implement Debug Functions
 Idea: Weaving Metrics
+Idea: Life and Death
 
 
 

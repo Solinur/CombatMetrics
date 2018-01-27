@@ -56,7 +56,7 @@
 	SI_COMBAT_METRICS_TOGGLE_GRAPH = "Graph", -- Toggle Combat Log
 	SI_COMBAT_METRICS_TOGGLE_INFO = "Info", -- Toggle Combat Log
 
-	SI_COMBAT_METRICS_STORAGE_FULL = "The storage file is full. Delete a fight to free some space!", -- The storage file is full. Delete a fight to free some space!
+	SI_COMBAT_METRICS_STORAGE_FULL = "The storage file is full. The fight you want to save needs <<1>> MB and <<2>> indices. Delete a fight to free some space!", -- The storage file is full. Delete a fight to free some space!
 
 	SI_COMBAT_METRICS_PREVIOUS_FIGHT = "Previous Fight", -- Previous Fight
 	SI_COMBAT_METRICS_NEXT_FIGHT = "Next Fight", -- Next Fight
@@ -178,7 +178,11 @@
 	SI_COMBAT_METRICS_MENU_GS_NAME = "General Settings",  -- General Settings
 	
 	SI_COMBAT_METRICS_MENU_FH_NAME = "Fight History",  -- Fight History
-	SI_COMBAT_METRICS_MENU_FH_TOOLTIP = "Number of recent fights to save",  -- Number of recent fights to save
+	SI_COMBAT_METRICS_MENU_FH_TOOLTIP = "Number of recent fights to save",  -- Number of recent fights to save	
+	
+	SI_COMBAT_METRICS_MENU_SVSIZE_NAME = "Saved Fight Memory",  -- Saved Fight Memory
+	SI_COMBAT_METRICS_MENU_SVSIZE_TOOLTIP = "Maximum memory size for saved fights in MB",  -- Maximum memory size for saved fights in MB
+	SI_COMBAT_METRICS_MENU_SVSIZE_WARNING = "Use with caution! Setting this too high significantly increases loading times. If the file gets too large, the client might crash when attempting to load it.", -- Use with caution! Setting this too high significantly increases loading times. If the file gets too large, the client might crash when attempting to load it.
 	
 	SI_COMBAT_METRICS_MENU_BOSSFIGHTS_NAME = "Keep Boss Fights",  -- Keep Boss Fights
 	SI_COMBAT_METRICS_MENU_BOSSFIGHTS_TOOLTIP = "Delete trash fights first before deleting boss fights when limit of fights is reached",  -- Delete trash fights first before deleting boss fights when limit of fights is reached
@@ -275,7 +279,9 @@
 	SI_COMBAT_METRICS_MENU_DEBUG_MD_TOOLTIP = "Print some other events to the system chat window",  -- Print some other events to the system chat window
 	SI_COMBAT_METRICS_MENU_DEBUG_SPECIAL_NAME = "Show special debug Info",  -- Show miscellaneous debug Info
 	SI_COMBAT_METRICS_MENU_DEBUG_SPECIAL_TOOLTIP = "Print certain special events to the system chat window",  -- Print some other events to the system chat window
-
+	SI_COMBAT_METRICS_MENU_DEBUG_SAVE_NAME = "Show save data Info",  -- Show group Info
+	SI_COMBAT_METRICS_MENU_DEBUG_SAVE_TOOLTIP = "Print debug info about saved and loaded fights to the system chat window",  -- Print group joining and leave events to the system chat window
+	
 -- make a label for keybinding
 
 	SI_BINDING_NAME_CMX_REPORT_TOGGLE = "Toggle Fight Report",
