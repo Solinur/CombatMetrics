@@ -225,3 +225,4 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Fixed an issue when a unit and a debuff were selected that nothing got shown in the combat log.
 [*] Added an option to change opacity of the live report.
 [*] Added an option to lock the position of the live report.
+[*] Added an internal parameter called hpstime. This allows to calculate the HPS based of the time you have been healing, while DPS can be calculated based on the time you did damage. In the live report window the bigger one of the two will be shown. In the main report the active time will reflect hpstime when a healing category is selected. This should also address an issue where refreshing path would cause your dps to lower at the end of the fight despite nothing really happening anymore.

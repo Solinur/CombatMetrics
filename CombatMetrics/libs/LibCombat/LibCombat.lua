@@ -31,7 +31,7 @@ local db
 local reset = false
 local data = {}
 local showdebug = false --or GetDisplayName() == "@Solinur"
-local timeout = 1000
+local timeout = 500
 local activetimeonheals = true
 local ActiveCallbackTypes = {}
 lib.ActiveCallbackTypes = ActiveCallbackTypes
@@ -44,9 +44,9 @@ EffectBuffer = {}
 
 LIBCOMBAT_EVENT_MIN = 0
 LIBCOMBAT_EVENT_UNITS = 0				-- LIBCOMBAT_EVENT_UNITS, {units}
-LIBCOMBAT_EVENT_FIGHTRECAP = 1			-- LIBCOMBAT_EVENT_FIGHTRECAP, DPSOut, DPSIn, hps, HPSIn, healingOutTotal, dpstime
+LIBCOMBAT_EVENT_FIGHTRECAP = 1			-- LIBCOMBAT_EVENT_FIGHTRECAP, DPSOut, DPSIn, hps, HPSIn, healingOutTotal, dpstime, hpstime
 LIBCOMBAT_EVENT_FIGHTSUMMARY = 2		-- LIBCOMBAT_EVENT_FIGHTSUMMARY, {fight}
-LIBCOMBAT_EVENT_GROUPRECAP = 3			-- LIBCOMBAT_EVENT_GROUPRECAP, groupDPSOut, groupDPSIn, groupHPS, dpstime
+LIBCOMBAT_EVENT_GROUPRECAP = 3			-- LIBCOMBAT_EVENT_GROUPRECAP, groupDPSOut, groupDPSIn, groupHPS, dpstime, hpstime
 LIBCOMBAT_EVENT_DAMAGE_OUT = 4			-- LIBCOMBAT_EVENT_DAMAGE_OUT, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType
 LIBCOMBAT_EVENT_DAMAGE_IN = 5			-- LIBCOMBAT_EVENT_DAMAGE_IN, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType
 LIBCOMBAT_EVENT_DAMAGE_SELF = 6			-- LIBCOMBAT_EVENT_DAMAGE_SELF, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType
@@ -199,8 +199,7 @@ function UnitHandler:Initialize(name, id, unitType)
 	self.id = id
 	self.damageOutTotal = 0
 	self.dpsstart = nil 				-- start of dps in ms
-	self.dpsend = nil				 	-- end of dps in ms
-	
+	self.dpsend = nil				 	-- end of dps in ms	
 	
 end
 
@@ -213,12 +212,14 @@ function FightHandler:New(...)
 end
 
 function FightHandler:Initialize()
-	self.char = GetUnitName("player")
+	self.char = data.playername
 	self.combatstart = 0-timeout-1		-- start of combat in ms
-	self.combatend = -1					-- end of combat in ms
+	self.combatend = -150				-- end of combat in ms
 	self.combattime = 0 				-- total combat time
 	self.dpsstart = nil 				-- start of dps in ms
 	self.dpsend = nil				 	-- end of dps in ms
+	self.hpsstart = nil 				-- start of hps in ms
+	self.hpsend = nil				 	-- end of hps in ms
 	self.dpstime = 0					-- total dps time	
 	self.units = {}				
 	self.grplog = {}					-- log from group actions
@@ -429,7 +430,7 @@ function FightHandler:PrepareFight()
 		
 		local charData = self.charData
 		
-		charData.name = GetUnitName("player")
+		charData.name = data.playername
 		charData.raceId = GetUnitRaceId("player")
 		charData.gender = GetUnitGender("player")
 		charData.classId = GetUnitClassId("player")
@@ -583,54 +584,51 @@ function FightHandler:AddCombatEvent(timems, result, targetUnitId, value, eventi
 		
 	elseif eventid == LIBCOMBAT_EVENT_HEAL_OUT then --outgoing heal
 	
-		if data.inCombat == false then return end
-		
 		currentfight.healingOutTotal = currentfight.healingOutTotal + value
 		
 		if activetimeonheals then 
 		
-			currentfight.dpsstart = currentfight.dpsstart or timems 
-			currentfight.dpsend = timems
+			currentfight.hpsstart = currentfight.hpsstart or timems 
+			currentfight.hpsend = timems
 			
 		end
 		
 	elseif eventid == LIBCOMBAT_EVENT_HEAL_IN then --incoming heals
-	
-		if data.inCombat == false then return end
 		
 		currentfight.healingInTotal = currentfight.healingInTotal + value
 		
 	elseif eventid == LIBCOMBAT_EVENT_HEAL_SELF then --outgoing heal
-	
-		if data.inCombat == false then return end
 		
 		currentfight.healingInTotal = currentfight.healingInTotal + value
 		currentfight.healingOutTotal = currentfight.healingOutTotal + value
 		
 		if activetimeonheals then 
 		
-			currentfight.dpsstart = currentfight.dpsstart or timems 
-			currentfight.dpsend = timems
+			currentfight.hpsstart = currentfight.hpsstart or timems 
+			currentfight.hpsend = timems
 			
 		end
-	end
-	
+	end	
 end
 
 function FightHandler:UpdateStats()
 
-	if self.dpsend == nil or self.dpsstart == nil then return end
+	if (self.dpsend == nil and self.hpsend == nil) or (self.dpsstart == nil and self.hpsstart == nil) then return end
+	
+	self.dpstime = math.max(((self.dpsend or 1) - (self.dpsstart or 0)) / 1000, 1)
+	self.hpstime = math.max(((self.hpsend or 1) - (self.hpsstart or 0)) / 1000, 1)
+	
+	local dpstime = self.dpstime
+	local hpstime = self.hpstime
 	
 	self:UpdateGrpStats()
+
+	self.DPSOut = math.floor(self.damageOutTotal / dpstime + 0.5)
+	self.HPSOut = math.floor(self.healingOutTotal / hpstime + 0.5)
+	self.DPSIn = math.floor(self.damageInTotal / dpstime + 0.5)
+	self.HPSIn = math.floor(self.healingInTotal / hpstime + 0.5)
 	
-	self.dpstime = math.max((self.dpsend-self.dpsstart)/1000,1)
-	
-	self.DPSOut = math.floor(self.damageOutTotal/self.dpstime+0.5)
-	self.HPSOut = math.floor(self.healingOutTotal/self.dpstime+0.5)
-	self.DPSIn = math.floor(self.damageInTotal/self.dpstime+0.5)
-	self.HPSIn = math.floor(self.healingInTotal/self.dpstime+0.5)
-	
-	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_FIGHTRECAP), LIBCOMBAT_EVENT_FIGHTRECAP, self.DPSOut, self.DPSIn, self.HPSOut, self.HPSIn, self.healingOutTotal, self.dpstime) 
+	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_FIGHTRECAP), LIBCOMBAT_EVENT_FIGHTRECAP, self.DPSOut, self.DPSIn, self.HPSOut, self.HPSIn, self.healingOutTotal, dpstime, hpstime) 
 	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_UNITS), LIBCOMBAT_EVENT_UNITS, self.units)
 	
 end
@@ -642,35 +640,47 @@ function FightHandler:UpdateGrpStats() -- called by onUpdate
 	local iend = (self.grplog and #self.grplog) or 0
 	
 	if iend > 1 then
+		
 		for i = iend, 1, -1 do 			-- go backwards for easier deletions
+			
 			local line = self.grplog[i]
-			local id, value, action = unpack(line)
+			local unitId, value, action = unpack(line)
 			
-			local unit = self.units[id]
+			local unit = self.units[unitId]
 			
-			if (action=="heal" and unit and unit.isFriendly == true) then --only identified events are removed. The others might be identified later.
+			if (action=="heal" and unit and unit.isFriendly == true) then --only events of identified units are removed. The others might be identified later.
+				
 				self.groupHealOut = self.groupHealOut + value
 				table.remove(self.grplog,i)
+			
 			elseif unit and unit.isFriendly == false and action=="dmg" then
-				self.groupDamageOut = self.groupDamageOut+value
+				
+				self.groupDamageOut = self.groupDamageOut + value
 				table.remove(self.grplog,i)
+			
 			elseif unit and unit.isFriendly == true and action=="dmg" then
-				self.groupDamageIn = self.groupDamageIn+value
+				
+				self.groupDamageIn = self.groupDamageIn + value
 				table.remove(self.grplog,i) 
+			
 			end
 		end
 	end
 	
+	local dpstime = self.dpstime
+	local hpstime = self.hpstime
+	
 	self.groupHealIn = self.groupHealOut
 	
-	self.groupDPSOut = math.floor(self.groupDamageOut/self.dpstime+0.5)
-	self.groupDPSIn = math.floor(self.groupDamageIn/self.dpstime+0.5)
-	self.groupHPSOut = math.floor(self.groupHealOut/self.dpstime+0.5)
+	self.groupDPSOut = math.floor(self.groupDamageOut / dpstime + 0.5)
+	self.groupDPSIn = math.floor(self.groupDamageIn / dpstime + 0.5)
+	self.groupHPSOut = math.floor(self.groupHealOut / hpstime + 0.5)
+	
 	self.groupHPSIn = self.groupHPSOut
 	
-	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_GROUPRECAP), LIBCOMBAT_EVENT_GROUPRECAP, self.groupDPSOut, self.groupDPSIn, self.groupHPSOut, self.dpstime)
+	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_GROUPRECAP), LIBCOMBAT_EVENT_GROUPRECAP, self.groupDPSOut, self.groupDPSIn, self.groupHPSOut, dpstime, hpstime)
 
-	end
+end
 
 function FightHandler:onUpdate()
 	--reset data
@@ -682,17 +692,17 @@ function FightHandler:onUpdate()
 		
 		if showdebug == true and (self.damageOutTotal>0 or self.healingOutTotal>0 or self.damageInTotal>0) then
 		
-			d("Time: "..self.dpstime.."s")
-			d("Dmg: "..self.damageOutTotal.." (DPS: "..self.DPSOut..")")
-			d("Heal: "..self.healingOutTotal.." (HPS: "..self.HPSOut..")")
-			d("IncDmg: "..self.damageInTotal.." (Sh: "..self.damageInShielded..", (IncDPS: "..self.DPSIn..")")
-			d("IncHeal: "..self.healingInTotal.." (IncHPS: "..self.HPSIn..")")
+			df("Time: %.2fs (DPS) | %.2fs (HPS) ", self.dpstime, self.hpstime)
+			df("Dmg: %d (DPS: %d)", self.damageOutTotal, self.DPSOut)
+			df("Heal: %d (HPS: %d)", self.healingOutTotal, self.HPSOut)
+			df("IncDmg: %d (Shield: %d, IncDPS: %d)", self.damageInTotal, self.damageInShielded, self.DPSIn)
+			df("IncHeal: %d (IncHPS: %d)", self.healingInTotal, self.HPSIn)
 			
 			if data.inGroup and Events.CombatGrp.active then
 			
-				d("GrpDmg: "..self.groupDamageOut.." (DPS: "..self.groupDPSOut..")")
-				d("GrpHeal: "..self.groupHealOut.." (HPS: "..self.groupHPS..")")
-				d("GrpIncDmg: "..self.groupDamageIn.." (IncDPS: "..self.groupDPSIn..")")
+				df("GrpDmg: %d (DPS: %d)", self.groupDamageOut, self.groupDPSOut)
+				df("GrpHeal: %d (HPS: %d)", self.groupHealOut, self.groupHPS)
+				df("GrpIncDmg: %d (IncDPS: %d)", self.groupDamageIn, self.groupDPSIn)
 				
 			end
 		end
@@ -922,7 +932,7 @@ end
 local function onBaseResourceChanged(_,unitTag,_,powerType,powerValue,_,_) 
 
 	if unitTag ~= "player" then return end
-	if (powerType ~= POWERTYPE_MAGICKA and powerType ~= POWERTYPE_STAMINA and powerType ~= POWERTYPE_ULTIMATE) or (IsUnitInCombat("player") == false) then return end 
+	if (powerType ~= POWERTYPE_MAGICKA and powerType ~= POWERTYPE_STAMINA and powerType ~= POWERTYPE_ULTIMATE) or (data.inCombat == false) then return end 
 	
 	local timems = GetGameTimeMilliseconds()
 	local powerValueChange
@@ -1066,7 +1076,7 @@ local function CombatEventHandler(isheal, _ , result , _ , _ , _ , _ , sourceNam
 
 	--d({eventCode=eventCode, result=result, isError=isError, abilityName=abilityName, abilityGraphic=abilityGraphic, abilityActionSlotType=abilityActionSlotType, sourceName=sourceName, sourceType=sourceType, targetName=targetName, targetType=targetType, hitValue=hitValue, powerType=powerType, damageType=damageType, log=log, sourceUnitId=sourceUnitId, targetUnitId=targetUnitId, abilityId})
 	
-	if hitValue<2 or (not (sourceUnitId > 0 and targetUnitId > 0)) or (IsUnitInCombat("player") == false and (result==ACTION_RESULT_DOT_TICK_CRITICAL or result==ACTION_RESULT_DOT_TICK) ) or targetType==2 then return end -- only record if both unitids are valid or player is in combat or a non dot damage action happens or the target is not a pet
+	if hitValue<2 or (not (sourceUnitId > 0 and targetUnitId > 0)) or (data.inCombat == false and (result==ACTION_RESULT_DOT_TICK_CRITICAL or result==ACTION_RESULT_DOT_TICK or isheal) ) or targetType==2 then return end -- only record if both unitids are valid or player is in combat or a non dot damage action happens or the target is not a pet
 	local timems = GetGameTimeMilliseconds()
 	
 	CheckUnit(sourceName, sourceUnitId, sourceType, timems)
@@ -1077,7 +1087,7 @@ local function CombatEventHandler(isheal, _ , result , _ , _ , _ , _ , sourceNam
 	
 	local eventid = LIBCOMBAT_EVENT_DAMAGE_OUT + (isheal and 3 or 0) + ((isout and isin) and 2 or isin and 1 or 0)
 
-	if currentfight.dpsstart==nil then currentfight:GetNewStats(timems) end -- get stats before the damage event
+	if currentfight.dpsstart == nil then currentfight:GetNewStats(timems) end -- get stats before the damage event
 	
 	damageType = (isheal and powerType) or damageType
 	
@@ -1102,7 +1112,7 @@ end
 local function onCombatEventHeal(...)  
 	local _, _, _, _, _, _, _, _, _, _, hitValue, _, _, _, _, _, _ = ...
 	
-	if hitValue<2 or (IsUnitInCombat("player") == false and (GetGameTimeMilliseconds() - (currentfight.combatend or 0) >= 50)) then return end				-- only record in combat, don't record pet incoming heal
+	if hitValue<2 or (data.inCombat == false and (GetGameTimeMilliseconds() - currentfight.combatend >= 50)) then return end				-- only record in combat, don't record pet incoming heal
 	
 	CombatEventHandler(true, ...)	-- (isheal, ...)
 end
@@ -1127,7 +1137,7 @@ end
 
 local function onCombatEventHealGrp(_ , _ , _ , _ , _ , _ , _, _, _, targetType, hitValue, _, _, _, _, targetUnitId, _)  -- called by Event
 	
-	if targetType==2 or targetUnitId == nil or targetName == "" or hitValue<2 or (IsUnitInCombat("player") == false and currentfight.combatstart>0 and (GetGameTimeMilliseconds() - currentfight.combatend >= 50)) then return end
+	if targetType==2 or targetUnitId == nil or targetName == "" or hitValue<2 or (data.inCombat == false and (GetGameTimeMilliseconds() - (currentfight.combatend or 0) >= 50)) then return end
 	
 	local name = zo_strformat(SI_UNIT_NAME,(targetName or ""))
 	
@@ -1142,7 +1152,7 @@ local function onResourceChanged (_, result, _, _, _, _, sourceName, _, targetNa
 	targetName = zo_strformat(SI_UNIT_NAME,targetName)
 	local timems = GetGameTimeMilliseconds()
 	
-	if (powerType ~= 0 and powerType ~= 6) or (IsUnitInCombat("player") == false) or powerValueChange < 1 or targetName ~= data.playername then return end 
+	if (powerType ~= 0 and powerType ~= 6) or data.inCombat == false or powerValueChange < 1 or targetName ~= data.playername then return end 
 	-- if showdebug==true then d(eventCode..",u"..unitTag..",i"..powerIndex..",t"..powerType..",v"..powerValue..",m"..powerMax..",em"..powerEffectiveMax) end
 	
 	if result==ACTION_RESULT_POWER_DRAIN then powerValueChange = -powerValueChange end

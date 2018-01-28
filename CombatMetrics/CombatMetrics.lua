@@ -585,13 +585,13 @@ local function AccumulateStats(fight)
 				
 					ability.healingOutTotal = ability.healingOutNormal + ability.healingOutCritical
 					ability.healsOutTotal = ability.healsOutNormal + ability.healsOutCritical
-					ability.HPSOut = ability.healingOutTotal / fight.dpstime
+					ability.HPSOut = ability.healingOutTotal / fight.hpstime
 					
 				elseif tablekey == "healingIn" then
 				
 					ability.healingInTotal = ability.healingInNormal + ability.healingInCritical
 					ability.healsInTotal = ability.healsInNormal + ability.healsInCritical
-					ability.HPSIn = ability.healingInTotal / fight.dpstime
+					ability.HPSIn = ability.healingInTotal / fight.hpstime
 					
 				end
 				
@@ -1238,7 +1238,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 end
 
 local function InitCurrentData()
-	CMX.currentdata = {log={}, DPSOut = 0, DPSIn = 0, HPSOut = 0, HPSIn = 0, dpstime = 0, groupDPSOut = 0, groupDPSIn = 0, groupHPSOut = 0, groupHPS = 0}	-- reset currentdata, the previous log is now only linked to the fight.
+	CMX.currentdata = {log={}, DPSOut = 0, DPSIn = 0, HPSOut = 0, HPSIn = 0, dpstime = 0, hpstime = 0, groupDPSOut = 0, groupDPSIn = 0, groupHPSOut = 0, groupHPS = 0}	-- reset currentdata, the previous log is now only linked to the fight.
 end
 
 local function AddtoChatLog(...)
@@ -1272,7 +1272,7 @@ local function UnitsCallback(_, units)
 	CMX.currentdata.units = units
 end
 
-local function FightRecapCallback(_, DPSOut, DPSIn, HPSOut, HPSIn, healingOutTotal, dpstime)
+local function FightRecapCallback(_, DPSOut, DPSIn, HPSOut, HPSIn, healingOutTotal, dpstime, hpstime)
 
 	local data = CMX.currentdata
 	
@@ -1281,13 +1281,14 @@ local function FightRecapCallback(_, DPSOut, DPSIn, HPSOut, HPSIn, healingOutTot
 	data.HPSOut = HPSOut
 	data.HPSIn = HPSIn
 	data.dpstime = dpstime
+	data.hpstime = hpstime
 	data.healingOutTotal = healingOutTotal
 	
-	CombatMetrics_LiveReport:Update(DPSOut, HPSOut, DPSIn, HPSIn, dpstime, data.groupDPSOut, data.groupDPSIn, data.groupHPSOut)
+	CombatMetrics_LiveReport:Update(DPSOut, HPSOut, DPSIn, HPSIn, dpstime, hpstime, data.groupDPSOut, data.groupDPSIn, data.groupHPSOut)
 
 end
 
-local function GroupFightRecapCallback(_, groupDPSOut, groupDPSIn, groupHPSOut, dpstime)
+local function GroupFightRecapCallback(_, groupDPSOut, groupDPSIn, groupHPSOut, dpstime, hpstime)
 	
 	local data = CMX.currentdata
 	
@@ -1295,9 +1296,6 @@ local function GroupFightRecapCallback(_, groupDPSOut, groupDPSIn, groupHPSOut, 
 	data.groupDPSIn = groupDPSIn
 	data.groupHPSOut = groupHPSOut
 	data.groupHPSIn = groupHPSOut
-	data.dpstime = dpstime
-	
-	CombatMetrics_LiveReport:Update(data.DPSOut, data.HPSOut, data.DPSIn, data.HPSIn, dpstime, groupDPSOut, groupDPSIn, groupHPSOut)
 	
 end
 

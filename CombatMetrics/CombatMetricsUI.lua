@@ -189,14 +189,14 @@ function NavButtonFunctions.delete(control)
 	else 
 	
 		table.remove(CMX.lastfights, currentFight)
-		if #CMX.lastfights == 0 then CombatMetrics_Report:Update() else CombatMetrics_Report:Update(math.min(currentFight,#CMX.lastfights)) end
+		if #CMX.lastfights == 0 then CombatMetrics_Report:Update() else CombatMetrics_Report:Update(math.min(currentFight, #CMX.lastfights)) end
 	
 	end 
 end
 	
 function CMX.InitNavButtons(rowControl) 
 
-	for i=1,rowControl:GetNumChildren() do
+	for i=1, rowControl:GetNumChildren() do
 	
 		local child = rowControl:GetChild(i)
 		
@@ -209,14 +209,14 @@ local function selectCategory(button)
 
 	local control = button:GetParent()
 
-	for i=1,4 do
+	for i=1, 4 do
 		
 		local child = control:GetChild(i)
 		
-		local r,g,b,_ = child:GetColor()
+		local r, g, b, _ = child:GetColor()
 		local a = child==button and 1 or .2
 		
-		child:SetColor(r,g,b,a)
+		child:SetColor(r, g, b, a)
 	
 	end
 	
@@ -230,13 +230,13 @@ local function selectMainPanel(button)
 
 	local selectControl = button:GetParent()
 
-	for i=5,8 do
+	for i=5, 8 do
 		
 		local child = selectControl:GetChild(i)
 		
 		local a = child == button and 1 or .2
 		
-		child:SetColor(1,1,1,a)
+		child:SetColor(1, 1, 1, a)
 	
 	end
 	
@@ -245,7 +245,7 @@ local function selectMainPanel(button)
 	local selected = mainpanel:GetNamedChild(button.category) -- Panel Content to show
 	mainpanel.active = selected
 	
-	for i = 2,mainpanel:GetNumChildren() do
+	for i = 2, mainpanel:GetNumChildren() do
 	
 		local child = mainpanel:GetChild(i)
 		
@@ -259,7 +259,7 @@ end
 	
 local function initSelectorButtons(rowControl) 
 
-	for i=1,8 do
+	for i=1, 8 do
 	
 		local child = rowControl:GetChild(i)
 		
@@ -285,7 +285,7 @@ end
 
 function CMX.InitCLNavButtonRow(rowControl)
 
-	for i=1,rowControl:GetNumChildren() do
+	for i=1, rowControl:GetNumChildren() do
 	
 		local button = rowControl:GetChild(i)
 		
@@ -317,7 +317,7 @@ local function initCLButtonRow()
 
 	local rowControl = GetControl(CombatMetrics_Report, "_MainPanelCombatLogHeaderFilterButtonRow")
 
-	for i=1,rowControl:GetNumChildren() do
+	for i=1, rowControl:GetNumChildren() do
 	
 		local button = rowControl:GetChild(i)
 		
@@ -478,7 +478,7 @@ function CMX.OnMouseEnter(control) --copy from ZO_Options_OnMouseEnter but modif
 		
 		if type(tooltipText) == "table" then 
 		
-			for i=1,#tooltipText do 
+			for i=1, #tooltipText do 
 			
 				AddTooltipLine(control, InformationTooltip, tooltipText[i])
 			
@@ -494,7 +494,7 @@ end
 
 function CMX.SetLabelColor(control, setcolor)  -- setcolor can be hex or rgba, ZO_ColorDef takes care of this
 	
-	for i=1,control:GetNumChildren(control) do
+	for i=1, control:GetNumChildren(control) do
 	
 		local child = control:GetChild(i)
 		local color = ZO_ColorDef:New(setcolor)
@@ -549,7 +549,7 @@ function CMX.SelectRightPanel(control)
 	
 	local menubar = control:GetParent()
 	
-	for i=1,menubar:GetNumChildren() do
+	for i=1, menubar:GetNumChildren() do
 	
 		local child = menubar:GetChild(i)
 		
@@ -627,7 +627,7 @@ function CMX.DeleteItem(control)
 	else
 	
 		table.remove(CMX.lastfights, id)
-		if #CMX.lastfights == 0 then CombatMetrics_Report:Update() else CombatMetrics_Report:Update(math.min(currentFight,#CMX.lastfights)) end		
+		if #CMX.lastfights == 0 then CombatMetrics_Report:Update() else CombatMetrics_Report:Update(math.min(currentFight, #CMX.lastfights)) end		
 	
 	end
 	
@@ -751,7 +751,7 @@ function CMX.AddSelection( self, button, upInside, ctrlkey, alt, shiftkey )
 		
 		sel = {} 	-- forget/disregard other selections
 		
-		for i=istart,iend do 
+		for i=istart, iend do 
 		
 			local irowcontrol = bars[i]
 			sel[irowcontrol.dataId] = i
@@ -777,7 +777,7 @@ function CMX.AddSelection( self, button, upInside, ctrlkey, alt, shiftkey )
 		local istart = math.min(lastsel, id)
 		local iend = math.max(lastsel, id)
 		
-		for i=istart,iend do
+		for i=istart, iend do
 		
 			local irowcontrol = bars[i]
 			sel[irowcontrol.dataId] = i
@@ -806,7 +806,7 @@ end
 
 -- Update the mini DPS meter
 
-local function updateLiveReport(self, dps,hps,idps,ihps,dpstime,gdps,igdps,ghps)
+local function updateLiveReport(self, dps, hps, idps, ihps, dpstime, hpstime, gdps, igdps, ghps)
 
 	local livereport = self
 
@@ -816,11 +816,12 @@ local function updateLiveReport(self, dps,hps,idps,ihps,dpstime,gdps,igdps,ghps)
 	local showdps
 	local showhps
 	local showidps
-	local showtime = string.format("%d:%04.1f",dpstime/60,dpstime%60)
+	local maxtime = math.max(dpstime, hpstime)
+	local showtime = string.format("%d:%04.1f", maxtime/60, maxtime%60)
 		
 	-- maybe add data from group
 	if db.recordgrp == true and ((gdps+igdps+ghps)>0) then
-		local dpsratio,hpsratio,idpsratio = 0,0,0
+		local dpsratio, hpsratio, idpsratio = 0, 0, 0
 		if gdps>0  then dpsratio  = (math.floor(dps/gdps*1000)/10) end 
 		if igdps>0 then idpsratio = (math.floor(idps/igdps*1000)/10) end 
 		if ghps>0  then hpsratio  = (math.floor(hps/ghps*1000)/10) end
@@ -866,7 +867,7 @@ function searchtable(t, field, value)
 
 	if value == nil then return false end
 	
-	for k,v in pairs(t) do
+	for k, v in pairs(t) do
 	
 		if type(v) == "table" and field and v[field] == value then 
 		
@@ -930,16 +931,16 @@ local function updateTitlePanel(panel)
 	-- RaceIcon
 	
 	local racetextures = {
-		"esoui/art/icons/heraldrycrests_race_breton_01.dds",
-		"esoui/art/icons/heraldrycrests_race_redguard_01.dds",
-		"esoui/art/icons/heraldrycrests_race_orc_01.dds",
-		"esoui/art/icons/heraldrycrests_race_dunmer_01.dds",
-		"esoui/art/icons/heraldrycrests_race_nord_01.dds",
-		"esoui/art/icons/heraldrycrests_race_argonian_01.dds",
-		"esoui/art/icons/heraldrycrests_race_altmer_01.dds",
-		"esoui/art/icons/heraldrycrests_race_bosmer_01.dds",
-		"esoui/art/icons/heraldrycrests_race_khajiit_01.dds",
-		"esoui/art/icons/heraldrycrests_race_imperial_01.dds",
+		"esoui/art/icons/heraldrycrests_race_breton_01.dds", 
+		"esoui/art/icons/heraldrycrests_race_redguard_01.dds", 
+		"esoui/art/icons/heraldrycrests_race_orc_01.dds", 
+		"esoui/art/icons/heraldrycrests_race_dunmer_01.dds", 
+		"esoui/art/icons/heraldrycrests_race_nord_01.dds", 
+		"esoui/art/icons/heraldrycrests_race_argonian_01.dds", 
+		"esoui/art/icons/heraldrycrests_race_altmer_01.dds", 
+		"esoui/art/icons/heraldrycrests_race_bosmer_01.dds", 
+		"esoui/art/icons/heraldrycrests_race_khajiit_01.dds", 
+		"esoui/art/icons/heraldrycrests_race_imperial_01.dds", 
 		}
 	
 	local raceIcon = charInfo:GetNamedChild("RaceIcon")
@@ -957,7 +958,7 @@ local function updateTitlePanel(panel)
 	local classIcon = charInfo:GetNamedChild("ClassIcon")
 	local classId = charData.classId
 	
-	for i=1,GetNumClasses() do
+	for i=1, GetNumClasses() do
 	
 		local id, _, _, _, _, _, texture = GetClassInfo(i)
 			
@@ -1022,15 +1023,15 @@ local function updateTitlePanel(panel)
 	
 	local ButtonStates = {
 	
-		["previous"] 	= CMX.lastfights[fightId - 1] ~= nil,
-		["next"] 		= CMX.lastfights[fightId + 1] ~= nil,
-		["last"] 		= CMX.lastfights[fightId + 1] ~= nil,
-		["load"] 		= savedFights ~= nil and #savedFights > 0,
-		["save"] 		= CMX.lastfights[fightId] ~= nil and not searchtable(savedFights, "date", fightData.date),
+		["previous"] 	= CMX.lastfights[fightId - 1] ~= nil, 
+		["next"] 		= CMX.lastfights[fightId + 1] ~= nil, 
+		["last"] 		= CMX.lastfights[fightId + 1] ~= nil, 
+		["load"] 		= savedFights ~= nil and #savedFights > 0, 
+		["save"] 		= CMX.lastfights[fightId] ~= nil and not searchtable(savedFights, "date", fightData.date), 
 		["delete"] 		= CMX.lastfights[fightId] ~= nil and #CMX.lastfights>0 ~= nil
 		}
 
-	for i = 1,NavButtons:GetNumChildren() do
+	for i = 1, NavButtons:GetNumChildren() do
 	
 		local child = NavButtons:GetChild(i)
 		local state = ButtonStates[child.func]
@@ -1042,17 +1043,17 @@ local function updateTitlePanel(panel)
 end
 
 local DPSstrings = {
-	["damageOut"]  = "DPSOut",
-	["damageIn"]   = "DPSIn",
-	["healingOut"] = "HPSOut",
-	["healingIn"]  = "HPSIn",
+	["damageOut"]  = "DPSOut", 
+	["damageIn"]   = "DPSIn", 
+	["healingOut"] = "HPSOut", 
+	["healingIn"]  = "HPSIn", 
 }
 
 local CountStrings = {
-	["damageOut"]  = "hitsOut",
-	["damageIn"]   = "hitsIn",
-	["healingOut"] = "healsOut",
-	["healingIn"]  = "healsIn",
+	["damageOut"]  = "hitsOut", 
+	["damageIn"]   = "hitsIn", 
+	["healingOut"] = "healsOut", 
+	["healingIn"]  = "healsIn", 
 }
 
 local function updateFightStatsPanelLeft(panel)
@@ -1073,6 +1074,7 @@ local function updateFightStatsPanelLeft(panel)
 	header2:SetText(GetString(headerstring))
 	
 	local label1, label2, label3, rowlist
+	local activetime
 	
 	if category == "healingOut" or category == "healingIn" then
 	
@@ -1082,6 +1084,8 @@ local function updateFightStatsPanelLeft(panel)
 		
 		rowlist = {Total = true, Normal = true, Critical = true, Blocked = false, Shielded = false}
 		
+		activetime = string.format("%.2f", fightData and fightData.hpstime or 0)
+		
 	else	
 	
 		label1 = GetString(SI_COMBAT_METRICS_DPS)
@@ -1089,6 +1093,8 @@ local function updateFightStatsPanelLeft(panel)
 		label3 = GetString(SI_COMBAT_METRICS_HIT)
 		
 		rowlist = {Total = true, Normal = true, Critical = true, Blocked = true, Shielded = true}
+		
+		activetime = string.format("%.2f", fightData and fightData.dpstime or 0)
 		
 	end
 	
@@ -1098,10 +1104,9 @@ local function updateFightStatsPanelLeft(panel)
 	panel:GetNamedChild("StatTitleAmount"):GetNamedChild("Label"):SetText(label2) 	-- Damage or Healing
 	panel:GetNamedChild("StatTitleCount"):GetNamedChild("Label"):SetText(label3) 	-- Hits or Heals
 	
-	local dpstime = string.format("%.2f", fightData and fightData.dpstime or 0)
 	local combattime = string.format("%.2f", fightData and fightData.combattime or 0)
 	
-	panel:GetNamedChild("ActiveTimeValue"):SetText(dpstime)
+	panel:GetNamedChild("ActiveTimeValue"):SetText(activetime)
 	panel:GetNamedChild("CombatTimeValue"):SetText(combattime)
 	
 	local key = DPSstrings[category]
@@ -1116,7 +1121,7 @@ local function updateFightStatsPanelLeft(panel)
 	
 	else
 	
-		aps2 = data["group"..zo_strformat("<<C:1>>",key)] or 0
+		aps2 = data["group"..zo_strformat("<<C:1>>", key)] or 0
 		apsratio = (aps2 == 0 and 0) or aps1/aps2*100
 	
 	end
@@ -1160,7 +1165,7 @@ local function updateFightStatsPanelLeft(panel)
 			
 			if k == "Total" and noselection then 
 			
-				amount2 = data["group"..zo_strformat("<<C:1>>",category)] or 0  -- first letter of category needs to be Capitalized
+				amount2 = data["group"..zo_strformat("<<C:1>>", category)] or 0  -- first letter of category needs to be Capitalized
 				amountratio = (amount2 == 0 and 0) or amount1/amount2*100
 				
 				hide2 = true
@@ -1212,35 +1217,35 @@ end
 
 
 local powerTypeLabels = {
-	[POWERTYPE_MAGICKA] = "_MAGICKA",
-	[POWERTYPE_STAMINA] = "_STAMINA",
-	[POWERTYPE_HEALTH] = "_HEALTH",
+	[POWERTYPE_MAGICKA] = "_MAGICKA", 
+	[POWERTYPE_STAMINA] = "_STAMINA", 
+	[POWERTYPE_HEALTH] = "_HEALTH", 
 }
 
 local attackStatsKeys = { 			-- {label, format, convert}
 
 	[POWERTYPE_MAGICKA] = {
-		[1] = {"maxmagicka", "%d"},
-		[2] = {"spellpower", "%d"},
-		[3] = {"spellcrit", "%.1f%%", true},
-		[4] = {"spellcritbonus", "%.1f%%"},
-		[5] = {"spellpen", "%d"},
-	},
+		[1] = {"maxmagicka", "%d"}, 
+		[2] = {"spellpower", "%d"}, 
+		[3] = {"spellcrit", "%.1f%%", true}, 
+		[4] = {"spellcritbonus", "%.1f%%"}, 
+		[5] = {"spellpen", "%d"}, 
+	}, 
 	
 	[POWERTYPE_STAMINA] = {
-		[1] = {"maxstamina", "%d"},
-		[2] = {"weaponpower", "%d"},
-		[3] = {"weaponcrit", "%.1f%%", true},
-		[4] = {"weaponcritbonus", "%.1f%%"},
-		[5] = {"weaponpen", "%d"},
-	},
+		[1] = {"maxstamina", "%d"}, 
+		[2] = {"weaponpower", "%d"}, 
+		[3] = {"weaponcrit", "%.1f%%", true}, 
+		[4] = {"weaponcritbonus", "%.1f%%"}, 
+		[5] = {"weaponpen", "%d"}, 
+	}, 
 	
 	[POWERTYPE_HEALTH] = {
-		[1] = {"maxhealth", "%d"},
-		[2] = {"physres", "%d"},
-		[3] = {"spellres", "%d"},
-		[4] = {"critres", "%.1f%%", true},
-	},
+		[1] = {"maxhealth", "%d"}, 
+		[2] = {"physres", "%d"}, 
+		[3] = {"spellres", "%d"}, 
+		[4] = {"critres", "%.1f%%", true}, 
+	}, 
 
 }
 
@@ -1287,9 +1292,9 @@ local function updateFightStatsPanelRight(panel)
 	local statWindowControl = panel:GetNamedChild("AttackStats")
 	local keys = attackStatsKeys[powerType]
 	
-	for i=1,4 do
+	for i=1, 4 do
 	
-		local text = GetString(stringKey,i)
+		local text = GetString(stringKey, i)
 		local rowcontrol = statWindowControl:GetNamedChild("Row"..i)
 		local dataKey, displayformat, convert = unpack(keys[i] or {})
 		
@@ -1361,13 +1366,13 @@ local function updateFightStatsPanelRight(panel)
 		row5:SetHidden(false) 
 		row6:SetHidden(false) 
 		
-		local text5 = GetString(stringKey,5)
+		local text5 = GetString(stringKey, 5)
 		
 		row5:GetNamedChild("Label"):SetText(text5)
 		row5:GetNamedChild("Value"):SetText(averagePenetration)
 		row5:GetNamedChild("Value2"):SetText(maxvalue)
 		
-		local text6 = GetString(stringKey,6)
+		local text6 = GetString(stringKey, 6)
 		
 		row6:GetNamedChild("Label"):SetText(text6)
 		row6:GetNamedChild("Value"):SetText(overPenetrationRatio)
@@ -1404,7 +1409,7 @@ local function adjustRowSize(row, header) 	-- this function resizes the row elem
 	
 	row.scale = db.FightReport.scale
 	
-	for i=1,header:GetNumChildren() do
+	for i=1, header:GetNumChildren() do
 	
 		local child = header:GetChild(i)
 		
@@ -1440,7 +1445,7 @@ local function ResetBars(panel)
 
 	if #panel.bars == 0 then return end 
 	
-	for i=1,#panel.bars do
+	for i=1, #panel.bars do
 	
 		panel.bars[i]:SetHidden(true)
 		panel.bars[i] = nil
@@ -1498,23 +1503,28 @@ local function updateBuffPanel(panel)
 	local selectedbuffs = selections["buff"]["buff"] 
 	local currentanchor = {TOPLEFT, scrollchild, TOPLEFT, 0, 1}
 	
+	local maxtime = math.max(fightData.dpstime or 0, fightData.hpstime or 0)
+	
+	local buffcount = buffdata.buffcount or 1
+	local showids = db.debuginfo.ids
+	
 	for buffName, buff in CMX.spairs(buffdata["buffs"], buffSortFunction) do
 		if buff.groupUptime > 0 then
 
 			-- prepare contents
 		
-			local color = (buff.effectType == BUFF_EFFECT_TYPE_BUFF and {0,0.6,0,0.6}) or (buff.effectType == BUFF_EFFECT_TYPE_DEBUFF and {0.75,0,0.6,0.6}) or {0.6,0.6,0.6,0.6}
-			local groupColor = (buff.effectType == BUFF_EFFECT_TYPE_BUFF and {0,0.6,0,0.3}) or (buff.effectType == BUFF_EFFECT_TYPE_DEBUFF and {0.75,0,0.6,0.3}) or {0.6,0.6,0.6,0.3}
+			local color = (buff.effectType == BUFF_EFFECT_TYPE_BUFF and {0, 0.6, 0, 0.6}) or (buff.effectType == BUFF_EFFECT_TYPE_DEBUFF and {0.75, 0, 0.6, 0.6}) or {0.6, 0.6, 0.6, 0.6}
+			local groupColor = (buff.effectType == BUFF_EFFECT_TYPE_BUFF and {0, 0.6, 0, 0.3}) or (buff.effectType == BUFF_EFFECT_TYPE_DEBUFF and {0.75, 0, 0.6, 0.3}) or {0.6, 0.6, 0.6, 0.3}
 			
 			local highlight = false
 			if selectedbuffs ~= nil then highlight = (selectedbuffs[buffName] ~= nil) end
 			
 			local icon = CMX.GetAbilityIcon(buff.icon)
-			local dbug = (db.debuginfo.ids and type(buff.icon) == "number") and string.format("(%d) ", buff.icon) or ""
+			local dbug = (showids and type(buff.icon) == "number") and string.format("(%d) ", buff.icon) or ""
 			local name = dbug .. buffName
 			
-			local uptimeRatio = buff.uptime / (1000 * fightData.dpstime * (buffdata.buffcount or 1))
-			local groupUptimeRatio = buff.groupUptime / (1000 * fightData.dpstime * (buffdata.buffcount or 1))
+			local uptimeRatio = buff.uptime / (1000 * maxtime * buffcount)
+			local groupUptimeRatio = buff.groupUptime / (1000 * maxtime * buffcount)
 			
 			local count = buff.count
 			local groupCount = buff.groupCount
@@ -1576,7 +1586,9 @@ local function updateResourceBars(panel, currentanchor, data, totalRate, selecte
 
 	local scrollchild = GetControl(panel, "PanelScrollChild")
 	
-	for abilityId, ability in CMX.spairs(data, function(t,a,b) return t[a].value>t[b].value end) do
+	local showids = db.debuginfo.ids
+	
+	for abilityId, ability in CMX.spairs(data, function(t, a, b) return t[a].value>t[b].value end) do
 	
 		if (ability.ticks or 0) > 0 then
 			
@@ -1585,7 +1597,7 @@ local function updateResourceBars(panel, currentanchor, data, totalRate, selecte
 			local highlight = false
 			if selectedresources ~= nil then highlight = selectedresources[abilityId] ~= nil end
 			
-			local dbug = db.debuginfo.ids and string.format("(%d) ", abilityId) or ""
+			local dbug = showids and string.format("(%d) ", abilityId) or ""
 			local name = dbug..label
 			
 			local count = ability.ticks
@@ -1736,24 +1748,27 @@ local function updateUnitPanel(panel)
 	local currentanchor = {TOPLEFT, scrollchild, TOPLEFT, 0, 1}
 	
 	local rightpanel = db.FightReport.rightpanel
+	
+	local showids = db.debuginfo.ids
+	local scale = db.FightReport.scale
 		
-	for unitId,unit in CMX.spairs(data.units, function(t,a,b) return t[a][totalAmountKey]>t[b][totalAmountKey] end) do -- i.e. for damageOut sort by damageOutTotal
+	for unitId, unit in CMX.spairs(data.units, function(t, a, b) return t[a][totalAmountKey]>t[b][totalAmountKey] end) do -- i.e. for damageOut sort by damageOutTotal
 	
 		local totalUnitAmount = unit[totalAmountKey]
+		
+		local unitData = fightData.units[unitId]
 	
-		if (totalUnitAmount > 0 or (rightpanel == "buffsout" and NonContiguousCount(unit.buffs) > 0 and (fightData.units[unitId].isFriendly == false and isdamage) or (fightData.units[unitId].isFriendly and not isdamage))) then
+		if (totalUnitAmount > 0 or (rightpanel == "buffsout" and NonContiguousCount(unit.buffs) > 0 and (fightData.units[unitId].isFriendly == false and isdamage) or (unitData.isFriendly and not isdamage))) then
 			
 			local highlight = false
 			if selectedunits ~= nil then highlight = selectedunits[unitId] ~= nil end
 			
-			local dbug = db.debuginfo.ids and string.format("(%d) ", unitId) or ""
+			local dbug = showids and string.format("(%d) ", unitId) or ""
 			
-			local unitData = fightData.units[unitId]
 			local name = dbug .. unitData.name
 			
 			local isboss = unitData.bossId
-			local scale = db.FightReport.scale
-			local namecolor = (isboss and {1,.8,.3,1}) or {1,1,1,1}
+			local namecolor = (isboss and {1, .8, .3, 1}) or {1, 1, 1, 1}
 			
 			local unitTime = unitData.dpsend and unitData.dpsstart and (unitData.dpsend - unitData.dpsstart) / 1000 or 1
 			local dps  = unitTime and totalUnitAmount / unitTime or unit[APSKey]
@@ -1849,9 +1864,11 @@ local function updateAbilityPanel(panel)
 	local totalAmountKey = category.."Total"
 	local totalHitKey = CountStrings[category].."Total"
 	local critKey = CountStrings[category].."Critical"
-	local DPSKey = DPSstrings[category]
+	local DPSKey = DPSstrings[category]	
 	
-	for abilityId, ability in CMX.spairs(data[category], function(t,a,b) return t[a][totalAmountKey]>t[b][totalAmountKey] end) do
+	local showids = db.debuginfo.ids
+	
+	for abilityId, ability in CMX.spairs(data[category], function(t, a, b) return t[a][totalAmountKey]>t[b][totalAmountKey] end) do
 	
 		if ability[totalAmountKey]>0 then 
 			
@@ -1865,7 +1882,7 @@ local function updateAbilityPanel(panel)
 			
 			local dot = (GetAbilityDuration(abilityId)>0 or (IsAbilityPassive(abilityId) and isDamage)) and "*" or ""
 			local pet = ability.pet and " (pet)" or ""
-			local dbug = db.debuginfo.ids and string.format("(%d) ", abilityId) or ""
+			local dbug = showids and string.format("(%d) ", abilityId) or ""
 			local color = ability.damageType and CMX.GetDamageColor(ability.damageType) or ""
 			
 			local name  = dbug..color..(ability.name or GetFormatedAbilityName(abilityId))..dot..pet.."|r"
@@ -1942,24 +1959,24 @@ local function updateAbilityPanel(panel)
 end
 
 local logtypeCategories = {
-	[LIBCOMBAT_EVENT_DAMAGE_OUT] = "damageOut",
-	[LIBCOMBAT_EVENT_DAMAGE_IN] = "damageIn",
-	[LIBCOMBAT_EVENT_DAMAGE_SELF] = "damageSelf",
-	[LIBCOMBAT_EVENT_HEAL_OUT] = "healingOut",
-	[LIBCOMBAT_EVENT_HEAL_IN] = "healingIn",
-	[LIBCOMBAT_EVENT_HEAL_SELF] = "healSelf",
-	[LIBCOMBAT_EVENT_EFFECTS_IN] = "buff",
-	[LIBCOMBAT_EVENT_EFFECTS_OUT] = "buff",
-	[LIBCOMBAT_EVENT_GROUPEFFECTS_IN] = "buff",
-	[LIBCOMBAT_EVENT_GROUPEFFECTS_OUT] = "buff",
-	[LIBCOMBAT_EVENT_PLAYERSTATS] = "stats",
-	[LIBCOMBAT_EVENT_RESOURCES] = "resource",
-	[LIBCOMBAT_EVENT_MESSAGES] = "message",
+	[LIBCOMBAT_EVENT_DAMAGE_OUT] = "damageOut", 
+	[LIBCOMBAT_EVENT_DAMAGE_IN] = "damageIn", 
+	[LIBCOMBAT_EVENT_DAMAGE_SELF] = "damageSelf", 
+	[LIBCOMBAT_EVENT_HEAL_OUT] = "healingOut", 
+	[LIBCOMBAT_EVENT_HEAL_IN] = "healingIn", 
+	[LIBCOMBAT_EVENT_HEAL_SELF] = "healSelf", 
+	[LIBCOMBAT_EVENT_EFFECTS_IN] = "buff", 
+	[LIBCOMBAT_EVENT_EFFECTS_OUT] = "buff", 
+	[LIBCOMBAT_EVENT_GROUPEFFECTS_IN] = "buff", 
+	[LIBCOMBAT_EVENT_GROUPEFFECTS_OUT] = "buff", 
+	[LIBCOMBAT_EVENT_PLAYERSTATS] = "stats", 
+	[LIBCOMBAT_EVENT_RESOURCES] = "resource", 
+	[LIBCOMBAT_EVENT_MESSAGES] = "message", 
 }
 
 local function updateCLPageButtons(buttonrow, page, maxpage)
 
-	local first = math.max(page-2,1)
+	local first = math.max(page-2, 1)
 	local last = first + 4
 	
 	buttonrow:GetNamedChild("PageLeft"):SetHidden(first==1)
@@ -1997,7 +2014,7 @@ local function updateCombatLog(panel)
 	
 	if loglength == 0 then return end
 	
-	buffer:SetMaxHistoryLines(math.min(loglength,1000))
+	buffer:SetMaxHistoryLines(math.min(loglength, 1000))
 	buffer:Clear()
 	buffer:SetFont(string.format("%s|%s|%s", GetString(SI_COMBAT_METRICS_STD_FONT), tonumber(GetString(SI_COMBAT_METRICS_FONT_SIZE)) * db.FightReport.scale, ""))
 	
@@ -2015,7 +2032,7 @@ local function updateCombatLog(panel)
 	
 	local unitsSelected = false
 	
-	for _,category in pairs({"healingIn", "healingOut", "damageIn", "damageOut"}) do
+	for _, category in pairs({"healingIn", "healingOut", "damageIn", "damageOut"}) do
 	
 		local subcategory = unitSelection[category]
 	
@@ -2031,7 +2048,7 @@ local function updateCombatLog(panel)
 		end
 	end
 	
-	for k,logline in ipairs(logdata) do 
+	for k, logline in ipairs(logdata) do 
 		
 		local condition1, condition2 = false, false
 		
@@ -2144,9 +2161,9 @@ local function updateInfoRowPanel(panel)
 	
 	local data = fightData or {
 	
-		["date"] = GetTimeStamp(),
-		["time"] = GetTimeString(),
-		["ESOversion"] = GetESOVersionString(),
+		["date"] = GetTimeStamp(), 
+		["time"] = GetTimeString(), 
+		["ESOversion"] = GetESOVersionString(), 
 	
 	}
 	
@@ -2250,11 +2267,23 @@ local function updateFightListPanel(panel, data, issaved)
 			local datestring = type(fight.date) == "number" and GetDateStringFromTimestamp(fight.date) or fight.date
 			local timestring = string.format("%s, %s", datestring, fight.time)
 		
-			local fightlog = fight.stringlog
+			local fightlog = issaved and fight.stringlog or fight.log
 			local logState = fightlog and #fightlog>0
 			
-			local dpstime = fight.dpstime
-			local durationstring = string.format("%d:%04.1f", dpstime/60, dpstime%60)
+			local activetime = 1
+			local category = db.FightReport.category
+			
+			if category == "healingOut" or category == "healingIn" then 
+			
+				activetime = fight.hpstime 
+			
+			else 
+			
+				activetime = fight.dpstime 
+			
+			end
+
+			local durationstring = string.format("%d:%04.1f", activetime/60, activetime%60)
 			
 			local DPSKey = DPSstrings[db.FightReport.category]
 			local dps = fight[DPSKey] or 0
@@ -2347,8 +2376,8 @@ function CMX.PosttoChat(mode)
 	local dpstime = data.dpstime
 	local timeString = string.format("%d:%04.1f", dpstime/60, dpstime%60)
 	
-	local totalDPS, totalDamage, maxDamage, units, name, bossName = 0,0,0,0,"",""
-	local bossDPS, bossDamage, maxBossDamage, bossUnits = 0,0,0,0
+	local totalDPS, totalDamage, maxDamage, units, name, bossName = 0, 0, 0, 0, "", ""
+	local bossDPS, bossDamage, maxBossDamage, bossUnits = 0, 0, 0, 0
 	
 	for unitId, unit in pairs(data.units) do
 	
@@ -2395,6 +2424,9 @@ function CMX.PosttoChat(mode)
 	local totalDamageString = ZO_CommaDelimitNumber(totalDamage)
 	
 	if mode == "HPS" then 
+	
+		local hpstime = data.hpstime
+		local timeString = string.format("%d:%04.1f", hpstime/60, hpstime%60)
 	
 		local totalHPSString = ZO_CommaDelimitNumber(data.HPSOut)
 		local totalHealingString = ZO_CommaDelimitNumber(data.healingOutTotal)
@@ -2630,33 +2662,33 @@ local function initLiveReport()
 		
 		local anchors = (setLR.layout == "Horizontal" and {
 		
-							{TOPLEFT,TOPLEFT,0,0,liveReport},
-							{LEFT,RIGHT,0,0},
-							{LEFT,RIGHT,0,0},
-							{LEFT,RIGHT,0,0},
-							{LEFT,RIGHT,0,0}
+							{TOPLEFT, TOPLEFT, 0, 0, liveReport}, 
+							{LEFT, RIGHT, 0, 0}, 
+							{LEFT, RIGHT, 0, 0}, 
+							{LEFT, RIGHT, 0, 0}, 
+							{LEFT, RIGHT, 0, 0}
 							
 						}) or (setLR.layout == "Vertical" and {
 						
-							{TOPLEFT,TOPLEFT,0,0,liveReport},
-							{TOPLEFT,BOTTOMLEFT,0,0},
-							{TOPLEFT,BOTTOMLEFT,0,0},
-							{TOPLEFT,BOTTOMLEFT,0,0},
-							{LEFT,RIGHT,0,0}
+							{TOPLEFT, TOPLEFT, 0, 0, liveReport}, 
+							{TOPLEFT, BOTTOMLEFT, 0, 0}, 
+							{TOPLEFT, BOTTOMLEFT, 0, 0}, 
+							{TOPLEFT, BOTTOMLEFT, 0, 0}, 
+							{LEFT, RIGHT, 0, 0}
 							
 						}) or { -- layout = compact
 						
-							{TOPLEFT,TOPLEFT,0,0,liveReport},
-							{LEFT,RIGHT,0,0},
-							{TOPRIGHT,BOTTOMLEFT,0,0},
-							{LEFT,RIGHT,0,0},
-							{LEFT,RIGHT,0,0}
+							{TOPLEFT, TOPLEFT, 0, 0, liveReport}, 
+							{LEFT, RIGHT, 0, 0}, 
+							{TOPRIGHT, BOTTOMLEFT, 0, 0}, 
+							{LEFT, RIGHT, 0, 0}, 
+							{LEFT, RIGHT, 0, 0}
 						
 						}
 		
 		local last = liveReport
 		
-		liveReport:SetDimensions(1,1)
+		liveReport:SetDimensions(1, 1)
 		
 		local blocks = 0
 		
@@ -2690,7 +2722,7 @@ local function initLiveReport()
 			end
 		end
 		
-		zo_callLater(function() liveReport:GetNamedChild("BG"):SetDimensions(liveReport:GetWidth(),liveReport:GetHeight()) end, 1)
+		zo_callLater(function() liveReport:GetNamedChild("BG"):SetDimensions(liveReport:GetWidth(), liveReport:GetHeight()) end, 1)
 		
 	end
 	
@@ -2735,17 +2767,17 @@ function CMX.InitializeUI()
 
 	selections = {
 		["ability"]		= {}, 
-		["unit"] 		= {},
-		["buff"] 		= {},
-		["resource"] 	= {},
+		["unit"] 		= {}, 
+		["buff"] 		= {}, 
+		["resource"] 	= {}, 
 		
 		}
 		
 	lastSelections = {
 		["ability"] 	= {}, 
-		["unit"] 		= {},
-		["buff"] 		= {},
-		["resource"] 	= {},
+		["unit"] 		= {}, 
+		["buff"] 		= {}, 
+		["resource"] 	= {}, 
 		}
 	
 	currentFight = nil
