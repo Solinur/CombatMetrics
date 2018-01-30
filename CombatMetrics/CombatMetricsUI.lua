@@ -1311,14 +1311,14 @@ local function updateFightStatsPanelRight(panel)
 			
 			if type(avgvalue) == "number" then -- legacy
 			
-				if convert then avgvalue = GetCriticalStrikeChance(avgvalue, true) end
+				if convert then avgvalue = GetCriticalStrikeChance(avgvalue) end
 				if displayformat then avgvalue = string.format(displayformat, avgvalue) end
 				
 			end
 			
 			local maxvalue = stats["max"..dataKey] or 0
 			
-			if convert then maxvalue = GetCriticalStrikeChance(maxvalue, true) end
+			if convert then maxvalue = math.min(GetCriticalStrikeChance(maxvalue), 100) end
 			if displayformat then maxvalue = string.format(displayformat, maxvalue) end
 			
 			rowcontrol:GetNamedChild("Label"):SetText(text)

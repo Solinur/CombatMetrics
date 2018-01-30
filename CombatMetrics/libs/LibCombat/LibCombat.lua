@@ -533,27 +533,34 @@ local function GetStats()
 	}
 end
 
+local maxcrit
+
 function FightHandler:GetNewStats(timems)
 
 	if self.prepared == nil then self:PrepareFight() return end
 
 	if NonContiguousCount(ActiveCallbackTypes[LIBCOMBAT_EVENT_PLAYERSTATS]) == 0 then return end
 	
+	local stats = self.stats
+	
 	for statName, newValue in pairs(GetStats()) do
 	
-		if self.stats["current"..statName] == nil or self.stats["max"..statName] == nil or timems == nil then 
+		if statName == "spellcrit" then newValue = math.min(newValue, maxcrit) end
+	
+		if stats["current"..statName] == nil or stats["max"..statName] == nil or timems == nil then 
 		
 			lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_PLAYERSTATS), LIBCOMBAT_EVENT_PLAYERSTATS, timems, 0, newValue, statName)
 			
-			self.stats["current"..statName] = newValue 
-			self.stats["max"..statName] = newValue 
+			stats["current"..statName] = newValue 
+			stats["max"..statName] = newValue 
 			
-		elseif self.stats["current"..statName] ~= newValue and timems ~= nil and data.inCombat then 
+		elseif stats["current"..statName] ~= newValue and timems ~= nil and data.inCombat then 
 		
-			lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_PLAYERSTATS), LIBCOMBAT_EVENT_PLAYERSTATS, timems, newValue - self.stats["current"..statName], newValue, statName)
+			lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_PLAYERSTATS), LIBCOMBAT_EVENT_PLAYERSTATS, timems, newValue - stats["current"..statName], newValue, statName)
 			
-			self.stats["current"..statName] = newValue
-			self.stats["max"..statName] = math.max(self.stats["max"..statName] or newValue, newValue)
+			stats["current"..statName] = newValue
+			stats["max"..statName] = math.max(stats["max"..statName] or newValue, newValue)
+			
 			
 		end
 	end
@@ -1803,8 +1810,8 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 		
 		if statname=="spellcrit"or statname=="weaponcrit" then 
 		
-			value = string.format("%.1f%%", GetCriticalStrikeChance(newvalue, true))
-			change = string.format("%.1f%%", GetCriticalStrikeChance(statchange, false))
+			value = string.format("%.1f%%", GetCriticalStrikeChance(newvalue))
+			change = string.format("%.1f%%", GetCriticalStrikeChance(statchange))
 			
 		end
 		
@@ -1887,6 +1894,8 @@ local function Initialize()
   onBossesChanged()
 
   if data.LoadCustomizations then data.LoadCustomizations() end
+  
+  maxcrit = math.floor(1/GetCriticalStrikeChance(1))
   
 end
 

@@ -232,8 +232,6 @@ local function decodeCombatLogLine(line)
 		
 	layout = layouts[layoutId]
 	
-	if CMX.db.debuginfo.save then df("%d, %s", linetype, line) end
-	
 	local logdata = Decode(line, layout)
 		
 	if layoutId == LAYOUT_COMBAT then						-- type, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType
