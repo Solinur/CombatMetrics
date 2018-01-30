@@ -1770,7 +1770,7 @@ local function updateUnitPanel(panel)
 			local isboss = unitData.bossId
 			local namecolor = (isboss and {1, .8, .3, 1}) or {1, 1, 1, 1}
 			
-			local unitTime = unitData.dpsend and unitData.dpsstart and (unitData.dpsend - unitData.dpsstart) / 1000 or 1
+			local unitTime = unitData.dpsend and unitData.dpsstart and math.max((unitData.dpsend - unitData.dpsstart) / 1000, 1) or 1
 			local dps  = unitTime and totalUnitAmount / unitTime or unit[APSKey]
 			local damage = totalUnitAmount
 			local ratio = damage / totalAmount
@@ -2009,13 +2009,13 @@ local function updateCombatLog(panel)
 	local buffer = window:GetNamedChild("Buffer")	
 	local slider = window:GetNamedChild("Slider")
 	
-	local logdata = fightData.log
+	local logdata = fightData.log or {}
 	local loglength = #logdata
 	
+	buffer:Clear()
 	if loglength == 0 then return end
 	
 	buffer:SetMaxHistoryLines(math.min(loglength, 1000))
-	buffer:Clear()
 	buffer:SetFont(string.format("%s|%s|%s", GetString(SI_COMBAT_METRICS_STD_FONT), tonumber(GetString(SI_COMBAT_METRICS_FONT_SIZE)) * db.FightReport.scale, ""))
 	
 	local maxpage = math.ceil(loglength/1000)

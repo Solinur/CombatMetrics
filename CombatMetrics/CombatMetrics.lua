@@ -1362,7 +1362,7 @@ local function FightSummaryCallback(_, fight) -- called by CMX.update
 	
 	InitCurrentData() 	-- reset currentdata, the previous log is now only linked to the fight.
 
-	table.insert(CMX.lastfights, fight)
+	if fight.dpsstart ~= nil or fight.hpsstart ~= nil then table.insert(CMX.lastfights, fight) end
 	
 	CheckNumberOfFights()
 	

@@ -221,6 +221,7 @@ function FightHandler:Initialize()
 	self.hpsstart = nil 				-- start of hps in ms
 	self.hpsend = nil				 	-- end of hps in ms
 	self.dpstime = 0					-- total dps time	
+	self.hpstime = 0					-- total dps time	
 	self.units = {}				
 	self.grplog = {}					-- log from group actions
 	self.groupDamageOut = 0						-- dmg from and to the group
@@ -457,6 +458,7 @@ function FightHandler:PrepareFight()
 		
 		self.prepared = true
 		
+		self.stats = {}
 		self:GetNewStats(timems)		
 	end	
 	
@@ -691,7 +693,7 @@ end
 
 function FightHandler:onUpdate()
 	--reset data
-	if reset == true or (IsUnitDeadOrReincarnating("player")==false and data.inCombat==false and self.dpsstart~=nil and self.combatend>0 and (GetGameTimeMilliseconds() > (self.combatend + timeout)) ) then
+	if reset == true or (IsUnitDeadOrReincarnating("player")==false and data.inCombat==false and self.combatend>0 and (GetGameTimeMilliseconds() > (self.combatend + timeout)) ) then
 	
 		reset = false	
 		
@@ -717,6 +719,7 @@ function FightHandler:onUpdate()
 		if showdebug == true then d("lib: resetting...") end
 		
 		self.grplog = {}
+		
 		lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_FIGHTSUMMARY), LIBCOMBAT_EVENT_FIGHTSUMMARY, self)
 
 		currentfight = FightHandler:New()
@@ -1895,7 +1898,7 @@ local function Initialize()
 
   if data.LoadCustomizations then data.LoadCustomizations() end
   
-  maxcrit = math.floor(1/GetCriticalStrikeChance(1))
+  maxcrit = math.floor(100/GetCriticalStrikeChance(1))
   
 end
 
