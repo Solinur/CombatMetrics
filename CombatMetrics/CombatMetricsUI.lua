@@ -1084,7 +1084,7 @@ local function updateFightStatsPanelLeft(panel)
 		
 		rowlist = {Total = true, Normal = true, Critical = true, Blocked = false, Shielded = false}
 		
-		activetime = string.format("%.2f", fightData and fightData.hpstime or 0)
+		activetime = string.format("%.2f", fightData and fightData.hpstime or 1)
 		
 	else	
 	
@@ -1094,7 +1094,7 @@ local function updateFightStatsPanelLeft(panel)
 		
 		rowlist = {Total = true, Normal = true, Critical = true, Blocked = true, Shielded = true}
 		
-		activetime = string.format("%.2f", fightData and fightData.dpstime or 0)
+		activetime = string.format("%.2f", fightData and fightData.dpstime or 1)
 		
 	end
 	

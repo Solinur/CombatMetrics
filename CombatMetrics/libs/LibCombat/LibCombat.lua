@@ -470,6 +470,10 @@ function FightHandler:FinishFight()
 	local timems = GetGameTimeMilliseconds()
 	self.combatend = timems
 	self.combattime = zo_round((timems - self.combatstart)/10)/100
+	
+	self.starttime = math.min(self.dpsstart or self.hpsstart or 0, self.hpsstart or self.dpsstart or 0)
+	self.endtime = math.max(self.dpsend or 0, self.hpsend or 0)
+	
 	data.majorForce = 0
 	data.minorForce = 0	
 	EffectBuffer = {}

@@ -16,7 +16,7 @@ local CMX = CMX
  
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "0.8.0"
+CMX.version = "0.8.0.1"
 	
 CMX.CustomAbilityIcon = {}
 CMX.CustomAbilityName = {}
@@ -907,21 +907,21 @@ local function ProcessLogEffects(fight, callbacktype, timems, unitId, abilityId,
 	local unit = fight:AcquireUnitData(unitId)
 	local effectdata = unit:AcquireEffectData(abilityId, effectType, stacks)
 	
-	if (changeType == EFFECT_RESULT_GAINED or changeType == EFFECT_RESULT_UPDATED) and timems<fight.dpsend then
+	if (changeType == EFFECT_RESULT_GAINED or changeType == EFFECT_RESULT_UPDATED) and timems < fight.endtime then
 	
 		if sourceType == COMBAT_UNIT_TYPE_PLAYER or sourceType == COMBAT_UNIT_TYPE_PLAYER_PET then 
 		
-			effectdata.lastgain = math.max(effectdata.lastgain or timems, fight.dpsstart)
+			effectdata.lastgain = math.max(effectdata.lastgain or timems, fight.starttime)
 			
 		elseif effectdata.lastgain ~= nil then																-- treat this as if the player effect stopped, the group timer will continue though. 
 		
-			effectdata.uptime = effectdata.uptime + (math.min(timems,fight.dpsend) - effectdata.lastgain)	
+			effectdata.uptime = effectdata.uptime + (math.min(timems, fight.endtime) - effectdata.lastgain)	
 			effectdata.lastgain = nil
 			effectdata.count = effectdata.count + 1
 			
 		end
 		
-		effectdata.groupLastGain = math.max(effectdata.groupLastGain or timems, fight.dpsstart)	
+		effectdata.groupLastGain = math.max(effectdata.groupLastGain or timems, fight.starttime)	
 		
 	elseif changeType == EFFECT_RESULT_FADED then
 		
@@ -929,7 +929,7 @@ local function ProcessLogEffects(fight, callbacktype, timems, unitId, abilityId,
 		
 			local effectdata = fight:AcquireUnitData(unitId):AcquireEffectData(abilityId, effectType, i)
 		
-			if timems <= fight.dpsstart and (effectdata.lastgain ~= nil or effectdata.groupLastGain ~= nil) then
+			if timems <= fight.starttime and (effectdata.lastgain ~= nil or effectdata.groupLastGain ~= nil) then
 			
 				effectdata.count = 0
 				effectdata.uptime = 0
@@ -938,7 +938,7 @@ local function ProcessLogEffects(fight, callbacktype, timems, unitId, abilityId,
 				
 			elseif effectdata.lastgain ~= nil then
 			
-				effectdata.uptime = effectdata.uptime + (math.min(timems,fight.dpsend) - effectdata.lastgain)
+				effectdata.uptime = effectdata.uptime + (math.min(timems,fight.endtime) - effectdata.lastgain)
 				effectdata.lastgain = nil
 				effectdata.count = effectdata.count + 1
 				
@@ -946,7 +946,7 @@ local function ProcessLogEffects(fight, callbacktype, timems, unitId, abilityId,
 			
 			if effectdata.groupLastGain ~= nil then 
 				
-				effectdata.groupUptime = effectdata.groupUptime + (math.min(timems,fight.dpsend) - effectdata.groupLastGain)
+				effectdata.groupUptime = effectdata.groupUptime + (math.min(timems,fight.endtime) - effectdata.groupLastGain)
 				effectdata.groupLastGain = nil
 				effectdata.groupCount = effectdata.groupCount + 1
 				
@@ -1049,17 +1049,17 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 			
 				for k,effectdata in pairs(unitCalc.buffs) do	-- finish buffs
 				
-					if effectdata.lastgain ~= nil and fight.dpsstart ~= nil then 
+					if effectdata.lastgain ~= nil and fight.starttime ~= 0 then 
 					
-						effectdata.uptime = effectdata.uptime + (fight.dpsend - effectdata.lastgain)   -- todo: maybe limit it to combattime... 
+						effectdata.uptime = effectdata.uptime + (fight.endtime - effectdata.lastgain)   -- todo: maybe limit it to combattime... 
 						effectdata.lastgain = nil
 						effectdata.count = effectdata.count + 1
 						
 					end
 					
-					if effectdata.groupLastGain ~= nil and fight.dpsstart ~= nil then 
+					if effectdata.groupLastGain ~= nil and fight.starttime ~= 0 then 
 						
-						effectdata.groupUptime = effectdata.groupUptime + (fight.dpsend - effectdata.groupLastGain)
+						effectdata.groupUptime = effectdata.groupUptime + (fight.endtime - effectdata.groupLastGain)
 						effectdata.groupLastGain = nil
 						effectdata.groupCount = effectdata.groupCount + 1
 						

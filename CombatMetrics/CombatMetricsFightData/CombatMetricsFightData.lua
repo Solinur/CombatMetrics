@@ -201,6 +201,7 @@ local function encodeCombatLogLine(line, unitConversion)
 	elseif layoutId == LAYOUT_POWER then			-- type, timems, abilityId, powerValueChange, powerType
 
 		line[3] = line[3] or 0
+		line[4] = line[4] + 131072					-- avoid negative numbers
 	
 	elseif layoutId == LAYOUT_MESSAGE and type(line[3]) ~= "number" then					-- type, timems, messageId
 
@@ -251,6 +252,7 @@ local function decodeCombatLogLine(line)
 	elseif layoutId == LAYOUT_POWER then					-- type, timems, abilityId, powerValueChange, powerType
 
 		if logdata[3] == 0 then logdata[3] = nil end
+		logdata[4] = logdata[4] - 131072	
 	
 	elseif layoutId ~= LAYOUT_MESSAGE then					-- type, timems, message (e.g. "weapon swap")
 
