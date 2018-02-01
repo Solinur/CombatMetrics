@@ -1284,8 +1284,8 @@ local function updateFightStatsPanelRight(panel)
 	staminacontrol:GetNamedChild("Value2"):SetText(string.format("%.0f", stamina.drainRate or 0))
 	
 	local ultimatecontrol = panel:GetNamedChild("ResourceUltimate")
-	ultimatecontrol:GetNamedChild("Value"):SetText(string.format("%.0f", ultimate.gainRate or 0))
-	ultimatecontrol:GetNamedChild("Value2"):SetText(string.format("%.0f", ultimate.drainRate or 0))
+	ultimatecontrol:GetNamedChild("Value"):SetText(string.format("%.2f", ultimate.gainRate or 0))
+	ultimatecontrol:GetNamedChild("Value2"):SetText(string.format("%.2f", ultimate.drainRate or 0))
 	
 	local stringKey = "SI_COMBAT_METRICS_STATS" .. powerTypeLabels[powerType]
 	
@@ -1403,7 +1403,7 @@ local function updateMainPanel(mainpanel, fightData, selectionData)
 end
 
 local function adjustRowSize(row, header) 	-- this function resizes the row elements to match the size of the header elements of a scrolllist. 
-									-- It's important to maintain the naming and structure of the header elements to match those of the row elements.
+											-- It's important to maintain the naming and structure of the header elements to match those of the row elements.
 	
 	if row == nil or row.scale == db.FightReport.scale then return end	-- if sizes are good already, bail out.
 	
@@ -1507,12 +1507,13 @@ local function updateBuffPanel(panel)
 	
 	local buffcount = buffdata.buffcount or 1
 	local showids = db.debuginfo.ids
+	local favs = db.FightReport.FavouriteBuffs
 	
 	for buffName, buff in CMX.spairs(buffdata["buffs"], buffSortFunction) do
 		if buff.groupUptime > 0 then
 
 			-- prepare contents
-		
+			
 			local color = (buff.effectType == BUFF_EFFECT_TYPE_BUFF and {0, 0.6, 0, 0.6}) or (buff.effectType == BUFF_EFFECT_TYPE_DEBUFF and {0.75, 0, 0.6, 0.6}) or {0.6, 0.6, 0.6, 0.6}
 			local groupColor = (buff.effectType == BUFF_EFFECT_TYPE_BUFF and {0, 0.6, 0, 0.3}) or (buff.effectType == BUFF_EFFECT_TYPE_DEBUFF and {0.75, 0, 0.6, 0.3}) or {0.6, 0.6, 0.6, 0.3}
 			
@@ -1544,6 +1545,8 @@ local function updateBuffPanel(panel)
 			local header = panel:GetNamedChild("Header")
 			adjustRowSize(row, header)
 			
+ 			local textcolor = favs[buffName] and {1, .8, .3, 1} or {1, 1, 1, 1} -- show favs in different color
+			
 			-- update controls with contents
 			
 			local highlightControl = row:GetNamedChild("HighLight")
@@ -1554,6 +1557,8 @@ local function updateBuffPanel(panel)
 			
 			local nameControl = row:GetNamedChild("Name")
 			nameControl:SetText(name)
+			nameControl:SetColor(unpack(textcolor))
+			
 			local maxwidth = nameControl:GetWidth()
 			
 			local groupBarControl = row:GetNamedChild("GroupBar")
