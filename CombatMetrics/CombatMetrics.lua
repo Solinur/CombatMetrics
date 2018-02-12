@@ -16,7 +16,7 @@ local CMX = CMX
  
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "0.8.0.1"
+CMX.version = "0.8.0.3"
 	
 CMX.CustomAbilityIcon = {}
 CMX.CustomAbilityName = {}
@@ -1179,7 +1179,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 			end
 		end
 
-		for statname, stattype in ipairs(IncomingStatList) do
+		for statname, stattype in pairs(IncomingStatList) do
 
 			local sumkey = "sum"..statname			
 			local avgkey = "avg"..statname
@@ -1204,7 +1204,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		
 			if dmginavg[sumkey] ~= nil then	value = dmginavg[sumkey] / totaldmgvalue end
 			
-			dmginavg["avg"..statname] = value
+			dmginavg[avgkey] = value
 
 		end
 		

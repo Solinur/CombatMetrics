@@ -1266,7 +1266,7 @@ local function updateFightStatsPanelRight(panel)
 	
 	local isdamage = category == "damageOut" or category == "damageIn"
 	local avgvalues = (powerType == POWERTYPE_HEALTH and calcstats.dmginavg) or (isdamage and calcstats.dmgavg) or calcstats.healavg or {}
-	local totalvalue = calculated[category.."Total"]
+	local totalvalue = powerType == POWERTYPE_HEALTH and calculated.damageInTotal or calculated[category.."Total"]
 	local countvalue = calculated[CountStrings[category].."Total"]
 	
 	local resources = calculated.resources or {}
@@ -1300,12 +1300,17 @@ local function updateFightStatsPanelRight(panel)
 		
 		if text ~= nil and text ~= "" and dataKey ~= nil then
 		
+			local maxvalue = stats["max"..dataKey] or 0
+			
+			if convert then maxvalue = math.min(GetCriticalStrikeChance(maxvalue), 100) end
+			if displayformat then maxvalue = string.format(displayformat, maxvalue) end
+		
 			local avgvalue = avgvalues["avg"..dataKey] or calcstats["avg"..dataKey]
 			
 			if avgvalue == nil then
 			
 				local legacyvalue = avgvalues["sum"..dataKey]
-				avgvalue = (legacyvalue and legacyvalue / math.max(convert and countvalue or totalvalue or 1, 1)) or 0
+				avgvalue = (legacyvalue and legacyvalue / math.max(convert and countvalue or totalvalue or 1, 1)) or maxvalue
 				
 			end
 			
@@ -1315,11 +1320,6 @@ local function updateFightStatsPanelRight(panel)
 				if displayformat then avgvalue = string.format(displayformat, avgvalue) end
 				
 			end
-			
-			local maxvalue = stats["max"..dataKey] or 0
-			
-			if convert then maxvalue = math.min(GetCriticalStrikeChance(maxvalue), 100) end
-			if displayformat then maxvalue = string.format(displayformat, maxvalue) end
 			
 			rowcontrol:GetNamedChild("Label"):SetText(text)
 			rowcontrol:GetNamedChild("Value"):SetText(avgvalue)
@@ -1360,6 +1360,15 @@ local function updateFightStatsPanelRight(panel)
 		
 		totaldamage = math.max(totaldamage, 1)
 		
+		local tooltiplines = {"Penetration: Damage"}  -- TODO use String
+		
+		for penetration, damage in CMX.spairs(resistvalues) do
+		
+			local newline = string.format("%d: %.1f%%", penetration, 100 * damage/totaldamage)
+			table.insert(tooltiplines, newline)
+			
+		end
+		
 		local averagePenetration = math.max(zo_round(sum / totaldamage), avgvalues["avg"..dataKey] or 0)
 		local overPenetrationRatio = string.format("%.1f%%", 100 * overpen / totaldamage)
 		
@@ -1376,11 +1385,13 @@ local function updateFightStatsPanelRight(panel)
 		
 		row6:GetNamedChild("Label"):SetText(text6)
 		row6:GetNamedChild("Value"):SetText(overPenetrationRatio)
+		row6.tooltip = #tooltiplines>1 and tooltiplines or nil
 	
 	else
 		
 		row5:SetHidden(true) 
 		row6:SetHidden(true) 
+		row6.tooltip = nil
 		
 	end
 end
