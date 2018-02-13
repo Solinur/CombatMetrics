@@ -1801,7 +1801,7 @@
 							</OnInitialized>
 						</Texture>
 						
-						<Texture name="$(parent)FightStatsButton" mouseEnabled="true" textureFile="esoui\art\menubar\gamepad\gp_playermenu_icon_skills.dds" color="FFFFFFFF" inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton">
+						<Texture name="$(parent)FightStatsButton" mouseEnabled="true" textureFile="esoui/art/menubar/gamepad/gp_playermenu_icon_skills.dds" color="FFFFFFFF" inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton">
 							<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)HealingInButton" offsetY="30"/>
 							<OnInitialized>
 								self.tooltip = {SI_COMBAT_METRICS_TOGGLE_FIGHTSTATS}
@@ -1817,7 +1817,7 @@
 							</OnInitialized>
 						</Texture>
 						
-						<Texture name="$(parent)GraphButton" mouseEnabled="true" textureFile="esoui\art\treeicons\gamepad\gp_tutorial_idexicon_charprogression.dds" color="33FFFFFF" inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton" hidden="true">
+						<Texture name="$(parent)GraphButton" mouseEnabled="true" textureFile="esoui/art/treeicons/gamepad/gp_tutorial_idexicon_charprogression.dds" color="33FFFFFF" inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton" hidden="true">
 							<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)CombatLogButton" offsetY="4"/>
 							<OnInitialized>
 								self.tooltip = {SI_COMBAT_METRICS_TOGGLE_GRAPH}

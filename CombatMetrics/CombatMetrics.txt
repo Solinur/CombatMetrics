@@ -13,64 +13,31 @@
 ## You can read the full terms at https://account.elderscrollsonline.com/add-on-terms
 
 ; see http://www.esoui.com/downloads/info44-LibStub.html
-libs\LibStub\LibStub.lua
+libs/LibStub/LibStub.lua
 
 ; see http://www.esoui.com/downloads/info7-LibAddonMenu.html
-libs\LibAddonMenu-2.0\LibAddonMenu-2.0.lua
-libs\LibAddonMenu-2.0\controls\panel.lua
-libs\LibAddonMenu-2.0\controls\submenu.lua
-libs\LibAddonMenu-2.0\controls\button.lua
-libs\LibAddonMenu-2.0\controls\checkbox.lua
-libs\LibAddonMenu-2.0\controls\colorpicker.lua
-libs\LibAddonMenu-2.0\controls\custom.lua
-libs\LibAddonMenu-2.0\controls\description.lua
-libs\LibAddonMenu-2.0\controls\dropdown.lua
-libs\LibAddonMenu-2.0\controls\editbox.lua
-libs\LibAddonMenu-2.0\controls\header.lua
-libs\LibAddonMenu-2.0\controls\slider.lua
-libs\LibAddonMenu-2.0\controls\texture.lua
-libs\LibAddonMenu-2.0\controls\iconpicker.lua
+libs/LibAddonMenu-2.0/LibAddonMenu-2.0.lua
+libs/LibAddonMenu-2.0/controls/panel.lua
+libs/LibAddonMenu-2.0/controls/submenu.lua
+libs/LibAddonMenu-2.0/controls/button.lua
+libs/LibAddonMenu-2.0/controls/checkbox.lua
+libs/LibAddonMenu-2.0/controls/colorpicker.lua
+libs/LibAddonMenu-2.0/controls/custom.lua
+libs/LibAddonMenu-2.0/controls/description.lua
+libs/LibAddonMenu-2.0/controls/dropdown.lua
+libs/LibAddonMenu-2.0/controls/editbox.lua
+libs/LibAddonMenu-2.0/controls/header.lua
+libs/LibAddonMenu-2.0/controls/slider.lua
+libs/LibAddonMenu-2.0/controls/texture.lua
+libs/LibAddonMenu-2.0/controls/iconpicker.lua
 
 
-libs\LibCombat\LibCombat.lua
+libs/LibCombat/LibCombat.lua
 
-libs\LibCustomMenu\LibCustomMenu.lua
+libs/LibCustomMenu/LibCustomMenu.lua
 
-icons\deleteicondisabled.dds
-icons\deleteicondown.dds
-icons\deleteiconover.dds
-icons\deleteiconup.dds
-icons\deleteicon2disabled.dds
-icons\deleteicon2down.dds
-icons\deleteicon2over.dds
-icons\deleteicon2up.dds
-icons\deletelogicondisabled.dds
-icons\deletelogicondown.dds
-icons\deletelogiconover.dds
-icons\deletelogiconup.dds
-icons\endarrowdisabled.dds
-icons\endarrowdown.dds
-icons\endarrowover.dds
-icons\endarrowup.dds
-icons\leftarrowdisabled.dds
-icons\leftarrowdown.dds
-icons\leftarrowover.dds
-icons\leftarrowup.dds
-icons\loadicondisabled.dds
-icons\loadicondown.dds
-icons\loadiconover.dds
-icons\loadiconup.dds
-icons\rightarrowdisabled.dds
-icons\rightarrowdown.dds
-icons\rightarrowover.dds
-icons\rightarrowup.dds
-icons\saveicondisabled.dds
-icons\saveicondown.dds
-icons\saveiconover.dds
-icons\saveiconup.dds
-
-lang\en.lua
-lang\$(language).lua
+lang/en.lua
+lang/$(language).lua
 
 CombatMetrics.lua
 CombatMetricsMenu.lua
