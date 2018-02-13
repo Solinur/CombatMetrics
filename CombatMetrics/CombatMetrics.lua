@@ -16,7 +16,7 @@ local CMX = CMX
  
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "0.8.0.3"
+CMX.version = "0.8.0.4"
 	
 CMX.CustomAbilityIcon = {}
 CMX.CustomAbilityName = {}
@@ -1565,7 +1565,7 @@ local svdefaults = {
 	
 	["FightReport"] = {
 		
-		["scale"] = 1 / zo_roundToNearest(GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE),0.01),
+		["scale"] = zo_roundToNearest(1 / GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE), 0.1),
 		["category"] = "damageOut",
 		["mainpanel"] = "FightStats",
 		["rightpanel"] = "buffs",
@@ -1595,7 +1595,7 @@ local svdefaults = {
 		["enabled"] = true,
 		["locked"] = false,
 		["layout"]="Compact", 
-		["scale"]= 1 / zo_roundToNearest(GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE),0.01), 
+		["scale"]= zo_roundToNearest(1 / GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE), 0.1), 
 		["bgalpha"]= 95, 
 		["damageOut"] = true, 
 		["healOut"] = true, 
@@ -1654,8 +1654,8 @@ local function Initialize(event, addon)
 	
 	-- load saved variables
 	
-	CMX.db = ZO_SavedVars:NewAccountWide(CombatMetrics_Save, 5, "Settings", svdefaults)
-	if not CMX.db.accountwide then CMX.db = ZO_SavedVars:NewCharacterIdSettings(CombatMetrics_Save, 5, "Settings", svdefaults) end
+	CMX.db = ZO_SavedVars:NewAccountWide("CombatMetrics_Save", 5, "Settings", svdefaults)
+	if not CMX.db.accountwide then CMX.db = ZO_SavedVars:NewCharacterIdSettings("CombatMetrics_Save", 5, "Settings", svdefaults) end
 	
 	local fightdata = CombatMetricsFightData
 	

@@ -545,9 +545,14 @@ local function Initialize(event, addon)
 	
 	em:UnregisterForEvent(AddonName, EVENT_ADD_ON_LOADED)
 	
-	sv = CombatMetricsFightDataSV
+	sv = _G["CombatMetricsFightDataSV"]
 	
-	if sv == nil or sv.version == nil then sv = {["version"] = AddonVersion} end
+	if sv == nil or sv.version == nil then 
+	
+		sv = {["version"] = AddonVersion} 
+		_G["CombatMetricsFightDataSV"] = sv
+	
+	end
 	
 	local svversion = sv.version
 	
