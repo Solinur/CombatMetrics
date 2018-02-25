@@ -473,6 +473,7 @@ function FightHandler:FinishFight()
 	
 	self.starttime = math.min(self.dpsstart or self.hpsstart or 0, self.hpsstart or self.dpsstart or 0)
 	self.endtime = math.max(self.dpsend or 0, self.hpsend or 0)
+	self.activetime = math.max((self.endtime - self.starttime) / 1000, 1)
 	
 	data.majorForce = 0
 	data.minorForce = 0	
@@ -628,11 +629,11 @@ function FightHandler:UpdateStats()
 
 	if (self.dpsend == nil and self.hpsend == nil) or (self.dpsstart == nil and self.hpsstart == nil) then return end
 	
-	self.dpstime = math.max(((self.dpsend or 1) - (self.dpsstart or 0)) / 1000, 1)
-	self.hpstime = math.max(((self.hpsend or 1) - (self.hpsstart or 0)) / 1000, 1)
+	local dpstime = math.max(((self.dpsend or 1) - (self.dpsstart or 0)) / 1000, 1)
+	local hpstime = math.max(((self.hpsend or 1) - (self.hpsstart or 0)) / 1000, 1)
 	
-	local dpstime = self.dpstime
-	local hpstime = self.hpstime
+	self.dpstime = dpstime
+	self.hpstime = hpstime
 	
 	self:UpdateGrpStats()
 

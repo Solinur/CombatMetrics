@@ -713,6 +713,31 @@ do	-- Handling Favourite Buffs
 	end
 end
 
+do
+
+	local function toggleshowids()
+	
+		db.debuginfo.ids = not db.debuginfo.ids
+		CombatMetrics_Report:Update()
+		
+	end
+
+	function CMX.SettingsContextMenu( settingsbutton, upInside )
+
+		if not upInside then return end
+		
+		local func = toggleshowids
+		local stringid = db.debuginfo.ids and SI_COMBAT_METRICS_HIDEIDS or SI_COMBAT_METRICS_SHOWIDS
+		local text = GetString(stringid)
+		
+		ClearMenu()
+		AddCustomMenuItem(text, func)
+		ShowMenu(settingsbutton)
+		
+
+	end
+end
+
 --function CMX.AddSelection( selecttype, id, dataId, shiftkey, controlkey, button )  -- IsShiftKeyDown() IsControlKeyDown() IsCommandKeyDown()
 
 function CMX.AddSelection( self, button, upInside, ctrlkey, alt, shiftkey )
@@ -1514,7 +1539,7 @@ local function updateBuffPanel(panel)
 	local selectedbuffs = selections["buff"]["buff"] 
 	local currentanchor = {TOPLEFT, scrollchild, TOPLEFT, 0, 1}
 	
-	local maxtime = math.max(fightData.dpstime or 0, fightData.hpstime or 0)
+	local maxtime = math.max(fightData.activetime or 0, fightData.dpstime or 0, fightData.hpstime or 0)
 	
 	local buffcount = buffdata.buffcount or 1
 	local showids = db.debuginfo.ids

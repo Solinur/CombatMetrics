@@ -1832,6 +1832,21 @@
 								self.category = "Info"
 							</OnInitialized>
 						</Texture>
+						
+						<Texture name="$(parent)SettingsButton" mouseEnabled="true" textureFile="EsoUI/Art/SkillsAdvisor/advisor_tabIcon_settings_up.dds" color="FFFFFFFF" inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton" hidden="false">
+							<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)CombatLogButton" offsetY="30"/>
+							<OnInitialized>
+								self.tooltip = {SI_COMBAT_METRICS_TOGGLE_SETTINGS}
+								self.category = "settings"
+							</OnInitialized>
+							
+							<OnMouseUp> 
+								
+								CMX.SettingsContextMenu( self, upInside )
+								
+							</OnMouseUp>
+							
+						</Texture>
 					
 						<Backdrop name="$(parent)BG" inherits="CombatMetrics_BackgroundFramed" excludeFromResizeToFitExtents="true" edgeColor="FF000000" centerColor="EE000000">
 							<AnchorFill/>

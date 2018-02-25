@@ -51,10 +51,14 @@
 	SI_COMBAT_METRICS_HEALING_DONE = "Healing Done", -- Healing Done
 	SI_COMBAT_METRICS_HEALING_RECEIVED = "Healing Recieved", -- Healing Recieved
 
-	SI_COMBAT_METRICS_TOGGLE_FIGHTSTATS = "Fight Stats", -- Toggle Combat Log
-	SI_COMBAT_METRICS_TOGGLE_COMBAT_LOG = "Combat Log", -- Toggle Combat Log
-	SI_COMBAT_METRICS_TOGGLE_GRAPH = "Graph", -- Toggle Combat Log
-	SI_COMBAT_METRICS_TOGGLE_INFO = "Info", -- Toggle Combat Log
+	SI_COMBAT_METRICS_TOGGLE_FIGHTSTATS = "Fight Stats", -- Fight Stats
+	SI_COMBAT_METRICS_TOGGLE_COMBAT_LOG = "Combat Log", -- Combat Log
+	SI_COMBAT_METRICS_TOGGLE_GRAPH = "Graph", -- Graph
+	SI_COMBAT_METRICS_TOGGLE_INFO = "Info", -- Info
+	SI_COMBAT_METRICS_TOGGLE_SETTINGS = "Options", -- Settings
+	
+	SI_COMBAT_METRICS_SHOWIDS = "Show IDs for units, buffs and abilities", -- Show IDs for units, buffs and abilities
+	SI_COMBAT_METRICS_HIDEIDS = "Hide IDs for units, buffs and abilities", -- Hide IDs for units, buffs and abilities
 
 	SI_COMBAT_METRICS_STORAGE_FULL = "The storage file is full. The fight you want to save needs <<1>> MB and <<2>> indices. Delete a fight to free some space!", -- The storage file is full. Delete a fight to free some space!
 
