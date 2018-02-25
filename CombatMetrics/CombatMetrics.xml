@@ -2306,7 +2306,7 @@
 				
 				<Control name="$(parent)DamageOut">
 					<Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="2" offsetY="2"/>
-					<Dimensions x="135" y="26"/>
+					<Dimensions x="150" y="26"/>
 					
 					<Controls>
 						<Texture name="$(parent)Icon" textureFile="/esoui/art/icons/poi/poi_battlefield_complete.dds">
@@ -2317,7 +2317,7 @@
 						
 						<Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0" horizontalAlignment="RIGHT" verticalAlignment="CENTER">
 							<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" />
-							<Dimensions x="105" y="24"/>
+							<Dimensions x="120" y="24"/>
 						</Label>
 					</Controls>
 					
@@ -2325,7 +2325,7 @@
 				
 				<Control name="$(parent)HealOut">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DamageOut"/>
-					<Dimensions x="135" y="26"/>
+					<Dimensions x="150" y="26"/>
 					
 					<Controls>
 						<Texture name="$(parent)Icon" textureFile="/esoui/art/buttons/gamepad/pointsplus_up.dds">
@@ -2336,7 +2336,7 @@
 						
 						<Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0" horizontalAlignment="RIGHT" verticalAlignment="CENTER">
 							<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="2"/>
-							<Dimensions x="105" y="24"/>
+							<Dimensions x="120" y="24"/>
 						</Label>
 					</Controls>
 					
@@ -2344,7 +2344,7 @@
 				
 				<Control name="$(parent)DamageIn">
 					<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)HealOut"/>
-					<Dimensions x="135" y="26"/>
+					<Dimensions x="150" y="26"/>
 					
 					<Controls>
 						<Texture name="$(parent)Icon" textureFile="/esoui/art/icons/heraldrycrests_weapon_shield_01.dds">
@@ -2355,7 +2355,7 @@
 						
 						<Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0" horizontalAlignment="RIGHT" verticalAlignment="CENTER">
 							<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon"/>
-							<Dimensions x="105" y="24"/>
+							<Dimensions x="120" y="24"/>
 						</Label>
 					</Controls>
 					
@@ -2363,7 +2363,7 @@
 				
 				<Control name="$(parent)HealIn">
 					<Anchor point="TOPLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)DamageOut"/>
-					<Dimensions x="75" y="26"/>
+					<Dimensions x="85" y="26"/>
 					
 					<Controls>
 						<Texture name="$(parent)Icon" textureFile="/esoui/art/buttons/gamepad/xbox/nav_xbone_dpad.dds">
@@ -2374,7 +2374,7 @@
 						
 						<Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0" horizontalAlignment="RIGHT" verticalAlignment="CENTER">
 							<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="2"/>
-							<Dimensions x="45" y="24"/>
+							<Dimensions x="55" y="24"/>
 						</Label>
 					</Controls>
 					
@@ -2382,7 +2382,7 @@
 				
 				<Control name="$(parent)Time">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)HealIn"/>
-					<Dimensions x="60" y="26"/>
+					<Dimensions x="65" y="26"/>
 					
 					<Controls>
 						<Texture name="$(parent)Icon" textureFile="/esoui/art/tutorial/timer_icon.dds">
@@ -2393,7 +2393,7 @@
 						
 						<Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0:00.0" horizontalAlignment="RIGHT" verticalAlignment="CENTER">
 							<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon"/>
-							<Dimensions x="33" y="24"/>
+							<Dimensions x="38" y="24"/>
 						</Label>
 					</Controls>
 					

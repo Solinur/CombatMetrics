@@ -2556,7 +2556,7 @@ local function initFightReport()
 		
 			local font, size, style = unpack(fontcontrol.font)
 		
-			if size then size = tonumber(size) * (3 * scale + 1) / 4 end			-- Don't Scale fonts as much
+			if size then size = tonumber(size) * (scale + 0.1)/1.2 end			-- Don't Scale fonts as much
 				
 			control:SetFont(string.format("%s|%s|%s", font, size, style))
 			
@@ -2742,21 +2742,33 @@ local function initLiveReport()
 		
 	end
 	
-	local function resize(liveReport, scale)
+	local function resize(control, scale)
 	
-		local width, height = unpack(liveReport.sizes)
+		local width, height = unpack(control.sizes)
 		
-		if width then liveReport:SetWidth(width*scale) end
-		if height then liveReport:SetHeight(height*scale) end
+		if width then control:SetWidth(width*scale) end
+		if height then control:SetHeight(height*scale) end
 		
-		for i = 1, liveReport:GetNumChildren() do
+		local fontcontrol = control:GetNamedChild("Font")
 		
-			local child = liveReport:GetChild(i)
+		if fontcontrol ~= nil then 
+		
+			local font, size, style = unpack(fontcontrol.font)
+		
+			if size then size = tonumber(size) * (scale + 0.1)/1.2 end			-- Don't Scale fonts as much
+				
+			control:SetFont(string.format("%s|%s|%s", font, size, style))
+			
+		end
+		
+		for i = 1, control:GetNumChildren() do
+		
+			local child = control:GetChild(i)
 			if child then resize(child, scale) end
 			
 		end
 	end
-	
+		
 	function liveReport.Resize(liveReport, scale)
 	
 		resize(liveReport, scale)
