@@ -161,12 +161,12 @@
 				
 				<Label name="$(parent)Value" inherits="CombatMetrics_StatRowValue" text="0" horizontalAlignment="RIGHT">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Label" offsetX="4"/>
-					<Dimensions x="90"/>
+					<Dimensions x="74"/>
 				</Label>
 				
 				<Label name="$(parent)Value2" inherits="CombatMetrics_StatRowValue" text="0" horizontalAlignment="RIGHT">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Value" offsetX="8"/>
-					<Dimensions x="90"/>
+					<Dimensions x="74"/>
 				</Label>
 				
 				<Label name="$(parent)Value3" inherits="CombatMetrics_StatRowValue" text="0 %" horizontalAlignment="RIGHT">
@@ -370,7 +370,7 @@
 						<Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_REGENERATION" horizontalAlignment="LEFT">
 							
 							<Anchor point="BOTTOMLEFT" offsetX="0" offsetY="0"/>
-							<Dimensions x="214" y="20"/>
+							<Dimensions x="250" y="20"/>
 							
 						</Label>
 						
@@ -981,7 +981,7 @@
 				
 				<Control name="$(parent)_MainPanel" inherits="CombatMetrics_ControlFramed">
 					<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)_Title" offsetX="0" offsetY="4"/>
-					<Dimensions x="660" y="374"/>
+					<Dimensions x="628" y="374"/>
 					
 					<Controls>
 					
@@ -990,8 +990,8 @@
 							
 							<Controls>
 								<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
-									<Anchor point="TOP" offsetX="50" offsetY="6"/>
-									<Anchor point="BOTTOM" offsetX="50" offsetY="-6"/>
+									<Anchor point="TOP" offsetX="34" offsetY="6"/>
+									<Anchor point="BOTTOM" offsetX="34" offsetY="-6"/>
 								</Line>
 								
 								<Control name="$(parent)Left">
@@ -1007,7 +1007,7 @@
 										
 										<Label name="$(parent)ActiveTimeValue" inherits="CombatMetrics_StatRowLabel" text="SI_COMBAT_METRICS_ZERO_SEC" color="FFFFFFCC" horizontalAlignment="RIGHT">
 											<Anchor point="TOPRIGHT" relativePoint="TOP" offsetX="-4" offsetY="4"/>
-											<Dimensions x="84"/>
+											<Dimensions x="76"/>
 										</Label>
 										
 										<Label name="$(parent)CombatTimeLabel" inherits="CombatMetrics_StatRowLabel" text="SI_COMBAT_METRICS_IN_COMBAT" horizontalAlignment="RIGHT">
@@ -1017,7 +1017,7 @@
 										
 										<Label name="$(parent)CombatTimeValue" inherits="CombatMetrics_StatRowLabel" text="SI_COMBAT_METRICS_ZERO_SEC" horizontalAlignment="RIGHT">
 											<Anchor point="TOPRIGHT" offsetX="-6" offsetY="4"/>
-											<Dimensions x="84"/>
+											<Dimensions x="76"/>
 										</Label>
 										
 										<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
@@ -1027,12 +1027,12 @@
 										
 										<Label name="$(parent)StatHeaderLabel1" inherits="CombatMetrics_StatRowLabel" text="SI_COMBAT_METRICS_PLAYER" horizontalAlignment="CENTER">
 											<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Sep" offsetX="120" offsetY="4"/>
-											<Dimensions x="94"/>
+											<Dimensions x="78"/>
 										</Label>
 										
 										<Label name="$(parent)StatHeaderLabel2" inherits="CombatMetrics_StatRowLabel" text="SI_COMBAT_METRICS_GROUP" horizontalAlignment="CENTER">
 											<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)StatHeaderLabel1" offsetX="4"/>
-											<Dimensions x="94"/>
+											<Dimensions x="78"/>
 										</Label>
 										
 										<Label name="$(parent)StatHeaderLabel3" inherits="CombatMetrics_StatRowLabel" text="%" horizontalAlignment="CENTER">
@@ -1871,7 +1871,7 @@
 								<Control name="$(parent)BuffsIn" inherits="CombatMetrics_BuffPanelBox" mouseEnabled="true">
 								
 									<Anchor point="TOPLEFT"/>
-									<Dimensions x="82" y="48"/>
+									<Dimensions x="90" y="48"/>
 									
 									<OnInitialized>
 									
@@ -1890,7 +1890,7 @@
 								<Control name="$(parent)BuffsOut" inherits="CombatMetrics_BuffPanelBox" mouseEnabled="true">
 								
 									<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)BuffsIn"/>
-									<Dimensions x="82" y="48"/>
+									<Dimensions x="90" y="48"/>
 									
 									<OnInitialized>
 									
@@ -1909,7 +1909,7 @@
 								<Control name="$(parent)MagickaStats" inherits="CombatMetrics_BuffPanelBox" mouseEnabled="true">
 								
 									<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)BuffsOut"/>
-									<Dimensions x="82" y="48"/>
+									<Dimensions x="90" y="48"/>
 									
 									<OnInitialized>
 									
@@ -1968,7 +1968,7 @@
 										<Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_BUFF" horizontalAlignment="LEFT" verticalAlignment="CENTER">
 											
 											<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="2" offsetY="0"/>
-											<Dimensions x="140" y="20"/>
+											<Dimensions x="176" y="20"/>
 											
 										</Label>
 										
