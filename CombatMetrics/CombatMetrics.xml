@@ -1833,7 +1833,7 @@
 							</OnInitialized>
 						</Texture>
 						
-						<Texture name="$(parent)SettingsButton" mouseEnabled="true" textureFile="EsoUI/Art/SkillsAdvisor/advisor_tabIcon_settings_up.dds" color="FFFFFFFF" inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton" hidden="false">
+						<Texture name="$(parent)SettingsButton" mouseEnabled="true" textureFile="esoui/art/tutorial/gamepad/gp_playermenu_icon_settings.dds" color="FFFFFFFF" inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton" hidden="false">
 							<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)CombatLogButton" offsetY="30"/>
 							<OnInitialized>
 								self.tooltip = {SI_COMBAT_METRICS_TOGGLE_SETTINGS}

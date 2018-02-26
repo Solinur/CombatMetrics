@@ -2581,7 +2581,7 @@ local function initFightReport()
 		
 			local font, size, style = unpack(fontcontrol.font)
 		
-			if size then size = tonumber(size) * (scale + 0.1)/1.2 end			-- Don't Scale fonts as much
+			if size then size = tonumber(size) * (scale + 0.2)/1.2 end			-- Don't Scale fonts as much
 				
 			control:SetFont(string.format("%s|%s|%s", font, size, style))
 			
