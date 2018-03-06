@@ -196,10 +196,7 @@ function CMX.MakeMenu(svdefaults)
 					if value then
 					
 						local number = zo_round(tonumber(value) or def.crusherValue)
-						db.crusherValue = number
-						
-						SpellResistDebuffs[17906] = number
-						PhysResistDebuffs[17906] = number
+						CMX.SetCrusher(number)
 					
 					end
 				end

@@ -2316,11 +2316,11 @@ local function updateFightListPanel(panel, data, issaved)
 			
 			if category == "healingOut" or category == "healingIn" then 
 			
-				activetime = fight.hpstime 
+				activetime = fight.hpstime or 1
 			
 			else 
 			
-				activetime = fight.dpstime 
+				activetime = fight.dpstime or 1
 			
 			end
 

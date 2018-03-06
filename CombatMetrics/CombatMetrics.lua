@@ -123,7 +123,18 @@ local PhysResistDebuffs = {
 	--Corrosive Armor ignores all resistance
 
 }
+
+function CMX.SetCrusher(value)
+
+	db.crusherValue = value
+
+	local crushername = GetFormatedAbilityName(17906)
+
+	SpellResistDebuffs[crushername] = value
+	PhysResistDebuffs[crushername] = value
  
+end
+
 local LC = LibStub:GetLibrary("LibCombat")
 if LC == nil then return end 
 

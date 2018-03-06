@@ -94,15 +94,15 @@ local critbonusabilities = {
 
 	{
 		["type"] = SKILL_TYPE_CLASS, 
-		["line"] = GetAPIVersion() == 100022 and 13 or 1, 
+		["line"] = 13,
 		["skill"] = 7, 
-		["effect"] = {[31698] = 5, [44046] = 10	}	-- Templar: Piercing Spear
+		["effect"] = {[1] = 5, [2] = 10	}	-- Templar: Piercing Spear
 	},
 	{
 		["type"] = SKILL_TYPE_CLASS, 
-		["line"] = GetAPIVersion() == 100022 and 9 or 1, 
+		["line"] = 4, 
 		["skill"] = 10, 
-		["effect"] = {[36641] = 5, [45060] = 10	}	-- Nightblade: Hemorrhage
+		["effect"] = {[1] = 5, [2] = 10	}	-- Nightblade: Hemorrhage
 	},
 	
 }
@@ -351,14 +351,10 @@ local function GetCritBonusFromPassives()
 		local line = ability.line
 		local skill = ability.skill
 	
-		local skilled = GetSkillAbilityId(skillType, line, skill)
+		local _, _, _, _, _, purchased, _, rank = GetSkillAbilityInfo(skillType, line, skill)
 		
-		for id, effect in pairs(ability.effect) do
-		
-			if skilled == id then bonus = effect end
-		
-		end	
-		
+		if purchased then bonus = ability.effect[rank] end
+	
 		if bonus > 0 then return {skillType, line, bonus} end
 	end
 	

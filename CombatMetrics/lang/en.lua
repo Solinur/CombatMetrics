@@ -220,7 +220,7 @@
 
 	SI_COMBAT_METRICS_MENU_RESPEN_NAME = "Resistance and Penetration",  -- Live Report Window NEW
 	SI_COMBAT_METRICS_MENU_CRUSHER = "Crusher",  -- Crusher NEW
-	SI_COMBAT_METRICS_MENU_CRUSHER_TOOLTIP = "Resistance reduction due to debuff from Crusher glyph. For maxlevel gold glyph: standard: 1622, infused: 1946",  -- Resistance reduction due to debuff from Crusher glyph. For maxlevel gold glyph: standard: 1622, infused: 1946 NEW
+	SI_COMBAT_METRICS_MENU_CRUSHER_TOOLTIP = "Resistance reduction due to debuff from Crusher glyph. For maxlevel gold glyph: standard: 1622, infused: 2108",  -- Resistance reduction due to debuff from Crusher glyph. For maxlevel gold glyph: standard: 1622, infused: 1946 NEW
 	SI_COMBAT_METRICS_MENU_MOBRESISTANCE = "Target resistance",  -- Target Resistance NEW
 	SI_COMBAT_METRICS_MENU_MOBRESISTANCE_TOOLTIP = "Target resistance that is assumed for overpenetration calculation",  -- Target resistance that is assumed for overpenetration calculation NEW
 	
