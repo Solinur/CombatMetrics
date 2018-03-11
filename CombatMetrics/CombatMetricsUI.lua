@@ -5,6 +5,7 @@ COMBAT_METRICS_LINE_SIZE = tostring(dx)
 local fontsize = 14
 local currentFight
 local abilitystats
+local abilitystatsversion = 2
 local fightData, selectionData
 local currentCLPage
 local selections, lastSelections
@@ -17,7 +18,7 @@ local _
 local db
 
 function CMX.GetAbilityStats()
-	return abilitystats
+	return abilitystats, abilitystatsversion
 end
  
 local function GetFormatedAbilityName(id)
