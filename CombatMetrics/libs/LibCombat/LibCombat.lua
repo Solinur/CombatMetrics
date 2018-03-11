@@ -512,6 +512,22 @@ local function GetCritbonus()
 
 end
 
+local TFSBonus = 0
+
+local function onTFSChanged(_, changeType, _, _, _, _, _, stackCount, _, _, _, _, _, _, _, _, _)
+
+	if (changeType == EFFECT_RESULT_GAINED or changeType == EFFECT_RESULT_UPDATED) and stackCount > 1 then 
+ 
+		TFSBonus = (stackCount - 1) * 860
+		
+	else
+		
+		TFSBonus = 0
+		
+	end
+end
+
+
 local function GetStats()
 
 	local weaponcritbonus, spellcritbonus = GetCritbonus()
@@ -527,7 +543,7 @@ local function GetStats()
 		["weaponpower"]		= GetStat(STAT_POWER), 
 		["weaponcrit"]		= GetStat(STAT_CRITICAL_STRIKE), 
 		["weaponcritbonus"]	= weaponcritbonus,
-		["weaponpen"]		= GetStat(STAT_PHYSICAL_PENETRATION), 
+		["weaponpen"]		= GetStat(STAT_PHYSICAL_PENETRATION) + TFSBonus, 
 							
 		["maxhealth"]		= GetStat(STAT_HEALTH_MAX), 		
 		["physres"]			= GetStat(STAT_PHYSICAL_RESIST), 
@@ -536,7 +552,7 @@ local function GetStats()
 	}
 end
 
-local maxcrit
+local maxcrit = 21912 -- fallback value, will be determined dynamically later
 
 function FightHandler:GetNewStats(timems)
 
@@ -548,7 +564,7 @@ function FightHandler:GetNewStats(timems)
 	
 	for statName, newValue in pairs(GetStats()) do
 	
-		if statName == "spellcrit" then newValue = math.min(newValue, maxcrit) end
+		if statName == "spellcrit" or statName == "weaponcrit" then newValue = math.min(newValue, maxcrit) end
 	
 		if stats["current"..statName] == nil or stats["max"..statName] == nil or timems == nil then 
 		
@@ -862,16 +878,16 @@ end
 
 local function onMajorForceChanged( _, changeType)
 	
-	if changeType == 1 then data.majorForce = 15
+	if changeType == 1 then data.majorForce = 15 
 	elseif changeType == 2 then data.majorForce = 0 end
 		
 end	
 
 local function onMinorForceChanged( _, changeType)
 	
-	if changeType == 1 then data.majorForce = 10
+	if changeType == 1 then data.majorForce = 10 
 	elseif changeType == 2 then data.majorForce = 0 end
-		
+
 end	
 
 local function onEffectChanged(...)
@@ -1520,6 +1536,8 @@ Events.Stats = EventHandler:New(
 			self:RegisterEvent(EVENT_EFFECT_CHANGED, onMinorForceChanged, REGISTER_FILTER_UNIT_TAG, "player", REGISTER_FILTER_ABILITY_ID, id)
 		
 		end	
+		
+		self:RegisterEvent(EVENT_EFFECT_CHANGED, onTFSChanged, REGISTER_FILTER_UNIT_TAG, "player", REGISTER_FILTER_ABILITY_ID, 51176)  -- to track TFS procs, which aren't recognized for stacks > 1 in penetration stat.
 	end
 )
 

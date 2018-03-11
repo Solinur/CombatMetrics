@@ -1327,7 +1327,7 @@ local function updateFightStatsPanelRight(panel)
 		
 			local maxvalue = stats["max"..dataKey] or 0
 			
-			if convert then maxvalue = math.min(GetCriticalStrikeChance(maxvalue), 100) end
+			if convert then maxvalue = GetCriticalStrikeChance(maxvalue) end
 			if displayformat then maxvalue = string.format(displayformat, maxvalue) end
 		
 			local avgvalue = avgvalues["avg"..dataKey] or calcstats["avg"..dataKey]
@@ -1394,7 +1394,7 @@ local function updateFightStatsPanelRight(panel)
 			
 		end
 		
-		local averagePenetration = math.max(zo_round(sum / totaldamage), avgvalues["avg"..dataKey] or 0)
+		local averagePenetration = string.format("%d", math.max(zo_round(sum / totaldamage), avgvalues["avg"..dataKey] or 0))
 		local overPenetrationRatio = string.format("%.1f%%", 100 * overpen / totaldamage)
 		
 		row5:SetHidden(false) 
