@@ -16,10 +16,10 @@ local CMX = CMX
  
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "0.8.0.4"
+CMX.version = "0.8.1.1"
 	
 CMX.CustomAbilityIcon = {}
-CMX.CustomAbilityName = {}
+CMX.CustomAbilityName = {[75753] = "Line-Breaker"}
 
 local function Print(category, message, ...)
 	if db.debuginfo[category] then df("[%s] %s", "CMX", message:format(...)) end
