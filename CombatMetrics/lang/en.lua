@@ -45,6 +45,8 @@
 	SI_COMBAT_METRICS_HEALING = "Healing", -- Healing
 	SI_COMBAT_METRICS_HEALS = "Heals",
 	SI_COMBAT_METRICS_HPS = "HPS",
+	
+	SI_COMBAT_METRICS_EDIT_TITLE = "Double click to edit fight name",
 
 	SI_COMBAT_METRICS_DAMAGE_CAUSED = "Damage Caused", -- Damage Caused
 	SI_COMBAT_METRICS_DAMAGE_RECEIVED = "Damage Received", -- Damage Received

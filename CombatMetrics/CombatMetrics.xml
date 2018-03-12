@@ -933,7 +933,7 @@
 						
 						</Control>
 						
-						<Control name="$(parent)FightTitle" resizeToFitDescendents="true" mouseEnabled="true">
+						<Control name="$(parent)FightTitle" resizeToFitDescendents="true" mouseEnabled="true" inherits="CombatMetrics_ControlTooltip">
 						
 							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)CharacterInfo" offsetX="8"/>
 							<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)NavigationRow" offsetX="-8"/>
@@ -965,6 +965,10 @@
 								</EditBox>
 								
 							</Controls>
+							
+							<OnInitialized>
+								self.tooltip = {SI_COMBAT_METRICS_EDIT_TITLE}
+							</OnInitialized>
 							
 							<OnMouseDoubleClick>								
 								CMX.EditTitleStart(self)

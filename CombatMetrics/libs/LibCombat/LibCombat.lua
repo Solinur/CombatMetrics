@@ -29,7 +29,7 @@ local em = GetEventManager()
 local _
 local db
 local reset = false
-local data = {}
+local data = {skillBars= {}}
 local showdebug = false --or GetDisplayName() == "@Solinur"
 local timeout = 500
 local activetimeonheals = true
@@ -38,7 +38,7 @@ lib.ActiveCallbackTypes = ActiveCallbackTypes
 local CustomAbilityTypeList = {}
 local currentfight
 local Events = {}
-EffectBuffer = {}
+local EffectBuffer = {}
 
 -- types of callbacks: Units, DPS/HPS, DPS/HPS for Group, Logevents
 
@@ -407,6 +407,23 @@ local function PurgeEffectBuffer(timems)
 	end
 end
 
+local function GetCurrentSkillBar()
+
+	local bar = GetActiveWeaponPairInfo()
+	
+	local skillBars = data.skillBars
+	
+	skillBars[bar] = {}
+	
+	local currentbar = skillBars[bar]
+	
+	for i=1,8 do 
+	
+		currentbar[i] = GetSlotBoundId(i)
+	end
+	
+end
+
 function FightHandler:PrepareFight()
 
 	local timems = GetGameTimeMilliseconds()
@@ -455,13 +472,41 @@ function FightHandler:PrepareFight()
 		self.prepared = true
 		
 		self.stats = {}
+		GetCurrentSkillBar()
 		self:GetNewStats(timems)		
 	end	
 	
 	em:RegisterForUpdate("LibCombat_update", 500, function() self:onUpdate() end)
 end
 
+local function GetSkillBars()	
+
+	local currentSkillBars = {}
+	
+	ZO_DeepTableCopy(data.skillBars, currentSkillBars)
+	
+	return currentSkillBars
+
+end
+
+local function GetEquip()
+
+	local equip = {}
+
+	for i = EQUIP_SLOT_ITERATION_BEGIN, EQUIP_SLOT_ITERATION_END do 
+	
+		equip[i] = GetItemLink(BAG_WORN, i, LINK_STYLE_DEFAULT)
+		
+	end
+	
+	return equip
+	
+end
+
 function FightHandler:FinishFight()
+
+	self.charData.skillBars = GetSkillBars()
+	self.charData.equip = GetEquip()
 
 	local timems = GetGameTimeMilliseconds()
 	self.combatend = timems
@@ -1052,12 +1097,18 @@ end
 
 local function onWeaponSwap(_, isHotbarSwap)
 
-	if not isHotbarSwap or data.inCombat == false then return end
+	if not isHotbarSwap then return end
 	
-	local timems = GetGameTimeMilliseconds()
-	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_MESSAGES), LIBCOMBAT_EVENT_MESSAGES, timems, LIBCOMBAT_MESSAGE_WEAPONSWAP)
+	GetCurrentSkillBar()
 	
-	currentfight:GetNewStats(timems)
+	if data.inCombat == true then  
+	
+		local timems = GetGameTimeMilliseconds()
+		lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_MESSAGES), LIBCOMBAT_EVENT_MESSAGES, timems, LIBCOMBAT_MESSAGE_WEAPONSWAP)
+		
+		currentfight:GetNewStats(timems)
+		
+	end
 end
 
 local function onGroupChange()
@@ -1362,6 +1413,7 @@ Events.General = EventHandler:New(GetAllCallbackTypes()
 		self:RegisterEvent(EVENT_PLAYER_COMBAT_STATE, onCombatState)
 		self:RegisterEvent(EVENT_UNIT_CREATED, onGroupChange)
 		self:RegisterEvent(EVENT_UNIT_DESTROYED, onGroupChange)
+		self:RegisterEvent(EVENT_ACTION_SLOT_ABILITY_SLOTTED, GetCurrentSkillBar)
 		
 		if showdebug == true then self:RegisterEvent(EVENT_COMBAT_EVENT, onCustomEvent, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_EFFECT_GAINED_DURATION, REGISTER_FILTER_IS_ERROR, false) end		
 		self.active = true
@@ -1553,7 +1605,7 @@ Events.Resources = EventHandler:New(
 )
 
 Events.Messages = EventHandler:New(
-	{LIBCOMBAT_EVENT_MESSAGES},
+	{LIBCOMBAT_EVENT_MESSAGES, LIBCOMBAT_EVENT_FIGHTSUMMARY},
 	function (self)
 		self:RegisterEvent(EVENT_ACTION_SLOTS_FULL_UPDATE, onWeaponSwap)
 		self.active = true
