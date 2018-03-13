@@ -593,14 +593,19 @@ function CMX.LoadItem(listitem)
 	local issaved = listitem.issaved
 	local id = listitem.id
 	
-	if issaved and not (searchtable(CMX.lastfights, "date", savedFights[id]["date"])) then
+	local lastfights = CMX.lastfights
+	
+	local isLoaded, loadId = searchtable(lastfights, "date", savedFights[id]["date"])	-- returns false if nothing is found else it returns the id
+	if isLoaded then isLoaded = lastfights[loadId]["time"] == savedFights[id]["time"] end					-- ensures old fights load correctly
+	
+	if issaved and isLoaded == false then
 		
-		table.insert(CMX.lastfights, SVHandler.Load(id))
+		table.insert(lastfights, SVHandler.Load(id))
 		CombatMetrics_Report:Update(#CMX.lastfights)
 		
 	else
 		
-		CombatMetrics_Report:Update((issaved and (searchtable(CMX.lastfights, "date", savedFights[id]["date"])) or id))
+		CombatMetrics_Report:Update((issaved and loadId or id))
 	
 	end
 	
@@ -897,16 +902,16 @@ function searchtable(t, field, value)
 	
 		if type(v) == "table" and field and v[field] == value then 
 		
-			return k 
+			return true, k 
 			
 		elseif v == value then 
 		
-			return k 
+			return true, k 
 			
 		end		
 	end
 	
-	return false
+	return false, nil
 end
 
 local function UpdateReport2()

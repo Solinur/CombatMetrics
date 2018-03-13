@@ -239,3 +239,6 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 0.8.1.2 551,076 (13.03.2018) 21:41
 [*] Fixed tracking of Night Mother's Gaze for penetration stats
 [*] Fixed an issue where the window position would sometimes not be saved when it was dragged around. 
+
+0.8.1.3 553,007 (14.03.2018) 00:01
+[*] Fixed an issue were loading of a fight could fail if a fight of the same date had been loaded already. (thx @Liko)

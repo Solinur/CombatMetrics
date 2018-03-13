@@ -16,7 +16,7 @@ local CMX = CMX
  
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "0.8.1.2"
+CMX.version = "0.8.1.3"
 	
 CMX.CustomAbilityIcon = {}
 CMX.CustomAbilityName = {[75753] = "Line-Breaker"}
@@ -1367,6 +1367,9 @@ local function FightSummaryCallback(_, fight) -- called by CMX.update
 	fight.AcquireUnitData = AcquireUnitData
 	fight.AcquireResourceData = AcquireResourceData
 	fight.AccumulateStats = AccumulateStats	
+	
+	fight.grouplog = nil
+	
 	GetFightName(fight)
 	
 	fight.log = CMX.currentdata.log -- copy combatlog
