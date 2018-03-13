@@ -231,3 +231,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Added an option button to the side bar. For now it just has a shortcut to toggle IDs 
 [*] Added tracking of Equip and Skillbars for future use.
 [*] Several bug fixes introduced in 0.8.0
+
+0.8.1.1 543,100 (12.03.2018) 23:56
+[*] fixed wrong version numbers
+[*] added internal override for Line-breaker debuff, to prevent calculation issues when it gets renamed by other addons.

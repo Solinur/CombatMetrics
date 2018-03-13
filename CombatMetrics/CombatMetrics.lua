@@ -117,7 +117,7 @@ local PhysResistDebuffs = {
 	[GetFormatedAbilityName(17906)] = 1946, -- Crusher, can get changed by settings !
 	[GetFormatedAbilityName(75753)] = 3010, -- Alkosh
 	
-	[GetFormatedAbilityName(75753)] = 2580, -- Night Mother's Gaze
+	[GetFormatedAbilityName(34386)] = 2580, -- Night Mother's Gaze
 	[GetFormatedAbilityName(60416)] = 3440, -- Sunderflame
 	
 	--Corrosive Armor ignores all resistance
@@ -1656,6 +1656,7 @@ local function Initialize(event, addon)
 	local svtable = svmain and svmain.Default and svmain.Default[GetDisplayName()] or nil
 	
 	if svtable then 
+	
 		for k,v in pairs(svtable) do
 
 			if v.version and v.version < 5 then svtable[k] = nil end

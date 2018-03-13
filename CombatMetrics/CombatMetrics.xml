@@ -2309,7 +2309,7 @@
 				</Control>
 			</Controls>
 			
-			<OnMouseUp> CMX.SavePosition(self) </OnMouseUp>
+			<OnMoveStop> CMX.SavePosition(self) </OnMoveStop>
 			
 		</TopLevelControl>
 		
@@ -2420,7 +2420,7 @@
 
 			</Controls>
 			
-			<OnMouseUp> CMX.SavePosition(self) </OnMouseUp>
+			<OnMoveStop> CMX.SavePosition(self) </OnMoveStop>
 			
 		</TopLevelControl>
 	</Controls>
