@@ -235,3 +235,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 0.8.1.1 543,100 (12.03.2018) 23:56
 [*] fixed wrong version numbers
 [*] added internal override for Line-breaker debuff, to prevent calculation issues when it gets renamed by other addons.
+
+0.8.1.2 551,076 (13.03.2018) 21:41
+[*] Fixed tracking of Night Mother's Gaze for penetration stats
+[*] Fixed an issue where the window position would sometimes not be saved when it was dragged around. 

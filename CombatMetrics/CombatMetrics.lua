@@ -16,7 +16,7 @@ local CMX = CMX
  
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "0.8.1.1"
+CMX.version = "0.8.1.2"
 	
 CMX.CustomAbilityIcon = {}
 CMX.CustomAbilityName = {[75753] = "Line-Breaker"}
