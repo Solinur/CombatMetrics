@@ -353,7 +353,7 @@ local function GetCritBonusFromPassives()
 	
 		local _, _, _, _, _, purchased, _, rank = GetSkillAbilityInfo(skillType, line, skill)
 		
-		if purchased then bonus = ability.effect[rank] end
+		if purchased == true then bonus = ability.effect[rank] or 0 end
 	
 		if bonus > 0 then return {skillType, line, bonus} end
 	end
