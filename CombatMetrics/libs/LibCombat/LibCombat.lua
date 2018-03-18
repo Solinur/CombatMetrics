@@ -276,7 +276,7 @@ local function GetShadowBonus()
 	
 		if trait == ITEM_TRAIT_TYPE_ARMOR_DIVINES then 
 		
-			divines = tonumber(desc:match("%d%.%d")) + divines
+			divines = tonumber(desc:match("%d%.%d")) or tonumber(desc:match("%d,%d")) or 0 + divines
 
 		end 
 	end

@@ -939,7 +939,7 @@ local function updateTitlePanel(panel)
 		
 		fightlabel = "Combat Metrics"
 		
-	elseif fightData.charData == nil or fightData.charData.classId == nil and fightData.char == GetUnitName("player") then   -- legacy
+	elseif (fightData.charData == nil or fightData.charData.classId == nil) and fightData.char == GetUnitName("player") then   -- legacy
 	
 		charData.name = fightData.char
 		charData.raceId = GetUnitRaceId("player")

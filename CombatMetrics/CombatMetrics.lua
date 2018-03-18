@@ -16,7 +16,7 @@ local CMX = CMX
  
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "0.8.1.3"
+CMX.version = "0.8.1.5"
 	
 CMX.CustomAbilityIcon = {}
 CMX.CustomAbilityName = {[75753] = "Line-Breaker"}
@@ -1455,7 +1455,7 @@ local function UpdateEvents()
 		registeredGroup = false
 	end
 	
-	Print("special", "State: %d, Group: %d", registrationStatus, registeredGroup)
+	Print("special", "State: %d, Group: %s", registrationStatus or 0, tostring(registeredGroup or false))
 end
 
 do
