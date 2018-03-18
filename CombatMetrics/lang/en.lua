@@ -62,7 +62,7 @@
 	SI_COMBAT_METRICS_SHOWIDS = "Show IDs for units, buffs and abilities", -- Show IDs for units, buffs and abilities
 	SI_COMBAT_METRICS_HIDEIDS = "Hide IDs for units, buffs and abilities", -- Hide IDs for units, buffs and abilities
 
-	SI_COMBAT_METRICS_STORAGE_FULL = "The storage file is full. The fight you want to save needs <<1>> MB and <<2>> indices. Delete a fight to free some space!", -- The storage file is full. Delete a fight to free some space!
+	SI_COMBAT_METRICS_STORAGE_FULL = "The storage file is full. The fight you want to save needs <<1>> MB and <<2>> indices. Delete a fight to free some space or increase the allowed space in the settings!", -- The storage file is full. Delete a fight to free some space!
 
 	SI_COMBAT_METRICS_PREVIOUS_FIGHT = "Previous Fight", -- Previous Fight
 	SI_COMBAT_METRICS_NEXT_FIGHT = "Next Fight", -- Next Fight
@@ -188,7 +188,7 @@
 	
 	SI_COMBAT_METRICS_MENU_SVSIZE_NAME = "Saved Fight Memory",  -- Saved Fight Memory
 	SI_COMBAT_METRICS_MENU_SVSIZE_TOOLTIP = "Maximum memory size for saved fights in MB",  -- Maximum memory size for saved fights in MB
-	SI_COMBAT_METRICS_MENU_SVSIZE_WARNING = "Use with caution! Setting this too high significantly increases loading times. If the file gets too large, the client might crash when attempting to load it.", -- Use with caution! Setting this too high significantly increases loading times. If the file gets too large, the client might crash when attempting to load it.
+	SI_COMBAT_METRICS_MENU_SVSIZE_WARNING = "Use with caution! Lots of saved data significantly increase loading times. If the file gets too large, the client might crash when attempting to load it.", -- Use with caution! Lots of saved data significantly increase loading times. If the file gets too large, the client might crash when attempting to load it.
 	
 	SI_COMBAT_METRICS_MENU_BOSSFIGHTS_NAME = "Keep Boss Fights",  -- Keep Boss Fights
 	SI_COMBAT_METRICS_MENU_BOSSFIGHTS_TOOLTIP = "Delete trash fights first before deleting boss fights when limit of fights is reached",  -- Delete trash fights first before deleting boss fights when limit of fights is reached

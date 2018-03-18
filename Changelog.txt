@@ -245,3 +245,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 
 0.8.1.4 565,212 (16.03.2018) 00:18
 [*] Fixed an issue that would cause an error message
+
+0.8.1.5 578,871 (18.03.2018) 15:22
+[*] fixed two issues that would cause an error message in some cases
+[*] fixed an issue where the wrong class/race icons could be shown for old parses

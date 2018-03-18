@@ -140,11 +140,15 @@ end
 
 local function checkSaveLimit(fight)
 
-	local size, constants = SVHandler.Check(fight)
+	local size, constants = SVHandler.Check(fight)									-- if no table is passed it will check size of the SV
 	
-	CMX.Print("save", "SV Size: %.3f MB, %.1f%%", size, size*100/db.maxSVsize)
-	CMX.Print("save", "SV Keys: %d, %.1f%%", constants, constants/1310.71) --131071 is the maximum possible number of constants
-
+	if fight == nil then 
+	
+		CMX.Print("save", "SV Size: %.3f MB, %.1f%%", size, size*100/db.maxSVsize)
+		CMX.Print("save", "SV Indices: %d, %.1f%%", constants, constants/1310.71) 		--131071 is the maximum possible number of constants
+	
+	end
+	
 	local isvalid = (size < db.maxSVsize and constants < 131071)
 	
 	return isvalid, size, constants
@@ -165,17 +169,21 @@ function NavButtonFunctions.save(control, _, _, _, _, shiftkey )
 		
 		SVHandler.Save(fightData, shiftkey)
 		
-		if checkSaveLimit() then 
+		local isvalid = checkSaveLimit()
+		
+		if isvalid then
 			
 			CombatMetrics_Report:Update()
 			
 		else 
 			
 			local removed = table.remove(savedFights)
-			local size, constants = SVHandler.Check(removed)
+			local _, size, constants = checkSaveLimit(removed)
 			
 			errorstring = zo_strformat(SI_COMBAT_METRICS_STORAGE_FULL, size, constants)
 			assert(false, errorstring) 
+			
+			CombatMetrics_Report:Update()
 			
 		end
 	end
@@ -2809,10 +2817,6 @@ local function initLiveReport()
 	
 	liveReport.Update = updateLiveReport
 	
-end
-
-function convertCurrentToSave(fight)	-- this function compresses the log a little and does a few things to attempt to reduce the ammount of keys that are saved. 
-
 end
 
 function CMX.InitializeUI()
