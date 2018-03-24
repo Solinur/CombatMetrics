@@ -19,7 +19,13 @@ CMX.name = "CombatMetrics"
 CMX.version = "0.8.1.5"
 	
 CMX.CustomAbilityIcon = {}
-CMX.CustomAbilityName = {[75753] = "Line-Breaker"}
+CMX.CustomAbilityName = {
+
+	[75753] = GetAbilityName(75753), -- Line-breaker (Alkosh). pin abiltiy name so it can't get overridden
+	[17906] = GetAbilityName(17906), -- Crusher (Glyph). pin abiltiy name so it can't get overridden
+	
+	} 
+
 
 local function Print(category, message, ...)
 	if db.debuginfo[category] then df("[%s] %s", "CMX", message:format(...)) end
@@ -114,7 +120,7 @@ local PhysResistDebuffs = {
 	[GetFormatedAbilityName(62490)] = 5260, --Major Fracture	
 	[GetFormatedAbilityName(64147)] = 1320, --Minor Fracture
 
-	[GetFormatedAbilityName(17906)] = 1946, -- Crusher, can get changed by settings !
+	[GetFormatedAbilityName(17906)] = 2108, -- Crusher, can get changed by settings !
 	[GetFormatedAbilityName(75753)] = 3010, -- Alkosh
 	
 	[GetFormatedAbilityName(34386)] = 2580, -- Night Mother's Gaze

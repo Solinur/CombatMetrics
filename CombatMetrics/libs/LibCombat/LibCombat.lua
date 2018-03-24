@@ -505,8 +505,12 @@ end
 
 function FightHandler:FinishFight()
 
-	self.charData.skillBars = GetSkillBars()
-	self.charData.equip = GetEquip()
+	local charData = self.charData
+	
+	if charData == nil then return end
+	
+	charData.skillBars = GetSkillBars()
+	charData.equip = GetEquip()
 
 	local timems = GetGameTimeMilliseconds()
 	self.combatend = timems
@@ -820,6 +824,8 @@ local function onCombatState(event, inCombat)  -- Detect Combat Stage
 			
 			currentfight:FinishFight()
 			
+			if charData == nil then return end
+
 			lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_MESSAGES), LIBCOMBAT_EVENT_MESSAGES, timems, LIBCOMBAT_MESSAGE_COMBATEND)
 			
 		end
