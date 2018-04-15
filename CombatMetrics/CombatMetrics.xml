@@ -2328,7 +2328,7 @@
 					<Dimensions x="150" y="26"/>
 					
 					<Controls>
-						<Texture name="$(parent)Icon" textureFile="/esoui/art/icons/poi/poi_battlefield_complete.dds">
+						<Texture name="$(parent)Icon" textureFile="/esoui/art/icons/mapkey/mapkey_fightersguild.dds">
 							<Anchor point="LEFT"/>
 							<Dimensions x="24" y="24"/>
 						

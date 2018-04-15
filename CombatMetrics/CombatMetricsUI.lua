@@ -735,6 +735,36 @@ do
 		CombatMetrics_Report:Update()
 		
 	end
+	
+	local function postSingleDPS()
+	
+		CMX.PosttoChat("DPSS", currentFight)
+		
+	end
+	
+	local function postSmartDPS()
+	
+		CMX.PosttoChat("SmartDPS", currentFight)
+		
+	end
+	
+	local function postMultiDPS()
+	
+		CMX.PosttoChat("DPSM", currentFight)
+		
+	end
+	
+	local function postAllDPS()
+	
+		CMX.PosttoChat("DPST", currentFight)
+		
+	end
+	
+	local function postHPS()
+	
+		CMX.PosttoChat("HPS", currentFight)
+		
+	end
 
 	function CMX.SettingsContextMenu( settingsbutton, upInside )
 
@@ -746,6 +776,17 @@ do
 		
 		ClearMenu()
 		AddCustomMenuItem(text, func)
+		
+		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTSINGLEDPS), postSingleDPS)
+		
+		local fight = CMX.lastfights[currentFight]
+		
+		if fight and fight.bossfight == true then AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTSMARTDPS), postSmartDPS) end
+		
+		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTMULTIDPS), postMultiDPS)
+		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTALLDPS), postAllDPS)
+		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTHPS), postHPS)
+
 		ShowMenu(settingsbutton)
 		
 
@@ -842,77 +883,6 @@ function CMX.AddSelection( self, button, upInside, ctrlkey, alt, shiftkey )
 	selections[selecttype][category] = sel
 	CombatMetrics_Report:Update(currentFight)
 end 
-
--- Update the mini DPS meter
-
-local function updateLiveReport(self, data)
-
-	local livereport = self
-	
-	local DPSOut = data.DPSOut
-	local DPSIn = data.DPSIn
-	local HPSOut = data.HPSOut
-	local HPSIn = data.HPSIn
-	local dpstime = data.dpstime
-	local hpstime = data.hpstime
-	local groupDPSOut = data.groupDPSOut
-	local groupDPSIn = data.groupDPSIn
-	local groupHPSOut = data.groupHPSOut
-
-	-- Bail out if there is no damage to report
-	if (DPSOut == 0 and HPSOut == 0 and DPSIn == 0) or livereport:IsHidden() then return end
-
-	local DPSString
-	local HPSString
-	local DPSInString
-	local maxtime = math.max(dpstime, hpstime)
-	local timeString = string.format("%d:%04.1f", maxtime/60, maxtime%60)
-		
-	-- maybe add data from group
-	if db.recordgrp == true and (groupDPSOut > 0 or groupDPSIn > 0 or groupHPSOut > 0) then
-	
-		local dpsratio, hpsratio, idpsratio = 0, 0, 0
-		if groupDPSOut > 0  then dpsratio  = (math.floor(DPSOut / groupDPSOut * 1000) / 10) end 
-		if groupDPSIn > 0 then idpsratio = (math.floor(DPSIn / groupDPSIn * 1000) / 10) end 
-		if groupHPSOut > 0  then hpsratio  = (math.floor(HPSOut / groupHPSOut * 1000) / 10) end
-
-		DPSString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), DPSOut, groupDPSOut, dpsratio)
-		HPSString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), HPSOut, groupHPSOut, hpsratio)
-		DPSInString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), DPSIn, gidps, idpsratio)
-		
-	else
-		DPSString  = DPSOut 
-		HPSString  = HPSOut
-		DPSInString = DPSIn
-	end
-	
-	-- Update the values
-	
-	livereport:GetNamedChild("DamageOut"):GetNamedChild("Label"):SetText( DPSString )
-	livereport:GetNamedChild("HealOut"):GetNamedChild("Label"):SetText( HPSString )
-	livereport:GetNamedChild("DamageIn"):GetNamedChild("Label"):SetText( DPSInString )
-	livereport:GetNamedChild("HealIn"):GetNamedChild("Label"):SetText( HPSIn )
-	livereport:GetNamedChild("Time"):GetNamedChild("Label"):SetText( timeString )
-end
-
-local function toggleFightReport()
-
-	if not SCENE_MANAGER:IsShowing("CMX_REPORT_SCENE") then 
-	
-		SCENE_MANAGER:Toggle("CMX_REPORT_SCENE")
-		
-		CombatMetrics_Report:Update(#CMX.lastfights>0 and #CMX.lastfights or nil)
-		
-		SCENE_MANAGER:SetInUIMode(true)
-		
-		if #CMX.lastfights>0 and not CMX.inCombat and db.autoscreenshot and (db.autoscreenshotmintime ==0 or CMX.lastfights[#CMX.lastfights]["combattime"]>db.autoscreenshotmintime) then zo_callLater(TakeScreenshot, 400) end
-	
-	else
-	
-		SCENE_MANAGER:Toggle("CMX_REPORT_SCENE")
-	
-	end
-end
 
 function searchtable(t, field, value)
 
@@ -2238,7 +2208,7 @@ local function updateInfoRowPanel(panel)
 	
 	local datestring = type(date) == "number" and GetDateStringFromTimestamp(date) or date
 	local timestring = string.format("%s, %s", datestring, data.time)
-	local versionstring = data.ESOversion or "<= 3.2"
+	local versionstring = string.format("%s / CMX %s", data.ESOversion or "<= 3.2" , CMX.version)
 	
 	datetimecontrol:SetText(timestring)
 	versioncontrol:SetText(versionstring)
@@ -2272,7 +2242,7 @@ local function updateFightReport(control, fightId)
 		
 		if #CMX.lastfights == 0 then 
 			
-			fightId = -1 -- there si no fight saved in pos. -1, it will be nil.
+			fightId = -1 -- there is no fight saved in pos. -1, it will be nil.
 		
 		else 
 			
@@ -2427,7 +2397,7 @@ local function updateFightList(panel)
 	updateFightListPanel(savedPanel, savedFights, true)
 end
 
-function CMX.PosttoChat(mode)
+local function GetCurrentData()
 
 	local data = CMX.currentdata
 	
@@ -2438,13 +2408,35 @@ function CMX.PosttoChat(mode)
 	
 	end
 	
-	local output = ""
+	return data
+end
+
+local function GetSingleTargetDamage(data)	-- Gets highest Single Target Damage and counts enemy units.
+
+	local damage, groupDamage, units, name = 0, 0, 0, ""
 	
-	local dpstime = data.dpstime
-	local timeString = string.format("%d:%04.1f", dpstime/60, dpstime%60)
+	for unitId, unit in pairs(data.units) do
 	
-	local totalDPS, totalDamage, maxDamage, units, name, bossName = 0, 0, 0, 0, "", ""
-	local bossDPS, bossDamage, maxBossDamage, bossUnits = 0, 0, 0, 0
+		local totalUnitDamage = unit.damageOutTotal
+		
+		if totalUnitDamage > 0 and unit.isFriendly == false then
+		
+			if totalUnitDamage > damage then 
+			
+				name = unit.name
+				damage = totalUnitDamage
+				groupDamage = unit.groupDamageOut
+				
+			end
+		end
+	end
+	
+	return damage, groupDamage, name
+end
+
+local function GetBossTargetDamage(data) -- Gets Damage done to bosses and counts enemy boss units.
+
+	local totalBossDamage, bossDamage, bossUnits, bossName = 0, 0, 0, ""
 	
 	for unitId, unit in pairs(data.units) do
 	
@@ -2452,42 +2444,76 @@ function CMX.PosttoChat(mode)
 		
 		if (unit.bossId ~= nil and totalUnitDamage>0) then 
 		
-			bossDamage = bossDamage + totalUnitDamage
+			totalBossDamage = totalBossDamage + totalUnitDamage
 			bossUnits = bossUnits + 1 
 			
-			if totalUnitDamage > maxBossDamage then 
+			if totalUnitDamage > bossDamage then 
 			
 				bossName = unit.name
-				maxBossDamage = totalUnitDamage
-				
-			end
-		end
-		
-		if totalUnitDamage > 0 and unit.isFriendly == false then
-		
-			totalDamage = totalDamage + totalUnitDamage
-			units = units + 1
-			
-			if totalUnitDamage > maxDamage then 
-			
-				name = unit.name
-				maxDamage = totalUnitDamage
+				bossDamage = totalUnitDamage
 				
 			end
 		end
 	end
 	
+	return totalBossDamage, bossUnits, bossName
+end
+
+local function GetFullDamage(data)	-- Gets highest Single Target Damage and counts enemy units.
+
+	local units, damage = 0, 0
+	
+	for unitId, unit in pairs(data.units) do
+	
+		local totalUnitDamage = unit.damageOutTotal
+		
+		if totalUnitDamage > 0 and unit.isFriendly == false then
+		
+			units = units + 1
+			damage = damage + totalUnitDamage
+			
+		end
+	end
+	
+	return units, damage
+end
+	
+function CMX.PosttoChat(mode, fight)
+
+	local data = fight and CMX.lastfights[fight] or GetCurrentData()
+	
+	if data == nil then return end
+	
+	local timedata = ""
+	
+	if data ~= GetCurrentData() then 
+
+		local date = data.date
+	
+		local datestring = type(date) == "number" and GetDateStringFromTimestamp(date) or date
+		local timedata = string.format("[%s, %s] ", datestring, data.time)
+
+	end
+	
+	local output = ""
+	
+	local dpstime = data.dpstime
+	local timeString = string.format("%d:%04.1f", dpstime/60, dpstime%60)
+	
+	local singleDamage, _, name = GetSingleTargetDamage(data)
+	local units, totalDamage = GetFullDamage(data)
+	local bossDamage, bossUnits, bossName = GetBossTargetDamage(data)
+	
 	name = zo_strformat(SI_UNIT_NAME, (bossName ~= "" and bossName) or name)
 	
-	local singleDamage = maxDamage
-	local singleDamageString = ZO_CommaDelimitNumber(singleDamage)
 	local singleDPSString = ZO_CommaDelimitNumber(math.floor(singleDamage / dpstime))
+	local singleDamageString = ZO_CommaDelimitNumber(singleDamage)
 	
 	local bossDamage = bossUnits > 0 and bossDamage or singleDamage
 	local bossDPSString = ZO_CommaDelimitNumber(math.floor(bossDamage / dpstime))
 	local bossDamageString = ZO_CommaDelimitNumber(bossDamage)
 	
-	local totalDPSString = ZO_CommaDelimitNumber(math.floor(totalDamage / dpstime))
+	local totalDPSString = ZO_CommaDelimitNumber(math.floor(data.DPSOut))
 	local totalDamageString = ZO_CommaDelimitNumber(totalDamage)
 	
 	if mode == "HPS" then 
@@ -2525,8 +2551,10 @@ function CMX.PosttoChat(mode)
 	local channel = db.autoselectchatchannel==false and "" or IsUnitGrouped('player') and "/p " or "/say "
 
 	-- Print output to chat
+	
+	local outputtext = string.format("%s%s", timedata, output)
 
-	CHAT_SYSTEM.textEntry:SetText( channel .. output )
+	CHAT_SYSTEM.textEntry:SetText( channel .. outputtext )
 	CHAT_SYSTEM:Maximize()
 	CHAT_SYSTEM.textEntry:Open()
 	CHAT_SYSTEM.textEntry:FadeIn()
@@ -2546,6 +2574,98 @@ local function maxStat()
 	return maxPower
 	
 end
+
+-- Update the mini DPS meter
+
+local function updateLiveReport(self, data)
+
+	local livereport = self
+	
+	local DPSOut = data.DPSOut
+	local DPSIn = data.DPSIn
+	local HPSOut = data.HPSOut
+	local HPSIn = data.HPSIn
+	local dpstime = data.dpstime
+	local hpstime = data.hpstime
+	local groupDPSOut = data.groupDPSOut
+	local groupDPSIn = data.groupDPSIn
+	local groupHPSOut = data.groupHPSOut
+	
+	-- Bail out if there is no damage to report
+	if (DPSOut == 0 and HPSOut == 0 and DPSIn == 0) or livereport:IsHidden() then return end
+	
+	local SDPS = 0
+	local groupSDPS = 0
+	
+	if db.liveReport.damageOutSingle then 
+	
+		local singleTargetDamage, singleTargetDamageGroup = GetSingleTargetDamage(data)
+		
+		SDPS = math.floor(singleTargetDamage / dpstime + 0.5)
+		groupSDPS = math.floor(singleTargetDamageGroup / dpstime + 0.5)
+		
+	end
+
+	local DPSString
+	local HPSString
+	local DPSInString
+	local maxtime = math.max(dpstime, hpstime)
+	local timeString = string.format("%d:%04.1f", maxtime/60, maxtime%60)
+		
+	-- maybe add data from group
+	if db.recordgrp == true and (groupDPSOut > 0 or groupDPSIn > 0 or groupHPSOut > 0) then
+	
+		local dpsratio, hpsratio, idpsratio , sdpsratio = 0, 0, 0, 0
+		
+		if groupDPSOut > 0  then dpsratio  = (math.floor(DPSOut / groupDPSOut * 1000) / 10) end 
+		if groupDPSIn > 0 then idpsratio = (math.floor(DPSIn / groupDPSIn * 1000) / 10) end 
+		if groupHPSOut > 0  then hpsratio  = (math.floor(HPSOut / groupHPSOut * 1000) / 10) end
+		if groupSDPS > 0  then sdpsratio  = (math.floor(SDPS / groupSDPS * 1000) / 10) end
+
+		DPSString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), DPSOut, groupDPSOut, dpsratio)
+		DPSInString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), DPSIn, groupDPSIn, idpsratio)
+		HPSString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), HPSOut, groupHPSOut, hpsratio)
+		SDPSString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), SDPS, groupSDPS, sdpsratio)
+		
+	else
+	
+		DPSString  = DPSOut 
+		DPSInString = DPSIn
+		HPSString  = HPSOut
+		SDPSString = SDPS
+		
+	end
+	
+	-- Update the values
+
+	livereport:GetNamedChild("DamageOutSingle"):GetNamedChild("Label"):SetText( SDPSString )
+	livereport:GetNamedChild("DamageOut"):GetNamedChild("Label"):SetText( DPSString )
+	livereport:GetNamedChild("HealOut"):GetNamedChild("Label"):SetText( HPSString )
+	livereport:GetNamedChild("DamageIn"):GetNamedChild("Label"):SetText( DPSInString )
+	livereport:GetNamedChild("HealIn"):GetNamedChild("Label"):SetText( HPSIn )
+	livereport:GetNamedChild("Time"):GetNamedChild("Label"):SetText( timeString )
+	
+end
+
+local function toggleFightReport()
+
+	if not SCENE_MANAGER:IsShowing("CMX_REPORT_SCENE") then 
+	
+		SCENE_MANAGER:Toggle("CMX_REPORT_SCENE")
+		
+		CombatMetrics_Report:Update(#CMX.lastfights>0 and #CMX.lastfights or nil)
+		
+		SCENE_MANAGER:SetInUIMode(true)
+		
+		if #CMX.lastfights>0 and not CMX.inCombat and db.autoscreenshot and (db.autoscreenshotmintime ==0 or CMX.lastfights[#CMX.lastfights]["combattime"]>db.autoscreenshotmintime) then zo_callLater(TakeScreenshot, 400) end
+	
+	else
+	
+		SCENE_MANAGER:Toggle("CMX_REPORT_SCENE")
+	
+	end
+end
+
 
 local function initFightReport()
 
@@ -2722,24 +2842,24 @@ local function initLiveReport()
 	
 	local setLR = db.liveReport	
 	
-	local anchors = (setLR.layout == "Horizontal" and {
+	local anchors = (setLR.layout == "Horizontal" and {	
+	
+			{TOPLEFT, TOPLEFT, 0, 0, liveReport}, 
+			{LEFT, RIGHT, 0, 0}, 
+			{LEFT, RIGHT, 0, 0}
+			
+		}) or (setLR.layout == "Vertical" and {
 		
-							{TOPLEFT, TOPLEFT, 0, 0, liveReport}, 
-							{LEFT, RIGHT, 0, 0}, 
-							{LEFT, RIGHT, 0, 0}
-							
-						}) or (setLR.layout == "Vertical" and {
-						
-							{TOPLEFT, TOPLEFT, 0, 0, liveReport}, 
-							{TOPLEFT, BOTTOMLEFT, 0, 0}, 
-							{LEFT, RIGHT, 0, 0}
-							
-						}) or { -- layout = compact
-						
-							{TOPLEFT, TOPLEFT, 0, 0, liveReport}, 
-							{LEFT, RIGHT, 0, 0}, 
-							{TOPRIGHT, BOTTOMLEFT, 0, 0}, 
-						}
+			{TOPLEFT, TOPLEFT, 0, 0, liveReport}, 
+			{TOPLEFT, BOTTOMLEFT, 0, 0}, 
+			{LEFT, RIGHT, 0, 0}
+			
+		}) or { -- layout = compact
+		
+			{TOPLEFT, TOPLEFT, 0, 0, liveReport}, 
+			{LEFT, RIGHT, 0, 0}, 
+			{TOPLEFT, BOTTOMLEFT, 0, 0}, 
+		}
 	
 	function liveReport.Refresh(liveReport)
 	
@@ -2796,7 +2916,7 @@ local function initLiveReport()
 				
 				local anchor = anchors[anchorIndex]
 				
-				anchor[5] = anchorIndex == 2 and first or last
+				anchor[5] = anchorIndex == 3 and firstBlock or last
 				
 				child:ClearAnchors()
 				

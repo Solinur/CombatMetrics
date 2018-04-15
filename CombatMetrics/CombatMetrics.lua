@@ -1287,7 +1287,9 @@ local function AddToLog(...)
 end
 
 local function UnitsCallback(_, units)
+
 	CMX.currentdata.units = units
+	
 end
 
 local function FightRecapCallback(_, newdata)
@@ -1610,6 +1612,7 @@ local svdefaults = {
 		["scale"]= zo_roundToNearest(1 / GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE), 0.1), 
 		["bgalpha"]= 95, 
 		["damageOut"] = true, 
+		["damageOutSingle"] = false, 
 		["healOut"] = true, 
 		["damageIn"] = true, 
 		["healIn"] = true, 

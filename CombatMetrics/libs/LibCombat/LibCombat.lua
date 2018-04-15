@@ -639,49 +639,49 @@ function FightHandler:AddCombatEvent(timems, result, targetUnitId, value, eventi
 
 	if eventid == LIBCOMBAT_EVENT_DAMAGE_OUT then 		--outgoing dmg
 	
-		currentfight.damageOutTotal = currentfight.damageOutTotal + value
+		self.damageOutTotal = self.damageOutTotal + value
 		
-		currentfight.units[targetUnitId]["damageOutTotal"] = currentfight.units[targetUnitId]["damageOutTotal"] + value
+		self.units[targetUnitId]["damageOutTotal"] = self.units[targetUnitId]["damageOutTotal"] + value
 		
-		currentfight.dpsstart = currentfight.dpsstart or timems
-		currentfight.dpsend = timems
+		self.dpsstart = self.dpsstart or timems
+		self.dpsend = timems
 		
 	elseif eventid == LIBCOMBAT_EVENT_DAMAGE_IN then 	--incoming dmg
 	
 		if result == ACTION_RESULT_DAMAGE_SHIELDED then
 		
-			currentfight.damageInShielded = currentfight.damageInShielded + value
+			self.damageInShielded = self.damageInShielded + value
 			
 		else 
 		
-			currentfight.damageInTotal = currentfight.damageInTotal + value
+			self.damageInTotal = self.damageInTotal + value
 			
 		end
 		
 	elseif eventid == LIBCOMBAT_EVENT_HEAL_OUT then --outgoing heal
 	
-		currentfight.healingOutTotal = currentfight.healingOutTotal + value
+		self.healingOutTotal = self.healingOutTotal + value
 		
 		if activetimeonheals then 
 		
-			currentfight.hpsstart = currentfight.hpsstart or timems 
-			currentfight.hpsend = timems
+			self.hpsstart = self.hpsstart or timems 
+			self.hpsend = timems
 			
 		end
 		
 	elseif eventid == LIBCOMBAT_EVENT_HEAL_IN then --incoming heals
 		
-		currentfight.healingInTotal = currentfight.healingInTotal + value
+		self.healingInTotal = self.healingInTotal + value
 		
 	elseif eventid == LIBCOMBAT_EVENT_HEAL_SELF then --outgoing heal
 		
-		currentfight.healingInTotal = currentfight.healingInTotal + value
-		currentfight.healingOutTotal = currentfight.healingOutTotal + value
+		self.healingInTotal = self.healingInTotal + value
+		self.healingOutTotal = self.healingOutTotal + value
 		
 		if activetimeonheals then 
 		
-			currentfight.hpsstart = currentfight.hpsstart or timems 
-			currentfight.hpsend = timems
+			self.hpsstart = self.hpsstart or timems 
+			self.hpsend = timems
 			
 		end
 	end	
@@ -714,8 +714,8 @@ function FightHandler:UpdateStats()
 		["hpstime"] = hpstime,
 	}
 	
-	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_FIGHTRECAP), LIBCOMBAT_EVENT_FIGHTRECAP, data) 
 	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_UNITS), LIBCOMBAT_EVENT_UNITS, self.units)
+	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_FIGHTRECAP), LIBCOMBAT_EVENT_FIGHTRECAP, data) 
 	
 end
 

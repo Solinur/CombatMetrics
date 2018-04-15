@@ -59,8 +59,14 @@
 	SI_COMBAT_METRICS_TOGGLE_INFO = "Info", -- Info
 	SI_COMBAT_METRICS_TOGGLE_SETTINGS = "Options", -- Settings
 	
-	SI_COMBAT_METRICS_SHOWIDS = "Show IDs for units, buffs and abilities", -- Show IDs for units, buffs and abilities
-	SI_COMBAT_METRICS_HIDEIDS = "Hide IDs for units, buffs and abilities", -- Hide IDs for units, buffs and abilities
+	SI_COMBAT_METRICS_SHOWIDS = "Show IDs", -- Show IDs for units, buffs and abilities
+	SI_COMBAT_METRICS_HIDEIDS = "Hide IDs", -- Hide IDs for units, buffs and abilities
+	
+	SI_COMBAT_METRICS_POSTSINGLEDPS = "Post single target DPS",
+	SI_COMBAT_METRICS_POSTSMARTDPS = "Post boss target DPS",
+	SI_COMBAT_METRICS_POSTMULTIDPS = "Post total DPS",
+	SI_COMBAT_METRICS_POSTALLDPS = "Post single and total DPS",
+	SI_COMBAT_METRICS_POSTHPS = "Post HPS",
 
 	SI_COMBAT_METRICS_STORAGE_FULL = "The storage file is full. The fight you want to save needs <<1>> MB and <<2>> indices. Delete a fight to free some space or increase the allowed space in the settings!", -- The storage file is full. Delete a fight to free some space!
 
@@ -246,6 +252,8 @@
 	
 	SI_COMBAT_METRICS_MENU_SHOW_DPS_NAME = "Show DPS",  -- Show DPS
 	SI_COMBAT_METRICS_MENU_SHOW_DPS_TOOLTIP = "Show DPS you deal in Live Report Window",  -- Show DPS you deal in Live Report Window
+	SI_COMBAT_METRICS_MENU_SHOW_SDPS_NAME = "Show single target DPS",  -- Show DPS
+	SI_COMBAT_METRICS_MENU_SHOW_SDPS_TOOLTIP = "Show single target DPS you deal in Live Report Window",  -- Show DPS you deal in Live Report Window
 	SI_COMBAT_METRICS_MENU_SHOW_HPS_NAME = "Show HPS",  -- Show HPS
 	SI_COMBAT_METRICS_MENU_SHOW_HPS_TOOLTIP = "Show HPS you cast in Live Report Window",  -- Show HPS you cast in Live Report Window
 	SI_COMBAT_METRICS_MENU_SHOW_INC_DPS_NAME = "Show Incoming DPS",  -- Show Incoming DPS

@@ -293,8 +293,21 @@ function CMX.MakeMenu(svdefaults)
 			default = def.liveReport.damageOut,
 			getFunc = function() return db.liveReport.damageOut end,
 			setFunc = function(value) 
-				db.liveReport.damageOut = 
-				value CombatMetrics_LiveReport:Refresh() 
+				db.liveReport.damageOut = value
+				CombatMetrics_LiveReport:Refresh() 
+			end,
+			disabled = function() return not db.liveReport.enabled end,
+		},
+		{
+			type = "checkbox",
+			name = GetString(SI_COMBAT_METRICS_MENU_SHOW_SDPS_NAME),
+			width = "half",
+			tooltip = GetString(SI_COMBAT_METRICS_MENU_SHOW_SDPS_TOOLTIP),
+			default = def.liveReport.damageOutSingle,
+			getFunc = function() return db.liveReport.damageOutSingle end,
+			setFunc = function(value) 
+				db.liveReport.damageOutSingle = value
+				CombatMetrics_LiveReport:Refresh() 
 			end,
 			disabled = function() return not db.liveReport.enabled end,
 		},
