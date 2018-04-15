@@ -198,6 +198,7 @@ function UnitHandler:Initialize(name, id, unitType)
 	self.isFriendly = false
 	self.id = id
 	self.damageOutTotal = 0
+	self.groupDamageOut  = 0
 	self.dpsstart = nil 				-- start of dps in ms
 	self.dpsend = nil				 	-- end of dps in ms	
 	
@@ -224,19 +225,19 @@ function FightHandler:Initialize()
 	self.hpstime = 0					-- total dps time	
 	self.units = {}				
 	self.grplog = {}					-- log from group actions
-	self.groupDamageOut = 0						-- dmg from and to the group
-	self.groupDamageIn = 0					-- dmg from and to the group
-	self.groupHealOut = 0					-- heal of the group
-	self.groupHealIn = 0					-- heal of the group
-	self.groupDPSOut = 0						-- group dps
-	self.groupDPSIn = 0						-- incoming dps	on group
-	self.groupHPSOut = 0						-- group hps
-	self.groupHPSIn = 0						-- group hps
-	self.damageOutTotal = 0						-- total damage out
-	self.healingOutTotal = 0						-- total healing out
-	self.damageInTotal = 0						-- total damage in
-	self.damageInShielded = 0						-- total damage in shielded
-	self.healingInTotal = 0						-- total healing in
+	self.groupDamageOut = 0				-- dmg from and to the group
+	self.groupDamageIn = 0				-- dmg from and to the group
+	self.groupHealOut = 0				-- heal of the group
+	self.groupHealIn = 0				-- heal of the group
+	self.groupDPSOut = 0				-- group dps
+	self.groupDPSIn = 0					-- incoming dps	on group
+	self.groupHPSOut = 0				-- group hps
+	self.groupHPSIn = 0					-- group hps
+	self.damageOutTotal = 0				-- total damage out
+	self.healingOutTotal = 0			-- total healing out
+	self.damageInTotal = 0				-- total damage in
+	self.damageInShielded = 0			-- total damage in shielded
+	self.healingInTotal = 0				-- total healing in
 	self.DPSOut = 0						-- dps
 	self.HPSOut = 0						-- hps
 	self.DPSIn = 0						-- incoming dps			
@@ -703,7 +704,17 @@ function FightHandler:UpdateStats()
 	self.DPSIn = math.floor(self.damageInTotal / dpstime + 0.5)
 	self.HPSIn = math.floor(self.healingInTotal / hpstime + 0.5)
 	
-	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_FIGHTRECAP), LIBCOMBAT_EVENT_FIGHTRECAP, self.DPSOut, self.DPSIn, self.HPSOut, self.HPSIn, self.healingOutTotal, dpstime, hpstime) 
+	local data = {
+		["DPSOut"] = self.DPSOut, 
+		["DPSIn"] = self.DPSIn,  
+		["HPSOut"] = self.HPSOut,  
+		["HPSIn"] = self.HPSIn,  
+		["healingOutTotal"] = self.healingOutTotal,  
+		["dpstime"] = dpstime,  
+		["hpstime"] = hpstime,
+	}
+	
+	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_FIGHTRECAP), LIBCOMBAT_EVENT_FIGHTRECAP, data) 
 	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_UNITS), LIBCOMBAT_EVENT_UNITS, self.units)
 	
 end
@@ -730,6 +741,7 @@ function FightHandler:UpdateGrpStats() -- called by onUpdate
 			
 			elseif unit and unit.isFriendly == false and action=="dmg" then
 				
+				unit.groupDamageOut = unit.groupDamageOut + value
 				self.groupDamageOut = self.groupDamageOut + value
 				table.remove(self.grplog,i)
 			
@@ -753,7 +765,17 @@ function FightHandler:UpdateGrpStats() -- called by onUpdate
 	
 	self.groupHPSIn = self.groupHPSOut
 	
-	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_GROUPRECAP), LIBCOMBAT_EVENT_GROUPRECAP, self.groupDPSOut, self.groupDPSIn, self.groupHPSOut, dpstime, hpstime)
+	local data = {
+	
+	["groupDPSOut"] = self.groupDPSOut, 
+	["groupDPSIn"] = self.groupDPSIn, 
+	["groupHPSOut"] = self.groupHPSOut, 
+	["dpstime"] = dpstime, 
+	["hpstime"] = hpstime
+	
+	}
+	
+	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_GROUPRECAP), LIBCOMBAT_EVENT_GROUPRECAP, data)
 
 end
 

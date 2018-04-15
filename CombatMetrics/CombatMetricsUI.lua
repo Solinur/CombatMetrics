@@ -845,42 +845,54 @@ end
 
 -- Update the mini DPS meter
 
-local function updateLiveReport(self, dps, hps, idps, ihps, dpstime, hpstime, gdps, igdps, ghps)
+local function updateLiveReport(self, data)
 
 	local livereport = self
+	
+	local DPSOut = data.DPSOut
+	local DPSIn = data.DPSIn
+	local HPSOut = data.HPSOut
+	local HPSIn = data.HPSIn
+	local dpstime = data.dpstime
+	local hpstime = data.hpstime
+	local groupDPSOut = data.groupDPSOut
+	local groupDPSIn = data.groupDPSIn
+	local groupHPSOut = data.groupHPSOut
 
 	-- Bail out if there is no damage to report
-	if (dps == 0 and hps == 0 and idps == 0) or livereport:IsHidden() then return end
+	if (DPSOut == 0 and HPSOut == 0 and DPSIn == 0) or livereport:IsHidden() then return end
 
-	local showdps
-	local showhps
-	local showidps
+	local DPSString
+	local HPSString
+	local DPSInString
 	local maxtime = math.max(dpstime, hpstime)
-	local showtime = string.format("%d:%04.1f", maxtime/60, maxtime%60)
+	local timeString = string.format("%d:%04.1f", maxtime/60, maxtime%60)
 		
 	-- maybe add data from group
-	if db.recordgrp == true and ((gdps+igdps+ghps)>0) then
+	if db.recordgrp == true and (groupDPSOut > 0 or groupDPSIn > 0 or groupHPSOut > 0) then
+	
 		local dpsratio, hpsratio, idpsratio = 0, 0, 0
-		if gdps>0  then dpsratio  = (math.floor(dps/gdps*1000)/10) end 
-		if igdps>0 then idpsratio = (math.floor(idps/igdps*1000)/10) end 
-		if ghps>0  then hpsratio  = (math.floor(hps/ghps*1000)/10) end
+		if groupDPSOut > 0  then dpsratio  = (math.floor(DPSOut / groupDPSOut * 1000) / 10) end 
+		if groupDPSIn > 0 then idpsratio = (math.floor(DPSIn / groupDPSIn * 1000) / 10) end 
+		if groupHPSOut > 0  then hpsratio  = (math.floor(HPSOut / groupHPSOut * 1000) / 10) end
 
-		showdps = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), dps, gdps, dpsratio)
-		showhps = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), hps, ghps, hpsratio)
-		showidps = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), idps, gidps, idpsratio)
+		DPSString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), DPSOut, groupDPSOut, dpsratio)
+		HPSString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), HPSOut, groupHPSOut, hpsratio)
+		DPSInString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), DPSIn, gidps, idpsratio)
+		
 	else
-		showdps  = dps 
-		showhps  = hps
-		showidps = idps
+		DPSString  = DPSOut 
+		HPSString  = HPSOut
+		DPSInString = DPSIn
 	end
 	
 	-- Update the values
 	
-	livereport:GetNamedChild("DamageOut"):GetNamedChild("Label"):SetText( showdps )
-	livereport:GetNamedChild("HealOut"):GetNamedChild("Label"):SetText( showhps )
-	livereport:GetNamedChild("DamageIn"):GetNamedChild("Label"):SetText( showidps )
-	livereport:GetNamedChild("HealIn"):GetNamedChild("Label"):SetText( ihps )
-	livereport:GetNamedChild("Time"):GetNamedChild("Label"):SetText( showtime )
+	livereport:GetNamedChild("DamageOut"):GetNamedChild("Label"):SetText( DPSString )
+	livereport:GetNamedChild("HealOut"):GetNamedChild("Label"):SetText( HPSString )
+	livereport:GetNamedChild("DamageIn"):GetNamedChild("Label"):SetText( DPSInString )
+	livereport:GetNamedChild("HealIn"):GetNamedChild("Label"):SetText( HPSIn )
+	livereport:GetNamedChild("Time"):GetNamedChild("Label"):SetText( timeString )
 end
 
 local function toggleFightReport()
@@ -2708,26 +2720,17 @@ local function initLiveReport()
 	
 	end
 	
-	function liveReport.Refresh(liveReport)
+	local setLR = db.liveReport	
 	
-		local liveReport = liveReport
-		
-		local setLR = db.liveReport		
-		local scale = setLR.scale
-		
-		local anchors = (setLR.layout == "Horizontal" and {
+	local anchors = (setLR.layout == "Horizontal" and {
 		
 							{TOPLEFT, TOPLEFT, 0, 0, liveReport}, 
-							{LEFT, RIGHT, 0, 0}, 
-							{LEFT, RIGHT, 0, 0}, 
 							{LEFT, RIGHT, 0, 0}, 
 							{LEFT, RIGHT, 0, 0}
 							
 						}) or (setLR.layout == "Vertical" and {
 						
 							{TOPLEFT, TOPLEFT, 0, 0, liveReport}, 
-							{TOPLEFT, BOTTOMLEFT, 0, 0}, 
-							{TOPLEFT, BOTTOMLEFT, 0, 0}, 
 							{TOPLEFT, BOTTOMLEFT, 0, 0}, 
 							{LEFT, RIGHT, 0, 0}
 							
@@ -2736,16 +2739,42 @@ local function initLiveReport()
 							{TOPLEFT, TOPLEFT, 0, 0, liveReport}, 
 							{LEFT, RIGHT, 0, 0}, 
 							{TOPRIGHT, BOTTOMLEFT, 0, 0}, 
-							{LEFT, RIGHT, 0, 0}, 
-							{LEFT, RIGHT, 0, 0}
-						
 						}
+	
+	function liveReport.Refresh(liveReport)
+	
+		local liveReport = liveReport
+		
+		local scale = setLR.scale
 		
 		local last = liveReport
 		
 		liveReport:SetDimensions(1, 1)
 		
+		local totalBlocks = 0
+		
+		for i = 2, liveReport:GetNumChildren() do
+		
+			local child = liveReport:GetChild(i)
+			local name = string.gsub(string.gsub(child:GetName(), liveReport:GetName(), ""), "^%u", string.lower) -- difference in names is the child name e.g. "DamageOut". Outer gsub changes first letter to lowercase to match the settings, e.g. "damageOut".
+			
+			local shown = setLR[name]
+			
+			if shown == true then 
+			
+				local addspace = child.blocksize
+				
+				totalBlocks = totalBlocks + addspace
+			
+			end
+		
+		end
+		
+		local halfway = (setLR.layout == "Compact" and (math.ceil(totalBlocks / 2) + 1)) or nil
+		
 		local blocks = 0
+		
+		local firstBlock = nil	-- to anchor 2nd row to
 		
 		for i = 2, liveReport:GetNumChildren() do
 		
@@ -2757,13 +2786,17 @@ local function initLiveReport()
 			
 			if shown then 
 			
-				blocks = blocks + 1
+				local addspace = child.blocksize
 				
-				local anchor = anchors[blocks]
+				blocks = blocks + addspace
 				
-				if blocks == 3 and i == 5 and setLR.layout == "Compact" then anchor = anchors[5] end
+				if firstBlock == nil then firstBlock = child end 
 				
-				anchor[5] = last
+				local anchorIndex = (blocks == 1 and 1) or (blocks == halfway and 3) or 2
+				
+				local anchor = anchors[anchorIndex]
+				
+				anchor[5] = anchorIndex == 2 and first or last
 				
 				child:ClearAnchors()
 				

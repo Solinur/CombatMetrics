@@ -16,13 +16,14 @@ local CMX = CMX
  
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "0.8.1.5"
+CMX.version = "0.8.2.0"
 	
 CMX.CustomAbilityIcon = {}
 CMX.CustomAbilityName = {
 
 	[75753] = GetAbilityName(75753), -- Line-breaker (Alkosh). pin abiltiy name so it can't get overridden
 	[17906] = GetAbilityName(17906), -- Crusher (Glyph). pin abiltiy name so it can't get overridden
+	[63003] = GetAbilityName(63003), -- Off-Balance
 	
 	} 
 
@@ -1289,30 +1290,21 @@ local function UnitsCallback(_, units)
 	CMX.currentdata.units = units
 end
 
-local function FightRecapCallback(_, DPSOut, DPSIn, HPSOut, HPSIn, healingOutTotal, dpstime, hpstime)
+local function FightRecapCallback(_, newdata)
 
 	local data = CMX.currentdata
 	
-	data.DPSOut = DPSOut
-	data.DPSIn = DPSIn
-	data.HPSOut = HPSOut
-	data.HPSIn = HPSIn
-	data.dpstime = dpstime
-	data.hpstime = hpstime
-	data.healingOutTotal = healingOutTotal
+	ZO_DeepTableCopy(newdata, data)
 	
-	CombatMetrics_LiveReport:Update(DPSOut, HPSOut, DPSIn, HPSIn, dpstime, hpstime, data.groupDPSOut, data.groupDPSIn, data.groupHPSOut)
+	CombatMetrics_LiveReport:Update(data)
 
 end
 
-local function GroupFightRecapCallback(_, groupDPSOut, groupDPSIn, groupHPSOut, dpstime, hpstime)
+local function GroupFightRecapCallback(_, newdata)
 	
 	local data = CMX.currentdata
 	
-	data.groupDPSOut = groupDPSOut
-	data.groupDPSIn = groupDPSIn
-	data.groupHPSOut = groupHPSOut
-	data.groupHPSIn = groupHPSOut
+	ZO_DeepTableCopy(newdata, data)
 	
 end
 
@@ -1365,7 +1357,7 @@ local function GetFightName(fight)
 end
 
 
-local function FightSummaryCallback(_, fight) -- called by CMX.update
+local function FightSummaryCallback(_, fight)
 
 	-- add functions
 	fight.CalculateFight = CalculateFight
