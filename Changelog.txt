@@ -249,3 +249,13 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 0.8.1.5 578,871 (18.03.2018) 15:22
 [*] fixed two issues that would cause an error message in some cases
 [*] fixed an issue where the wrong class/race icons could be shown for old parses
+
+0.8.2.0 630,400 (18.04.2018) 23:17
+[*] Bump API for PTS
+[*] removed context menus from PTS due to an issue with the new API (this will be fixed until the patch hits live)
+[*] added a single target damage display to the live report window
+[*] added an option to post DPS or HPS to the options menu on the main report (cogwheel)
+[*] fixed an issue where debuffs that affected spell resistance weren't tracked properly when another addon changed their name
+[*] added CombatMetrics Version to the info bar at the bottom
+[*] some small improvements
+
