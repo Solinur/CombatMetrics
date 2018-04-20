@@ -131,6 +131,22 @@ local PhysResistDebuffs = {
 
 }
 
+
+if GetAPIVersion() > 100022 then -- no more Sunder and NMG :(
+
+	PhysResistDebuffs = {
+
+		[GetFormatedAbilityName(62490)] = 5260, --Major Fracture	
+		[GetFormatedAbilityName(64147)] = 1320, --Minor Fracture
+
+		[GetFormatedAbilityName(17906)] = 2108, -- Crusher, can get changed by settings !
+		[GetFormatedAbilityName(75753)] = 3010, -- Alkosh
+		
+		--Corrosive Armor ignores all resistance
+
+	}
+end
+
 function CMX.SetCrusher(value)
 
 	db.crusherValue = value

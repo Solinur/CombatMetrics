@@ -702,7 +702,7 @@ do	-- Handling Favourite Buffs
 
 	function CMX.BuffContextMenu( bufflistitem, upInside )
 
-		if not upInside or (GetAPIVersion() > 100022 and not ST_PreHookFixApplied) then return end
+		if not upInside then return end
 		
 		buffname = bufflistitem.dataId
 		favs = db.FightReport.FavouriteBuffs
@@ -768,7 +768,7 @@ do
 
 	function CMX.SettingsContextMenu( settingsbutton, upInside )
 
-		if not upInside or (GetAPIVersion() > 100022 and not ST_PreHookFixApplied) then return end
+		if not upInside then return end
 		
 		local func = toggleshowids
 		local stringid = db.debuginfo.ids and SI_COMBAT_METRICS_HIDEIDS or SI_COMBAT_METRICS_SHOWIDS
