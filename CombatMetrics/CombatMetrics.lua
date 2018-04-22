@@ -19,11 +19,17 @@ CMX.name = "CombatMetrics"
 CMX.version = "0.8.2.0"
 	
 CMX.CustomAbilityIcon = {}
+
 CMX.CustomAbilityName = {
 
 	[75753] = GetAbilityName(75753), -- Line-breaker (Alkosh). pin abiltiy name so it can't get overridden
 	[17906] = GetAbilityName(17906), -- Crusher (Glyph). pin abiltiy name so it can't get overridden
 	[63003] = GetAbilityName(63003), -- Off-Balance
+	
+	[81274] = "(C) " .. GetAbilityName(81274) , -- Crown Store Poison, Rename to differentiate from normal Poison, which can apparently stack ?
+	[81275] = "(C) " .. GetAbilityName(81275) , -- Crown Store Poison, Rename to differentiate from normal Poison, which can apparently stack ?
+	
+	
 	
 	} 
 
@@ -141,6 +147,9 @@ if GetAPIVersion() > 100022 then -- no more Sunder and NMG :(
 
 		[GetFormatedAbilityName(17906)] = 2108, -- Crusher, can get changed by settings !
 		[GetFormatedAbilityName(75753)] = 3010, -- Alkosh
+		
+		-- [GetFormatedAbilityName(34386)] = 2580, -- Night Mother's Gaze
+		-- [GetFormatedAbilityName(60416)] = 3440, -- Sunderflame
 		
 		--Corrosive Armor ignores all resistance
 
