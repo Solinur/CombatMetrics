@@ -29,8 +29,6 @@ CMX.CustomAbilityName = {
 	[81274] = "(C) " .. GetAbilityName(81274) , -- Crown Store Poison, Rename to differentiate from normal Poison, which can apparently stack ?
 	[81275] = "(C) " .. GetAbilityName(81275) , -- Crown Store Poison, Rename to differentiate from normal Poison, which can apparently stack ?
 	
-	
-	
 	} 
 
 
@@ -114,17 +112,17 @@ end
  
 local SpellResistDebuffs = {
 
-	[GetFormatedAbilityName(62795)] = 5260, --Major Breach
+	[GetFormatedAbilityName(62795)] = 5280, --Major Breach
 	[GetFormatedAbilityName(68589)] = 1320, --Minor Breach
 	
-	[GetFormatedAbilityName(17906)] = 1946, -- Crusher, can get changed by settings !
+	[GetFormatedAbilityName(17906)] = 2108, -- Crusher, can get changed by settings !
 	[GetFormatedAbilityName(75753)] = 3010, -- Alkosh
 
 } 
 
 local PhysResistDebuffs = {
 
-	[GetFormatedAbilityName(62490)] = 5260, --Major Fracture	
+	[GetFormatedAbilityName(62490)] = 5280, --Major Fracture	
 	[GetFormatedAbilityName(64147)] = 1320, --Minor Fracture
 
 	[GetFormatedAbilityName(17906)] = 2108, -- Crusher, can get changed by settings !
@@ -142,7 +140,7 @@ if GetAPIVersion() > 100022 then -- no more Sunder and NMG :(
 
 	PhysResistDebuffs = {
 
-		[GetFormatedAbilityName(62490)] = 5260, --Major Fracture	
+		[GetFormatedAbilityName(62490)] = 5280, --Major Fracture	
 		[GetFormatedAbilityName(64147)] = 1320, --Minor Fracture
 
 		[GetFormatedAbilityName(17906)] = 2108, -- Crusher, can get changed by settings !

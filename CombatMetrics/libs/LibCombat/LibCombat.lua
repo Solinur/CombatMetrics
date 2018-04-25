@@ -148,6 +148,7 @@ local MinorForceAbility = {
 	[81012] = true,
 	[81014] = true,
 	[85611] = true,
+	[103708] = true,
 
 }
 

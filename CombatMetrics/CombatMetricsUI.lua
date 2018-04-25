@@ -2842,7 +2842,9 @@ local function initLiveReport()
 	
 	local setLR = db.liveReport	
 	
-	local anchors = (setLR.layout == "Horizontal" and {	
+	function liveReport.Refresh(liveReport)
+	
+		local anchors = (setLR.layout == "Horizontal" and {	
 	
 			{TOPLEFT, TOPLEFT, 0, 0, liveReport}, 
 			{LEFT, RIGHT, 0, 0}, 
@@ -2860,8 +2862,6 @@ local function initLiveReport()
 			{LEFT, RIGHT, 0, 0}, 
 			{TOPLEFT, BOTTOMLEFT, 0, 0}, 
 		}
-	
-	function liveReport.Refresh(liveReport)
 	
 		local liveReport = liveReport
 		
@@ -2908,15 +2908,19 @@ local function initLiveReport()
 			
 				local addspace = child.blocksize
 				
+				local isnotfull = ( math.ceil(blocks) - math.ceil(blocks + addspace)) == 0
+				
 				blocks = blocks + addspace
+				
+				local is 
 				
 				if firstBlock == nil then firstBlock = child end 
 				
-				local anchorIndex = (blocks == 1 and 1) or (blocks == halfway and 3) or 2
+				local anchorIndex = (blocks == 1 and 1) or ((blocks == halfway or (isnotfull and setLR.layout ~= "Compact")) and 3) or 2
 				
 				local anchor = anchors[anchorIndex]
 				
-				anchor[5] = anchorIndex == 3 and firstBlock or last
+				anchor[5] = (not isnotfull) and anchorIndex == 3 and firstBlock or last
 				
 				child:ClearAnchors()
 				
