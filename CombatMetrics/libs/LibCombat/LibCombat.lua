@@ -579,28 +579,43 @@ local function onTFSChanged(_, changeType, _, _, _, _, _, stackCount, _, _, _, _
 end
 
 
+local lastGetStatsCall = 0
+
+local currentStats
+
 local function GetStats()
+
+	local timenow = GetGameTimeMilliseconds()
+	
+	if timenow - lastGetStatsCall < 100 then return currentStats end
+	
+	df("[%d] GS", timenow)
+	
+	lastGetStatsCall = timenow
 
 	local weaponcritbonus, spellcritbonus = GetCritbonus()
 	
-	return {
+	currentStats = {
+	
 		["maxmagicka"]		= GetStat(STAT_MAGICKA_MAX), 
-		["spellpower"]		= GetStat(STAT_SPELL_POWER), 
-		["spellcrit"]		= GetStat(STAT_SPELL_CRITICAL), 
+		["spellpower"]		= GetStat(STAT_SPELL_POWER),
+		["spellcrit"]		= GetStat(STAT_SPELL_CRITICAL), 		
 		["spellcritbonus"]	= spellcritbonus,
 		["spellpen"]		= GetStat(STAT_SPELL_PENETRATION), 
-							
+	
 		["maxstamina"]		= GetStat(STAT_STAMINA_MAX), 
 		["weaponpower"]		= GetStat(STAT_POWER), 
-		["weaponcrit"]		= GetStat(STAT_CRITICAL_STRIKE), 
+		["weaponcrit"]		= GetStat(STAT_CRITICAL_STRIKE),
 		["weaponcritbonus"]	= weaponcritbonus,
 		["weaponpen"]		= GetStat(STAT_PHYSICAL_PENETRATION) + TFSBonus, 
 							
 		["maxhealth"]		= GetStat(STAT_HEALTH_MAX), 		
 		["physres"]			= GetStat(STAT_PHYSICAL_RESIST), 
 		["spellres"]		= GetStat(STAT_SPELL_RESIST), 
-		["critres"]			= GetStat(STAT_CRITICAL_RESISTANCE)
+		["critres"]			= GetStat(STAT_CRITICAL_RESISTANCE) 
 	}
+	
+	return currentStats
 end
 
 local maxcrit = 21912 -- fallback value, will be determined dynamically later
@@ -630,7 +645,6 @@ function FightHandler:GetNewStats(timems)
 			
 			stats["current"..statName] = newValue
 			stats["max"..statName] = math.max(stats["max"..statName] or newValue, newValue)
-			
 			
 		end
 	end
