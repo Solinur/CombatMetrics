@@ -578,53 +578,53 @@ local function onTFSChanged(_, changeType, _, _, _, _, _, stackCount, _, _, _, _
 	end
 end
 
-
-local lastGetStatsCall = 0
-
-local currentStats
-
 local function GetStats()
-
-	local timenow = GetGameTimeMilliseconds()
-	
-	if timenow - lastGetStatsCall < 100 then return currentStats end
-	
-	df("[%d] GS", timenow)
-	
-	lastGetStatsCall = timenow
 
 	local weaponcritbonus, spellcritbonus = GetCritbonus()
 	
-	currentStats = {
-	
+	return {
 		["maxmagicka"]		= GetStat(STAT_MAGICKA_MAX), 
-		["spellpower"]		= GetStat(STAT_SPELL_POWER),
-		["spellcrit"]		= GetStat(STAT_SPELL_CRITICAL), 		
+		["spellpower"]		= GetStat(STAT_SPELL_POWER), 
+		["spellcrit"]		= GetStat(STAT_SPELL_CRITICAL), 
 		["spellcritbonus"]	= spellcritbonus,
 		["spellpen"]		= GetStat(STAT_SPELL_PENETRATION), 
-	
+							
 		["maxstamina"]		= GetStat(STAT_STAMINA_MAX), 
 		["weaponpower"]		= GetStat(STAT_POWER), 
-		["weaponcrit"]		= GetStat(STAT_CRITICAL_STRIKE),
+		["weaponcrit"]		= GetStat(STAT_CRITICAL_STRIKE), 
 		["weaponcritbonus"]	= weaponcritbonus,
 		["weaponpen"]		= GetStat(STAT_PHYSICAL_PENETRATION) + TFSBonus, 
 							
 		["maxhealth"]		= GetStat(STAT_HEALTH_MAX), 		
 		["physres"]			= GetStat(STAT_PHYSICAL_RESIST), 
 		["spellres"]		= GetStat(STAT_SPELL_RESIST), 
-		["critres"]			= GetStat(STAT_CRITICAL_RESISTANCE) 
+		["critres"]			= GetStat(STAT_CRITICAL_RESISTANCE)
 	}
-	
-	return currentStats
 end
 
 local maxcrit = 21912 -- fallback value, will be determined dynamically later
 
+local lastGetNewStatsCall = 0
+
 function FightHandler:GetNewStats(timems)
+	
+	em:UnregisterForUpdate("COMBATMETRICS_GETNEWSTATS")
+	
+	timems = timems or GetGameTimeMilliseconds()
+	
+	if timems - lastGetNewStatsCall < 100 then 
+	
+		em:RegisterForUpdate("COMBATMETRICS_GETNEWSTATS", 100, function() self:GetNewStats() end)
+	
+		return 
+		
+	end
 
 	if self.prepared == nil then self:PrepareFight() return end
 
 	if NonContiguousCount(ActiveCallbackTypes[LIBCOMBAT_EVENT_PLAYERSTATS]) == 0 then return end
+	
+	lastGetNewStatsCall = timems
 	
 	local stats = self.stats
 	
@@ -632,7 +632,7 @@ function FightHandler:GetNewStats(timems)
 	
 		if statName == "spellcrit" or statName == "weaponcrit" then newValue = math.min(newValue, maxcrit) end
 	
-		if stats["current"..statName] == nil or stats["max"..statName] == nil or timems == nil then 
+		if stats["current"..statName] == nil or stats["max"..statName] == nil then 
 		
 			lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_PLAYERSTATS), LIBCOMBAT_EVENT_PLAYERSTATS, timems, 0, newValue, statName)
 			
