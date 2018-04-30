@@ -9,6 +9,9 @@ local stepsize = 50 	-- stepsize for chunks of the log.
 local logdata
 local chatContainer
 local chatWindow
+	
+local LC = LibStub:GetLibrary("LibCombat")
+if LC == nil then return end 
 
 -- namespace for thg addon
 if CMX == nil then CMX = {} end
@@ -16,21 +19,11 @@ local CMX = CMX
  
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "0.8.2.0"
-	
-CMX.CustomAbilityIcon = {}
+CMX.version = "0.8.2.1"
 
-CMX.CustomAbilityName = {
+local GetFormatedAbilityName = LC.GetFormatedAbilityName
 
-	[75753] = GetAbilityName(75753), -- Line-breaker (Alkosh). pin abiltiy name so it can't get overridden
-	[17906] = GetAbilityName(17906), -- Crusher (Glyph). pin abiltiy name so it can't get overridden
-	[63003] = GetAbilityName(63003), -- Off-Balance
-	
-	[81274] = "(C) " .. GetAbilityName(81274) , -- Crown Store Poison, Rename to differentiate from normal Poison, which can apparently stack ?
-	[81275] = "(C) " .. GetAbilityName(81275) , -- Crown Store Poison, Rename to differentiate from normal Poison, which can apparently stack ?
-	
-	} 
-
+local GetFormatedAbilityIcon = LC.GetFormatedAbilityIcon
 
 local function Print(category, message, ...)
 	if db.debuginfo[category] then df("[%s] %s", "CMX", message:format(...)) end
@@ -101,14 +94,6 @@ local IsMagickaAbility = {				-- nil for oblivion and other damage types that ar
 	[DAMAGE_TYPE_DISEASE] = false,
 
 }
-
-local function GetFormatedAbilityName(id)
-
-	local name = CMX.CustomAbilityName[id] or zo_strformat(SI_ABILITY_NAME, GetAbilityName(id))
-	
-	return name
-	
-end
  
 local SpellResistDebuffs = {
 
@@ -165,8 +150,7 @@ function CMX.SetCrusher(value)
  
 end
 
-local LC = LibStub:GetLibrary("LibCombat")
-if LC == nil then return end 
+
 
 function CMX.spairs(t, order) -- from https://stackoverflow.com/questions/15706270/sort-a-table-in-lua
 
@@ -503,16 +487,6 @@ function ResourceHandler:Initialize()
 
 	self.ticks = 0
 	self.value = 0
-	
-end
-
-function CMX.GetAbilityIcon(abilityId)
-
-	if abilityId == nil then return
-	elseif type(abilityId) == "string" then return abilityId end
-		
-	local icon  = CMX.CustomAbilityIcon[abilityId] or GetAbilityIcon(abilityId)
-	return icon
 	
 end
 

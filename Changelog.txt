@@ -259,3 +259,11 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] added CombatMetrics Version to the info bar at the bottom
 [*] some small improvements
 
+0.8.2.1 656,599 (27.04.2018) 01:14
+[*] Fix Resistance Values for Major Breech and Major Fracture
+[*] Added a throttle to a function that can cause stutter on PTS
+[*] Fixed an issue with vertical layout of Live Report Window
+[*] Fixed an issue where Crown Store Poisons and normal ones where pooled together even though they stack
+[*] Updated data for resistance debuffs on PTS to reflect changes to certain sets
+
+

@@ -20,14 +20,13 @@ local db
 function CMX.GetAbilityStats()
 	return abilitystats, abilitystatsversion
 end
- 
-local function GetFormatedAbilityName(id)
 
-	local name = CMX.CustomAbilityName[id] or zo_strformat(SI_ABILITY_NAME, GetAbilityName(id))
-	
-	return name
-	
-end
+local LC = LibStub:GetLibrary("LibCombat")
+if LC == nil then return end 
+
+local GetFormatedAbilityName = LC.GetFormatedAbilityName
+
+local GetFormatedAbilityIcon = LC.GetFormatedAbilityIcon
 
 local function storeOrigLayout(self)
 				
@@ -1552,7 +1551,7 @@ local function updateBuffPanel(panel)
 			local highlight = false
 			if selectedbuffs ~= nil then highlight = (selectedbuffs[buffName] ~= nil) end
 			
-			local icon = CMX.GetAbilityIcon(buff.icon)
+			local icon = GetFormatedAbilityIcon(buff.icon)
 			local dbug = (showids and type(buff.icon) == "number") and string.format("(%d) ", buff.icon) or ""
 			local name = dbug .. buffName
 			
@@ -1629,7 +1628,7 @@ local function updateResourceBars(panel, currentanchor, data, totalRate, selecte
 	
 		if (ability.ticks or 0) > 0 then
 			
-			local label = abilityId > 0 and GetFormatedAbilityName(abilityId) or GetString(SI_COMBAT_METRICS_BASE_REG)
+			local label = abilityId ~= 0 and GetFormatedAbilityName(abilityId) or GetString(SI_COMBAT_METRICS_BASE_REG)
 			
 			local highlight = false
 			if selectedresources ~= nil then highlight = selectedresources[abilityId] ~= nil end
@@ -1915,7 +1914,7 @@ local function updateAbilityPanel(panel)
 				highlight = selectedabilities[abilityId] ~= nil 
 			end
 			
-			local icon = CMX.GetAbilityIcon(abilityId)
+			local icon = GetFormatedAbilityIcon(abilityId)
 			
 			local dot = (GetAbilityDuration(abilityId)>0 or (IsAbilityPassive(abilityId) and isDamage)) and "*" or ""
 			local pet = ability.pet and " (pet)" or ""

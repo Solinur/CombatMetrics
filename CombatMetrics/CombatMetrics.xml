@@ -370,7 +370,7 @@
 						<Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_REGENERATION" horizontalAlignment="LEFT">
 							
 							<Anchor point="BOTTOMLEFT" offsetX="0" offsetY="0"/>
-							<Dimensions x="250" y="20"/>
+							<Dimensions x="246" y="20"/>
 							
 						</Label>
 						

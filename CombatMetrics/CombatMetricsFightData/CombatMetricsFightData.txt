@@ -1,5 +1,5 @@
 ﻿## Title: CombatMetricsFightData
-## APIVersion: 100022 100022
+## APIVersion: 100022 100023
 ## Author: Solinur/decay
 ## Version: 1
 ## DependsOn:
