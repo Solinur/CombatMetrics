@@ -16,7 +16,7 @@ Idea: Life and Death
 local _
 
 --Register with LibStub
-local MAJOR, MINOR = "LibCombat", 6
+local MAJOR, MINOR = "LibCombat", 7
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end --the same or newer version of this lib is already loaded into memory
 
@@ -62,7 +62,7 @@ LIBCOMBAT_EVENT_RESOURCES = 15			-- LIBCOMBAT_EVENT_RESOURCES, timems, abilityId
 LIBCOMBAT_EVENT_MESSAGES = 16			-- LIBCOMBAT_EVENT_MESSAGES, timems, messageId
 LIBCOMBAT_EVENT_DEATH = 17				-- LIBCOMBAT_EVENT_DEATH, timems, unitId, abilityId
 LIBCOMBAT_EVENT_RESURRECTION = 18		-- LIBCOMBAT_EVENT_RESURRECTION, timems, unitId, self
-LIBCOMBAT_EVENT_MAX = 17
+LIBCOMBAT_EVENT_MAX = 18
 
 -- Messages:
 
@@ -1251,6 +1251,54 @@ local function onWeaponSwap(_, isHotbarSwap)
 	end
 end
 
+local function OnDeathStateChanged(_, unitTag, isDead)
+
+	if isDead then df("[%.3f] CE: %s died!", GetGameTimeMilliseconds()/1000, GetUnitName(unitTag) ) end
+	
+	-- death (for group display, also works for different zones)
+
+end
+
+local function OnPlayerReincarnated()
+
+	df("[%.3f] Revive!", GetGameTimeMilliseconds()/1000)
+
+end
+
+
+local function OnDeath(_, result, _, abilityName, _, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, _, sourceUnitId, targetUnitId, abilityId) 
+
+	df("[%.3f] CE: %s died!", GetGameTimeMilliseconds()/1000, targetName )
+
+end
+
+local function OnResurrectResult(_, targetCharacterName, result, targetDisplayName)
+
+	df("[%.3f] Rezzed %s", GetGameTimeMilliseconds()/1000, targetCharacterName )
+
+end
+
+local function OnResurrectRequest(_, requesterCharacterName, timeLeftToAccept, requesterDisplayName)
+
+	df("[%.3f] Rezzed by %s", GetGameTimeMilliseconds()/1000, requesterCharacterName )
+
+end
+
+local function AcceptResurrectRequest()
+
+	df("[%.3f] Accepted Rezz", GetGameTimeMilliseconds()/1000)
+
+end
+
+local function AcceptRevive()
+
+	df("[%.3f] Accepted Revive", GetGameTimeMilliseconds()/1000)
+
+end
+
+ZO_PreHook("AcceptResurrect", AcceptResurrectRequest)
+ZO_PreHook("Revive", AcceptRevive)
+
 local function onGroupChange()
 	data.inGroup = IsUnitGrouped("player")
 	
@@ -1732,6 +1780,28 @@ Events.Messages = EventHandler:New(
 	{LIBCOMBAT_EVENT_MESSAGES, LIBCOMBAT_EVENT_FIGHTSUMMARY},
 	function (self)
 		self:RegisterEvent(EVENT_ACTION_SLOTS_FULL_UPDATE, onWeaponSwap)
+		self.active = true
+	end
+)
+
+Events.Deaths = EventHandler:New(
+	{LIBCOMBAT_EVENT_DEATH},
+	function (self)
+		self:RegisterEvent(EVENT_COMBAT_EVENT, OnDeath, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_KILLING_BLOW)
+		self:RegisterEvent(EVENT_COMBAT_EVENT, OnDeath, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_GROUP, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_KILLING_BLOW)
+		self:RegisterEvent(EVENT_COMBAT_EVENT, OnDeath, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_DIED)
+		self:RegisterEvent(EVENT_COMBAT_EVENT, OnDeath, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_GROUP, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_DIED)
+		self:RegisterEvent(EVENT_UNIT_DEATH_STATE_CHANGED, OnDeathStateChanged)
+		self:RegisterEvent(EVENT_PLAYER_REINCARNATED, OnPlayerReincarnated)
+		self.active = true
+	end
+)
+
+Events.Ressurections = EventHandler:New(
+	{LIBCOMBAT_EVENT_RESURRECTION},
+	function (self)
+		self:RegisterEvent(EVENT_RESURRECT_RESULT, OnResurrectResult)
+		self:RegisterEvent(EVENT_RESURRECT_REQUEST , OnResurrectRequest)
 		self.active = true
 	end
 )
