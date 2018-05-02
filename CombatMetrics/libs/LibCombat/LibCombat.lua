@@ -39,6 +39,7 @@ local CustomAbilityTypeList = {}
 local currentfight
 local Events = {}
 local EffectBuffer = {}
+local lastdeaths = {}
 
 -- types of callbacks: Units, DPS/HPS, DPS/HPS for Group, Logevents
 
@@ -920,9 +921,9 @@ local function onBossesChanged(_) -- Detect Bosses
 		
 		if DoesUnitExist(unitTag) then
 		
-			data.bosses=i
+			data.bosses = i
 			
-			local name=zo_strformat(SI_UNIT_NAME,GetUnitName(unitTag))
+			local name = zo_strformat(SI_UNIT_NAME, GetUnitName(unitTag))
 			
 			data.bossnames[name] = true
 			currentfight.bossfight = true
@@ -1013,8 +1014,8 @@ end
 
 local function onMinorForceChanged( _, changeType)
 	
-	if changeType == 1 then data.majorForce = 10 
-	elseif changeType == 2 then data.majorForce = 0 end
+	if changeType == 1 then data.minorForce = 10 
+	elseif changeType == 2 then data.minorForce = 0 end
 
 end	
 
@@ -1221,12 +1222,11 @@ local function onResourceChanged (_, result, _, _, _, _, _, _, targetName, _, po
 	
 	local lastabilities = data.lastabilities
 	
-	if data.playerid == nil and zo_strformat(SI_UNIT_NAME,targetName) == data.playername then data.playerid = targetUnitId end
+	if data.playerid == nil and zo_strformat(SI_UNIT_NAME, targetName) == data.playername then data.playerid = targetUnitId end
 	
 	local timems = GetGameTimeMilliseconds()
 	
 	if (powerType ~= 0 and powerType ~= 6) or data.inCombat == false or powerValueChange < 1 then return end 
-	-- if showdebug==true then d(eventCode..",u"..unitTag..",i"..powerIndex..",t"..powerType..",v"..powerValue..",m"..powerMax..",em"..powerEffectiveMax) end
 	
 	if result == ACTION_RESULT_POWER_DRAIN then powerValueChange = -powerValueChange end
 	
@@ -1253,7 +1253,21 @@ end
 
 local function OnDeathStateChanged(_, unitTag, isDead)
 
-	if isDead then df("[%.3f] CE: %s died!", GetGameTimeMilliseconds()/1000, GetUnitName(unitTag) ) end
+	if not isdead or data.inCombat == false then return end
+	
+	local name = zo_strformat(SI_UNIT_NAME, GetUnitName(unitTag))
+	
+	local lasttime = lastdeaths[name]
+	
+	local timems = GetGameTimeMilliseconds()
+	
+	unitId = data.groupmembers[name]
+	
+	if (lasttime and lasttime - timems < 100) or not unitId then return end
+	
+	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_DEATH), LIBCOMBAT_EVENT_DEATH, timems, unitId, -1)
+
+	if isDead then df("[%.3f] DS: %s died!", timems/1000, name ) end
 	
 	-- death (for group display, also works for different zones)
 
@@ -1265,50 +1279,69 @@ local function OnPlayerReincarnated()
 
 end
 
-
 local function OnDeath(_, result, _, abilityName, _, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, _, sourceUnitId, targetUnitId, abilityId) 
 
-	df("[%.3f] CE: %s died!", GetGameTimeMilliseconds()/1000, targetName )
-
+	if targetUnitId == nil or targetUnitId == 0 or data.inCombat == false then return end
+	
+	local unitdata = currentfight.units[targetUnitId]
+	
+	if unitdata == nil or unitdata.type ~= COMBAT_UNIT_TYPE_GROUP then return end
+	
+	name = unitdata.name or zo_strformat(SI_UNIT_NAME, targetName) or ""
+	
+	lastdeaths[name] = GetGameTimeMilliseconds()
+	
+	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_DEATH), LIBCOMBAT_EVENT_DEATH, timems, targetUnitId, abilityId)
+	
+	df("[%.3f] CE: %s died! (%d - %s) (%s -> %s)", GetGameTimeMilliseconds()/1000, name, result, GetFormatedAbilityName(abilityId), tostring(sourceUnitId), tostring(targetUnitId))
+	
 end
 
 local function OnResurrectResult(_, targetCharacterName, result, targetDisplayName)
 
-	df("[%.3f] Rezzed %s", GetGameTimeMilliseconds()/1000, targetCharacterName )
+	if result ~= RESURRECT_RESULT_SUCCESS then return end
 
+	name = zo_strformat(SI_UNIT_NAME, targetCharacterName) or ""
+	
+	unitId = data.groupmembers[name]
+	
+	if not unitId then return end	
+
+	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_RESURRECTION), LIBCOMBAT_EVENT_RESURRECTION, timems, data.playerid, unitId)
+	
+	df("[%.3f] Rezzed %s", GetGameTimeMilliseconds()/1000, targetCharacterName )
+	
 end
 
 local function OnResurrectRequest(_, requesterCharacterName, timeLeftToAccept, requesterDisplayName)
+
+	name = zo_strformat(SI_UNIT_NAME, requesterCharacterName) or ""
+	
+	unitId = data.groupmembers[name]
+	
+	if not unitId then return end	
+
+	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_RESURRECTION), LIBCOMBAT_EVENT_RESURRECTION, timems, unitId, data.playerid)
 
 	df("[%.3f] Rezzed by %s", GetGameTimeMilliseconds()/1000, requesterCharacterName )
 
 end
 
-local function AcceptResurrectRequest()
-
-	df("[%.3f] Accepted Rezz", GetGameTimeMilliseconds()/1000)
-
-end
-
-local function AcceptRevive()
-
-	df("[%.3f] Accepted Revive", GetGameTimeMilliseconds()/1000)
-
-end
-
-ZO_PreHook("AcceptResurrect", AcceptResurrectRequest)
-ZO_PreHook("Revive", AcceptRevive)
-
 local function onGroupChange()
+
 	data.inGroup = IsUnitGrouped("player")
 	
+	data.groupmemberdisplaynames = {}
+	
 	if data.inGroup == true then
+	
 		for i = 1,GetGroupSize() do 
-			local name = zo_strformat(SI_UNIT_NAME,GetUnitName("group"..i))
-			data.groupmembers[name] = true
-		end
-	else
-		data.groupmembers = {}
+		
+			local name = zo_strformat(SI_UNIT_NAME, GetUnitName("group"..i))
+			local displayname = zo_strformat(SI_UNIT_NAME, GetUnitDisplayName("group"..i))
+			
+			data.groupmemberdisplaynames[name] = displayname
+		end	
 	end
 end
 
@@ -1328,12 +1361,22 @@ local function CheckUnit(unitName, unitId, unitType, timems)
 	local unit = currentunits[unitId]
 	
 	if unit.name == "Offline" or unit.name == "" then unit.name = zo_strformat(SI_UNIT_NAME,unitName) end 
+	
 	if unit.unitType ~= COMBAT_UNIT_TYPE_GROUP and unitType==COMBAT_UNIT_TYPE_GROUP then unit.unitType = COMBAT_UNIT_TYPE_GROUP end
-	if unit.unitType == COMBAT_UNIT_TYPE_PLAYER or unit.unitType == COMBAT_UNIT_TYPE_GROUP or unit.unitType == COMBAT_UNIT_TYPE_PLAYER_PET then unit.isFriendly = true end
+	if unit.unitType == COMBAT_UNIT_TYPE_GROUP or unit.unitType == COMBAT_UNIT_TYPE_PLAYER or unit.unitType == COMBAT_UNIT_TYPE_PLAYER_PET then unit.isFriendly = true end
 
 	unit.dpsstart = unit.dpsstart or timems
 	unit.dpsend = timems
 	
+	if unitType == COMBAT_UNIT_TYPE_GROUP then 
+	
+		unit.displayname = data.groupmemberdisplaynames[unitName]
+	
+		local groupdata = data.groupmembers
+		
+		if groupdata then groupdata[unitName] = unitId end 
+	
+	end
 end
 
 --(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId) 
@@ -1787,17 +1830,15 @@ Events.Messages = EventHandler:New(
 Events.Deaths = EventHandler:New(
 	{LIBCOMBAT_EVENT_DEATH},
 	function (self)
-		self:RegisterEvent(EVENT_COMBAT_EVENT, OnDeath, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_KILLING_BLOW)
-		self:RegisterEvent(EVENT_COMBAT_EVENT, OnDeath, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_GROUP, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_KILLING_BLOW)
-		self:RegisterEvent(EVENT_COMBAT_EVENT, OnDeath, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_DIED)
-		self:RegisterEvent(EVENT_COMBAT_EVENT, OnDeath, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_GROUP, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_DIED)
-		self:RegisterEvent(EVENT_UNIT_DEATH_STATE_CHANGED, OnDeathStateChanged)
+		self:RegisterEvent(EVENT_COMBAT_EVENT, OnDeath, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_KILLING_BLOW)
+		self:RegisterEvent(EVENT_COMBAT_EVENT, OnDeath, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_DIED)
+		self:RegisterEvent(EVENT_UNIT_DEATH_STATE_CHANGED, OnDeathStateChanged, REGISTER_FILTER_UNIT_TAG_PREFIX, "group")
 		self:RegisterEvent(EVENT_PLAYER_REINCARNATED, OnPlayerReincarnated)
 		self.active = true
 	end
 )
 
-Events.Ressurections = EventHandler:New(
+Events.Resurrections = EventHandler:New(
 	{LIBCOMBAT_EVENT_RESURRECTION},
 	function (self)
 		self:RegisterEvent(EVENT_RESURRECT_RESULT, OnResurrectResult)
@@ -2141,6 +2182,7 @@ local function Initialize()
   data.playername = zo_strformat(SI_UNIT_NAME,GetUnitName("player"))
   data.bosses=0
   data.groupmembers={}
+  data.groupmemberdisplaynames={}
   data.PlayerPets={}
   data.lastabilities = {}
   data.bossnames={}  
@@ -2164,7 +2206,6 @@ local function Initialize()
   if data.LoadCustomizations then data.LoadCustomizations() end
   
   maxcrit = math.floor(100/GetCriticalStrikeChance(1))
-  
 end
 
 Initialize()
