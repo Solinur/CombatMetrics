@@ -266,4 +266,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Fixed an issue where Crown Store Poisons and normal ones where pooled together even though they stack
 [*] Updated data for resistance debuffs on PTS to reflect changes to certain sets
 
+0.8.2.2 679,378 (03.05.2018) 19:28
+[*] reworked resource tracking algorithm. This means includes adding the ability to track dodge rolls and bashs. As a result now all resouce events that cannot be attributed to a source will be shown as "Unkown". Therefore resource consumption and regeneration is tracked more accurately now. Before those unattributed resource events were ignored. If you see anything suspicious there please let me know.
+[*] Some minor code improvements
 
