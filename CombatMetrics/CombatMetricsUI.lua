@@ -249,6 +249,12 @@ local function selectMainPanel(button)
 	end
 	
 	local mainpanel = CombatMetrics_Report_MainPanel
+	local rightpanel = CombatMetrics_Report_RightPanel
+	local infopanel = CombatMetrics_Report_InfoPanel
+	
+	mainpanel:SetHidden(false)
+	rightpanel:SetHidden(false)
+	infopanel:SetHidden(true)
 	
 	local selected = mainpanel:GetNamedChild(button.category) -- Panel Content to show
 	mainpanel.active = selected
@@ -264,7 +270,31 @@ local function selectMainPanel(button)
 	selectControl:GetParent():GetNamedChild("_MainPanel"):Update()
 	
 end
+
+local function toggleInfoPanel(button)
+
+	local selectControl = button:GetParent()
+
+	for i=5, 8 do
+		
+		local child = selectControl:GetChild(i)
+		
+		local a = child == button and 1 or .2
+		
+		child:SetColor(1, 1, 1, a)
 	
+	end
+
+	local mainpanel = CombatMetrics_Report_MainPanel
+	local rightpanel = CombatMetrics_Report_RightPanel
+	local infopanel = CombatMetrics_Report_InfoPanel
+	
+	mainpanel:SetHidden(true)
+	rightpanel:SetHidden(true)
+	infopanel:SetHidden(false)
+	
+end
+
 local function initSelectorButtons(rowControl) 
 
 	for i=1, 8 do
@@ -276,6 +306,10 @@ local function initSelectorButtons(rowControl)
 			child:SetHandler( "OnMouseUp", selectCategory) 
 			if child.category == db.FightReport.category then selectCategory(child) end
 			
+		elseif child and child.category == "Info" then 
+		
+			child:SetHandler( "OnMouseUp", toggleInfoPanel) 
+		
 		elseif child and i>4 then 
 		
 			child:SetHandler( "OnMouseUp", selectMainPanel)
@@ -2188,6 +2222,62 @@ local function updateCombatLog(panel)
 	slider:SetValue(slider:GetValue() - offset)
 end
 
+function CMX.SkillTooltip_OnMouseEnter(control)
+	
+	InitializeTooltip(SkillTooltip, control, TOPLEFT, 0, 5, BOTTOMLEFT)
+	SkillTooltip:SetAbilityId(control.id)
+	
+end
+
+function CMX.SkillTooltip_OnMouseExit(control)
+	
+	ClearTooltip(SkillTooltip)
+
+end
+
+local function updateLeftInfoPanel(panel)
+	
+	if fightData == nil then return end
+	
+	local charData = fightData.charData
+	
+	if charData == nil then return end
+	
+	local skilldata = charData.skillBars
+	
+	if skilldata == nil then return end
+	
+	for i = 1, 2 do
+	
+		local row = panel:GetNamedChild("AbilityRow" .. i)
+	
+		local bardata = skilldata[i]
+		
+		for i = 1, row:GetNumChildren() - 1 do
+		
+			local control = row:GetChild(i)
+			
+			local icon = control:GetNamedChild("Texture")
+			
+			local key = i == 1 and 1 or i + 1
+			
+			local abilityId = bardata[key]
+			
+			control.id = abilityId
+			
+			local texture = GetFormatedAbilityIcon(abilityId)
+			
+			icon:SetTexture(texture)			
+		end
+	end
+end
+
+local function updateInfoPanel(panel)
+
+	updateLeftInfoPanel(panel:GetNamedChild("Left"))
+	
+end
+
 local function updateInfoRowPanel(panel)
 
 	CMX.Print("dev", "Updating InfoRow")
@@ -2771,6 +2861,9 @@ local function initFightReport()
 		
 		local combatLogPageButtonRow = GetControl(combatLogPanel, "HeaderPageButtonRow")
 		combatLogPageButtonRow.Update = updateCLPageButtons
+		
+	local infoPanel = fightReport:GetNamedChild("_InfoPanel")
+	infoPanel.Update = updateInfoPanel
 		
 	local rightPanel = fightReport:GetNamedChild("_RightPanel")
 	rightPanel.Update = updateRightPanel	

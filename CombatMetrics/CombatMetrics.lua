@@ -19,7 +19,7 @@ local CMX = CMX
  
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "0.8.2.1"
+CMX.version = "0.8.2.2"
 
 local GetFormatedAbilityName = LC.GetFormatedAbilityName
 
@@ -1403,7 +1403,7 @@ local function UpdateEvents()
 	
 		if newstatus == CMX_STATUS_DISABLED then
 		
-			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_MESSAGES do
+			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_RESURRECTION do
 				LC:UnregisterCallbackType(i, AddToLog, CMX.name)
 			end
 			
@@ -1413,7 +1413,7 @@ local function UpdateEvents()
 	
 		elseif newstatus == CMX_STATUS_LIGHTMODE then 
 		
-			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_MESSAGES do
+			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_RESURRECTION do
 				LC:UnregisterCallbackType(i, AddToLog, CMX.name)
 			end
 			
@@ -1424,7 +1424,7 @@ local function UpdateEvents()
 			
 		elseif newstatus == CMX_STATUS_ENABLED then 
 		
-			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_MESSAGES do
+			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_RESURRECTION do
 			
 				LC:RegisterCallbackType(i, AddToLog ,CMX.name)
 				

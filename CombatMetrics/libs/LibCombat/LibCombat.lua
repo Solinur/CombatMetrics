@@ -93,8 +93,8 @@ local BadAbility = {
 
 local CustomAbilityName = {
 
-	[-1] = "Unkown", -- Whenever there is no known abilityId
-	[-2] = "Unkown", -- Whenever there is no known abilityId
+	[-1] = "Unknown", -- Whenever there is no known abilityId
+	[-2] = "Unknown", -- Whenever there is no known abilityId
 	
 	[75753] = GetAbilityName(75753), -- Line-breaker (Alkosh). pin abiltiy name so it can't get overridden
 	[17906] = GetAbilityName(17906), -- Crusher (Glyph). pin abiltiy name so it can't get overridden
@@ -1009,8 +1009,8 @@ local function onMajorForceChanged( _, changeType)
 	
 	if changeType == 1 then data.majorForce = 15 
 	elseif changeType == 2 then data.majorForce = 0 end
-		
-end	
+
+end
 
 local function onMinorForceChanged( _, changeType)
 	
