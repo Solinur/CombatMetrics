@@ -270,3 +270,8 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] reworked resource tracking algorithm. This means includes adding the ability to track dodge rolls and bashs. As a result now all resouce events that cannot be attributed to a source will be shown as "Unkown". Therefore resource consumption and regeneration is tracked more accurately now. Before those unattributed resource events were ignored. If you see anything suspicious there please let me know.
 [*] Some minor code improvements
 
+0.8.2.3 714,687 (21.05.2018) 16:09
+[*]API Bump to Summerset (100023)
+[*]Update LAM to r26
+[*]added option to show left-aligned numbers in live report window
+[*]fixed an issue resulting in a lua error when deleting a fight while having something selected
