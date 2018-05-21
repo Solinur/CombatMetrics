@@ -232,7 +232,7 @@
 		
 		<Control name="CombatMetrics_InfoSkillIcon" virtual="true" mouseEnabled="true">
 		
-			<Dimensions x="36" y="36"/>
+			<Dimensions x="30" y="30"/>
 		
 			<Controls>
 		
@@ -262,7 +262,7 @@
 			
 				<Label name="$(parent)Label" inherits="CombatMetrics_InfoFontControl" text="1" horizontalAlignment="CENTER" verticalAlignment="CENTER">
 				
-					<Anchor point="TOPLEFT" offsetX="3" offsetY="5"/>
+					<Anchor point="TOPLEFT" offsetX="3" offsetY="3"/>
 				
 				</Label>											
 				
@@ -280,25 +280,25 @@
 				
 				<Control name="$(parent)Ability2" inherits="CombatMetrics_InfoSkillIcon">
 				
-					<Anchor point="LEFT" relativeTo="$(parent)Ability1" relativePoint="RIGHT" offsetX="2"/>
+					<Anchor point="LEFT" relativeTo="$(parent)Ability1" relativePoint="RIGHT" offsetX="4"/>
 				
 				</Control>
 				
 				<Control name="$(parent)Ability3" inherits="CombatMetrics_InfoSkillIcon">
 				
-					<Anchor point="LEFT" relativeTo="$(parent)Ability2" relativePoint="RIGHT" offsetX="2"/>
+					<Anchor point="LEFT" relativeTo="$(parent)Ability2" relativePoint="RIGHT" offsetX="4"/>
 				
 				</Control>
 				
 				<Control name="$(parent)Ability4" inherits="CombatMetrics_InfoSkillIcon">
 				
-					<Anchor point="LEFT" relativeTo="$(parent)Ability3" relativePoint="RIGHT" offsetX="2"/>
+					<Anchor point="LEFT" relativeTo="$(parent)Ability3" relativePoint="RIGHT" offsetX="4"/>
 				
 				</Control>
 				
 				<Control name="$(parent)Ability5" inherits="CombatMetrics_InfoSkillIcon">
 				
-					<Anchor point="LEFT" relativeTo="$(parent)Ability4" relativePoint="RIGHT" offsetX="2"/>
+					<Anchor point="LEFT" relativeTo="$(parent)Ability4" relativePoint="RIGHT" offsetX="4"/>
 				
 				</Control>
 				
@@ -310,6 +310,55 @@
 				
 			</Controls>
 			
+		</Control>
+		
+		<Control name="CombatMetrics_EquipLine" virtual="true">
+		
+			<Dimensions y="22"/>
+		
+			<Controls>
+	
+				<Texture name="$(parent)Icon" textureFile="EsoUI/Art/CharacterWindow/gearSlot_head.dds">
+				
+					<Anchor point="TOPLEFT"/>
+					<Dimensions x="22" y="22"/>
+				
+				</Texture>
+				
+				<Texture name="$(parent)Icon2" textureFile="EsoUI/Art/CharacterWindow/gearSlot_head.dds">
+				
+					<Anchor point="TOPLEFT"/>
+					<Dimensions x="22" y="22"/>
+				
+				</Texture>
+				
+				<Label name="$(parent)ItemLink" text="" inherits="CombatMetrics_LabelFontControl" linkEnabled="true" mouseEnabled="true">
+					
+					<Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="4" offsetY="0"/>
+					
+					<Dimensions x="220" y="22"/>
+					
+				</Label>
+				
+				<Label name="$(parent)Trait" text="" inherits="CombatMetrics_ValueFontControl">
+					
+					<Anchor point="LEFT" relativeTo="$(parent)ItemLink" relativePoint="RIGHT" offsetX="4" offsetY="0"/>
+					
+					<Dimensions x="50" y="22"/>
+					
+				</Label>
+				
+				<Label name="$(parent)Enchant" text="" inherits="CombatMetrics_ValueFontControl">
+					
+					<Anchor point="LEFT" relativeTo="$(parent)Trait" relativePoint="RIGHT" offsetX="10" offsetY="0"/>
+					<Anchor point="RIGHT" offsetX="-8" />
+					
+					<Dimensions y="22"/>
+					
+				</Label>
+				
+			</Controls>
+		
 		</Control>
 		
 		<Control name="CombatMetrics_BuffPanelBox" virtual="true">
@@ -1856,19 +1905,19 @@
 						
 							<Anchor point="TOPLEFT" offsetX="4" offsetY="4"/>
 							<Anchor point="BOTTOMLEFT" offsetX="4" offsetY="-4"/>
-							<Dimensions x="324"/>
+							<Dimensions x="284"/>
 							
 								<Controls>
 								
 									<Control name="$(parent)AbilityRow1" inherits="CombatMetrics_InfoAbilityRow" resizeToFitDescendents="true">
 									
-										<Anchor point="TOPLEFT" offsetX="10" offsetY="10"/>
+										<Anchor point="TOPLEFT" offsetX="4" offsetY="14"/>
 										
 									</Control>
 								
 									<Control name="$(parent)AbilityRow2" inherits="CombatMetrics_InfoAbilityRow" resizeToFitDescendents="true">
 									
-										<Anchor point="TOPLEFT" relativeTo="$(parent)AbilityRow1" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
+										<Anchor point="TOPLEFT" relativeTo="$(parent)AbilityRow1" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="22"/>
 										
 										<OnInitialized> self:GetNamedChild("Label"):SetText("2")</OnInitialized>
 										
@@ -1887,7 +1936,109 @@
 						
 							<Anchor point="TOP" offsetX="0" offsetY="4"/>
 							<Anchor point="BOTTOM" offsetX="0" offsetY="-4"/>
-							<Dimensions x="324"/>
+							<Dimensions x="404"/>
+							
+							<Controls>
+									
+									<Control name="$(parent)EquipLine1" inherits="CombatMetrics_EquipLine">
+									
+										<Anchor point="TOPLEFT" offsetX="4" offsetY="8"/>
+										<Anchor point="TOPRIGHT" offsetX="4" offsetY="8"/>
+									
+									</Control>
+									
+									<Control name="$(parent)EquipLine2" inherits="CombatMetrics_EquipLine">
+									
+										<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine1" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
+										<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine1" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
+									
+									</Control>
+									
+									<Control name="$(parent)EquipLine3" inherits="CombatMetrics_EquipLine">
+									
+										<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine2" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
+										<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine2" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
+									
+									</Control>
+									
+									<Control name="$(parent)EquipLine4" inherits="CombatMetrics_EquipLine">
+									
+										<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine3" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
+										<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine3" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
+									
+									</Control>
+									
+									<Control name="$(parent)EquipLine5" inherits="CombatMetrics_EquipLine">
+									
+										<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine4" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
+										<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine4" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
+									
+									</Control>
+									
+									<Control name="$(parent)EquipLine6" inherits="CombatMetrics_EquipLine">
+									
+										<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine5" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
+										<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine5" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
+									
+									</Control>
+									
+									<Control name="$(parent)EquipLine7" inherits="CombatMetrics_EquipLine">
+									
+										<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine6" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
+										<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine6" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
+									
+									</Control>
+									
+									<Control name="$(parent)EquipLine8" inherits="CombatMetrics_EquipLine">
+									
+										<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine7" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
+										<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine7" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
+									
+									</Control>
+									
+									<Control name="$(parent)EquipLine9" inherits="CombatMetrics_EquipLine">
+									
+										<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine8" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
+										<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine8" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
+									
+									</Control>
+									
+									<Control name="$(parent)EquipLine10" inherits="CombatMetrics_EquipLine">
+									
+										<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine9" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
+										<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine9" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
+									
+									</Control>
+									
+									<Control name="$(parent)EquipLine11" inherits="CombatMetrics_EquipLine">
+									
+										<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine10" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
+										<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine10" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
+									
+									</Control>
+									
+									<Control name="$(parent)EquipLine12" inherits="CombatMetrics_EquipLine">
+									
+										<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine11" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
+										<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine11" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
+									
+									</Control>
+									
+									<Control name="$(parent)EquipLine13" inherits="CombatMetrics_EquipLine">
+									
+										<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine12" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
+										<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine12" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
+									
+									</Control>
+									
+									<Control name="$(parent)EquipLine14" inherits="CombatMetrics_EquipLine">
+									
+										<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine13" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
+										<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine13" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
+									
+									</Control>
+									
+								</Controls>
 						
 						</Control>
 						
@@ -1900,7 +2051,7 @@
 						
 							<Anchor point="TOPRIGHT" offsetX="-4" offsetY="4"/>
 							<Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4"/>
-							<Dimensions x="324"/>
+							<Dimensions x="284"/>
 						
 						</Control>
 						
@@ -1971,7 +2122,7 @@
 							</OnInitialized>
 						</Texture>
 						
-						<Texture name="$(parent)InfoButton" mouseEnabled="true" textureFile="esoui/art/menubar/gamepad/gp_playermenu_icon_tutorial.dds" color="33FFFFFF" inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton" hidden="false">
+						<Texture name="$(parent)InfoButton" mouseEnabled="true" textureFile="esoui/art/menubar/gamepad/gp_playermenu_icon_tutorial.dds" color="33FFFFFF" inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton" hidden="true">
 							<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)CombatLogButton" offsetY="4"/>
 							<OnInitialized>
 								self.tooltip = {SI_COMBAT_METRICS_TOGGLE_INFO}
@@ -1980,7 +2131,7 @@
 						</Texture>
 						
 						<Texture name="$(parent)SettingsButton" mouseEnabled="true" textureFile="esoui/art/tutorial/gamepad/gp_playermenu_icon_settings.dds" color="FFFFFFFF" inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton" hidden="false">
-							<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)InfoButton" offsetY="30"/>
+							<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)CombatLogButton" offsetY="30"/>
 							<OnInitialized>
 								self.tooltip = {SI_COMBAT_METRICS_TOGGLE_SETTINGS}
 								self.category = "Settings"

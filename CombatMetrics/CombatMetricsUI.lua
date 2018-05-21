@@ -188,6 +188,17 @@ function NavButtonFunctions.save(control, _, _, _, _, shiftkey )
 	end
 end
 
+local function ClearSelections()
+
+	local category = db.FightReport.category or "damageOut"
+	
+	selections["ability"][category] = nil
+	selections["unit"][category] = nil
+	selections["buff"]["buff"] = nil	
+	selections["resource"]["resource"] = nil
+	
+end
+
 function NavButtonFunctions.delete(control)
 
 	if control:GetState() == BSTATE_DISABLED then 
@@ -197,6 +208,7 @@ function NavButtonFunctions.delete(control)
 	else 
 	
 		table.remove(CMX.lastfights, currentFight)
+		ClearSelections()
 		if #CMX.lastfights == 0 then CombatMetrics_Report:Update() else CombatMetrics_Report:Update(math.min(currentFight, #CMX.lastfights)) end
 	
 	end 
@@ -652,10 +664,7 @@ function CMX.LoadItem(listitem)
 	
 	local category = db.FightReport.category
 	
-	selections["ability"][category] = nil
-	selections["unit"][category] = nil
-	selections["buff"]["buff"] = nil	
-	selections["resource"]["resource"] = nil	
+	ClearSelections()	
 	
 	toggleFightList()
 	
@@ -1298,7 +1307,7 @@ local attackStatsKeys = { 			-- {label, format, convert}
 		[1] = {"maxhealth", "%d"}, 
 		[2] = {"physres", "%d"}, 
 		[3] = {"spellres", "%d"}, 
-		[4] = {"critres", "%.1f%%", true}, 
+		[4] = {"critres", "%d", "%.1f%%"}, 
 	}, 
 
 }
@@ -1356,7 +1365,8 @@ local function updateFightStatsPanelRight(panel)
 		
 			local maxvalue = stats["max"..dataKey] or 0
 			
-			if convert then maxvalue = GetCriticalStrikeChance(maxvalue) end
+			if convert == true then maxvalue = GetCriticalStrikeChance(maxvalue) end
+			if dataKey == POWERTYPE_HEALTH and i == 4 then maxvalue = maxvalue / 68 end 	-- untested, but good agreement from multiple sources
 			if displayformat then maxvalue = string.format(displayformat, maxvalue) end
 		
 			local avgvalue = avgvalues["avg"..dataKey] or calcstats["avg"..dataKey]
@@ -2236,6 +2246,8 @@ function CMX.SkillTooltip_OnMouseExit(control)
 end
 
 local function updateLeftInfoPanel(panel)
+
+	if true then return end
 	
 	if fightData == nil then return end
 	
@@ -2270,11 +2282,103 @@ local function updateLeftInfoPanel(panel)
 			icon:SetTexture(texture)			
 		end
 	end
+	
+end
+
+local equipslots = {
+	
+	EQUIP_SLOT_MAIN_HAND,
+	EQUIP_SLOT_OFF_HAND,
+	EQUIP_SLOT_BACKUP_MAIN,
+	EQUIP_SLOT_BACKUP_OFF,
+	EQUIP_SLOT_HEAD,
+	EQUIP_SLOT_SHOULDERS,
+	EQUIP_SLOT_CHEST,
+	EQUIP_SLOT_HAND,
+	EQUIP_SLOT_WAIST,
+	EQUIP_SLOT_LEGS,
+	EQUIP_SLOT_FEET,
+	EQUIP_SLOT_NECK,
+	EQUIP_SLOT_RING1,
+	EQUIP_SLOT_RING2,
+}
+
+local equipicons = {
+	
+	"EsoUI/Art/CharacterWindow/gearslot_mainhand.dds",
+	"EsoUI/Art/CharacterWindow/gearslot_offhand.dds",
+	"EsoUI/Art/CharacterWindow/gearslot_mainhand.dds",
+	"EsoUI/Art/CharacterWindow/gearslot_offhand.dds",
+	"EsoUI/Art/CharacterWindow/gearslot_head.dds",
+	"EsoUI/Art/CharacterWindow/gearslot_shoulders.dds",
+	"EsoUI/Art/CharacterWindow/gearslot_chest.dds",
+	"EsoUI/Art/CharacterWindow/gearslot_hands.dds",
+	"EsoUI/Art/CharacterWindow/gearslot_belt.dds",
+	"EsoUI/Art/CharacterWindow/gearslot_legs.dds",
+	"EsoUI/Art/CharacterWindow/gearslot_feet.dds",
+	"EsoUI/Art/CharacterWindow/gearslot_neck.dds",
+	"EsoUI/Art/CharacterWindow/gearslot_ring.dds",
+	"EsoUI/Art/CharacterWindow/gearslot_ring.dds",
+}
+
+local armorcolors = {
+
+	[ARMORTYPE_NONE] = {1, 1, 1, 1},
+	[ARMORTYPE_HEAVY] = {1, 0.3, 0.3, 1},
+	[ARMORTYPE_MEDIUM] = {0.3, 1, 0.3, 1},
+	[ARMORTYPE_LIGHT] = {0.3, 0.3, 1, 1},
+}
+
+local function updateMiddleInfoPanel(panel)
+	
+	local charData = fightData and fightData.charData or nil
+	
+	local equipdata = charData and charData.equip or {}
+	
+	for i = 1, 14 do
+	
+		local equipline = panel:GetNamedChild("EquipLine" .. i)
+		local label = equipline:GetNamedChild("ItemLink")
+		local icon = equipline:GetNamedChild("Icon")
+		local icon2 = equipline:GetNamedChild("Icon2")	-- textures are added twice since icons are so low in contrast
+		local trait = equipline:GetNamedChild("Trait")	-- textures are added twice since icons are so low in contrast
+		local enchant = equipline:GetNamedChild("Enchant")	-- textures are added twice since icons are so low in contrast
+	
+		local slot = equipslots[i]
+		
+		local item = equipdata[slot] or ""
+		local texture = equipicons[i]
+		
+		local armortype = GetItemLinkArmorType(item)
+		local color = item:len() > 0 and armorcolors[armortype] or {0, 0, 0, 1}
+		local color2 = item:len() > 0 and {1, 1, 1, 1} or {0.5, 0.5, 0.5, 1}
+	
+		label:SetText(item)
+		
+		icon:SetTexture(texture)
+		icon:SetColor(unpack(color))
+		icon:SetBlendMode(TEX_BLEND_MODE_ADD)	
+		
+		icon2:SetTexture(texture)
+		icon2:SetColor(unpack(color2))
+		icon2:SetBlendMode(TEX_BLEND_MODE_ADD)	
+		
+		local traitType, _ = GetItemLinkTraitInfo(item) 
+		local traitName = traitType > 0 and GetString("SI_ITEMTRAITTYPE", traitType) or ""
+		
+		trait:SetText(traitName)
+		
+		local _, enchantstring = GetItemLinkEnchantInfo(item) 
+		
+		enchant:SetText(enchantstring)
+		
+	end
 end
 
 local function updateInfoPanel(panel)
 
 	updateLeftInfoPanel(panel:GetNamedChild("Left"))
+	updateMiddleInfoPanel(panel:GetNamedChild("Middle"))
 	
 end
 
@@ -2316,10 +2420,7 @@ local function updateFightReport(control, fightId)
 	
 	if fightId == nil or fightId ~= currentFight then
 	
-		selections["ability"][category] = nil
-		selections["unit"][category] = nil
-		selections["buff"]["buff"] = nil	
-		selections["resource"]["resource"] = nil
+		ClearSelections()
 		
 	end
 	
@@ -3022,6 +3123,13 @@ local function initLiveReport()
 				child:SetAnchor(anchor[1], anchor[5], anchor[2], anchor[3]*scale, anchor[4]*scale)
 				
 				last = child
+				
+				-- set label alignments
+				
+				local label = child:GetNamedChild("Label")
+				local alignment = db.liveReport.alignmentleft and TEXT_ALIGN_LEFT or TEXT_ALIGN_RIGHT
+				
+				label:SetHorizontalAlignment(alignment)
 			
 			end
 		end

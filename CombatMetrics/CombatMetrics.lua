@@ -19,7 +19,7 @@ local CMX = CMX
  
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "0.8.2.2"
+CMX.version = "0.8.2.3"
 
 local GetFormatedAbilityName = LC.GetFormatedAbilityName
 
@@ -1608,6 +1608,7 @@ local svdefaults = {
 		["layout"]="Compact", 
 		["scale"]= zo_roundToNearest(1 / GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE), 0.1), 
 		["bgalpha"]= 95, 
+		["alignmentleft"] = false,
 		["damageOut"] = true, 
 		["damageOutSingle"] = false, 
 		["healOut"] = true, 

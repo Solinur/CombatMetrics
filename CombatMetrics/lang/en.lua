@@ -236,8 +236,11 @@
 	SI_COMBAT_METRICS_MENU_ENABLE_NAME = "Enable",  -- Enable
 	SI_COMBAT_METRICS_MENU_ENABLE_TOOLTIP = "Enable Live Report Window which shows DPS & HPS during combat",  -- Enable Live Report Window which shows DPS & HPS during combat
 	
-	SI_COMBAT_METRICS_MENU_LOCK = "Lock",  -- Lock NEW
-	SI_COMBAT_METRICS_MENU_LOCK_LR_TOOLTIP = "Lock the Live Report Window, so it can't be moved",  --  Lock the Live Report Window, so it can't be moved NEW
+	SI_COMBAT_METRICS_MENU_LR_LOCK = "Lock",  -- Lock NEW
+	SI_COMBAT_METRICS_MENU_LR_LOCK_TOOLTIP = "Lock the Live Report Window, so it can't be moved",  --  Lock the Live Report Window, so it can't be moved NEW
+	
+	SI_COMBAT_METRICS_MENU_LR_ALIGNMENT = "Use left-aligned numbers",
+	SI_COMBAT_METRICS_MENU_LR_ALIGNMENT_TOOLTIP = "Sets positioning of Damage/Heal/etc. numbers for the Live Report Window to left-aligned",
 	
 	SI_COMBAT_METRICS_MENU_LAYOUT_NAME = "Layout",  -- Layout
 	SI_COMBAT_METRICS_MENU_LAYOUT_TOOLTIP = "Select the Layout of the Live Report Window",  -- Select the Layout of the Live Report Window

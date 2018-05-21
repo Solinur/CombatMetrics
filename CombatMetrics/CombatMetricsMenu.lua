@@ -233,8 +233,8 @@ function CMX.MakeMenu(svdefaults)
 		},
 		{
 			type = "checkbox",
-			name = GetString(SI_COMBAT_METRICS_MENU_LOCK),
-			tooltip = GetString(SI_COMBAT_METRICS_MENU_LOCK_LR_TOOLTIP),
+			name = GetString(SI_COMBAT_METRICS_MENU_LR_LOCK),
+			tooltip = GetString(SI_COMBAT_METRICS_MENU_LR_LOCK_TOOLTIP),
 			default = def.liveReport.locked,
 			getFunc = function() return db.liveReport.locked end,
 			setFunc = function(value) 
@@ -284,6 +284,17 @@ function CMX.MakeMenu(svdefaults)
 				CombatMetrics_LiveReportBG:SetAlpha(value/100) 
 			end,
 			disabled = function() return not db.liveReport.enabled end,
+		},
+		{
+			type = "checkbox",
+			name = GetString(SI_COMBAT_METRICS_MENU_LR_ALIGNMENT),
+			tooltip = GetString(SI_COMBAT_METRICS_MENU_LR_ALIGNMENT_TOOLTIP),
+			default = def.liveReport.alignmentleft,
+			getFunc = function() return db.liveReport.alignmentleft end,
+			setFunc = function(value) 
+				db.liveReport.alignmentleft = value 
+				CombatMetrics_LiveReport:Refresh() 
+			end,
 		},
 		{
 			type = "checkbox",
