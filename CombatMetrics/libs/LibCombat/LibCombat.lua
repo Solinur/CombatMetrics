@@ -1267,7 +1267,7 @@ local function OnDeathStateChanged(_, unitTag, isDead)
 	
 	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_DEATH), LIBCOMBAT_EVENT_DEATH, timems, unitId, -1)
 
-	if isDead then df("[%.3f] DS: %s died!", timems/1000, name ) end
+	if isDead then Print("[%.3f] DS: %s died!", timems/1000, name ) end
 	
 	-- death (for group display, also works for different zones)
 
@@ -1275,7 +1275,7 @@ end
 
 local function OnPlayerReincarnated()
 
-	df("[%.3f] Revive!", GetGameTimeMilliseconds()/1000)
+	Print("[%.3f] Revive!", GetGameTimeMilliseconds()/1000)
 
 end
 
@@ -1293,7 +1293,7 @@ local function OnDeath(_, result, _, abilityName, _, abilityActionSlotType, sour
 	
 	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_DEATH), LIBCOMBAT_EVENT_DEATH, timems, targetUnitId, abilityId)
 	
-	df("[%.3f] CE: %s died! (%d - %s) (%s -> %s)", GetGameTimeMilliseconds()/1000, name, result, GetFormatedAbilityName(abilityId), tostring(sourceUnitId), tostring(targetUnitId))
+	Print("[%.3f] CE: %s died! (%d - %s) (%s -> %s)", GetGameTimeMilliseconds()/1000, name, result, GetFormatedAbilityName(abilityId), tostring(sourceUnitId), tostring(targetUnitId))
 	
 end
 
@@ -1309,7 +1309,7 @@ local function OnResurrectResult(_, targetCharacterName, result, targetDisplayNa
 
 	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_RESURRECTION), LIBCOMBAT_EVENT_RESURRECTION, timems, data.playerid, unitId)
 	
-	df("[%.3f] Rezzed %s", GetGameTimeMilliseconds()/1000, targetCharacterName )
+	Print("[%.3f] Rezzed %s", GetGameTimeMilliseconds()/1000, targetCharacterName )
 	
 end
 
@@ -1323,7 +1323,7 @@ local function OnResurrectRequest(_, requesterCharacterName, timeLeftToAccept, r
 
 	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_RESURRECTION), LIBCOMBAT_EVENT_RESURRECTION, timems, unitId, data.playerid)
 
-	df("[%.3f] Rezzed by %s", GetGameTimeMilliseconds()/1000, requesterCharacterName )
+	Print("[%.3f] Rezzed by %s", GetGameTimeMilliseconds()/1000, requesterCharacterName )
 
 end
 

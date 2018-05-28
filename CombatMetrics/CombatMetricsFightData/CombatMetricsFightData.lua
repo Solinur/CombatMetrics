@@ -433,52 +433,13 @@ local function getSavedVariableSize(sv)
 	
 end
 
-local function countSavedVariableConstants(sv)
-
-	if constantTable == nil then 
-	
-		constantTable = {} 
-		constants = 0
-		
-	end
-
-	if type(sv) ~= "table" then return 1 end
-	
-	for key, value in pairs(sv) do
-	
-		if constantTable[key] == nil then 
-		
-			constantTable[key] = true
-			constants = constants + 1 
-			
-		end
-	
-		local dtype = type(value)
-		
-		if (dtype == "number" or dtype == "string" or  dtype == "boolean") and constantTable[value] == nil then 
-		
-			constantTable[value] = true 
-			constants = constants + 1 
-			
-		elseif dtype == "table" then 
-		
-			countSavedVariableConstants(value, constantTable) 
-			
-		end
-	end
-	
-	return constants
-end
-
 local function checkSavedVariable(data)
 
 	data = data or sv
 
 	local size = getSavedVariableSize(data)
 		
-	local constants = countSavedVariableConstants(data)
-	
-	return size, constants
+	return size
 	
 end
 

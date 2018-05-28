@@ -262,19 +262,13 @@
 			
 				<Label name="$(parent)Label" inherits="CombatMetrics_InfoFontControl" text="1" horizontalAlignment="CENTER" verticalAlignment="CENTER">
 				
-					<Anchor point="TOPLEFT" offsetX="3" offsetY="3"/>
+					<Anchor point="TOPLEFT" offsetX="30" offsetY="3"/>
 				
-				</Label>											
-				
-				<Control name="$(parent)Weapon" inherits="CombatMetrics_InfoSkillIcon">
-				
-					<Anchor point="TOPLEFT" offsetX="20"/>
-				
-				</Control>
+				</Label>	
 				
 				<Control name="$(parent)Ability1" inherits="CombatMetrics_InfoSkillIcon">
 				
-					<Anchor point="LEFT" relativeTo="$(parent)Weapon" relativePoint="RIGHT" offsetX="12"/>
+					<Anchor point="LEFT" relativeTo="$(parent)Label" relativePoint="RIGHT" offsetX="12"/>
 				
 				</Control>
 				
@@ -336,7 +330,7 @@
 					
 					<Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="4" offsetY="0"/>
 					
-					<Dimensions x="220" y="22"/>
+					<Dimensions x="240" y="22"/>
 					
 				</Label>
 				
@@ -344,19 +338,120 @@
 					
 					<Anchor point="LEFT" relativeTo="$(parent)ItemLink" relativePoint="RIGHT" offsetX="4" offsetY="0"/>
 					
-					<Dimensions x="50" y="22"/>
+					<Dimensions x="100" y="22"/>
 					
 				</Label>
 				
-				<Label name="$(parent)Enchant" text="" inherits="CombatMetrics_ValueFontControl">
+				<Label name="$(parent)Enchant" text="" inherits="CombatMetrics_ValueFontControl" mouseEnabled="true" >
 					
 					<Anchor point="LEFT" relativeTo="$(parent)Trait" relativePoint="RIGHT" offsetX="10" offsetY="0"/>
-					<Anchor point="RIGHT" offsetX="-8" />
+					<Anchor point="RIGHT" offsetX="-4" />
 					
 					<Dimensions y="22"/>
 					
 				</Label>
 				
+			</Controls>
+		
+		</Control>
+		
+		<Control name="CombatMetrics_StarRow" virtual="true">
+		
+			<Controls>
+	
+				<Label name="$(parent)Value" text="0" inherits="CombatMetrics_ValueFontControl" horizontalAlignment="RIGHT">
+		
+					<Anchor point="RIGHT"/>
+					<Dimensions x="24" y="22"/>
+					
+				</Label>
+	
+				<Label name="$(parent)Name" text="Celestial Star 1" inherits="CombatMetrics_ValueFontControl">
+		
+					<Anchor point="LEFT"/>
+					<Anchor point="RIGHT" relativeTo="$(parent)Value" relativePoint="LEFT" offsetX="-8" offsetY="0"/>
+					
+					<Dimensions x="24" y="22"/>
+					
+				</Label>
+				
+			</Controls>
+			
+		</Control>
+		
+		<Control name="CombatMetrics_StarSign" virtual="true">
+		
+		<Dimensions x="350" y="66"/>
+		
+			<Controls>
+			
+				<Label name="$(parent)Title" text="CPNAME" inherits="CombatMetrics_LabelFontControl">
+					
+					<Anchor point="TOPLEFT"/>
+					<Dimensions x="200" y="20"/>
+					
+				</Label>
+				
+				<Texture name="$(parent)Passive1" textureFile="esoui/art/mainmenu/menubar_champion_up.dds">
+				
+					<Anchor point="LEFT" relativeTo="$(parent)Title" relativePoint="RIGHT" offsetX="8" offsetY="0"/>
+					<Dimensions x="18" y="18"/>
+					
+				</Texture>
+				
+				<Texture name="$(parent)Passive2" textureFile="esoui/art/mainmenu/menubar_champion_up.dds">
+				
+					<Anchor point="LEFT" relativeTo="$(parent)Passive1" relativePoint="RIGHT" offsetX="4" offsetY="0"/>
+					<Dimensions x="18" y="18"/>
+				
+				</Texture>
+				
+				<Texture name="$(parent)Passive3" textureFile="esoui/art/mainmenu/menubar_champion_up.dds">
+				
+					<Anchor point="LEFT" relativeTo="$(parent)Passive2" relativePoint="RIGHT" offsetX="4" offsetY="0"/>
+					<Dimensions x="18" y="18"/>
+				
+				</Texture>
+				
+				<Texture name="$(parent)Passive4" textureFile="esoui/art/mainmenu/menubar_champion_up.dds">
+				
+					<Anchor point="LEFT" relativeTo="$(parent)Passive3" relativePoint="RIGHT" offsetX="4" offsetY="0"/>
+					<Dimensions x="18" y="18"/>
+				
+				</Texture>
+				
+				<Control name="$(parent)Row1" inherits="CombatMetrics_StarRow">
+				
+					<Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="4"/>
+					<Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="BOTTOM" offsetX="-8" offsetY="0" constrains="X"/>
+					<Dimensions y="20"/>
+					
+				</Control>
+				
+				<Control name="$(parent)Row2" inherits="CombatMetrics_StarRow">
+				
+					<Anchor point="TOPLEFT" relativeTo="$(parent)Row1" relativePoint="TOPRIGHT" offsetX="16" offsetY="0"/>
+					<Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="4" constrains="X"/>
+					<Dimensions y="20"/>
+					
+				</Control>
+				
+				<Control name="$(parent)Row3" inherits="CombatMetrics_StarRow">
+				
+					<Anchor point="TOPLEFT" relativeTo="$(parent)Row1" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
+					<Anchor point="TOPRIGHT" relativeTo="$(parent)Row1" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
+					<Dimensions y="20"/>
+					
+				</Control>
+				
+				<Control name="$(parent)Row4" inherits="CombatMetrics_StarRow">
+				
+					<Anchor point="TOPLEFT" relativeTo="$(parent)Row2" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
+					<Anchor point="TOPRIGHT" relativeTo="$(parent)Row2" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
+					<Dimensions y="20"/>
+					
+				</Control>
+			
 			</Controls>
 		
 		</Control>
@@ -1891,174 +1986,8 @@
 						</Control>
 						
 					</Controls>
-				</Control>
+				</Control>				
 				
-				<Control name="$(parent)_InfoPanel" inherits="CombatMetrics_ControlFramed" hidden="true" mouseEnabled="true">
-							
-						<Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)_Title" offsetX="0" offsetY="4"/>
-						<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)_Title" offsetX="0" offsetY="4"/>
-						<Dimensions y="374"/>
-					
-					<Controls>
-					
-						<Control name="$(parent)Left" inherits="CombatMetrics_ControlFramed">
-						
-							<Anchor point="TOPLEFT" offsetX="4" offsetY="4"/>
-							<Anchor point="BOTTOMLEFT" offsetX="4" offsetY="-4"/>
-							<Dimensions x="284"/>
-							
-								<Controls>
-								
-									<Control name="$(parent)AbilityRow1" inherits="CombatMetrics_InfoAbilityRow" resizeToFitDescendents="true">
-									
-										<Anchor point="TOPLEFT" offsetX="4" offsetY="14"/>
-										
-									</Control>
-								
-									<Control name="$(parent)AbilityRow2" inherits="CombatMetrics_InfoAbilityRow" resizeToFitDescendents="true">
-									
-										<Anchor point="TOPLEFT" relativeTo="$(parent)AbilityRow1" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="22"/>
-										
-										<OnInitialized> self:GetNamedChild("Label"):SetText("2")</OnInitialized>
-										
-									</Control>
-									
-								</Controls>
-						
-						</Control>
-						
-						<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
-							<Anchor point="TOPRIGHT" relativeTo="$(parent)Left" offsetX="3" offsetY="2"/>
-							<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Left" offsetX="3" offsetY="-2"/>
-						</Line>
-					
-						<Control name="$(parent)Middle" inherits="CombatMetrics_ControlFramed">
-						
-							<Anchor point="TOP" offsetX="0" offsetY="4"/>
-							<Anchor point="BOTTOM" offsetX="0" offsetY="-4"/>
-							<Dimensions x="404"/>
-							
-							<Controls>
-									
-									<Control name="$(parent)EquipLine1" inherits="CombatMetrics_EquipLine">
-									
-										<Anchor point="TOPLEFT" offsetX="4" offsetY="8"/>
-										<Anchor point="TOPRIGHT" offsetX="4" offsetY="8"/>
-									
-									</Control>
-									
-									<Control name="$(parent)EquipLine2" inherits="CombatMetrics_EquipLine">
-									
-										<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine1" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
-										<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine1" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
-									
-									</Control>
-									
-									<Control name="$(parent)EquipLine3" inherits="CombatMetrics_EquipLine">
-									
-										<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine2" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
-										<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine2" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
-									
-									</Control>
-									
-									<Control name="$(parent)EquipLine4" inherits="CombatMetrics_EquipLine">
-									
-										<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine3" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
-										<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine3" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
-									
-									</Control>
-									
-									<Control name="$(parent)EquipLine5" inherits="CombatMetrics_EquipLine">
-									
-										<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine4" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
-										<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine4" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
-									
-									</Control>
-									
-									<Control name="$(parent)EquipLine6" inherits="CombatMetrics_EquipLine">
-									
-										<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine5" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
-										<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine5" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
-									
-									</Control>
-									
-									<Control name="$(parent)EquipLine7" inherits="CombatMetrics_EquipLine">
-									
-										<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine6" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
-										<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine6" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
-									
-									</Control>
-									
-									<Control name="$(parent)EquipLine8" inherits="CombatMetrics_EquipLine">
-									
-										<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine7" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
-										<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine7" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
-									
-									</Control>
-									
-									<Control name="$(parent)EquipLine9" inherits="CombatMetrics_EquipLine">
-									
-										<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine8" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
-										<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine8" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
-									
-									</Control>
-									
-									<Control name="$(parent)EquipLine10" inherits="CombatMetrics_EquipLine">
-									
-										<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine9" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
-										<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine9" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
-									
-									</Control>
-									
-									<Control name="$(parent)EquipLine11" inherits="CombatMetrics_EquipLine">
-									
-										<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine10" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
-										<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine10" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
-									
-									</Control>
-									
-									<Control name="$(parent)EquipLine12" inherits="CombatMetrics_EquipLine">
-									
-										<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine11" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
-										<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine11" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
-									
-									</Control>
-									
-									<Control name="$(parent)EquipLine13" inherits="CombatMetrics_EquipLine">
-									
-										<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine12" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
-										<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine12" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
-									
-									</Control>
-									
-									<Control name="$(parent)EquipLine14" inherits="CombatMetrics_EquipLine">
-									
-										<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine13" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
-										<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine13" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
-									
-									</Control>
-									
-								</Controls>
-						
-						</Control>
-						
-						<Line name="$(parent)Sep2" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
-							<Anchor point="TOPRIGHT" relativeTo="$(parent)Middle" offsetX="3" offsetY="2"/>
-							<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Middle" offsetX="3" offsetY="-2"/>
-						</Line>
-					
-						<Control name="$(parent)Right" inherits="CombatMetrics_ControlFramed">
-						
-							<Anchor point="TOPRIGHT" offsetX="-4" offsetY="4"/>
-							<Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4"/>
-							<Dimensions x="284"/>
-						
-						</Control>
-						
-					</Controls>
-					
-				</Control>
-							
 				<Control name="$(parent)_SelectorRow" resizeToFitDescendents="true" mouseEnabled="true">
 					<Anchor point="RIGHT" relativePoint="LEFT" constrains="X"/>
 					<Anchor point="TOP" relativePoint="TOP" relativeTo="$(parent)_MainPanel" constrains="Y"/>
@@ -2122,7 +2051,7 @@
 							</OnInitialized>
 						</Texture>
 						
-						<Texture name="$(parent)InfoButton" mouseEnabled="true" textureFile="esoui/art/menubar/gamepad/gp_playermenu_icon_tutorial.dds" color="33FFFFFF" inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton" hidden="true">
+						<Texture name="$(parent)InfoButton" mouseEnabled="true" textureFile="esoui/art/menubar/gamepad/gp_playermenu_icon_tutorial.dds" color="33FFFFFF" inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton">
 							<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)CombatLogButton" offsetY="4"/>
 							<OnInitialized>
 								self.tooltip = {SI_COMBAT_METRICS_TOGGLE_INFO}
@@ -2130,8 +2059,8 @@
 							</OnInitialized>
 						</Texture>
 						
-						<Texture name="$(parent)SettingsButton" mouseEnabled="true" textureFile="esoui/art/tutorial/gamepad/gp_playermenu_icon_settings.dds" color="FFFFFFFF" inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton" hidden="false">
-							<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)CombatLogButton" offsetY="30"/>
+						<Texture name="$(parent)SettingsButton" mouseEnabled="true" textureFile="esoui/art/tutorial/gamepad/gp_playermenu_icon_settings.dds" color="FFFFFFFF" inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton">
+							<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)InfoButton" offsetY="30"/>
 							<OnInitialized>
 								self.tooltip = {SI_COMBAT_METRICS_TOGGLE_SETTINGS}
 								self.category = "Settings"
@@ -2422,7 +2351,7 @@
 					</OnInitialized>
 					
 				</Control>
-				
+					
 				<Control name="$(parent)_AbilityPanel" inherits="CombatMetrics_ControlFramed">
 					<Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)_RightPanel" offsetX="0" offsetY="4"/>
 					<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)_UnitPanel" offsetX="4" offsetY="0"/>
@@ -2533,6 +2462,232 @@
 					</OnInitialized>
 					
 				</Control>
+				
+				<Control name="$(parent)_InfoPanel" inherits="CombatMetrics_ControlFramed" hidden="true" mouseEnabled="true">
+							
+						<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)_Title" offsetX="0" offsetY="4"/>
+						<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)_AbilityPanel" offsetX="0" offsetY="0"/>
+					
+					<Controls>
+					
+						<Control name="$(parent)Left">
+						
+							<Anchor point="TOPLEFT" offsetX="4" offsetY="4"/>
+							<Dimensions x="610" y="420"/>
+							
+							<Controls>
+							
+								<Control name="$(parent)AbilityRow1" inherits="CombatMetrics_InfoAbilityRow" resizeToFitDescendents="true">
+								
+									<Anchor point="TOPLEFT" offsetX="5" offsetY="8"/>
+									
+								</Control>
+							
+								<Control name="$(parent)AbilityRow2" inherits="CombatMetrics_InfoAbilityRow" resizeToFitDescendents="true">
+								
+									<Anchor point="TOPLEFT" relativePoint="TOP" offsetX="0" offsetY="8"/>
+									
+									<OnInitialized> self:GetNamedChild("Label"):SetText("2")</OnInitialized>
+									
+								</Control>
+								
+								<Control name="$(parent)EquipLine1" inherits="CombatMetrics_EquipLine">
+							
+									<Anchor point="TOPLEFT" relativeTo="$(parent)AbilityRow1" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="14"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)" offsetX="0" constrains="X"/>
+								
+								</Control>
+								
+								<Control name="$(parent)EquipLine2" inherits="CombatMetrics_EquipLine">
+								
+									<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine1" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine1" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
+								
+								</Control>
+								
+								<Control name="$(parent)EquipLine3" inherits="CombatMetrics_EquipLine">
+								
+									<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine2" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="12"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine2" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="12"/>
+								
+								</Control>
+								
+								<Control name="$(parent)EquipLine4" inherits="CombatMetrics_EquipLine">
+								
+									<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine3" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine3" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
+								
+								</Control>
+								
+								<Control name="$(parent)EquipLine5" inherits="CombatMetrics_EquipLine">
+								
+									<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine4" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="12"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine4" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="12"/>
+								
+								</Control>
+								
+								<Control name="$(parent)EquipLine6" inherits="CombatMetrics_EquipLine">
+								
+									<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine5" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine5" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
+								
+								</Control>
+								
+								<Control name="$(parent)EquipLine7" inherits="CombatMetrics_EquipLine">
+								
+									<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine6" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine6" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
+								
+								</Control>
+								
+								<Control name="$(parent)EquipLine8" inherits="CombatMetrics_EquipLine">
+								
+									<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine7" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine7" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
+								
+								</Control>
+								
+								<Control name="$(parent)EquipLine9" inherits="CombatMetrics_EquipLine">
+								
+									<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine8" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine8" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
+								
+								</Control>
+								
+								<Control name="$(parent)EquipLine10" inherits="CombatMetrics_EquipLine">
+								
+									<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine9" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine9" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
+								
+								</Control>
+								
+								<Control name="$(parent)EquipLine11" inherits="CombatMetrics_EquipLine">
+								
+									<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine10" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine10" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
+								
+								</Control>
+								
+								<Control name="$(parent)EquipLine12" inherits="CombatMetrics_EquipLine">
+								
+									<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine11" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="12"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine11" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="12"/>
+								
+								</Control>
+								
+								<Control name="$(parent)EquipLine13" inherits="CombatMetrics_EquipLine">
+								
+									<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine12" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine12" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
+								
+								</Control>
+								
+								<Control name="$(parent)EquipLine14" inherits="CombatMetrics_EquipLine">
+								
+									<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine13" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine13" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
+								
+								</Control>
+								
+							</Controls>
+						
+						</Control>
+						
+						<Control name="$(parent)Right">
+							
+							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Left" offsetX="6" offsetY="0"/>
+							<Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4"/>
+							
+							<Controls>
+									
+								<Control name="$(parent)StarSign1" inherits="CombatMetrics_StarSign">
+								
+									<Anchor point="TOPLEFT" offsetX="8" offsetY="4"/>
+									
+								</Control>
+								
+								<Control name="$(parent)StarSign2" inherits="CombatMetrics_StarSign">
+								
+									<Anchor point="TOPLEFT" relativeTo="$(parent)StarSign1" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)StarSign1" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
+									
+								</Control>
+								
+								<Control name="$(parent)StarSign3" inherits="CombatMetrics_StarSign">
+								
+									<Anchor point="TOPLEFT" relativeTo="$(parent)StarSign2" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)StarSign2" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
+									
+								</Control>
+								
+								<Control name="$(parent)StarSign4" inherits="CombatMetrics_StarSign">
+								
+									<Anchor point="TOPLEFT" relativeTo="$(parent)StarSign3" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="12"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)StarSign3" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="12"/>
+									
+								</Control>
+								
+								<Control name="$(parent)StarSign5" inherits="CombatMetrics_StarSign">
+								
+									<Anchor point="TOPLEFT" relativeTo="$(parent)StarSign4" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)StarSign4" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
+									
+								</Control>
+								
+								<Control name="$(parent)StarSign6" inherits="CombatMetrics_StarSign">
+								
+									<Anchor point="TOPLEFT" relativeTo="$(parent)StarSign5" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)StarSign5" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
+									
+								</Control>
+									
+								<Control name="$(parent)StarSign7" inherits="CombatMetrics_StarSign">
+								
+									<Anchor point="TOPLEFT" relativeTo="$(parent)StarSign6" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="12"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)StarSign6" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="12"/>
+									
+								</Control>
+								
+								<Control name="$(parent)StarSign8" inherits="CombatMetrics_StarSign">
+								
+									<Anchor point="TOPLEFT" relativeTo="$(parent)StarSign7" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)StarSign7" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
+									
+								</Control>
+								
+								<Control name="$(parent)StarSign9" inherits="CombatMetrics_StarSign">
+								
+									<Anchor point="TOPLEFT" relativeTo="$(parent)StarSign8" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)StarSign8" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
+									
+								</Control>
+						
+							</Controls>
+							
+							<OnInitialized> CMX.InitializeCPRows(self) </OnInitialized>
+						
+						</Control>
+						
+						<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+							<Anchor point="TOPLEFT" relativeTo="$(parent)Right" offsetX="-3" offsetY="2"/>
+							<Anchor point="BOTTOMLEFT" relativeTo="$(parent)Right" offsetX="-3" offsetY="-2"/>
+						</Line>
+						
+						<Line name="$(parent)Sep2" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+							<Anchor point="BOTTOMLEFT" relativeTo="$(parent)Left" offsetX="2" offsetY="3"/>
+							<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Left" offsetX="-2" offsetY="3"/>
+						</Line>
+					
+						<Control name="$(parent)Bottom">
+							
+							<Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Left" offsetX="0" offsetY="6"/>
+							<Anchor point="BOTTOMLEFT" offsetX="4" offsetY="-4"/>
+							
+						</Control>
+						
+					</Controls>
+					
+				</Control>				
 				
 				<Control name="$(parent)_InfoRow">
 					<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)_UnitPanel" offsetX="0" offsetY="4"/>

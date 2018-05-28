@@ -139,19 +139,17 @@ end
 
 local function checkSaveLimit(fight)
 
-	local size, constants = SVHandler.Check(fight)									-- if no table is passed it will check size of the SV
+	local size = SVHandler.Check(fight)									-- if no table is passed it will check size of the SV
 	
 	if fight == nil then 
 	
 		CMX.Print("save", "SV Size: %.3f MB, %.1f%%", size, size*100/db.maxSVsize)
-		CMX.Print("save", "SV Indices: %d, %.1f%%", constants, constants/1310.71) 		--131071 is the maximum possible number of constants
 	
 	end
 	
-	local isvalid = (size < db.maxSVsize and constants < 131071)
+	local isvalid = (size < db.maxSVsize)
 	
-	return isvalid, size, constants
-	
+	return isvalid, size	
 end
 
 function NavButtonFunctions.save(control, _, _, _, _, shiftkey )
@@ -177,9 +175,9 @@ function NavButtonFunctions.save(control, _, _, _, _, shiftkey )
 		else 
 			
 			local removed = table.remove(savedFights)
-			local _, size, constants = checkSaveLimit(removed)
+			local _, size = checkSaveLimit(removed)
 			
-			errorstring = zo_strformat(SI_COMBAT_METRICS_STORAGE_FULL, size, constants)
+			errorstring = zo_strformat(SI_COMBAT_METRICS_STORAGE_FULL, size)
 			assert(false, errorstring) 
 			
 			CombatMetrics_Report:Update()
@@ -249,6 +247,7 @@ end
 local function selectMainPanel(button)
 
 	local selectControl = button:GetParent()
+	local category = button.category
 
 	for i=5, 8 do
 		
@@ -260,27 +259,36 @@ local function selectMainPanel(button)
 	
 	end
 	
-	local mainpanel = CombatMetrics_Report_MainPanel
-	local rightpanel = CombatMetrics_Report_RightPanel
-	local infopanel = CombatMetrics_Report_InfoPanel
+	local mainPanel = CombatMetrics_Report_MainPanel
+	local rightPanel = CombatMetrics_Report_RightPanel
+	local unitPanel = CombatMetrics_Report_UnitPanel
+	local abilityPanel = CombatMetrics_Report_AbilityPanel
+	local infoPanel = CombatMetrics_Report_InfoPanel
 	
-	mainpanel:SetHidden(false)
-	rightpanel:SetHidden(false)
-	infopanel:SetHidden(true)
+	local isInfo = category == "Info"
 	
-	local selected = mainpanel:GetNamedChild(button.category) -- Panel Content to show
-	mainpanel.active = selected
+	mainPanel:SetHidden(isInfo)
+	rightPanel:SetHidden(isInfo)
+	unitPanel:SetHidden(isInfo)
+	abilityPanel:SetHidden(isInfo)
+	infoPanel:SetHidden(not isInfo)
 	
-	for i = 2, mainpanel:GetNumChildren() do
+	if not isInfo then 
 	
-		local child = mainpanel:GetChild(i)
+		local selected = mainPanel:GetNamedChild(category) -- Panel Content to show
+		mainPanel.active = selected
 		
-		child:SetHidden(child ~= selected) -- Hide all other panels except the selected panel
+		for i = 2, mainPanel:GetNumChildren() do
+		
+			local child = mainPanel:GetChild(i)
+			
+			child:SetHidden(child ~= selected) -- Hide all other panels except the selected panel
 
-	end
+		end
+		
+		selectControl:GetParent():GetNamedChild("_MainPanel"):Update()
 	
-	selectControl:GetParent():GetNamedChild("_MainPanel"):Update()
-	
+	end	
 end
 
 local function toggleInfoPanel(button)
@@ -318,10 +326,6 @@ local function initSelectorButtons(rowControl)
 			child:SetHandler( "OnMouseUp", selectCategory) 
 			if child.category == db.FightReport.category then selectCategory(child) end
 			
-		elseif child and child.category == "Info" then 
-		
-			child:SetHandler( "OnMouseUp", toggleInfoPanel) 
-		
 		elseif child and i>4 then 
 		
 			child:SetHandler( "OnMouseUp", selectMainPanel)
@@ -329,6 +333,48 @@ local function initSelectorButtons(rowControl)
 		end
 	end
 end 
+
+function CMX.InitializeCPRows(panel)
+
+	for i = 1, 9 do
+
+		local discipline = (7-i)%9+1	-- start with apprentice and then clockwise (seriously, how did they come up with those ids?)
+		
+		local color = GetString(SI_COMBAT_METRICS_MAGICKA_COLOR)
+		
+		if i > 6 then 
+		
+			color = GetString(SI_COMBAT_METRICS_STAMINA_COLOR)
+			
+		elseif i > 3 then 
+		
+			color = GetString(SI_COMBAT_METRICS_HEALTH_COLOR)
+			
+		end		
+		
+		local signcontrol = panel:GetNamedChild("StarSign"..i)
+		
+		local title = signcontrol:GetNamedChild("Title")
+		
+		title:SetText(GetChampionDisciplineName(discipline))
+		
+		local width = title:GetTextWidth() + 4
+		local height = title:GetHeight() 
+		
+		title:SetDimensions(width, height)
+		
+		CMX.SetLabelColor(signcontrol, color)
+		
+		for i = 1, 4 do
+		
+			local row = signcontrol:GetNamedChild("Row"..i)
+		
+			local label = row:GetNamedChild("Name")
+			label:SetText(GetChampionSkillName(discipline, i))
+			
+		end
+	end
+end
 
 local function CLNavButtonFunction(self)
 	
@@ -2245,46 +2291,6 @@ function CMX.SkillTooltip_OnMouseExit(control)
 
 end
 
-local function updateLeftInfoPanel(panel)
-
-	if true then return end
-	
-	if fightData == nil then return end
-	
-	local charData = fightData.charData
-	
-	if charData == nil then return end
-	
-	local skilldata = charData.skillBars
-	
-	if skilldata == nil then return end
-	
-	for i = 1, 2 do
-	
-		local row = panel:GetNamedChild("AbilityRow" .. i)
-	
-		local bardata = skilldata[i]
-		
-		for i = 1, row:GetNumChildren() - 1 do
-		
-			local control = row:GetChild(i)
-			
-			local icon = control:GetNamedChild("Texture")
-			
-			local key = i == 1 and 1 or i + 1
-			
-			local abilityId = bardata[key]
-			
-			control.id = abilityId
-			
-			local texture = GetFormatedAbilityIcon(abilityId)
-			
-			icon:SetTexture(texture)			
-		end
-	end
-	
-end
-
 local equipslots = {
 	
 	EQUIP_SLOT_MAIN_HAND,
@@ -2329,9 +2335,43 @@ local armorcolors = {
 	[ARMORTYPE_LIGHT] = {0.3, 0.3, 1, 1},
 }
 
-local function updateMiddleInfoPanel(panel)
+local function updateLeftInfoPanel(panel)
+
+	if fightData == nil then return end
 	
-	local charData = fightData and fightData.charData or nil
+	local charData = fightData.charData
+	
+	if charData == nil then return end
+	
+	local skilldata = charData.skillBars
+	
+	if skilldata == nil then return end
+	
+	for i = 1, 2 do
+	
+		local row = panel:GetNamedChild("AbilityRow" .. i)
+	
+		local bardata = skilldata[i]
+		
+		if bardata == nil then return end	-- ToDo: Fallback to default
+		
+		for i = 1, row:GetNumChildren() - 1  do
+		
+			local control = row:GetChild(i)
+			
+			local icon = control:GetNamedChild("Texture")
+			
+			local key = i + 2
+			
+			local abilityId = bardata[key]
+			
+			control.id = abilityId
+			
+			local texture = GetFormatedAbilityIcon(abilityId)
+			
+			icon:SetTexture(texture)			
+		end
+	end
 	
 	local equipdata = charData and charData.equip or {}
 	
@@ -2370,15 +2410,63 @@ local function updateMiddleInfoPanel(panel)
 		
 		local _, enchantstring = GetItemLinkEnchantInfo(item) 
 		
-		enchant:SetText(enchantstring)
+		enchant:SetText(enchantstring:gsub(GetString(SI_COMBAT_METRICS_ENCHANTMENT_TRIM), ""))
 		
 	end
+	
+end
+
+local passiveRequirements = {10, 30, 75, 120}
+
+local function updateRightInfoPanel(panel)
+	
+	if fightData == nil then return end
+	
+	local CPData = fightData.CP
+	
+	if CPData == nil then return end
+
+	for i = 1, 9 do
+
+		local discipline = (7-i)%9+1	-- start with apprentice and then clockwise (seriously, how did they come up with those ids?)
+		
+		local signcontrol = panel:GetNamedChild("StarSign"..i)
+		
+		local sum = 0
+		
+		for id = 1, 4 do
+		
+			local value = signcontrol:GetNamedChild("Row" .. id):GetNamedChild("Value")
+		
+			local cpvalue = CPData[discipline][id]
+			
+			sum = sum + cpvalue
+			
+			value:SetText(tostring(cpvalue))
+			
+		end
+		
+		for k = 1, 4 do
+		
+			local passiveControl = signcontrol:GetNamedChild("Passive" .. k)
+			
+			local texture = sum >= passiveRequirements[k] and "esoui/art/mainmenu/menubar_champion_down.dds" or "esoui/art/mainmenu/menubar_champion_up.dds"
+
+			passiveControl:SetTexture(texture)
+		end
+	end
+end
+
+local function updateBottomInfoPanel(panel)
+	
+	
 end
 
 local function updateInfoPanel(panel)
 
 	updateLeftInfoPanel(panel:GetNamedChild("Left"))
-	updateMiddleInfoPanel(panel:GetNamedChild("Middle"))
+	updateRightInfoPanel(panel:GetNamedChild("Right"))
+	updateBottomInfoPanel(panel:GetNamedChild("Bottom"))
 	
 end
 

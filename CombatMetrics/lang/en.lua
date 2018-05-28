@@ -18,6 +18,10 @@
 	SI_COMBAT_METRICS_STAMINA_COLOR = "FFA6D852",
 	SI_COMBAT_METRICS_ULTIMATE_COLOR = "FFffe785",
 	
+-- Functionality
+
+	SI_COMBAT_METRICS_ENCHANTMENT_TRIM = " Enchantment", -- this will be frmoved for the enchantments shown in infopanel
+	
 -- Ingame (Use ZOS Tranlations, change only for languages which are not supported)
 
 	SI_COMBAT_METRICS_MAGICKA = GetString(SI_COMBATMECHANICTYPE0),  -- Magicka 
@@ -68,7 +72,7 @@
 	SI_COMBAT_METRICS_POSTALLDPS = "Post single and total DPS",
 	SI_COMBAT_METRICS_POSTHPS = "Post HPS",
 
-	SI_COMBAT_METRICS_STORAGE_FULL = "The storage file is full. The fight you want to save needs <<1>> MB and <<2>> indices. Delete a fight to free some space or increase the allowed space in the settings!", -- The storage file is full. Delete a fight to free some space!
+	SI_COMBAT_METRICS_STORAGE_FULL = "The storage file is full. The fight you want to save needs <<1>> MB. Delete a fight to free some space or increase the allowed space in the settings!", -- The storage file is full. Delete a fight to free some space!
 
 	SI_COMBAT_METRICS_PREVIOUS_FIGHT = "Previous Fight", -- Previous Fight
 	SI_COMBAT_METRICS_NEXT_FIGHT = "Next Fight", -- Next Fight
