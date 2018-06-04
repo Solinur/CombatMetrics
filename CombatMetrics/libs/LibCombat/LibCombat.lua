@@ -31,6 +31,7 @@ local db
 local reset = false
 local data = {skillBars= {}}
 local showdebug = false --or GetDisplayName() == "@Solinur"
+local dev = GetDisplayName() == "@Solinur" --or GetDisplayName() == "@Solinur"
 local timeout = 500
 local activetimeonheals = true
 local ActiveCallbackTypes = {}
@@ -40,6 +41,7 @@ local currentfight
 local Events = {}
 local EffectBuffer = {}
 local lastdeaths = {}
+local CESkills = {}
 
 -- types of callbacks: Units, DPS/HPS, DPS/HPS for Group, Logevents
 
@@ -63,7 +65,8 @@ LIBCOMBAT_EVENT_RESOURCES = 15			-- LIBCOMBAT_EVENT_RESOURCES, timems, abilityId
 LIBCOMBAT_EVENT_MESSAGES = 16			-- LIBCOMBAT_EVENT_MESSAGES, timems, messageId
 LIBCOMBAT_EVENT_DEATH = 17				-- LIBCOMBAT_EVENT_DEATH, timems, unitId, abilityId
 LIBCOMBAT_EVENT_RESURRECTION = 18		-- LIBCOMBAT_EVENT_RESURRECTION, timems, unitId, self
-LIBCOMBAT_EVENT_MAX = 18
+LIBCOMBAT_EVENT_SKILL_TIMINGS = 19		-- LIBCOMBAT_EVENT_SKILL_TIMINGS, timems, abilityID, status
+LIBCOMBAT_EVENT_MAX = 19
 
 -- Messages:
 
@@ -194,6 +197,7 @@ local MinorForceAbility = {
 }
 
 local SpecialBuffs = {
+
 	21230,	-- Weapon/spell power enchant (Berserker)
 	21578,	-- Damage shield enchant (Hardening)
 	71067,	-- Trial By Fire: Shock
@@ -209,11 +213,34 @@ local SpecialBuffs = {
 	70352,	-- Armor Master Spell Resistance
 	46539,	-- Major Force
 	71107,  -- Briarheart
+	
 }
 
 		
 local SpecialDebuffs = {
 	17906,  -- Crusher Enchantment
+}
+
+
+local abilityconversions = {
+
+	[28279] 	= {28279, 1, 2}, -- Uppercut
+	[38814] 	= {38814, 1, 2}, -- Dizzying Swing
+	[38807] 	= {38807, 1, 2}, -- Wrecking Blow
+
+	[24584] 	= {24587, 16, 32}, -- Dark Echange
+	[24595] 	= {24597, 16, 32}, -- Dark Deal 
+	[24589] 	= {24592, 16, 32}, -- Dark Conversion
+		
+	[31531] 	= {88565, 2240}, -- Force Siphon
+	[40109] 	= {88575, 2240}, -- Siphon Spirit
+		
+	[32633] 	= {-1, 0},	 -- Roar
+	[39113] 	= {-1, 0},	 -- Ferocious Roar
+	[39114] 	= {39124, 2240}, -- Rousing Roar
+	
+	[103706] 	= {103707, 2240},	 -- Channeled Acceleration
+
 }
 
 local UnitHandler = ZO_Object:Subclass()
@@ -450,6 +477,49 @@ local function PurgeEffectBuffer(timems)
 	end
 end
 
+local function UpdateSlotSkillEvents()
+
+	local events = Events.Skills
+	
+	if not events.active then d("oh") return end
+	
+	events:UnregisterEvents()
+	
+	CESkills = {}
+	
+	if data.skillBars == nil then data.skillBars = {} end
+
+	for _, bar in pairs(data.skillBars) do
+	
+		for _, abilityId in pairs(bar) do
+		
+			local isGroundTargetSkill = GetAbilityTargetDescription(abilityId) == GetString(SI_ABILITY_TOOLTIP_TARGET_TYPE_GROUND)
+			local _, duration, _ = GetAbilityCastInfo(abilityId)
+			
+			if isGroundTargetSkill or duration > 0 then
+			
+				local conversion = abilityconversions[abilityId]
+				local result = ACTION_RESULT_EFFECT_GAINED
+	
+				if conversion then
+				
+					abilityId, result, result2 = unpack(conversion)
+				
+				end
+				
+				if abilityId ~= -1 then 
+				
+					table.insert(CESkills, {abilityId, result})
+					if result2 then table.insert(CESkills, {abilityId, result2}) end
+					
+				end
+			end
+		end
+	end	
+	
+	events:RegisterEvents()
+end
+
 local function GetCurrentSkillBar()
 
 	local bar = GetActiveWeaponPairInfo()
@@ -463,7 +533,16 @@ local function GetCurrentSkillBar()
 	for i=1,8 do 
 	
 		currentbar[i] = GetSlotBoundId(i)
+		
 	end
+	
+	UpdateSlotSkillEvents()
+	
+end
+
+local function onPlayerActivated()
+
+	zo_callLater(GetCurrentSkillBar, 100)
 	
 end
 
@@ -1201,6 +1280,8 @@ local function onBaseResourceChanged(_,unitTag,_,powerType,powerValue,_,_)
 	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_RESOURCES), LIBCOMBAT_EVENT_RESOURCES, timems, aId, powerValueChange, powerType)
 end
 
+local lastGroundOrCastTimeAbility = 0
+
 local function onSlotUpdate(_, slot)
 	
 	local timems = GetGameTimeMilliseconds()
@@ -1208,13 +1289,42 @@ local function onSlotUpdate(_, slot)
 	local abilityId = GetSlotBoundId(slot)
 	local lastabilities = data.lastabilities
 	
-	if slot <= 2 or (powerType ~= 0 and powerType ~= 6) then return end
+	if Events.Resources.active and slot > 2 and (powerType == 0 or powerType == 6) then 
 	
-	table.insert(lastabilities,{timems, abilityId, -cost, powerType})
+		table.insert(lastabilities,{timems, abilityId, -cost, powerType})
+		
+		if #lastabilities > 10 then table.remove(lastabilities, 1) end
 	
-	if #lastabilities > 10 then table.remove(lastabilities, 1) end
+	end
 	
-	if showdebug == true then d("Slot used: "..timems..", "..abilityId..", "..cost..", "..powerType..", "..#lastabilities) end
+	if Events.Skills.active ~= true then return end
+
+	local _, duration, _ = GetAbilityCastInfo(abilityId)
+	
+	local target = GetAbilityTargetDescription(abilityId)
+	
+	local isGroundTargetSkill = target == GetString(SI_ABILITY_TOOLTIP_TARGET_TYPE_GROUND)
+	
+	if dev == true then df("[%.3f] Skill used: %s (%d), Duration: %ds Target: %s", timems/1000, GetAbilityName(abilityId), abilityId, duration/1000, tostring(target)) end
+	
+	if isGroundTargetSkill or duration > 0 then
+	
+		abilityId = abilityconversions[abilityId] or abilityId
+		
+		if abilityId == -1 then 
+		
+			if dev == true then df("[%.3f] Skill used: %s (%d), Duration: %ds Target: %s", timems/1000, GetAbilityName(abilityId), abilityId, duration/1000, tostring(target)) end			
+		else
+	
+			lastGroundOrCastTimeAbility = abilityId
+			
+		end
+	
+	else
+	
+		lastGroundOrCastTimeAbility = 0
+		
+	end
 end
 
 --(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId)
@@ -1453,6 +1563,18 @@ local function onCombatEventHealGrp(_ , _ , _ , _ , _ , _ , _, _, _, targetType,
 	table.insert(currentfight.grplog,{targetUnitId,hitValue,"heal"})
 end
 
+
+
+local function onAbilityUsedCE(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId) 
+
+	if abilityId == lastGroundOrCastTimeAbility then
+
+		if dev == true then df("[%.3f] Skill activated: %s (%d, R: %d)", GetGameTimeMilliseconds()/1000, GetAbilityName(abilityId), abilityId, result) end
+		lastGroundOrCastTimeAbility = 0
+		
+	end
+end
+
 local function UpdateEventRegistrations()
 
 	for _,Eventgroup in pairs(Events) do
@@ -1561,7 +1683,7 @@ function EventHandler:RegisterEvent(event, callback, ...) -- convinience functio
 	
 	self.data[#self.data+1] = { ["id"]=lib.totalevents, ["event"] = event, ["callback"] = callback, ["active"] = active, ["filtered"] = filtered , ["filters"] = filters }  -- remove callbacks later, probably not necessary
 	
-	if active then lib.totalevents=lib.totalevents+1 end
+	if active then lib.totalevents = lib.totalevents + 1 end
 end
 
 function EventHandler:UpdateEvents()
@@ -1611,7 +1733,7 @@ local function UnregisterAllEvents()
 	end
 end
 
-lib.UnregisterAllEvents = UnregisterAllEvents 	-- debug exposure
+--  lib.UnregisterAllEvents = UnregisterAllEvents 	-- debug exposure
 
 local function GetAllCallbackTypes()
 	local t={}
@@ -1629,6 +1751,7 @@ Events.General = EventHandler:New(GetAllCallbackTypes()
 		self:RegisterEvent(EVENT_UNIT_CREATED, onGroupChange)
 		self:RegisterEvent(EVENT_UNIT_DESTROYED, onGroupChange)
 		self:RegisterEvent(EVENT_ACTION_SLOT_ABILITY_SLOTTED, GetCurrentSkillBar)
+		self:RegisterEvent(EVENT_PLAYER_ACTIVATED, onPlayerActivated)
 		
 		if showdebug == true then self:RegisterEvent(EVENT_COMBAT_EVENT, onCustomEvent, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_EFFECT_GAINED_DURATION, REGISTER_FILTER_IS_ERROR, false) end		
 		self.active = true
@@ -1812,7 +1935,6 @@ Events.Resources = EventHandler:New(
 	{LIBCOMBAT_EVENT_RESOURCES},
 	function (self)
 		self:RegisterEvent(EVENT_POWER_UPDATE, onBaseResourceChanged, REGISTER_FILTER_UNIT_TAG, "player")
-		self:RegisterEvent(EVENT_ACTION_SLOT_ABILITY_USED, onSlotUpdate)
 		self:RegisterEvent(EVENT_COMBAT_EVENT, onResourceChanged, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_POWER_ENERGIZE, REGISTER_FILTER_IS_ERROR, false)
 		self:RegisterEvent(EVENT_COMBAT_EVENT, onResourceChanged, REGISTER_FILTER_TARGET_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_POWER_DRAIN, REGISTER_FILTER_IS_ERROR, false)
 		self.active = true
@@ -1820,9 +1942,11 @@ Events.Resources = EventHandler:New(
 )
 
 Events.Messages = EventHandler:New(
-	{LIBCOMBAT_EVENT_MESSAGES, LIBCOMBAT_EVENT_FIGHTSUMMARY},
+	{LIBCOMBAT_EVENT_MESSAGES, LIBCOMBAT_EVENT_FIGHTSUMMARY, LIBCOMBAT_EVENT_SKILL_TIMINGS},
 	function (self)
 		self:RegisterEvent(EVENT_ACTION_SLOTS_FULL_UPDATE, onWeaponSwap)
+		
+		
 		self.active = true
 	end
 )
@@ -1844,6 +1968,34 @@ Events.Resurrections = EventHandler:New(
 		self:RegisterEvent(EVENT_RESURRECT_RESULT, OnResurrectResult)
 		self:RegisterEvent(EVENT_RESURRECT_REQUEST , OnResurrectRequest)
 		self.active = true
+	end
+)
+
+Events.Slots = EventHandler:New(
+	{LIBCOMBAT_EVENT_SKILL_TIMINGS, LIBCOMBAT_EVENT_RESOURCES},
+	function (self)
+		
+		self:RegisterEvent(EVENT_ACTION_SLOT_ABILITY_USED , onSlotUpdate)
+		
+		self.active = true
+	end
+)
+
+Events.Skills = EventHandler:New(
+	{LIBCOMBAT_EVENT_SKILL_TIMINGS},	
+	function (self)
+		
+		
+		for _, skill in pairs(CESkills) do
+		
+			local id, result = unpack(skill)
+			
+			self:RegisterEvent(EVENT_COMBAT_EVENT, onAbilityUsedCE, REGISTER_FILTER_COMBAT_RESULT, result, REGISTER_FILTER_ABILITY_ID, id)
+		
+		end
+	
+		self.active = true
+		
 	end
 )
 

@@ -1,6 +1,6 @@
 local em = GetEventManager()
 local wm = GetWindowManager()
-local dx = 1/GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE)
+local dx = 1/(tonumber(GetCVar("WindowedWidth"))/GuiRoot:GetWidth())
 COMBAT_METRICS_LINE_SIZE = tostring(dx)
 local fontsize = 14
 local currentFight
@@ -2450,9 +2450,13 @@ local function updateRightInfoPanel(panel)
 		
 			local passiveControl = signcontrol:GetNamedChild("Passive" .. k)
 			
-			local texture = sum >= passiveRequirements[k] and "esoui/art/mainmenu/menubar_champion_down.dds" or "esoui/art/mainmenu/menubar_champion_up.dds"
+			local show = sum >= passiveRequirements[k]
+			
+			local texture = show and "esoui/art/mainmenu/menubar_champion_down.dds" or "esoui/art/mainmenu/menubar_champion_up.dds"
+			local alpha = show and 1 or 0.4
 
 			passiveControl:SetTexture(texture)
+			passiveControl:SetAlpha(alpha)
 		end
 	end
 end

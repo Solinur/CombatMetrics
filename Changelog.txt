@@ -275,3 +275,10 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*]Update LAM to r26
 [*]added option to show left-aligned numbers in live report window
 [*]fixed an issue resulting in a lua error when deleting a fight while having something selected
+
+0.8.2.4 757,506 (31.05.2018) 00:21
+[*]added Russian localization by KiriX
+[*]added Brazilian Portuguese localization by Brazilian Portuguese
+[*]removed some undesired debug messages
+
+
