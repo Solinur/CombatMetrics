@@ -332,6 +332,16 @@
 					
 					<Dimensions x="240" y="22"/>
 					
+					<OnLinkClicked> 
+					
+						ClearTooltip(ItemTooltip)
+						ZO_LinkHandler_OnLinkClicked(linkText, button) 
+					
+					</OnLinkClicked>
+					
+					<OnMouseEnter> CMX.ItemTooltip_OnMouseEnter(self) </OnMouseEnter>
+					<OnMouseExit> CMX.ItemTooltip_OnMouseExit(self) </OnMouseExit>
+					
 				</Label>
 				
 				<Label name="$(parent)Trait" text="" inherits="CombatMetrics_ValueFontControl">
@@ -355,7 +365,12 @@
 		
 		</Control>
 		
-		<Control name="CombatMetrics_StarRow" virtual="true">
+		<Control name="CombatMetrics_StarRow" virtual="true" mouseEnabled="true">
+			
+			<Dimensions y="20"/>
+			
+			<OnMouseEnter> CMX.CPTooltip_OnMouseEnter(self) </OnMouseEnter>
+			<OnMouseExit> CMX.CPTooltip_OnMouseExit(self) </OnMouseExit>	
 		
 			<Controls>
 	
@@ -379,9 +394,18 @@
 			
 		</Control>
 		
+		<Control name="CombatMetrics_StarPassive" virtual="true" mouseEnabled="true">
+		
+			<Dimensions x="18" y="18"/>
+			
+			<OnMouseEnter> CMX.CPTooltip_OnMouseEnter(self) </OnMouseEnter>
+			<OnMouseExit> CMX.CPTooltip_OnMouseExit(self) </OnMouseExit>		
+		
+		</Control>
+			
 		<Control name="CombatMetrics_StarSign" virtual="true">
 		
-		<Dimensions x="350" y="66"/>
+			<Dimensions x="350" y="66"/>
 		
 			<Controls>
 			
@@ -392,31 +416,27 @@
 					
 				</Label>
 				
-				<Texture name="$(parent)Passive1" textureFile="esoui/art/mainmenu/menubar_champion_up.dds">
-				
-					<Anchor point="LEFT" relativeTo="$(parent)Title" relativePoint="RIGHT" offsetX="8" offsetY="0"/>
-					<Dimensions x="18" y="18"/>
+				<Texture name="$(parent)Passive1" textureFile="esoui/art/mainmenu/menubar_champion_up.dds" inherits="CombatMetrics_StarPassive">				
 					
+					<Anchor point="LEFT" relativeTo="$(parent)Title" relativePoint="RIGHT" offsetX="8" offsetY="0"/>
+				
 				</Texture>
 				
-				<Texture name="$(parent)Passive2" textureFile="esoui/art/mainmenu/menubar_champion_up.dds">
+				<Texture name="$(parent)Passive2" textureFile="esoui/art/mainmenu/menubar_champion_up.dds" inherits="CombatMetrics_StarPassive">
 				
 					<Anchor point="LEFT" relativeTo="$(parent)Passive1" relativePoint="RIGHT" offsetX="4" offsetY="0"/>
-					<Dimensions x="18" y="18"/>
 				
 				</Texture>
 				
-				<Texture name="$(parent)Passive3" textureFile="esoui/art/mainmenu/menubar_champion_up.dds">
+				<Texture name="$(parent)Passive3" textureFile="esoui/art/mainmenu/menubar_champion_up.dds" inherits="CombatMetrics_StarPassive">
 				
 					<Anchor point="LEFT" relativeTo="$(parent)Passive2" relativePoint="RIGHT" offsetX="4" offsetY="0"/>
-					<Dimensions x="18" y="18"/>
 				
 				</Texture>
 				
-				<Texture name="$(parent)Passive4" textureFile="esoui/art/mainmenu/menubar_champion_up.dds">
+				<Texture name="$(parent)Passive4" textureFile="esoui/art/mainmenu/menubar_champion_up.dds" inherits="CombatMetrics_StarPassive">
 				
 					<Anchor point="LEFT" relativeTo="$(parent)Passive3" relativePoint="RIGHT" offsetX="4" offsetY="0"/>
-					<Dimensions x="18" y="18"/>
 				
 				</Texture>
 				
@@ -424,7 +444,6 @@
 				
 					<Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="4"/>
 					<Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="BOTTOM" offsetX="-8" offsetY="0" constrains="X"/>
-					<Dimensions y="20"/>
 					
 				</Control>
 				
@@ -432,7 +451,6 @@
 				
 					<Anchor point="TOPLEFT" relativeTo="$(parent)Row1" relativePoint="TOPRIGHT" offsetX="16" offsetY="0"/>
 					<Anchor point="TOPRIGHT" relativeTo="$(parent)" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="4" constrains="X"/>
-					<Dimensions y="20"/>
 					
 				</Control>
 				
@@ -440,7 +458,6 @@
 				
 					<Anchor point="TOPLEFT" relativeTo="$(parent)Row1" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
 					<Anchor point="TOPRIGHT" relativeTo="$(parent)Row1" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
-					<Dimensions y="20"/>
 					
 				</Control>
 				
@@ -448,7 +465,6 @@
 				
 					<Anchor point="TOPLEFT" relativeTo="$(parent)Row2" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="2"/>
 					<Anchor point="TOPRIGHT" relativeTo="$(parent)Row2" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="2"/>
-					<Dimensions y="20"/>
 					
 				</Control>
 			
@@ -1678,7 +1694,7 @@
 										<Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_COMBAT_LOG" horizontalAlignment="LEFT" verticalAlignment="CENTER">
 											
 											<Anchor point="LEFT" offsetX="0" offsetY="0"/>
-											<Dimensions x="120" y="20"/>
+											<Dimensions x="80" y="20"/>
 											
 										</Label>
 										
@@ -1771,8 +1787,18 @@
 											<Dimensions x="120"/>
 											
 											<Controls>
-												<Control name="$(parent)Info" inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
+												<Control name="$(parent)Skills" inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
 													<Anchor point="LEFT" offsetX="0" offsetY="0"/>										
+													
+													<OnInitialized>
+														self.tooltip = {SI_COMBAT_METRICS_TOGGLE_SKILL_USE_EVENTS}
+														self.func = LIBCOMBAT_EVENT_SKILL_TIMINGS
+														self.texture = "EsoUI/Art/Campaign/campaignBrowser_hiPop.dds"
+													</OnInitialized>
+												</Control>
+												
+												<Control name="$(parent)Info" inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
+													<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Skills" offsetX="3" offsetY="0"/>
 													
 													<OnInitialized>
 														self.tooltip = {SI_COMBAT_METRICS_TOGGLE_MESSAGE_CHANGE_EVENTS}

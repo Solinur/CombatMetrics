@@ -281,4 +281,6 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*]added Brazilian Portuguese localization by Brazilian Portuguese
 [*]removed some undesired debug messages
 
-
+0.8.2.5 791,715 (06.06.2018) 00:58
+[*]Fix version numbers in manifest and ingame
+ 	

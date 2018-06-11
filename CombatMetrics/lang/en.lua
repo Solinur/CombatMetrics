@@ -156,7 +156,8 @@
 	SI_COMBAT_METRICS_TOGGLE_GROUPBUFFOUT_EVENTS = "Toggle outbound groupbuff events",  -- Toggle buff events
 	SI_COMBAT_METRICS_TOGGLE_RESOURCE_EVENTS = "Toggle resource events",  -- Toggle resource events
 	SI_COMBAT_METRICS_TOGGLE_STATS_CHANGE_EVENTS = "Toggle stats change events",  -- Toggle stats change events
-	SI_COMBAT_METRICS_TOGGLE_MESSAGE_CHANGE_EVENTS = "Toggle info events i.e. weapon swap",  -- Toggle stats change events
+	SI_COMBAT_METRICS_TOGGLE_MESSAGE_CHANGE_EVENTS = "Toggle info events i.e. weapon swap",  -- Toggle info events i.e. weapon swap
+	SI_COMBAT_METRICS_TOGGLE_SKILL_USE_EVENTS = "Toggle info about used skills",  -- Toggle info about used skills
 
 	SI_COMBAT_METRICS_DEBUFF_IN = "(De-)Buffs\nIn",  -- (De-)Buffs\nIn (\n is newline,
 	SI_COMBAT_METRICS_DEBUFF_OUT = "(De-)Buffs\nOut",  -- (De-,Buffs\nOut

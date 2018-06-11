@@ -372,6 +372,16 @@ function CMX.InitializeCPRows(panel)
 			local label = row:GetNamedChild("Name")
 			label:SetText(GetChampionSkillName(discipline, i))
 			
+			row.discipline = discipline
+			row.skillId = i
+			row.points = 0
+			
+			local passive = signcontrol:GetNamedChild("Passive"..i)
+			
+			passive.discipline = discipline
+			passive.skillId = i + 4
+			passive.points = 0
+			
 		end
 	end
 end
@@ -874,7 +884,13 @@ do
 		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTMULTIDPS), postMultiDPS)
 		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTALLDPS), postAllDPS)
 		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTHPS), postHPS)
-
+		
+		local function CalculateCurrentFight()
+		
+			CMX.CalculateFight(fightData)
+			
+		end
+		
 		ShowMenu(settingsbutton)
 		
 
@@ -2245,7 +2261,7 @@ local function updateCombatLog(panel)
 				
 				condition2 = resourceSelection == nil or resourceSelection[abilityId or 0] ~= nil
 				
-			elseif logtype == LIBCOMBAT_EVENT_PLAYERSTATS or logtype == LIBCOMBAT_EVENT_MESSAGES then
+			elseif logtype == LIBCOMBAT_EVENT_PLAYERSTATS or logtype == LIBCOMBAT_EVENT_MESSAGES or logtype == LIBCOMBAT_EVENT_SKILL_TIMINGS then
 			
 				condition2 = true	
 				
@@ -2288,6 +2304,37 @@ end
 function CMX.SkillTooltip_OnMouseExit(control)
 	
 	ClearTooltip(SkillTooltip)
+
+end
+
+function CMX.CPTooltip_OnMouseEnter(control)
+	
+	InitializeTooltip(SkillTooltip, control, TOPLEFT, 0, 5, BOTTOMLEFT)
+	
+	SkillTooltip:SetChampionSkillAbility(control.discipline, control.skillId, control.points)
+	
+end
+
+function CMX.CPTooltip_OnMouseExit(control)
+	
+	ClearTooltip(SkillTooltip)
+
+end
+
+function CMX.ItemTooltip_OnMouseEnter(control)
+
+	local itemLink = control.itemLink
+
+	if itemLink == "" or itemLink == nil then return end
+	
+	InitializeTooltip(ItemTooltip, control:GetParent(), TOPLEFT, 5, 0, TOPRIGHT)
+	ItemTooltip:SetLink(itemLink)
+	
+end
+
+function CMX.ItemTooltip_OnMouseExit(control)
+	
+	ClearTooltip(ItemTooltip)
 
 end
 
@@ -2395,6 +2442,8 @@ local function updateLeftInfoPanel(panel)
 	
 		label:SetText(item)
 		
+		label.itemLink = item == "" and nil or item
+		
 		icon:SetTexture(texture)
 		icon:SetColor(unpack(color))
 		icon:SetBlendMode(TEX_BLEND_MODE_ADD)	
@@ -2436,9 +2485,13 @@ local function updateRightInfoPanel(panel)
 		
 		for id = 1, 4 do
 		
-			local value = signcontrol:GetNamedChild("Row" .. id):GetNamedChild("Value")
-		
 			local cpvalue = CPData[discipline][id]
+		
+			local row = signcontrol:GetNamedChild("Row" .. id)
+			
+			row.points = cpvalue - GetNumPointsSpentOnChampionSkill(discipline, id)
+			
+			local value = row:GetNamedChild("Value")
 			
 			sum = sum + cpvalue
 			
@@ -2537,7 +2590,7 @@ local function updateFightReport(control, fightId)
 	
 	fightData = CMX.lastfights[fightId] -- this is the fight of interest, can be nil
 	
-	if fightData and fightData.calculated == nil then -- if it wasn't calculated yet, do so now
+	if fightData and fightData.calculated == nil and fightData.CalculateFight then -- if it wasn't calculated yet, do so now
 		
 		fightData:CalculateFight() 
 		UpdateReport2()

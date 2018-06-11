@@ -130,6 +130,7 @@ local LAYOUT_EVENT = 10
 local LAYOUT_STATS = 14
 local LAYOUT_POWER = 15
 local LAYOUT_MESSAGE = 16
+local LAYOUT_SKILL = 19
 
 local logTypeToLayout = {
 
@@ -146,6 +147,7 @@ local logTypeToLayout = {
 	[14] = LAYOUT_STATS,
 	[15] = LAYOUT_POWER,
 	[16] = LAYOUT_MESSAGE,
+	[19] = LAYOUT_SKILL,
 	
 }
 	
@@ -156,6 +158,7 @@ local layouts = {
 	[LAYOUT_STATS] = {1, 4, 4, 4, 1},		 			-- (15) type, timems, statchange, newvalue, statname
 	[LAYOUT_POWER] = {1, 4, 3, 3, 1},		 			-- (13) type, timems, abilityId, powerValueChange, powerType
 	[LAYOUT_MESSAGE] = {1, 4, 1}, 						-- (7)  type, timems, message (e.g. "weapon swap")
+	[LAYOUT_SKILL] = {1, 4, 1, 3, 1}, 					-- (11)  type, timems, reducedslot, abilityId, status
 }
 
 local layoutsize = {} -- get total sizes of layouts
@@ -207,7 +210,7 @@ local function encodeCombatLogLine(line, unitConversion)
 
 		return
 		
-	elseif layoutId ~= LAYOUT_MESSAGE then 
+	elseif layoutId ~= LAYOUT_MESSAGE and layoutId ~= LAYOUT_SKILL then 
 
 		return
 	
@@ -220,8 +223,6 @@ local function encodeCombatLogLine(line, unitConversion)
 	
 	return logstring, size
 end
-
-local limiter = 0
 
 local function decodeCombatLogLine(line)
 
@@ -254,7 +255,7 @@ local function decodeCombatLogLine(line)
 		if logdata[3] == 0 then logdata[3] = nil end
 		logdata[4] = logdata[4] - 131072	
 	
-	elseif layoutId ~= LAYOUT_MESSAGE then					-- type, timems, message (e.g. "weapon swap")
+	elseif layoutId ~= LAYOUT_MESSAGE and layoutId ~= LAYOUT_SKILL then					-- type, timems, message (e.g. "weapon swap")
 
 		return
 	

@@ -9,6 +9,9 @@ local stepsize = 50 	-- stepsize for chunks of the log.
 local logdata
 local chatContainer
 local chatWindow
+
+local lastUsedSkill
+local lastUsedWeaponAttack
 	
 local LC = LibStub:GetLibrary("LibCombat")
 if LC == nil then return end 
@@ -19,7 +22,7 @@ local CMX = CMX
  
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "0.8.2.3"
+CMX.version = "0.9.0.0"
 
 local GetFormatedAbilityName = LC.GetFormatedAbilityName
 
@@ -176,11 +179,32 @@ function CMX.spairs(t, order) -- from https://stackoverflow.com/questions/157062
     end
 end
 
-local UnitHandler = ZO_Object:Subclass()			-- define classes
-local AbilityHandler = ZO_Object:Subclass()
-local ResourceTable = ZO_Object:Subclass()
-local ResourceHandler = ZO_Object:Subclass()
-local EffectHandler = ZO_Object:Subclass()
+local function NewObject(subclass, ...)
+
+	local object = ZO_Object.New(subclass)
+	object:Initialize(...)
+	
+	return object
+	
+end
+
+local function NewSubclass()
+
+	local subclass = ZO_Object:Subclass()
+	
+	subclass.New = NewObject
+	
+	return subclass
+end
+	
+
+
+local UnitHandler = NewSubclass()			-- define classes
+local AbilityHandler = NewSubclass()
+local ResourceTable = NewSubclass()
+local ResourceHandler = NewSubclass()
+local EffectHandler = NewSubclass()
+local SkillTimingHandler = NewSubclass()
 
 local function AcquireUnitData(self, unitId, timems)
 
@@ -238,6 +262,19 @@ local function AcquireResourceData(self, abilityId, powerValueChange, powerType)
 	end
 	
 	return resource[tablekey][abilityId]
+end
+
+local function AcquireSkillTimingData(self, reducedslot)
+
+	local skilldata = self.calculated.skills
+	
+	if skilldata[reducedslot] == nil then  
+	
+		skilldata[reducedslot] = SkillTimingHandler:New()
+	
+	end
+	
+	return skilldata[reducedslot]
 end
 
 local CategoryList = {
@@ -322,14 +359,6 @@ end
 local basicTable = {}
 InitBasicValues(basicTable)
 
-function UnitHandler:New(...)
-
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-	
-end
-
 function UnitHandler:Initialize()
 
 	InitBasicValues(self)
@@ -376,14 +405,6 @@ function UnitHandler:UpdateResistance(ismagic, debuffName)
 	end	
 end
 
-function AbilityHandler:New(...)
-
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-	
-end
-
 local function initBaseAbility(self, tablekey)
 
 	local list = CategoryList[tablekey]
@@ -417,14 +438,6 @@ function AbilityHandler:Initialize(abilityId, pet, damageType, tablekey)
 	
 end
 
-function EffectHandler:New(...)
-
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-	
-end
-
 function EffectHandler:Initialize(effectType, abilityId, stacks)
 	
 	self.name = GetFormatedAbilityName(abilityId)
@@ -437,14 +450,6 @@ function EffectHandler:Initialize(effectType, abilityId, stacks)
 	self.icon = abilityId				-- icon of this effect
 	self.stacks = stacks				-- stacks = 0 if the effect wasn't tracked trough EVENT_EFFECT_CHANGED
 
-end
-
-function ResourceTable:New(...)
-
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-	
 end
 
 function ResourceTable:Initialize()
@@ -475,18 +480,20 @@ function ResourceTable:Initialize()
 	}
 end
 
-function ResourceHandler:New(...)
-
-    local object = ZO_Object.New(self)
-    object:Initialize(...)
-    return object
-	
-end
-
 function ResourceHandler:Initialize()
 
 	self.ticks = 0
 	self.value = 0
+	
+end
+
+function SkillTimingHandler:Initialize()
+
+	self.times = {}  				-- holds times a skill gets used
+	self.skillBefore = {} 			-- holds times since last skill completed
+	self.WeaponAttackBefore = {} 	-- holds times since last light or heavy attack completed
+	self.skillNext = {} 			-- holds times until a new skill is cast afterwards
+	self.WeaponAttackNext = {} 		-- holds times until a new light or heavy attack is cast afterwards
 	
 end
 
@@ -501,6 +508,11 @@ local function GetEmtpyFightStats()
 	data.stats = {dmgavg={}, healavg ={}, dmginavg = {}}	-- stat tracking
 	
 	data.resources = ResourceTable:New()
+	
+	data.skills = {}
+	
+	lastUsedSkill = nil
+	lastUsedWeaponAttack = nil
 	
 	return data
 	
@@ -1027,6 +1039,92 @@ end
 
 ProcessLog[LIBCOMBAT_EVENT_PLAYERSTATS] = ProcessLogStats
 
+---[[
+local function ProcessLogSkillTimings(fight, callbacktype, timems, reducedslot, abilityId, status)
+
+	local isWeaponAttack = reducedslot == 1 or reducedslot == 2 or reducedslot == 11 or reducedslot == 12
+
+	local newdata = {}
+	
+	local slotdata = fight:AcquireSkillTimingData(reducedslot)
+	
+	local lastSkillTime, lastSkillSlot, lastSkillSuccessTime
+	local lastWeaponAttackTime, lastWeaponAttackSlot, lastWeaponAttackSuccessTime
+	
+	table.insert(slotdata.times, timems)
+	
+	if lastUsedSkill then 
+		
+		lastSkillTime, lastSkillSlot, lastSkillSuccessTime = unpack(lastUsedSkill)
+		
+	end
+	
+	if lastUsedWeaponAttack then 
+	
+		lastWeaponAttackTime, lastWeaponAttackSlot, lastWeaponAttackSuccessTime = unpack(lastUsedWeaponAttack)
+		
+	end
+	
+	local doubleWeaponAttack = isWeaponAttack and lastUsedWeaponAttack and lastUsedSkill and (lastWeaponAttackTime > lastSkillTime)
+	local doubleSkillUse = (not isWeaponAttack) and lastUsedWeaponAttack and lastUsedSkill and (lastSkillTime > lastWeaponAttackTime)
+	
+	if lastSkillSuccessTime and not doubleWeaponAttack then 
+	
+		local timeDifference = timems - lastSkillSuccessTime
+	
+		table.insert(slotdata.skillBefore, timeDifference) 
+		table.insert(fight:AcquireSkillTimingData(lastSkillSlot).skillNext, timems - lastSkillSuccessTime)
+		
+		df("%s - last skill: %d", GetAbilityName(abilityId) , timeDifference)
+		
+	end
+	
+	if lastWeaponAttackSuccessTime and not doubleSkillUse then 
+	
+		local timeDifference = timems - lastWeaponAttackSuccessTime
+	
+		table.insert(slotdata.WeaponAttackBefore, timems - lastWeaponAttackSuccessTime) 
+		table.insert(fight:AcquireSkillTimingData(lastWeaponAttackSlot).WeaponAttackNext, timems - lastWeaponAttackSuccessTime)
+	
+		df("%s - last WA: %d", GetAbilityName(abilityId) , timeDifference)
+	
+	end	
+
+	if status ~= LIBCOMBAT_SKILLSTATUS_SUCCESS then 		
+		
+		if isWeaponAttack then
+		
+			local successTime = status == LIBCOMBAT_SKILLSTATUS_INSTANT and timems or nil
+		
+			lastUsedWeaponAttack = {timems, reducedslot, successTime}
+			
+		else
+		
+			local successTime = status == LIBCOMBAT_SKILLSTATUS_INSTANT and timems + 1000 or nil
+		
+			lastUsedSkill = {timems, reducedslot, successTime}
+			
+		end
+		
+	else
+	
+		if isWeaponAttack then
+		
+			lastUsedWeaponAttack[3] = timems
+			
+		else
+		
+			lastUsedSkill[3] = timems
+			
+		end
+		
+	end
+end
+
+ProcessLog[LIBCOMBAT_EVENT_SKILL_TIMINGS] = ProcessLogSkillTimings
+
+--]]
+
 local function CalculateChunk(fight)  -- called by CalculateFight or itself
 	em:UnregisterForUpdate("CMX_chunk")
 	
@@ -1364,6 +1462,7 @@ local function FightSummaryCallback(_, fight)
 	fight.AcquireUnitData = AcquireUnitData
 	fight.AcquireResourceData = AcquireResourceData
 	fight.AccumulateStats = AccumulateStats	
+	fight.AcquireSkillTimingData = AcquireSkillTimingData	
 	
 	fight.grouplog = nil
 	

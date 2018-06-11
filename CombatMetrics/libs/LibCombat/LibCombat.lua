@@ -65,7 +65,7 @@ LIBCOMBAT_EVENT_RESOURCES = 15			-- LIBCOMBAT_EVENT_RESOURCES, timems, abilityId
 LIBCOMBAT_EVENT_MESSAGES = 16			-- LIBCOMBAT_EVENT_MESSAGES, timems, messageId
 LIBCOMBAT_EVENT_DEATH = 17				-- LIBCOMBAT_EVENT_DEATH, timems, unitId, abilityId
 LIBCOMBAT_EVENT_RESURRECTION = 18		-- LIBCOMBAT_EVENT_RESURRECTION, timems, unitId, self
-LIBCOMBAT_EVENT_SKILL_TIMINGS = 19		-- LIBCOMBAT_EVENT_SKILL_TIMINGS, timems, abilityID, status
+LIBCOMBAT_EVENT_SKILL_TIMINGS = 19		-- LIBCOMBAT_EVENT_SKILL_TIMINGS, timems, reducedslot, abilityId, status
 LIBCOMBAT_EVENT_MAX = 19
 
 -- Messages:
@@ -73,6 +73,12 @@ LIBCOMBAT_EVENT_MAX = 19
 local LIBCOMBAT_MESSAGE_COMBATSTART = 1
 local LIBCOMBAT_MESSAGE_COMBATEND = 2
 local LIBCOMBAT_MESSAGE_WEAPONSWAP = 3
+
+LIBCOMBAT_SKILLSTATUS_INSTANT = 1
+LIBCOMBAT_SKILLSTATUS_BEGIN_DURATION = 2
+LIBCOMBAT_SKILLSTATUS_BEGIN_CHANNEL = 3
+LIBCOMBAT_SKILLSTATUS_GROUNDTARGET = 4
+LIBCOMBAT_SKILLSTATUS_SUCCESS = 5
 
 -- Basic values
 lib.name = "LibCombat"
@@ -481,7 +487,7 @@ local function UpdateSlotSkillEvents()
 
 	local events = Events.Skills
 	
-	if not events.active then d("oh") return end
+	if not events.active then return end
 	
 	events:UnregisterEvents()
 	
@@ -494,12 +500,14 @@ local function UpdateSlotSkillEvents()
 		for _, abilityId in pairs(bar) do
 		
 			local isGroundTargetSkill = GetAbilityTargetDescription(abilityId) == GetString(SI_ABILITY_TOOLTIP_TARGET_TYPE_GROUND)
-			local _, duration, _ = GetAbilityCastInfo(abilityId)
+			local channeled, duration, channelTime = GetAbilityCastInfo(abilityId)
+			
+			duration = channeled and channelTime or duration
 			
 			if isGroundTargetSkill or duration > 0 then
 			
 				local conversion = abilityconversions[abilityId]
-				local result = ACTION_RESULT_EFFECT_GAINED
+				local result = channeled and ACTION_RESULT_EFFECT_FADED or ACTION_RESULT_EFFECT_GAINED
 	
 				if conversion then
 				
@@ -969,7 +977,7 @@ local function onCombatState(event, inCombat)  -- Detect Combat Stage
 		
 		if inCombat then
 		
-			if showdebug == true then d("Entering combat.") end
+			if showdebug == true or dev then d("Entering combat.") end
 			
 			lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_MESSAGES), LIBCOMBAT_EVENT_MESSAGES, timems, LIBCOMBAT_MESSAGE_COMBATSTART)
 			
@@ -977,7 +985,7 @@ local function onCombatState(event, inCombat)  -- Detect Combat Stage
 			
 		else 
 		
-			if showdebug == true then d("Leaving combat.") end
+			if showdebug == true or dev then d("Leaving combat.") end
 			
 			currentfight:FinishFight()
 			
@@ -1280,14 +1288,17 @@ local function onBaseResourceChanged(_,unitTag,_,powerType,powerValue,_,_)
 	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_RESOURCES), LIBCOMBAT_EVENT_RESOURCES, timems, aId, powerValueChange, powerType)
 end
 
-local lastGroundOrCastTimeAbility = 0
+local lastGroundOrCastTimeAbility = {0, 0, false}
 
 local function onSlotUpdate(_, slot)
+
+	if data.inCombat == false or slot > 8 then return end
 	
 	local timems = GetGameTimeMilliseconds()
 	local cost, powerType = GetSlotAbilityCost(slot)
 	local abilityId = GetSlotBoundId(slot)
 	local lastabilities = data.lastabilities
+	local bar = GetActiveWeaponPairInfo()
 	
 	if Events.Resources.active and slot > 2 and (powerType == 0 or powerType == 6) then 
 	
@@ -1297,9 +1308,13 @@ local function onSlotUpdate(_, slot)
 	
 	end
 	
+	local reducedslot = (bar - 1) * 10 + slot
+	
 	if Events.Skills.active ~= true then return end
 
-	local _, duration, _ = GetAbilityCastInfo(abilityId)
+	local channeled, duration, channelTime = GetAbilityCastInfo(abilityId)
+	
+	duration = channeled and channelTime or duration
 	
 	local target = GetAbilityTargetDescription(abilityId)
 	
@@ -1309,20 +1324,34 @@ local function onSlotUpdate(_, slot)
 	
 	if isGroundTargetSkill or duration > 0 then
 	
-		abilityId = abilityconversions[abilityId] or abilityId
+		abilityId = abilityconversions[abilityId] and abilityconversions[abilityId][1] or abilityId
+		
+		local status = isGroundTargetSkill and LIBCOMBAT_SKILLSTATUS_GROUNDTARGET or channeled and LIBCOMBAT_SKILLSTATUS_BEGIN_CHANNEL or LIBCOMBAT_SKILLSTATUS_BEGIN_DURATION
+		
+		lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_SKILL_TIMINGS), LIBCOMBAT_EVENT_SKILL_TIMINGS, timems, reducedslot, abilityId, status)
 		
 		if abilityId == -1 then 
 		
-			if dev == true then df("[%.3f] Skill used: %s (%d), Duration: %ds Target: %s", timems/1000, GetAbilityName(abilityId), abilityId, duration/1000, tostring(target)) end			
+			local function delayedsuccess()
+			
+				local data = {reducedslot, abilityId, LIBCOMBAT_SKILLSTATUS_SUCCESS}
+			
+				lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_SKILL_TIMINGS), LIBCOMBAT_EVENT_SKILL_TIMINGS, GetGameTimeMilliseconds(), unpack(data))
+			
+			end
+			
+			zo_callLater(delayedsuccess, duration)
+			
 		else
 	
-			lastGroundOrCastTimeAbility = abilityId
+			lastGroundOrCastTimeAbility = {abilityId, reducedslot, channeled}
 			
 		end
 	
 	else
 	
-		lastGroundOrCastTimeAbility = 0
+		lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_SKILL_TIMINGS), LIBCOMBAT_EVENT_SKILL_TIMINGS, timems, reducedslot, abilityId, LIBCOMBAT_SKILLSTATUS_INSTANT)
+		lastGroundOrCastTimeAbility = {0, 0, false}
 		
 	end
 end
@@ -1563,14 +1592,18 @@ local function onCombatEventHealGrp(_ , _ , _ , _ , _ , _ , _, _, _, targetType,
 	table.insert(currentfight.grplog,{targetUnitId,hitValue,"heal"})
 end
 
-
-
 local function onAbilityUsedCE(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId) 
 
-	if abilityId == lastGroundOrCastTimeAbility then
+	if abilityId == lastGroundOrCastTimeAbility[1] then
 
+		local timems = GetGameTimeMilliseconds()
+		local reducedslot = lastGroundOrCastTimeAbility[2]
+		
 		if dev == true then df("[%.3f] Skill activated: %s (%d, R: %d)", GetGameTimeMilliseconds()/1000, GetAbilityName(abilityId), abilityId, result) end
-		lastGroundOrCastTimeAbility = 0
+		
+		lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_SKILL_TIMINGS), LIBCOMBAT_EVENT_SKILL_TIMINGS, timems, reducedslot, abilityId, LIBCOMBAT_SKILLSTATUS_SUCCESS)
+		
+		lastGroundOrCastTimeAbility = {0, 0, false}
 		
 	end
 end
@@ -2052,10 +2085,16 @@ local strings = {
 	SI_LIBCOMBAT_LOG_FORMATSTRING12 = "<<1>> |cffffff<<2>>|r <<3>> <<4>><<5>>.",  -- buff, i.e. "[0.0s] You gained Block from yourself." <<1>> = timestring, <<2>> = sourceName, <<3>> = changetype,  <<4>> = ability, <<5>> = source
 	SI_LIBCOMBAT_LOG_FORMATSTRING13 = "<<1>> |cffffff<<2>>|r <<3>> <<4>><<5>>.",  -- buff, i.e. "[0.0s] You gained Block from yourself." <<1>> = timestring, <<2>> = sourceName, <<3>> = changetype,  <<4>> = ability, <<5>> = source
 
-	SI_LIBCOMBAT_LOG_FORMATSTRING14 = "<<1>> Your <<2>> <<3>> |cffffff<<4>>|r<<5>>.",  -- buff, i.e. "[0.0s] Weaponpower increased to 1800 (+100,". <<1>> = timeString, <<2>> = stat, <<3>> = changeText,  <<4>> = value, <<5>> = changeValueText
+	SI_LIBCOMBAT_LOG_FORMATSTRING14 = "<<1>> Your <<2>> <<3>> |cffffff<<4>>|r<<5>>.",  -- buff, i.e. "[0.0s] Weaponpower increased to 1800 (+100)". <<1>> = timeString, <<2>> = stat, <<3>> = changeText,  <<4>> = value, <<5>> = changeValueText
 	
 	SI_LIBCOMBAT_LOG_FORMATSTRING15 = "<<1>> |cffffffYou|r <<2>>|r <<3>> <<4>> |cffffff(<<5>>)|r.",  -- buff, i.e. "[0.0s] You gained 200 Magicka (Base Regeneration,." <<1>> = timeString, <<2>> = changeTypeString, <<3>> = amount,  <<4>> = resource, <<5>> = ability
 
+	SI_LIBCOMBAT_LOG_FORMATSTRING_SKILLS1 = "<<1>> You cast <<2>>.", -- skill used, i.e. "[0.0s] You used Puncturing Sweeps. (<<1>> = timestring, <<2>> = Ability)
+	SI_LIBCOMBAT_LOG_FORMATSTRING_SKILLS2 = "<<1>> You start to cast <<2>>.", -- skill used, i.e. "[0.0s] You start to cast Solar Barrage. (<<1>> = timestring, <<2>> = Ability)
+	SI_LIBCOMBAT_LOG_FORMATSTRING_SKILLS3 = "<<1>> You start to channel <<2>>.", -- skill used, i.e. "[0.0s] You start to target Blazing Spear. (<<1>> = timestring, <<2>> = Ability)
+	SI_LIBCOMBAT_LOG_FORMATSTRING_SKILLS4 = "<<1>> You start to target <<2>>.", -- skill used, i.e. "[0.0s] You start to target Blazing Spear. (<<1>> = timestring, <<2>> = Ability)
+	SI_LIBCOMBAT_LOG_FORMATSTRING_SKILLS5 = "<<1>> You finished casting <<2>>.", -- skill used, i.e. "[0.0s] You succeeded casting Blazing Spear. (<<1>> = timestring, <<2>> = Ability)
+	
 }
 
 for stringId, stringValue in pairs(strings) do
@@ -2130,7 +2169,7 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 	
 	local timeValue = fight.combatstart < 0 and 0 or (logline[2] - fight.combatstart)/1000
 	local timeString = string.format("|ccccccc[%.3fs]|r", timeValue)
-	local stringFormat = GetString("SI_LIBCOMBAT_LOG_FORMATSTRING", logtype)
+	local stringFormat = logtype == LIBCOMBAT_EVENT_SKILL_TIMINGS and GetString("SI_LIBCOMBAT_LOG_FORMATSTRING_SKILLS", logline[5]) or GetString("SI_LIBCOMBAT_LOG_FORMATSTRING", logtype)
 	
 	local units = fight.units
 
@@ -2307,7 +2346,7 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 
 	elseif logtype == LIBCOMBAT_EVENT_MESSAGES then 
 	
-		local _, _ , message = unpack(logline)
+		local message = logline[3]
 		
 		if message == LIBCOMBAT_MESSAGE_WEAPONSWAP then 
 		
@@ -2322,6 +2361,21 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 		local messagetext = type(message) == "number" and GetString("SI_LIBCOMBAT_LOG_MESSAGE", message) or message
 		
 		text = zo_strformat("<<1>> <<2>>", timeString, messagetext)
+	
+	elseif logtype == LIBCOMBAT_EVENT_SKILL_TIMINGS then
+	
+		local _, _, reducedslot, abilityId, status = unpack(logline)
+		
+		local isWeaponAttack = reducedslot == 1 or reducedslot == 2 or reducedslot == 11 or reducedslot == 12		
+		
+		local name = GetFormatedAbilityName(abilityId)		
+		
+		if isWeaponAttack then name = " |cffffff"..name.."|r" end
+		
+		color = {.9,.8,.7}
+		
+		text = zo_strformat(stringFormat, timeString, name)
+		
 	end
 
 	return text, color
