@@ -884,13 +884,7 @@ do
 		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTMULTIDPS), postMultiDPS)
 		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTALLDPS), postAllDPS)
 		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTHPS), postHPS)
-		
-		local function CalculateCurrentFight()
-		
-			CMX.CalculateFight(fightData)
-			
-		end
-		
+
 		ShowMenu(settingsbutton)
 		
 
@@ -2396,19 +2390,21 @@ local function updateLeftInfoPanel(panel)
 	
 	for i = 1, 2 do
 	
-		local row = panel:GetNamedChild("AbilityRow" .. i)
+		local row = panel:GetNamedChild("AbilityBlock" .. i)
 	
 		local bardata = skilldata[i]
 		
 		if bardata == nil then return end	-- ToDo: Fallback to default
 		
-		for i = 1, row:GetNumChildren() - 1  do
+		for i = 1, row:GetNumChildren() do
 		
 			local control = row:GetChild(i)
 			
-			local icon = control:GetNamedChild("Texture")
+			local icon = control:GetNamedChild("Icon"):GetNamedChild("Texture")
 			
-			local key = i + 2
+			local name = control:GetNamedChild("Label")
+			
+			local key = i
 			
 			local abilityId = bardata[key]
 			
@@ -2416,51 +2412,10 @@ local function updateLeftInfoPanel(panel)
 			
 			local texture = GetFormatedAbilityIcon(abilityId)
 			
-			icon:SetTexture(texture)			
+			icon:SetTexture(texture)
+
+			name:SetText(GetFormatedAbilityName(abilityId))
 		end
-	end
-	
-	local equipdata = charData and charData.equip or {}
-	
-	for i = 1, 14 do
-	
-		local equipline = panel:GetNamedChild("EquipLine" .. i)
-		local label = equipline:GetNamedChild("ItemLink")
-		local icon = equipline:GetNamedChild("Icon")
-		local icon2 = equipline:GetNamedChild("Icon2")	-- textures are added twice since icons are so low in contrast
-		local trait = equipline:GetNamedChild("Trait")	-- textures are added twice since icons are so low in contrast
-		local enchant = equipline:GetNamedChild("Enchant")	-- textures are added twice since icons are so low in contrast
-	
-		local slot = equipslots[i]
-		
-		local item = equipdata[slot] or ""
-		local texture = equipicons[i]
-		
-		local armortype = GetItemLinkArmorType(item)
-		local color = item:len() > 0 and armorcolors[armortype] or {0, 0, 0, 1}
-		local color2 = item:len() > 0 and {1, 1, 1, 1} or {0.5, 0.5, 0.5, 1}
-	
-		label:SetText(item)
-		
-		label.itemLink = item == "" and nil or item
-		
-		icon:SetTexture(texture)
-		icon:SetColor(unpack(color))
-		icon:SetBlendMode(TEX_BLEND_MODE_ADD)	
-		
-		icon2:SetTexture(texture)
-		icon2:SetColor(unpack(color2))
-		icon2:SetBlendMode(TEX_BLEND_MODE_ADD)	
-		
-		local traitType, _ = GetItemLinkTraitInfo(item) 
-		local traitName = traitType > 0 and GetString("SI_ITEMTRAITTYPE", traitType) or ""
-		
-		trait:SetText(traitName)
-		
-		local _, enchantstring = GetItemLinkEnchantInfo(item) 
-		
-		enchant:SetText(enchantstring:gsub(GetString(SI_COMBAT_METRICS_ENCHANTMENT_TRIM), ""))
-		
 	end
 	
 end
@@ -2515,8 +2470,55 @@ local function updateRightInfoPanel(panel)
 end
 
 local function updateBottomInfoPanel(panel)
+
+	if fightData == nil then return end
 	
+	local charData = fightData.charData
 	
+	if charData == nil then return end
+	
+	local equipdata = charData and charData.equip or {}
+	
+	for i = 1, 14 do
+	
+		local equipline = panel:GetNamedChild("EquipLine" .. i)
+		local label = equipline:GetNamedChild("ItemLink")
+		local icon = equipline:GetNamedChild("Icon")
+		local icon2 = equipline:GetNamedChild("Icon2")	-- textures are added twice since icons are so low in contrast
+		local trait = equipline:GetNamedChild("Trait")	-- textures are added twice since icons are so low in contrast
+		local enchant = equipline:GetNamedChild("Enchant")	-- textures are added twice since icons are so low in contrast
+	
+		local slot = equipslots[i]
+		
+		local item = equipdata[slot] or ""
+		local texture = equipicons[i]
+		
+		local armortype = GetItemLinkArmorType(item)
+		local color = item:len() > 0 and armorcolors[armortype] or {0, 0, 0, 1}
+		local color2 = item:len() > 0 and {1, 1, 1, 1} or {0.5, 0.5, 0.5, 1}
+	
+		label:SetText(item)
+		
+		label.itemLink = item == "" and nil or item
+		
+		icon:SetTexture(texture)
+		icon:SetColor(unpack(color))
+		icon:SetBlendMode(TEX_BLEND_MODE_ADD)	
+		
+		icon2:SetTexture(texture)
+		icon2:SetColor(unpack(color2))
+		icon2:SetBlendMode(TEX_BLEND_MODE_ADD)	
+		
+		local traitType, _ = GetItemLinkTraitInfo(item) 
+		local traitName = traitType > 0 and GetString("SI_ITEMTRAITTYPE", traitType) or ""
+		
+		trait:SetText(traitName)
+		
+		local _, enchantstring = GetItemLinkEnchantInfo(item) 
+		
+		enchant:SetText(enchantstring:gsub(GetString(SI_COMBAT_METRICS_ENCHANTMENT_TRIM), ""))
+		
+	end
 end
 
 local function updateInfoPanel(panel)
