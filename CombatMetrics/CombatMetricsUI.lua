@@ -24,9 +24,9 @@ end
 local LC = LibStub:GetLibrary("LibCombat")
 if LC == nil then return end 
 
-local GetFormatedAbilityName = LC.GetFormatedAbilityName
+local GetFormattedAbilityName = LC.GetFormattedAbilityName
 
-local GetFormatedAbilityIcon = LC.GetFormatedAbilityIcon
+local GetFormattedAbilityIcon = LC.GetFormattedAbilityIcon
 
 local function storeOrigLayout(self)
 				
@@ -383,6 +383,16 @@ function CMX.InitializeCPRows(panel)
 			passive.points = 0
 			
 		end
+	end
+end
+
+function CMX.InitializeSkillStats(panel)
+
+	for i = 1,2 do
+	
+		local title = panel:GetNamedChild("AbilityBlock" .. i):GetNamedChild("Title")
+		title:SetText(GetString(SI_COMBAT_METRICS_BAR) .. i)
+		
 	end
 end
 
@@ -1651,7 +1661,7 @@ local function updateBuffPanel(panel)
 			local highlight = false
 			if selectedbuffs ~= nil then highlight = (selectedbuffs[buffName] ~= nil) end
 			
-			local icon = GetFormatedAbilityIcon(buff.icon)
+			local icon = GetFormattedAbilityIcon(buff.icon)
 			local dbug = (showids and type(buff.icon) == "number") and string.format("(%d) ", buff.icon) or ""
 			local name = dbug .. buffName
 			
@@ -1728,7 +1738,7 @@ local function updateResourceBars(panel, currentanchor, data, totalRate, selecte
 	
 		if (ability.ticks or 0) > 0 then
 			
-			local label = abilityId ~= 0 and GetFormatedAbilityName(abilityId) or GetString(SI_COMBAT_METRICS_BASE_REG)
+			local label = abilityId ~= 0 and GetFormattedAbilityName(abilityId) or GetString(SI_COMBAT_METRICS_BASE_REG)
 			
 			local highlight = false
 			if selectedresources ~= nil then highlight = selectedresources[abilityId] ~= nil end
@@ -2014,14 +2024,14 @@ local function updateAbilityPanel(panel)
 				highlight = selectedabilities[abilityId] ~= nil 
 			end
 			
-			local icon = GetFormatedAbilityIcon(abilityId)
+			local icon = GetFormattedAbilityIcon(abilityId)
 			
 			local dot = (GetAbilityDuration(abilityId)>0 or (IsAbilityPassive(abilityId) and isDamage)) and "*" or ""
 			local pet = ability.pet and " (pet)" or ""
 			local dbug = showids and string.format("(%d) ", abilityId) or ""
 			local color = ability.damageType and CMX.GetDamageColor(ability.damageType) or ""
 			
-			local name  = dbug..color..(ability.name or GetFormatedAbilityName(abilityId))..dot..pet.."|r"
+			local name  = dbug..color..(ability.name or GetFormattedAbilityName(abilityId))..dot..pet.."|r"
 			
 			local dps = ability[DPSKey]
 			local total = ability[totalAmountKey]
@@ -2240,7 +2250,7 @@ local function updateCombatLog(panel)
 				local unitId = logline[3]
 				local abilityId = logline[4]
 			
-				local ability = GetFormatedAbilityName(abilityId)
+				local ability = GetFormattedAbilityName(abilityId)
 				
 				condition2 = (
 					buffSelection == nil and unitsSelected==false)
@@ -2376,6 +2386,8 @@ local armorcolors = {
 	[ARMORTYPE_LIGHT] = {0.3, 0.3, 1, 1},
 }
 
+local skillkeys = {"skillBeforeAvg", "weaponAttackBeforeAvg", "skillNextAvg", "weaponAttackNextAvg"}
+
 local function updateLeftInfoPanel(panel)
 
 	if fightData == nil then return end
@@ -2384,40 +2396,87 @@ local function updateLeftInfoPanel(panel)
 	
 	if charData == nil then return end
 	
-	local skilldata = charData.skillBars
+	local skillBars = charData.skillBars
 	
-	if skilldata == nil then return end
+	if skillBars == nil then return end
+	
+	local data = fightData.calculated
+	
+	if data == nil then return end
+	
+	local skilldata = data.skills
 	
 	for i = 1, 2 do
 	
 		local row = panel:GetNamedChild("AbilityBlock" .. i)
 	
-		local bardata = skilldata[i]
+		local bardata = skillBars[i]
 		
 		if bardata == nil then return end	-- ToDo: Fallback to default
 		
-		for i = 1, row:GetNumChildren() do
+		for j = 2, row:GetNumChildren() - 1 do
 		
-			local control = row:GetChild(i)
+			local control = row:GetChild(j)
 			
 			local icon = control:GetNamedChild("Icon"):GetNamedChild("Texture")
 			
 			local name = control:GetNamedChild("Label")
 			
-			local key = i
-			
-			local abilityId = bardata[key]
+			local abilityId = bardata[j-1]
 			
 			control.id = abilityId
 			
-			local texture = GetFormatedAbilityIcon(abilityId)
+			local texture = GetFormattedAbilityIcon(abilityId)
 			
 			icon:SetTexture(texture)
 
-			name:SetText(GetFormatedAbilityName(abilityId))
+			name:SetText(GetFormattedAbilityName(abilityId))
+			
+			local reducedslot = (i-1) * 10 + j
+			
+			local slotdata = skilldata[reducedslot]
+			
+			local strings = {"-", "-", "-", "-"}
+			
+			if slotdata then
+			
+				for i, key in ipairs(skillkeys) do
+				
+					local value = slotdata[key]
+					
+					if type(value) == "number" then
+					
+						strings[i] = string.format("%.2f", value / 1000)
+						
+					end
+				end
+			end
+			
+			local value1string = string.format("%s/%s", strings[1], strings[2])
+			local value2string = string.format("%s/%s", strings[3], strings[4])
+			
+			control:GetNamedChild("Value1"):SetText(value1string)
+			control:GetNamedChild("Value2"):SetText(value2string)
 		end
 	end
 	
+	local statrow = panel:GetNamedChild("Stats")	
+	
+	local totalSkills = data.totalSkills
+	local totalTime = data.totalSkillTime
+	
+	local value1string = "-"
+	local value2string = "-"
+	
+	if totalSkills and totalTime then 
+	
+		value1string = (totalTime and totalSkills) and string.format("%.3f s", totalTime / (1000 * totalSkills)) or "-"
+		value2string = totalTime and string.format("%.3f s", totalTime / 1000) or "-"
+		
+	end
+	
+	statrow:GetNamedChild("Value1"):SetText(value1string)
+	statrow:GetNamedChild("Value2"):SetText(value2string)
 end
 
 local passiveRequirements = {10, 30, 75, 120}
@@ -2485,8 +2544,8 @@ local function updateBottomInfoPanel(panel)
 		local label = equipline:GetNamedChild("ItemLink")
 		local icon = equipline:GetNamedChild("Icon")
 		local icon2 = equipline:GetNamedChild("Icon2")	-- textures are added twice since icons are so low in contrast
-		local trait = equipline:GetNamedChild("Trait")	-- textures are added twice since icons are so low in contrast
-		local enchant = equipline:GetNamedChild("Enchant")	-- textures are added twice since icons are so low in contrast
+		local trait = equipline:GetNamedChild("Trait")	
+		local enchant = equipline:GetNamedChild("Enchant")	
 	
 		local slot = equipslots[i]
 		

@@ -43,6 +43,7 @@
 	SI_COMBAT_METRICS_CRITS = "Crits", -- Crits
 
 	SI_COMBAT_METRICS_DAMAGE = "Damage", -- Damage
+	SI_COMBAT_METRICS_DAMAGEC = "Damage: ", -- Damage
 	SI_COMBAT_METRICS_HIT = "Hit",
 	SI_COMBAT_METRICS_DPS = "DPS",
 
@@ -88,6 +89,7 @@
 	SI_COMBAT_METRICS_CHARACTER = "Character", -- Character
 	SI_COMBAT_METRICS_ZONE = "Zone", -- Zone
 	SI_COMBAT_METRICS_TIME = "Time", -- Time
+	SI_COMBAT_METRICS_TIMEC = "Time: ", -- Time: 
 
 	SI_COMBAT_METRICS_SHOW = "Show", -- Show
 	SI_COMBAT_METRICS_DELETE = "Delete", -- Delete
@@ -184,6 +186,9 @@
 	
 	SI_COMBAT_METRICS_FAVOURITE_ADD = "Add to Favourites", -- Add to Favourites NEW
 	SI_COMBAT_METRICS_FAVOURITE_REMOVE = "Remove from Favourites", -- Remove from Favourites NEW
+	
+	SI_COMBAT_METRICS_BAR = "Bar ", -- Total Time Between Skills: NEW
+	SI_COMBAT_METRICS_SKILLTIME = "Average / Total: ", -- Total Time Between Skills: NEW
 
 -- Menus
 

@@ -24,9 +24,9 @@ local CMX = CMX
 CMX.name = "CombatMetrics"
 CMX.version = "0.9.0.0"
 
-local GetFormatedAbilityName = LC.GetFormatedAbilityName
+local GetFormattedAbilityName = LC.GetFormattedAbilityName
 
-local GetFormatedAbilityIcon = LC.GetFormatedAbilityIcon
+local GetFormattedAbilityIcon = LC.GetFormattedAbilityIcon
 
 local function Print(category, message, ...)
 	if db.debuginfo[category] then df("[%s] %s", "CMX", message:format(...)) end
@@ -100,24 +100,24 @@ local IsMagickaAbility = {				-- nil for oblivion and other damage types that ar
  
 local SpellResistDebuffs = {
 
-	[GetFormatedAbilityName(62795)] = 5280, --Major Breach
-	[GetFormatedAbilityName(68589)] = 1320, --Minor Breach
+	[GetFormattedAbilityName(62795)] = 5280, --Major Breach
+	[GetFormattedAbilityName(68589)] = 1320, --Minor Breach
 	
-	[GetFormatedAbilityName(17906)] = 2108, -- Crusher, can get changed by settings !
-	[GetFormatedAbilityName(75753)] = 3010, -- Alkosh
+	[GetFormattedAbilityName(17906)] = 2108, -- Crusher, can get changed by settings !
+	[GetFormattedAbilityName(75753)] = 3010, -- Alkosh
 
 } 
 
 local PhysResistDebuffs = {
 
-	[GetFormatedAbilityName(62490)] = 5280, --Major Fracture	
-	[GetFormatedAbilityName(64147)] = 1320, --Minor Fracture
+	[GetFormattedAbilityName(62490)] = 5280, --Major Fracture	
+	[GetFormattedAbilityName(64147)] = 1320, --Minor Fracture
 
-	[GetFormatedAbilityName(17906)] = 2108, -- Crusher, can get changed by settings !
-	[GetFormatedAbilityName(75753)] = 3010, -- Alkosh
+	[GetFormattedAbilityName(17906)] = 2108, -- Crusher, can get changed by settings !
+	[GetFormattedAbilityName(75753)] = 3010, -- Alkosh
 	
-	[GetFormatedAbilityName(34386)] = 2580, -- Night Mother's Gaze
-	[GetFormatedAbilityName(60416)] = 3440, -- Sunderflame
+	[GetFormattedAbilityName(34386)] = 2580, -- Night Mother's Gaze
+	[GetFormattedAbilityName(60416)] = 3440, -- Sunderflame
 	
 	--Corrosive Armor ignores all resistance
 
@@ -128,14 +128,14 @@ if GetAPIVersion() > 100022 then -- no more Sunder and NMG :(
 
 	PhysResistDebuffs = {
 
-		[GetFormatedAbilityName(62490)] = 5280, --Major Fracture	
-		[GetFormatedAbilityName(64147)] = 1320, --Minor Fracture
+		[GetFormattedAbilityName(62490)] = 5280, --Major Fracture	
+		[GetFormattedAbilityName(64147)] = 1320, --Minor Fracture
 
-		[GetFormatedAbilityName(17906)] = 2108, -- Crusher, can get changed by settings !
-		[GetFormatedAbilityName(75753)] = 3010, -- Alkosh
+		[GetFormattedAbilityName(17906)] = 2108, -- Crusher, can get changed by settings !
+		[GetFormattedAbilityName(75753)] = 3010, -- Alkosh
 		
-		-- [GetFormatedAbilityName(34386)] = 2580, -- Night Mother's Gaze
-		-- [GetFormatedAbilityName(60416)] = 3440, -- Sunderflame
+		-- [GetFormattedAbilityName(34386)] = 2580, -- Night Mother's Gaze
+		-- [GetFormattedAbilityName(60416)] = 3440, -- Sunderflame
 		
 		--Corrosive Armor ignores all resistance
 
@@ -146,7 +146,7 @@ function CMX.SetCrusher(value)
 
 	db.crusherValue = value
 
-	local crushername = GetFormatedAbilityName(17906)
+	local crushername = GetFormattedAbilityName(17906)
 
 	SpellResistDebuffs[crushername] = value
 	PhysResistDebuffs[crushername] = value
@@ -234,7 +234,7 @@ end
 local function AcquireEffectData(self, abilityId, effectType, stacks)
 	
 	local stacktext = (stacks <= 1 or db.showstacks == false) and "" or (" (x"..stacks..")")
-	local name = GetFormatedAbilityName(abilityId)..stacktext
+	local name = GetFormattedAbilityName(abilityId)..stacktext
 	
 	if self.buffs[name] == nil then 
 		
@@ -429,7 +429,7 @@ end
 
 function AbilityHandler:Initialize(abilityId, pet, damageType, tablekey)
 	
-	self.name = GetFormatedAbilityName(abilityId)		-- ability name
+	self.name = GetFormattedAbilityName(abilityId)		-- ability name
 	self.pet = pet
 	self.damageType = damageType or ""
 	self.isheal = (tablekey == "healingOut" or tablekey == "healingIn")
@@ -440,7 +440,7 @@ end
 
 function EffectHandler:Initialize(effectType, abilityId, stacks)
 	
-	self.name = GetFormatedAbilityName(abilityId)
+	self.name = GetFormattedAbilityName(abilityId)
 	self.uptime = 0						-- uptime of effect caused by player
 	self.count = 0						-- count of effect applications caused by player
 	self.groupUptime = 0				-- uptime of effect caused by the whole group
@@ -491,9 +491,9 @@ function SkillTimingHandler:Initialize()
 
 	self.times = {}  				-- holds times a skill gets used
 	self.skillBefore = {} 			-- holds times since last skill completed
-	self.WeaponAttackBefore = {} 	-- holds times since last light or heavy attack completed
+	self.weaponAttackBefore = {} 	-- holds times since last light or heavy attack completed
 	self.skillNext = {} 			-- holds times until a new skill is cast afterwards
-	self.WeaponAttackNext = {} 		-- holds times until a new light or heavy attack is cast afterwards
+	self.weaponAttackNext = {} 		-- holds times until a new light or heavy attack is cast afterwards
 	
 end
 
@@ -510,6 +510,8 @@ local function GetEmtpyFightStats()
 	data.resources = ResourceTable:New()
 	
 	data.skills = {}
+	data.totalSkillTime = 0
+	data.totalSkills = 0
 	
 	lastUsedSkill = nil
 	lastUsedWeaponAttack = nil
@@ -1042,6 +1044,8 @@ ProcessLog[LIBCOMBAT_EVENT_PLAYERSTATS] = ProcessLogStats
 ---[[
 local function ProcessLogSkillTimings(fight, callbacktype, timems, reducedslot, abilityId, status)
 
+	if reducedslot == nil then return end
+
 	local isWeaponAttack = reducedslot == 1 or reducedslot == 2 or reducedslot == 11 or reducedslot == 12
 
 	local newdata = {}
@@ -1068,28 +1072,28 @@ local function ProcessLogSkillTimings(fight, callbacktype, timems, reducedslot, 
 	local doubleWeaponAttack = isWeaponAttack and lastUsedWeaponAttack and lastUsedSkill and (lastWeaponAttackTime > lastSkillTime)
 	local doubleSkillUse = (not isWeaponAttack) and lastUsedWeaponAttack and lastUsedSkill and (lastSkillTime > lastWeaponAttackTime)
 	
-	if lastSkillSuccessTime and not doubleWeaponAttack then 
+	local timenow = GetGameTimeMilliseconds()/1000
+	
+	local key = isWeaponAttack and "weaponAttackNext" or "skillNext"
+	
+	if lastSkillSuccessTime and not doubleWeaponAttack and status ~= LIBCOMBAT_SKILLSTATUS_SUCCESS then 
 	
 		local timeDifference = timems - lastSkillSuccessTime
 	
 		table.insert(slotdata.skillBefore, timeDifference) 
-		table.insert(fight:AcquireSkillTimingData(lastSkillSlot).skillNext, timems - lastSkillSuccessTime)
-		
-		df("%s - last skill: %d", GetAbilityName(abilityId) , timeDifference)
-		
+		table.insert(fight:AcquireSkillTimingData(lastSkillSlot)[key], timeDifference)
+	
 	end
 	
-	if lastWeaponAttackSuccessTime and not doubleSkillUse then 
+	if lastWeaponAttackSuccessTime and not doubleSkillUse and status ~= LIBCOMBAT_SKILLSTATUS_SUCCESS then 
 	
 		local timeDifference = timems - lastWeaponAttackSuccessTime
 	
-		table.insert(slotdata.WeaponAttackBefore, timems - lastWeaponAttackSuccessTime) 
-		table.insert(fight:AcquireSkillTimingData(lastWeaponAttackSlot).WeaponAttackNext, timems - lastWeaponAttackSuccessTime)
-	
-		df("%s - last WA: %d", GetAbilityName(abilityId) , timeDifference)
+		table.insert(slotdata.weaponAttackBefore, timeDifference) 
+		table.insert(fight:AcquireSkillTimingData(lastWeaponAttackSlot)[key], timeDifference)
 	
 	end	
-
+	
 	if status ~= LIBCOMBAT_SKILLSTATUS_SUCCESS then 		
 		
 		if isWeaponAttack then
@@ -1107,14 +1111,18 @@ local function ProcessLogSkillTimings(fight, callbacktype, timems, reducedslot, 
 		end
 		
 	else
-	
+		
+		local channeled, castTime = GetAbilityCastInfo(abilityId)
+		
+		local delay = (channeled or castTime) and 200 or 0		-- there is a general 200ms delay after each cast time ability
+		
 		if isWeaponAttack then
 		
-			lastUsedWeaponAttack[3] = timems
+			lastUsedWeaponAttack[3] = timems + delay
 			
 		else
 		
-			lastUsedSkill[3] = timems
+			lastUsedSkill[3] = timems + delay
 			
 		end
 		
@@ -1321,7 +1329,64 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 		end
 		
+		-- calculate skill timings
+		
+		local skilldata = data.skills
+		
+		local totalSkillTime = 0
+		local totalSkills = 0
+		
+		for reducedslot, skill in pairs(skilldata) do
+		
+			local isNotWeaponAttack = reducedslot ~= 1 and reducedslot ~= 2 and reducedslot ~= 11 and reducedslot ~= 12
+		
+			local difftimes = {}
+			
+			local timedata = skill["times"]
+			
+			skill.count = #timedata
+			
+			for i = 1, #timedata - 1 do
+			
+				difftimes[i] = timedata[i+1] - timedata[i]
+			
+			end
+		
+			for i, key in ipairs({"skillBefore", "weaponAttackBefore", "skillNext", "weaponAttackNext", "times"}) do
+			
+				local times = skill[key]
+				
+				local avgkey = key .. "Avg"
+				
+				local sum = 0
+				local count = 0
+
+				for _, v in pairs(times) do
+				
+					if type(v) == 'number' then
+					
+						sum = sum + v
+						count = count + 1
+						
+					end
+					
+				end
+				
+				skill[avgkey] = count > 0 and sum / count or 0
+				
+				if i == 1 and isNotWeaponAttack then
+					
+					totalSkillTime = totalSkillTime + sum
+					totalSkills = totalSkills + count
+				
+				end	
+			end			
+		end
+		
 		data.buffs = fight.playerid ~= nil and data.units[fight.playerid] and data.units[fight.playerid].buffs or {}
+		
+		data.totalSkillTime = totalSkillTime
+		data.totalSkills = totalSkills
 
 		fight.calculating = false
 		fight.cindex = nil
