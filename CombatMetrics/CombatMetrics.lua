@@ -1,4 +1,4 @@
---aliases
+-- aliases
 
 local wm = GetWindowManager()
 local em = GetEventManager()
@@ -12,6 +12,8 @@ local chatWindow
 
 local lastUsedSkill
 local lastUsedWeaponAttack
+
+local currentbar
 	
 local LC = LibStub:GetLibrary("LibCombat")
 if LC == nil then return end 
@@ -1055,8 +1057,6 @@ local function ProcessLogSkillTimings(fight, callbacktype, timems, reducedslot, 
 	local lastSkillTime, lastSkillSlot, lastSkillSuccessTime
 	local lastWeaponAttackTime, lastWeaponAttackSlot, lastWeaponAttackSuccessTime
 	
-	table.insert(slotdata.times, timems)
-	
 	if lastUsedSkill then 
 		
 		lastSkillTime, lastSkillSlot, lastSkillSuccessTime = unpack(lastUsedSkill)
@@ -1094,7 +1094,9 @@ local function ProcessLogSkillTimings(fight, callbacktype, timems, reducedslot, 
 	
 	end	
 	
-	if status ~= LIBCOMBAT_SKILLSTATUS_SUCCESS then 		
+	if status ~= LIBCOMBAT_SKILLSTATUS_SUCCESS then 
+
+		table.insert(slotdata.times, timems)
 		
 		if isWeaponAttack then
 		
@@ -1130,6 +1132,14 @@ local function ProcessLogSkillTimings(fight, callbacktype, timems, reducedslot, 
 end
 
 ProcessLog[LIBCOMBAT_EVENT_SKILL_TIMINGS] = ProcessLogSkillTimings
+
+local function ProcessMessages(fight, callbacktype, timems, messageId, value)
+
+	if messageId ~= LIBCOMBAT_MESSAGE_WEAPONSWAP then return end	
+
+	currentbar = value
+	
+end
 
 --]]
 
@@ -1351,8 +1361,10 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 				difftimes[i] = timedata[i+1] - timedata[i]
 			
 			end
+			
+			skill.difftimes = difftimes
 		
-			for i, key in ipairs({"skillBefore", "weaponAttackBefore", "skillNext", "weaponAttackNext", "times"}) do
+			for i, key in ipairs({"skillBefore", "weaponAttackBefore", "skillNext", "weaponAttackNext", "difftimes"}) do
 			
 				local times = skill[key]
 				
@@ -1740,71 +1752,73 @@ local svdefaults = {
 	
 	["FightReport"] = {
 		
-		["scale"] = zo_roundToNearest(1 / GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE), 0.1),
-		["category"] = "damageOut",
-		["mainpanel"] = "FightStats",
-		["rightpanel"] = "buffs",
-		["fightstatspanel"] = maxStat(),
+		["scale"] 				= zo_roundToNearest(1 / GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE), 0.1),
+		["category"] 			= "damageOut",
+		["mainpanel"] 			= "FightStats",
+		["rightpanel"] 			= "buffs",
+		["fightstatspanel"] 	= maxStat(),
+		["skilltimingbefore"] 	= true,
+		
 		
 		["FavouriteBuffs"] = {},
 		
 		["CLSelection"] = {
 		
-			[LIBCOMBAT_EVENT_DAMAGE_OUT] = true,
-			[LIBCOMBAT_EVENT_DAMAGE_IN] = false,
-			[LIBCOMBAT_EVENT_HEAL_OUT] = false,
-			[LIBCOMBAT_EVENT_HEAL_IN] = false,
-			[LIBCOMBAT_EVENT_EFFECTS_IN] = false,
-			[LIBCOMBAT_EVENT_EFFECTS_OUT] = false,
-			[LIBCOMBAT_EVENT_GROUPEFFECTS_IN] = false,
-			[LIBCOMBAT_EVENT_GROUPEFFECTS_OUT] = false,
-			[LIBCOMBAT_EVENT_PLAYERSTATS] = false,
-			[LIBCOMBAT_EVENT_RESOURCES] = false,
-			[LIBCOMBAT_EVENT_MESSAGES] = false,
+			[LIBCOMBAT_EVENT_DAMAGE_OUT] 		= true,
+			[LIBCOMBAT_EVENT_DAMAGE_IN] 		= false,
+			[LIBCOMBAT_EVENT_HEAL_OUT] 			= false,
+			[LIBCOMBAT_EVENT_HEAL_IN] 			= false,
+			[LIBCOMBAT_EVENT_EFFECTS_IN] 		= false,
+			[LIBCOMBAT_EVENT_EFFECTS_OUT] 		= false,
+			[LIBCOMBAT_EVENT_GROUPEFFECTS_IN] 	= false,
+			[LIBCOMBAT_EVENT_GROUPEFFECTS_OUT] 	= false,
+			[LIBCOMBAT_EVENT_PLAYERSTATS] 		= false,
+			[LIBCOMBAT_EVENT_RESOURCES] 		= false,
+			[LIBCOMBAT_EVENT_MESSAGES] 			= false,
 			
 		},
 	},
 	
 	["liveReport"] = {
 	
-		["enabled"] = true,
-		["locked"] = false,
-		["layout"]="Compact", 
-		["scale"]= zo_roundToNearest(1 / GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE), 0.1), 
-		["bgalpha"]= 95, 
-		["alignmentleft"] = false,
-		["damageOut"] = true, 
+		["enabled"] 		= true,
+		["locked"] 			= false,
+		["layout"]			="Compact", 
+		["scale"]			= zo_roundToNearest(1 / GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE), 0.1), 
+		["bgalpha"]			= 95, 
+		["alignmentleft"] 	= false,
+		["damageOut"] 		= true, 
 		["damageOutSingle"] = false, 
-		["healOut"] = true, 
-		["damageIn"] = true, 
-		["healIn"] = true, 
-		["time"] = true
+		["healOut"] 		= true, 
+		["damageIn"] 		= true, 
+		["healIn"] 			= true, 
+		["time"] 			= true
 		
 	},
 	
 	["chatLog"] = {
 	
-		["enabled"] = false,
-		["name"] = "CMX Combat Log",
-		["damageOut"] = true,
-		["healingOut"] = false,
-		["damageIn"] = false,
-		["healingIn"] = false,
+		["enabled"] 	= false,
+		["name"] 		= "CMX Combat Log",
+		["damageOut"] 	= true,
+		["healingOut"] 	= false,
+		["damageIn"] 	= false,
+		["healingIn"] 	= false,
 		
 	},
 	
 	["debuginfo"] = {
 	
-		["fightsummary"] = false, 
-		["ids"] = false, 
+		["fightsummary"] 	= false, 
+		["ids"] 			= false, 
 		["calculationtime"] = false, 
-		["buffs"] = false, 
-		["skills"] = false, 
-		["group"] = false, 
-		["misc"] = false, 
-		["special"] = false,
-		["save"] = false,
-		["dev"] = false, 
+		["buffs"] 			= false, 
+		["skills"] 			= false, 
+		["group"] 			= false, 
+		["misc"] 			= false, 
+		["special"] 		= false,
+		["save"] 			= false,
+		["dev"] 			= false, 
 		
 	},
 }

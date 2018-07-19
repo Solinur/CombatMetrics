@@ -28,6 +28,27 @@ local GetFormattedAbilityName = LC.GetFormattedAbilityName
 
 local GetFormattedAbilityIcon = LC.GetFormattedAbilityIcon
 
+local function searchtable(t, field, value)
+
+	if value == nil then return false end
+	
+	for k, v in pairs(t) do
+	
+		if type(v) == "table" and field and v[field] == value then 
+		
+			return true, k 
+			
+		elseif v == value then 
+		
+			return true, k 
+			
+		end		
+	end
+	
+	return false, nil
+end
+
+
 local function storeOrigLayout(self)
 				
 	self.sizes = {self:GetDimensions()}
@@ -714,6 +735,15 @@ function CMX.LoadItem(listitem)
 	
 	local lastfights = CMX.lastfights
 	
+	if id == nil or savedFights[id] == nil then 
+	
+		assert(id, "Id is nil")
+		assert(savedFights[id], "fight is nil")
+	
+		return 
+	
+	end
+	
 	local isLoaded, loadId = searchtable(lastfights, "date", savedFights[id]["date"])	-- returns false if nothing is found else it returns the id
 	if isLoaded then isLoaded = lastfights[loadId]["time"] == savedFights[id]["time"] end					-- ensures old fights load correctly
 	
@@ -991,26 +1021,6 @@ function CMX.AddSelection( self, button, upInside, ctrlkey, alt, shiftkey )
 	selections[selecttype][category] = sel
 	CombatMetrics_Report:Update(currentFight)
 end 
-
-function searchtable(t, field, value)
-
-	if value == nil then return false end
-	
-	for k, v in pairs(t) do
-	
-		if type(v) == "table" and field and v[field] == value then 
-		
-			return true, k 
-			
-		elseif v == value then 
-		
-			return true, k 
-			
-		end		
-	end
-	
-	return false, nil
-end
 
 local function UpdateReport2()
 	CombatMetrics_Report:Update()
@@ -2301,7 +2311,7 @@ end
 function CMX.SkillTooltip_OnMouseEnter(control)
 	
 	InitializeTooltip(SkillTooltip, control, TOPLEFT, 0, 5, BOTTOMLEFT)
-	SkillTooltip:SetAbilityId(control.id)
+	SkillTooltip:SetAbilityId(control:GetParent().id)
 	
 end
 
@@ -2386,7 +2396,7 @@ local armorcolors = {
 	[ARMORTYPE_LIGHT] = {0.3, 0.3, 1, 1},
 }
 
-local skillkeys = {"skillBeforeAvg", "weaponAttackBeforeAvg", "skillNextAvg", "weaponAttackNextAvg"}
+local skillkeys = { "count", "weaponAttackBeforeAvg", "skillBeforeAvg", "weaponAttackNextAvg", "skillNextAvg", "difftimesAvg"}
 
 local function updateLeftInfoPanel(panel)
 
@@ -2406,15 +2416,17 @@ local function updateLeftInfoPanel(panel)
 	
 	local skilldata = data.skills
 	
-	for i = 1, 2 do
+	for i = 0, 1 do
 	
-		local row = panel:GetNamedChild("AbilityBlock" .. i)
+		local row = panel:GetNamedChild("AbilityBlock" .. i+1)
 	
-		local bardata = skillBars[i]
+		local bardata = skillBars[i+1]
 		
 		if bardata == nil then return end	-- ToDo: Fallback to default
 		
-		for j = 2, row:GetNumChildren() - 1 do
+		local skilltimingbefore = db.FightReport.skilltimingbefore
+		
+		for j = 4, row:GetNumChildren() - 1 do
 		
 			local control = row:GetChild(j)
 			
@@ -2422,7 +2434,7 @@ local function updateLeftInfoPanel(panel)
 			
 			local name = control:GetNamedChild("Label")
 			
-			local abilityId = bardata[j-1]
+			local abilityId = bardata[j-3]
 			
 			control.id = abilityId
 			
@@ -2432,43 +2444,56 @@ local function updateLeftInfoPanel(panel)
 
 			name:SetText(GetFormattedAbilityName(abilityId))
 			
-			local reducedslot = (i-1) * 10 + j
+			local reducedslot = i * 10 + j - 3 
 			
 			local slotdata = skilldata[reducedslot]
 			
-			local strings = {"-", "-", "-", "-"}
+			local strings = {"-", "-", "-", "-", "-", "-"}
 			
 			if slotdata then
 			
-				for i, key in ipairs(skillkeys) do
+				strings[1] = string.format("%d", slotdata[skillkeys[1]])
+			
+				for k = 2, #skillkeys do
 				
-					local value = slotdata[key]
+					local value = slotdata[skillkeys[k]]
 					
-					if type(value) == "number" then
+					if type(value) == "number" and k > 1 then
 					
-						strings[i] = string.format("%.2f", value / 1000)
+						strings[k] = string.format("%.2f", value / 1000)
 						
 					end
 				end
 			end
+		
+			local keymod = skilltimingbefore and 0 or 2
 			
-			local value1string = string.format("%s/%s", strings[1], strings[2])
-			local value2string = string.format("%s/%s", strings[3], strings[4])
+			local valuestring = string.format("%s/%s", strings[2+keymod], strings[3+keymod])
 			
-			control:GetNamedChild("Value1"):SetText(value1string)
-			control:GetNamedChild("Value2"):SetText(value2string)
+			control:GetNamedChild("Value1"):SetText(strings[1])
+			control:GetNamedChild("Value2"):SetText(valuestring)
+			control:GetNamedChild("Value3"):SetText(strings[6])
 		end
+		
+		local header3 = row:GetNamedChild("Header"):GetNamedChild("3")
+		
+		local HeaderStringKey = skilltimingbefore and 2 or 3
+		
+		header3:SetText(GetString("SI_COMBAT_METRICS_SKILLTIME_LABEL", HeaderStringKey))
+		
+		header3.tooltip = GetString("SI_COMBAT_METRICS_SKILLTIME_TT", HeaderStringKey)
 	end
 	
 	local statrow = panel:GetNamedChild("Stats")	
 	
 	local totalSkills = data.totalSkills
+	
 	local totalTime = data.totalSkillTime
 	
 	local value1string = "-"
 	local value2string = "-"
 	
-	if totalSkills and totalTime then 
+	if totalSkills and totalSkills > 0 and totalTime then 
 	
 		value1string = (totalTime and totalSkills) and string.format("%.3f s", totalTime / (1000 * totalSkills)) or "-"
 		value2string = totalTime and string.format("%.3f s", totalTime / 1000) or "-"
@@ -2477,6 +2502,14 @@ local function updateLeftInfoPanel(panel)
 	
 	statrow:GetNamedChild("Value1"):SetText(value1string)
 	statrow:GetNamedChild("Value2"):SetText(value2string)
+end
+
+function CMX.ToggleSkillTimingData(control) 
+
+	db.FightReport.skilltimingbefore = not db.FightReport.skilltimingbefore
+
+	updateLeftInfoPanel(CombatMetrics_Report_InfoPanelLeft)
+
 end
 
 local passiveRequirements = {10, 30, 75, 120}

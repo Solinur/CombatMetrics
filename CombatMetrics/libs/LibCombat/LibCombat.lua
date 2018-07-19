@@ -9,8 +9,6 @@ Implement Debug Functions
 Idea: Weaving Metrics
 Idea: Life and Death
 
-
-
 ]]
 
 local _
@@ -31,7 +29,7 @@ local db
 local reset = false
 local data = {skillBars= {}}
 local showdebug = false --or GetDisplayName() == "@Solinur"
-local dev = GetDisplayName() == "@Solinur" -- or GetDisplayName() == "@Solinur"
+local dev = false --GetDisplayName() == "@Solinur" -- or GetDisplayName() == "@Solinur"
 local timeout = 2000
 local activetimeonheals = true
 local ActiveCallbackTypes = {}
@@ -63,7 +61,7 @@ LIBCOMBAT_EVENT_GROUPEFFECTS_IN = 12	-- LIBCOMBAT_EVENT_GROUPEFFECTS_IN, timems,
 LIBCOMBAT_EVENT_GROUPEFFECTS_OUT = 13	-- LIBCOMBAT_EVENT_GROUPEFFECTS_OUT, timems, unitId, abilityId, changeType, effectType, stacks, sourceType
 LIBCOMBAT_EVENT_PLAYERSTATS = 14		-- LIBCOMBAT_EVENT_PLAYERSTATS, timems, statchange, newvalue, statname
 LIBCOMBAT_EVENT_RESOURCES = 15			-- LIBCOMBAT_EVENT_RESOURCES, timems, abilityId, powerValueChange, powerType
-LIBCOMBAT_EVENT_MESSAGES = 16			-- LIBCOMBAT_EVENT_MESSAGES, timems, messageId
+LIBCOMBAT_EVENT_MESSAGES = 16			-- LIBCOMBAT_EVENT_MESSAGES, timems, messageId, value
 LIBCOMBAT_EVENT_DEATH = 17				-- LIBCOMBAT_EVENT_DEATH, timems, unitId, abilityId
 LIBCOMBAT_EVENT_RESURRECTION = 18		-- LIBCOMBAT_EVENT_RESURRECTION, timems, unitId, self
 LIBCOMBAT_EVENT_SKILL_TIMINGS = 19		-- LIBCOMBAT_EVENT_SKILL_TIMINGS, timems, reducedslot, abilityId, status
@@ -71,9 +69,9 @@ LIBCOMBAT_EVENT_MAX = 19
 
 -- Messages:
 
-local LIBCOMBAT_MESSAGE_COMBATSTART = 1
-local LIBCOMBAT_MESSAGE_COMBATEND = 2
-local LIBCOMBAT_MESSAGE_WEAPONSWAP = 3
+LIBCOMBAT_MESSAGE_COMBATSTART = 1
+LIBCOMBAT_MESSAGE_COMBATEND = 2
+LIBCOMBAT_MESSAGE_WEAPONSWAP = 3
 
 LIBCOMBAT_SKILLSTATUS_INSTANT = 1
 LIBCOMBAT_SKILLSTATUS_BEGIN_DURATION = 2
@@ -987,21 +985,21 @@ local function onCombatState(event, inCombat)  -- Detect Combat Stage
 		
 		if inCombat then
 		
-			if showdebug == true then d("Entering combat.") end
+			if showdebug == true or dev then df("[%.3f] Entering combat.", GetGameTimeMilliseconds()/1000) end
 			
-			lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_MESSAGES), LIBCOMBAT_EVENT_MESSAGES, timems, LIBCOMBAT_MESSAGE_COMBATSTART)
+			lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_MESSAGES), LIBCOMBAT_EVENT_MESSAGES, timems, LIBCOMBAT_MESSAGE_COMBATSTART, 0)
 			
 			currentfight:PrepareFight()
 			
 		else 
 		
-			if showdebug == true then d("Leaving combat.") end
+			if showdebug == true or dev then df("[%.3f] Leaving combat.", GetGameTimeMilliseconds()/1000) end
 			
 			currentfight:FinishFight()
 			
 			if charData == nil then return end
 
-			lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_MESSAGES), LIBCOMBAT_EVENT_MESSAGES, timems, LIBCOMBAT_MESSAGE_COMBATEND)
+			lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_MESSAGES), LIBCOMBAT_EVENT_MESSAGES, timems, LIBCOMBAT_MESSAGE_COMBATEND, 0)
 			
 		end
 	end
@@ -1339,12 +1337,14 @@ local function onWeaponSwap(_, isHotbarSwap)
 
 	if not isHotbarSwap then return end
 	
+	local bar = GetActiveWeaponPairInfo()
+	
 	GetCurrentSkillBar()
 	
 	if data.inCombat == true then  
 	
 		local timems = GetGameTimeMilliseconds()
-		lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_MESSAGES), LIBCOMBAT_EVENT_MESSAGES, timems, LIBCOMBAT_MESSAGE_WEAPONSWAP)
+		lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_MESSAGES), LIBCOMBAT_EVENT_MESSAGES, timems, LIBCOMBAT_MESSAGE_WEAPONSWAP, bar)
 		
 		currentfight:GetNewStats(timems)
 		
@@ -1537,11 +1537,11 @@ end
 
 local function onCombatEventDmgGrp(_ , _ , _ , _ , _ , _ , _ , _ , targetName, targetType, hitValue, _ , _ , _ , _, targetUnitId, abilityId)  -- called by Event
 	
-	if hitValue < 2 or targetUnitId == nil or targetName == "" or targetType==2 then return end
+	if hitValue < 2 or targetUnitId == nil or targetType==2 then return end
 	
-	if hitValue > 100000 then
+	if hitValue > 150000 then
 	
-		if dev then df("[%.3f] %s did %d damage to %s", GetGameTimeMilliseconds(), GetFormattedAbilityName(abilityId), )
+		if dev then df("[%.3f] (%d) %s did %d damage to %s", GetGameTimeMilliseconds(), abilityId, GetFormattedAbilityName(abilityId), hitValue, tostring(targetName)) end
 	
 		return
 	

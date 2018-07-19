@@ -1,4 +1,4 @@
-<GuiXml>
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
 	
 	<Controls>
 		<Label name="CombatMetrics_LabelFontControl" font="ZoFontGameSmall" virtual="true" verticalAlignment="BOTTOM">
@@ -253,29 +253,35 @@
 			
 		</Control>
 		
-		<Control name="CombatMetrics_InfoSkillRow" virtual="true" mouseEnabled="true">
+		<Control name="CombatMetrics_InfoSkillRow" virtual="true">
 		
 			<Dimensions x="300" y="20"/>
 		
 			<Controls>
 		
-				<Control name="$(parent)Icon" inherits="CombatMetrics_InfoSkillIcon">
+				<Control name="$(parent)Icon" inherits="CombatMetrics_InfoSkillIcon" mouseEnabled="true">
 				
 					<Anchor point="LEFT"/>
+			
+					<OnMouseEnter> if self:GetParent().id then CMX.SkillTooltip_OnMouseEnter(self) end </OnMouseEnter>
+					<OnMouseExit> CMX.SkillTooltip_OnMouseExit(self) </OnMouseExit>
 				
 				</Control>
 				
-				<Label name="$(parent)Label" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="LEFT">
+				<Label name="$(parent)Label" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="LEFT" mouseEnabled="true">
 				
 					<Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="4"/>
 					<Dimensions x="146" y="20"/>
+			
+					<OnMouseEnter> if self:GetParent().id then CMX.SkillTooltip_OnMouseEnter(self) end </OnMouseEnter>
+					<OnMouseExit> CMX.SkillTooltip_OnMouseExit(self) </OnMouseExit>
 					
 				</Label>
 				
-				<Label name="$(parent)Value1" inherits="CombatMetrics_ValueFontControl" text="- / -" horizontalAlignment="CENTER">
+				<Label name="$(parent)Value1" inherits="CombatMetrics_ValueFontControl" text="-" horizontalAlignment="CENTER">
 				
 					<Anchor point="LEFT" relativeTo="$(parent)Label" relativePoint="RIGHT" offsetX="4"/>
-					<Dimensions x="66" y="20"/>
+					<Dimensions x="18" y="20"/>
 					
 				</Label>
 				
@@ -286,10 +292,14 @@
 					
 				</Label>
 				
+				<Label name="$(parent)Value3" inherits="CombatMetrics_ValueFontControl" text="-" horizontalAlignment="CENTER">
+				
+					<Anchor point="LEFT" relativeTo="$(parent)Value2" relativePoint="RIGHT" offsetX="4"/>
+					<Dimensions x="40" y="20"/>
+					
+				</Label>
+				
 			</Controls>
-			
-			<OnMouseEnter> if self.id then CMX.SkillTooltip_OnMouseEnter(self) end </OnMouseEnter>
-			<OnMouseExit> CMX.SkillTooltip_OnMouseExit(self) </OnMouseExit>
 			
 		</Control>		
 		
@@ -347,10 +357,65 @@
 					</Controls>
 				
 				</Control>
+				
+				<Control name="$(parent)Header">
+				
+					<Anchor point="TOPLEFT" relativeTo="$(parent)Stats" relativePoint="BOTTOMLEFT" offsetY="6"/>
+					<Anchor point="TOPRIGHT" relativeTo="$(parent)Stats" relativePoint="BOTTOMRIGHT" offsetY="6"/>
+					
+					<Dimensions y="20"/>
+		
+					<Controls>
+						
+						<Label name="$(parent)1" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_SKILL" horizontalAlignment="LEFT">
+						
+							<Anchor point="LEFT" offsetX="24"/>
+							<Dimensions x="146" y="20"/>
+							
+						</Label>
+						
+						<Label name="$(parent)2" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip" text="SI_COMBAT_METRICS_SHARP" horizontalAlignment="CENTER">
+						
+							<Anchor point="LEFT" relativeTo="$(parent)1" relativePoint="RIGHT" offsetX="4"/>
+							<Dimensions x="18" y="20"/>
+							
+							<OnInitialized>self.tooltip = {SI_COMBAT_METRICS_SKILLTIME_TT1}</OnInitialized>
+							
+						</Label>
+						
+						<Label name="$(parent)3" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip" text="SI_COMBAT_METRICS_SKILLTIME_LABEL2" horizontalAlignment="CENTER" mouseEnabled="true">
+						
+							<Anchor point="LEFT" relativeTo="$(parent)2" relativePoint="RIGHT" offsetX="4"/>
+							<Dimensions x="66" y="20"/>
+							
+							<OnInitialized>self.tooltip = {SI_COMBAT_METRICS_SKILLTIME_TT3}</OnInitialized>
+							
+							<OnMouseUp> CMX.ToggleSkillTimingData(self) </OnMouseUp>
+							
+						</Label>
+						
+						<Label name="$(parent)4" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip" text="SI_COMBAT_METRICS_TIME" horizontalAlignment="CENTER">
+						
+							<Anchor point="LEFT" relativeTo="$(parent)3" relativePoint="RIGHT" offsetX="4"/>
+							<Dimensions x="40" y="20"/>
+							
+							<OnInitialized>self.tooltip = {SI_COMBAT_METRICS_SKILLTIME_TT4}</OnInitialized>
+							
+						</Label>
+						
+					</Controls>
+				</Control>
+				
+				<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+				
+					<Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="3"/>
+					<Anchor point="TOPRIGHT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetY="3"/>
+				
+				</Line>
 			
 				<Control name="$(parent)LightAttack" inherits="CombatMetrics_InfoSkillRow">
 				
-					<Anchor point="TOPLEFT" relativeTo="$(parent)Stats" relativePoint="BOTTOMLEFT" offsetY="6"/>
+					<Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="6"/>
 				
 				</Control>
 			
@@ -394,7 +459,7 @@
 				
 					<Anchor point="TOPLEFT" relativeTo="$(parent)Ability5" relativePoint="BOTTOMLEFT" offsetY="6"/>
 				
-				</Control>
+				</Control>		
 				
 			</Controls>
 			
@@ -863,7 +928,6 @@
 					<Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Name" offsetX="-2" />
 					<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Name" />
 					<Dimensions x="50"/>
-					5
 					<Edge edgeSize="1" />
 				</Backdrop>
 				
@@ -1281,7 +1345,7 @@
 									<Anchor point="RIGHT"/>
 								</Label>
 								
-								<EditBox name="$(parent)Edit" text="Test" verticalAlignment="CENTER" hidden="true" inherits="ZO_DefaultEdit" horizontalAlignment="CENTER">
+								<EditBox name="$(parent)Edit" hidden="true" inherits="ZO_DefaultEdit">
 									<Anchor point="LEFT"/>
 									<Anchor point="RIGHT"/>
 									
@@ -2610,6 +2674,13 @@
 									<Anchor point="BOTTOM" offsetY="-2"/>
 									
 								</Line>
+				
+								<Line name="$(parent)Sep2" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+								
+									<Anchor point="TOPLEFT" relativeTo="$(parent)AbilityBlock1" relativePoint="BOTTOMLEFT" offsetX="2" offsetY="8"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)AbilityBlock1" relativePoint="BOTTOMRIGHT" offsetX="-2" offsetY="8"/>
+								
+								</Line>		
 							
 								<Control name="$(parent)AbilityBlock2" inherits="CombatMetrics_InfoAbilityBlock">
 								
@@ -2620,15 +2691,15 @@
 				
 								<Control name="$(parent)Stats">
 								
-									<Anchor point="TOPLEFT" relativeTo="$(parent)AbilityBlock1" relativePoint="BOTTOMLEFT" offsetY="16"/>
+									<Anchor point="TOPLEFT" relativeTo="$(parent)AbilityBlock1" relativePoint="BOTTOMLEFT" offsetY="10"/>
 									<Dimensions x="300" y="20"/>									
 		
 									<Controls>
 										
-										<Label name="$(parent)Label" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_SKILLTIME" horizontalAlignment="LEFT">
+										<Label name="$(parent)Label" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_AVERAGEC" horizontalAlignment="LEFT">
 										
 											<Anchor point="LEFT" offsetX="6"/>
-											<Dimensions x="164" y="20"/>
+											<Dimensions x="60" y="20"/>
 											
 										</Label>
 										
@@ -2637,11 +2708,19 @@
 											<Anchor point="LEFT" relativeTo="$(parent)Label" relativePoint="RIGHT" offsetX="4"/>
 											<Dimensions x="66" y="20"/>
 											
+										</Label>										
+										
+										<Label name="$(parent)Label2" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_TOTAL" horizontalAlignment="LEFT">
+										
+											<Anchor point="LEFT" offsetX="6" constrains="Y"/>
+											<Anchor point="TOPLEFT" relativePoint="TOP" constrains="X" offsetX="3" offsetY="0"/>
+											<Dimensions x="60" y="20"/>
+											
 										</Label>
 										
 										<Label name="$(parent)Value2" inherits="CombatMetrics_ValueFontControl" text="-" horizontalAlignment="CENTER">
 										
-											<Anchor point="LEFT" relativeTo="$(parent)Value1" relativePoint="RIGHT" offsetX="4"/>
+											<Anchor point="LEFT" relativeTo="$(parent)Label2" relativePoint="RIGHT" offsetX="4"/>
 											<Dimensions x="66" y="20"/>
 											
 										</Label>

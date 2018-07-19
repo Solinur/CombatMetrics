@@ -187,8 +187,18 @@
 	SI_COMBAT_METRICS_FAVOURITE_ADD = "Add to Favourites", -- Add to Favourites NEW
 	SI_COMBAT_METRICS_FAVOURITE_REMOVE = "Remove from Favourites", -- Remove from Favourites NEW
 	
+	SI_COMBAT_METRICS_SKILL = "Skill", -- "Skill"
+	
 	SI_COMBAT_METRICS_BAR = "Bar ", -- Total Time Between Skills: NEW
-	SI_COMBAT_METRICS_SKILLTIME = "Average / Total: ", -- Total Time Between Skills: NEW
+	SI_COMBAT_METRICS_AVERAGEC = "Average: ", -- Total Time Between Skills: NEW
+	
+	SI_COMBAT_METRICS_SKILLTIME_LABEL2 = "< W / S", -- as in Weapon / Skill
+	SI_COMBAT_METRICS_SKILLTIME_LABEL3 = "W / S >", -- as in Weapon / Skill
+	
+	SI_COMBAT_METRICS_SKILLTIME_TT1 = "Number of casts", -- "Number of uses of this skill"
+	SI_COMBAT_METRICS_SKILLTIME_TT2 = "Time between the last weapon / skill use and the useage of the ability.", -- "Time between the last weapon / skill use and the useage of the ability."
+	SI_COMBAT_METRICS_SKILLTIME_TT3 = "Time between the ability and the next useage of the weapon / skill .", -- "Time between the ability and the next useage of the weapon / skill ."
+	SI_COMBAT_METRICS_SKILLTIME_TT4 = "Average time between subsequent uses of this skill", -- "Average time between the uses of this skill"
 
 -- Menus
 
