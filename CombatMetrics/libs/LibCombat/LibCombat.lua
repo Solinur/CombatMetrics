@@ -29,7 +29,7 @@ local db
 local reset = false
 local data = {skillBars= {}}
 local showdebug = false --or GetDisplayName() == "@Solinur"
-local dev = false --GetDisplayName() == "@Solinur" -- or GetDisplayName() == "@Solinur"
+local dev = GetDisplayName() == "@Solinur" -- or GetDisplayName() == "@Solinur"
 local timeout = 2000
 local activetimeonheals = true
 local ActiveCallbackTypes = {}
@@ -41,6 +41,7 @@ local EffectBuffer = {}
 local lastdeaths = {}
 local SlotSkills = {}
 local IdToReducedSlot = {}
+local lastskilluses = {}
 
 -- types of callbacks: Units, DPS/HPS, DPS/HPS for Group, Logevents
 
@@ -225,26 +226,120 @@ local SpecialDebuffs = {
 	17906,  -- Crusher Enchantment
 }
 
+local abilityConversions = {
 
-local abilityconversions = {
+	[29012] = 48744, -- Dragon Leap --> CC Immunity
+	[32719] = 48753, -- Take Flight --> CC Immunity
+	[32715] = 48760, -- Ferocious Leap --> CC Immunity
 
-	[28279] 	= {28279, 1, false, 2, false}, -- Uppercut
-	[38814] 	= {38814, 1, false, 2, false}, -- Dizzying Swing
-	[38807] 	= {38807, 1, false, 2, false}, -- Wrecking Blow
+	[29043] = 92507, -- Molten Weapons --> Major Sorcery
+	[31874] = 92503, -- Igneous Weapons --> Major Sorcery
+	[31888] = 92512, -- Molten Armaments --> Major Sorcery
 
-	[24584] 	= {24587, 16, false, 32, false}, -- Dark Echange
-	[24595] 	= {24597, 16, false, 32, false}, -- Dark Deal 
-	[24589] 	= {24592, 16, false, 32, false}, -- Dark Conversion
-		
-	[31531] 	= {88565, 2240, false}, -- Force Siphon
-	[40109] 	= {88575, 2240, false}, -- Siphon Spirit
-		
-	[32633] 	= {-1, 0},	 -- Roar
-	[39113] 	= {-1, 0},	 -- Ferocious Roar
-	[39114] 	= {39124, 2240, false}, -- Rousing Roar
+	[23234] = 51392, -- Bolt Escape --> Bolt Escape Fatigue
+	[23236] = 51392, -- Streak --> Bolt Escape Fatigue
+
+	[33375] = 90587, -- Blur --> Major Evasion
+	[35414] = 90593, -- Mirage --> Major Evasion
+	[35419] = 90620, -- Double Take --> Major Evasion
+
+	[25375] = 25376, -- Shadow Cloak --> Shadow Cloak
+	[25380] = 25381, -- Shadowy Disguise --> Shadowy Disguise
+
+	[86122] = 86224, -- Frost Cloak --> Major Resolve
+	[86126] = 88758, -- Expansive Frost Cloak --> Major Resolve
+	[86130] = 88761, -- Ice Fortress --> Major Resolve
+
+	[22178] = 22179,  -- Sun Shield --> Sun Shield
+	[22182] = 22183,  -- Radiant Ward --> Radiant Ward
+	[22180] = 49091,  -- Blazing Shield --> Blazing Shield
+					 
+	[22149] = 48532,  -- Focused Charge --> Charge Snare
+	[22161] = 48532,  -- Explosive Charge --> Charge Snare
+	[15540] = 48532,  -- Toppling Charge --> Charge Snare
+					 
+	[26209] = 26220,  -- Restoring Aura --> Minor Magickasteal
+	[26807] = 26809,  -- Radiant Aura --> Minor Magickasteal
+	[26821] = 34366,  -- Repentance --> Repentance
+					 
+	[22304] = 22307,  -- Healing Ritual --> Healing Ritual
+	[22327] = 22331,  -- Ritual of Rebirth --> Ritual of Rebirth
+	[22314] = 22318,  -- Hasty Prayer --> Hasty Prayer
+					 
+	[28448] = 28450,  -- Critical Charge --> Critical Strike
+	[38788] = 38789,  -- Stampede --> Critical Strike
+	[38778] = 38781,  -- Critical Rush --> Critical Strike
+					 
+	[28719] = 48532,  -- Shield Charge --> Charge Snare
+	[38401] = 48532,  -- Shielded Assault --> Charge Snare
+	[38405] = 38408,  -- Invasion --> Invasion
+					 
+	[83600] = 85156,  -- Lacerate --> Lacerate
+	[85187] = 85192,  -- Rend --> Rend
+	[85179] = 85182,  -- Thrive in Chaos --> Thrive in Chaos
+					 
+	[29173] = 53881,  -- Weakness to Elements --> Major Breach
+	[39089] = 62775,  -- Elemental Susceptibility --> Major Breach
+	[39095] = 62787,  -- Elemental Drain --> Major Breach
+					 
+	[40116] = 88606,  -- Quick Siphon --> Minor Lifesteal
+					 
+	[29556] = 63015,  -- Evasion --> Major Evasion
+	[39195] = 63019,  -- Shuffle --> Major Evasion
+	[39192] = 63030,  -- Elude --> Major Evasion
+					 
+	[32632] = 48532,  -- Pounce --> Charge Snare
+	[39105] = 48532,  -- Brutal Pounce --> Charge Snare
+	[39104] = 48532,  -- Feral Pounce --> Charge Snare
+
+	[103503] = 103521, -- Accelerate --> Minor Force
+	[103503] = 103712, -- Race Against Time --> Minor Force
+
+	[103478] = 108609, -- Undo --> Undo
+	[103557] = 108621, -- Precognition --> Precognition
+	[103564] = 108641, -- Temporal Guard --> Temporal Guard
+
+	[38566] = 101161,  -- Rapid Maneuver --> Major Expedition
+	[40211] = 101169,  -- Retreating Maneuver --> Major Expedition
+	[40215] = 101178,  -- Charging Maneuver --> Major Expedition
+
+	[61503] = 61504,   -- Vigor --> Vigor
+	[61505] = 61506,   -- Echoing Vigor --> Echoing Vigor
+	[61507] = 61509,   -- Resolving Vigor --> Resolving Vigor
+
+	[38563] = 38564,   -- War Horn --> War Horn
+	[40223] = 40224,   -- Aggressive Horn --> Aggressive Horn
+	[40220] = 40221,   -- Sturdy Horn --> Sturdy Horn
+
+	[38571] = 38572,   -- Purge --> Purge
+	[40232] = 40233,   -- Efficient Purge --> Purge
+
+
+	-- unclear: Malevolent Offering 33308 -- Heal ?
+	-- unclear: Shrewd Offering 34721 -- Heal ?
+	-- unclear: healthy Offering 34721 -- Heal ?
+
+}
+
+local validSkillStartResults = {
+
+	[ACTION_RESULT_DAMAGE] = true, -- 1
+	[ACTION_RESULT_CRITICAL_DAMAGE] = true, -- 2
+	[ACTION_RESULT_HEAL] = true, -- 16
+	[ACTION_RESULT_CRITICAL_HEAL] = true, -- 32
+	[ACTION_RESULT_BLOCKED_DAMAGE] = true, -- 2151
+	[ACTION_RESULT_DAMAGE_SHIELDED] = true, -- 2460
+	[ACTION_RESULT_SNARED] = true, -- 2025
+	[ACTION_RESULT_BEGIN] = true, -- 2200
+	[ACTION_RESULT_EFFECT_GAINED] = true, -- 2240
 	
-	[103706] 	= {103707, 2240, false},	 -- Channeled Acceleration
+}
 
+local validSkillEndResults = {
+
+	[ACTION_RESULT_EFFECT_GAINED] = true, -- 2240
+	[ACTION_RESULT_EFFECT_FADED] = true, -- 2250
+	
 }
 
 local UnitHandler = ZO_Object:Subclass()
@@ -505,24 +600,14 @@ local function UpdateSlotSkillEvents()
 		
 				local channeled, castTime = GetAbilityCastInfo(abilityId)
 				
-				local result = castTime > 0 and ACTION_RESULT_BEGIN or ACTION_RESULT_EFFECT_GAINED
+				local result = castTime > 0 and ACTION_RESULT_BEGIN or nil
 				
 				local result2 = castTime > 0 and ACTION_RESULT_EFFECT_GAINED or channeled and ACTION_RESULT_EFFECT_FADED or nil
 				
-				local conversion = abilityconversions[abilityId]
-				
-				local eventvalues = conversion or {abilityId, result, false, result2, true}				
-				
-				abilityId = eventvalues[1]
-				
-				if abilityId ~= -1 then 
-					
-					for i = 2, #eventvalues, 2 do
+				local convertedId = abilityConversions[abilityId] or abilityId
 
-						if eventvalues[i] ~= nil then table.insert(SlotSkills, {abilityId, eventvalues[i], eventvalues[i+1]}) end
-					
-					end				
-				end
+				table.insert(SlotSkills, {convertedId, result, false})
+				table.insert(SlotSkills, {convertedId, result2, true})
 			end
 		end
 	end	
@@ -530,11 +615,11 @@ local function UpdateSlotSkillEvents()
 	events:RegisterEvents()
 end
 
-local function GetCurrentSkillBar()
+local function GetCurrentSkillBars()
 
-	local bar = GetActiveWeaponPairInfo()
-	
 	local skillBars = data.skillBars
+	
+	local bar = GetActiveWeaponPairInfo()	
 	
 	skillBars[bar] = {}
 	
@@ -548,7 +633,9 @@ local function GetCurrentSkillBar()
 		
 		local reducedslot = (bar - 1) * 10 + i
 		
-		IdToReducedSlot[id] = reducedslot
+		local convertedId = abilityConversions[id] or id
+		
+		IdToReducedSlot[convertedId] = reducedslot
 		
 	end	
 	
@@ -558,7 +645,7 @@ end
 
 local function onPlayerActivated()
 
-	zo_callLater(GetCurrentSkillBar, 100)
+	zo_callLater(GetCurrentSkillBars, 100)
 	
 end
 
@@ -610,7 +697,7 @@ function FightHandler:PrepareFight()
 		self.prepared = true
 		
 		self.stats = {}
-		GetCurrentSkillBar()
+		GetCurrentSkillBars()
 		self:GetNewStats(timems)		
 	end	
 	
@@ -1339,7 +1426,7 @@ local function onWeaponSwap(_, isHotbarSwap)
 	
 	local bar = GetActiveWeaponPairInfo()
 	
-	GetCurrentSkillBar()
+	GetCurrentSkillBars()
 	
 	if data.inCombat == true then  
 	
@@ -1563,22 +1650,43 @@ end
 
 local lastCastTimeAbility = 0
 
+local function GetReducedSlotId(reducedslot)
+
+	local bar = reducedslot > 10 and 2 or 1
+
+	local slot = reducedslot%10
+	
+	local origId = (data.skillBars and data.skillBars[bar] and data.skillBars[bar][slot]) or nil
+
+	return origId
+	
+end
+	
 local function onAbilityUsed(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId) 
 
-	if Events.Skills.active ~= true or (result == ACTION_RESULT_EFFECT_GAINED and hitValue ~= 1) then return end
+	if Events.Skills.active ~= true or validSkillStartResults[result] ~= true then return end
+	
+	local lasttime = lastskilluse[abilityId] or 0
+	
+	if now - lasttime > 2000 then return end
+	
+	lastskilluse[abilityId] = nil
 	
 	local timems = GetGameTimeMilliseconds()
 	
-	local reducedslot = IdToReducedSlot[abilityId]	
-	local channeled, castTime, channelTime = GetAbilityCastInfo(abilityId)
+	local reducedslot = IdToReducedSlot[abilityId]
+	
+	local origId = GetReducedSlotId(reducedslot)
+	
+	local channeled, castTime, channelTime = GetAbilityCastInfo(origId)
 	
 	castTime = channeled and channelTime or castTime
 	
-	-- if dev == true then df("[%.3f] Skill used: %s (%d), Duration: %ds Target: %s", timems/1000, GetAbilityName(abilityId), abilityId, castTime/1000, tostring(target)) end
+	if dev == true then df("[%.3f] Skill used: %s (%d), Duration: %ds Target: %s", timems/1000, GetAbilityName(abilityId), abilityId, castTime/1000, tostring(target)) end
 	
 	if castTime > 0 then
 	
-		abilityId = abilityconversions[abilityId] and abilityconversions[abilityId][1] or abilityId
+		abilityId = abilityConversions[abilityId] or abilityId
 		
 		local status = channeled and LIBCOMBAT_SKILLSTATUS_BEGIN_CHANNEL or LIBCOMBAT_SKILLSTATUS_BEGIN_DURATION
 		
@@ -1611,6 +1719,8 @@ local function onAbilityUsed(eventCode, result, isError, abilityName, abilityGra
 end
 
 local function onAbilityFinished(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId) 
+	
+	if validSkillEndResults[result] ~= true then return end
 	
 	local timems = GetGameTimeMilliseconds()
 	
@@ -1804,7 +1914,7 @@ Events.General = EventHandler:New(GetAllCallbackTypes()
 		self:RegisterEvent(EVENT_PLAYER_COMBAT_STATE, onCombatState)
 		self:RegisterEvent(EVENT_UNIT_CREATED, onGroupChange)
 		self:RegisterEvent(EVENT_UNIT_DESTROYED, onGroupChange)
-		self:RegisterEvent(EVENT_ACTION_SLOT_ABILITY_SLOTTED, GetCurrentSkillBar)
+		self:RegisterEvent(EVENT_ACTION_SLOT_ABILITY_SLOTTED, GetCurrentSkillBars)
 		self:RegisterEvent(EVENT_PLAYER_ACTIVATED, onPlayerActivated)
 		
 		if showdebug == true then self:RegisterEvent(EVENT_COMBAT_EVENT, onCustomEvent, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_EFFECT_GAINED_DURATION, REGISTER_FILTER_IS_ERROR, false) end		
@@ -2046,8 +2156,15 @@ Events.Skills = EventHandler:New(
 			
 			local func = finish and onAbilityFinished or onAbilityUsed
 			
-			self:RegisterEvent(EVENT_COMBAT_EVENT, func, REGISTER_FILTER_COMBAT_RESULT, result, REGISTER_FILTER_ABILITY_ID, id)
-		
+			if result then 
+			
+				self:RegisterEvent(EVENT_COMBAT_EVENT, func, REGISTER_FILTER_ABILITY_ID, id, REGISTER_FILTER_COMBAT_RESULT, result)
+			
+			else
+			
+				self:RegisterEvent(EVENT_COMBAT_EVENT, func, REGISTER_FILTER_ABILITY_ID, id)
+			
+			end
 		end
 	
 		self.active = true
