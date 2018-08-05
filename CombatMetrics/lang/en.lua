@@ -67,11 +67,21 @@
 	SI_COMBAT_METRICS_SHOWIDS = "Show IDs", -- Show IDs for units, buffs and abilities
 	SI_COMBAT_METRICS_HIDEIDS = "Hide IDs", -- Hide IDs for units, buffs and abilities
 	
+	SI_COMBAT_METRICS_POSTDPS = "Post DPS/HPS",
 	SI_COMBAT_METRICS_POSTSINGLEDPS = "Post single target DPS",
 	SI_COMBAT_METRICS_POSTSMARTDPS = "Post boss target DPS",
 	SI_COMBAT_METRICS_POSTMULTIDPS = "Post total DPS",
 	SI_COMBAT_METRICS_POSTALLDPS = "Post single and total DPS",
 	SI_COMBAT_METRICS_POSTHPS = "Post HPS",
+	
+	SI_COMBAT_METRICS_FEEDBACK = "Send Feedback / Donate",
+	
+	SI_COMBAT_METRICS_FEEDBACK_MAIL = "Send Note",
+	SI_COMBAT_METRICS_FEEDBACK_GOLD = "Donate 5000g",
+	SI_COMBAT_METRICS_FEEDBACK_GOLD2 = "Donate 50000g",
+	SI_COMBAT_METRICS_FEEDBACK_ESOUI = "Site (ESOUI)",
+	SI_COMBAT_METRICS_FEEDBACK_PP = "PayPal",
+	SI_COMBAT_METRICS_FEEDBACK_TEXT = "If you found a bug, have a request or a suggestion, or simply wish to donate, send a mail.",
 
 	SI_COMBAT_METRICS_STORAGE_FULL = "The storage file is full. The fight you want to save needs <<1>> MB. Delete a fight to free some space or increase the allowed space in the settings!", -- The storage file is full. Delete a fight to free some space!
 

@@ -21,6 +21,8 @@ for i = 1, 64 do
 
 end
 
+local lastid = 0
+
 local function GetChar(value, logstringdata, length)
 
 	table.insert(logstringdata, chars[value%64])
@@ -49,6 +51,8 @@ end
 local function GetValue(value, logstring, length, offset)
 
 	local newchar = string.sub(logstring, offset, offset)
+	
+	if newchar == "" or newchar == nil then return end
 
 	value = value * 64 + values[newchar]
 
@@ -67,7 +71,12 @@ local function Decode(logstring, layout)
 	for i = #layout, 1, -1 do
 	
 		offset, value = GetValue(0, logstring, layout[i], offset)
-		line[i] = value
+		
+		if value then 
+		
+			line[i] = value
+			
+		else return line end
 		
 	end
 	
@@ -157,8 +166,8 @@ local layouts = {
 	[LAYOUT_EVENT] = {1, 4, 2, 3, 1, 1, 1, 1},			-- (15) type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType
 	[LAYOUT_STATS] = {1, 4, 4, 4, 1},		 			-- (15) type, timems, statchange, newvalue, statname
 	[LAYOUT_POWER] = {1, 4, 3, 3, 1},		 			-- (13) type, timems, abilityId, powerValueChange, powerType
-	[LAYOUT_MESSAGE] = {1, 4, 1}, 						-- (7)  type, timems, message (e.g. "weapon swap")
-	[LAYOUT_SKILL] = {1, 4, 1, 3, 1}, 					-- (11)  type, timems, reducedslot, abilityId, status
+	[LAYOUT_MESSAGE] = {1, 4, 1, 1}, 					-- (7)  type, timems, messageId (e.g. "weapon swap"), bar
+	[LAYOUT_SKILL] = {1, 4, 1, 3, 1}, 					-- (11) type, timems, reducedslot, abilityId, status
 }
 
 local layoutsize = {} -- get total sizes of layouts
@@ -210,6 +219,10 @@ local function encodeCombatLogLine(line, unitConversion)
 
 		return
 		
+	elseif layoutId == LAYOUT_MESSAGE then 
+	
+		line[4] = line[4] or 0
+		
 	elseif layoutId ~= LAYOUT_MESSAGE and layoutId ~= LAYOUT_SKILL then 
 
 		return
@@ -218,7 +231,7 @@ local function encodeCombatLogLine(line, unitConversion)
 	
 	local layout = layouts[layoutId]
 	local size = layoutsize[layoutId]
-	
+
 	local logstring = Encode(line, layout)
 	
 	return logstring, size
@@ -255,7 +268,11 @@ local function decodeCombatLogLine(line)
 		if logdata[3] == 0 then logdata[3] = nil end
 		logdata[4] = logdata[4] - 131072	
 	
-	elseif layoutId ~= LAYOUT_MESSAGE and layoutId ~= LAYOUT_SKILL then					-- type, timems, message (e.g. "weapon swap")
+	elseif layoutId ~= LAYOUT_MESSAGE then
+	
+		line[4] = line[4] or 0
+
+	elseif layoutId ~= LAYOUT_SKILL then					-- type, timems, message (e.g. "weapon swap")
 
 		return
 	

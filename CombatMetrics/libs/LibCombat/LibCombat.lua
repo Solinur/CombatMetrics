@@ -619,7 +619,7 @@ local function GetCurrentSkillBars()
 
 	local skillBars = data.skillBars
 	
-	local bar = GetActiveWeaponPairInfo()	
+	local bar = data.bar	
 	
 	skillBars[bar] = {}
 	
@@ -697,6 +697,7 @@ function FightHandler:PrepareFight()
 		self.prepared = true
 		
 		self.stats = {}
+		self.startBar = data.bar
 		GetCurrentSkillBars()
 		self:GetNewStats(timems)		
 	end	
@@ -747,7 +748,10 @@ function FightHandler:FinishFight()
 	
 	data.majorForce = 0
 	data.minorForce = 0	
+	
 	EffectBuffer = {}
+	
+	lastskilluses = {}
 end
  
 local function GetStat(stat) -- helper function to make code shorter
@@ -1391,13 +1395,20 @@ local function onSlotUpdate(_, slot)
 	local cost, powerType = GetSlotAbilityCost(slot)
 	local abilityId = GetSlotBoundId(slot)
 	local lastabilities = data.lastabilities
-	local bar = GetActiveWeaponPairInfo()
 	
 	if Events.Resources.active and slot > 2 and (powerType == 0 or powerType == 6) then 
 	
 		table.insert(lastabilities,{timems, abilityId, -cost, powerType})
 		
 		if #lastabilities > 10 then table.remove(lastabilities, 1) end
+	
+	end
+	
+	if Events.Skills.active then
+	
+		local convertedId = abilityConversions[abilityId] or abilityId
+	
+		lastskilluses[convertedId] = timems
 	
 	end
 end
@@ -1424,7 +1435,7 @@ local function onWeaponSwap(_, isHotbarSwap)
 
 	if not isHotbarSwap then return end
 	
-	local bar = GetActiveWeaponPairInfo()
+	data.bar = GetActiveWeaponPairInfo()
 	
 	GetCurrentSkillBars()
 	
@@ -1666,13 +1677,13 @@ local function onAbilityUsed(eventCode, result, isError, abilityName, abilityGra
 
 	if Events.Skills.active ~= true or validSkillStartResults[result] ~= true then return end
 	
-	local lasttime = lastskilluse[abilityId] or 0
-	
-	if now - lasttime > 2000 then return end
-	
-	lastskilluse[abilityId] = nil
+	local lasttime = lastskilluses[abilityId] or 0
 	
 	local timems = GetGameTimeMilliseconds()
+	
+	if timems - lasttime > 2000 then return end
+	
+	lastskilluses[abilityId] = nil	
 	
 	local reducedslot = IdToReducedSlot[abilityId]
 	
@@ -2136,7 +2147,7 @@ Events.Resurrections = EventHandler:New(
 )
 
 Events.Slots = EventHandler:New(
-	{LIBCOMBAT_EVENT_RESOURCES},
+	{LIBCOMBAT_EVENT_RESOURCES, LIBCOMBAT_EVENT_SKILL_TIMINGS},
 	function (self)
 		
 		self:RegisterEvent(EVENT_ACTION_SLOT_ABILITY_USED , onSlotUpdate)
@@ -2197,11 +2208,10 @@ local strings = {
 	SI_LIBCOMBAT_LOG_STAT_SPELL_CRIT_DONE = "Spell Critical Damage",  -- "Spell Critical Damage"
 	SI_LIBCOMBAT_LOG_STAT_WEAPON_CRIT_DONE = "Physical Critical Damage",  -- "Physical Critical Damage"
 	
-	
 	SI_LIBCOMBAT_LOG_MESSAGE1 = "Entering Combat",  -- "Entering Combat"
 	SI_LIBCOMBAT_LOG_MESSAGE2 = "Exiting Combat",  -- "Entering Combat"
-	SI_LIBCOMBAT_LOG_MESSAGE3 = "Weapon Swap",  -- "Entering Combat"
-		
+	SI_LIBCOMBAT_LOG_MESSAGE3 = "Weapon Swap",  -- "Entering Combat"	
+	SI_LIBCOMBAT_LOG_MESSAGE_BAR = "Bar",  -- "Entering Combat"	
 
 	SI_LIBCOMBAT_LOG_FORMAT_TARGET_NORMAL = "%s|r with ",  -- i.e. "dwemer sphere with", %s = targetname. |r stops the colored text
 	SI_LIBCOMBAT_LOG_FORMAT_TARGET_SHIELD = "%ss shield:|r",  -- i.e. "dwemer spheres shield:", %s = targetname. |r stops the colored text "
@@ -2486,18 +2496,22 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 	elseif logtype == LIBCOMBAT_EVENT_MESSAGES then 
 	
 		local message = logline[3]
+		local bar = logline[4]
+		local messagetext		
 		
 		if message == LIBCOMBAT_MESSAGE_WEAPONSWAP then 
 		
 			color = {.6,.6,.6}
+			local formatstring = bar ~= nil and "%s: %s %d" or "%s"
 
+			messagetext = string.format(formatstring, GetString("SI_LIBCOMBAT_LOG_MESSAGE3"), GetString("SI_LIBCOMBAT_LOG_MESSAGE_BAR"), bar)
+			
 		elseif message ~= nil then 
 		
 			color = {.7,.7,.7}
+			messagetext = type(message) == "number" and GetString("SI_LIBCOMBAT_LOG_MESSAGE", message) or message
 			
 		else return end
-		
-		local messagetext = type(message) == "number" and GetString("SI_LIBCOMBAT_LOG_MESSAGE", message) or message
 		
 		text = zo_strformat("<<1>> <<2>>", timeString, messagetext)
 	
@@ -2534,6 +2548,8 @@ local function Initialize()
   data.majorForce = 0
   data.minorForce = 0
   data.critBonusMundus = 0
+  data.bar = GetActiveWeaponPairInfo()
+  
   --resetfightdata
   currentfight = FightHandler:New()
   

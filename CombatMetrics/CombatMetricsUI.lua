@@ -11,6 +11,7 @@ local currentCLPage
 local selections, lastSelections
 local savedFights
 local SVHandler
+local feedbackfunc
 
 local CMX = CMX
 if CMX == nil then CMX = {} end
@@ -23,6 +24,8 @@ end
 
 local LC = LibStub:GetLibrary("LibCombat")
 if LC == nil then return end 
+
+local LibFeedback = LibStub:GetLibrary('LibFeedback')
 
 local GetFormattedAbilityName = LC.GetFormattedAbilityName
 
@@ -915,18 +918,27 @@ do
 		ClearMenu()
 		AddCustomMenuItem(text, func)
 		
-		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTSINGLEDPS), postSingleDPS)
+		local postoptions = {}
+		
+		table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTMULTIDPS), callback = postMultiDPS})
 		
 		local fight = CMX.lastfights[currentFight]
 		
-		if fight and fight.bossfight == true then AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTSMARTDPS), postSmartDPS) end
-		
-		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTMULTIDPS), postMultiDPS)
-		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTALLDPS), postAllDPS)
-		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTHPS), postHPS)
+		if fight and fight.bossfight == true then 
 
-		ShowMenu(settingsbutton)
+			table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTSMARTDPS), callback = postSmartDPS}) 
+			
+		end
 		
+		table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTMULTIDPS), callback = postMultiDPS})
+		table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTALLDPS), callback = postAllDPS})
+		table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTHPS), callback = postHPS})
+		
+		AddCustomSubMenuItem(GetString(SI_COMBAT_METRICS_POSTDPS), postoptions)
+		
+		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_FEEDBACK), feedbackfunc)
+
+		ShowMenu(settingsbutton)		
 
 	end
 end
@@ -3452,4 +3464,16 @@ function CMX.InitializeUI()
 				
 	CombatMetrics_Report:Resize(db.FightReport.scale)
 	
+	local settingsbutton = CombatMetrics_Report_SelectorRowSettingsButton
+	
+	local data = CMX.GetFeedBackData(settingsbutton)
+					
+	local button = LibFeedback:initializeFeedbackWindow(unpack(data))
+	button:SetHidden(true)
+			
+	function feedbackfunc() 
+		
+		button.feedbackWindow:ToggleHidden()
+		
+	end	
 end

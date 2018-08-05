@@ -26,6 +26,31 @@ local CMX = CMX
 CMX.name = "CombatMetrics"
 CMX.version = "0.9.0.0"
 
+function CMX.GetFeedBackData(parentcontrol)
+	
+	local data = {
+	
+		CMX,
+		"Combat Metrics", 
+		parentcontrol,
+		"@Solinur",
+		{TOPLEFT, parentcontrol, TOPRIGHT, 10, 0},
+		{	
+			{0, GetString(SI_COMBAT_METRICS_FEEDBACK_MAIL), false},
+			{5000, GetString(SI_COMBAT_METRICS_FEEDBACK_GOLD), true},
+			{50000, GetString(SI_COMBAT_METRICS_FEEDBACK_GOLD2), true},
+			{"https://www.esoui.com/downloads/info1360-CombatMetrics.html", GetString(SI_COMBAT_METRICS_FEEDBACK_ESOUI), false},
+			{"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=C83FDY9AQ6N3G", GetString(SI_COMBAT_METRICS_FEEDBACK_PP), false},
+		},
+		GetString(SI_COMBAT_METRICS_FEEDBACK_TEXT),
+		720,
+		100,
+		140,
+	}
+	
+	return data
+end
+
 local GetFormattedAbilityName = LC.GetFormattedAbilityName
 
 local GetFormattedAbilityIcon = LC.GetFormattedAbilityIcon
@@ -207,6 +232,7 @@ local ResourceTable = NewSubclass()
 local ResourceHandler = NewSubclass()
 local EffectHandler = NewSubclass()
 local SkillTimingHandler = NewSubclass()
+local BarStatsHandler = NewSubclass()
 
 local function AcquireUnitData(self, unitId, timems)
 
@@ -277,6 +303,20 @@ local function AcquireSkillTimingData(self, reducedslot)
 	end
 	
 	return skilldata[reducedslot]
+end
+
+local function AcquireBarStats(self, bar)
+
+	local bardata = self.calculated.barStats 
+	
+	if bardata[bar] == nil then  
+	
+		bardata[bar] = BarStatsHandler:New()
+	
+	end
+	
+	return bardata[bar]
+
 end
 
 local CategoryList = {
@@ -499,6 +539,17 @@ function SkillTimingHandler:Initialize()
 	
 end
 
+function BarStatsHandler:Initialize()
+
+	self.onTimes = {}  		-- holds times the bar gets used
+	self.offTimes = {}  	-- holds times the bar gets used
+	self.damageOut = {} 	-- holds damage done on the bar
+	self.damageIn = {} 		-- holds damage received on the bar
+	self.healingOut = {} 	-- holds healing done on the bar
+	self.healingIn = {} 	-- holds healing received on the bar
+	
+end
+
 local function GetEmtpyFightStats()
 
 	local data = {}
@@ -512,6 +563,8 @@ local function GetEmtpyFightStats()
 	data.resources = ResourceTable:New()
 	
 	data.skills = {}
+	data.barStats = {}
+	
 	data.totalSkillTime = 0
 	data.totalSkills = 0
 	
@@ -528,6 +581,11 @@ local function CalculateFight(fight) -- called by CMX.update or on user interact
 	fight.calculated = GetEmtpyFightStats()
 	
 	local data = fight.calculated
+	
+	currentbar = fight.startBar
+	
+	local barStats = fight:AcquireBarStats(currentbar)
+	barStats.onTimes = {fight.dpsstart}
 	
 	-- copy group values (since they won't get calculated)
 	
@@ -764,6 +822,8 @@ local function IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitVa
 		statlist = StatListTable[key]
 
 	end
+	
+	local barStats = fight:AcquireBarStats(currentbar)
 	
 	local stats = fight.calculated.stats
 	
@@ -1135,9 +1195,17 @@ ProcessLog[LIBCOMBAT_EVENT_SKILL_TIMINGS] = ProcessLogSkillTimings
 
 local function ProcessMessages(fight, callbacktype, timems, messageId, value)
 
-	if messageId ~= LIBCOMBAT_MESSAGE_WEAPONSWAP then return end	
+	if messageId ~= LIBCOMBAT_MESSAGE_WEAPONSWAP then return end
+	
+	local barStatsOld = fight:AcquireBarStats(currentbar)
+	
+	table.insert(barStatsOld.offTimes, timems) 
 
 	currentbar = value
+	
+	local barStatsNew = fight:AcquireBarStats(currentbar)
+	
+	table.insert(barStatsNew.onTimes, timems) 
 	
 end
 
@@ -1395,6 +1463,14 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 			end			
 		end
 		
+		-- calculate bardata
+		
+		local barStats = fight:AcquireBarStats(currentbar)
+		
+		table.insert(barStats.offTimes, timems)
+		
+		currentbar = nil -- TODO: remove, this is only to test for contamination
+		
 		data.buffs = fight.playerid ~= nil and data.units[fight.playerid] and data.units[fight.playerid].buffs or {}
 		
 		data.totalSkillTime = totalSkillTime
@@ -1530,16 +1606,21 @@ local function GetFightName(fight)
 	fight.fightlabel = fight.fightlabel or bigunitname
 end
 
+local function AddFightCalculationFunctions(fight)
 
-local function FightSummaryCallback(_, fight)
-
-	-- add functions
 	fight.CalculateFight = CalculateFight
 	fight.CalculateChunk = CalculateChunk
 	fight.AcquireUnitData = AcquireUnitData
 	fight.AcquireResourceData = AcquireResourceData
 	fight.AccumulateStats = AccumulateStats	
 	fight.AcquireSkillTimingData = AcquireSkillTimingData	
+	fight.AcquireBarStats = AcquireBarStats
+
+end
+
+local function FightSummaryCallback(_, fight)
+
+	AddFightCalculationFunctions(fight)
 	
 	fight.grouplog = nil
 	
