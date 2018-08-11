@@ -619,7 +619,7 @@ local function GetCurrentSkillBars()
 
 	local skillBars = data.skillBars
 	
-	local bar = data.bar	
+	local bar = data.bar
 	
 	skillBars[bar] = {}
 	
@@ -1171,6 +1171,8 @@ local function BuffEventHandler(isspecial, groupeffect, _, changeType, _, _, uni
 	
 	local timems = GetGameTimeMilliseconds()
 	
+	-- if dev and abilityId == -1 and unitTag == "player" then df("[%.3f] %s %s", timems/1000, changeType == EFFECT_RESULT_GAINED and "Got" or "Lost", GetFormattedAbilityName(abilityId)) end
+	
 	-- if showdebug==true then d(changeType..","..GetAbilityName(abilityId)..", ET:"..effectType..","..abilityType..","..unitTag) end
 	
 	local eventid = groupeffect == GROUP_EFFECT_IN and LIBCOMBAT_EVENT_GROUPEFFECTS_IN or groupeffect == GROUP_EFFECT_OUT and LIBCOMBAT_EVENT_GROUPEFFECTS_OUT or string.sub(unitTag, 1, 6) == "player" and LIBCOMBAT_EVENT_EFFECTS_IN or LIBCOMBAT_EVENT_EFFECTS_OUT
@@ -1431,18 +1433,24 @@ local function onResourceChanged (_, result, _, _, _, _, _, _, targetName, _, po
 	if #lastabilities > 10 then table.remove(lastabilities, 1) end
 end
 
-local function onWeaponSwap(_, isHotbarSwap)
+local function onWeaponSwap(_, _)
 
-	if not isHotbarSwap then return end
+	if GetAPIVersion() > 100023 then 
 	
-	data.bar = GetActiveWeaponPairInfo()
+		data.bar = ACTION_BAR_ASSIGNMENT_MANAGER.currentHotbarCategory
+		
+	else
+	
+		data.bar = GetActiveWeaponPairInfo()
+		
+	end
 	
 	GetCurrentSkillBars()
 	
 	if data.inCombat == true then  
 	
 		local timems = GetGameTimeMilliseconds()
-		lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_MESSAGES), LIBCOMBAT_EVENT_MESSAGES, timems, LIBCOMBAT_MESSAGE_WEAPONSWAP, bar)
+		lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_MESSAGES), LIBCOMBAT_EVENT_MESSAGES, timems, LIBCOMBAT_MESSAGE_WEAPONSWAP, data.bar)
 		
 		currentfight:GetNewStats(timems)
 		
@@ -1693,7 +1701,7 @@ local function onAbilityUsed(eventCode, result, isError, abilityName, abilityGra
 	
 	castTime = channeled and channelTime or castTime
 	
-	if dev == true then df("[%.3f] Skill used: %s (%d), Duration: %ds Target: %s", timems/1000, GetAbilityName(abilityId), abilityId, castTime/1000, tostring(target)) end
+	-- if dev == true then df("[%.3f] Skill used: %s (%d), Duration: %ds Target: %s", timems/1000, GetAbilityName(abilityId), abilityId, castTime/1000, tostring(target)) end
 	
 	if castTime > 0 then
 	
@@ -2502,9 +2510,9 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 		if message == LIBCOMBAT_MESSAGE_WEAPONSWAP then 
 		
 			color = {.6,.6,.6}
-			local formatstring = bar ~= nil and "%s: %s %d" or "%s"
+			local formatstring = bar ~= nil and bar > 0 and "%s (%s %d)" or "%s"
 
-			messagetext = string.format(formatstring, GetString("SI_LIBCOMBAT_LOG_MESSAGE3"), GetString("SI_LIBCOMBAT_LOG_MESSAGE_BAR"), bar)
+			messagetext = string.format(formatstring, GetString(SI_LIBCOMBAT_LOG_MESSAGE3), GetString(SI_LIBCOMBAT_LOG_MESSAGE_BAR), bar)
 			
 		elseif message ~= nil then 
 		

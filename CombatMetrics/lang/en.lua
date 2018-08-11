@@ -119,11 +119,14 @@
 	SI_COMBAT_METRICS_SHIELDED = "Shielded: ", -- Shielded: 
 
 	SI_COMBAT_METRICS_HITS = "Hits", -- Hits
+	SI_COMBAT_METRICS_NORM = "Norm", -- Norm
 
 	SI_COMBAT_METRICS_RESOURCES = "Resources",  -- Resources
 
 	SI_COMBAT_METRICS_STATS = "Stats",  -- Stats
 	SI_COMBAT_METRICS_AVE = "Avg",  -- Average
+	SI_COMBAT_METRICS_AVERAGE = "Average",  -- Average
+	SI_COMBAT_METRICS_NORMAL_HITS = "Normal Hits",  -- Average
 	SI_COMBAT_METRICS_MAX = "Max",  -- Maximum
 
 	SI_COMBAT_METRICS_STATS_MAGICKA1 = "Max Magicka:",  -- Max Magicka:

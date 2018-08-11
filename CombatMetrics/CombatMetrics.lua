@@ -543,10 +543,10 @@ function BarStatsHandler:Initialize()
 
 	self.onTimes = {}  		-- holds times the bar gets used
 	self.offTimes = {}  	-- holds times the bar gets used
-	self.damageOut = {} 	-- holds damage done on the bar
-	self.damageIn = {} 		-- holds damage received on the bar
-	self.healingOut = {} 	-- holds healing done on the bar
-	self.healingIn = {} 	-- holds healing received on the bar
+	self.damageOut = 0 		-- holds damage done on the bar
+	self.damageIn = 0 		-- holds damage received on the bar
+	self.healingOut = 0 	-- holds healing done on the bar
+	self.healingIn = 0 		-- holds healing received on the bar
 	
 end
 
@@ -829,9 +829,26 @@ local function IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitVa
 	
 	local values
 	
-	if 		isheal == true  and isDamageOut == true then values = stats.healavg
-	elseif 	isheal == false and isDamageOut == true then values = stats.dmgavg
-	elseif 	isheal == false and isDamageOut == false then values = stats.dmginavg
+	if 		isheal == true  and isDamageOut == true then 
+	
+		values = stats.healavg
+		barStats.healingOut = barStats.healingOut + hitValue
+		
+	elseif 	isheal == true and isDamageOut == false then
+	
+		barStats.healingIn = barStats.healingIn + hitValue
+		return
+		
+	elseif 	isheal == false and isDamageOut == true then 
+	
+		values = stats.dmgavg
+		barStats.damageOut = barStats.damageOut + hitValue
+		
+	elseif 	isheal == false and isDamageOut == false then 
+	
+		values = stats.dmginavg
+		barStats.damageIn = barStats.damageIn + hitValue
+		
 	else return end 
 
 	for statkey, stattype in pairs(statlist) do 
@@ -1209,6 +1226,8 @@ local function ProcessMessages(fight, callbacktype, timems, messageId, value)
 	
 end
 
+ProcessLog[LIBCOMBAT_EVENT_MESSAGES] = ProcessMessages
+
 --]]
 
 local function CalculateChunk(fight)  -- called by CalculateFight or itself
@@ -1465,9 +1484,35 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		
 		-- calculate bardata
 		
-		local barStats = fight:AcquireBarStats(currentbar)
+		local barData = data.barStats
 		
-		table.insert(barStats.offTimes, timems)
+		local barStats = barData[currentbar]
+		
+		table.insert(barStats.offTimes, fight.dpsend) -- add endtime for last used bar
+	
+		for bar, barStats in pairs(barData) do
+		
+			local totalTime =  0
+			
+			local onTimes  = barStats.onTimes
+			local offTimes = barStats.offTimes
+			
+			if #onTimes == #offTimes then 
+			
+				for i, onTime in ipairs(onTimes) do
+				
+					totalTime = totalTime + offTimes[i] - onTime
+					
+				end
+				
+				barStats.totalTime = totalTime / 1000
+				
+			else
+			
+				Print("misc", "Time Array lengthes doesn't match for bar %d", bar)
+			
+			end
+		end
 		
 		currentbar = nil -- TODO: remove, this is only to test for contamination
 		
@@ -1858,6 +1903,9 @@ local svdefaults = {
 			[LIBCOMBAT_EVENT_MESSAGES] 			= false,
 			
 		},
+		
+		["hitCritLayout"] = {"Critical", "Total", "SI_COMBAT_METRICS_HITS", "SI_COMBAT_METRICS_CRITS"},
+		["averageLayout"] = {"Total", "SI_COMBAT_METRICS_HITS"},
 	},
 	
 	["liveReport"] = {
@@ -1957,7 +2005,7 @@ local function Initialize(event, addon)
 	SpellResistDebuffs[17906] = db.crusherValue
 	PhysResistDebuffs[17906] = db.crusherValue
 	
-	if db.chatLog.enabled then zo_callLater(CMX.InitializeChat, 200) end
+	if db.chatLog.enabled then zo_callLater(CMX.InitializeChat, 200) end -- TODO: maybe move this to player activated?
 	
 	CMX.playername = zo_strformat(SI_UNIT_NAME,GetUnitName("player"))
 	CMX.inCombat = IsUnitInCombat("player")

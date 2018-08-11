@@ -268,9 +268,9 @@ local function decodeCombatLogLine(line)
 		if logdata[3] == 0 then logdata[3] = nil end
 		logdata[4] = logdata[4] - 131072	
 	
-	elseif layoutId ~= LAYOUT_MESSAGE then
+	elseif layoutId == LAYOUT_MESSAGE then
 	
-		line[4] = line[4] or 0
+		logdata[4] = logdata[4] or 0
 
 	elseif layoutId ~= LAYOUT_SKILL then					-- type, timems, message (e.g. "weapon swap")
 

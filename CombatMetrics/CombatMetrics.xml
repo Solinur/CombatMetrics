@@ -329,14 +329,14 @@
 						<Label name="$(parent)Label1" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_TIMEC" horizontalAlignment="LEFT">
 				
 							<Anchor point="LEFT" offsetX="6"/>
-							<Dimensions x="60" y="20"/>
+							<Dimensions x="50" y="20"/>
 							
 						</Label>
 						
 						<Label name="$(parent)Value1" inherits="CombatMetrics_ValueFontControl" text="0 %" horizontalAlignment="RIGHT">
 						
 							<Anchor point="LEFT" relativeTo="$(parent)Label1" relativePoint="RIGHT" offsetX="6"/>
-							<Dimensions x="30" y="20"/>
+							<Dimensions x="45" y="20"/>
 							
 						</Label>
 					
@@ -350,7 +350,7 @@
 						<Label name="$(parent)Value2" inherits="CombatMetrics_ValueFontControl" text="0 %" horizontalAlignment="RIGHT">
 						
 							<Anchor point="LEFT" relativeTo="$(parent)Label2" relativePoint="RIGHT" offsetX="6"/>
-							<Dimensions x="30" y="20"/>
+							<Dimensions x="45" y="20"/>
 							
 						</Label>
 					
@@ -2227,7 +2227,7 @@
 							</OnInitialized>
 						</Texture>
 						
-						<Texture name="$(parent)GraphButton" mouseEnabled="true" textureFile="esoui/art/treeicons/gamepad/gp_tutorial_idexicon_charprogression.dds" color="33FFFFFF" inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton" hidden="true">
+						<Texture name="$(parent)GraphButton" mouseEnabled="true" textureFile="esoui/art/treeicons/gamepad/gp_tutorial_idexicon_charprogression.dds" color="33FFFFFF" inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton">
 							<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)CombatLogButton" offsetY="4"/>
 							<OnInitialized>
 								self.tooltip = {SI_COMBAT_METRICS_TOGGLE_GRAPH}
@@ -2235,8 +2235,8 @@
 							</OnInitialized>
 						</Texture>
 						
-						<Texture name="$(parent)InfoButton" mouseEnabled="true" textureFile="esoui/art/menubar/gamepad/gp_playermenu_icon_tutorial.dds" color="33FFFFFF" inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton">
-							<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)CombatLogButton" offsetY="4"/>
+						<Texture name="$(parent)InfoButton" mouseEnabled="true" textureFile="esoui/art/menubar/gamepad/gp_playermenu_icon_tutorial.dds" color="FFFFFFFF" inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton">
+							<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)GraphButton" offsetY="4"/>
 							<OnInitialized>
 								self.tooltip = {SI_COMBAT_METRICS_TOGGLE_INFO}
 								self.category = "Info"
@@ -2250,11 +2250,7 @@
 								self.category = "Settings"
 							</OnInitialized>
 							
-							<OnMouseUp> 
-								
-								CMX.SettingsContextMenu( self, upInside )
-								
-							</OnMouseUp>
+							<OnMouseUp> CMX.SettingsContextMenu( self, upInside ) </OnMouseUp>
 							
 						</Texture>
 					
@@ -2583,17 +2579,21 @@
 									
 								</Label>
 								
-								<Label name="$(parent)Crits" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"  text="SI_COMBAT_METRICS_CRITS" horizontalAlignment="RIGHT">
+								<Label name="$(parent)Crits" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip" text="SI_COMBAT_METRICS_CRITS" color="FFFFFFCC" horizontalAlignment="RIGHT">
 									
 									<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Total" offsetX="2" offsetY="0"/>
 									<Dimensions x="42" y="20"/>
 									
+									<OnMouseUp> CMX.HitCritContextMenu(self, button)</OnMouseUp>
+									
 								</Label>
 								
-								<Label name="$(parent)Hits" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"  text="SI_COMBAT_METRICS_PER_HITS" horizontalAlignment="LEFT">
+								<Label name="$(parent)Hits" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip" text="SI_COMBAT_METRICS_PER_HITS" color="FFFFFFCC" horizontalAlignment="LEFT">
 									
 									<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Crits" offsetX="0" offsetY="0"/>
 									<Dimensions x="42" y="20"/>
+									
+									<OnMouseUp> CMX.HitCritContextMenus(self, button)</OnMouseUp>
 									
 								</Label>
 								
@@ -2604,10 +2604,12 @@
 									
 								</Label>
 								
-								<Label name="$(parent)Average" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"  text="SI_COMBAT_METRICS_AVE" horizontalAlignment="RIGHT">
+								<Label name="$(parent)Average" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"  text="SI_COMBAT_METRICS_AVE" color="FFFFFFCC" horizontalAlignment="RIGHT">
 									
 									<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)CritRatio" offsetX="2" offsetY="0"/>
 									<Dimensions x="50" y="20"/>
+									
+									<OnMouseUp> CMX.AverageContextMenu(self, button, "hitcrit")</OnMouseUp>
 									
 								</Label>
 								

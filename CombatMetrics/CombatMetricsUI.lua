@@ -11,7 +11,8 @@ local currentCLPage
 local selections, lastSelections
 local savedFights
 local SVHandler
-local feedbackfunc
+local ToggleFeedback
+local barKeyOffset = 1
 
 local CMX = CMX
 if CMX == nil then CMX = {} end
@@ -936,7 +937,7 @@ do
 		
 		AddCustomSubMenuItem(GetString(SI_COMBAT_METRICS_POSTDPS), postoptions)
 		
-		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_FEEDBACK), feedbackfunc)
+		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_FEEDBACK), ToggleFeedback)
 
 		ShowMenu(settingsbutton)		
 
@@ -1988,13 +1989,97 @@ local function updateUnitPanel(panel)
 	end 
 end
 
+local function selectHitCritOption1()
+
+	db.FightReport.hitCritLayout = {"Critical", "Total", "SI_COMBAT_METRICS_HITS", "SI_COMBAT_METRICS_CRITS"}
+	
+	CombatMetrics_Report_AbilityPanel:Update()
+	
+end
+
+local function selectHitCritOption2()
+
+	db.FightReport.hitCritLayout = {"Total", "Critical", "SI_COMBAT_METRICS_CRITS", "SI_COMBAT_METRICS_HITS"}
+	
+	CombatMetrics_Report_AbilityPanel:Update()
+	
+end
+
+local function selectHitCritOption3()
+
+	db.FightReport.hitCritLayout = {"Normal", "Critical", "SI_COMBAT_METRICS_NORM", "SI_COMBAT_METRICS_CRITS"}
+	
+	CombatMetrics_Report_AbilityPanel:Update()
+	
+end
+
+function CMX.HitCritContextMenu(control, button)
+
+	ClearMenu()
+	
+	local text1 = string.format("%s/%s", GetString(SI_COMBAT_METRICS_HITS), GetString(SI_COMBAT_METRICS_CRITS))
+	local text2 = string.format("%s/%s", GetString(SI_COMBAT_METRICS_CRITS), GetString(SI_COMBAT_METRICS_HITS))
+	local text3 = string.format("%s/%s", GetString(SI_COMBAT_METRICS_NORM), GetString(SI_COMBAT_METRICS_CRITS))
+	
+	AddCustomMenuItem(text1, selectHitCritOption1)
+	AddCustomMenuItem(text2, selectHitCritOption2)
+	AddCustomMenuItem(text3, selectHitCritOption3)
+	
+	ShowMenu(control)
+
+end
+
+local function selectAverageOption1()
+
+	db.FightReport.averageLayout = {"Total", ""}
+	
+	CombatMetrics_Report_AbilityPanel:Update()
+	
+end
+
+local function selectAverageOption2()
+
+	db.FightReport.averageLayout = {"Normal", " N"}
+	
+	CombatMetrics_Report_AbilityPanel:Update()
+	
+end
+
+local function selectAverageOption3()
+
+	db.FightReport.averageLayout = {"Critical", " C"}
+	
+	CombatMetrics_Report_AbilityPanel:Update()
+	
+end
+
+function CMX.AverageContextMenu(control, button)
+
+	ClearMenu()
+	
+	local text1 = string.format("%s/%s", GetString(SI_COMBAT_METRICS_AVERAGE), GetString(SI_COMBAT_METRICS_HITS))
+	local text2 = string.format("%s/%s", GetString(SI_COMBAT_METRICS_AVERAGE), GetString(SI_COMBAT_METRICS_NORMAL_HITS))
+	local text3 = string.format("%s/%s", GetString(SI_COMBAT_METRICS_AVERAGE), GetString(SI_COMBAT_METRICS_CRITS))
+	
+	AddCustomMenuItem(text1, selectAverageOption1)
+	AddCustomMenuItem(text2, selectAverageOption2)
+	AddCustomMenuItem(text3, selectAverageOption3)
+	
+	ShowMenu(control)
+
+end
+
 local function updateAbilityPanel(panel)
 
 	CMX.Print("dev", "Updating AbilityPanel")
 
 	ResetBars(panel)
 	
-	local category = db.FightReport.category
+	local settings = db.FightReport
+	
+	local category = settings.category
+	local hitCritLayout = settings.hitCritLayout
+	local averageLayout = settings.averageLayout
 	
 	local isDamage = category == "damageIn" or category == "damageOut"
 	
@@ -2032,9 +2117,28 @@ local function updateAbilityPanel(panel)
 	local totalAmountKey = category.."Total"
 	local totalHitKey = CountStrings[category].."Total"
 	local critKey = CountStrings[category].."Critical"
+	
+	local ratioKey1 = CountStrings[category]..hitCritLayout[1]	-- first value of the crits/hits column display
+	local ratioKey2 = CountStrings[category]..hitCritLayout[2]  -- second value of the crits/hits column display
+	
+	local avgKey1 = category..averageLayout[1]					-- damage value of the avg column display
+	local avgKey2 = CountStrings[category]..averageLayout[1]	-- hits value of the avg column display
+	
 	local DPSKey = DPSstrings[category]	
 	
 	local showids = db.debuginfo.ids
+	
+	local header = panel:GetNamedChild("Header")
+	
+	local headerCrit = header:GetNamedChild("Crits")
+	local headerHit = header:GetNamedChild("Hits")
+	
+	headerCrit:SetText(GetString(_G[hitCritLayout[3]]))
+	headerHit:SetText("/" .. GetString(_G[hitCritLayout[4]]))
+	
+	local headerAvg = header:GetNamedChild("Average")
+	
+	headerAvg:SetText(GetString(SI_COMBAT_METRICS_AVE) .. averageLayout[2])
 	
 	for abilityId, ability in CMX.spairs(data[category], function(t, a, b) return t[a][totalAmountKey]>t[b][totalAmountKey] end) do
 	
@@ -2063,7 +2167,10 @@ local function updateAbilityPanel(panel)
 			local hits = ability[totalHitKey]
 			local critratio = 100 * crits / hits
 			
-			local avg = total / hits
+			local ratio1 = ability[ratioKey1]
+			local ratio2 = ability[ratioKey2]
+			
+			local avg = ability[avgKey1] / ability[avgKey2]
 			local max = ability.max
 			
 			local rowId = #panel.bars + 1
@@ -2073,7 +2180,6 @@ local function updateAbilityPanel(panel)
 			row:SetAnchor(unpack(currentanchor))
 			row:SetHidden(false)
 			
-			local header = panel:GetNamedChild("Header")
 			adjustRowSize(row, header)
 			
 			local highlightControl = row:GetNamedChild("HighLight")
@@ -2099,10 +2205,10 @@ local function updateAbilityPanel(panel)
 			amountControl:SetText(total)
 			
 			local critControl = row:GetNamedChild("Crits")
-			critControl:SetText(crits)
+			critControl:SetText(ratio1)
 			
 			local hitsControl = row:GetNamedChild("Hits")
-			hitsControl:SetText(string.format("/%d", hits))			
+			hitsControl:SetText(string.format("/%d", ratio2))			
 			
 			local critFractionControl = row:GetNamedChild("CritRatio")
 			critFractionControl:SetText(string.format("%.0f%%", critratio))
@@ -2320,6 +2426,10 @@ local function updateCombatLog(panel)
 	slider:SetValue(slider:GetValue() - offset)
 end
 
+local function updateGraphPanel(panel)
+
+end
+
 function CMX.SkillTooltip_OnMouseEnter(control)
 	
 	InitializeTooltip(SkillTooltip, control, TOPLEFT, 0, 5, BOTTOMLEFT)
@@ -2420,47 +2530,76 @@ local function updateLeftInfoPanel(panel)
 	
 	local skillBars = charData.skillBars
 	
-	if skillBars == nil then return end
-	
 	local data = fightData.calculated
 	
 	if data == nil then return end
 	
 	local skilldata = data.skills
+	local barStatData = data.barStats
+	
+	local barkeys = {}
+	
+	for bar, data in CMX.spairs(skillBars or {}) do
+	
+		table.insert(barkeys, bar)
+	
+	end
+	
+	local category = db.FightReport.category
 	
 	for i = 0, 1 do
 	
 		local row = panel:GetNamedChild("AbilityBlock" .. i+1)
-	
-		local bardata = skillBars[i+1]
 		
-		if bardata == nil then return end	-- ToDo: Fallback to default
+		local barkey = barkeys and barkeys[i + barKeyOffset] or i
+	
+		local bardata = skillBars and skillBars[barkey] or nil
+		local barStats = barStatData and barStatData[barkey] or nil	
 		
 		local skilltimingbefore = db.FightReport.skilltimingbefore
 		
+		if barStats then
+		
+			local dpsratio = (barStats[category] or 0) / data[category.."Total"]
+			
+			local totalTime = (category == "healingIn" or category == "healingOut") and fightData.hpstime or fightData.dpstime or 1
+			
+			local timeratio = (barStats.totalTime or 0) / totalTime
+		
+		end
+		
+		local statControl = row:GetNamedChild("Stats")
+		local ratioControl = statControl:GetNamedChild("Value1")
+		local timeControl = statControl:GetNamedChild("Value2")
+		
+		ratioControl:SetText(string.format("%.1f%%", (timeratio or 0) * 100))
+		timeControl:SetText(string.format("%.1f%%", (dpsratio or 0) * 100))
+		
 		for j = 4, row:GetNumChildren() - 1 do
 		
+			local strings = {"-", "-", "-", "-", "-", "-"}
+			
 			local control = row:GetChild(j)
 			
 			local icon = control:GetNamedChild("Icon"):GetNamedChild("Texture")
 			
 			local name = control:GetNamedChild("Label")
 			
-			local abilityId = bardata[j-3]
+			local abilityId = bardata and bardata[j-3] or nil
 			
 			control.id = abilityId
 			
-			local texture = GetFormattedAbilityIcon(abilityId)
+			local texture = abilityId and GetFormattedAbilityIcon(abilityId) or "EsoUI/Art/crafting/gamepad/crafting_alchemy_trait_unknown.dds"
 			
 			icon:SetTexture(texture)
+			
+			local abilityName = abilityId and GetFormattedAbilityName(abilityId) or ""
 
-			name:SetText(GetFormattedAbilityName(abilityId))
+			name:SetText(abilityName)
 			
-			local reducedslot = i * 10 + j - 3 
+			local reducedslot = (barkey - 1) * 10 + j - 3 
 			
-			local slotdata = skilldata[reducedslot]
-			
-			local strings = {"-", "-", "-", "-", "-", "-"}
+			local slotdata = skilldata and skilldata[reducedslot] or nil
 			
 			if slotdata then
 			
@@ -3213,6 +3352,9 @@ local function initFightReport()
 		
 		local combatLogPageButtonRow = GetControl(combatLogPanel, "HeaderPageButtonRow")
 		combatLogPageButtonRow.Update = updateCLPageButtons
+			
+		local graphPanel = mainPanel:GetNamedChild("Graph")
+		graphPanel.Update = updateGraphPanel
 		
 	local infoPanel = fightReport:GetNamedChild("_InfoPanel")
 	infoPanel.Update = updateInfoPanel
@@ -3468,12 +3610,12 @@ function CMX.InitializeUI()
 	
 	local data = CMX.GetFeedBackData(settingsbutton)
 					
-	local button = LibFeedback:initializeFeedbackWindow(unpack(data))
+	local button, feedbackWindow = LibFeedback:initializeFeedbackWindow(unpack(data))
 	button:SetHidden(true)
 			
-	function feedbackfunc() 
+	function ToggleFeedback() 
 		
-		button.feedbackWindow:ToggleHidden()
+		feedbackWindow:ToggleHidden()
 		
 	end	
 end
