@@ -1364,6 +1364,26 @@
 									</OnFocusLost>
 								</EditBox>
 								
+								<StatusBar name="$(parent)Bar" orientation="HORIZONTAL" color="CC00BB00" hidden="true">
+								
+									<Anchor point="TOPLEFT" offsetX="20" offsetY="4"/>
+									<Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-6"/>
+									<Limits min="0" max="1"/>
+									
+									<Controls>
+								
+										<Backdrop name="$(parent)BarBg" centerColor="00000000" edgeColor="FFCCCCCC" layer="1" level="1">
+										
+											<AnchorFill/>
+											
+											<Edge edgeSize="1"/>
+										
+										</Backdrop>
+										
+									</Controls>
+								
+								</StatusBar>
+								
 							</Controls>
 							
 							<OnInitialized>
@@ -2165,7 +2185,38 @@
 							
 						</Control>
 					
-						<Control name="$(parent)Graph" inherits="CombatMetrics_ControlFramed" hidden="true">
+						<Control name="$(parent)Graph" inherits="CombatMetrics_ControlFramed" hidden="true" mouseEnabled="true">
+							<AnchorFill/>
+						
+							<Controls>
+							
+								<Control name="$(parent)PlotWindow" inherits="CombatMetrics_ControlFramed" mouseEnabled="true">
+								
+									<Anchor point="TOPRIGHT" offsetX="-24" offsetY="4"/>
+									<Dimensions x="440" y="314"/>
+									
+									<OnInitialized> self.plots = {}	</OnInitialized>
+									
+								</Control>
+								
+								<Label name="$(parent)XLabel" inherits="CombatMetrics_LabelFontControl" text="Time (s)" horizontalAlignment="CENTER" mouseEnabled="true">
+								
+									<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)PlotWindow" offsetY="28"/>
+									<Dimensions x="200" y="20"/>
+									
+								</Label>
+								
+								<Label name="$(parent)YLabel" inherits="CombatMetrics_LabelFontControl" text="DPS" horizontalAlignment="CENTER" mouseEnabled="true">
+								
+									<Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)PlotWindow" offsetX="-28"/>
+									<Dimensions x="50" y="20"/>
+									
+								</Label>
+								
+								
+							
+							
+							</Controls>
 						
 						</Control>
 						
@@ -2942,14 +2993,48 @@
 					<Controls>
 						
 						<Label name="$(parent)DateTime" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="LEFT">
+						
 							<Anchor point="LEFT" offsetX="4"/>
+							
+							<Dimensions x="200" y="20"/>
 							
 						</Label>
 						
 						<Label name="$(parent)ESOVersion" inherits="CombatMetrics_StatRowLabel" text="" horizontalAlignment="RIGHT">
+						
 							<Anchor point="RIGHT" offsetX="-4"/>
+							<Dimensions x="250" y="20"/>
 							
 						</Label>
+						
+						<StatusBar name="$(parent)Bar" orientation="HORIZONTAL" color="CCBBBB77">
+						
+							<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DateTime" offsetX="120"/>
+							<Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)ESOVersion" offsetX="-70"/>
+							
+							<Dimensions y="20"/>
+							
+							<Limits min="0" max="1"/>
+							
+							<Controls>
+						
+								<Label name="$(parent)Label" inherits="CombatMetrics_StatRowLabel" text="" horizontalAlignment="CENTER">
+								
+									<AnchorFill/>
+									
+								</Label>
+						
+								<Backdrop name="$(parent)BarBg" centerColor="00000000" edgeColor="FFCCCCCC" layer="1" level="1">
+								
+									<AnchorFill/>
+									
+									<Edge edgeSize="1"/>
+								
+								</Backdrop>
+								
+							</Controls>
+						
+						</StatusBar>
 						
 					</Controls>
 				</Control>

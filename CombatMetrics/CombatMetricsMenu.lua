@@ -11,7 +11,7 @@ function CMX.MakeMenu(svdefaults)
 	local def = svdefaults
 
     -- the panel for the addons menu
-	local panel = {
+	local panelData = {
 		type = "panel",
 		name = "Combat Metrics",
 		displayName = "Combat Metrics",
@@ -59,7 +59,7 @@ function CMX.MakeMenu(svdefaults)
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_SVSIZE_TOOLTIP),
 			warning = GetString(SI_COMBAT_METRICS_MENU_SVSIZE_WARNING), 
 			min = 5,
-			max = 40,
+			max = 50,
 			step = 1,
 			default = def.maxSVsize,
 			getFunc = function() return db.maxSVsize end,
@@ -543,6 +543,12 @@ function CMX.MakeMenu(svdefaults)
 		}
 	end
 	
-	menu:RegisterAddonPanel("CMX_Options", panel)
+	local panel = menu:RegisterAddonPanel("CMX_Options", panelData)
 	menu:RegisterOptionControls("CMX_Options", options)
+	
+	function CMX.OpenSettings()
+	
+		menu:OpenToPanel(panel)
+		
+	end
 end

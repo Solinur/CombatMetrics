@@ -24,7 +24,7 @@ local CMX = CMX
  
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "0.9.0.0"
+CMX.version = "0.9.0.0 alpha"
 
 function CMX.GetFeedBackData(parentcontrol)
 	
@@ -223,8 +223,6 @@ local function NewSubclass()
 	
 	return subclass
 end
-	
-
 
 local UnitHandler = NewSubclass()			-- define classes
 local AbilityHandler = NewSubclass()
@@ -236,27 +234,31 @@ local BarStatsHandler = NewSubclass()
 
 local function AcquireUnitData(self, unitId, timems)
 
-	if self.calculated.units[unitId] == nil then
+	local units = self.calculated.units
+
+	if units[unitId] == nil then
 	
-		self.calculated.units[unitId] = UnitHandler:New()
-		self.calculated.units[unitId]["start"] = timems
+		units[unitId] = UnitHandler:New()
+		units[unitId]["start"] = timems
 		
 	end
 	
-	self.calculated.units[unitId]["end"] = timems
+	units[unitId]["end"] = timems
 	
-	return self.calculated.units[unitId]
+	return units[unitId]
 end
 
 local function AcquireAbilityData(self, abilityId, ispet, damageType, tableKey)
 
-	if self[tableKey][abilityId] == nil then
+	local data = self[tableKey]
+
+	if data[abilityId] == nil then
 		
-		self[tableKey][abilityId] = AbilityHandler:New(abilityId, ispet, damageType, tableKey)
+		data[abilityId] = AbilityHandler:New(abilityId, ispet, damageType, tableKey)
 	
 	end
 	
-	return self[tableKey][abilityId]
+	return data[abilityId]
 end
 
 local function AcquireEffectData(self, abilityId, effectType, stacks)
@@ -264,13 +266,15 @@ local function AcquireEffectData(self, abilityId, effectType, stacks)
 	local stacktext = (stacks <= 1 or db.showstacks == false) and "" or (" (x"..stacks..")")
 	local name = GetFormattedAbilityName(abilityId)..stacktext
 	
-	if self.buffs[name] == nil then 
+	local buffs = self.buffs
+	
+	if buffs[name] == nil then 
 		
-		self.buffs[name] = EffectHandler:New(effectType, abilityId, stacks)
+		buffs[name] = EffectHandler:New(effectType, abilityId, stacks)
 	
 	end
 	
-	return self.buffs[name]
+	return buffs[name]
 	
 end
 
@@ -279,17 +283,19 @@ local function AcquireResourceData(self, abilityId, powerValueChange, powerType)
 	local tablekey = powerValueChange>=0 and "gains" or "drains"
 	local resource = self.calculated.resources[powerType]
 	
+	local resourceData = resource[tablekey]
+	
 	if powerType == POWERTYPE_ULTIMATE then 
 	
 		return resource
 		
-	elseif resource[tablekey][abilityId] == nil then
+	elseif resourceData[abilityId] == nil then
 	
-		resource[tablekey][abilityId] = ResourceHandler:New()
+		resourceData[abilityId] = ResourceHandler:New()
 		
 	end
 	
-	return resource[tablekey][abilityId]
+	return resourceData[abilityId]
 end
 
 local function AcquireSkillTimingData(self, reducedslot)
@@ -599,6 +605,13 @@ local function CalculateFight(fight) -- called by CMX.update or on user interact
 	data.groupDPSIn 	= fight.groupDPSIn
 	
 	fight.calculating = true
+	
+	local titleBar = CombatMetrics_Report_TitleFightTitleBar
+	local titleBarBg = CombatMetrics_Report_TitleFightTitleBarBG
+	
+	titleBar:SetValue(0)
+	titleBar:SetHidden(false)
+	
 	fight:CalculateChunk()
 	
 end
@@ -1246,11 +1259,16 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		
 		if ProcessLog[logline[1]] then ProcessLog[logline[1]](fight,unpack(logline)) end -- logline[1] is the callbacktype e.g. LIBCOMBAT_EVENT_DAMAGEOUT
 
-	end	
+	end		
+	
+	local titleBar = CombatMetrics_Report_TitleFightTitleBar	
+	local fightlabel = CombatMetrics_Report_TitleFightTitleName
 	
 	if iend >= #logdata then
 	
 		Print("calculationtime", "Start end routine")
+		
+		fightlabel:SetText(GetString(SI_COMBAT_METRICS_FINALIZING))
 		
 		local data = fight.calculated
 		
@@ -1524,6 +1542,8 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		fight.calculating = false
 		fight.cindex = nil
 		
+		titleBar:SetHidden(true)
+		
 		Print("calculationtime", "Time for final calculations: %d ms", GetGameTimeMilliseconds() - scalcms)
 
 		return
@@ -1542,8 +1562,11 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 	
 	db.chunksize = newchunksize
 	
-	local fightlabel = CombatMetrics_Report_TitleFightTitleName
-	fightlabel:SetText(string.format("%s (%.1f%%)", GetString(SI_COMBAT_METRICS_CALC), 100*iend/#logdata))
+	local progress = iend/#logdata
+	
+	fightlabel:SetText(string.format("%s (%.1f%%)", GetString(SI_COMBAT_METRICS_CALC), 100 * progress))
+	
+	titleBar:SetValue(progress)
 	
 	return
 end
@@ -1885,6 +1908,7 @@ local svdefaults = {
 		["fightstatspanel"] 	= maxStat(),
 		["skilltimingbefore"] 	= true,
 		
+		["SmoothWindow"] 		= 5,
 		
 		["FavouriteBuffs"] = {},
 		

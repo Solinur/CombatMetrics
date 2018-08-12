@@ -283,4 +283,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 
 0.8.2.5 791,715 (06.06.2018) 00:58
 [*]Fix version numbers in manifest and ingame
+
+0.8.2.6 886,162 (13.08.2018) 01:43
+[*]API Bump to Wolfhunter (100024)
  	

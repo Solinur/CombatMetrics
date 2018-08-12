@@ -32,6 +32,7 @@
 
 	SI_COMBAT_METRICS_SHOW_XPS = "<<1>> / <<2>> (<<3>>%)",
 	SI_COMBAT_METRICS_CALC = "Calculating...", -- Calculating...
+	SI_COMBAT_METRICS_FINALISING = "Finalising...", -- Finalizing...
 	SI_COMBAT_METRICS_GROUP = "Group", -- Group
 	SI_COMBAT_METRICS_SELECTION = "Selection", -- Selection
 
@@ -74,6 +75,7 @@
 	SI_COMBAT_METRICS_POSTALLDPS = "Post single and total DPS",
 	SI_COMBAT_METRICS_POSTHPS = "Post HPS",
 	
+	SI_COMBAT_METRICS_SETTINGS = "Addon Settings",
 	SI_COMBAT_METRICS_FEEDBACK = "Send Feedback / Donate",
 	
 	SI_COMBAT_METRICS_FEEDBACK_MAIL = "Send Note",
@@ -213,6 +215,8 @@
 	SI_COMBAT_METRICS_SKILLTIME_TT3 = "Time between the ability and the next useage of the weapon / skill .", -- "Time between the ability and the next useage of the weapon / skill ."
 	SI_COMBAT_METRICS_SKILLTIME_TT4 = "Average time between subsequent uses of this skill", -- "Average time between the uses of this skill"
 
+	SI_COMBAT_METRICS_SAVED_DATA = "Saved Data", -- "Saved Data"
+	
 -- Menus
 
 	SI_COMBAT_METRICS_MENU_PROFILES = "Profiles",  -- Profiles

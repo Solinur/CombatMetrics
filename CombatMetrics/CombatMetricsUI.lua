@@ -257,7 +257,7 @@ local function selectCategory(button)
 		local child = control:GetChild(i)
 		
 		local r, g, b, _ = child:GetColor()
-		local a = child==button and 1 or .2
+		local a = child == button and 1 or .2
 		
 		child:SetColor(r, g, b, a)
 	
@@ -274,7 +274,7 @@ local function selectMainPanel(button)
 	local selectControl = button:GetParent()
 	local category = button.category
 
-	for i=5, 8 do
+	for i = 5, 8 do
 		
 		local child = selectControl:GetChild(i)
 		
@@ -340,13 +340,13 @@ local function toggleInfoPanel(button)
 	
 end
 
-local function initSelectorButtons(rowControl) 
+local function initSelectorButtons(selectorButtons) 
 
-	for i=1, 8 do
+	for i = 1, 8 do
 	
-		local child = rowControl:GetChild(i)
+		local child = selectorButtons:GetChild(i)
 		
-		if child and i<=4 then 
+		if child and i <= 4 then 
 			
 			child:SetHandler( "OnMouseUp", selectCategory) 
 			if child.category == db.FightReport.category then selectCategory(child) end
@@ -354,6 +354,7 @@ local function initSelectorButtons(rowControl)
 		elseif child and i>4 then 
 		
 			child:SetHandler( "OnMouseUp", selectMainPanel)
+			selectMainPanel(selectorButtons:GetNamedChild("FightStatsButton"))
 			
 		end
 	end
@@ -458,9 +459,7 @@ local function CLFilterButtonFunction(self)
 
 end 
 
-local function initCLButtonRow() 
-
-	local rowControl = GetControl(CombatMetrics_Report, "_MainPanelCombatLogHeaderFilterButtonRow")
+local function initCLButtonRow(rowControl) 
 
 	for i=1, rowControl:GetNumChildren() do
 	
@@ -912,12 +911,7 @@ do
 
 		if not upInside then return end
 		
-		local func = toggleshowids
-		local stringid = db.debuginfo.ids and SI_COMBAT_METRICS_HIDEIDS or SI_COMBAT_METRICS_SHOWIDS
-		local text = GetString(stringid)
-		
-		ClearMenu()
-		AddCustomMenuItem(text, func)
+		local showIdString = db.debuginfo.ids and SI_COMBAT_METRICS_HIDEIDS or SI_COMBAT_METRICS_SHOWIDS
 		
 		local postoptions = {}
 		
@@ -935,8 +929,11 @@ do
 		table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTALLDPS), callback = postAllDPS})
 		table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTHPS), callback = postHPS})
 		
-		AddCustomSubMenuItem(GetString(SI_COMBAT_METRICS_POSTDPS), postoptions)
+		ClearMenu()
 		
+		AddCustomMenuItem(GetString(showIdString), toggleshowids)		
+		AddCustomSubMenuItem(GetString(SI_COMBAT_METRICS_POSTDPS), postoptions)		
+		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_SETTINGS), CMX.OpenSettings)
 		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_FEEDBACK), ToggleFeedback)
 
 		ShowMenu(settingsbutton)		
@@ -1181,7 +1178,7 @@ local function updateTitlePanel(panel)
 		["load"] 		= savedFights ~= nil and #savedFights > 0, 
 		["save"] 		= CMX.lastfights[fightId] ~= nil and not searchtable(savedFights, "date", fightData.date), 
 		["delete"] 		= CMX.lastfights[fightId] ~= nil and #CMX.lastfights>0 ~= nil
-		}
+	}
 
 	for i = 1, NavButtons:GetNumChildren() do
 	
@@ -2170,7 +2167,10 @@ local function updateAbilityPanel(panel)
 			local ratio1 = ability[ratioKey1]
 			local ratio2 = ability[ratioKey2]
 			
-			local avg = ability[avgKey1] / ability[avgKey2]
+			local avg1 = ability[avgKey1] 
+			local avg2 = ability[avgKey2]
+			
+			local avg = avg2 == 0 and 0 or (avg1 / avg2)
 			local max = ability.max
 			
 			local rowId = #panel.bars + 1
@@ -2426,8 +2426,161 @@ local function updateCombatLog(panel)
 	slider:SetValue(slider:GetValue() - offset)
 end
 
+local CMX_PLOT_DIMENSION_X = 1
+local CMX_PLOT_DIMENSION_Y = 2
+
+local function MapValue(plotwindow, dimension, value)
+
+	local range = dimension == CMX_PLOT_DIMENSION_X and plotwindow.RangesX or plotwindow.RangesY
+	local minRange, maxRange = unpack(range)
+	
+	local controlSize = dimension == CMX_PLOT_DIMENSION_X and plotwindow:GetWidth() or plotwindow:GetHeight()
+
+	local IsInRange = (value < maxRange) and (value > minRange)
+	local offset = controlSize  * ((value - minRange)/(maxRange - minRange))
+	
+	return offset, IsInRange
+
+end
+
+local function MapXY(plotwindow, x, y)
+
+	local XOffset, IsInRangeX = MapValue(plotwindow, CMX_PLOT_DIMENSION_X, x)
+	local YOffset, IsInRangeY = MapValue(plotwindow, CMX_PLOT_DIMENSION_Y, y)
+
+	local IsInRange = IsInRangeX and IsInRangeY
+	
+	return XOffset, YOffset, IsInRange
+
+end
+
+local CMX_PLOT_TYPE_XY = 1
+local CMX_PLOT_TYPE_BAR = 2
+
+local plotTypeTemplates = {
+
+	[CMX_PLOT_TYPE_XY] = "CombatMetrics_PlotControlXY",
+	[CMX_PLOT_TYPE_BAR] = "CombatMetrics_PlotControlBar",
+
+}
+
+local function AddPlot(plotwindow, id, plotType, height)
+
+	local plots = plotwindow.plots
+
+	if plots[id] == nil then
+	
+		plots[id] = CreateControlFromVirtual("$(parent)Plot" .. id, plot, plotTypeTemplates[plotType])
+		plots[id].plotType = plotType
+		
+	elseif plotType ~= plots[id].plotType then	-- if plottype is different, get rid of the control.
+	
+		plots[id]:SetParent(nil)
+		
+		plots[id] = CreateControlFromVirtual("$(parent)Plot" .. id, plot, plotTypeTemplates[plotType])
+		plots[id].plotType = plotType
+		
+	end
+	
+	local plot = plots[id]
+	
+	if plotType == CMX_PLOT_TYPE_BAR then
+	
+		plot:ClearAnchors()
+		plot:SetAnchor(TOPLEFT, plotwindow, TOPLEFT, -24, height)
+		plot:SetAnchor(TOPRIGHT, plotwindow, TOPRIGHT, 0, height)
+		plot:SetHeight(20 * dx)
+	
+	end
+	
+	return plot
+end
+
+local function DrawLine(plot, coords, id)
+
+	local plotid = plot.id
+	local lineControls = plot.lineControls
+
+	if lineControls[id] == nil then
+	
+		lineControls[id] = CreateControlFromVirtual("$(parent)Line" .. id, plot, "CombatMetrics_PlotLine")
+		
+	end	
+	
+	local line = lineControls[id]
+	
+	line:SetThickness(dx) 
+	line:ClearAnchors()
+	
+	
+end
+
+local function AcquireRange(plotwindow, XYData) 
+
+	local maxX, maxY
+
+	for i, coords in ipairs(XYData) do
+	
+		local x, y = unpack(coords)
+		
+		maxX = math.max(maxX, x)
+		maxY = math.max(maxY, y)
+		
+	end
+	
+	plotwindow.RangesX = {0, maxX}
+	plotwindow.RangesY = {0, maxY}
+	
+end
+
+local function PlotXY(plotwindow, plotid, XYData, autoRange)
+
+	if autoRange then AcquireRange(plotwindow, XYData) end
+
+	local plot = AddPlot(plotwindow, plotid, CMX_PLOT_TYPE_XY)
+	
+	local coordinates = {}
+	plot.coordinates = coordinates
+	
+	local x0, y0
+	
+	for i, coords in ipairs(XYData) do
+	
+		local x, y = unpack(coords)
+		coordinates[i] = {MapXY(plotwindow, x, y)}
+		
+		if i > 1 then			
+		
+			local lineCoords = {x0, y0, x, y}
+			DrawLine(plot, lineCoords, i-1)
+		
+		end
+			
+		x0 = x
+		y0 = y
+	
+	end
+end
+
+local rangesizes = {1, 1.5, 2, 2.5, 3, 4, 5, 6, 8}
+local tickseparation = {.2, .3, .5, .5, .5, 1, 1, 1, 2}	
+
 local function updateGraphPanel(panel)
 
+	if true then return end
+
+	local plotwindow = panel:GetNamedChild("PlotWindow")
+	
+	local category = db.FightReport.category
+	
+	local data = fightData.calculated
+	
+	local RawData = data[category .. "PlotData"]	-- DPS data, one value per second
+	
+	local XYData = Smooth(RawData, db.FightReport.SmoothWindow)
+	
+	PlotXY(plotwindow, 1, XYData, autoRange)	
+	
 end
 
 function CMX.SkillTooltip_OnMouseEnter(control)
@@ -2778,6 +2931,8 @@ local function updateInfoRowPanel(panel)
 
 	local datetimecontrol = panel:GetNamedChild("DateTime")
 	local versioncontrol = panel:GetNamedChild("ESOVersion")
+	local barcontrol = panel:GetNamedChild("Bar")
+	local barlabelcontrol = barcontrol:GetNamedChild("Label")
 	
 	local data = fightData or {
 	
@@ -2795,6 +2950,13 @@ local function updateInfoRowPanel(panel)
 	
 	datetimecontrol:SetText(timestring)
 	versioncontrol:SetText(versionstring)
+	
+	local _, size = checkSaveLimit()
+	
+	local usedSpace = size/db.maxSVsize
+	
+	barcontrol:SetValue(usedSpace)
+	barlabelcontrol:SetText(string.format("%s: %.1f MB / %d MB (%.1f%%)", GetString(SI_COMBAT_METRICS_SAVED_DATA), size, db.maxSVsize, usedSpace * 100))
 
 end
 
@@ -3352,6 +3514,9 @@ local function initFightReport()
 		
 		local combatLogPageButtonRow = GetControl(combatLogPanel, "HeaderPageButtonRow")
 		combatLogPageButtonRow.Update = updateCLPageButtons
+		
+		local combatLogFilterButtonRow = GetControl(combatLogPanel, "HeaderFilterButtonRow")	
+		initCLButtonRow(combatLogFilterButtonRow)
 			
 		local graphPanel = mainPanel:GetNamedChild("Graph")
 		graphPanel.Update = updateGraphPanel
@@ -3387,8 +3552,6 @@ local function initFightReport()
 	
 	local selectorButtons = fightReport:GetNamedChild("_SelectorRow")
 	initSelectorButtons(selectorButtons)
-	
-	initCLButtonRow()
 end
 
 local function initLiveReport()
