@@ -14,7 +14,7 @@ Idea: Life and Death
 local _
 
 --Register with LibStub
-local MAJOR, MINOR = "LibCombat", 7
+local MAJOR, MINOR = "LibCombat", 9
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end --the same or newer version of this lib is already loaded into memory
 
@@ -142,15 +142,11 @@ lib.GetFormattedAbilityIcon = GetFormattedAbilityIcon
 local critbonusabilities = {
 
 	{
-		["type"] = SKILL_TYPE_CLASS, 
-		["line"] = 13,
-		["skill"] = 7, 
+		["id"] = 31698,
 		["effect"] = {[1] = 5, [2] = 10	}	-- Templar: Piercing Spear
 	},
 	{
-		["type"] = SKILL_TYPE_CLASS, 
-		["line"] = 4, 
-		["skill"] = 10, 
+		["id"] = 36641,
 		["effect"] = {[1] = 5, [2] = 10	}	-- Nightblade: Hemorrhage
 	},
 	
@@ -514,17 +510,23 @@ local function GetCritBonusFromPassives()
 
 	local bonus = 0
 	
+	local skillDataTable = SKILLS_DATA_MANAGER.abilityIdToProgressionDataMap
+	
 	for k, ability in pairs(critbonusabilities) do
 	
-		local skillType = ability.type
-		local line = ability.line
-		local skill = ability.skill
+		local id = ability.id
 	
-		local _, _, _, _, _, purchased, _, rank = GetSkillAbilityInfo(skillType, line, skill)
+		local skillData = skillDataTable[id].skillData	
+		
+		local purchased = skillData.isPurchased
+		local rank = skillData.currentRank
+		local lineData = skillData["skillLineData"]
+		
+		local line = lineData.skillLineIndex
 		
 		if purchased == true then bonus = ability.effect[rank] or 0 end
 	
-		if bonus > 0 then return {skillType, line, bonus} end
+		if bonus > 0 then return {SKILL_TYPE_CLASS, line, bonus} end
 	end
 	
 	return {}
@@ -533,14 +535,14 @@ end
 
 local function GetCritBonusFromCP()
 
-	local mightyCP = GetNumPointsSpentOnChampionSkill(5, 2)/100
-	local elfbornCP = GetNumPointsSpentOnChampionSkill(7, 3)/100
+	local mightyCP = GetNumPointsSpentOnChampionSkill(5, 2) / 100
+	local elfbornCP = GetNumPointsSpentOnChampionSkill(7, 3) / 100
 	
-	local mightyValue = 0.25*mightyCP*(2-mightyCP)+(mightyCP-1)*(mightyCP-0.5)*mightyCP*2/250
-	local elfbornValue = 0.25*elfbornCP*(2-elfbornCP)+(elfbornCP-1)*(elfbornCP-0.5)*elfbornCP*2/250
+	local mightyValue = 0.25 * mightyCP * (2 - mightyCP) + (mightyCP - 1) * (mightyCP - 0.5) * mightyCP * 2/250
+	local elfbornValue = 0.25 * elfbornCP * (2 - elfbornCP) + (elfbornCP - 1) * (elfbornCP - 0.5) * elfbornCP * 2 / 250
 
-	mightyValue = math.floor(mightyValue*100)
-	elfbornValue = math.floor(elfbornValue*100)
+	mightyValue = math.floor(mightyValue * 100)
+	elfbornValue = math.floor(elfbornValue * 100)
 	
 	return mightyValue, elfbornValue
 end
@@ -1435,15 +1437,7 @@ end
 
 local function onWeaponSwap(_, _)
 
-	if GetAPIVersion() > 100023 then 
-	
-		data.bar = ACTION_BAR_ASSIGNMENT_MANAGER.currentHotbarCategory
-		
-	else
-	
-		data.bar = GetActiveWeaponPairInfo()
-		
-	end
+	data.bar = ACTION_BAR_ASSIGNMENT_MANAGER.currentHotbarCategory + 1
 	
 	GetCurrentSkillBars()
 	

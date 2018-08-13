@@ -286,4 +286,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 
 0.8.2.6 886,162 (13.08.2018) 01:43
 [*]API Bump to Wolfhunter (100024)
+
+0.8.2.7 904,149 (14.08.2018) 01:06
+[*]Fixed tracking of Piercing Spear and Hemorrhage
  	
