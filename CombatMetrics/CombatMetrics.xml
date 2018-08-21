@@ -1169,6 +1169,43 @@
 			
 		</Control>
 		
+		<Line name="CombatMetrics_PlotLine" color="AAFFFF00" thickness="2" pixelRoundingEnabled="true" virtual="true">
+		</Line>
+		
+		<Control name="CombatMetrics_PlotControlXY" virtual="true">
+			<AnchorFill/>
+		</Control>
+		
+		<Control name="CombatMetrics_PlotControlBar" virtual="true">
+			<AnchorFill/>
+		</Control>
+		
+		<Line name="CombatMetrics_GraphTickX" color="FF888888" thickness="COMBAT_METRICS_LINE_SIZE" virtual="true">
+		
+			<Controls>
+			
+				<Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0" horizontalAlignment="RIGHT" verticalAlignment="CENTER">
+					<Anchor point="RIGHT" relativePoint="LEFT" offsetX="-3"/>
+					<Dimensions x="45" y="20"/>
+				</Label>
+			
+			</Controls>
+	
+		</Line>
+		
+		<Line name="CombatMetrics_GraphTickY" color="FF888888" thickness="COMBAT_METRICS_LINE_SIZE" virtual="true">
+		
+			<Controls>
+			
+				<Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0" horizontalAlignment="CENTER" verticalAlignment="TOP">
+					<Anchor point="TOP" relativePoint="BOTTOM" offsetY="3"/>
+					<Dimensions x="45" y="20"/>
+				</Label>
+			
+			</Controls>
+	
+		</Line>
+		
 		<TopLevelControl name="CombatMetrics_Report" clampedToScreen="true" mouseEnabled="true" movable="true" hidden="true">
 			
 			<Dimensions x="1000" y="770"/>
@@ -2190,10 +2227,152 @@
 						
 							<Controls>
 							
-								<Control name="$(parent)PlotWindow" inherits="CombatMetrics_ControlFramed" mouseEnabled="true">
+								<Control name="$(parent)SmoothControl" mouseEnabled="true"> 
 								
-									<Anchor point="TOPRIGHT" offsetX="-24" offsetY="4"/>
-									<Dimensions x="440" y="314"/>
+									<Anchor point="TOPLEFT" offsetX="8" offsetY="8"/>
+									<Dimensions x="100" y="50" />
+									
+									<Controls>
+								
+										<Label name="$(parent)Label" inherits="CombatMetrics_LabelFontControl" text="Smooth: 5s" horizontalAlignment="LEFT" mouseEnabled="true">
+										
+											<Anchor point="TOPLEFT"/>
+											<Dimensions x="100" y="22" />
+											
+										</Label>
+									
+										<Slider name="$(parent)Slider" inherits="ZO_Slider" step="1">
+											<Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT" offsetY="10"/>
+											<Dimensions x="100"/>
+											
+											<Limits min="1" max="20" />
+											
+											<OnValueChanged>
+												CMX.SetSliderValue(self, value)
+											</OnValueChanged>
+										</Slider>
+										
+									</Controls>
+									
+									<OnMouseWheel>
+										self:GetNamedChild("Slider"):SetValue(self:GetNamedChild("Slider"):GetValue() + delta * self:GetNamedChild("Slider"):GetValueStep()) 
+									</OnMouseWheel>
+									
+								</Control>
+								
+								<Line name="$(parent)Sep" color="FF888888" thickness="COMBAT_METRICS_LINE_SIZE">
+									<Anchor point="TOP" relativePoint="TOPLEFT" offsetX="116" offsetY="6"/>
+									<Anchor point="BOTTOM" relativePoint="BOTTOMLEFT" offsetX="116" offsetY="-6"/>
+									
+									<Dimensions x="0"/>
+								</Line>
+							
+								<Control name="$(parent)PlotWindow" mouseEnabled="true">
+								
+									<Anchor point="TOPRIGHT" offsetX="-24" offsetY="12"/>
+									<Dimensions x="390" y="306"/>
+									
+									<Controls>
+									
+										<Control name="$(parent)Spacer1">
+										
+											<Anchor point="TOPLEFT" relativePoint="TOPLEFT"/>
+											<Anchor point="BOTTOMRIGHT" relativePoint="CENTER"/>										
+										
+										</Control> 
+										
+										<Control name="$(parent)Spacer2">
+										
+											<Anchor point="TOPLEFT" relativePoint="LEFT"/>
+											<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM"/>										
+										
+										</Control> 
+										
+										<Control name="$(parent)Spacer3">
+										
+											<Anchor point="TOPLEFT" relativePoint="TOP"/>
+											<Anchor point="BOTTOMRIGHT" relativePoint="RIGHT"/>										
+										
+										</Control> 
+										
+										<Control name="$(parent)Spacer4">
+										
+											<Anchor point="TOPLEFT" relativePoint="CENTER"/>
+											<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT"/>										
+										
+										</Control> 
+									
+										<Line name="$(parent)YTick5" color="FFFFFFFF" level="1" inherits="CombatMetrics_GraphTickX">
+									
+											<Anchor point="LEFT" relativePoint="TOPLEFT" offsetX="-3"/>
+											<Anchor point="RIGHT" relativePoint="TOPRIGHT" offsetX="0"/>
+									
+										</Line>
+									
+										<Line name="$(parent)YTick4" inherits="CombatMetrics_GraphTickX">
+									
+											<Anchor point="LEFT" relativePoint="LEFT" relativeTo="$(parent)Spacer1" offsetX="-3"/>
+											<Anchor point="RIGHT" relativePoint="RIGHT" relativeTo="$(parent)Spacer3" offsetX="0"/>
+									
+										</Line>
+										
+										<Line name="$(parent)YTick3" inherits="CombatMetrics_GraphTickX">
+									
+											<Anchor point="LEFT" relativePoint="LEFT" offsetX="-3"/>
+											<Anchor point="RIGHT" relativePoint="RIGHT" offsetX="0"/>
+									
+										</Line>
+									
+										<Line name="$(parent)YTick2" inherits="CombatMetrics_GraphTickX">
+									
+											<Anchor point="LEFT" relativePoint="LEFT" relativeTo="$(parent)Spacer2" offsetX="-3"/>
+											<Anchor point="RIGHT" relativePoint="RIGHT" relativeTo="$(parent)Spacer4" offsetX="0"/>
+									
+										</Line>
+										
+										<Line name="$(parent)YTick1" color="FFFFFFFF" level="1" inherits="CombatMetrics_GraphTickX">
+									
+											<Anchor point="LEFT" relativePoint="BOTTOMLEFT" offsetX="-3"/>
+											<Anchor point="RIGHT" relativePoint="BOTTOMRIGHT" offsetX="0"/>
+									
+										</Line> 
+									
+										<Line name="$(parent)XTick1" color="FFFFFFFF" level="1" inherits="CombatMetrics_GraphTickY">
+									
+											<Anchor point="TOP" relativePoint="TOPLEFT" offsetY="0"/>
+											<Anchor point="BOTTOM" relativePoint="BOTTOMLEFT" offsetY="3"/>
+									
+										</Line>
+									
+										<Line name="$(parent)XTick2" inherits="CombatMetrics_GraphTickY">
+									
+											<Anchor point="TOP" relativePoint="TOP" relativeTo="$(parent)Spacer1" offsetY="0"/>
+											<Anchor point="BOTTOM" relativePoint="BOTTOM" relativeTo="$(parent)Spacer2" offsetY="3"/>
+									
+										</Line>
+										
+										<Line name="$(parent)XTick3" inherits="CombatMetrics_GraphTickY">
+									
+											<Anchor point="TOP" relativePoint="TOP" offsetY="0"/>
+											<Anchor point="BOTTOM" relativePoint="BOTTOM" offsetY="3"/>
+									
+										</Line>
+									
+										<Line name="$(parent)XTick4" inherits="CombatMetrics_GraphTickY">
+									
+											<Anchor point="TOP" relativePoint="TOP" relativeTo="$(parent)Spacer3" offsetY="0"/>
+											<Anchor point="BOTTOM" relativePoint="BOTTOM" relativeTo="$(parent)Spacer4" offsetY="3"/>
+									
+										</Line>
+										
+										<Line name="$(parent)XTick5" color="FFFFFFFF" level="1" inherits="CombatMetrics_GraphTickY">
+									
+											<Anchor point="TOP" relativePoint="TOPRIGHT" offsetY="0"/>
+											<Anchor point="BOTTOM" relativePoint="BOTTOMRIGHT" offsetY="3"/>
+									
+										</Line>
+									
+									</Controls>
 									
 									<OnInitialized> self.plots = {}	</OnInitialized>
 									
@@ -2208,13 +2387,10 @@
 								
 								<Label name="$(parent)YLabel" inherits="CombatMetrics_LabelFontControl" text="DPS" horizontalAlignment="CENTER" mouseEnabled="true">
 								
-									<Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)PlotWindow" offsetX="-28"/>
+									<Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)PlotWindow" offsetX="-56"/>
 									<Dimensions x="50" y="20"/>
 									
 								</Label>
-								
-								
-							
 							
 							</Controls>
 						

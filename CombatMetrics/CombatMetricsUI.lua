@@ -738,21 +738,22 @@ function CMX.LoadItem(listitem)
 	
 	local lastfights = CMX.lastfights
 	
-	if id == nil or savedFights[id] == nil then 
+	local isLoaded, loadId
 	
-		assert(id, "Id is nil")
-		assert(savedFights[id], "fight is nil")
+	if issaved and savedFights[id] then 
 	
-		return 
+		isLoaded, loadId = searchtable(lastfights, "date", savedFights[id]["date"])					-- returns false if nothing is found else it returns the id
+		if isLoaded then isLoaded = lastfights[loadId]["time"] == savedFights[id]["time"] end		-- ensures old fights load correctly
 	
 	end
 	
-	local isLoaded, loadId = searchtable(lastfights, "date", savedFights[id]["date"])	-- returns false if nothing is found else it returns the id
-	if isLoaded then isLoaded = lastfights[loadId]["time"] == savedFights[id]["time"] end					-- ensures old fights load correctly
-	
 	if issaved and isLoaded == false then
+	
+		local loadedfight = SVHandler.Load(id)
 		
-		table.insert(lastfights, SVHandler.Load(id))
+		if loadedfight.log then CMX.AddFightCalculationFunctions(loadedfight) end
+		
+		table.insert(lastfights, loadedfight)
 		CombatMetrics_Report:Update(#CMX.lastfights)
 		
 	else
@@ -932,8 +933,22 @@ do
 		ClearMenu()
 		
 		AddCustomMenuItem(GetString(showIdString), toggleshowids)		
-		AddCustomSubMenuItem(GetString(SI_COMBAT_METRICS_POSTDPS), postoptions)		
+		AddCustomSubMenuItem(GetString(SI_COMBAT_METRICS_POSTDPS), postoptions)
 		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_SETTINGS), CMX.OpenSettings)
+		
+		if fight and fight.CalculateFight then
+		
+			local function calculate()
+			
+				fight:CalculateFight()
+				CombatMetrics_Report:Update(currentFight)
+				
+			end
+		
+			AddCustomMenuItem(GetString(SI_COMBAT_METRICS_RECALCULATE), calculate)
+			
+		end
+		
 		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_FEEDBACK), ToggleFeedback)
 
 		ShowMenu(settingsbutton)		
@@ -2437,7 +2452,7 @@ local function MapValue(plotwindow, dimension, value)
 	local controlSize = dimension == CMX_PLOT_DIMENSION_X and plotwindow:GetWidth() or plotwindow:GetHeight()
 
 	local IsInRange = (value < maxRange) and (value > minRange)
-	local offset = controlSize  * ((value - minRange)/(maxRange - minRange))
+	local offset = controlSize * ((value - minRange)/(maxRange - minRange))
 	
 	return offset, IsInRange
 
@@ -2470,19 +2485,29 @@ local function AddPlot(plotwindow, id, plotType, height)
 
 	if plots[id] == nil then
 	
-		plots[id] = CreateControlFromVirtual("$(parent)Plot" .. id, plot, plotTypeTemplates[plotType])
-		plots[id].plotType = plotType
+		local newplot = CreateControlFromVirtual("CombatMetrics_Report_MainPanelGraphPlot", plotwindow, plotTypeTemplates[plotType], id)
+		
+		newplot.plotType = plotType
+		newplot.lineControls = {}
+		
+		plots[id] = newplot
 		
 	elseif plotType ~= plots[id].plotType then	-- if plottype is different, get rid of the control.
 	
 		plots[id]:SetParent(nil)
 		
-		plots[id] = CreateControlFromVirtual("$(parent)Plot" .. id, plot, plotTypeTemplates[plotType])
+		plots[id] = CreateControlFromVirtual("CombatMetrics_Report_MainPanelGraphPlot", plotwindow, plotTypeTemplates[plotType], id)
 		plots[id].plotType = plotType
 		
 	end
 	
 	local plot = plots[id]
+	
+	for id, line in ipairs(plot.lineControls) do
+	
+		line:SetHidden(true)
+		
+	end
 	
 	if plotType == CMX_PLOT_TYPE_BAR then
 	
@@ -2503,21 +2528,113 @@ local function DrawLine(plot, coords, id)
 
 	if lineControls[id] == nil then
 	
-		lineControls[id] = CreateControlFromVirtual("$(parent)Line" .. id, plot, "CombatMetrics_PlotLine")
+		lineControls[id] = CreateControlFromVirtual("$(parent)Line", plot, "CombatMetrics_PlotLine", id)
 		
 	end	
 	
 	local line = lineControls[id]
 	
-	line:SetThickness(dx) 
+	line:SetThickness(dx * 2) 
 	line:ClearAnchors()
 	
+	local x1, y1, x2, y2 = unpack(coords)
 	
+	local side1 = BOTTOMLEFT
+	local side2 = TOPRIGHT
+	
+	if y1 > y2 then 
+	
+		side1 = TOPLEFT
+		side2 = BOTTOMRIGHT
+		
+	end
+	
+	line:SetAnchor(side1, plot, BOTTOMLEFT, x1, -y1)
+	line:SetAnchor(side2, plot, BOTTOMLEFT, x2, -y2)
+	line:SetHidden(false)
+	
+end
+
+local function GetScale(x1, x2)	-- e.g. 34596 and 42693
+
+	local distance = math.max(x2 - x1, 1)	-- 8097
+
+	local power = math.pow(10, math.floor(math.log10(distance)))	-- math.pow(10, math.floor(3.91) = math.pow(10, 3) = 1000
+	
+	local high = math.ceil(x2 / power) * power	-- 43000
+	local low = math.floor(x1 / power) * power	-- 34000
+	
+	local size = (high - low) / power 	-- 9000 / 1000 = 9
+	
+	local rangesizes = {1, 2, 4, 8, 10, 20}
+	
+	local cleansize
+	
+	for i, value in ipairs(rangesizes) do
+	
+		if size <= value then 
+		
+			cleansize = value	-- 10
+			break
+			
+		end
+		
+	end
+	
+	local delta = cleansize - size -- 1
+	
+	local cleanLow = low - math.floor(delta / 2) * power 	-- 34000 - math.floor(0.5) * 1000 = 34000
+	local cleanHigh = high + math.ceil(delta / 2) * power 	-- 34000 - math.ceil(0.5) * 1000 = 44000
+	
+	if cleanLow < 0 then
+	
+		cleanHigh = cleanHigh - cleanLow	
+		cleanLow = 0
+	
+	end
+	
+	local cleanDist = cleanHigh - cleanLow
+	
+	local tickValues = {cleanLow, 0, 0, 0, cleanHigh}
+	
+	for i = 2,4 do
+	
+		tickValues[i] = cleanLow + cleanDist * (i - 1) / 4
+	
+	end
+	
+	return cleanLow, cleanHigh, tickValues
+
+end
+
+local function UpdateScales(plotwindow, ranges)
+
+	local x1, x2, y1, y2 = unpack(ranges)	
+	
+	local RangesX = {GetScale(x1, x2)}
+	local RangesY = {GetScale(y1, y2)}
+	
+	plotwindow.RangesX = RangesX
+	plotwindow.RangesY = RangesY
+	
+	local ticksX = RangesX[3]
+	local ticksY = RangesY[3]
+	
+	for i = 1,5 do
+	
+		local ticklabelX = GetControl(plotwindow:GetName(), "XTick" .. i .. "Label")
+		local ticklabelY = GetControl(plotwindow:GetName(), "YTick" .. i .. "Label")
+		
+		ticklabelX:SetText(tostring(ticksX[i]))
+		ticklabelY:SetText(tostring(ticksY[i]))
+		
+	end
 end
 
 local function AcquireRange(plotwindow, XYData) 
 
-	local maxX, maxY
+	local maxX = 0
+	local maxY = 0
 
 	for i, coords in ipairs(XYData) do
 	
@@ -2528,8 +2645,9 @@ local function AcquireRange(plotwindow, XYData)
 		
 	end
 	
-	plotwindow.RangesX = {0, maxX}
-	plotwindow.RangesY = {0, maxY}
+	local rawRanges = {0, maxX, 0, maxY}
+	
+	UpdateScales(plotwindow, rawRanges)
 	
 end
 
@@ -2542,17 +2660,20 @@ local function PlotXY(plotwindow, plotid, XYData, autoRange)
 	local coordinates = {}
 	plot.coordinates = coordinates
 	
-	local x0, y0
+	local x0
+	local y0
+		
+	for i, dataPair in ipairs(XYData) do
 	
-	for i, coords in ipairs(XYData) do
-	
-		local x, y = unpack(coords)
-		coordinates[i] = {MapXY(plotwindow, x, y)}
+		local t, v = unpack(dataPair)
+		local x, y, inRange = MapXY(plotwindow, t, v)
+		coordinates[i] = {x, y, inRange}
 		
 		if i > 1 then			
 		
 			local lineCoords = {x0, y0, x, y}
-			DrawLine(plot, lineCoords, i-1)
+
+			DrawLine(plot, lineCoords, i - 1)
 		
 		end
 			
@@ -2562,24 +2683,73 @@ local function PlotXY(plotwindow, plotid, XYData, autoRange)
 	end
 end
 
-local rangesizes = {1, 1.5, 2, 2.5, 3, 4, 5, 6, 8}
-local tickseparation = {.2, .3, .5, .5, .5, 1, 1, 1, 2}	
+local function Smooth(data, smoothWindow, totaltime)
+
+	local XYData = {}
+	
+	local t2 = math.ceil(totaltime) - smoothWindow
+	
+	for t = 0, t2 do
+	
+		local sum = 0
+	
+		for i = 0, smoothWindow - 1 do
+		
+			sum = sum + (data[t + i] or 0)
+		end
+		
+		local x = t + smoothWindow / 2
+		
+		local y = sum / smoothWindow
+		
+		if t == 0 then table.insert(XYData, {0, y}) end
+		
+		table.insert(XYData, {x, y})
+		
+		if t == t2 then table.insert(XYData, {totaltime, y}) end
+	end
+	
+	return XYData
+end
 
 local function updateGraphPanel(panel)
 
-	if true then return end
-
 	local plotwindow = panel:GetNamedChild("PlotWindow")
+	local smoothSlider = panel:GetNamedChild("SmoothControl"):GetNamedChild("Slider")
+	
+	local SmoothWindow = db.FightReport.SmoothWindow
+	
+	smoothSlider:SetValue(SmoothWindow)
 	
 	local category = db.FightReport.category
 	
+	if fightData == nil then plotwindow:SetHidden(true) return end
+	
+	plotwindow:SetHidden(false)
+	
 	local data = fightData.calculated
 	
-	local RawData = data[category .. "PlotData"]	-- DPS data, one value per second
+	local RawData = data.graph and data.graph[category] or nil -- DPS data, one value per second
 	
-	local XYData = Smooth(RawData, db.FightReport.SmoothWindow)
+	if RawData == nil then return end
 	
-	PlotXY(plotwindow, 1, XYData, autoRange)	
+	local XYData = Smooth(RawData, SmoothWindow, fightData.combattime)
+	
+	PlotXY(plotwindow, 1, XYData, true)	
+	
+end
+
+function CMX.SetSliderValue(self, value)
+	
+	local labelControl = self:GetParent():GetNamedChild("Label")
+	
+	labelControl:SetText(string.format(GetString(SI_COMBAT_METRICS_SMOOTH), value))
+	
+	db.FightReport.SmoothWindow = value
+	
+	local graphPanel = self:GetParent():GetParent()
+	
+	graphPanel:Update() 
 	
 end
 

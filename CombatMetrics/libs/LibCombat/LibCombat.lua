@@ -14,7 +14,7 @@ Idea: Life and Death
 local _
 
 --Register with LibStub
-local MAJOR, MINOR = "LibCombat", 9
+local MAJOR, MINOR = "LibCombat", 10
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end --the same or newer version of this lib is already loaded into memory
 
@@ -30,7 +30,7 @@ local reset = false
 local data = {skillBars= {}}
 local showdebug = false --or GetDisplayName() == "@Solinur"
 local dev = GetDisplayName() == "@Solinur" -- or GetDisplayName() == "@Solinur"
-local timeout = 2000
+local timeout = 500
 local activetimeonheals = true
 local ActiveCallbackTypes = {}
 lib.ActiveCallbackTypes = ActiveCallbackTypes
@@ -42,6 +42,7 @@ local lastdeaths = {}
 local SlotSkills = {}
 local IdToReducedSlot = {}
 local lastskilluses = {}
+local isInShadowWorld = false	-- used to prevent fight reset in Cloudrest when using a portal.
 
 -- types of callbacks: Units, DPS/HPS, DPS/HPS for Group, Logevents
 
@@ -648,6 +649,7 @@ end
 local function onPlayerActivated()
 
 	zo_callLater(GetCurrentSkillBars, 100)
+	isInShadowWorld = false
 	
 end
 
@@ -1070,6 +1072,13 @@ end
 
 local function onCombatState(event, inCombat)  -- Detect Combat Stage
 
+	if isInShadowWorld and IsUnitDead("player") == false then -- prevent fight reset in Cloudrest when using a portal.
+		
+		if dev then d("[%.3f] Prevented combat state change due to Shadow World!", GetGameTimeMilliseconds()/1000) end
+		return 
+		
+	end
+
 	if inCombat ~= data.inCombat then     -- Check if player state changed
   
 		local timems = GetGameTimeMilliseconds()
@@ -1156,14 +1165,21 @@ local function AddtoEffectBuffer(eventid, timems, unitId, abilityId, changeType,
 	end
 end
 
+local function onShadowWorld( _, changeType)
+
+	isInShadowWorld = changeType == EFFECT_RESULT_GAINED
+	if dev then df("[%.3f] Shadow: %s", GetGameTimeMilliseconds()/1000, tostring(isInShadowWorld)) end
+	
+end
+
+local function onMageExplode( _, changeType, _, _, unitTag, _, endTime, stackCount, _, _, effectType, abilityType, _, unitName, unitId, abilityId, sourceType)
+
+	currentfight:ResetFight()	-- special tracking for The Mage in Aetherian Archives. It will reset the fight when the mage encounter starts.
+
+end
 
 local function BuffEventHandler(isspecial, groupeffect, _, changeType, _, _, unitTag, _, endTime, stackCount, _, _, effectType, abilityType, _, unitName, unitId, abilityId, sourceType)
-	
-	if abilityId == 50184 then -- special tracking for The Mage in Aetherian Archives. It will reset the fight when the mage encounter starts.
-		currentfight:ResetFight()
-		return
-	end
-	
+
 	if BadAbility[abilityId] == true then return end
 
 	if unitTag and string.sub(unitTag, 1, 5) == "group" and AreUnitsEqual(unitTag, "player") then return end
@@ -1929,6 +1945,8 @@ Events.General = EventHandler:New(GetAllCallbackTypes()
 		self:RegisterEvent(EVENT_UNIT_DESTROYED, onGroupChange)
 		self:RegisterEvent(EVENT_ACTION_SLOT_ABILITY_SLOTTED, GetCurrentSkillBars)
 		self:RegisterEvent(EVENT_PLAYER_ACTIVATED, onPlayerActivated)
+		self:RegisterEvent(EVENT_EFFECT_CHANGED, onMageExplode, REGISTER_FILTER_ABILITY_ID, 50184)
+		self:RegisterEvent(EVENT_EFFECT_CHANGED, onShadowWorld, REGISTER_FILTER_ABILITY_ID, 108045)
 		
 		if showdebug == true then self:RegisterEvent(EVENT_COMBAT_EVENT, onCustomEvent, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_EFFECT_GAINED_DURATION, REGISTER_FILTER_IS_ERROR, false) end		
 		self.active = true
@@ -2048,7 +2066,6 @@ Events.Effects = EventHandler:New(
 		self:RegisterEvent(EVENT_EFFECT_CHANGED, onEffectChanged, REGISTER_FILTER_UNIT_TAG, "player", REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_GROUP)
 		self:RegisterEvent(EVENT_EFFECT_CHANGED, onEffectChanged, REGISTER_FILTER_UNIT_TAG, "player", REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_TARGET_DUMMY)
 		self:RegisterEvent(EVENT_EFFECT_CHANGED, onEffectChanged, REGISTER_FILTER_UNIT_TAG, "player", REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_OTHER)
-		self:RegisterEvent(EVENT_EFFECT_CHANGED, onEffectChanged, REGISTER_FILTER_ABILITY_ID, 50184)
 		
 		for i=1,#SpecialBuffs do
 			self:RegisterEvent(EVENT_COMBAT_EVENT, onSpecialBuffEvent, REGISTER_FILTER_SOURCE_COMBAT_UNIT_TYPE, COMBAT_UNIT_TYPE_PLAYER, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_EFFECT_GAINED_DURATION, REGISTER_FILTER_ABILITY_ID, SpecialBuffs[i], REGISTER_FILTER_IS_ERROR, false)

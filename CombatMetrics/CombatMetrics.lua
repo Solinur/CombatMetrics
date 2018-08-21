@@ -143,31 +143,10 @@ local PhysResistDebuffs = {
 	[GetFormattedAbilityName(17906)] = 2108, -- Crusher, can get changed by settings !
 	[GetFormattedAbilityName(75753)] = 3010, -- Alkosh
 	
-	[GetFormattedAbilityName(34386)] = 2580, -- Night Mother's Gaze
-	[GetFormattedAbilityName(60416)] = 3440, -- Sunderflame
-	
 	--Corrosive Armor ignores all resistance
 
 }
 
-
-if GetAPIVersion() > 100022 then -- no more Sunder and NMG :(
-
-	PhysResistDebuffs = {
-
-		[GetFormattedAbilityName(62490)] = 5280, --Major Fracture	
-		[GetFormattedAbilityName(64147)] = 1320, --Minor Fracture
-
-		[GetFormattedAbilityName(17906)] = 2108, -- Crusher, can get changed by settings !
-		[GetFormattedAbilityName(75753)] = 3010, -- Alkosh
-		
-		-- [GetFormattedAbilityName(34386)] = 2580, -- Night Mother's Gaze
-		-- [GetFormattedAbilityName(60416)] = 3440, -- Sunderflame
-		
-		--Corrosive Armor ignores all resistance
-
-	}
-end
 
 function CMX.SetCrusher(value)
 
@@ -574,6 +553,13 @@ local function GetEmtpyFightStats()
 	data.totalSkillTime = 0
 	data.totalSkills = 0
 	
+	data.graph = {	
+		damageOut = {}, 
+		damageIn = {}, 
+		healingOut = {}, 
+		healingIn = {}, 
+	}
+	
 	lastUsedSkill = nil
 	lastUsedWeaponAttack = nil
 	
@@ -842,7 +828,7 @@ local function IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitVa
 	
 	local values
 	
-	if 		isheal == true  and isDamageOut == true then 
+	if isheal == true  and isDamageOut == true then 
 	
 		values = stats.healavg
 		barStats.healingOut = barStats.healingOut + hitValue
@@ -928,6 +914,7 @@ local function ProcessLogDamage(fight, callbacktype, timems, result, sourceUnitI
 	
 	local dmgkey
 	local hitkey
+	local graphkey
 	
 	if callbacktype == LIBCOMBAT_EVENT_DAMAGE_OUT then 
 		
@@ -937,6 +924,7 @@ local function ProcessLogDamage(fight, callbacktype, timems, result, sourceUnitI
 		
 		dmgkey = "damageOut" .. resultkey	-- determine categories. For normal incoming damage: dmgkey = "damageNormal", for critical outgoing damage: dmgkey = "damageCritical" ...
 		hitkey = "hitsOut" .. resultkey
+		graphkey = "damageOut"
 		
 	else																												-- incoming and self inflicted Damage are consolidated.
 		
@@ -945,11 +933,16 @@ local function ProcessLogDamage(fight, callbacktype, timems, result, sourceUnitI
 		
 		dmgkey = "damageIn" .. resultkey	-- determine categories. For normal incoming damage: dmgkey = "damageNormal", for critical outgoing damage: dmgkey = "damageCritical" ...
 		hitkey = "hitsIn" .. resultkey
+		graphkey = "damageIn"
 		
 	end
 	
 	abilitydata[dmgkey] = abilitydata[dmgkey] + hitValue
 	abilitydata[hitkey] = abilitydata[hitkey] + 1
+	
+	local inttime = math.floor((timems - fight.combatstart)/1000)
+	local data = fight.calculated.graph[graphkey]
+	data[inttime] = (data[inttime] or 0) + hitValue
 	
 	abilitydata.max = math.max(abilitydata.max, hitValue)
 	
@@ -981,6 +974,7 @@ local function ProcessLogHeal(fight, callbacktype, timems, result, sourceUnitId,
 	
 	local healkey 
 	local hitkey 
+	local graphkey 
 	
 	if callbacktype == LIBCOMBAT_EVENT_HEAL_OUT then 
 	
@@ -989,6 +983,7 @@ local function ProcessLogHeal(fight, callbacktype, timems, result, sourceUnitId,
 		
 		healkey = "healingOut" .. resultkey		-- determine categories. For normal incoming healing: healkey = "healingNormal", for critical outgoing healing: healkey = "healingCritical" ...
 		hitkey = "healsOut" .. resultkey
+		graphkey = "healingOut"
 		
 	else
 	
@@ -997,11 +992,16 @@ local function ProcessLogHeal(fight, callbacktype, timems, result, sourceUnitId,
 		
 		healkey = "healingIn" .. resultkey		-- determine categories. For normal incoming healing: healkey = "healingNormal", for critical outgoing healing: healkey = "healingCritical" ...
 		hitkey = "healsIn" .. resultkey
+		graphkey = "healingIn"
 		
 	end
 	
 	abilitydata[healkey] = abilitydata[healkey] + hitValue
 	abilitydata[hitkey] = abilitydata[hitkey] + 1
+	
+	local inttime = math.floor((timems - fight.combatstart)/1000)
+	local data = fight.calculated.graph[graphkey]
+	data[inttime] = (data[inttime] or 0) + hitValue
 	
 	abilitydata.max = math.max(abilitydata.max,hitValue)
 	
@@ -1685,6 +1685,8 @@ local function AddFightCalculationFunctions(fight)
 	fight.AcquireBarStats = AcquireBarStats
 
 end
+
+CMX.AddFightCalculationFunctions = AddFightCalculationFunctions
 
 local function FightSummaryCallback(_, fight)
 
