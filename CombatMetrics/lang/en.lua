@@ -133,6 +133,7 @@
 	SI_COMBAT_METRICS_AVERAGE = "Average",  -- Average
 	SI_COMBAT_METRICS_NORMAL_HITS = "Normal Hits",  -- Average
 	SI_COMBAT_METRICS_MAX = "Max",  -- Maximum
+	SI_COMBAT_METRICS_MIN = "Min",  -- Maximum
 
 	SI_COMBAT_METRICS_STATS_MAGICKA1 = "Max Magicka:",  -- Max Magicka:
 	SI_COMBAT_METRICS_STATS_MAGICKA2 = "Spell Damage:",  -- Spell Damage:

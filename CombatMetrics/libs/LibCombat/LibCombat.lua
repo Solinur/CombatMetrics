@@ -668,6 +668,7 @@ function FightHandler:PrepareFight()
 		self.zone = GetPlayerActiveZoneName()
 		self.subzone = GetPlayerActiveSubzoneName()
 		self.ESOversion = GetESOVersionString()
+		self.account = data.accountname
 		
 		self.charData = {}
 		
@@ -2558,6 +2559,7 @@ local function Initialize()
   data.inCombat = IsUnitInCombat("player")
   data.inGroup = IsUnitGrouped("player")
   data.playername = zo_strformat(SI_UNIT_NAME,GetUnitName("player"))
+  data.accountname = GetDisplayName()
   data.bosses=0
   data.groupmembers={}
   data.groupmemberdisplaynames={}

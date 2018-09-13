@@ -1063,7 +1063,7 @@
 					<Dimensions x="50" y="20"/>
 				</Label>
 				
-				<Label name="$(parent)Maximum" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT" verticalAlignment="CENTER">
+				<Label name="$(parent)MinMax" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT" verticalAlignment="CENTER">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Average" offsetX="2"/>
 					<Dimensions x="50" y="20"/>
 				</Label>
@@ -2820,7 +2820,7 @@
 									<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Crits" offsetX="0" offsetY="0"/>
 									<Dimensions x="42" y="20"/>
 									
-									<OnMouseUp> CMX.HitCritContextMenus(self, button)</OnMouseUp>
+									<OnMouseUp> CMX.HitCritContextMenu(self, button)</OnMouseUp>
 									
 								</Label>
 								
@@ -2840,10 +2840,12 @@
 									
 								</Label>
 								
-								<Label name="$(parent)Maximum" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"  text="SI_COMBAT_METRICS_MAX" horizontalAlignment="RIGHT">
+								<Label name="$(parent)MinMax" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"  text="SI_COMBAT_METRICS_MAX" color="FFFFFFCC" horizontalAlignment="RIGHT">
 									
 									<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Average" offsetX="2" offsetY="0"/>
 									<Dimensions x="50" y="20"/>
+									
+									<OnMouseUp> CMX.MinMaxContextMenu(self, button, "hitcrit")</OnMouseUp>
 									
 								</Label>
 								

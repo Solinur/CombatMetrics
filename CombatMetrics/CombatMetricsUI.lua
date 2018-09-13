@@ -2069,13 +2069,43 @@ function CMX.AverageContextMenu(control, button)
 
 	ClearMenu()
 	
-	local text1 = string.format("%s/%s", GetString(SI_COMBAT_METRICS_AVERAGE), GetString(SI_COMBAT_METRICS_HITS))
-	local text2 = string.format("%s/%s", GetString(SI_COMBAT_METRICS_AVERAGE), GetString(SI_COMBAT_METRICS_NORMAL_HITS))
-	local text3 = string.format("%s/%s", GetString(SI_COMBAT_METRICS_AVERAGE), GetString(SI_COMBAT_METRICS_CRITS))
+	local text1 = string.format("%s %s", GetString(SI_COMBAT_METRICS_AVERAGE), GetString(SI_COMBAT_METRICS_HITS))
+	local text2 = string.format("%s %s", GetString(SI_COMBAT_METRICS_AVERAGE), GetString(SI_COMBAT_METRICS_NORMAL_HITS))
+	local text3 = string.format("%s %s", GetString(SI_COMBAT_METRICS_AVERAGE), GetString(SI_COMBAT_METRICS_CRITS))
 	
 	AddCustomMenuItem(text1, selectAverageOption1)
 	AddCustomMenuItem(text2, selectAverageOption2)
 	AddCustomMenuItem(text3, selectAverageOption3)
+	
+	ShowMenu(control)
+
+end
+
+local function selectMinMaxOption1()
+
+	db.FightReport.maxValue = true
+	
+	CombatMetrics_Report_AbilityPanel:Update()
+	
+end
+
+local function selectMinMaxOption2()
+
+	db.FightReport.maxValue = false
+	
+	CombatMetrics_Report_AbilityPanel:Update()
+	
+end
+
+function CMX.MinMaxContextMenu(control, button)
+
+	ClearMenu()
+	
+	local text1 = string.format("%s", GetString(SI_COMBAT_METRICS_MAX))
+	local text2 = string.format("%s", GetString(SI_COMBAT_METRICS_MIN))
+	
+	AddCustomMenuItem(text1, selectMinMaxOption1)
+	AddCustomMenuItem(text2, selectMinMaxOption2)
 	
 	ShowMenu(control)
 
@@ -2092,6 +2122,7 @@ local function updateAbilityPanel(panel)
 	local category = settings.category
 	local hitCritLayout = settings.hitCritLayout
 	local averageLayout = settings.averageLayout
+	local minmax = settings.maxValue
 	
 	local isDamage = category == "damageIn" or category == "damageOut"
 	
@@ -2102,6 +2133,20 @@ local function updateAbilityPanel(panel)
 	
 	header:GetNamedChild("Total"):SetText(valueColumnLabel)
 	header:GetNamedChild("Crits"):SetText(ratioColumnLabel)
+	
+	local headerCrit = header:GetNamedChild("Crits")
+	local headerHit = header:GetNamedChild("Hits")
+	
+	headerCrit:SetText(GetString(_G[hitCritLayout[3]]))
+	headerHit:SetText("/" .. GetString(_G[hitCritLayout[4]]))
+	
+	local headerAvg = header:GetNamedChild("Average")
+	
+	headerAvg:SetText(GetString(SI_COMBAT_METRICS_AVE) .. averageLayout[2])
+	
+	local headerMinMax = header:GetNamedChild("MinMax")
+	
+	headerMinMax:SetText(GetString(minmax and SI_COMBAT_METRICS_MAX or SI_COMBAT_METRICS_MIN))
 	
 	if fightData == nil then return end
 	
@@ -2140,18 +2185,6 @@ local function updateAbilityPanel(panel)
 	
 	local showids = db.debuginfo.ids
 	
-	local header = panel:GetNamedChild("Header")
-	
-	local headerCrit = header:GetNamedChild("Crits")
-	local headerHit = header:GetNamedChild("Hits")
-	
-	headerCrit:SetText(GetString(_G[hitCritLayout[3]]))
-	headerHit:SetText("/" .. GetString(_G[hitCritLayout[4]]))
-	
-	local headerAvg = header:GetNamedChild("Average")
-	
-	headerAvg:SetText(GetString(SI_COMBAT_METRICS_AVE) .. averageLayout[2])
-	
 	for abilityId, ability in CMX.spairs(data[category], function(t, a, b) return t[a][totalAmountKey]>t[b][totalAmountKey] end) do
 	
 		if ability[totalAmountKey]>0 then 
@@ -2186,7 +2219,7 @@ local function updateAbilityPanel(panel)
 			local avg2 = ability[avgKey2]
 			
 			local avg = avg2 == 0 and 0 or (avg1 / avg2)
-			local max = ability.max
+			local minmaxValue = minmax and ability.max or (ability.min or 0)
 			
 			local rowId = #panel.bars + 1
 			
@@ -2231,8 +2264,8 @@ local function updateAbilityPanel(panel)
 			local avgControl = row:GetNamedChild("Average")
 			avgControl:SetText(string.format("%.0f", avg))
 			
-			local maxControl = row:GetNamedChild("Maximum")
-			maxControl:SetText(max)
+			local maxControl = row:GetNamedChild("MinMax")
+			maxControl:SetText(minmaxValue)
 			
 			currentanchor = {TOPLEFT, row, BOTTOMLEFT, 0, dx}
 			
@@ -2521,7 +2554,19 @@ local function AddPlot(plotwindow, id, plotType, height)
 	return plot
 end
 
-local function DrawLine(plot, coords, id)
+local Plotcolors = {
+
+	[1] = {1, 1, 0, 0.66},	-- yellow
+	[2] = {1, 0, 0, 0.66},	-- red
+	[3] = {0, 1, 0, 0.66},	-- green
+	[4] = {0, 0, 1, 0.66},	-- blue
+	[5] = {1, 0, 1, 0.66},	-- violet
+	[6] = {0, 1, 1, 0.66},	-- cyan
+
+}
+
+
+local function DrawLine(plot, coords, id, colorId)
 
 	local plotid = plot.id
 	local lineControls = plot.lineControls
@@ -2535,6 +2580,7 @@ local function DrawLine(plot, coords, id)
 	local line = lineControls[id]
 	
 	line:SetThickness(dx * 2) 
+	line:SetColor(unpack(Plotcolors[colorId])) 
 	line:ClearAnchors()
 	
 	local x1, y1, x2, y2 = unpack(coords)
@@ -2651,7 +2697,7 @@ local function AcquireRange(plotwindow, XYData)
 	
 end
 
-local function PlotXY(plotwindow, plotid, XYData, autoRange)
+local function PlotXY(plotwindow, plotid, XYData, autoRange, colorId)
 
 	if autoRange then AcquireRange(plotwindow, XYData) end
 
@@ -2673,7 +2719,7 @@ local function PlotXY(plotwindow, plotid, XYData, autoRange)
 		
 			local lineCoords = {x0, y0, x, y}
 
-			DrawLine(plot, lineCoords, i - 1)
+			DrawLine(plot, lineCoords, i - 1, colorId)
 		
 		end
 			
@@ -2712,6 +2758,34 @@ local function Smooth(data, smoothWindow, totaltime)
 	return XYData
 end
 
+local function Accumulate(data, startpoint, totaltime)
+
+	local XYData = {}
+	
+	local t2 = math.ceil(totaltime)
+	
+	local sum = 0
+	
+	for t = 0, t2 do		
+	
+		sum = sum + (data[t] or 0)
+		
+		if t >= startpoint then 
+		
+			local x = t
+			
+			local y = sum / t
+			
+			table.insert(XYData, {x, y})
+		
+		end
+	end
+	
+	ACCDATA = XYData
+	
+	return XYData
+end
+
 local function updateGraphPanel(panel)
 
 	local plotwindow = panel:GetNamedChild("PlotWindow")
@@ -2733,9 +2807,15 @@ local function updateGraphPanel(panel)
 	
 	if RawData == nil then return end
 	
-	local XYData = Smooth(RawData, SmoothWindow, fightData.combattime)
+	local combattime = fightData.combattime
 	
-	PlotXY(plotwindow, 1, XYData, true)	
+	local SmoothData = Smooth(RawData, SmoothWindow, combattime)
+	
+	PlotXY(plotwindow, 1, SmoothData, true, 1)
+	
+	local AccData = Accumulate(RawData, SmoothWindow/2, combattime)
+	
+	PlotXY(plotwindow, 2, AccData, false, 2)
 	
 end
 
@@ -2881,13 +2961,15 @@ local function updateLeftInfoPanel(panel)
 		
 		local skilltimingbefore = db.FightReport.skilltimingbefore
 		
+		local dpsratio, timeratio
+		
 		if barStats then
 		
-			local dpsratio = (barStats[category] or 0) / data[category.."Total"]
+			dpsratio = (barStats[category] or 0) / data[category.."Total"]
 			
 			local totalTime = (category == "healingIn" or category == "healingOut") and fightData.hpstime or fightData.dpstime or 1
 			
-			local timeratio = (barStats.totalTime or 0) / totalTime
+			timeratio = (barStats.totalTime or 0) / totalTime
 		
 		end
 		
@@ -3109,13 +3191,17 @@ local function updateInfoRowPanel(panel)
 		["date"] = GetTimeStamp(), 
 		["time"] = GetTimeString(), 
 		["ESOversion"] = GetESOVersionString(), 
+		["account"] = GetDisplayName()
 	
 	}
 	
 	local date = data.date
+	local account = data.account
+	
+	local accountstring = account and string.format("%s, ", account) or ""
 	
 	local datestring = type(date) == "number" and GetDateStringFromTimestamp(date) or date
-	local timestring = string.format("%s, %s", datestring, data.time)
+	local timestring = string.format("%s%s, %s", accountstring, datestring, data.time)
 	local versionstring = string.format("%s / CMX %s", data.ESOversion or "<= 3.2" , CMX.version)
 	
 	datetimecontrol:SetText(timestring)
@@ -3578,6 +3664,7 @@ local function toggleFightReport()
 	end
 end
 
+local scene = ZO_Scene:New("CMX_REPORT_SCENE", SCENE_MANAGER)
 
 local function initFightReport()
 
@@ -3591,8 +3678,6 @@ local function initFightReport()
 	fightReport:SetAnchor(CENTER, nil , TOPLEFT, pos.x, pos.y)
 	
 	local fragment = ZO_HUDFadeSceneFragment:New(fightReport)
-
-	local scene = ZO_Scene:New("CMX_REPORT_SCENE", SCENE_MANAGER)
 	
 	scene:AddFragment(fragment)
 

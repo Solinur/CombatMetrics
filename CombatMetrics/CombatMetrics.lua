@@ -14,6 +14,8 @@ local lastUsedSkill
 local lastUsedWeaponAttack
 
 local currentbar
+
+local infinity = math.huge
 	
 local LC = LibStub:GetLibrary("LibCombat")
 if LC == nil then return end 
@@ -335,7 +337,6 @@ local CategoryList = {
 		"hitsInBlocked",
 		"hitsInShielded",
 		"hitsInTotal",
-		"DPSIn",
 		
 	},
 	
@@ -437,6 +438,7 @@ local function initBaseAbility(self, tablekey)
 	local list = CategoryList[tablekey]
 
 	self.max = 0 -- max hit 
+	self.min = math.huge -- min hit 
 	
 	for _,key in pairs(list) do
 		
@@ -635,6 +637,10 @@ local function sumUnitTables(target, source, reference) -- adds values from sour
 			if key == "max" then 
 			
 				target[key] = math.max((target[key] or 0), (source[key] or 0))
+				
+			elseif key == "min" then 				
+			
+				target[key] = math.min((target[key] or infinity), (source[key] or infinity))
 				
 			else
 			
@@ -945,6 +951,7 @@ local function ProcessLogDamage(fight, callbacktype, timems, result, sourceUnitI
 	data[inttime] = (data[inttime] or 0) + hitValue
 	
 	abilitydata.max = math.max(abilitydata.max, hitValue)
+	abilitydata.min = math.min(abilitydata.min, hitValue)
 	
 	IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitValue, false, unit)
 end
@@ -1004,6 +1011,7 @@ local function ProcessLogHeal(fight, callbacktype, timems, result, sourceUnitId,
 	data[inttime] = (data[inttime] or 0) + hitValue
 	
 	abilitydata.max = math.max(abilitydata.max,hitValue)
+	abilitydata.min = math.min(abilitydata.min, hitValue)
 	
 	IncrementStatSum(fight, powerType, resultkey, isHealingOut, hitValue, true)
 end
@@ -1212,7 +1220,7 @@ local function ProcessLogSkillTimings(fight, callbacktype, timems, reducedslot, 
 		
 			lastUsedWeaponAttack[3] = timems + delay
 			
-		else
+		elseif lastUsedSkill then
 		
 			lastUsedSkill[3] = timems + delay
 			
@@ -1932,6 +1940,7 @@ local svdefaults = {
 		
 		["hitCritLayout"] = {"Critical", "Total", "SI_COMBAT_METRICS_HITS", "SI_COMBAT_METRICS_CRITS"},
 		["averageLayout"] = {"Total", "SI_COMBAT_METRICS_HITS"},
+		["maxValue"] = true,
 	},
 	
 	["liveReport"] = {
