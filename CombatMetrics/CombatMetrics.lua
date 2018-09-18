@@ -4,8 +4,8 @@ local wm = GetWindowManager()
 local em = GetEventManager()
 local _
 local db
-local desiredtime = 25  -- desired calculation time for a chunk of the log. 
-local stepsize = 50 	-- stepsize for chunks of the log. 
+local desiredtime = 10  -- desired calculation time for a chunk of the log. 
+local stepsize = 20 	-- stepsize for chunks of the log. 
 local logdata
 local chatContainer
 local chatWindow
@@ -1558,13 +1558,13 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 	else
 	
 		fight.cindex = iend
-		em:RegisterForUpdate("CMX_chunk", 50, function() fight:CalculateChunk() end )
+		em:RegisterForUpdate("CMX_chunk", 20, function() fight:CalculateChunk() end )
 		
 	end
 	
 	local chunktime = GetGameTimeMilliseconds() - scalcms
 
-	local newchunksize = math.min(math.ceil(desiredtime/math.max(chunktime,1)*db.chunksize/stepsize)*stepsize,10000)
+	local newchunksize = math.min(math.ceil(desiredtime/math.max(chunktime,1)*db.chunksize/stepsize)*stepsize,20000)
 	
 	Print("calculationtime", "Chunk calculation time: %d ms, new chunk size: %d", chunktime, newchunksize)
 	

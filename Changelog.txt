@@ -294,3 +294,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Attempted to fix an issue in Cloudrest where the fight would reset when player goes to the shadow world. While in the shadow world, Combat Metrics will ignore changes to combat status. 
 [*] Fixed outdated API number in CombatMetricsFightData submodule
 [*] Fixed an error that could occur when selecting a fight via the fight list panel
+
+0.8.2.9 1,002,327 (18.09.2018) 23:54
+[*] Improved performance for calculating fights massively. Thanks to ZOS for implementing a profiling tool with the Murkmire PTS that allowed me to identify a function where the calculation was slowed down. I wouldn't have found that without the tool.
+[*] API Bump for Murkmire (100025)

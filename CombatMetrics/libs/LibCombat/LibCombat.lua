@@ -14,7 +14,7 @@ Idea: Life and Death
 local _
 
 --Register with LibStub
-local MAJOR, MINOR = "LibCombat", 10
+local MAJOR, MINOR = "LibCombat", 11
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end --the same or newer version of this lib is already loaded into memory
 
@@ -116,11 +116,20 @@ local CustomAbilityName = {
 	
 local CustomAbilityIcon = {}
 
+local AbilityNameCache = {}
+
 local function GetFormattedAbilityName(id)
 
-	if id == nil then return "" end
-
-	local name = CustomAbilityName[id] or zo_strformat(SI_ABILITY_NAME, GetAbilityName(id))
+	if id == nil then return "" end	
+	
+	local name = AbilityNameCache[id]
+	
+	if name == nil then 
+	
+		name = CustomAbilityName[id] or zo_strformat(SI_ABILITY_NAME, GetAbilityName(id))
+		AbilityNameCache[id] = name
+		
+	end  
 	
 	return name
 	
