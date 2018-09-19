@@ -77,6 +77,7 @@
 	
 	SI_COMBAT_METRICS_SETTINGS = "Addon Settings",
 	SI_COMBAT_METRICS_FEEDBACK = "Send Feedback / Donate",
+	SI_COMBAT_METRICS_SAVEHDD = "Save FightData to HDD",
 	
 	SI_COMBAT_METRICS_RECALCULATE = "Recalculate Fight",
 	SI_COMBAT_METRICS_SMOOTH = "Smooth: %d s",

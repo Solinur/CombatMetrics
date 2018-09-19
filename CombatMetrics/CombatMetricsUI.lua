@@ -907,6 +907,13 @@ do
 		CMX.PosttoChat("HPS", currentFight)
 		
 	end
+	
+	local function requestLuaSave()
+	
+		GetAddOnManager():RequestAddOnSavedVariablesPrioritySave(CMX.name)
+		d("Save Requested: " .. CMX.name)
+		
+	end
 
 	function CMX.SettingsContextMenu( settingsbutton, upInside )
 
@@ -936,7 +943,7 @@ do
 		AddCustomSubMenuItem(GetString(SI_COMBAT_METRICS_POSTDPS), postoptions)
 		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_SETTINGS), CMX.OpenSettings)
 		
-		if fight and fight.CalculateFight then
+		if fight and fight.CalculateFight and (fight.svversion == nil or fight.svversion > 2) then
 		
 			local function calculate()
 			
@@ -950,6 +957,8 @@ do
 		end
 		
 		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_FEEDBACK), ToggleFeedback)
+		
+		if GetAPIVersion() > 100024 then AddCustomMenuItem(GetString(SI_COMBAT_METRICS_SAVEHDD), requestLuaSave) end 
 
 		ShowMenu(settingsbutton)		
 

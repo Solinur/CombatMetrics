@@ -370,7 +370,6 @@ function UnitHandler:Initialize(name, id, unitType)
 	self.name = name				-- name
 	self.unitType = unitType		-- type of unit: group, pet or boss
 	self.isFriendly = false
-	self.id = id
 	self.damageOutTotal = 0
 	self.groupDamageOut  = 0
 	self.dpsstart = nil 				-- start of dps in ms

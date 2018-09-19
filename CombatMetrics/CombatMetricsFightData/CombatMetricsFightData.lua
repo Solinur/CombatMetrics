@@ -4,7 +4,7 @@ local sv
 CombatMetricsFightData = {}
  
 local AddonName = "CombatMetricsFightData"
-local AddonVersion = 2
+local AddonVersion = 3
 
 local constants = 0
 
@@ -198,7 +198,8 @@ local function encodeCombatLogLine(line, unitConversion)
 	
 		line[3] = CombatResultTableSave[line[3]]
 		line[4] = unitConversion[line[4]]
-		line[5] = unitConversion[line[5]]		
+		line[5] = unitConversion[line[5]]
+		line[6]	= line[6] > 0 and line[6] or 0
 	
 	elseif layoutId == LAYOUT_EVENT then			-- type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType
 		
@@ -252,6 +253,7 @@ local function decodeCombatLogLine(line)
 	if layoutId == LAYOUT_COMBAT then						-- type, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType
 	
 		logdata[3] = CombatResultTableLoad[logdata[3]]
+		logdata[6] = logdata[6] == 0 and -1 or logdata[6]
 	
 	elseif layoutId == LAYOUT_EVENT then					-- type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType
 		
@@ -297,8 +299,7 @@ local function convertCombatLog(savedFight, filters)
 		
 	end
 	
-	savedFight.starttime = combatlog[1][2] or 0 -- use this to store only times relative to the first time entry.
-	local starttime = savedFight.starttime
+	local starttime = (savedFight.starttime or combatlog[1][2] or 0) - 1000 -- prevent negative numbers
 	
 	local tempLogTable = {}
 	local tempLog = {}
@@ -310,7 +311,7 @@ local function convertCombatLog(savedFight, filters)
 		
 		for i, line in ipairs(combatlog) do
 			
-			line[2] = line[2] - starttime	
+			line[2] = line[2] - starttime
 			
 			local logstring, size = encodeCombatLogLine(line, unitConversion)
 			
@@ -339,7 +340,7 @@ local function convertCombatLog(savedFight, filters)
 		
 			if filters[line[1]] == true then 
 			
-				line[2] = line[2] - starttime	
+				line[2] = line[2] - starttime
 			
 				local logstring, size = encodeCombatLogLine(line, unitConversion)
 				
@@ -379,17 +380,30 @@ local function recoverCombatLog(loadedFight)
 
 	local strings = loadedFight.stringlog
 	
+	local timeOffset = 0
+	if loadedFight.svversion >= 3 then timeOffset = 1000 end
+	
 	if strings == nil or #strings == 0 then return end
 	
 	local combatlog = {}
-	local starttime = loadedFight.starttime
+	local starttime = loadedFight.starttime - timeOffset
 	
 	for i, data in ipairs(strings) do
 	
 		for line in string.gfind(data, ",?(.-),") do
 		
 			local logline = decodeCombatLogLine(line)
-			logline[2] = logline[2] + starttime
+			
+			if logline[2] < 16776016 then
+			
+				logline[2] = logline[2] + starttime 
+
+			else 
+			
+				logline[2] = logline[2] + starttime - 16777216
+			
+			end
+			
 			table.insert(combatlog, logline)
 			
 		end
@@ -397,7 +411,7 @@ local function recoverCombatLog(loadedFight)
 	
 	loadedFight.log = combatlog
 	loadedFight.stringlog = nil
-	
+	loadedFight.unitConversion = nil
 end
 
 local function reduceUnitIds(fight) 
@@ -409,15 +423,17 @@ local function reduceUnitIds(fight)
 	local calcData = fight.calculated
 	local calcUnits = calcData.units
 	
-	local count = 1
+	local newId = 1
 
 	for id, unit in pairs(fight.units) do
 	
-		newUnits[count] = unit
-		newCalcUnits[count] = calcUnits[id]
-		unitConversion[id] = count
+		newUnits[newId] = unit
+		newCalcUnits[newId] = calcUnits[id]
+		unitConversion[id] = newId
 		
-		count = count + 1
+		if unit.unitType == 1 then fight.playerid = newId end
+		
+		newId = newId + 1		
 		
 	end
 	
@@ -484,8 +500,6 @@ local function loadFight(id)
 	
 	recoverCombatLog(loadedFight)
 	
-	loadedFight.svversion = nil
-	
 	return loadedFight
 end
 
@@ -508,7 +522,7 @@ local function ConvertSV(version)
 	
 	end
 	
-	sv.version = version
+	sv.version = AddonVersion
 
 end
 
