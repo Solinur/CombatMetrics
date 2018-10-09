@@ -191,16 +191,19 @@ function NavButtonFunctions.save(control, _, _, _, _, shiftkey )
 		
 		SVHandler.Save(fightData, shiftkey)
 		
-		local isvalid = checkSaveLimit()
+		local isvalid, size = checkSaveLimit()
 		
 		if isvalid then
 			
 			CombatMetrics_Report:Update()
+			db.SVsize = size
 			
 		else 
 			
 			local removed = table.remove(savedFights)
 			local _, size = checkSaveLimit(removed)
+			
+			db.SVsize = size
 			
 			errorstring = zo_strformat(SI_COMBAT_METRICS_STORAGE_FULL, size)
 			assert(false, errorstring) 
@@ -311,9 +314,13 @@ local function selectMainPanel(button)
 
 		end
 		
-		selectControl:GetParent():GetNamedChild("_MainPanel"):Update()
+		selected:Update()
+		
+	else
 	
-	end	
+		infoPanel:Update()
+	
+	end		
 end
 
 local function toggleInfoPanel(button)
@@ -1257,7 +1264,7 @@ local function updateFightStatsPanelLeft(panel)
 		
 		rowlist = {Total = true, Normal = true, Critical = true, Blocked = false, Shielded = false}
 		
-		activetime = string.format("%.2f", fightData and fightData.hpstime or 1)
+		activetime = fightData and fightData.hpstime or 1
 		
 	else	
 	
@@ -1267,9 +1274,11 @@ local function updateFightStatsPanelLeft(panel)
 		
 		rowlist = {Total = true, Normal = true, Critical = true, Blocked = true, Shielded = true}
 		
-		activetime = string.format("%.2f", fightData and fightData.dpstime or 1)
+		activetime = fightData and fightData.dpstime or 1
 		
 	end
+	
+	local activetimestring = string.format("%d:%05.2f", activetime/60, activetime%60)
 	
 	local dpsRow = panel:GetNamedChild("StatRowAPS")
 	
@@ -1277,10 +1286,11 @@ local function updateFightStatsPanelLeft(panel)
 	panel:GetNamedChild("StatTitleAmount"):GetNamedChild("Label"):SetText(label2) 	-- Damage or Healing
 	panel:GetNamedChild("StatTitleCount"):GetNamedChild("Label"):SetText(label3) 	-- Hits or Heals
 	
-	local combattime = string.format("%.2f", fightData and fightData.combattime or 0)
+	local combattime = fightData and fightData.combattime or 1	
+	local combattimestring = string.format("%d:%05.2f", combattime/60, combattime%60)
 	
-	panel:GetNamedChild("ActiveTimeValue"):SetText(activetime)
-	panel:GetNamedChild("CombatTimeValue"):SetText(combattime)
+	panel:GetNamedChild("ActiveTimeValue"):SetText(activetimestring)
+	panel:GetNamedChild("CombatTimeValue"):SetText(combattimestring)
 	
 	local key = DPSstrings[category]
 	
@@ -1579,11 +1589,11 @@ local function updateFightStatsPanel(control)
 
 end
 
-local function updateMainPanel(mainpanel, fightData, selectionData)
+local function updateMainPanel(mainpanel)
 
 	CMX.Print("dev", "Updating MainPanel")
 
-	mainpanel.active:Update(fightData, selectionData)
+	mainpanel.active:Update()
 
 end
 
@@ -3180,6 +3190,8 @@ end
 
 local function updateInfoPanel(panel)
 
+	if panel:IsHidden() then return end
+
 	updateLeftInfoPanel(panel:GetNamedChild("Left"))
 	updateRightInfoPanel(panel:GetNamedChild("Right"))
 	updateBottomInfoPanel(panel:GetNamedChild("Bottom"))
@@ -3216,12 +3228,10 @@ local function updateInfoRowPanel(panel)
 	datetimecontrol:SetText(timestring)
 	versioncontrol:SetText(versionstring)
 	
-	local _, size = checkSaveLimit()
-	
-	local usedSpace = size/db.maxSVsize
+	local usedSpace = db.SVsize/db.maxSVsize
 	
 	barcontrol:SetValue(usedSpace)
-	barlabelcontrol:SetText(string.format("%s: %.1f MB / %d MB (%.1f%%)", GetString(SI_COMBAT_METRICS_SAVED_DATA), size, db.maxSVsize, usedSpace * 100))
+	barlabelcontrol:SetText(string.format("%s: %.1f MB / %d MB (%.1f%%)", GetString(SI_COMBAT_METRICS_SAVED_DATA), db.SVsize, db.maxSVsize, usedSpace * 100))
 
 end
 
@@ -4003,7 +4013,8 @@ function CMX.InitializeUI()
 	SVHandler = CombatMetricsFightData
 	savedFights = SVHandler.GetFights()
 	
-	checkSaveLimit()
+	local _, size = checkSaveLimit()
+	db.SVsize = size
 
 	selections = {
 		["ability"]		= {}, 

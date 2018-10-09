@@ -4,7 +4,7 @@ local wm = GetWindowManager()
 local em = GetEventManager()
 local _
 local db
-local desiredtime = 10  -- desired calculation time for a chunk of the log. 
+local desiredtime = 0.010  -- desired calculation time (s) for a chunk of the log. 
 local stepsize = 20 	-- stepsize for chunks of the log. 
 local logdata
 local chatContainer
@@ -58,7 +58,7 @@ local GetFormattedAbilityName = LC.GetFormattedAbilityName
 local GetFormattedAbilityIcon = LC.GetFormattedAbilityIcon
 
 local function Print(category, message, ...)
-	if db.debuginfo[category] then df("[%s] %s", "CMX", message:format(...)) end
+	if db.debuginfo[category] then df("[%.2f - %s] %s", GetGameTimeSeconds(), "CMX", message:format(...)) end
 end
 
 CMX.Print = Print
@@ -1042,7 +1042,7 @@ local function ProcessLogEffects(fight, callbacktype, timems, unitId, abilityId,
 		
 			effectdata.lastgain = math.max(effectdata.lastgain or timems, fight.starttime)
 			
-		elseif effectdata.lastgain ~= nil then																-- treat this as if the player effect stopped, the group timer will continue though. 
+		elseif effectdata.lastgain ~= nil then	-- treat this as if the player effect stopped, the group timer will continue though. 
 		
 			effectdata.uptime = effectdata.uptime + (math.min(timems, fight.endtime) - effectdata.lastgain)	
 			effectdata.lastgain = nil
@@ -1056,7 +1056,7 @@ local function ProcessLogEffects(fight, callbacktype, timems, unitId, abilityId,
 		
 		for i = 1, stacks do
 		
-			local effectdata = fight:AcquireUnitData(unitId):AcquireEffectData(abilityId, effectType, i)
+			local effectdata = unit:AcquireEffectData(abilityId, effectType, i)
 		
 			if timems <= fight.starttime and (effectdata.lastgain ~= nil or effectdata.groupLastGain ~= nil) then
 			
@@ -1078,9 +1078,6 @@ local function ProcessLogEffects(fight, callbacktype, timems, unitId, abilityId,
 				effectdata.groupUptime = effectdata.groupUptime + (math.min(timems,fight.endtime) - effectdata.groupLastGain)
 				effectdata.groupLastGain = nil
 				effectdata.groupCount = effectdata.groupCount + 1
-				
-				if spellres then unit.currentSpellResistance = unit.currentSpellResistance - spellres end
-				if physres then unit.currentPhysicalResistance = unit.currentPhysicalResistance - physres end
 				
 			end
 		end
@@ -1254,7 +1251,7 @@ ProcessLog[LIBCOMBAT_EVENT_MESSAGES] = ProcessMessages
 local function CalculateChunk(fight)  -- called by CalculateFight or itself
 	em:UnregisterForUpdate("CMX_chunk")
 	
-	local scalcms = GetGameTimeMilliseconds()
+	local scalcms = GetGameTimeSeconds()
 	
 	local logdata = fight.log
 	
@@ -1552,7 +1549,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		
 		titleBar:SetHidden(true)
 		
-		Print("calculationtime", "Time for final calculations: %d ms", GetGameTimeMilliseconds() - scalcms)
+		Print("calculationtime", "Time for final calculations: %.2f ms", (GetGameTimeSeconds() - scalcms) * 1000)
 
 		return
 	else
@@ -1562,11 +1559,11 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		
 	end
 	
-	local chunktime = GetGameTimeMilliseconds() - scalcms
+	local chunktime = GetGameTimeSeconds() - scalcms
 
-	local newchunksize = math.min(math.ceil(desiredtime/math.max(chunktime,1)*db.chunksize/stepsize)*stepsize,20000)
+	local newchunksize = math.min(math.ceil(desiredtime / math.max(chunktime, 0.001) * db.chunksize / stepsize) * stepsize, 20000)
 	
-	Print("calculationtime", "Chunk calculation time: %d ms, new chunk size: %d", chunktime, newchunksize)
+	Print("calculationtime", "Chunk calculation time: %.2f ms, new chunk size: %d", chunktime * 1000, newchunksize)
 	
 	db.chunksize = newchunksize
 	
@@ -1887,6 +1884,7 @@ local svdefaults = {
 	
 	["fighthistory"] = 25,
 	["maxSVsize"] = 10,
+	["SVsize"] = 0,
 	["keepbossfights"] = false,
 	["chunksize"] = 1000,
 	
