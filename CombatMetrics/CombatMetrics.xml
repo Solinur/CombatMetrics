@@ -2008,7 +2008,7 @@
 													<OnInitialized>
 														self.tooltip = {SI_COMBAT_METRICS_TOGGLE_SKILL_USE_EVENTS}
 														self.func = LIBCOMBAT_EVENT_SKILL_TIMINGS
-														self.texture = "EsoUI/Art/Campaign/campaignBrowser_hiPop.dds"
+														self.texture = "esoui\art\lfg\gamepad\lfg_roleicon_dps.dds"
 													</OnInitialized>
 												</Control>
 												
@@ -2018,7 +2018,7 @@
 													<OnInitialized>
 														self.tooltip = {SI_COMBAT_METRICS_TOGGLE_MESSAGE_CHANGE_EVENTS}
 														self.func = LIBCOMBAT_EVENT_MESSAGES
-														self.texture = "EsoUI/Art/Campaign/campaignBrowser_hiPop.dds"
+														self.texture = "esoui/art/menubar/gamepad/gp_playermenu_icon_tutorial.dds"
 													</OnInitialized>
 												</Control>
 												
@@ -2274,6 +2274,15 @@
 									
 									<Controls>
 									
+										<Backdrop name="$(parent)Zoom" centerColor="33FFFFFF" edgeColor="55FFFFFF" layer="1" level="1" hidden="true">
+										
+											<Anchor point="TOPLEFT" relativeTo="GuiRoot"/>
+											<Dimensions x="0" y="0"/>
+										
+											<Edge edgeSize="2"/>
+											
+										</Backdrop>
+									
 										<Control name="$(parent)Spacer1">
 										
 											<Anchor point="TOPLEFT" relativePoint="TOPLEFT"/>
@@ -2374,7 +2383,10 @@
 									
 									</Controls>
 									
-									<OnInitialized> self.plots = {}	</OnInitialized>
+									<OnInitialized> CMX.initPlotWindow(self) </OnInitialized>
+									
+									<OnMouseDown> CMX.onPlotMouseDown(self, button) </OnMouseDown>
+									<OnMouseUp> CMX.onPlotMouseUp(self, button, upInside) </OnMouseUp>
 									
 								</Control>
 								

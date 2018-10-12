@@ -3,7 +3,7 @@
 ## Author: Solinur/decay
 ## Version: 0.9.0.0
 ## DependsOn: CombatMetricsFightData
-## OptionalDependsOn: LibAddonMenu-2.0
+## OptionalDependsOn: LibAddonMenu-2.0 LibStub LibFeedback LibCustomMenu
 ## SavedVariables: CombatMetrics_Save
 
 ## This Add-on is not created by, affiliated with or sponsored by ZeniMax Media Inc. or its affiliates. 

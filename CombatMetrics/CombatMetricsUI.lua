@@ -195,17 +195,15 @@ function NavButtonFunctions.save(control, _, _, _, _, shiftkey )
 		
 		if isvalid then
 			
-			CombatMetrics_Report:Update()
 			db.SVsize = size
+			CombatMetrics_Report:Update()
 			
 		else 
 			
 			local removed = table.remove(savedFights)
-			local _, size = checkSaveLimit(removed)
+			local _, removedSize = checkSaveLimit(removed)			
 			
-			db.SVsize = size
-			
-			errorstring = zo_strformat(SI_COMBAT_METRICS_STORAGE_FULL, size)
+			errorstring = zo_strformat(SI_COMBAT_METRICS_STORAGE_FULL, removedSize)
 			assert(false, errorstring) 
 			
 			CombatMetrics_Report:Update()
@@ -918,6 +916,7 @@ do
 	local function requestLuaSave()
 	
 		GetAddOnManager():RequestAddOnSavedVariablesPrioritySave(CMX.name)
+		GetAddOnManager():RequestAddOnSavedVariablesPrioritySave("CombatMetricsFightData")
 		d("Save Requested: " .. CMX.name)
 		
 	end
@@ -2340,11 +2339,11 @@ end
 
 local function updateCombatLog(panel)
 
+	if fightData == nil or panel:IsHidden() then return end
+	
 	CMX.Print("dev", "Updating CombatLog")
 	
-	local CLSelection = db.FightReport.CLSelection	
-	
-	if fightData == nil then return end
+	local CLSelection = db.FightReport.CLSelection		
 	
 	local window = panel:GetNamedChild("Window")
 	local buffer = window:GetNamedChild("Buffer")	
@@ -2510,15 +2509,206 @@ local function MapValue(plotwindow, dimension, value)
 
 end
 
-local function MapXY(plotwindow, x, y)
+local function MapValueXY(plotwindow, x, y)
 
-	local XOffset, IsInRangeX = MapValue(plotwindow, CMX_PLOT_DIMENSION_X, x)
-	local YOffset, IsInRangeY = MapValue(plotwindow, CMX_PLOT_DIMENSION_Y, y)
+	local XOffset, IsInRangeX = plotwindow:MapValue(CMX_PLOT_DIMENSION_X, x)
+	local YOffset, IsInRangeY = plotwindow:MapValue(CMX_PLOT_DIMENSION_Y, y)
 
 	local IsInRange = IsInRangeX and IsInRangeY
 	
 	return XOffset, YOffset, IsInRange
 
+end
+
+local function MapUIPos(plotwindow, dimension, value)
+
+	local range = dimension == CMX_PLOT_DIMENSION_X and plotwindow.RangesX or plotwindow.RangesY
+	local minRange, maxRange = unpack(range)
+	
+	local minCoord = dimension == CMX_PLOT_DIMENSION_X and plotwindow:GetLeft() or plotwindow:GetTop()
+	local maxCoord = dimension == CMX_PLOT_DIMENSION_X and plotwindow:GetRight() or plotwindow:GetBottom()
+
+	local IsInRange = (value < maxCoord) and (value > minCoord)
+	
+	local relpos = (value - minCoord) / (maxCoord - minCoord)
+	
+	if dimension == CMX_PLOT_DIMENSION_Y then relpos = 1 - relpos end -- since coords start at topleft but a plot from bottom left 
+	
+	local value = relpos * (maxRange - minRange) + minRange
+	
+	return value, IsInRange
+
+end
+
+local function MapUIPosXY(plotwindow, x, y)
+
+	local t, IsInRangeX = plotwindow:MapUIPos(CMX_PLOT_DIMENSION_X, x)
+	local v, IsInRangeY = plotwindow:MapUIPos(CMX_PLOT_DIMENSION_Y, y)
+
+	local IsInRange = IsInRangeX and IsInRangeY
+	
+	return t, v, IsInRange
+
+end
+
+local Plotcolors = {
+
+	[1] = {1, 1, 0, 0.66},	-- yellow
+	[2] = {1, 0, 0, 0.66},	-- red
+	[3] = {0, 1, 0, 0.66},	-- green
+	[4] = {0, 0, 1, 0.66},	-- blue
+	[5] = {1, 0, 1, 0.66},	-- violet
+	[6] = {0, 1, 1, 0.66},	-- cyan
+
+}
+
+local function DrawLine(plot, coords, id, colorId)
+
+	local plotid = plot.id
+	local lineControls = plot.lineControls
+
+	if lineControls[id] == nil then
+	
+		lineControls[id] = CreateControlFromVirtual("$(parent)Line", plot, "CombatMetrics_PlotLine", id)
+		
+	end	
+	
+	local line = lineControls[id]
+	
+	line:SetThickness(dx * 2) 
+	line:SetColor(unpack(Plotcolors[colorId])) 
+	line:ClearAnchors()
+	
+	local x1, y1, x2, y2, inRange1, inRange2 = unpack(coords)
+	
+	local minX = 0
+	local minY = 0
+	
+	local maxX, maxY = plot:GetDimensions()
+	
+	local outOfRange = 
+	
+		( x1 < minX and x2 < minX ) or
+		( x1 > maxX and x2 > maxX ) or
+		( y1 < minY and y2 < minY ) or
+		( y1 > maxY and y2 > maxY )
+	
+	if outOfRange then	-- line is completely out of drawing area
+	
+		line:SetHidden(false)
+		return
+		
+	elseif not (inRange1 and inRange2) then -- line is partially out of drawing area
+		
+		local m = (y2 - y1) / (x2 - x1)
+		local n = y1 - (m * x1)
+		
+		if y1 > maxY then
+			
+			x1 = m == 0 and x1 or (maxY - n) / m
+			y1 = maxY
+			
+		elseif y1 < minY then
+		
+			x1 = m == 0 and x1 or (minY - n) / m
+			y1 = minY
+
+		end
+		
+		if y2 > maxY then
+		
+			x2 = m == 0 and x2 or (maxY - n) / m
+			y2 = maxY
+			
+		elseif y2 < minY then
+		
+			x2 = m == 0 and x2 or (minY - n) / m
+			y2 = minY
+			
+		end
+		
+		if x1 < minX then
+			
+			x1 = minX
+			y1 = m * minX + n
+		
+		end
+		
+		if x2 > maxX then
+			
+			x2 = maxX
+			y2 = m * maxX + n
+		
+		end		
+	end
+	
+	-- in the end it is still possible that y values are out of range, in this case, the line doesn't touch the window. 
+	
+	local inRange = y1 >= minY and y1 <= maxY and y2 >= minY and y2 <= maxY and x2 >= minX and x1 <= maxX
+	
+	if not inRange then 
+	
+		line:SetHidden(false)
+		return
+		
+	end
+	
+	local side1 = BOTTOMLEFT
+	local side2 = TOPRIGHT
+	
+	if y1 > y2 then 
+	
+		side1 = TOPLEFT
+		side2 = BOTTOMRIGHT
+		
+	end
+	
+	line:SetAnchor(side1, plot, BOTTOMLEFT, x1, -y1)
+	line:SetAnchor(side2, plot, BOTTOMLEFT, x2, -y2)
+	line:SetHidden(false)
+	
+end
+
+local function DrawXYPlot(plot)
+
+	local plotwindow = plot:GetParent()
+
+	local XYData = plot.XYData
+	local colorId = plot.colorId
+	
+	local coordinates = {}
+	plot.coordinates = coordinates
+	
+	for id, line in ipairs(plot.lineControls) do
+	
+		line:SetHidden(true)
+		
+	end
+	
+	local x0
+	local y0
+	local inRange0
+		
+	for i, dataPair in ipairs(XYData) do
+	
+		local t, v = unpack(dataPair)
+		local x, y, inRange = plotwindow:MapValueXY(t, v)
+		coordinates[i] = {x, y, inRange}
+		
+		if i > 1 then			
+		
+			local lineCoords = {x0, y0, x, y, inRange0, inRange}
+			local id = i - 1
+
+			DrawLine(plot, lineCoords, id, colorId)
+		
+		end
+			
+		x0 = x
+		y0 = y
+		inRange0 = inRange
+	
+	end
 end
 
 local CMX_PLOT_TYPE_XY = 1
@@ -2540,13 +2730,37 @@ local function AddPlot(plotwindow, id, plotType, height)
 		local newplot = CreateControlFromVirtual("CombatMetrics_Report_MainPanelGraphPlot", plotwindow, plotTypeTemplates[plotType], id)
 		
 		newplot.plotType = plotType
-		newplot.lineControls = {}
+		
+		if plotType == CMX_PLOT_TYPE_XY then 
+		
+			newplot.lineControls = {} 
+			newplot.DrawXYPlot = DrawXYPlot			
+			
+		end
 		
 		plots[id] = newplot
 		
 	elseif plotType ~= plots[id].plotType then	-- if plottype is different, get rid of the control.
 	
 		plots[id]:SetParent(nil)
+		
+		local plot = plots[id]
+		
+		if plotType ~= CMX_PLOT_TYPE_XY and plot.lineControls then
+		
+			for id, line in pairs(plot.lineControls) do
+	
+				line:SetParent(nil)
+				plot.lineControls[id] = nil
+				
+			end
+			
+		else 
+			
+			plot.lineControls = {}
+			plot.DrawXYPlot = DrawXYPlot
+			
+		end
 		
 		plots[id] = CreateControlFromVirtual("CombatMetrics_Report_MainPanelGraphPlot", plotwindow, plotTypeTemplates[plotType], id)
 		plots[id].plotType = plotType
@@ -2555,13 +2769,15 @@ local function AddPlot(plotwindow, id, plotType, height)
 	
 	local plot = plots[id]
 	
-	for id, line in ipairs(plot.lineControls) do
+	if plotType == CMX_PLOT_TYPE_XY then
 	
-		line:SetHidden(true)
-		
-	end
+		for id, line in ipairs(plot.lineControls) do
 	
-	if plotType == CMX_PLOT_TYPE_BAR then
+			line:SetHidden(true)
+			
+		end
+	
+	elseif plotType == CMX_PLOT_TYPE_BAR then
 	
 		plot:ClearAnchors()
 		plot:SetAnchor(TOPLEFT, plotwindow, TOPLEFT, -24, height)
@@ -2571,53 +2787,6 @@ local function AddPlot(plotwindow, id, plotType, height)
 	end
 	
 	return plot
-end
-
-local Plotcolors = {
-
-	[1] = {1, 1, 0, 0.66},	-- yellow
-	[2] = {1, 0, 0, 0.66},	-- red
-	[3] = {0, 1, 0, 0.66},	-- green
-	[4] = {0, 0, 1, 0.66},	-- blue
-	[5] = {1, 0, 1, 0.66},	-- violet
-	[6] = {0, 1, 1, 0.66},	-- cyan
-
-}
-
-
-local function DrawLine(plot, coords, id, colorId)
-
-	local plotid = plot.id
-	local lineControls = plot.lineControls
-
-	if lineControls[id] == nil then
-	
-		lineControls[id] = CreateControlFromVirtual("$(parent)Line", plot, "CombatMetrics_PlotLine", id)
-		
-	end	
-	
-	local line = lineControls[id]
-	
-	line:SetThickness(dx * 2) 
-	line:SetColor(unpack(Plotcolors[colorId])) 
-	line:ClearAnchors()
-	
-	local x1, y1, x2, y2 = unpack(coords)
-	
-	local side1 = BOTTOMLEFT
-	local side2 = TOPRIGHT
-	
-	if y1 > y2 then 
-	
-		side1 = TOPLEFT
-		side2 = BOTTOMRIGHT
-		
-	end
-	
-	line:SetAnchor(side1, plot, BOTTOMLEFT, x1, -y1)
-	line:SetAnchor(side2, plot, BOTTOMLEFT, x2, -y2)
-	line:SetHidden(false)
-	
 end
 
 local function GetScale(x1, x2)	-- e.g. 34596 and 42693
@@ -2696,56 +2865,73 @@ local function UpdateScales(plotwindow, ranges)
 	end
 end
 
-local function AcquireRange(plotwindow, XYData) 
+local function AcquireRange(XYData) 
 
+	local minX = 0
 	local maxX = 0
+	local minY = 0
 	local maxY = 0
 
 	for i, coords in ipairs(XYData) do
 	
 		local x, y = unpack(coords)
 		
+		minX = math.min(minX, x)
 		maxX = math.max(maxX, x)
+		minY = math.max(minY, y)
 		maxY = math.max(maxY, y)
 		
 	end
 	
-	local rawRanges = {0, maxX, 0, maxY}
+	local range = {minX, maxX, minY, maxY}
 	
-	UpdateScales(plotwindow, rawRanges)
+	return range
 	
 end
 
+local function GetRequiredRange(plotwindow, newRange, startZero)
+
+	local oldRangeX = plotwindow.RangesX
+	local oldRangeY = plotwindow.RangesY
+	
+	local minXOld = oldRangeX[1]
+	local maxXOld = oldRangeX[2]
+	local minYOld = oldRangeY[1]
+	local maxYOld = oldRangeY[2]
+	
+	local minX, maxX, minY, maxY = unpack(newRange) 
+
+	local minXNew = startZero and 0 or math.min(minXOld, minX)
+	local maxXNew = math.max(maxXOld, maxX)
+	local minYNew = startZero and 0 or math.min(minYOld, minY)
+	local maxYNew = math.max(maxYOld, maxY)
+	
+	return {minXNew, maxXNew, minYNew, maxYNew}
+
+end
+
+
 local function PlotXY(plotwindow, plotid, XYData, autoRange, colorId)
 
-	if autoRange then AcquireRange(plotwindow, XYData) end
+	local range = AcquireRange(XYData) 
 
-	local plot = AddPlot(plotwindow, plotid, CMX_PLOT_TYPE_XY)
-	
-	local coordinates = {}
-	plot.coordinates = coordinates
-	
-	local x0
-	local y0
+	if autoRange then 
 		
-	for i, dataPair in ipairs(XYData) do
-	
-		local t, v = unpack(dataPair)
-		local x, y, inRange = MapXY(plotwindow, t, v)
-		coordinates[i] = {x, y, inRange}
+		local newRange = plotwindow:GetRequiredRange(range, true)
 		
-		if i > 1 then			
+		plotwindow:UpdateScales(newRange)
 		
-			local lineCoords = {x0, y0, x, y}
-
-			DrawLine(plot, lineCoords, i - 1, colorId)
-		
-		end
-			
-		x0 = x
-		y0 = y
-	
 	end
+
+	local plot = plotwindow:AddPlot(plotid, CMX_PLOT_TYPE_XY)
+	
+	plot.range = range
+	plot.XYData = XYData
+	plot.colorId = colorId
+	plot.autoRange = autoRange
+	
+	plot:DrawXYPlot()
+	
 end
 
 local function Smooth(data, smoothWindow, totaltime)
@@ -2819,6 +3005,8 @@ local function updateGraphPanel(panel)
 	if fightData == nil then plotwindow:SetHidden(true) return end
 	
 	plotwindow:SetHidden(false)
+	plotwindow.RangesX = {0, 0, {}}
+	plotwindow.RangesY = {0, 0, {}}
 	
 	local data = fightData.calculated
 	
@@ -2830,11 +3018,11 @@ local function updateGraphPanel(panel)
 	
 	local SmoothData = Smooth(RawData, SmoothWindow, combattime)
 	
-	PlotXY(plotwindow, 1, SmoothData, true, 1)
+	plotwindow:PlotXY(1, SmoothData, true, 1)
 	
 	local AccData = Accumulate(RawData, SmoothWindow/2, combattime)
 	
-	PlotXY(plotwindow, 2, AccData, false, 2)
+	plotwindow:PlotXY(2, AccData, true, 2)
 	
 end
 
@@ -2851,6 +3039,135 @@ function CMX.SetSliderValue(self, value)
 	graphPanel:Update() 
 	
 end
+
+local function limit(value, minValue, maxValue)
+
+	local coercedValue = math.min(math.max(value, minValue), maxValue)
+
+	return coercedValue
+
+end
+
+do
+
+	local startX, startY
+
+	local function UpdateZoomControl()
+
+		local plotwindow = _G["CombatMetrics_Report_MainPanelGraphPlotWindow"]
+		local zoomcontrol = plotwindow:GetNamedChild("Zoom")
+		
+		local x2, y2 = GetUIMousePosition()
+		
+		local minX, minY, maxX, maxY = plotwindow:GetScreenRect()
+		
+		limit(x2, minX, maxX)
+		limit(y2, minY, maxY)
+		
+		local width = math.abs(x2 - startX)
+		local height = math.abs(y2 - startY)
+		
+		zoomcontrol:SetAnchor(TOPLEFT, GuiRoot , TOPLEFT, math.min(startX, x2), math.min(startY, y2))
+		zoomcontrol:SetDimensions(width, height)
+		
+	end
+
+	function CMX.onPlotMouseDown(plotwindow, button)
+
+		if button ~= MOUSE_BUTTON_INDEX_LEFT then return end
+		
+		local zoomcontrol = plotwindow:GetNamedChild("Zoom")
+		
+		local x, y = GetUIMousePosition()
+		
+		zoomcontrol:SetAnchor(TOPLEFT, GuiRoot , TOPLEFT, x, y)
+		zoomcontrol:SetDimensions(0, 0)
+		zoomcontrol:SetHidden(false)
+		
+		startX = x
+		startY = y
+		
+		em:RegisterForUpdate("CMX_Report_Zoom_Control", 25, UpdateZoomControl)
+		
+	end
+
+	function CMX.onPlotMouseUp(plotwindow, button, upInside)
+
+		if button == MOUSE_BUTTON_INDEX_LEFT then
+		
+			local x, y = GetUIMousePosition()
+			
+			local t1, v1 = plotwindow:MapUIPosXY(startX, startY)
+			local t2, v2 = plotwindow:MapUIPosXY(x, y)
+			
+			local minT, maxT = unpack(plotwindow.RangesX)
+			local minV, maxV = unpack(plotwindow.RangesY)
+			
+			limit(t2, minT, maxT)
+			limit(v2, minV, maxV)
+			
+			em:UnregisterForUpdate("CMX_Report_Zoom_Control")
+			local zoomcontrol = plotwindow:GetNamedChild("Zoom")
+			zoomcontrol:SetHidden(true)
+			
+			local tMin = math.min(t1, t2)
+			local tMax = math.max(t1, t2)
+			local vMin = math.min(v1, v2)
+			local vMax = math.max(v1, v2)
+			
+			plotwindow:UpdateScales({tMin, tMax, vMin, vMax})
+			
+			for id, plot in pairs(plotwindow.plots) do
+			
+				if plot.DrawXYPlot then
+				
+					plot:DrawXYPlot()
+					
+				end
+			end
+
+		elseif button == MOUSE_BUTTON_INDEX_RIGHT then
+		
+			for id, plot in pairs(plotwindow.plots) do
+			
+				if plot.XYData and plot.autoRange then
+				
+					local range = AcquireRange(plot.XYData) 
+						
+					local newRange = plotwindow:GetRequiredRange(range, true)
+						
+					plotwindow:UpdateScales(newRange)
+					
+				end
+			end	
+
+			for id, plot in pairs(plotwindow.plots) do
+			
+				if plot.DrawXYPlot then
+				
+					plot:DrawXYPlot()
+					
+				end
+			end
+		end
+	end
+end
+	
+function CMX.initPlotWindow(plotwindow)
+
+	plotwindow.plots = {}
+	
+	plotwindow.MapValue = MapValue
+	plotwindow.MapValueXY = MapValueXY
+	plotwindow.MapUIPos = MapUIPos
+	plotwindow.MapUIPosXY = MapUIPosXY
+	plotwindow.AddPlot = AddPlot
+	plotwindow.PlotXY = PlotXY
+	plotwindow.UpdateScales = UpdateScales
+	plotwindow.GetRequiredRange = GetRequiredRange
+	
+end
+
 
 function CMX.SkillTooltip_OnMouseEnter(control)
 	
