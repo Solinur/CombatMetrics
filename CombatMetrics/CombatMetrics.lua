@@ -947,8 +947,13 @@ local function ProcessLogDamage(fight, callbacktype, timems, result, sourceUnitI
 	abilitydata[hitkey] = abilitydata[hitkey] + 1
 	
 	local inttime = math.floor((timems - fight.combatstart)/1000)
-	local data = fight.calculated.graph[graphkey]
-	data[inttime] = (data[inttime] or 0) + hitValue
+	
+	if inttime >= 0 then 
+	
+		local data = fight.calculated.graph[graphkey]
+		data[inttime] = (data[inttime] or 0) + hitValue
+		
+	end
 	
 	abilitydata.max = math.max(abilitydata.max, hitValue)
 	abilitydata.min = math.min(abilitydata.min, hitValue)
@@ -1007,8 +1012,13 @@ local function ProcessLogHeal(fight, callbacktype, timems, result, sourceUnitId,
 	abilitydata[hitkey] = abilitydata[hitkey] + 1
 	
 	local inttime = math.floor((timems - fight.combatstart)/1000)
-	local data = fight.calculated.graph[graphkey]
-	data[inttime] = (data[inttime] or 0) + hitValue
+	
+	if inttime >= 0 then 
+	
+		local data = fight.calculated.graph[graphkey]
+		data[inttime] = (data[inttime] or 0) + hitValue
+		
+	end
 	
 	abilitydata.max = math.max(abilitydata.max,hitValue)
 	abilitydata.min = math.min(abilitydata.min, hitValue)

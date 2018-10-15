@@ -162,9 +162,9 @@
 
 	SI_COMBAT_METRICS_COMBAT_LOG = "Combat Log",  -- Combat Log
 
-	SI_COMBAT_METRICS_GOTO_PREVIOUS = "Go to previous pages",  -- Go to previous pages
-	SI_COMBAT_METRICS_PAGE = "Page <<1>>",  -- Page 
-	SI_COMBAT_METRICS_GOTO_NEXT = "Go to next pages",  -- Go to next pages
+	SI_COMBAT_METRICS_GOTO_PREVIOUS = "Go to previous page",  -- Go to previous pages
+	SI_COMBAT_METRICS_PAGE = "Go to page <<1>>",  -- Page 
+	SI_COMBAT_METRICS_GOTO_NEXT = "Go to next page",  -- Go to next pages
 
 	SI_COMBAT_METRICS_TOGGLE_HEAL = "Toggle received heal events",  -- Toggle received heal events
 	SI_COMBAT_METRICS_TOGGLE_DAMAGE = "Toggle received damage events",  -- Toggle received damage events

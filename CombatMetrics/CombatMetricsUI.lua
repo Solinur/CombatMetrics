@@ -233,6 +233,10 @@ function NavButtonFunctions.delete(control)
 	
 		table.remove(CMX.lastfights, currentFight)
 		ClearSelections()
+		
+		local _, size = checkSaveLimit()
+		db.SVsize = size		
+		
 		if #CMX.lastfights == 0 then CombatMetrics_Report:Update() else CombatMetrics_Report:Update(math.min(currentFight, #CMX.lastfights)) end
 	
 	end 
@@ -429,7 +433,7 @@ end
 
 local function CLNavButtonFunction(self)
 	
-	currentCLPage = (currentCLPage - 1 + self.func)
+	currentCLPage = tonumber(self.value or (currentCLPage + self.func))
 	self:GetParent():GetParent():GetParent():Update()
 	
 end 
@@ -442,7 +446,14 @@ function CMX.InitCLNavButtonRow(rowControl)
 		
 		if button.texture then button:GetNamedChild("Icon"):SetTexture(button.texture) end
 		
-		if button.label then button:GetNamedChild("Label"):SetText(button.label) end
+		local value = button.value
+		
+		if value then 
+		
+			button:GetNamedChild("Label"):SetText(value) 
+			button.tooltip = {zo_strformat(SI_COMBAT_METRICS_PAGE, value)}		
+			
+		end
 		
 		button:SetHandler( "OnMouseUp", CLNavButtonFunction )
 
@@ -2319,14 +2330,19 @@ local function updateCLPageButtons(buttonrow, page, maxpage)
 	local first = math.max(page-2, 1)
 	local last = first + 4
 	
-	buttonrow:GetNamedChild("PageLeft"):SetHidden(first==1)
-	buttonrow:GetNamedChild("PageRight"):SetHidden(last>=maxpage)
+	buttonrow:GetNamedChild("PageLeft"):SetHidden(page == 1)
+	buttonrow:GetNamedChild("PageRight"):SetHidden(page >= maxpage)
 	
 	for i = first, last do
 	
 		local key = "Page" .. (i - first + 1)
 		
-		buttonrow:GetNamedChild(key):SetHidden(i>maxpage)
+		button = buttonrow:GetNamedChild(key)
+		button.tooltip = {zo_strformat(SI_COMBAT_METRICS_PAGE, i)}
+		button.value = i
+		
+		button:SetHidden(i > maxpage)
+		
 		buttonrow:GetNamedChild(key .. "Label"):SetText(i)
 		
 		local bg = buttonrow:GetNamedChild(key.."Overlay")
@@ -3103,8 +3119,8 @@ do
 			local minT, maxT = unpack(plotwindow.RangesX)
 			local minV, maxV = unpack(plotwindow.RangesY)
 			
-			limit(t2, minT, maxT)
-			limit(v2, minV, maxV)
+			t2 = limit(t2, minT, maxT)
+			v2 = limit(v2, minV, maxV)
 			
 			em:UnregisterForUpdate("CMX_Report_Zoom_Control")
 			local zoomcontrol = plotwindow:GetNamedChild("Zoom")

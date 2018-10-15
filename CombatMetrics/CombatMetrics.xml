@@ -1924,7 +1924,7 @@
 													
 													<OnInitialized>
 														self.tooltip = {SI_COMBAT_METRICS_GOTO_PREVIOUS}
-														self.func = "0"
+														self.func = -1
 														self.texture = "CombatMetrics/icons/leftarrowover.dds"
 													</OnInitialized>
 												</Control>
@@ -1933,9 +1933,8 @@
 													<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)PageLeft" offsetX="3" offsetY="0"/>										
 													
 													<OnInitialized>
-														self.tooltip = {SI_COMBAT_METRICS_GOTO_PREVIOUS}
-														self.func = 1
-														self.label = "1"
+														self.tooltip = {SI_COMBAT_METRICS_GOTO_PAGE}
+														self.value = 1
 													</OnInitialized>
 												</Control>
 												
@@ -1943,9 +1942,8 @@
 													<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Page1" offsetX="3" offsetY="0"/>										
 													
 													<OnInitialized>
-														self.tooltip = {SI_COMBAT_METRICS_GOTO_PREVIOUS}
-														self.func = 2
-														self.label = "2"
+														self.tooltip = {SI_COMBAT_METRICS_PAGE}
+														self.value = 2
 													</OnInitialized>
 												</Control>
 												
@@ -1953,9 +1951,8 @@
 													<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Page2" offsetX="3" offsetY="0"/>										
 													
 													<OnInitialized>
-														self.tooltip = {SI_COMBAT_METRICS_GOTO_PREVIOUS}
-														self.func = 3
-														self.label = "3"
+														self.tooltip = {SI_COMBAT_METRICS_PAGE}
+														self.value = 3
 													</OnInitialized>
 												</Control>
 												
@@ -1963,9 +1960,8 @@
 													<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Page3" offsetX="3" offsetY="0"/>										
 													
 													<OnInitialized>
-														self.tooltip = {SI_COMBAT_METRICS_GOTO_PREVIOUS}
-														self.func = 4
-														self.label = "4"
+														self.tooltip = {SI_COMBAT_METRICS_PAGE}
+														self.value = 4
 													</OnInitialized>
 												</Control>
 												
@@ -1973,9 +1969,8 @@
 													<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Page4" offsetX="3" offsetY="0"/>										
 													
 													<OnInitialized>
-														self.tooltip = {SI_COMBAT_METRICS_GOTO_PREVIOUS}
-														self.func = 5
-														self.label = "5"
+														self.tooltip = {SI_COMBAT_METRICS_PAGE}
+														self.value = 5
 													</OnInitialized>
 												</Control>
 												
@@ -1983,8 +1978,8 @@
 													<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Page5" offsetX="3" offsetY="0"/>									
 													
 													<OnInitialized>
-														self.tooltip = {SI_COMBAT_METRICS_GOTO_PREVIOUS}
-														self.func = "6"
+														self.tooltip = {SI_COMBAT_METRICS_GOTO_NEXT}
+														self.func = 1
 														self.texture = "CombatMetrics/icons/rightarrowover.dds"
 													</OnInitialized>
 												</Control>
