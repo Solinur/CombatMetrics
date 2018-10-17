@@ -2987,6 +2987,18 @@ local function Accumulate(data, startpoint, totaltime)
 	
 	local sum = 0
 	
+	local t0 = 0
+	
+	if category == "healingOut" or category == "healingIn" then 
+		
+		--t0 = fightData.hpsstart or 0
+		
+	else 
+		
+		--t0 = fightData.dpsstart or 0
+		
+	end
+	
 	for t = 0, t2 do		
 	
 		sum = sum + (data[t] or 0)
@@ -2995,7 +3007,7 @@ local function Accumulate(data, startpoint, totaltime)
 		
 			local x = t
 			
-			local y = sum / t
+			local y = sum / (t - t0)
 			
 			table.insert(XYData, {x, y})
 		
@@ -3010,7 +3022,7 @@ end
 local function updateGraphPanel(panel)
 
 	local plotwindow = panel:GetNamedChild("PlotWindow")
-	local smoothSlider = panel:GetNamedChild("SmoothControl"):GetNamedChild("Slider")
+	local smoothSlider = panel:GetNamedChild("Toolbar"):GetNamedChild("SmoothControl"):GetNamedChild("Slider")
 	
 	local SmoothWindow = db.FightReport.SmoothWindow
 	
@@ -3050,7 +3062,7 @@ function CMX.SetSliderValue(self, value)
 	
 	db.FightReport.SmoothWindow = value
 	
-	local graphPanel = self:GetParent():GetParent()
+	local graphPanel = self:GetParent():GetParent():GetParent()
 	
 	graphPanel:Update() 
 	

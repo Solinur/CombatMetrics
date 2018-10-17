@@ -1206,6 +1206,43 @@
 	
 		</Line>
 		
+		<Control name="CombatMetrics_DataSelector" virtual="true">
+		
+			<Dimensions y="24" />
+			
+			<Controls>
+			
+				<Backdrop name="$(parent)ColorBox" centerColor="FFFFFF00" edgeColor="FF333333" mouseEnabled="true">
+				
+					<Anchor point="LEFT" offsetX="0" offsetY="0" />
+					
+					<Dimensions x="10" y="24"/>
+				
+					<Edge edgeSize="2"/>
+				
+				</Backdrop>
+				
+				<Backdrop name="$(parent)Dropdown" centerColor="FF000000" edgeColor="FF333333" mouseEnabled="true">
+
+					<Anchor point="LEFT" relativeTo="$(parent)ColorBox" relativePoint="RIGHT" offsetX="4" offsetY="0" />
+					<Anchor point="RIGHT" offsetX="0" offsetY="0" />
+					
+					<Dimensions y="24"/>
+					
+					<Edge edgeSize="2"/>
+					
+				</Backdrop>
+				
+				<Label name="$(parent)Label" inherits="CombatMetrics_LabelFontControl" text="Graph" horizontalAlignment="LEFT" verticalAlignment="CENTER">
+					
+					<Anchor point="TOPLEFT" relativeTo="$(parent)Dropdown" offsetX="4"/>
+					<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Dropdown" offsetX="-4"/>
+					
+				</Label>
+				
+			</Controls>
+		</Control>	
+		
 		<TopLevelControl name="CombatMetrics_Report" clampedToScreen="true" mouseEnabled="true" movable="true" hidden="true">
 			
 			<Dimensions x="1000" y="770"/>
@@ -2108,6 +2145,7 @@
 												</Control>
 												
 												<Control name="$(parent)HealingIn" inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
+													
 													<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DamageIn" offsetX="3" offsetY="0"/>									
 													
 													<OnInitialized>
@@ -2115,13 +2153,11 @@
 														self.func = LIBCOMBAT_EVENT_HEAL_IN
 														self.texture = "/esoui/art/hud/gamepad/gp_radialicon_invitegroup_down.dds"
 													</OnInitialized>
+													
 												</Control>
-												
 											</Controls>
 										</Control>
-										
 									</Controls>
-									
 								</Control>
 								
 								<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
@@ -2202,7 +2238,6 @@
 													
 												</Button>												
 											</Controls>
-											
 										</Slider>									
 									</Controls>
 									
@@ -2213,59 +2248,111 @@
 									</OnInitialized>
 								
 								</Control>								
-							</Controls>							
-							
+							</Controls>	
 						</Control>
 					
 						<Control name="$(parent)Graph" inherits="CombatMetrics_ControlFramed" hidden="true" mouseEnabled="true">
+							
 							<AnchorFill/>
 						
 							<Controls>
 							
-								<Control name="$(parent)SmoothControl" mouseEnabled="true"> 
+								<Control name="$(parent)Toolbar" mouseEnabled="true">
 								
-									<Anchor point="TOPLEFT" offsetX="8" offsetY="8"/>
-									<Dimensions x="100" y="50" />
+									<Anchor point="TOPLEFT" offsetX="4" offsetY="4"/>
+									<Anchor point="BOTTOMLEFT" offsetX="4" offsetY="-4"/>
 									
+									<Dimensions x="128"/>
+								
 									<Controls>
-								
-										<Label name="$(parent)Label" inherits="CombatMetrics_LabelFontControl" text="Smooth: 5s" horizontalAlignment="LEFT" mouseEnabled="true">
 										
-											<Anchor point="TOPLEFT"/>
-											<Dimensions x="100" y="22" />
+										<Control name="$(parent)DataSelector1" inherits="CombatMetrics_DataSelector">
+										
+											<Anchor point="TOPLEFT" offsetX="2" offsetY="4"/>
+											<Anchor point="TOPRIGHT" offsetX="-2" offsetY="4"/>
 											
-										</Label>
+										</Control>
+										
+										<Control name="$(parent)DataSelector2" inherits="CombatMetrics_DataSelector">
+										
+											<Anchor point="TOPLEFT" relativeTo="$(parent)DataSelector1" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
+											<Anchor point="TOPRIGHT" relativeTo="$(parent)DataSelector1" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
+											
+										</Control>	
+										
+										<Control name="$(parent)DataSelector3" inherits="CombatMetrics_DataSelector">
+										
+											<Anchor point="TOPLEFT" relativeTo="$(parent)DataSelector2" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
+											<Anchor point="TOPRIGHT" relativeTo="$(parent)DataSelector2" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
+											
+										</Control>	
+										
+										<Control name="$(parent)DataSelector4" inherits="CombatMetrics_DataSelector">
+										
+											<Anchor point="TOPLEFT" relativeTo="$(parent)DataSelector3" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
+											<Anchor point="TOPRIGHT" relativeTo="$(parent)DataSelector3" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
+											
+										</Control>	
+										
+										<Control name="$(parent)DataSelector5" inherits="CombatMetrics_DataSelector">
+										
+											<Anchor point="TOPLEFT" relativeTo="$(parent)DataSelector4" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
+											<Anchor point="TOPRIGHT" relativeTo="$(parent)DataSelector4" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
+											
+										</Control>										
 									
-										<Slider name="$(parent)Slider" inherits="ZO_Slider" step="1">
-											<Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT" offsetY="10"/>
-											<Dimensions x="100"/>
-											
-											<Limits min="1" max="20" />
-											
-											<OnValueChanged>
-												CMX.SetSliderValue(self, value)
-											</OnValueChanged>
-										</Slider>
+										<Control name="$(parent)SmoothControl" mouseEnabled="true"> 
 										
+											<Anchor point="TOPLEFT" relativeTo="$(parent)DataSelector5" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="12"/>
+											<Anchor point="TOPRIGHT" relativeTo="$(parent)DataSelector5" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="12"/>
+											<Dimensions y="50" />
+											
+											<Controls>
+										
+												<Label name="$(parent)Label" inherits="CombatMetrics_LabelFontControl" text="Smooth: 5s" horizontalAlignment="LEFT" mouseEnabled="true">
+												
+													<Anchor point="TOPLEFT"/>
+													<Anchor point="TOPRIGHT"/>
+													<Dimensions y="22" />
+													
+												</Label>
+											
+												<Slider name="$(parent)Slider" inherits="ZO_Slider" step="1">
+												
+													<Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT" offsetY="8"/>
+													<Anchor point="TOPRIGHT" relativeTo="$(parent)Label" relativePoint="BOTTOMRIGHT" offsetY="8"/>
+													
+													<Limits min="1" max="20" />
+													
+													<OnValueChanged>
+														CMX.SetSliderValue(self, value)
+													</OnValueChanged>
+													
+													<OnMouseWheel>
+														self:SetValue(self:GetValue() + delta * self:GetValueStep()) 
+													</OnMouseWheel>
+													
+												</Slider>
+												
+											</Controls>
+											
+										</Control>
 									</Controls>
-									
-									<OnMouseWheel>
-										self:GetNamedChild("Slider"):SetValue(self:GetNamedChild("Slider"):GetValue() + delta * self:GetNamedChild("Slider"):GetValueStep()) 
-									</OnMouseWheel>
-									
 								</Control>
 								
 								<Line name="$(parent)Sep" color="FF888888" thickness="COMBAT_METRICS_LINE_SIZE">
-									<Anchor point="TOP" relativePoint="TOPLEFT" offsetX="116" offsetY="6"/>
-									<Anchor point="BOTTOM" relativePoint="BOTTOMLEFT" offsetX="116" offsetY="-6"/>
+									
+									<Anchor point="TOP" relativePoint="TOPRIGHT" relativeTo="$(parent)Toolbar" offsetX="4" offsetY="2"/>
+									<Anchor point="BOTTOM" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Toolbar" offsetX="4" offsetY="-2"/>
 									
 									<Dimensions x="0"/>
+									
 								</Line>
 							
 								<Control name="$(parent)PlotWindow" mouseEnabled="true">
 								
 									<Anchor point="TOPRIGHT" offsetX="-24" offsetY="12"/>
-									<Dimensions x="390" y="306"/>
+									<Dimensions x="370" y="306"/>
 									
 									<Controls>
 									
