@@ -1928,6 +1928,16 @@ local svdefaults = {
 		
 		["SmoothWindow"] 		= 5,
 		
+		["PlotColors"]				= {
+		
+			[1]	= {1, 1, 0, 0.66},	-- yellow
+			[2]	= {1, 0, 0, 0.66},	-- red
+			[3]	= {0, 1, 0, 0.66},	-- green
+			[4]	= {0, 0, 1, 0.66},	-- blue
+			[5]	= {1, 0, 1, 0.66},	-- violet
+	
+		},
+	
 		["FavouriteBuffs"] = {},
 		
 		["CLSelection"] = {

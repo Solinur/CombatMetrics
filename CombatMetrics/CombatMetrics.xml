@@ -1231,9 +1231,11 @@
 					
 					<Edge edgeSize="2"/>
 					
+					<OnMouseUp> CMX.PlotSelectionMenu(self) </OnMouseUp> 
+					
 				</Backdrop>
 				
-				<Label name="$(parent)Label" inherits="CombatMetrics_LabelFontControl" text="Graph" horizontalAlignment="LEFT" verticalAlignment="CENTER">
+				<Label name="$(parent)Label" inherits="CombatMetrics_LabelFontControl" text="-" horizontalAlignment="LEFT" verticalAlignment="CENTER">
 					
 					<Anchor point="TOPLEFT" relativeTo="$(parent)Dropdown" offsetX="4"/>
 					<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Dropdown" offsetX="-4"/>
@@ -2271,12 +2273,16 @@
 											<Anchor point="TOPLEFT" offsetX="2" offsetY="4"/>
 											<Anchor point="TOPRIGHT" offsetX="-2" offsetY="4"/>
 											
+											<OnInitialized> self.id = 1 </OnInitialized>
+											
 										</Control>
 										
 										<Control name="$(parent)DataSelector2" inherits="CombatMetrics_DataSelector">
 										
 											<Anchor point="TOPLEFT" relativeTo="$(parent)DataSelector1" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
 											<Anchor point="TOPRIGHT" relativeTo="$(parent)DataSelector1" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
+											
+											<OnInitialized> self.id = 2 </OnInitialized>
 											
 										</Control>	
 										
@@ -2285,6 +2291,8 @@
 											<Anchor point="TOPLEFT" relativeTo="$(parent)DataSelector2" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
 											<Anchor point="TOPRIGHT" relativeTo="$(parent)DataSelector2" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
 											
+											<OnInitialized> self.id = 3 </OnInitialized>
+											
 										</Control>	
 										
 										<Control name="$(parent)DataSelector4" inherits="CombatMetrics_DataSelector">
@@ -2292,12 +2300,16 @@
 											<Anchor point="TOPLEFT" relativeTo="$(parent)DataSelector3" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
 											<Anchor point="TOPRIGHT" relativeTo="$(parent)DataSelector3" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
 											
+											<OnInitialized> self.id = 4 </OnInitialized>
+											
 										</Control>	
 										
 										<Control name="$(parent)DataSelector5" inherits="CombatMetrics_DataSelector">
 										
 											<Anchor point="TOPLEFT" relativeTo="$(parent)DataSelector4" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
 											<Anchor point="TOPRIGHT" relativeTo="$(parent)DataSelector4" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
+											
+											<OnInitialized> self.id = 5 </OnInitialized>
 											
 										</Control>										
 									
@@ -2338,6 +2350,7 @@
 											
 										</Control>
 									</Controls>
+									
 								</Control>
 								
 								<Line name="$(parent)Sep" color="FF888888" thickness="COMBAT_METRICS_LINE_SIZE">
@@ -2464,8 +2477,6 @@
 										</Line>
 									
 									</Controls>
-									
-									<OnInitialized> CMX.initPlotWindow(self) </OnInitialized>
 									
 									<OnMouseDown> CMX.onPlotMouseDown(self, button) </OnMouseDown>
 									<OnMouseUp> CMX.onPlotMouseUp(self, button, upInside) </OnMouseUp>

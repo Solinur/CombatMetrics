@@ -940,7 +940,7 @@ do
 		
 		local postoptions = {}
 		
-		table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTMULTIDPS), callback = postMultiDPS})
+		table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTSINGLEDPS), callback = postSingleDPS})
 		
 		local fight = CMX.lastfights[currentFight]
 		
@@ -977,7 +977,8 @@ do
 		
 		if GetAPIVersion() > 100024 then AddCustomMenuItem(GetString(SI_COMBAT_METRICS_SAVEHDD), requestLuaSave) end 
 
-		ShowMenu(settingsbutton)		
+		ShowMenu(settingsbutton)
+		AnchorMenu(settingsbutton)		
 
 	end
 end
@@ -2511,12 +2512,12 @@ end
 local CMX_PLOT_DIMENSION_X = 1
 local CMX_PLOT_DIMENSION_Y = 2
 
-local function MapValue(plotwindow, dimension, value)
+local function MapValue(plotWindow, dimension, value)
 
-	local range = dimension == CMX_PLOT_DIMENSION_X and plotwindow.RangesX or plotwindow.RangesY
+	local range = dimension == CMX_PLOT_DIMENSION_X and plotWindow.RangesX or plotWindow.RangesY
 	local minRange, maxRange = unpack(range)
 	
-	local controlSize = dimension == CMX_PLOT_DIMENSION_X and plotwindow:GetWidth() or plotwindow:GetHeight()
+	local controlSize = dimension == CMX_PLOT_DIMENSION_X and plotWindow:GetWidth() or plotWindow:GetHeight()
 
 	local IsInRange = (value < maxRange) and (value > minRange)
 	local offset = controlSize * ((value - minRange)/(maxRange - minRange))
@@ -2525,10 +2526,10 @@ local function MapValue(plotwindow, dimension, value)
 
 end
 
-local function MapValueXY(plotwindow, x, y)
+local function MapValueXY(plotWindow, x, y)
 
-	local XOffset, IsInRangeX = plotwindow:MapValue(CMX_PLOT_DIMENSION_X, x)
-	local YOffset, IsInRangeY = plotwindow:MapValue(CMX_PLOT_DIMENSION_Y, y)
+	local XOffset, IsInRangeX = plotWindow:MapValue(CMX_PLOT_DIMENSION_X, x)
+	local YOffset, IsInRangeY = plotWindow:MapValue(CMX_PLOT_DIMENSION_Y, y)
 
 	local IsInRange = IsInRangeX and IsInRangeY
 	
@@ -2536,13 +2537,13 @@ local function MapValueXY(plotwindow, x, y)
 
 end
 
-local function MapUIPos(plotwindow, dimension, value)
+local function MapUIPos(plotWindow, dimension, value)
 
-	local range = dimension == CMX_PLOT_DIMENSION_X and plotwindow.RangesX or plotwindow.RangesY
+	local range = dimension == CMX_PLOT_DIMENSION_X and plotWindow.RangesX or plotWindow.RangesY
 	local minRange, maxRange = unpack(range)
 	
-	local minCoord = dimension == CMX_PLOT_DIMENSION_X and plotwindow:GetLeft() or plotwindow:GetTop()
-	local maxCoord = dimension == CMX_PLOT_DIMENSION_X and plotwindow:GetRight() or plotwindow:GetBottom()
+	local minCoord = dimension == CMX_PLOT_DIMENSION_X and plotWindow:GetLeft() or plotWindow:GetTop()
+	local maxCoord = dimension == CMX_PLOT_DIMENSION_X and plotWindow:GetRight() or plotWindow:GetBottom()
 
 	local IsInRange = (value < maxCoord) and (value > minCoord)
 	
@@ -2556,10 +2557,10 @@ local function MapUIPos(plotwindow, dimension, value)
 
 end
 
-local function MapUIPosXY(plotwindow, x, y)
+local function MapUIPosXY(plotWindow, x, y)
 
-	local t, IsInRangeX = plotwindow:MapUIPos(CMX_PLOT_DIMENSION_X, x)
-	local v, IsInRangeY = plotwindow:MapUIPos(CMX_PLOT_DIMENSION_Y, y)
+	local t, IsInRangeX = plotWindow:MapUIPos(CMX_PLOT_DIMENSION_X, x)
+	local v, IsInRangeY = plotWindow:MapUIPos(CMX_PLOT_DIMENSION_Y, y)
 
 	local IsInRange = IsInRangeX and IsInRangeY
 	
@@ -2567,18 +2568,7 @@ local function MapUIPosXY(plotwindow, x, y)
 
 end
 
-local Plotcolors = {
-
-	[1] = {1, 1, 0, 0.66},	-- yellow
-	[2] = {1, 0, 0, 0.66},	-- red
-	[3] = {0, 1, 0, 0.66},	-- green
-	[4] = {0, 0, 1, 0.66},	-- blue
-	[5] = {1, 0, 1, 0.66},	-- violet
-	[6] = {0, 1, 1, 0.66},	-- cyan
-
-}
-
-local function DrawLine(plot, coords, id, colorId)
+local function DrawLine(plot, coords, id)
 
 	local plotid = plot.id
 	local lineControls = plot.lineControls
@@ -2592,7 +2582,7 @@ local function DrawLine(plot, coords, id, colorId)
 	local line = lineControls[id]
 	
 	line:SetThickness(dx * 2) 
-	line:SetColor(unpack(Plotcolors[colorId])) 
+	line:SetColor(unpack(db.FightReport.PlotColors[plotid])) 
 	line:ClearAnchors()
 	
 	local x1, y1, x2, y2, inRange1, inRange2 = unpack(coords)
@@ -2687,15 +2677,16 @@ end
 
 local function DrawXYPlot(plot)
 
-	local plotwindow = plot:GetParent()
+	local plotWindow = plot:GetParent()
 
 	local XYData = plot.XYData
-	local colorId = plot.colorId
+	
+	if XYData == nil then return end
 	
 	local coordinates = {}
 	plot.coordinates = coordinates
 	
-	for id, line in ipairs(plot.lineControls) do
+	for id, line in ipairs(plot.lineControls) do	-- hide previous Plot
 	
 		line:SetHidden(true)
 		
@@ -2708,7 +2699,7 @@ local function DrawXYPlot(plot)
 	for i, dataPair in ipairs(XYData) do
 	
 		local t, v = unpack(dataPair)
-		local x, y, inRange = plotwindow:MapValueXY(t, v)
+		local x, y, inRange = plotWindow:MapValueXY(t, v)
 		coordinates[i] = {x, y, inRange}
 		
 		if i > 1 then			
@@ -2716,7 +2707,7 @@ local function DrawXYPlot(plot)
 			local lineCoords = {x0, y0, x, y, inRange0, inRange}
 			local id = i - 1
 
-			DrawLine(plot, lineCoords, id, colorId)
+			DrawLine(plot, lineCoords, id)
 		
 		end
 			
@@ -2737,71 +2728,121 @@ local plotTypeTemplates = {
 
 }
 
-local function AddPlot(plotwindow, id, plotType, height)
+local function Smooth(category)
 
-	local plots = plotwindow.plots
+	local calcData = fightData.calculated
+	
+	local category = category or db.FightReport.category
+	
+	local data = calcData.graph and calcData.graph[category] or nil -- DPS data, one value per second
+	
+	if data == nil then return end
+	
+	local totaltime = fightData.combattime
+	
+	local smoothWindow = db.FightReport.SmoothWindow
+
+	local XYData = {}
+	
+	local t2 = math.ceil(totaltime) - smoothWindow
+	
+	for t = 0, t2 do
+	
+		local sum = 0
+	
+		for i = 0, smoothWindow - 1 do
+		
+			sum = sum + (data[t + i] or 0)
+			
+		end
+		
+		local x = t + smoothWindow / 2
+		
+		local y = sum / smoothWindow
+		
+		if t == 0 then table.insert(XYData, {0, y}) end
+		
+		table.insert(XYData, {x, y})
+		
+		if t == t2 then table.insert(XYData, {totaltime, y}) end
+	end
+	
+	return XYData
+end
+
+local function Accumulate(category)
+
+	local calcData = fightData.calculated
+	
+	local category = category or db.FightReport.category
+	
+	local data = calcData.graph and calcData.graph[category] or nil -- DPS data, one value per second
+	
+	if data == nil then return end
+	
+	local totaltime = fightData.combattime
+	
+	local startpoint = db.FightReport.SmoothWindow / 2
+
+	local XYData = {}
+	
+	local t2 = math.ceil(totaltime)
+	
+	local sum = 0
+	
+	local t0 = 0
+	
+	if category == "healingOut" or category == "healingIn" then 
+		
+		--t0 = fightData.hpsstart or 0
+		
+	else 
+		
+		--t0 = fightData.dpsstart or 0
+		
+	end
+	
+	for t = 0, t2 do		
+	
+		sum = sum + (data[t] or 0)
+		
+		if t >= startpoint then 
+		
+			local x = t
+			
+			local y = sum / (t - t0)
+			
+			table.insert(XYData, {x, y})
+		
+		end
+	end
+	
+	ACCDATA = XYData
+	
+	return XYData
+end
+
+local function AddUptimePlot(plotWindow, id, height)
+
+	local plots = plotWindow.plots
 
 	if plots[id] == nil then
 	
-		local newplot = CreateControlFromVirtual("CombatMetrics_Report_MainPanelGraphPlot", plotwindow, plotTypeTemplates[plotType], id)
+		local newplot = CreateControlFromVirtual("CombatMetrics_Report_MainPanelGraphPlot", plotWindow, plotTypeTemplates[CMX_PLOT_TYPE_BAR], id)
 		
-		newplot.plotType = plotType
-		
-		if plotType == CMX_PLOT_TYPE_XY then 
-		
-			newplot.lineControls = {} 
-			newplot.DrawXYPlot = DrawXYPlot			
-			
-		end
+		newplot.plotType = CMX_PLOT_TYPE_BAR
 		
 		plots[id] = newplot
-		
-	elseif plotType ~= plots[id].plotType then	-- if plottype is different, get rid of the control.
-	
-		plots[id]:SetParent(nil)
-		
-		local plot = plots[id]
-		
-		if plotType ~= CMX_PLOT_TYPE_XY and plot.lineControls then
-		
-			for id, line in pairs(plot.lineControls) do
-	
-				line:SetParent(nil)
-				plot.lineControls[id] = nil
-				
-			end
-			
-		else 
-			
-			plot.lineControls = {}
-			plot.DrawXYPlot = DrawXYPlot
-			
-		end
-		
-		plots[id] = CreateControlFromVirtual("CombatMetrics_Report_MainPanelGraphPlot", plotwindow, plotTypeTemplates[plotType], id)
-		plots[id].plotType = plotType
 		
 	end
 	
 	local plot = plots[id]
 	
-	if plotType == CMX_PLOT_TYPE_XY then
-	
-		for id, line in ipairs(plot.lineControls) do
-	
-			line:SetHidden(true)
-			
-		end
-	
-	elseif plotType == CMX_PLOT_TYPE_BAR then
-	
-		plot:ClearAnchors()
-		plot:SetAnchor(TOPLEFT, plotwindow, TOPLEFT, -24, height)
-		plot:SetAnchor(TOPRIGHT, plotwindow, TOPRIGHT, 0, height)
-		plot:SetHeight(20 * dx)
-	
-	end
-	
+	plot:ClearAnchors()
+	plot:SetAnchor(TOPLEFT, plotWindow, TOPLEFT, -24, height)
+	plot:SetAnchor(TOPRIGHT, plotWindow, TOPRIGHT, 0, height)
+	plot:SetHeight(20 * dx)
+		
 	return plot
 end
 
@@ -2857,23 +2898,23 @@ local function GetScale(x1, x2)	-- e.g. 34596 and 42693
 
 end
 
-local function UpdateScales(plotwindow, ranges)
+local function UpdateScales(plotWindow, ranges)
 
 	local x1, x2, y1, y2 = unpack(ranges)	
 	
 	local RangesX = {GetScale(x1, x2)}
 	local RangesY = {GetScale(y1, y2)}
 	
-	plotwindow.RangesX = RangesX
-	plotwindow.RangesY = RangesY
+	plotWindow.RangesX = RangesX
+	plotWindow.RangesY = RangesY
 	
 	local ticksX = RangesX[3]
 	local ticksY = RangesY[3]
 	
 	for i = 1,5 do
 	
-		local ticklabelX = GetControl(plotwindow:GetName(), "XTick" .. i .. "Label")
-		local ticklabelY = GetControl(plotwindow:GetName(), "YTick" .. i .. "Label")
+		local ticklabelX = GetControl(plotWindow:GetName(), "XTick" .. i .. "Label")
+		local ticklabelY = GetControl(plotWindow:GetName(), "YTick" .. i .. "Label")
 		
 		ticklabelX:SetText(tostring(ticksX[i]))
 		ticklabelY:SetText(tostring(ticksY[i]))
@@ -2905,10 +2946,10 @@ local function AcquireRange(XYData)
 	
 end
 
-local function GetRequiredRange(plotwindow, newRange, startZero)
+local function GetRequiredRange(plotWindow, newRange, startZero)
 
-	local oldRangeX = plotwindow.RangesX
-	local oldRangeY = plotwindow.RangesY
+	local oldRangeX = plotWindow.RangesX
+	local oldRangeY = plotWindow.RangesY
 	
 	local minXOld = oldRangeX[1]
 	local maxXOld = oldRangeX[2]
@@ -2927,138 +2968,68 @@ local function GetRequiredRange(plotwindow, newRange, startZero)
 end
 
 
-local function PlotXY(plotwindow, plotid, XYData, autoRange, colorId)
-
-	local range = AcquireRange(XYData) 
-
-	if autoRange then 
-		
-		local newRange = plotwindow:GetRequiredRange(range, true)
-		
-		plotwindow:UpdateScales(newRange)
+local function UpdatePlotXY(plot)
+	
+	local func = plot.func
+	
+	local XYData = func and func() or nil
+	
+	if XYData == nil then 
+	
+		plot:SetHidden(true)
+	
+		return 
 		
 	end
+	
+	plot:SetHidden(false)
 
-	local plot = plotwindow:AddPlot(plotid, CMX_PLOT_TYPE_XY)
+	local range = AcquireRange(XYData)	
+	
+	plotWindow = plot:GetParent()
+
+	if plot.autoRange then 
+		
+		local newRange = plotWindow:GetRequiredRange(range, true)
+		
+		plotWindow:UpdateScales(newRange)
+		
+	end
 	
 	plot.range = range
 	plot.XYData = XYData
-	plot.colorId = colorId
-	plot.autoRange = autoRange
 	
 	plot:DrawXYPlot()
 	
 end
 
-local function Smooth(data, smoothWindow, totaltime)
-
-	local XYData = {}
-	
-	local t2 = math.ceil(totaltime) - smoothWindow
-	
-	for t = 0, t2 do
-	
-		local sum = 0
-	
-		for i = 0, smoothWindow - 1 do
-		
-			sum = sum + (data[t + i] or 0)
-		end
-		
-		local x = t + smoothWindow / 2
-		
-		local y = sum / smoothWindow
-		
-		if t == 0 then table.insert(XYData, {0, y}) end
-		
-		table.insert(XYData, {x, y})
-		
-		if t == t2 then table.insert(XYData, {totaltime, y}) end
-	end
-	
-	return XYData
-end
-
-local function Accumulate(data, startpoint, totaltime)
-
-	local XYData = {}
-	
-	local t2 = math.ceil(totaltime)
-	
-	local sum = 0
-	
-	local t0 = 0
-	
-	if category == "healingOut" or category == "healingIn" then 
-		
-		--t0 = fightData.hpsstart or 0
-		
-	else 
-		
-		--t0 = fightData.dpsstart or 0
-		
-	end
-	
-	for t = 0, t2 do		
-	
-		sum = sum + (data[t] or 0)
-		
-		if t >= startpoint then 
-		
-			local x = t
-			
-			local y = sum / (t - t0)
-			
-			table.insert(XYData, {x, y})
-		
-		end
-	end
-	
-	ACCDATA = XYData
-	
-	return XYData
-end
-
 local function updateGraphPanel(panel)
 
-	local plotwindow = panel:GetNamedChild("PlotWindow")
+	local plotWindow = panel:GetNamedChild("PlotWindow")
 	local smoothSlider = panel:GetNamedChild("Toolbar"):GetNamedChild("SmoothControl"):GetNamedChild("Slider")
 	
 	local SmoothWindow = db.FightReport.SmoothWindow
 	
 	smoothSlider:SetValue(SmoothWindow)
 	
-	local category = db.FightReport.category
+	if fightData == nil then plotWindow:SetHidden(true) return end
 	
-	if fightData == nil then plotwindow:SetHidden(true) return end
+	plotWindow:SetHidden(false)
+	plotWindow.RangesX = {0, 0, {}}
+	plotWindow.RangesY = {0, 0, {}}
 	
-	plotwindow:SetHidden(false)
-	plotwindow.RangesX = {0, 0, {}}
-	plotwindow.RangesY = {0, 0, {}}
+	for id, plot in ipairs(plotWindow.plots) do
 	
-	local data = fightData.calculated
-	
-	local RawData = data.graph and data.graph[category] or nil -- DPS data, one value per second
-	
-	if RawData == nil then return end
-	
-	local combattime = fightData.combattime
-	
-	local SmoothData = Smooth(RawData, SmoothWindow, combattime)
-	
-	plotwindow:PlotXY(1, SmoothData, true, 1)
-	
-	local AccData = Accumulate(RawData, SmoothWindow/2, combattime)
-	
-	plotwindow:PlotXY(2, AccData, true, 2)
-	
+		plot:Update()
+		
+	end	
 end
 
 function CMX.SetSliderValue(self, value)
 	
 	local labelControl = self:GetParent():GetNamedChild("Label")
 	
-	labelControl:SetText(string.format(GetString(SI_COMBAT_METRICS_SMOOTH), value))
+	labelControl:SetText(string.format(GetString(SI_COMBAT_METRICS_SMOOTH_LABEL), value))
 	
 	db.FightReport.SmoothWindow = value
 	
@@ -3082,12 +3053,12 @@ do
 
 	local function UpdateZoomControl()
 
-		local plotwindow = _G["CombatMetrics_Report_MainPanelGraphPlotWindow"]
-		local zoomcontrol = plotwindow:GetNamedChild("Zoom")
+		local plotWindow = _G["CombatMetrics_Report_MainPanelGraphPlotWindow"]
+		local zoomcontrol = plotWindow:GetNamedChild("Zoom")
 		
 		local x2, y2 = GetUIMousePosition()
 		
-		local minX, minY, maxX, maxY = plotwindow:GetScreenRect()
+		local minX, minY, maxX, maxY = plotWindow:GetScreenRect()
 		
 		limit(x2, minX, maxX)
 		limit(y2, minY, maxY)
@@ -3100,11 +3071,11 @@ do
 		
 	end
 
-	function CMX.onPlotMouseDown(plotwindow, button)
+	function CMX.onPlotMouseDown(plotWindow, button)
 
 		if button ~= MOUSE_BUTTON_INDEX_LEFT then return end
 		
-		local zoomcontrol = plotwindow:GetNamedChild("Zoom")
+		local zoomcontrol = plotWindow:GetNamedChild("Zoom")
 		
 		local x, y = GetUIMousePosition()
 		
@@ -3119,23 +3090,23 @@ do
 		
 	end
 
-	function CMX.onPlotMouseUp(plotwindow, button, upInside)
+	function CMX.onPlotMouseUp(plotWindow, button, upInside)
 
 		if button == MOUSE_BUTTON_INDEX_LEFT then
 		
 			local x, y = GetUIMousePosition()
 			
-			local t1, v1 = plotwindow:MapUIPosXY(startX, startY)
-			local t2, v2 = plotwindow:MapUIPosXY(x, y)
+			local t1, v1 = plotWindow:MapUIPosXY(startX, startY)
+			local t2, v2 = plotWindow:MapUIPosXY(x, y)
 			
-			local minT, maxT = unpack(plotwindow.RangesX)
-			local minV, maxV = unpack(plotwindow.RangesY)
+			local minT, maxT = unpack(plotWindow.RangesX)
+			local minV, maxV = unpack(plotWindow.RangesY)
 			
 			t2 = limit(t2, minT, maxT)
 			v2 = limit(v2, minV, maxV)
 			
 			em:UnregisterForUpdate("CMX_Report_Zoom_Control")
-			local zoomcontrol = plotwindow:GetNamedChild("Zoom")
+			local zoomcontrol = plotWindow:GetNamedChild("Zoom")
 			zoomcontrol:SetHidden(true)
 			
 			local tMin = math.min(t1, t2)
@@ -3143,9 +3114,9 @@ do
 			local vMin = math.min(v1, v2)
 			local vMax = math.max(v1, v2)
 			
-			plotwindow:UpdateScales({tMin, tMax, vMin, vMax})
+			plotWindow:UpdateScales({tMin, tMax, vMin, vMax})
 			
-			for id, plot in pairs(plotwindow.plots) do
+			for id, plot in pairs(plotWindow.plots) do
 			
 				if plot.DrawXYPlot then
 				
@@ -3156,20 +3127,20 @@ do
 
 		elseif button == MOUSE_BUTTON_INDEX_RIGHT then
 		
-			for id, plot in pairs(plotwindow.plots) do
+			for id, plot in pairs(plotWindow.plots) do
 			
 				if plot.XYData and plot.autoRange then
 				
 					local range = AcquireRange(plot.XYData) 
 						
-					local newRange = plotwindow:GetRequiredRange(range, true)
+					local newRange = plotWindow:GetRequiredRange(range, true)
 						
-					plotwindow:UpdateScales(newRange)
+					plotWindow:UpdateScales(newRange)
 					
 				end
 			end	
 
-			for id, plot in pairs(plotwindow.plots) do
+			for id, plot in pairs(plotWindow.plots) do
 			
 				if plot.DrawXYPlot then
 				
@@ -3179,21 +3150,241 @@ do
 			end
 		end
 	end
+end	
+
+local PlotFunctions = {}
+
+local MainCategoryFunctions = {
+
+	[1] = {label = SI_COMBAT_METRICS_SMOOTHED, 	func = Smooth},
+	[2] = {label = SI_COMBAT_METRICS_ACCUMULATED, func = Accumulate},
+
+}
+
+local CategoryStrings = {
+
+	[1] = {label = SI_COMBAT_METRICS_DPS, 			category = "damageOut"},
+	[2] = {label = SI_COMBAT_METRICS_HPS, 			category = "healingOut"},
+	[3] = {label = SI_COMBAT_METRICS_INCOMING_DPS, 	category = "damageIn"},
+	[4] = {label = SI_COMBAT_METRICS_INCOMING_HPS, 	category = "healingIn"},
+	
+}
+
+local lastPlotSelector
+
+local function RemovePlotSelection()
+	
+	local selector = lastPlotSelector
+	
+	local control = selector:GetParent()
+	local id = control.id
+	
+	local label = control:GetNamedChild("Label")
+	label:SetText("-")
+
+	local plotwindow = control:GetParent():GetParent():GetNamedChild("PlotWindow")
+	
+	local plot = plotwindow.plots[id]
+	
+	plot.func = nil
+	
+	plot:Update()
+
+end
+
+function CMX.PlotSelectionMenu(selector)
+	
+	ClearMenu()
+
+	lastPlotSelector = selector
+	
+	AddCustomMenuItem(GetString(SI_COMBAT_METRICS_NONE), RemovePlotSelection)
+	
+	local funcId = 1
+	
+	for id, data in ipairs(CategoryStrings) do
+	
+		local submenu = {}
+	
+		for id2, data2 in ipairs(MainCategoryFunctions) do
+		
+			local stringid2 = data2.label
+		
+			table.insert(submenu, {label = GetString(stringid2), callback = PlotFunctions[funcId]})
+			
+			funcId = funcId + 1
+			
+		end
+		
+		local stringid = data.label
+		
+		AddCustomSubMenuItem(GetString(stringid), submenu)
+	
+	end		
+	
+	ShowMenu(selector)
+	AnchorMenu(selector)
+	
+end
+
+local plotDefaultFunction = {
+
+	[1] = Smooth,
+	[2] = Accumulate,
+	
+}
+
+local function InitXYPlot(plotWindow, id)
+
+	local plots = plotWindow.plots
+	
+	local newPlot = plots[id]
+
+	if newPlot == nil then
+	
+		newPlot = CreateControlFromVirtual("CombatMetrics_Report_MainPanelGraphPlot", plotWindow, plotTypeTemplates[CMX_PLOT_TYPE_XY], id)
+		
+		newPlot.plotType = CMX_PLOT_TYPE_XY
+		
+		newPlot.lineControls = {} 
+		newPlot.DrawXYPlot = DrawXYPlot
+		
+		newPlot.Update = UpdatePlotXY		
+		newPlot.autoRange = true		
+		
+		newPlot.id = id
+		
+		local category = db.FightReport.category
+		
+		local catId = 1
+		
+		while CategoryStrings[catId].category ~= category do
+			
+			catId = catId + 1 
+			
+		end
+		
+		if id <= 2 then
+		
+			local selectorLabel = plotWindow:GetParent():GetNamedChild("Toolbar"):GetNamedChild("DataSelector" .. id):GetNamedChild("Label")
+			
+			local labelString = zo_strformat("<<1>>: <<2>>", GetString(CategoryStrings[catId].label), GetString(MainCategoryFunctions[id].label))
+			
+			selectorLabel:SetText(labelString)
+			
+			newPlot.func = function() return plotDefaultFunction[id](category) end
+			
+		end
+		
+		plots[id] = newPlot
+		
+	end
+	
+	return newPlot
 end
 	
-function CMX.initPlotWindow(plotwindow)
+local function initPlotWindow(plotWindow)
+	
+	plotWindow.MapValue = MapValue
+	plotWindow.MapValueXY = MapValueXY
+	plotWindow.MapUIPos = MapUIPos
+	plotWindow.MapUIPosXY = MapUIPosXY
+	plotWindow.InitXYPlot = InitXYPlot
+	plotWindow.AddUptimePlot = AddUptimePlot
+	plotWindow.UpdateScales = UpdateScales
+	plotWindow.GetRequiredRange = GetRequiredRange
+	
+	plotWindow.plots = {}
+	
+	local funcId = 1
+	
+	for id, data in ipairs(CategoryStrings) do
+	
+		for id2, data2 in ipairs(MainCategoryFunctions) do
+		
+			local categoryString = data.label
+			local category = data.category
+			
+			local labelString = data2.label
+		
+			local function newFunc()
+			
+				local selector = lastPlotSelector
+			
+				local control = selector:GetParent()
+				local id = control.id
+				
+				local label = control:GetNamedChild("Label")
+				
+				label:SetText(zo_strformat("<<1>>: <<2>>", GetString(categoryString), GetString(labelString)))
+				
+				local plotwindow = control:GetParent():GetParent():GetNamedChild("PlotWindow")
+				
+				local plot = plotwindow.plots[id]
+				
+				local basefunc = data2.func
+				
+				plot.func = function() return basefunc(category) end
+				
+				plot:Update()
+		
+			end
+			
+			PlotFunctions[funcId] = newFunc
+			
+			funcId = funcId + 1
+			
+		end	
+	end
+	
+	for id = 1,5 do
+	
+		plotWindow:InitXYPlot(id)
+		
+	end
+	
+end
 
-	plotwindow.plots = {}
+function initPlotToolbar(toolbar)
+
+	local PlotColors = db.FightReport.PlotColors
+
+	for i = 1,5 do
 	
-	plotwindow.MapValue = MapValue
-	plotwindow.MapValueXY = MapValueXY
-	plotwindow.MapUIPos = MapUIPos
-	plotwindow.MapUIPosXY = MapUIPosXY
-	plotwindow.AddPlot = AddPlot
-	plotwindow.PlotXY = PlotXY
-	plotwindow.UpdateScales = UpdateScales
-	plotwindow.GetRequiredRange = GetRequiredRange
-	
+		local selector = toolbar:GetNamedChild("DataSelector" .. i)
+
+		selector.id = i
+		
+		local colorbox = selector:GetNamedChild("ColorBox")
+		
+		local color = PlotColors[i]
+		
+		colorbox:SetCenterColor(unpack(color))
+		selector.color = color
+		
+		local function updateColor(r, g, b, a)
+		
+			colorbox:SetCenterColor(r, g, b, a)
+			
+			selector.color = {r, g, b, a}
+			
+			PlotColors[i] = {r, g, b, a}
+			
+			toolbar:GetParent():Update()
+			
+		end
+
+		colorbox:SetHandler("OnMouseUp", function(self, button, upInside)
+
+				if upInside then
+				
+					local r, g, b, a = unpack(selector.color)
+					COLOR_PICKER:Show(updateColor, r, g, b, a)
+					
+				end
+			end
+		)		
+	end
 end
 
 
@@ -4028,6 +4219,27 @@ local function toggleFightReport()
 	end
 end
 
+function CMX.GetCMXData(dataType)	-- for external access to fightdata
+
+	local data = {}
+
+    if dataType == "selectionData" then
+	
+		ZO_DeepTableCopy(selectionData, data)
+		
+    elseif dataType == "fightData" then
+	
+		ZO_DeepTableCopy(fightData, data)
+		
+    else
+	
+        data = nil
+		
+    end
+	
+	return data
+end
+
 local scene = ZO_Scene:New("CMX_REPORT_SCENE", SCENE_MANAGER)
 
 local function initFightReport()
@@ -4139,6 +4351,12 @@ local function initFightReport()
 			
 		local graphPanel = mainPanel:GetNamedChild("Graph")
 		graphPanel.Update = updateGraphPanel
+		
+			local plotToolBar = graphPanel:GetNamedChild("Toolbar")		
+			initPlotToolbar(plotToolBar)
+			
+			local plotWindow = graphPanel:GetNamedChild("PlotWindow")	
+			initPlotWindow(plotWindow)
 		
 	local infoPanel = fightReport:GetNamedChild("_InfoPanel")
 	infoPanel.Update = updateInfoPanel
