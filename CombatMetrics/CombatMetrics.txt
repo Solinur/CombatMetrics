@@ -31,12 +31,9 @@ libs/LibAddonMenu-2.0/controls/slider.lua
 libs/LibAddonMenu-2.0/controls/texture.lua
 libs/LibAddonMenu-2.0/controls/iconpicker.lua
 
-
 libs/LibCombat/LibCombat.lua
 
 libs/LibFeedback/LibFeedback.lua
-
-libs/LibCustomMenu/LibCustomMenu.lua
 
 lang/en.lua
 lang/$(language).lua

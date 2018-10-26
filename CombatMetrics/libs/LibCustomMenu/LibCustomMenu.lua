@@ -2,9 +2,10 @@
 -- thanks to: baertram & circonian
 
 -- Register with LibStub
-local MAJOR, MINOR = "LibCustomMenu", 6.5
-local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
-if not lib then return end -- the same or newer version of this lib is already loaded into memory
+local MAJOR, MINOR = "LibCustomMenu", 6.6
+local lib, oldminor = LibStub and LibStub:NewLibrary(MAJOR, MINOR)
+if LibStub and not lib then return end -- the same or newer version of this lib is already loaded into memory
+lib = lib or { }
 
 local wm = WINDOW_MANAGER
 
@@ -663,3 +664,5 @@ lib.CATEGORY_LATE = 6
 
 EVENT_MANAGER:UnregisterForEvent(MAJOR, EVENT_ADD_ON_LOADED)
 EVENT_MANAGER:RegisterForEvent(MAJOR, EVENT_ADD_ON_LOADED, OnAddonLoaded)
+
+LibCustomMenu = lib

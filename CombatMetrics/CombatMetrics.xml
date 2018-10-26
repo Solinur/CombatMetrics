@@ -2042,7 +2042,7 @@
 													<OnInitialized>
 														self.tooltip = {SI_COMBAT_METRICS_TOGGLE_SKILL_USE_EVENTS}
 														self.func = LIBCOMBAT_EVENT_SKILL_TIMINGS
-														self.texture = "esoui\art\lfg\gamepad\lfg_roleicon_dps.dds"
+														self.texture = "esoui/art/lfg/gamepad/lfg_roleicon_dps.dds"
 													</OnInitialized>
 												</Control>
 												
@@ -2072,7 +2072,7 @@
 													<OnInitialized>
 														self.tooltip = {SI_COMBAT_METRICS_TOGGLE_RESOURCE_EVENTS}
 														self.func = LIBCOMBAT_EVENT_RESOURCES
-														self.texture = "/esoui/art/icons/alchemy/crafting_alchemy_trait_unstoppable_match.dds"
+														self.texture = "esoui/art/icons/alchemy/crafting_alchemy_trait_restoremagicka.dds"
 													</OnInitialized>
 												</Control>
 												
@@ -2092,7 +2092,7 @@
 													<OnInitialized>
 														self.tooltip = {SI_COMBAT_METRICS_TOGGLE_BUFFOUT_EVENTS}
 														self.func = LIBCOMBAT_EVENT_EFFECTS_OUT
-														self.texture = "/esoui/art/icons/alchemy/crafting_alchemy_trait_unstoppable_match.dds"
+														self.texture = "esoui/art/treeicons/gamepad/gp_tutorial_idexicon_death.dds"
 													</OnInitialized>
 												</Control>
 												
@@ -2112,7 +2112,7 @@
 													<OnInitialized>
 														self.tooltip = {SI_COMBAT_METRICS_TOGGLE_GROUPBUFFOUT_EVENTS}
 														self.func = LIBCOMBAT_EVENT_GROUPEFFECTS_OUT
-														self.texture = "/esoui/art/icons/alchemy/crafting_alchemy_trait_unstoppable_match.dds"
+														self.texture = "esoui/art/treeicons/gamepad/gp_tutorial_idexicon_death.dds"
 													</OnInitialized>
 												</Control>
 												
