@@ -85,7 +85,7 @@ LIBCOMBAT_SKILLSTATUS_SUCCESS = 4
 local strings = {
 
 	SI_LIBCOMBAT_LOG_CRITICAL = "critically ",  -- "critically"
-	SI_LIBCOMBAT_LOG_YOU = "you", -- "you"
+	SI_LIBCOMBAT_LOG_YOU = "You", -- "you"
 	SI_LIBCOMBAT_LOG_GAINED = "gained", -- "gained"
 	SI_LIBCOMBAT_LOG_NOGAINED = "gained no", -- "gained no"
 	SI_LIBCOMBAT_LOG_LOST = "lost", -- "lost"
@@ -95,7 +95,7 @@ local strings = {
 	SI_LIBCOMBAT_LOG_UNITTYPE_PLAYER = "yourself", -- "You"
 	SI_LIBCOMBAT_LOG_UNITTYPE_PET = "your pet", -- "Pet"
 	SI_LIBCOMBAT_LOG_UNITTYPE_GROUP = "a group member", -- "Groupmember"
-	SI_LIBCOMBAT_LOG_UNITTYPE_OTHER = "another Player", -- "Another Player"
+	SI_LIBCOMBAT_LOG_UNITTYPE_OTHER = "another player", -- "Another Player"
 
 	SI_LIBCOMBAT_LOG_IS_AT = "is at", -- "Weapon Swap"
 	SI_LIBCOMBAT_LOG_INCREASED = "increased to", -- "Weapon Swap"
@@ -174,6 +174,8 @@ local CustomAbilityName = {
 
 	[-1] = "Unknown", -- Whenever there is no known abilityId
 	[-2] = "Unknown", -- Whenever there is no known abilityId
+	
+	[0] = GetString(SI_LIBCOMBAT_LOG_BASEREG), -- Whenever there is no known abilityId
 	
 	[75753] = zo_strformat(SI_ABILITY_NAME, GetAbilityName(75753)), -- Line-breaker (Alkosh). pin abiltiy name so it can't get overridden
 	[17906] = zo_strformat(SI_ABILITY_NAME, GetAbilityName(17906)), -- Crusher (Glyph). pin abiltiy name so it can't get overridden
@@ -772,6 +774,7 @@ function FightHandler:PrepareFight()
 		GetPlayerBuffs(timems)
 		GetOtherBuffs(timems)
 		
+		self.stats.currenthealth, _, _ = GetUnitPower("player", POWERTYPE_HEALTH) 
 		self.stats.currentmagicka, _, _ = GetUnitPower("player", POWERTYPE_MAGICKA) 
 		self.stats.currentstamina, _, _ = GetUnitPower("player", POWERTYPE_STAMINA) 		
 		self.stats.currentulti, _, _ = GetUnitPower("player", POWERTYPE_ULTIMATE)
@@ -1372,21 +1375,51 @@ function lib.GetCustomAbilityList()
 	return CustomAbilityTypeList
 end
 
+local function checkLastAbilities(powerType, powerValueChange)
+
+	local lastabilities = data.lastabilities
+
+	local aId = -1
+
+	for i = #lastabilities, 1, -1 do			
+		
+		local values = lastabilities[i]
+		
+		if powerType == values[4] then 
+	
+			local ratio = powerValueChange / values[3]
+			
+			if showdebug == true then d("Ratio: "..ratio) end
+			
+			local goodratio = ratio >= 0.98 and ratio <= 1.02
+			
+			if goodratio then 
+			
+				aId = values[2]
+				table.remove(lastabilities, i)
+				
+				break
+				
+			end
+		end
+	end
+	
+	return aId
+	
+end
+
 local function onBaseResourceChanged(_,unitTag,_,powerType,powerValue,_,_) 
 
 	if unitTag ~= "player" then return end
-	if (powerType ~= POWERTYPE_MAGICKA and powerType ~= POWERTYPE_STAMINA and powerType ~= POWERTYPE_ULTIMATE) or (data.inCombat == false) then return end 
+	if (powerType ~= POWERTYPE_HEALTH and powerType ~= POWERTYPE_MAGICKA and powerType ~= POWERTYPE_STAMINA and powerType ~= POWERTYPE_ULTIMATE) or (data.inCombat == false) then return end 
 	
 	local timems = GetGameTimeMilliseconds()
 	local powerValueChange
 	local aId 
 	
-	local stats = currentfight.stats
-	local lastabilities = data.lastabilities
+	local stats = currentfight.stats	
 	
  	if powerType == POWERTYPE_MAGICKA then
-	
-		aId = -1
 	
 		powerValueChange = powerValue - (stats.currentmagicka or powerValue)
 		stats.currentmagicka = powerValue
@@ -1395,26 +1428,7 @@ local function onBaseResourceChanged(_,unitTag,_,powerType,powerValue,_,_)
 		
 		if showdebug == true then d("Skill cost: "..powerValueChange) end
 		
-		for i = #lastabilities, 1, -1 do
-		
-			local values = lastabilities[i]
-		
-			local ratio = powerValueChange / values[3]
-			
-			if showdebug == true and powerType == values[4] then d("Ratio: "..ratio) end
-			
-			local goodratio = ratio >= 0.98 and ratio <= 1.02
-			
-			if (powerValueChange == values[3] or goodratio) and powerType == values[4] then
-			
-				aId = values[2]					
-				table.remove(lastabilities, i)
-				
-				break
-				
-			end
-		end
-	
+		aId = checkLastAbilities(powerType, powerValueChange)
 			
 		if aId == -1 and powerValueChange == GetStat(STAT_MAGICKA_REGEN_COMBAT) then 
 
@@ -1424,38 +1438,18 @@ local function onBaseResourceChanged(_,unitTag,_,powerType,powerValue,_,_)
 		
 	elseif powerType == POWERTYPE_STAMINA then
 	
-		aId = -2
-	
 		powerValueChange = powerValue - (stats.currentstamina or powerValue)
 		stats.currentstamina = powerValue
 		
 		if powerValueChange == 0 then return end
 	
-		for i = #lastabilities, 1, -1 do
+		aId = checkLastAbilities(powerType, powerValueChange)
 		
-			local values = lastabilities[i]
-		
-			local ratio = powerValueChange / values[3]
-			
-			if showdebug == true and powerType == values[4] then d("Ratio: "..ratio) end
-			
-			local goodratio = ratio >= 0.98 and ratio <= 1.02
-			
-			if goodratio and powerType == values[4] then 
-			
-				aId = values[2]
-				table.remove(lastabilities, i)
-				
-				break
-				
-			end
-		end
-		
-		if powerValueChange == GetStat(STAT_STAMINA_REGEN_COMBAT) and aId == -2 then 
+		if powerValueChange == GetStat(STAT_STAMINA_REGEN_COMBAT) and aId == -1 then 
 
 			aId = 0
  
-		elseif aId == -2 then 
+		elseif aId == -1 then 
 		
 			local bashratio = -GetAbilityCost(21970) * 5/3 / powerValueChange
 			local dodgeratio = -GetAbilityCost(28549) / powerValueChange
@@ -1483,6 +1477,22 @@ local function onBaseResourceChanged(_,unitTag,_,powerType,powerValue,_,_)
 		
 		if powerValueChange == 0 then return end
 		
+	elseif powerType == POWERTYPE_HEALTH then
+	
+		aId = -1
+	
+		powerValueChange = powerValue - (stats.currenthealth or powerValue)
+		stats.currenthealth = powerValue
+		
+		if powerValueChange == 0 then return end	
+			
+		if powerValueChange == GetStat(STAT_HEALTH_REGEN_COMBAT) and data.playerid then 
+
+			aId = 0
+			lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_HEAL_SELF), LIBCOMBAT_EVENT_HEAL_SELF, timems, ACTION_RESULT_HOT_TICK, data.playerid, data.playerid, aId, powerValueChange, powerType)
+			return
+			
+		end
 	end
 	
 	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_RESOURCES), LIBCOMBAT_EVENT_RESOURCES, timems, aId, powerValueChange, powerType)
@@ -1497,7 +1507,7 @@ local function onSlotUpdate(_, slot)
 	local abilityId = GetSlotBoundId(slot)
 	local lastabilities = data.lastabilities
 	
-	if Events.Resources.active and slot > 2 and (powerType == 0 or powerType == 6) then 
+	if Events.Resources.active and slot > 2 and (powerType == POWERTYPE_HEALTH or powerType == POWERTYPE_MAGICKA or powerType == POWERTYPE_STAMINA) then 
 	
 		table.insert(lastabilities,{timems, abilityId, -cost, powerType})
 		
@@ -2474,7 +2484,7 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 			
 			local resource = (powerType == POWERTYPE_MAGICKA and GetString(SI_ATTRIBUTES2)) or (powerType == POWERTYPE_STAMINA and GetString(SI_ATTRIBUTES3)) or (powerType == POWERTYPE_ULTIMATE and GetString(SI_LIBCOMBAT_LOG_ULTIMATE))
 			
-			local ability = abilityId and abilityId ~= 0 and GetFormattedAbilityName(abilityId) or GetString(SI_LIBCOMBAT_LOG_BASEREG)
+			local ability = abilityId and GetFormattedAbilityName(abilityId)
 			
 			color = (powerType == POWERTYPE_MAGICKA and {0.7,0.7,1}) or (powerType == POWERTYPE_STAMINA and {0.7,1,0.7}) or (powerType == POWERTYPE_ULTIMATE and {1,1,0.7})
 			text = zo_strformat(stringFormat, timeString, changeTypeString, amount, resource, ability)

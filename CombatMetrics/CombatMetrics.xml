@@ -1169,7 +1169,7 @@
 			
 		</Control>
 		
-		<Line name="CombatMetrics_PlotLine" color="AAFFFF00" thickness="2" pixelRoundingEnabled="true" virtual="true">
+		<Line name="CombatMetrics_PlotLine" color="AAFFFF00" thickness="2" layer="1" level="2" virtual="true">
 		</Line>
 		
 		<Control name="CombatMetrics_PlotControlXY" virtual="true">
@@ -1180,7 +1180,7 @@
 			<AnchorFill/>
 		</Control>
 		
-		<Line name="CombatMetrics_GraphTickX" color="FF888888" thickness="COMBAT_METRICS_LINE_SIZE" virtual="true">
+		<Line name="CombatMetrics_GraphTickY" color="FF888888" thickness="COMBAT_METRICS_LINE_SIZE" virtual="true">
 		
 			<Controls>
 			
@@ -1188,12 +1188,17 @@
 					<Anchor point="RIGHT" relativePoint="LEFT" offsetX="-3"/>
 					<Dimensions x="45" y="20"/>
 				</Label>
+				
+				<Label name="$(parent)LabelR" inherits="CombatMetrics_ValueFontSmallControl" text="100%" horizontalAlignment="RIGHT" verticalAlignment="CENTER">
+					<Anchor point="LEFT" relativePoint="RIGHT" offsetX="3"/>
+					<Dimensions x="30" y="20"/>
+				</Label>
 			
 			</Controls>
 	
 		</Line>
 		
-		<Line name="CombatMetrics_GraphTickY" color="FF888888" thickness="COMBAT_METRICS_LINE_SIZE" virtual="true">
+		<Line name="CombatMetrics_GraphTickX" color="FF888888" thickness="COMBAT_METRICS_LINE_SIZE" virtual="true">
 		
 			<Controls>
 			
@@ -2364,8 +2369,8 @@
 							
 								<Control name="$(parent)PlotWindow" mouseEnabled="true">
 								
-									<Anchor point="TOPRIGHT" offsetX="-24" offsetY="12"/>
-									<Dimensions x="370" y="306"/>
+									<Anchor point="TOPRIGHT" offsetX="-41" offsetY="12"/>
+									<Dimensions x="353" y="306"/>
 									
 									<Controls>
 									
@@ -2406,70 +2411,70 @@
 										
 										</Control> 
 									
-										<Line name="$(parent)YTick5" color="FFFFFFFF" level="1" inherits="CombatMetrics_GraphTickX">
+										<Line name="$(parent)YTick5" color="FFFFFFFF" level="1" inherits="CombatMetrics_GraphTickY">
 									
 											<Anchor point="LEFT" relativePoint="TOPLEFT" offsetX="-3"/>
-											<Anchor point="RIGHT" relativePoint="TOPRIGHT" offsetX="0"/>
+											<Anchor point="RIGHT" relativePoint="TOPRIGHT" offsetX="3"/>
 									
 										</Line>
 									
-										<Line name="$(parent)YTick4" inherits="CombatMetrics_GraphTickX">
+										<Line name="$(parent)YTick4" inherits="CombatMetrics_GraphTickY">
 									
 											<Anchor point="LEFT" relativePoint="LEFT" relativeTo="$(parent)Spacer1" offsetX="-3"/>
-											<Anchor point="RIGHT" relativePoint="RIGHT" relativeTo="$(parent)Spacer3" offsetX="0"/>
+											<Anchor point="RIGHT" relativePoint="RIGHT" relativeTo="$(parent)Spacer3" offsetX="3"/>
 									
 										</Line>
 										
-										<Line name="$(parent)YTick3" inherits="CombatMetrics_GraphTickX">
+										<Line name="$(parent)YTick3" inherits="CombatMetrics_GraphTickY">
 									
 											<Anchor point="LEFT" relativePoint="LEFT" offsetX="-3"/>
-											<Anchor point="RIGHT" relativePoint="RIGHT" offsetX="0"/>
+											<Anchor point="RIGHT" relativePoint="RIGHT" offsetX="3"/>
 									
 										</Line>
 									
-										<Line name="$(parent)YTick2" inherits="CombatMetrics_GraphTickX">
+										<Line name="$(parent)YTick2" inherits="CombatMetrics_GraphTickY">
 									
 											<Anchor point="LEFT" relativePoint="LEFT" relativeTo="$(parent)Spacer2" offsetX="-3"/>
-											<Anchor point="RIGHT" relativePoint="RIGHT" relativeTo="$(parent)Spacer4" offsetX="0"/>
+											<Anchor point="RIGHT" relativePoint="RIGHT" relativeTo="$(parent)Spacer4" offsetX="3"/>
 									
 										</Line>
 										
-										<Line name="$(parent)YTick1" color="FFFFFFFF" level="1" inherits="CombatMetrics_GraphTickX">
+										<Line name="$(parent)YTick1" color="FFFFFFFF" level="1" inherits="CombatMetrics_GraphTickY">
 									
 											<Anchor point="LEFT" relativePoint="BOTTOMLEFT" offsetX="-3"/>
-											<Anchor point="RIGHT" relativePoint="BOTTOMRIGHT" offsetX="0"/>
+											<Anchor point="RIGHT" relativePoint="BOTTOMRIGHT" offsetX="3"/>
 									
 										</Line> 
 									
-										<Line name="$(parent)XTick1" color="FFFFFFFF" level="1" inherits="CombatMetrics_GraphTickY">
+										<Line name="$(parent)XTick1" color="FFFFFFFF" level="1" inherits="CombatMetrics_GraphTickX">
 									
 											<Anchor point="TOP" relativePoint="TOPLEFT" offsetY="0"/>
 											<Anchor point="BOTTOM" relativePoint="BOTTOMLEFT" offsetY="3"/>
 									
 										</Line>
 									
-										<Line name="$(parent)XTick2" inherits="CombatMetrics_GraphTickY">
+										<Line name="$(parent)XTick2" inherits="CombatMetrics_GraphTickX">
 									
 											<Anchor point="TOP" relativePoint="TOP" relativeTo="$(parent)Spacer1" offsetY="0"/>
 											<Anchor point="BOTTOM" relativePoint="BOTTOM" relativeTo="$(parent)Spacer2" offsetY="3"/>
 									
 										</Line>
 										
-										<Line name="$(parent)XTick3" inherits="CombatMetrics_GraphTickY">
+										<Line name="$(parent)XTick3" inherits="CombatMetrics_GraphTickX">
 									
 											<Anchor point="TOP" relativePoint="TOP" offsetY="0"/>
 											<Anchor point="BOTTOM" relativePoint="BOTTOM" offsetY="3"/>
 									
 										</Line>
 									
-										<Line name="$(parent)XTick4" inherits="CombatMetrics_GraphTickY">
+										<Line name="$(parent)XTick4" inherits="CombatMetrics_GraphTickX">
 									
 											<Anchor point="TOP" relativePoint="TOP" relativeTo="$(parent)Spacer3" offsetY="0"/>
 											<Anchor point="BOTTOM" relativePoint="BOTTOM" relativeTo="$(parent)Spacer4" offsetY="3"/>
 									
 										</Line>
 										
-										<Line name="$(parent)XTick5" color="FFFFFFFF" level="1" inherits="CombatMetrics_GraphTickY">
+										<Line name="$(parent)XTick5" color="FFFFFFFF" level="1" inherits="CombatMetrics_GraphTickX">
 									
 											<Anchor point="TOP" relativePoint="TOPRIGHT" offsetY="0"/>
 											<Anchor point="BOTTOM" relativePoint="BOTTOMRIGHT" offsetY="3"/>

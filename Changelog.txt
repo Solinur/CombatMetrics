@@ -298,3 +298,6 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 0.8.2.9 1,002,327 (18.09.2018) 22:27
 [*] Improved performance for calculating fights massively. Thanks to ZOS for implementing a profiling tool with the Murkmire PTS that allowed me to identify a function where the calculation was slowed down. I wouldn't have found that without the tool.
 [*] API Bump for Murkmire (100025)
+
+0.8.2.10 1,067,304 (26.10.2018) 20:24
+[*] Fixed tracking of Spell Strategist.

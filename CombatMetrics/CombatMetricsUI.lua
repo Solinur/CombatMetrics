@@ -1803,7 +1803,7 @@ local function updateResourceBars(panel, currentanchor, data, totalRate, selecte
 	
 		if (ability.ticks or 0) > 0 then
 			
-			local label = abilityId ~= 0 and GetFormattedAbilityName(abilityId) or GetString(SI_COMBAT_METRICS_BASE_REG)
+			local label = GetFormattedAbilityName(abilityId)
 			
 			local highlight = false
 			if selectedresources ~= nil then highlight = selectedresources[abilityId] ~= nil end
@@ -2512,10 +2512,22 @@ end
 local CMX_PLOT_DIMENSION_X = 1
 local CMX_PLOT_DIMENSION_Y = 2
 
-local function MapValue(plotWindow, dimension, value)
+local function MapValue(plotWindow, dimension, value, norm)
 
-	local range = dimension == CMX_PLOT_DIMENSION_X and plotWindow.RangesX or plotWindow.RangesY
-	local minRange, maxRange = unpack(range)
+	local minRange, maxRange
+
+	if norm then 
+
+		minRange = 0
+		maxRange = 1
+		
+	else 
+	
+		local range = dimension == CMX_PLOT_DIMENSION_X and plotWindow.RangesX or plotWindow.RangesY
+		
+		minRange, maxRange = unpack(range)
+		
+	end
 	
 	local controlSize = dimension == CMX_PLOT_DIMENSION_X and plotWindow:GetWidth() or plotWindow:GetHeight()
 
@@ -2526,10 +2538,10 @@ local function MapValue(plotWindow, dimension, value)
 
 end
 
-local function MapValueXY(plotWindow, x, y)
+local function MapValueXY(plotWindow, x, y, normX, normY)
 
-	local XOffset, IsInRangeX = plotWindow:MapValue(CMX_PLOT_DIMENSION_X, x)
-	local YOffset, IsInRangeY = plotWindow:MapValue(CMX_PLOT_DIMENSION_Y, y)
+	local XOffset, IsInRangeX = plotWindow:MapValue(CMX_PLOT_DIMENSION_X, x, normX)
+	local YOffset, IsInRangeY = plotWindow:MapValue(CMX_PLOT_DIMENSION_Y, y, normY)
 
 	local IsInRange = IsInRangeX and IsInRangeY
 	
@@ -2675,6 +2687,9 @@ local function DrawLine(plot, coords, id)
 	
 end
 
+local COMBAT_METRICS_YAXIS_LEFT = 1
+local COMBAT_METRICS_YAXIS_RIGHT = 2
+
 local function DrawXYPlot(plot)
 
 	local plotWindow = plot:GetParent()
@@ -2695,11 +2710,12 @@ local function DrawXYPlot(plot)
 	local x0
 	local y0
 	local inRange0
+	local normY = plot.YAxisSide == COMBAT_METRICS_YAXIS_RIGHT
 		
 	for i, dataPair in ipairs(XYData) do
 	
 		local t, v = unpack(dataPair)
-		local x, y, inRange = plotWindow:MapValueXY(t, v)
+		local x, y, inRange = plotWindow:MapValueXY(t, v, false, normY)
 		coordinates[i] = {x, y, inRange}
 		
 		if i > 1 then			
@@ -2767,7 +2783,7 @@ local function Smooth(category)
 		if t == t2 then table.insert(XYData, {totaltime, y}) end
 	end
 	
-	return XYData
+	return XYData, COMBAT_METRICS_YAXIS_LEFT
 end
 
 local function Accumulate(category)
@@ -2781,8 +2797,6 @@ local function Accumulate(category)
 	if data == nil then return end
 	
 	local totaltime = fightData.combattime
-	
-	local startpoint = db.FightReport.SmoothWindow / 2
 
 	local XYData = {}
 	
@@ -2790,27 +2804,34 @@ local function Accumulate(category)
 	
 	local sum = 0
 	
-	local t0 = 0
+	local t0
+	local tmax
+	
+	local combatstart = fightData.combatstart
 	
 	if category == "healingOut" or category == "healingIn" then 
 		
-		--t0 = fightData.hpsstart or 0
+		t0 = (fightData.hpsstart - combatstart) / 1000 or 0
+		tmax = (fightData.hpsend - combatstart) / 1000 or 1
 		
 	else 
 		
-		--t0 = fightData.dpsstart or 0
+		t0 = (fightData.dpsstart - combatstart) / 1000 or 0
+		tmax = (fightData.dpsend - combatstart) / 1000 or 1
 		
 	end
+	
+	local startpoint = math.max(db.FightReport.SmoothWindow / 2, t0)
 	
 	for t = 0, t2 do		
 	
 		sum = sum + (data[t] or 0)
 		
-		if t >= startpoint then 
+		if t >= startpoint and t <= math.ceil(tmax) then 
 		
 			local x = t
 			
-			local y = sum / (t - t0)
+			local y = sum / (math.min(tmax, t) - t0)
 			
 			table.insert(XYData, {x, y})
 		
@@ -2819,7 +2840,45 @@ local function Accumulate(category)
 	
 	ACCDATA = XYData
 	
-	return XYData
+	return XYData, COMBAT_METRICS_YAXIS_LEFT
+end
+
+local function Absolute(category)
+
+	local calcData = fightData.calculated
+	
+	local category = category or db.FightReport.category
+	
+	local data = calcData.graph and calcData.graph[category] or nil -- DPS data, one value per second
+	
+	if data == nil then return end
+	
+	local totaltime = fightData.combattime
+
+	local XYData = {}
+	
+	local t2 = math.ceil(totaltime)
+	
+	local sum = 0
+	
+	for t = 0, t2 do		
+	
+		sum = sum + (data[t] or 0)
+		
+		local x = t
+		
+		local y = sum
+		
+		table.insert(XYData, {x, y})
+	end
+	
+	for i, xyData in ipairs(XYData) do
+	
+		xyData[2] = xyData[2]/sum
+	
+	end
+	
+	return XYData, COMBAT_METRICS_YAXIS_RIGHT
 end
 
 local function AddUptimePlot(plotWindow, id, height)
@@ -2972,7 +3031,13 @@ local function UpdatePlotXY(plot)
 	
 	local func = plot.func
 	
-	local XYData = func and func() or nil
+	local XYData, YAxisSide
+	
+	if func then 
+	
+		XYData, YAxisSide = func()
+		
+	end
 	
 	if XYData == nil then 
 	
@@ -2984,7 +3049,14 @@ local function UpdatePlotXY(plot)
 	
 	plot:SetHidden(false)
 
-	local range = AcquireRange(XYData)	
+	local range = AcquireRange(XYData)
+	
+	if YAxisSide == COMBAT_METRICS_YAXIS_RIGHT then 
+	
+		range[3] = 0
+		range[4] = 1
+		
+	end
 	
 	plotWindow = plot:GetParent()
 
@@ -2997,7 +3069,9 @@ local function UpdatePlotXY(plot)
 	end
 	
 	plot.range = range
+	
 	plot.XYData = XYData
+	plot.YAxisSide = YAxisSide
 	
 	plot:DrawXYPlot()
 	
@@ -3158,6 +3232,7 @@ local MainCategoryFunctions = {
 
 	[1] = {label = SI_COMBAT_METRICS_SMOOTHED, 	func = Smooth},
 	[2] = {label = SI_COMBAT_METRICS_ACCUMULATED, func = Accumulate},
+	[3] = {label = SI_COMBAT_METRICS_ABSOLUTE, func = Absolute},
 
 }
 
@@ -3295,6 +3370,16 @@ local function initPlotWindow(plotWindow)
 	plotWindow.GetRequiredRange = GetRequiredRange
 	
 	plotWindow.plots = {}
+	
+	for i = 1, 5 do
+		
+		local label = plotWindow:GetNamedChild("YTick" .. i):GetNamedChild("LabelR")
+		
+		local text = string.format("%d%%", (i - 1) * 25)
+		
+		label:SetText(text)
+		
+	end
 	
 	local funcId = 1
 	

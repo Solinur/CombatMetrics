@@ -84,6 +84,7 @@
 	SI_COMBAT_METRICS_RECALCULATE = "Recalculate Fight",
 	SI_COMBAT_METRICS_SMOOTHED = "Smoothed",
 	SI_COMBAT_METRICS_ACCUMULATED = "Accumulated",
+	SI_COMBAT_METRICS_ABSOLUTE = "Absolute",
 	SI_COMBAT_METRICS_SMOOTH_LABEL = "Smooth: %d s",
 	SI_COMBAT_METRICS_NONE = "None",
 	
@@ -171,7 +172,7 @@
 	SI_COMBAT_METRICS_PAGE = "Go to page <<1>>",  -- Page 
 	SI_COMBAT_METRICS_GOTO_NEXT = "Go to next page",  -- Go to next pages
 
-	SI_COMBAT_METRICS_TOGGLE_HEAL = "Toggle received heal events",  -- Toggle received heal events
+	SI_COMBAT_METRICS_TOGGLE_HEAL = "Toggle received healing events",  -- Toggle received heal events
 	SI_COMBAT_METRICS_TOGGLE_DAMAGE = "Toggle received damage events",  -- Toggle received damage events
 
 	SI_COMBAT_METRICS_TOGGLE_YOUR_HEAL = "Toggle your healing events",  -- Toggle your healing events
@@ -183,8 +184,8 @@
 	SI_COMBAT_METRICS_TOGGLE_GROUPBUFFOUT_EVENTS = "Toggle outbound groupbuff events",  -- Toggle buff events
 	SI_COMBAT_METRICS_TOGGLE_RESOURCE_EVENTS = "Toggle resource events",  -- Toggle resource events
 	SI_COMBAT_METRICS_TOGGLE_STATS_CHANGE_EVENTS = "Toggle stats change events",  -- Toggle stats change events
-	SI_COMBAT_METRICS_TOGGLE_MESSAGE_CHANGE_EVENTS = "Toggle info events i.e. weapon swap",  -- Toggle info events i.e. weapon swap
-	SI_COMBAT_METRICS_TOGGLE_SKILL_USE_EVENTS = "Toggle info about used skills",  -- Toggle info about used skills
+	SI_COMBAT_METRICS_TOGGLE_MESSAGE_CHANGE_EVENTS = "Toggle info events (e.g. weapon swap)",  -- Toggle info events (e.g. weapon swap)
+	SI_COMBAT_METRICS_TOGGLE_SKILL_USE_EVENTS = "Toggle used skills events",  -- Toggle used skills events
 
 	SI_COMBAT_METRICS_DEBUFF_IN = "(De-)Buffs\nIn",  -- (De-)Buffs\nIn (\n is newline,
 	SI_COMBAT_METRICS_DEBUFF_OUT = "(De-)Buffs\nOut",  -- (De-,Buffs\nOut

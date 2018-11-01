@@ -26,7 +26,7 @@ local CMX = CMX
  
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "0.9.0.0 alpha"
+CMX.version = "0.9.0 alpha"
 
 function CMX.GetFeedBackData(parentcontrol)
 	
@@ -1121,15 +1121,17 @@ ProcessLog[LIBCOMBAT_EVENT_GROUPEFFECTS_OUT] = ProcessLogEffects
 
 local function ProcessLogResources(fight, callbacktype, timems, abilityId, powerValueChange, powerType)
 	
+	if powerType == POWERTYPE_HEALTH then return end
+	
 	abilityId = abilityId or 0
 
 	local resourceData = fight:AcquireResourceData(abilityId, powerValueChange, powerType)
 	
 	local change = math.abs(powerValueChange)
 	
-	if powerType==POWERTYPE_ULTIMATE then
+	if powerType == POWERTYPE_ULTIMATE then
 		
-		local tablekey = powerValueChange>=0 and "gains" or "drains"
+		local tablekey = powerValueChange >= 0 and "gains" or "drains"
 		resourceData["total"..tablekey] = resourceData["total"..tablekey] + change	
 	
 	else
