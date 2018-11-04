@@ -677,9 +677,9 @@ function CMX.UpdateAttackStatsSelector(control)
 
 	local selector = control:GetParent()
 
-	for _, powertype in pairs{"Magicka", "Stamina", "Health"} do
+	for _, powerType in pairs{"Magicka", "Stamina", "Health"} do
 	
-		local control = selector:GetNamedChild(powertype)
+		local control = selector:GetNamedChild(powerType)
 		
 		control:GetNamedChild("Line"):SetColor(0.53, 0.53, 0.53, 1)
 		control:GetNamedChild("Icon"):SetAlpha(0.5)
@@ -2473,8 +2473,9 @@ local function updateCombatLog(panel)
 			elseif logtype == LIBCOMBAT_EVENT_RESOURCES then
 			
 				local abilityId = logline[3]
+				local powerType = logline[5]
 				
-				condition2 = resourceSelection == nil or resourceSelection[abilityId or 0] ~= nil
+				condition2 = powerType ~= POWERTYPE_HEALTH and (resourceSelection == nil or resourceSelection[abilityId or 0] ~= nil)
 				
 			elseif logtype == LIBCOMBAT_EVENT_PLAYERSTATS or logtype == LIBCOMBAT_EVENT_MESSAGES or logtype == LIBCOMBAT_EVENT_SKILL_TIMINGS then
 			
@@ -2865,16 +2866,64 @@ local function Absolute(category)
 	
 		sum = sum + (data[t] or 0)
 		
-		local x = t
+		table.insert(XYData, {t, sum})
 		
-		local y = sum
-		
-		table.insert(XYData, {x, y})
 	end
 	
 	for i, xyData in ipairs(XYData) do
 	
 		xyData[2] = xyData[2]/sum
+	
+	end
+	
+	return XYData, COMBAT_METRICS_YAXIS_RIGHT
+end
+
+local powerTypeKeyTable = {
+
+	[POWERTYPE_HEALTH] = "maxmaxhealth",
+	[POWERTYPE_MAGICKA] = "maxmaxmagicka",
+	[POWERTYPE_STAMINA] = "maxmaxstamina",
+
+}
+
+local function ResourceAbsolute(powerType)
+
+	if powerType == nil then return end
+
+	local logData = fightData.log
+	
+	local starttime = fightData.combatstart
+
+	local XYData = {}
+	
+	local x	= -1
+	local y
+	
+	for line, lineData in ipairs(logData) do
+	
+		if lineData[1] == LIBCOMBAT_EVENT_RESOURCES and lineData[5] == powerType and lineData[6] then 
+	
+			local deltatime = math.floor() - lineData[2]
+			
+			if deltatime > x then 
+	
+				local x = deltatime
+				
+				local y = lineData[6]
+				
+				table.insert(XYData, {x, y})
+			end			
+		end
+	end
+	
+	local key = powerTypeKeyTable[powerType]
+	
+	local maxValue = fightData.stats[key]
+	
+	for i, xyData in ipairs(XYData) do
+	
+		xyData[2] = xyData[2]/maxValue
 	
 	end
 	

@@ -4,7 +4,7 @@ local sv
 CombatMetricsFightData = {}
  
 local AddonName = "CombatMetricsFightData"
-local AddonVersion = 3
+local AddonVersion = 4
 
 local constants = 0
 
@@ -65,18 +65,24 @@ end
 
 local function Decode(logstring, layout)
 
-	local offset = -1	-- walking trough the string backwards, ignoring the separator...
+	local offset = 0
 	local line = {}
 
-	for i = #layout, 1, -1 do
+	for i, chars in ipairs(layout) do
 	
-		offset, value = GetValue(0, logstring, layout[i], offset)
+		offset = offset + chars
+	
+		_, value = GetValue(0, logstring, chars, offset)
 		
 		if value then 
 		
 			line[i] = value
 			
-		else return line end
+		else 
+
+			line[i] = nil
+		
+		end
 		
 	end
 	
@@ -165,7 +171,7 @@ local layouts = {
 	[LAYOUT_COMBAT] = {1, 4, 1, 2, 2, 3, 4, 1}, 		-- (19) type, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType
 	[LAYOUT_EVENT] = {1, 4, 2, 3, 1, 1, 1, 1},			-- (15) type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType
 	[LAYOUT_STATS] = {1, 4, 4, 4, 1},		 			-- (15) type, timems, statchange, newvalue, statname
-	[LAYOUT_POWER] = {1, 4, 3, 3, 1},		 			-- (13) type, timems, abilityId, powerValueChange, powerType
+	[LAYOUT_POWER] = {1, 4, 3, 3, 1, 3},		 		-- (13) type, timems, abilityId, powerValueChange, powerType, powerValue
 	[LAYOUT_MESSAGE] = {1, 4, 1, 1}, 					-- (7)  type, timems, messageId (e.g. "weapon swap"), bar
 	[LAYOUT_SKILL] = {1, 4, 1, 3, 1}, 					-- (11) type, timems, reducedslot, abilityId, status
 }
@@ -213,8 +219,9 @@ local function encodeCombatLogLine(line, unitConversion)
 	
 	elseif layoutId == LAYOUT_POWER then			-- type, timems, abilityId, powerValueChange, powerType
 
-		line[3] = line[3] or 0
+		line[3] = line[3] or -3						
 		line[4] = line[4] + 131072					-- avoid negative numbers
+		line[6] = line[6] or 0
 	
 	elseif layoutId == LAYOUT_MESSAGE and type(line[3]) ~= "number" then					-- type, timems, messageId
 
@@ -267,8 +274,20 @@ local function decodeCombatLogLine(line)
 	
 	elseif layoutId == LAYOUT_POWER then					-- type, timems, abilityId, powerValueChange, powerType
 
-		if logdata[3] == 0 then logdata[3] = nil end
-		logdata[4] = logdata[4] - 131072	
+		if logdata[3] == 262141 then
+		
+			logdata[3] = nil
+		
+		elseif logdata[3] > 262140 then
+		
+			logdata[3] = logdata[3] - 262144
+			
+		end			
+		
+		logdata[4] = logdata[4] - 131072
+		
+		if logdata[5] > POWERTYPE_ITERATION_END then logdata[5] = logdata[5] - 64 end -- POWERTYPE_HEALTH is -2
+		if logdata[6] == 0 then logdata[6] = nil end	
 	
 	elseif layoutId == LAYOUT_MESSAGE then
 	
