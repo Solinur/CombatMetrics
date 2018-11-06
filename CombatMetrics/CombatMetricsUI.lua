@@ -926,7 +926,7 @@ do
 	
 	local function requestLuaSave()
 	
-		GetAddOnManager():RequestAddOnSavedVariablesPrioritySave(CMX.name)
+		GetAddOnManager():RequestAddOnSavedVariablesPrioritySave("CombatMetrics")
 		GetAddOnManager():RequestAddOnSavedVariablesPrioritySave("CombatMetricsFightData")
 		d("Save Requested: " .. CMX.name)
 		
@@ -2415,6 +2415,7 @@ local function updateCombatLog(panel)
 			CLSelection[logtype] 
 			or (logtype == LIBCOMBAT_EVENT_DAMAGE_SELF and (CLSelection[LIBCOMBAT_EVENT_DAMAGE_IN] or CLSelection[LIBCOMBAT_EVENT_DAMAGE_OUT])) 
 			or (logtype == LIBCOMBAT_EVENT_HEAL_SELF and (CLSelection[LIBCOMBAT_EVENT_HEAL_IN] or CLSelection[LIBCOMBAT_EVENT_HEAL_OUT])) 
+			or (logtype == LIBCOMBAT_EVENT_BOSSHP and (CLSelection[LIBCOMBAT_EVENT_MESSAGES]))
 		
 		if condition1 == true then
 		
@@ -2477,7 +2478,7 @@ local function updateCombatLog(panel)
 				
 				condition2 = powerType ~= POWERTYPE_HEALTH and (resourceSelection == nil or resourceSelection[abilityId or 0] ~= nil)
 				
-			elseif logtype == LIBCOMBAT_EVENT_PLAYERSTATS or logtype == LIBCOMBAT_EVENT_MESSAGES or logtype == LIBCOMBAT_EVENT_SKILL_TIMINGS then
+			elseif logtype == LIBCOMBAT_EVENT_PLAYERSTATS or logtype == LIBCOMBAT_EVENT_MESSAGES or logtype == LIBCOMBAT_EVENT_SKILL_TIMINGS or logtype == LIBCOMBAT_EVENT_BOSSHP then
 			
 				condition2 = true	
 				
@@ -2893,7 +2894,7 @@ local function ResourceAbsolute(powerType)
 
 	local logData = fightData.log
 	
-	local starttime = fightData.combatstart
+	local starttime = fightData.combatstart/1000
 
 	local XYData = {}
 	
@@ -2904,7 +2905,7 @@ local function ResourceAbsolute(powerType)
 	
 		if lineData[1] == LIBCOMBAT_EVENT_RESOURCES and lineData[5] == powerType and lineData[6] then 
 	
-			local deltatime = math.floor() - lineData[2]
+			local deltatime = math.floor(lineData[2]/1000 - starttime)
 			
 			if deltatime > x then 
 	
@@ -3294,6 +3295,21 @@ local CategoryStrings = {
 	
 }
 
+local ResourceFunctions = {
+
+	[1] = {label = SI_COMBAT_METRICS_ABSOLUTE, 	func = ResourceAbsolute},
+
+}
+
+local ResourceStrings = {
+
+	[1] = {label = SI_COMBAT_METRICS_HEALTH, 	powerType = POWERTYPE_HEALTH},
+	[2] = {label = SI_COMBAT_METRICS_MAGICKA, 	powerType = POWERTYPE_MAGICKA},
+	[3] = {label = SI_COMBAT_METRICS_STAMINA, 	powerType = POWERTYPE_STAMINA},
+	[4] = {label = SI_COMBAT_METRICS_ULTIMATE, 	powerType = POWERTYPE_ULTIMATE},
+	
+}
+
 local lastPlotSelector
 
 local function RemovePlotSelection()
@@ -3331,6 +3347,26 @@ function CMX.PlotSelectionMenu(selector)
 		local submenu = {}
 	
 		for id2, data2 in ipairs(MainCategoryFunctions) do
+		
+			local stringid2 = data2.label
+		
+			table.insert(submenu, {label = GetString(stringid2), callback = PlotFunctions[funcId]})
+			
+			funcId = funcId + 1
+			
+		end
+		
+		local stringid = data.label
+		
+		AddCustomSubMenuItem(GetString(stringid), submenu)
+	
+	end		
+	
+	for id, data in ipairs(ResourceStrings) do
+	
+		local submenu = {}
+	
+		for id2, data2 in ipairs(ResourceFunctions) do
 		
 			local stringid2 = data2.label
 		
@@ -3459,6 +3495,45 @@ local function initPlotWindow(plotWindow)
 				local basefunc = data2.func
 				
 				plot.func = function() return basefunc(category) end
+				
+				plot:Update()
+		
+			end
+			
+			PlotFunctions[funcId] = newFunc
+			
+			funcId = funcId + 1
+			
+		end	
+	end
+	
+	for id, data in ipairs(ResourceStrings) do
+	
+		for id2, data2 in ipairs(ResourceFunctions) do
+		
+			local resourceString = data.label
+			local powerType = data.powerType
+			
+			local labelString = data2.label
+		
+			local function newFunc()
+			
+				local selector = lastPlotSelector
+			
+				local control = selector:GetParent()
+				local id = control.id
+				
+				local label = control:GetNamedChild("Label")
+				
+				label:SetText(zo_strformat("<<1>>: <<2>>", GetString(resourceString), GetString(labelString)))
+				
+				local plotwindow = control:GetParent():GetParent():GetNamedChild("PlotWindow")
+				
+				local plot = plotwindow.plots[id]
+				
+				local basefunc = data2.func
+				
+				plot.func = function() return basefunc(powerType) end
 				
 				plot:Update()
 		

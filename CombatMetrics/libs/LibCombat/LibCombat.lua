@@ -44,6 +44,8 @@ local IdToReducedSlot = {}
 local lastskilluses = {}
 local isInShadowWorld = false	-- used to prevent fight reset in Cloudrest when using a portal.
 
+local lastBossHealthValue = 2
+
 -- types of callbacks: Units, DPS/HPS, DPS/HPS for Group, Logevents
 
 LIBCOMBAT_EVENT_MIN = 0
@@ -57,17 +59,18 @@ LIBCOMBAT_EVENT_DAMAGE_SELF = 6			-- LIBCOMBAT_EVENT_DAMAGE_SELF, timems, result
 LIBCOMBAT_EVENT_HEAL_OUT = 7			-- LIBCOMBAT_EVENT_HEAL_OUT, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType
 LIBCOMBAT_EVENT_HEAL_IN = 8				-- LIBCOMBAT_EVENT_HEAL_IN, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType
 LIBCOMBAT_EVENT_HEAL_SELF = 9			-- LIBCOMBAT_EVENT_HEAL_SELF, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType
-LIBCOMBAT_EVENT_EFFECTS_IN = 10			-- LIBCOMBAT_EVENT_EFFECTS_IN, timems, unitId, abilityId, changeType, effectType, stacks, sourceType
-LIBCOMBAT_EVENT_EFFECTS_OUT = 11		-- LIBCOMBAT_EVENT_EFFECTS_OUT, timems, unitId, abilityId, changeType, effectType, stacks, sourceType
-LIBCOMBAT_EVENT_GROUPEFFECTS_IN = 12	-- LIBCOMBAT_EVENT_GROUPEFFECTS_IN, timems, unitId, abilityId, changeType, effectType, stacks, sourceType
-LIBCOMBAT_EVENT_GROUPEFFECTS_OUT = 13	-- LIBCOMBAT_EVENT_GROUPEFFECTS_OUT, timems, unitId, abilityId, changeType, effectType, stacks, sourceType
+LIBCOMBAT_EVENT_EFFECTS_IN = 10			-- LIBCOMBAT_EVENT_EFFECTS_IN, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, effectSlot
+LIBCOMBAT_EVENT_EFFECTS_OUT = 11		-- LIBCOMBAT_EVENT_EFFECTS_OUT, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, effectSlot
+LIBCOMBAT_EVENT_GROUPEFFECTS_IN = 12	-- LIBCOMBAT_EVENT_GROUPEFFECTS_IN, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, effectSlot
+LIBCOMBAT_EVENT_GROUPEFFECTS_OUT = 13	-- LIBCOMBAT_EVENT_GROUPEFFECTS_OUT, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, effectSlot
 LIBCOMBAT_EVENT_PLAYERSTATS = 14		-- LIBCOMBAT_EVENT_PLAYERSTATS, timems, statchange, newvalue, statname
 LIBCOMBAT_EVENT_RESOURCES = 15			-- LIBCOMBAT_EVENT_RESOURCES, timems, abilityId, powerValueChange, powerType
 LIBCOMBAT_EVENT_MESSAGES = 16			-- LIBCOMBAT_EVENT_MESSAGES, timems, messageId, value
 LIBCOMBAT_EVENT_DEATH = 17				-- LIBCOMBAT_EVENT_DEATH, timems, unitId, abilityId
 LIBCOMBAT_EVENT_RESURRECTION = 18		-- LIBCOMBAT_EVENT_RESURRECTION, timems, unitId, self
 LIBCOMBAT_EVENT_SKILL_TIMINGS = 19		-- LIBCOMBAT_EVENT_SKILL_TIMINGS, timems, reducedslot, abilityId, status
-LIBCOMBAT_EVENT_MAX = 19
+LIBCOMBAT_EVENT_BOSSHP = 20				-- LIBCOMBAT_EVENT_BOSSHP, timems, bossId, currenthp, maxhp
+LIBCOMBAT_EVENT_MAX = 20
 
 -- Messages:
 
@@ -137,6 +140,8 @@ local strings = {
 	SI_LIBCOMBAT_LOG_FORMATSTRING14 = "<<1>> Your <<2>> <<3>> |cffffff<<4>>|r<<5>>.",  -- buff, i.e. "[0.0s] Weaponpower increased to 1800 (+100)". <<1>> = timeString, <<2>> = stat, <<3>> = changeText,  <<4>> = value, <<5>> = changeValueText
 	
 	SI_LIBCOMBAT_LOG_FORMATSTRING15 = "<<1>> |cffffffYou|r <<2>> <<3>> <<4>> <<5>>.",  -- resource, i.e. "[0.0s] You gained 200 Magicka (Base Regeneration)" <<1>> = timeString, <<2>> = changeTypeString, <<3>> = amount,  <<4>> = resource, <<5>> = ability
+	
+	SI_LIBCOMBAT_LOG_FORMATSTRING20 = "<<1>> |cffffff<<2>>:|r <<3>>% HP. (<<4>>/<<5>>)",  -- resource, i.e. "[0.0s] You gained 200 Magicka (Base Regeneration)" <<1>> = timeString, <<2>> = changeTypeString, <<3>> = amount,  <<4>> = resource, <<5>> = ability
 
 	SI_LIBCOMBAT_LOG_FORMATSTRING_SKILLS1 = "<<1>> You cast <<2>>.", -- skill used, i.e. "[0.0s] You used Puncturing Sweeps. (<<1>> = timestring, <<2>> = Ability)
 	SI_LIBCOMBAT_LOG_FORMATSTRING_SKILLS2 = "<<1>> You start to cast <<2>>.", -- skill used, i.e. "[0.0s] You start to cast Solar Barrage. (<<1>> = timestring, <<2>> = Ability)
@@ -450,13 +455,20 @@ function UnitHandler:Initialize(name, id, unitType)
 	
 	if name~=nil and id~=nil and (unitType~=COMBAT_UNIT_TYPE_PLAYER or unitType~=COMBAT_UNIT_TYPE_PLAYER_PET or unitType~=COMBAT_UNIT_TYPE_GROUP) then
 	
-		self.bossId = data.bossnames[zo_strformat(SI_UNIT_NAME,name)]		-- if this is a boss, add the id (e.g. 1 for unitTag == "boss1")
 		name = zo_strformat(SI_UNIT_NAME,(name or ""))
 		
+		local bossId = data.bossnames[name]		-- if this is a boss, add the id (e.g. 1 for unitTag == "boss1")
+		
+		if bossId then
+			
+			self.bossId = bossId
+			currentfight.bosses[bossId] = id
+			
+		end
 	end 
 	
-	self.name = name				-- name
-	self.unitType = unitType		-- type of unit: group, pet or boss
+	self.name = name					-- name
+	self.unitType = unitType			-- type of unit: group, pet or boss
 	self.isFriendly = false
 	self.damageOutTotal = 0
 	self.groupDamageOut  = 0
@@ -506,6 +518,7 @@ function FightHandler:Initialize()
 	self.group = data.inGroup
 	self.stats = {}
 	self.playerid = data.playerid
+	self.bosses = {}
 end
 
 local function Print(message, ...)
@@ -564,7 +577,7 @@ local function GetPlayerBuffs(timems)
 	
 		-- buffName, timeStarted, timeEnding, buffSlot, stackCount, iconFilename, buffType, effectType, abilityType, statusEffectType, abilityId, canClickOff, castByPlayer
 	
-		local _, _, endTime, _, stackCount, _, _, effectType, abilityType, _, abilityId, _, castByPlayer = GetUnitBuffInfo("player",i)
+		local _, _, endTime, buffSlot, stackCount, _, _, effectType, abilityType, _, abilityId, _, castByPlayer = GetUnitBuffInfo("player",i)
 		
 		local unitType = castByPlayer and COMBAT_UNIT_TYPE_PLAYER or COMBAT_UNIT_TYPE_NONE
 		
@@ -574,7 +587,7 @@ local function GetPlayerBuffs(timems)
 		
 		if abilityType == 5 and endTime > 0 and (not BadAbility[abilityId]) then 
 					
-			lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_EFFECTS_IN), LIBCOMBAT_EVENT_EFFECTS_IN, newtime, playerid, abilityId, EFFECT_RESULT_GAINED, effectType, stacks, unitType)
+			lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_EFFECTS_IN), LIBCOMBAT_EVENT_EFFECTS_IN, newtime, playerid, abilityId, EFFECT_RESULT_GAINED, effectType, stacks, unitType, buffSlot)
 			--timems, unitId, abilityId, changeType, effectType, stacks, sourceType
 			
 		end
@@ -801,7 +814,10 @@ function FightHandler:PrepareFight()
 		self.stats = {}
 		self.startBar = data.bar
 		GetCurrentSkillBars()
-		self:GetNewStats(timems)		
+		self:GetNewStats(timems)	
+		
+		lastBossHealthValue = 2
+		
 	end	
 	
 	em:RegisterForUpdate("LibCombat_update", 500, function() self:onUpdate() end)
@@ -1125,7 +1141,7 @@ end
 
 function FightHandler:onUpdate()
 	--reset data
-	if reset == true or (IsUnitDeadOrReincarnating("player")==false and data.inCombat==false and self.combatend>0 and (GetGameTimeMilliseconds() > (self.combatend + timeout)) ) then
+	if reset == true or (data.inCombat==false and self.combatend>0 and (GetGameTimeMilliseconds() > (self.combatend + timeout)) ) then
 	
 		reset = false	
 		
@@ -1207,8 +1223,8 @@ end
 
 local function onBossesChanged(_) -- Detect Bosses
 
-	data.bosses=0
-	data.bossnames={}
+	data.bosses = 0
+	data.bossnames = {}
 	
 	for i = 1, 12 do
 	
@@ -1220,7 +1236,7 @@ local function onBossesChanged(_) -- Detect Bosses
 			
 			local name = zo_strformat(SI_UNIT_NAME, GetUnitName(unitTag))
 			
-			data.bossnames[name] = true
+			data.bossnames[name] = i
 			currentfight.bossfight = true
 			
 		else return
@@ -1239,9 +1255,9 @@ local GROUP_EFFECT_OUT = 2
 
 local lastPurge = 0
 
-local function AddtoEffectBuffer(eventid, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, endTime)
+local function AddtoEffectBuffer(eventid, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, buffSlot, endTime)
 
-	local data = {endTime, {eventid, timems, unitId, abilityId, changeType, effectType, stacks, sourceType}}
+	local data = {endTime, {eventid, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, buffSlot}}
 	
 	local unit = EffectBuffer[unitId]
 
@@ -1270,13 +1286,13 @@ local function onShadowWorld( _, changeType)
 	
 end
 
-local function onMageExplode( _, changeType, _, _, unitTag, _, endTime, stackCount, _, _, effectType, abilityType, _, unitName, unitId, abilityId, sourceType)
+local function onMageExplode( _, changeType, effectSlot, _, unitTag, _, endTime, stackCount, _, _, effectType, abilityType, _, unitName, unitId, abilityId, sourceType)
 
 	currentfight:ResetFight()	-- special tracking for The Mage in Aetherian Archives. It will reset the fight when the mage encounter starts.
 
 end
 
-local function BuffEventHandler(isspecial, groupeffect, _, changeType, _, _, unitTag, _, endTime, stackCount, _, _, effectType, abilityType, _, unitName, unitId, abilityId, sourceType)
+local function BuffEventHandler(isspecial, groupeffect, _, changeType, effectSlot, _, unitTag, _, endTime, stackCount, _, _, effectType, abilityType, _, unitName, unitId, abilityId, sourceType)
 
 	if BadAbility[abilityId] == true then return end
 
@@ -1298,13 +1314,13 @@ local function BuffEventHandler(isspecial, groupeffect, _, changeType, _, _, uni
 	
 	if inCombat ~= true and unitTag ~= "player" and (changeType == EFFECT_RESULT_GAINED or changeType == EFFECT_RESULT_UPDATED) then
 	
-		AddtoEffectBuffer(eventid, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, endTime)
+		AddtoEffectBuffer(eventid, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, effectSlot, endTime)
 		return 
 		
 	elseif inCombat == true then 
 	
 		if unitTag == "player" then currentfight:GetNewStats(timems) end
-		lib.cm:FireCallbacks(("LibCombat"..eventid), eventid, timems, unitId, abilityId, changeType, effectType, stacks, sourceType)
+		lib.cm:FireCallbacks(("LibCombat"..eventid), eventid, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, effectSlot)
 		
 	end
 end
@@ -1875,6 +1891,25 @@ local function onAbilityFinished(eventCode, result, isError, abilityName, abilit
 	end
 end
 
+
+-- * EVENT_POWER_UPDATE (*string* _unitTag_, *luaindex* _powerIndex_, *[CombatMechanicType|#CombatMechanicType]* _powerType_, *integer* _powerValue_, *integer* _powerMax_, *integer* _powerEffectiveMax_)
+
+local function onBossHealthChanged(eventid, unitTag, _, powerType, powerValue, powerMax, powerEffectiveMax)
+
+	local timems = GetGameTimeMilliseconds()
+	
+	local BossHealthValue = zo_round(powerValue / powerMax * 100)
+	
+	if BossHealthValue == lastBossHealthValue then return end
+
+	lastBossHealthValue = BossHealthValue	
+	
+	local bossId = tonumber(string.match(unitTag, "boss(%d+)"))
+	
+	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_BOSSHP), LIBCOMBAT_EVENT_BOSSHP, timems, bossId, powerValue, powerMax)
+	
+end
+
 local function UpdateEventRegistrations()
 
 	for _,Eventgroup in pairs(Events) do
@@ -2309,6 +2344,14 @@ Events.Skills = EventHandler:New(
 	end
 )
 
+Events.BossHP = EventHandler:New(
+	{LIBCOMBAT_EVENT_BOSSHP},
+	function (self)
+		self:RegisterEvent(EVENT_POWER_UPDATE, onBossHealthChanged, REGISTER_FILTER_UNIT_TAG, "boss1", REGISTER_FILTER_POWER_TYPE, POWERTYPE_HEALTH)
+		self.active = true
+	end
+)
+
 local statnames = {
 	["spellpower"]		= "|c8888ff"..GetString(SI_DERIVEDSTATS25).."|r ", 							--|c8888ff blue
 	["spellcrit"]		= "|c8888ff"..GetString(SI_DERIVEDSTATS23).."|r ",
@@ -2603,6 +2646,20 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 		color = {.9,.8,.7}
 		
 		text = ZO_CachedStrFormat(stringFormat, timeString, name)
+		
+	elseif logtype == LIBCOMBAT_EVENT_BOSSHP then
+	
+		local _, _, bossId, currenthp, maxhp = unpack(logline)	
+		
+		local unitId = fight.bosses[bossId]		
+		
+		local bossName = units[unitId].name
+		
+		local percent = zo_round(currenthp/maxhp * 100)
+		
+		color = {.7,.7,.7}
+		
+		text = ZO_CachedStrFormat(stringFormat, timeString, bossName, percent, currenthp, maxhp)
 		
 	end
 

@@ -37,9 +37,9 @@ local function Encode(line, layout)
 
 	local logstringdata = {}
 
-	for i,value in ipairs(line) do
+	for i, size in ipairs(layout) do
 	
-		GetChar(value, logstringdata, layout[i]) 
+		GetChar(line[i], logstringdata, size) 
 		
 	end
 	

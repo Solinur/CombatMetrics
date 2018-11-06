@@ -24,7 +24,8 @@
 	
 -- Ingame (Use ZOS Tranlations, change only for languages which are not supported)
 
-	SI_COMBAT_METRICS_MAGICKA = GetString(SI_COMBATMECHANICTYPE0),  -- Magicka 
+	SI_COMBAT_METRICS_HEALTH = GetString(SI_ATTRIBUTES1),  -- Health 
+	SI_COMBAT_METRICS_MAGICKA = GetString(SI_ATTRIBUTES2),  -- Magicka 
 	SI_COMBAT_METRICS_STAMINA = GetString(SI_ATTRIBUTES3),  -- Stamina 
 	SI_COMBAT_METRICS_ULTIMATE = GetString(SI_COMBATMECHANICTYPE10),  -- Ultimate 
 
@@ -276,7 +277,7 @@
 
 	SI_COMBAT_METRICS_MENU_RESPEN_NAME = "Resistance and Penetration",  -- Live Report Window NEW
 	SI_COMBAT_METRICS_MENU_CRUSHER = "Crusher",  -- Crusher NEW
-	SI_COMBAT_METRICS_MENU_CRUSHER_TOOLTIP = "Resistance reduction due to debuff from Crusher glyph. For maxlevel gold glyph: standard: 1622, infused: 2108",  -- Resistance reduction due to debuff from Crusher glyph. For maxlevel gold glyph: standard: 1622, infused: 1946 NEW
+	SI_COMBAT_METRICS_MENU_CRUSHER_TOOLTIP = "Resistance reduction due to debuff from Crusher glyph. For maxlevel gold glyph: standard: 1622, infused: 2108, infused + Torug's: 2740",  -- Resistance reduction due to debuff from Crusher glyph. For maxlevel gold glyph: standard: 1622, infused: 1946 NEW
 	SI_COMBAT_METRICS_MENU_MOBRESISTANCE = "Target resistance",  -- Target Resistance NEW
 	SI_COMBAT_METRICS_MENU_MOBRESISTANCE_TOOLTIP = "Target resistance that is assumed for overpenetration calculation",  -- Target resistance that is assumed for overpenetration calculation NEW
 	

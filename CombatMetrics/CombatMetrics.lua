@@ -1040,8 +1040,9 @@ ProcessLog[LIBCOMBAT_EVENT_HEAL_SELF] = ProcessLogHealSelf
 
 -- Buffs/Debuffs
 
-local function ProcessLogEffects(fight, callbacktype, timems, unitId, abilityId, changeType, effectType, stacks, sourceType)
-	if timems < (fight.combatstart-500) or fight.units[unitId] == nil then return end
+local function ProcessLogEffects(fight, callbacktype, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, slotId)
+
+	if timems < (fight.combatstart - 500) or fight.units[unitId] == nil then return end
 	
 	local unit = fight:AcquireUnitData(unitId)
 	local effectdata = unit:AcquireEffectData(abilityId, effectType, stacks)
@@ -1051,6 +1052,8 @@ local function ProcessLogEffects(fight, callbacktype, timems, unitId, abilityId,
 		if sourceType == COMBAT_UNIT_TYPE_PLAYER or sourceType == COMBAT_UNIT_TYPE_PLAYER_PET then 
 		
 			effectdata.lastgain = math.max(effectdata.lastgain or timems, fight.starttime)
+			
+			if abilityId == 113417 or abilityId == 113382 then effectdata.lastslot = slotId end
 			
 		elseif effectdata.lastgain ~= nil then	-- treat this as if the player effect stopped, the group timer will continue though. 
 		
@@ -1067,8 +1070,14 @@ local function ProcessLogEffects(fight, callbacktype, timems, unitId, abilityId,
 		for i = 1, stacks do
 		
 			local effectdata = unit:AcquireEffectData(abilityId, effectType, i)
+			
+			local ignore
+			
+			if (abilityId == 113417 or abilityId == 113382) and slotId ~= effectdata.lastslot then
+			
+				ignore = true
 		
-			if timems <= fight.starttime and (effectdata.lastgain ~= nil or effectdata.groupLastGain ~= nil) then
+			elseif timems <= fight.starttime and (effectdata.lastgain ~= nil or effectdata.groupLastGain ~= nil) then
 			
 				effectdata.count = 0
 				effectdata.uptime = 0
@@ -1083,7 +1092,7 @@ local function ProcessLogEffects(fight, callbacktype, timems, unitId, abilityId,
 				
 			end
 			
-			if effectdata.groupLastGain ~= nil then 
+			if effectdata.groupLastGain ~= nil and not ignore then 
 				
 				effectdata.groupUptime = effectdata.groupUptime + (math.min(timems,fight.endtime) - effectdata.groupLastGain)
 				effectdata.groupLastGain = nil
@@ -1257,6 +1266,8 @@ local function ProcessMessages(fight, callbacktype, timems, messageId, value)
 end
 
 ProcessLog[LIBCOMBAT_EVENT_MESSAGES] = ProcessMessages
+
+ProcessLog[LIBCOMBAT_EVENT_BOSSHP] = function() end
 
 --]]
 
@@ -1661,8 +1672,8 @@ local function CheckNumberOfFights()
 		end
 		
 		table.remove(lastfights, fighttodelete)
+		
 	end
-
 end 
 
 local function GetFightName(fight)
@@ -1747,7 +1758,7 @@ local function UpdateEvents()
 	
 		if newstatus == CMX_STATUS_DISABLED then
 		
-			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_SKILL_TIMINGS do
+			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_BOSSHP do
 				LC:UnregisterCallbackType(i, AddToLog, CMX.name)
 			end
 			
@@ -1757,7 +1768,7 @@ local function UpdateEvents()
 	
 		elseif newstatus == CMX_STATUS_LIGHTMODE then 
 		
-			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_SKILL_TIMINGS do
+			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_BOSSHP do
 				LC:UnregisterCallbackType(i, AddToLog, CMX.name)
 			end
 			
@@ -1768,7 +1779,7 @@ local function UpdateEvents()
 			
 		elseif newstatus == CMX_STATUS_ENABLED then 
 		
-			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_SKILL_TIMINGS do
+			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_BOSSHP do
 			
 				LC:RegisterCallbackType(i, AddToLog ,CMX.name)
 				
