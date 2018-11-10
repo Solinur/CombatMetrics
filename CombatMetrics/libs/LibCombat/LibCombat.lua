@@ -14,7 +14,7 @@ Idea: Life and Death
 local _
 
 --Register with LibStub
-local MAJOR, MINOR = "LibCombat", 11
+local MAJOR, MINOR = "LibCombat", 12
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end --the same or newer version of this lib is already loaded into memory
 
@@ -201,7 +201,6 @@ local CustomAbilityIcon = {
 }
 
 local AbilityNameCache = {}
-local AbilityIconCache = {}
 
 local function GetFormattedAbilityName(id)
 
@@ -221,6 +220,8 @@ local function GetFormattedAbilityName(id)
 end
 
 lib.GetFormattedAbilityName = GetFormattedAbilityName
+
+local AbilityIconCache = {}
 
 local function GetFormattedAbilityIcon(id)
 
