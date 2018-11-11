@@ -305,4 +305,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 0.8.2.11 1,113,154 (10.11.2018) 21:23
 [*] Added a temporary workaround for Spell Strategist. The uptime that is shown refers to the time when at least one buff/debuff is active. Since the buff can overlap with itself (for double bonus) briefly, the theoretical possible uptime would be above 100% (for mre on this see here: https://forums.elderscrollsonline.com/en/discussion/443636/spell-strategist-stacking-when-soloing-a-single-target-bug-or-feature.
 [*] Updated French localization. Thanks to @Floliroy
-[*] Updated libraries and changed the way they are loaded. They are still embedded, but need to be activated in the addon list ingame. This requires to check the "Allow out of date add-ons" box.
+[*] Updated libraries and changed the way they are loaded. They are still embedded, but need to be activated in the addon list ingame. This requires to check the "Allow out of date add-ons" box.0.8.2.11 1,113,154 (10.11.2018) 21:23
+
+0.8.2.12 1,120,978 (11.11.2018) 11:23
+[*] Fixed an issue with the new library format introduced in last patch. Sorry for the inconvenience.

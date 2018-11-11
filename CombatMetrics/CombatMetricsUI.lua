@@ -2840,8 +2840,6 @@ local function Accumulate(category)
 		end
 	end
 	
-	ACCDATA = XYData
-	
 	return XYData, COMBAT_METRICS_YAXIS_LEFT
 end
 
@@ -2920,13 +2918,60 @@ local function ResourceAbsolute(powerType)
 	
 	local key = powerTypeKeyTable[powerType]
 	
-	local maxValue = fightData.stats[key]
+	local maxValue = powerType == POWERTYPE_ULTIMATE and 500 or fightData.stats[key]
 	
 	for i, xyData in ipairs(XYData) do
 	
 		xyData[2] = xyData[2]/maxValue
 	
 	end
+	
+	return XYData, COMBAT_METRICS_YAXIS_RIGHT
+end
+
+local function BossHPAbsolute()
+
+	d("BossHP Start")
+
+	local logData = fightData.log
+	
+	local starttime = fightData.combatstart/1000
+
+	local XYData = {}
+	
+	local x	= -1
+	local y
+	
+	local maxhp = 0
+	
+	for line, lineData in ipairs(logData) do
+	
+		if lineData[1] == LIBCOMBAT_EVENT_BOSSHP then 
+	
+			local deltatime = math.floor(lineData[2]/1000 - starttime)
+			
+			maxhp = math.max(lineData[5], maxhp)
+			
+			if deltatime > x then 			
+	
+				local x = deltatime
+				
+				local y = lineData[4]
+				
+				df("BossHP: %d/%d", x, y)
+				
+				table.insert(XYData, {x, y})
+			end			
+		end
+	end
+	
+	for i, xyData in ipairs(XYData) do
+	
+		xyData[2] = xyData[2]/maxhp
+	
+	end
+	
+	BossData = XYData
 	
 	return XYData, COMBAT_METRICS_YAXIS_RIGHT
 end
@@ -3295,11 +3340,11 @@ local CategoryStrings = {
 	
 }
 
-local ResourceFunctions = {
+--[[local ResourceFunctions = {
 
 	[1] = {label = SI_COMBAT_METRICS_ABSOLUTE, 	func = ResourceAbsolute},
 
-}
+}--]]
 
 local ResourceStrings = {
 
@@ -3364,7 +3409,11 @@ function CMX.PlotSelectionMenu(selector)
 	
 	for id, data in ipairs(ResourceStrings) do
 	
-		local submenu = {}
+		AddCustomMenuItem(GetString(data.label), PlotFunctions[funcId])
+		
+		funcId = funcId + 1
+		
+		--[[local submenu = {}
 	
 		for id2, data2 in ipairs(ResourceFunctions) do
 		
@@ -3378,9 +3427,12 @@ function CMX.PlotSelectionMenu(selector)
 		
 		local stringid = data.label
 		
-		AddCustomSubMenuItem(GetString(stringid), submenu)
+		AddCustomSubMenuItem(GetString(stringid), submenu)--]]
 	
-	end		
+	end	
+
+	AddCustomMenuItem(GetString(SI_COMBAT_METRICS_BOSS_HP), PlotFunctions[funcId])
+	funcId = funcId + 1
 	
 	ShowMenu(selector)
 	AnchorMenu(selector)
@@ -3443,6 +3495,33 @@ local function InitXYPlot(plotWindow, id)
 	return newPlot
 end
 	
+local function getCustomMenuFunction(basefunc, parameter, labelString)
+
+	local function newFunc()
+			
+		local selector = lastPlotSelector
+	
+		local control = selector:GetParent()
+		local id = control.id
+		
+		local label = control:GetNamedChild("Label")
+		
+		label:SetText(labelString)
+		
+		local plotwindow = control:GetParent():GetParent():GetNamedChild("PlotWindow")
+		
+		local plot = plotwindow.plots[id]
+		
+		plot.func = function() return basefunc(parameter) end
+		
+		plot:Update()
+
+	end
+	
+	return newFunc
+	
+end
+	
 local function initPlotWindow(plotWindow)
 	
 	plotWindow.MapValue = MapValue
@@ -3475,32 +3554,9 @@ local function initPlotWindow(plotWindow)
 			local categoryString = data.label
 			local category = data.category
 			
-			local labelString = data2.label
-		
-			local function newFunc()
+			local labelString = zo_strformat("<<1>>: <<2>>", GetString(categoryString), GetString(data2.label))
 			
-				local selector = lastPlotSelector
-			
-				local control = selector:GetParent()
-				local id = control.id
-				
-				local label = control:GetNamedChild("Label")
-				
-				label:SetText(zo_strformat("<<1>>: <<2>>", GetString(categoryString), GetString(labelString)))
-				
-				local plotwindow = control:GetParent():GetParent():GetNamedChild("PlotWindow")
-				
-				local plot = plotwindow.plots[id]
-				
-				local basefunc = data2.func
-				
-				plot.func = function() return basefunc(category) end
-				
-				plot:Update()
-		
-			end
-			
-			PlotFunctions[funcId] = newFunc
+			PlotFunctions[funcId] = getCustomMenuFunction(basefunc, category, labelString)
 			
 			funcId = funcId + 1
 			
@@ -3508,44 +3564,22 @@ local function initPlotWindow(plotWindow)
 	end
 	
 	for id, data in ipairs(ResourceStrings) do
-	
-		for id2, data2 in ipairs(ResourceFunctions) do
 		
-			local resourceString = data.label
-			local powerType = data.powerType
-			
-			local labelString = data2.label
+		local resourceString = data.label
+		local powerType = data.powerType
 		
-			local function newFunc()
-			
-				local selector = lastPlotSelector
-			
-				local control = selector:GetParent()
-				local id = control.id
-				
-				local label = control:GetNamedChild("Label")
-				
-				label:SetText(zo_strformat("<<1>>: <<2>>", GetString(resourceString), GetString(labelString)))
-				
-				local plotwindow = control:GetParent():GetParent():GetNamedChild("PlotWindow")
-				
-				local plot = plotwindow.plots[id]
-				
-				local basefunc = data2.func
-				
-				plot.func = function() return basefunc(powerType) end
-				
-				plot:Update()
+		local labelString = GetString(resourceString)
 		
-			end
-			
-			PlotFunctions[funcId] = newFunc
-			
-			funcId = funcId + 1
-			
-		end	
+		PlotFunctions[funcId] = getCustomMenuFunction(ResourceAbsolute, powerType, labelString)
+		
+		funcId = funcId + 1
+		
 	end
 	
+	PlotFunctions[funcId] = getCustomMenuFunction(BossHPAbsolute, nil, GetString(SI_COMBAT_METRICS_BOSS_HP))
+		
+	funcId = funcId + 1
+
 	for id = 1,5 do
 	
 		plotWindow:InitXYPlot(id)
