@@ -146,6 +146,7 @@ local LAYOUT_STATS = 14
 local LAYOUT_POWER = 15
 local LAYOUT_MESSAGE = 16
 local LAYOUT_SKILL = 19
+local LAYOUT_BOSSHP = 20
 
 local logTypeToLayout = {
 
@@ -163,17 +164,19 @@ local logTypeToLayout = {
 	[15] = LAYOUT_POWER,
 	[16] = LAYOUT_MESSAGE,
 	[19] = LAYOUT_SKILL,
+	[20] = LAYOUT_BOSSHP,
 	
 }
 	
 local layouts = {
 
 	[LAYOUT_COMBAT] = {1, 4, 1, 2, 2, 3, 4, 1}, 		-- (19) type, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType
-	[LAYOUT_EVENT] = {1, 4, 2, 3, 1, 1, 1, 1},			-- (15) type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType
+	[LAYOUT_EVENT] = {1, 4, 2, 3, 1, 1, 1, 1, 4},		-- (19) type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, slot
 	[LAYOUT_STATS] = {1, 4, 4, 4, 1},		 			-- (15) type, timems, statchange, newvalue, statname
 	[LAYOUT_POWER] = {1, 4, 3, 3, 1, 3},		 		-- (13) type, timems, abilityId, powerValueChange, powerType, powerValue
-	[LAYOUT_MESSAGE] = {1, 4, 1, 1}, 					-- (7)  type, timems, messageId (e.g. "weapon swap"), bar
+	[LAYOUT_MESSAGE] = {1, 4, 1, 1}, 					-- (8)  type, timems, messageId (e.g. "weapon swap"), bar
 	[LAYOUT_SKILL] = {1, 4, 1, 3, 1}, 					-- (11) type, timems, reducedslot, abilityId, status
+	[LAYOUT_BOSSHP] = {1, 4, 1, 5, 5}, 					-- (17) type, timems, bossId, currenthp, maxhp
 }
 
 local layoutsize = {} -- get total sizes of layouts
@@ -231,7 +234,7 @@ local function encodeCombatLogLine(line, unitConversion)
 	
 		line[4] = line[4] or 0
 		
-	elseif layoutId ~= LAYOUT_MESSAGE and layoutId ~= LAYOUT_SKILL then 
+	elseif layoutId ~= LAYOUT_SKILL and layoutId ~= LAYOUT_BOSSHP then 
 
 		return
 	
@@ -293,7 +296,7 @@ local function decodeCombatLogLine(line)
 	
 		logdata[4] = logdata[4] or 0
 
-	elseif layoutId ~= LAYOUT_SKILL then					-- type, timems, message (e.g. "weapon swap")
+	elseif layoutId ~= LAYOUT_SKILL and layoutId ~= LAYOUT_BOSSHP then					-- type, timems, message (e.g. "weapon swap")
 
 		return
 	
@@ -453,6 +456,14 @@ local function reduceUnitIds(fight)
 		if unit.unitType == 1 then fight.playerid = newId end
 		
 		newId = newId + 1		
+		
+	end
+	
+	local bosses = fight.bosses 
+	
+	for id, boss in pairs(bosses) do
+		
+		bosses[id] = unitConversion[bosses[id]]
 		
 	end
 	

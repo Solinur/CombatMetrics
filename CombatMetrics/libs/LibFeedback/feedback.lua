@@ -172,7 +172,7 @@ function LibFeedback:initializeFeedbackWindow(parentAddonNameSpace, parentAddonN
 	for i = 1, #buttonInfo do
 
 		buttons[#buttons+1] =  createFeedbackButton(feedbackWindow:GetName().."Button"..#buttons, feedbackWindow, feedbackWindowButtonWidth, feedbackWindowButtonHeight)
-		buttons[i]:SetAnchor(BOTTOMLEFT, feedbackWindow, BOTTOMLEFT, (i-1)*(feedbackWindowButtonWidth)+10,-10)
+		buttons[i]:SetAnchor(BOTTOM, feedbackWindow, BOTTOMLEFT, (i-1)*feedbackWindowHeight+70,-10)
         local buttonData = buttonInfo[i]
         if buttonData ~= nil then
             local amount

@@ -2931,8 +2931,6 @@ end
 
 local function BossHPAbsolute()
 
-	d("BossHP Start")
-
 	local logData = fightData.log
 	
 	local starttime = fightData.combatstart/1000
@@ -2957,8 +2955,6 @@ local function BossHPAbsolute()
 				local x = deltatime
 				
 				local y = lineData[4]
-				
-				df("BossHP: %d/%d", x, y)
 				
 				table.insert(XYData, {x, y})
 			end			
@@ -3555,6 +3551,8 @@ local function initPlotWindow(plotWindow)
 			local category = data.category
 			
 			local labelString = zo_strformat("<<1>>: <<2>>", GetString(categoryString), GetString(data2.label))
+			
+			local basefunc = data2.func
 			
 			PlotFunctions[funcId] = getCustomMenuFunction(basefunc, category, labelString)
 			
