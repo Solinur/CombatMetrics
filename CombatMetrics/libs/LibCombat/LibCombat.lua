@@ -2511,7 +2511,7 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 		
 	elseif logtype == LIBCOMBAT_EVENT_EFFECTS_IN or logtype == LIBCOMBAT_EVENT_EFFECTS_OUT or logtype == LIBCOMBAT_EVENT_GROUPEFFECTS_IN or logtype == LIBCOMBAT_EVENT_GROUPEFFECTS_OUT then 
 	
-		local _, _, unitId, abilityId, changeType, effectType, _, sourceType = unpack(logline)
+		local _, _, unitId, abilityId, changeType, effectType, _, sourceType, slot = unpack(logline)
 		
 		if units[unitId] == nil then return end
 		
@@ -2520,6 +2520,8 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 		local changeTypeString = (changeType == EFFECT_RESULT_GAINED or changeType == EFFECT_RESULT_UPDATED) and GetString(SI_LIBCOMBAT_LOG_GAINED) or changeType == EFFECT_RESULT_FADED and GetString(SI_LIBCOMBAT_LOG_LOST) 
 
 		local source = UnitTypeString[sourceType] == nil and "" or ZO_CachedStrFormat(" from <<1>>", UnitTypeString[sourceType])
+		
+		-- if dev and slot then source = ZO_CachedStrFormat("<<1>> (<<2>>)", source, slot) end
 		
 		local colorKey = effectType == BUFF_EFFECT_TYPE_DEBUFF and "debuff" or "buff"
 		

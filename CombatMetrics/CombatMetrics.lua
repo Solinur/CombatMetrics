@@ -1,5 +1,3 @@
--- aliases
-
 local wm = GetWindowManager()
 local em = GetEventManager()
 local _
@@ -1051,19 +1049,19 @@ local function ProcessLogEffects(fight, callbacktype, timems, unitId, abilityId,
 	
 		if sourceType == COMBAT_UNIT_TYPE_PLAYER or sourceType == COMBAT_UNIT_TYPE_PLAYER_PET then 
 		
-			effectdata.lastgain = math.max(effectdata.lastgain or timems, fight.starttime)
+			effectdata.lastGain = math.max(effectdata.lastGain or timems, fight.starttime)
+			effectdata.lastSlot = slotId
 			
-			if abilityId == 113417 or abilityId == 113382 then effectdata.lastslot = slotId end
-			
-		elseif effectdata.lastgain ~= nil then	-- treat this as if the player effect stopped, the group timer will continue though. 
+		--[[elseif effectdata.lastGain ~= nil then	-- treat this as if the player effect stopped, the group timer will continue though. 
 		
-			effectdata.uptime = effectdata.uptime + (math.min(timems, fight.endtime) - effectdata.lastgain)	
-			effectdata.lastgain = nil
-			effectdata.count = effectdata.count + 1
+			effectdata.uptime = effectdata.uptime + (math.min(timems, fight.endtime) - effectdata.lastGain)	
+			effectdata.lastGain = nil
+			effectdata.count = effectdata.count + 1]]
 			
 		end
 		
-		effectdata.groupLastGain = math.max(effectdata.groupLastGain or timems, fight.starttime)	
+		effectdata.groupLastGain = math.max(effectdata.groupLastGain or timems, fight.starttime)
+		effectdata.groupLastSlot = slotId		
 		
 	elseif changeType == EFFECT_RESULT_FADED then
 		
@@ -1071,28 +1069,22 @@ local function ProcessLogEffects(fight, callbacktype, timems, unitId, abilityId,
 		
 			local effectdata = unit:AcquireEffectData(abilityId, effectType, i)
 			
-			local ignore
+			if timems <= fight.starttime and (effectdata.lastGain ~= nil or effectdata.groupLastGain ~= nil) then
 			
-			if (abilityId == 113417 or abilityId == 113382) and slotId ~= effectdata.lastslot then
-			
-				ignore = true
-		
-			elseif timems <= fight.starttime and (effectdata.lastgain ~= nil or effectdata.groupLastGain ~= nil) then
-			
-				effectdata.count = 0
-				effectdata.uptime = 0
-				effectdata.lastgain = nil
-				effectdata.groupLastGain = nil
+				if slotId == effectdata.lastSlot then effectdata.lastGain = nil end
+				if slotId == effectdata.groupLastSlot then effectdata.groupLastGain = nil end
 				
-			elseif effectdata.lastgain ~= nil then
-			
-				effectdata.uptime = effectdata.uptime + (math.min(timems,fight.endtime) - effectdata.lastgain)
-				effectdata.lastgain = nil
+			end
+				
+			if effectdata.lastGain ~= nil and slotId == effectdata.lastSlot and (sourceType == COMBAT_UNIT_TYPE_PLAYER or sourceType == COMBAT_UNIT_TYPE_PLAYER_PET) then
+				
+				effectdata.uptime = effectdata.uptime + (math.min(timems,fight.endtime) - effectdata.lastGain)
+				effectdata.lastGain = nil
 				effectdata.count = effectdata.count + 1
 				
 			end
 			
-			if effectdata.groupLastGain ~= nil and not ignore then 
+			if effectdata.groupLastGain ~= nil and slotId == effectdata.groupLastSlot and not ignore then 
 				
 				effectdata.groupUptime = effectdata.groupUptime + (math.min(timems,fight.endtime) - effectdata.groupLastGain)
 				effectdata.groupLastGain = nil
@@ -1313,10 +1305,10 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 			
 				for k,effectdata in pairs(unitCalc.buffs) do	-- finish buffs
 				
-					if effectdata.lastgain ~= nil and fight.starttime ~= 0 then 
+					if effectdata.lastGain ~= nil and fight.starttime ~= 0 then 
 					
-						effectdata.uptime = effectdata.uptime + (fight.endtime - effectdata.lastgain)   -- todo: maybe limit it to combattime... 
-						effectdata.lastgain = nil
+						effectdata.uptime = effectdata.uptime + (fight.endtime - effectdata.lastGain)   -- todo: maybe limit it to combattime... 
+						effectdata.lastGain = nil
 						effectdata.count = effectdata.count + 1
 						
 					end

@@ -2260,7 +2260,8 @@
 					
 						<Control name="$(parent)Graph" inherits="CombatMetrics_ControlFramed" hidden="true" mouseEnabled="true">
 							
-							<AnchorFill/>
+							<Anchor point="TOPLEFT" relativeTo="$(parent)_MainPanel"/>
+							<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)_MainPanel"/>
 						
 							<Controls>
 							
@@ -2269,7 +2270,7 @@
 									<Anchor point="TOPLEFT" offsetX="4" offsetY="4"/>
 									<Anchor point="BOTTOMLEFT" offsetX="4" offsetY="-4"/>
 									
-									<Dimensions x="128"/>
+									<Dimensions x="140"/>
 								
 									<Controls>
 										
@@ -2354,6 +2355,34 @@
 											</Controls>
 											
 										</Control>
+										
+										<Control name="$(parent)ToggleSize" mouseEnabled="true"> 
+										
+											<Anchor point="TOPLEFT" relativeTo="$(parent)SmoothControl" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="12"/>
+											<Anchor point="TOPRIGHT" relativeTo="$(parent)SmoothControl" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="12"/>
+											<Dimensions y="20" />
+										
+											<Controls>
+											
+												<Backdrop name="$(parent)Bg" inherits="CombatMetrics_BackgroundFramed" centerColor="CC222222">
+													
+													<Anchor point="TOPLEFT" offsetX="0"/>
+													<Anchor point="BOTTOMRIGHT" offsetX="0"/>
+													
+												</Backdrop>
+												
+												<Label name="$(parent)Label" inherits="CombatMetrics_LabelFontControl" text="SI_COMBAT_METRICS_ENLARGE" verticalAlignment="CENTER" horizontalAlignment="CENTER">
+													
+													<Anchor point="TOPLEFT" relativeTo="$(parent)Bg"/>
+													<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Bg"/>
+												
+												</Label>
+											
+											</Controls>
+											
+											<OnMouseUp> CMX.ToggleGraphSize(self) </OnMouseUp>
+										
+										</Control>
 									</Controls>
 									
 								</Control>
@@ -2370,7 +2399,7 @@
 								<Control name="$(parent)PlotWindow" mouseEnabled="true">
 								
 									<Anchor point="TOPRIGHT" offsetX="-41" offsetY="12"/>
-									<Dimensions x="353" y="306"/>
+									<Anchor point="BOTTOMLEFT" relativeTo="$(parent)Sep" offsetX="98" offsetY="-50"/>
 									
 									<Controls>
 									

@@ -13,6 +13,7 @@ local savedFights
 local SVHandler
 local ToggleFeedback
 local barKeyOffset = 1
+local enlargedGraph = false
 
 local CMX = CMX
 if CMX == nil then CMX = {} end
@@ -294,6 +295,7 @@ local function selectMainPanel(button)
 	local unitPanel = CombatMetrics_Report_UnitPanel
 	local abilityPanel = CombatMetrics_Report_AbilityPanel
 	local infoPanel = CombatMetrics_Report_InfoPanel
+	local graphPanel = CombatMetrics_Report_MainPanelGraph
 	
 	local isInfo = category == "Info"
 	
@@ -302,6 +304,10 @@ local function selectMainPanel(button)
 	unitPanel:SetHidden(isInfo)
 	abilityPanel:SetHidden(isInfo)
 	infoPanel:SetHidden(not isInfo)
+	
+	local isGraph = category == "Graph"
+	
+	graphPanel:SetHidden(not isGraph)
 	
 	if not isInfo then 
 	
@@ -3113,10 +3119,11 @@ local function GetRequiredRange(plotWindow, newRange, startZero)
 	local minYNew = startZero and 0 or math.min(minYOld, minY)
 	local maxYNew = math.max(maxYOld, maxY)
 	
-	return {minXNew, maxXNew, minYNew, maxYNew}
+	local isChanged = minXOld ~= minXNew or maxXOld ~= maxXNew or minYOld ~= minYNew or maxYOld ~= maxYNew
+	
+	return {minXNew, maxXNew, minYNew, maxYNew}, isChanged
 
 end
-
 
 local function UpdatePlotXY(plot)
 	
@@ -3153,10 +3160,18 @@ local function UpdatePlotXY(plot)
 
 	if plot.autoRange then 
 		
-		local newRange = plotWindow:GetRequiredRange(range, true)
+		local newRange, isChanged = plotWindow:GetRequiredRange(range, true)
 		
 		plotWindow:UpdateScales(newRange)
 		
+		if isChanged then 
+		
+			for i = 1, plot.id - 1 do
+			
+				plotWindow.plots[i]:DrawXYPlot()
+				
+			end
+		end
 	end
 	
 	plot.range = range
@@ -3169,6 +3184,23 @@ local function UpdatePlotXY(plot)
 end
 
 local function updateGraphPanel(panel)
+
+	if enlargedGraph == true then 
+	
+		panel:SetParent(CombatMetrics_Report)
+		panel:SetAnchor(BOTTOMRIGHT, CombatMetrics_Report_InfoPanel, BOTTOMRIGHT, 0, 0)
+		
+	else
+	
+		panel:SetParent(CombatMetrics_Report_MainPanel)
+		panel:SetAnchor(BOTTOMRIGHT, CombatMetrics_Report_MainPanel, BOTTOMRIGHT, 0, 0)
+	
+	end
+	
+	CombatMetrics_Report:GetNamedChild("_AbilityPanel"):SetHidden(enlargedGraph)
+	CombatMetrics_Report:GetNamedChild("_UnitPanel"):SetHidden(enlargedGraph)
+	CombatMetrics_Report:GetNamedChild("_RightPanel"):SetHidden(enlargedGraph)
+	CombatMetrics_Report:GetNamedChild("_MainPanel"):SetHidden(enlargedGraph)
 
 	local plotWindow = panel:GetNamedChild("PlotWindow")
 	local smoothSlider = panel:GetNamedChild("Toolbar"):GetNamedChild("SmoothControl"):GetNamedChild("Slider")
@@ -3401,11 +3433,13 @@ function CMX.PlotSelectionMenu(selector)
 		
 		AddCustomSubMenuItem(GetString(stringid), submenu)
 	
-	end		
+	end
+	
+	local submenu2 = {}
 	
 	for id, data in ipairs(ResourceStrings) do
 	
-		AddCustomMenuItem(GetString(data.label), PlotFunctions[funcId])
+		table.insert(submenu2, {label = GetString(data.label), callback = PlotFunctions[funcId]})
 		
 		funcId = funcId + 1
 		
@@ -3426,6 +3460,8 @@ function CMX.PlotSelectionMenu(selector)
 		AddCustomSubMenuItem(GetString(stringid), submenu)--]]
 	
 	end	
+	
+	AddCustomSubMenuItem(GetString(SI_COMBAT_METRICS_RESOURCES), submenu2)
 
 	AddCustomMenuItem(GetString(SI_COMBAT_METRICS_BOSS_HP), PlotFunctions[funcId])
 	funcId = funcId + 1
@@ -3628,6 +3664,18 @@ function initPlotToolbar(toolbar)
 	end
 end
 
+function CMX.ToggleGraphSize(self)
+
+	enlargedGraph = not enlargedGraph
+	
+	local labelText = enlargedGraph and GetString(SI_COMBAT_METRICS_SHRINK) or GetString(SI_COMBAT_METRICS_ENLARGE)
+	
+	self:GetNamedChild("Label"):SetText(labelText)
+
+	local graphPanel = self:GetParent():GetParent()
+	graphPanel:Update()
+	
+end
 
 function CMX.SkillTooltip_OnMouseEnter(control)
 	
