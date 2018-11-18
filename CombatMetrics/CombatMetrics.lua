@@ -785,7 +785,7 @@ function CMX.GenerateSelectionStats(fight, menuItem, selection) -- this is simil
 				selectiondata.buffs[name] = selectedbuff
 			end
 
-			selectiondata.buffcount = (selectiondata.buffcount or 0) +1
+			selectiondata.totalUnitTime = (selectiondata.totalUnitTime or 0) + (math.min(fight.endtime, unitData.dpsend) - math.max(fight.starttime, unitData.dpsstart))
 		end
 	end
 	

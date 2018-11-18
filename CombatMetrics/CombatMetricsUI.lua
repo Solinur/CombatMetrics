@@ -1717,7 +1717,7 @@ local function updateBuffPanel(panel)
 	
 	local maxtime = math.max(fightData.activetime or 0, fightData.dpstime or 0, fightData.hpstime or 0)
 	
-	local buffcount = buffdata.buffcount or 1
+	local totalUnitTime = buffdata.totalUnitTime or maxtime * 1000
 	local showids = db.debuginfo.ids
 	local favs = db.FightReport.FavouriteBuffs
 	
@@ -1736,8 +1736,8 @@ local function updateBuffPanel(panel)
 			local dbug = (showids and type(buff.icon) == "number") and string.format("(%d) ", buff.icon) or ""
 			local name = dbug .. buffName
 			
-			local uptimeRatio = buff.uptime / (1000 * maxtime * buffcount)
-			local groupUptimeRatio = buff.groupUptime / (1000 * maxtime * buffcount)
+			local uptimeRatio = buff.uptime / (totalUnitTime)
+			local groupUptimeRatio = buff.groupUptime / (totalUnitTime)
 			
 			local count = buff.count
 			local groupCount = buff.groupCount
