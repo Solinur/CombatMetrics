@@ -1492,9 +1492,9 @@ local function updateFightStatsPanelRight(panel)
 	local statWindowControl = panel:GetNamedChild("AttackStats")
 	local keys = attackStatsKeys[powerType]
 	
-	for i=1, 4 do
+	for i = 1, 4 do
 	
-		local text = GetString(stringKey, i)
+		local text = ZO_CachedStrFormat("<<1>>:", GetString(stringKey, i))
 		local rowcontrol = statWindowControl:GetNamedChild("Row"..i)
 		local dataKey, displayformat, convert = unpack(keys[i] or {})
 		
@@ -2754,6 +2754,8 @@ local plotTypeTemplates = {
 
 local function Smooth(category)
 
+	if fightData == nil then return end
+
 	local calcData = fightData.calculated
 	
 	local category = category or db.FightReport.category
@@ -2795,6 +2797,8 @@ local function Smooth(category)
 end
 
 local function Accumulate(category)
+
+	if fightData == nil then return end
 
 	local calcData = fightData.calculated
 	
@@ -2851,6 +2855,8 @@ end
 
 local function Absolute(category)
 
+	if fightData == nil then return end
+
 	local calcData = fightData.calculated
 	
 	local category = category or db.FightReport.category
@@ -2892,9 +2898,38 @@ local powerTypeKeyTable = {
 
 }
 
+local oldX, oldY
+
+local function updateXYData(XYData, x, y)
+
+	if #XYData == 0 then oldX = -1 end		
+	
+	if x - 1 > oldX and oldY ~= y and oldY then		
+		
+		table.insert(XYData, {oldX + 1, oldY})
+	
+	end
+	
+	if x - 2 > oldX and oldY then		
+		
+		table.insert(XYData, {x - 1, oldY})
+	
+	end
+	
+	if x > oldX then
+		
+		table.insert(XYData, {x, y})
+		
+		oldX = x
+		
+	end
+	
+	oldY = y
+end
+
 local function ResourceAbsolute(powerType)
 
-	if powerType == nil then return end
+	if powerType == nil or fightData == nil then return end
 
 	local logData = fightData.log
 	
@@ -2902,8 +2937,7 @@ local function ResourceAbsolute(powerType)
 
 	local XYData = {}
 	
-	local x	= -1
-	local y
+	local value
 	
 	for line, lineData in ipairs(logData) do
 	
@@ -2911,20 +2945,20 @@ local function ResourceAbsolute(powerType)
 	
 			local deltatime = math.floor(lineData[2]/1000 - starttime)
 			
-			if deltatime > x then 
-	
-				local x = deltatime
-				
-				local y = lineData[6]
-				
-				table.insert(XYData, {x, y})
-			end			
+			value = lineData[6]
+			
+			updateXYData(XYData, deltatime, value)
+			
 		end
 	end
+	
+	updateXYData(XYData, fightData.combattime, value)
 	
 	local key = powerTypeKeyTable[powerType]
 	
 	local maxValue = powerType == POWERTYPE_ULTIMATE and 500 or fightData.stats[key]
+	
+	DATA = XYData
 	
 	for i, xyData in ipairs(XYData) do
 	
@@ -2936,6 +2970,8 @@ local function ResourceAbsolute(powerType)
 end
 
 local function BossHPAbsolute()
+
+	if fightData == nil then return end
 
 	local logData = fightData.log
 	
@@ -2958,9 +2994,9 @@ local function BossHPAbsolute()
 			
 			if deltatime > x then 			
 	
-				local x = deltatime
+				x = deltatime
 				
-				local y = lineData[4]
+				y = lineData[4]
 				
 				table.insert(XYData, {x, y})
 			end			
@@ -2973,7 +3009,45 @@ local function BossHPAbsolute()
 	
 	end
 	
-	BossData = XYData
+	return XYData, COMBAT_METRICS_YAXIS_RIGHT
+end
+
+local function StatAbsolute(statId)
+
+	if fightData == nil then return end
+
+	local logData = fightData.log
+	
+	local starttime = fightData.combatstart/1000
+
+	local XYData = {}
+	
+	local maxvalue = 0
+	
+	local value
+	
+	for line, lineData in ipairs(logData) do
+	
+		if lineData[1] == LIBCOMBAT_EVENT_PLAYERSTATS and lineData[5] == statId then 
+		
+			value = lineData[4]
+			
+			maxvalue = math.max(value, maxvalue) 
+	
+			local deltatime = math.floor(lineData[2]/1000 - starttime)	
+	
+			updateXYData(XYData, deltatime, value)
+			
+		end
+	end
+	
+	updateXYData(XYData, fightData.combattime, value)
+	
+	for i, xyData in ipairs(XYData) do
+	
+		xyData[2] = xyData[2]/maxvalue
+	
+	end
 	
 	return XYData, COMBAT_METRICS_YAXIS_RIGHT
 end
@@ -3383,6 +3457,25 @@ local ResourceStrings = {
 	
 }
 
+local StatStrings = {
+
+	[1] = {label = SI_COMBAT_METRICS_STATS_MAGICKA1, 	statId = LIBCOMBAT_STAT_MAXMAGICKA},
+	[2] = {label = SI_COMBAT_METRICS_STATS_MAGICKA2, 	statId = LIBCOMBAT_STAT_SPELLPOWER},
+	[3] = {label = SI_COMBAT_METRICS_STATS_MAGICKA3, 	statId = LIBCOMBAT_STAT_SPELLCRIT},
+	[4] = {label = SI_COMBAT_METRICS_STATS_MAGICKA4, 	statId = LIBCOMBAT_STAT_SPELLCRITBONUS},
+	[5] = {label = SI_COMBAT_METRICS_STATS_MAGICKA5, 	statId = LIBCOMBAT_STAT_SPELLPENETRATION},
+	[6] = {label = SI_COMBAT_METRICS_STATS_STAMINA1, 	statId = LIBCOMBAT_STAT_MAXSTAMINA},
+	[7] = {label = SI_COMBAT_METRICS_STATS_STAMINA2, 	statId = LIBCOMBAT_STAT_WEAPONPOWER},
+	[8] = {label = SI_COMBAT_METRICS_STATS_STAMINA3, 	statId = LIBCOMBAT_STAT_WEAPONCRIT},
+	[9] = {label = SI_COMBAT_METRICS_STATS_STAMINA4, 	statId = LIBCOMBAT_STAT_WEAPONCRITBONUS},
+	[10] = {label = SI_COMBAT_METRICS_STATS_STAMINA5, 	statId = LIBCOMBAT_STAT_WEAPONPENETRATION},
+	[11] = {label = SI_COMBAT_METRICS_STATS_HEALTH1, 	statId = LIBCOMBAT_STAT_MAXHEALTH},
+	[12] = {label = SI_COMBAT_METRICS_STATS_HEALTH2, 	statId = LIBCOMBAT_STAT_PHYSICALRESISTANCE},
+	[13] = {label = SI_COMBAT_METRICS_STATS_HEALTH3, 	statId = LIBCOMBAT_STAT_SPELLRESISTANCE},
+	[14] = {label = SI_COMBAT_METRICS_STATS_HEALTH4, 	statId = LIBCOMBAT_STAT_CRITICALRESISTANCE},
+	
+}
+
 local lastPlotSelector
 
 local function RemovePlotSelection()
@@ -3434,6 +3527,9 @@ function CMX.PlotSelectionMenu(selector)
 		AddCustomSubMenuItem(GetString(stringid), submenu)
 	
 	end
+
+	AddCustomMenuItem(GetString(SI_COMBAT_METRICS_BOSS_HP), PlotFunctions[funcId])
+	funcId = funcId + 1
 	
 	local submenu2 = {}
 	
@@ -3462,9 +3558,36 @@ function CMX.PlotSelectionMenu(selector)
 	end	
 	
 	AddCustomSubMenuItem(GetString(SI_COMBAT_METRICS_RESOURCES), submenu2)
-
-	AddCustomMenuItem(GetString(SI_COMBAT_METRICS_BOSS_HP), PlotFunctions[funcId])
-	funcId = funcId + 1
+	
+	local submenu3 = {}
+	
+	for id, data in ipairs(StatStrings) do
+	
+		table.insert(submenu3, {label = GetString(data.label), callback = PlotFunctions[funcId]})
+		
+		funcId = funcId + 1
+		
+		if id == 5 or id == 10 then table.insert(submenu3, {label = "-"}) end
+		
+		--[[local submenu = {}
+	
+		for id2, data2 in ipairs(ResourceFunctions) do
+		
+			local stringid2 = data2.label
+		
+			table.insert(submenu, {label = GetString(stringid2), callback = PlotFunctions[funcId]})
+			
+			funcId = funcId + 1
+			
+		end
+		
+		local stringid = data.label
+		
+		AddCustomSubMenuItem(GetString(stringid), submenu)--]]
+	
+	end	
+	
+	AddCustomSubMenuItem(GetString(SI_COMBAT_METRICS_STATS), submenu3)
 	
 	ShowMenu(selector)
 	AnchorMenu(selector)
@@ -3597,6 +3720,10 @@ local function initPlotWindow(plotWindow)
 		end	
 	end
 	
+	PlotFunctions[funcId] = getCustomMenuFunction(BossHPAbsolute, nil, GetString(SI_COMBAT_METRICS_BOSS_HP))
+	
+	funcId = funcId + 1
+	
 	for id, data in ipairs(ResourceStrings) do
 		
 		local resourceString = data.label
@@ -3610,9 +3737,18 @@ local function initPlotWindow(plotWindow)
 		
 	end
 	
-	PlotFunctions[funcId] = getCustomMenuFunction(BossHPAbsolute, nil, GetString(SI_COMBAT_METRICS_BOSS_HP))
+	for id, data in ipairs(StatStrings) do
 		
-	funcId = funcId + 1
+		local statString = data.label
+		local statId = data.statId
+		
+		local labelString = GetString(statString)
+		
+		PlotFunctions[funcId] = getCustomMenuFunction(StatAbsolute, statId, labelString)
+		
+		funcId = funcId + 1
+		
+	end
 
 	for id = 1,5 do
 	

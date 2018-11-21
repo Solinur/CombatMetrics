@@ -146,28 +146,28 @@
 	SI_COMBAT_METRICS_MAX = "Max",  -- Maximum
 	SI_COMBAT_METRICS_MIN = "Min",  -- Minimum
 
-	SI_COMBAT_METRICS_STATS_MAGICKA1 = "Max Magicka:",  -- Max Magicka:
-	SI_COMBAT_METRICS_STATS_MAGICKA2 = "Spell Damage:",  -- Spell Damage:
-	SI_COMBAT_METRICS_STATS_MAGICKA3 = "Spell Critical:",  -- Spell Critical:
+	SI_COMBAT_METRICS_STATS_MAGICKA1 = "Max Magicka",  -- Max Magicka:
+	SI_COMBAT_METRICS_STATS_MAGICKA2 = "Spell Damage",  -- Spell Damage:
+	SI_COMBAT_METRICS_STATS_MAGICKA3 = "Spell Critical",  -- Spell Critical:
 	SI_COMBAT_METRICS_STATS_MAGICKA_FORMAT3 = "%.1f %%",  -- %.1f %%
-	SI_COMBAT_METRICS_STATS_MAGICKA4 = "Critical Damage:",  -- Critical Damage:
-	SI_COMBAT_METRICS_STATS_MAGICKA5 = "Spell Penetration:",  -- Spell Penetration:
-	SI_COMBAT_METRICS_STATS_MAGICKA6 = "Overpenetration:",  -- Overpenetration:
+	SI_COMBAT_METRICS_STATS_MAGICKA4 = "Critical Damage",  -- Critical Damage:
+	SI_COMBAT_METRICS_STATS_MAGICKA5 = "Spell Penetration",  -- Spell Penetration:
+	SI_COMBAT_METRICS_STATS_MAGICKA6 = "Overpenetration",  -- Overpenetration:
 	SI_COMBAT_METRICS_STATS_MAGICKA_FORMAT6 = "%.1f %%",  -- %.1f %%
 
-	SI_COMBAT_METRICS_STATS_STAMINA1 = "Max Stamina:",  -- Max Stamina:
-	SI_COMBAT_METRICS_STATS_STAMINA2 = "Weapon Damage:",  -- Weapon Damage:
-	SI_COMBAT_METRICS_STATS_STAMINA3 = "Weapon Critical:",  -- Weapon Critical:
+	SI_COMBAT_METRICS_STATS_STAMINA1 = "Max Stamina",  -- Max Stamina:
+	SI_COMBAT_METRICS_STATS_STAMINA2 = "Weapon Damage",  -- Weapon Damage:
+	SI_COMBAT_METRICS_STATS_STAMINA3 = "Weapon Critical",  -- Weapon Critical:
 	SI_COMBAT_METRICS_STATS_STAMINA_FORMAT3 = "%.1f %%",  -- Spell Critical:
-	SI_COMBAT_METRICS_STATS_STAMINA4 = "Critical Damage:",  -- Critical Damage:
-	SI_COMBAT_METRICS_STATS_STAMINA5 = "Phys. Penetration:",  -- Physical Penetration:
-	SI_COMBAT_METRICS_STATS_STAMINA6 = "Overpenetration:",  -- Overpenetration:
+	SI_COMBAT_METRICS_STATS_STAMINA4 = "Critical Damage",  -- Critical Damage:
+	SI_COMBAT_METRICS_STATS_STAMINA5 = "Phys. Penetration",  -- Physical Penetration:
+	SI_COMBAT_METRICS_STATS_STAMINA6 = "Overpenetration",  -- Overpenetration:
 	SI_COMBAT_METRICS_STATS_STAMINA_FORMAT6 = "%.1f %%",  -- %.1f %%
 
-	SI_COMBAT_METRICS_STATS_HEALTH1 = "Max Health:",  -- Max Magicka:
-	SI_COMBAT_METRICS_STATS_HEALTH2 = "Physical Resist.:",  -- Physical Resist.:
-	SI_COMBAT_METRICS_STATS_HEALTH3 = "Spell Resistance:",  -- Spell Resistance:
-	SI_COMBAT_METRICS_STATS_HEALTH4 = "Critical Resist.:",  -- Critical Resist.:
+	SI_COMBAT_METRICS_STATS_HEALTH1 = "Max Health",  -- Max Magicka:
+	SI_COMBAT_METRICS_STATS_HEALTH2 = "Physical Resist.",  -- Physical Resist.:
+	SI_COMBAT_METRICS_STATS_HEALTH3 = "Spell Resistance",  -- Spell Resistance:
+	SI_COMBAT_METRICS_STATS_HEALTH4 = "Critical Resist.",  -- Critical Resist.:
 	SI_COMBAT_METRICS_STATS_HEALTH_FORMAT4 = "%.1f %%",  -- Critical Resist.:
 
 	SI_COMBAT_METRICS_COMBAT_LOG = "Combat Log",  -- Combat Log

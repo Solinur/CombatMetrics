@@ -63,7 +63,7 @@ LIBCOMBAT_EVENT_EFFECTS_IN = 10			-- LIBCOMBAT_EVENT_EFFECTS_IN, timems, unitId,
 LIBCOMBAT_EVENT_EFFECTS_OUT = 11		-- LIBCOMBAT_EVENT_EFFECTS_OUT, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, effectSlot
 LIBCOMBAT_EVENT_GROUPEFFECTS_IN = 12	-- LIBCOMBAT_EVENT_GROUPEFFECTS_IN, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, effectSlot
 LIBCOMBAT_EVENT_GROUPEFFECTS_OUT = 13	-- LIBCOMBAT_EVENT_GROUPEFFECTS_OUT, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, effectSlot
-LIBCOMBAT_EVENT_PLAYERSTATS = 14		-- LIBCOMBAT_EVENT_PLAYERSTATS, timems, statchange, newvalue, statname
+LIBCOMBAT_EVENT_PLAYERSTATS = 14		-- LIBCOMBAT_EVENT_PLAYERSTATS, timems, statchange, newvalue, statId
 LIBCOMBAT_EVENT_RESOURCES = 15			-- LIBCOMBAT_EVENT_RESOURCES, timems, abilityId, powerValueChange, powerType, powerValue
 LIBCOMBAT_EVENT_MESSAGES = 16			-- LIBCOMBAT_EVENT_MESSAGES, timems, messageId, value
 LIBCOMBAT_EVENT_DEATH = 17				-- LIBCOMBAT_EVENT_DEATH, timems, unitId, abilityId
@@ -71,6 +71,14 @@ LIBCOMBAT_EVENT_RESURRECTION = 18		-- LIBCOMBAT_EVENT_RESURRECTION, timems, unit
 LIBCOMBAT_EVENT_SKILL_TIMINGS = 19		-- LIBCOMBAT_EVENT_SKILL_TIMINGS, timems, reducedslot, abilityId, status
 LIBCOMBAT_EVENT_BOSSHP = 20				-- LIBCOMBAT_EVENT_BOSSHP, timems, bossId, currenthp, maxhp
 LIBCOMBAT_EVENT_MAX = 20
+
+local CallbackKeys = {}
+
+for i = LIBCOMBAT_EVENT_MIN, LIBCOMBAT_EVENT_MAX do
+
+	CallbackKeys[i] = "LibCombat" .. i
+	
+end
 
 -- Messages:
 
@@ -82,6 +90,83 @@ LIBCOMBAT_SKILLSTATUS_INSTANT = 1
 LIBCOMBAT_SKILLSTATUS_BEGIN_DURATION = 2
 LIBCOMBAT_SKILLSTATUS_BEGIN_CHANNEL = 3
 LIBCOMBAT_SKILLSTATUS_SUCCESS = 4
+
+-- Statnames
+
+LIBCOMBAT_STAT_MAXMAGICKA = 1
+LIBCOMBAT_STAT_SPELLPOWER = 2
+LIBCOMBAT_STAT_SPELLCRIT = 3
+LIBCOMBAT_STAT_SPELLCRITBONUS = 4
+LIBCOMBAT_STAT_SPELLPENETRATION = 5
+
+LIBCOMBAT_STAT_MAXSTAMINA = 11
+LIBCOMBAT_STAT_WEAPONPOWER = 12
+LIBCOMBAT_STAT_WEAPONCRIT = 13
+LIBCOMBAT_STAT_WEAPONCRITBONUS = 14
+LIBCOMBAT_STAT_WEAPONPENETRATION = 15
+
+LIBCOMBAT_STAT_MAXHEALTH = 21
+LIBCOMBAT_STAT_PHYSICALRESISTANCE = 22
+LIBCOMBAT_STAT_SPELLRESISTANCE = 23
+LIBCOMBAT_STAT_CRITICALRESISTANCE = 24
+
+local statNames = {
+
+	[LIBCOMBAT_STAT_MAXMAGICKA] = "maxmagicka",
+	[LIBCOMBAT_STAT_SPELLPOWER] = "spellpower",
+	[LIBCOMBAT_STAT_SPELLCRIT] = "spellcrit",
+	[LIBCOMBAT_STAT_SPELLCRITBONUS] = "spellcritbonus",
+	[LIBCOMBAT_STAT_SPELLPENETRATION] = "spellpen",
+	
+	[LIBCOMBAT_STAT_MAXSTAMINA] = "maxstamina",
+	[LIBCOMBAT_STAT_WEAPONPOWER] = "weaponpower",
+	[LIBCOMBAT_STAT_WEAPONCRIT] = "weaponcrit",
+	[LIBCOMBAT_STAT_WEAPONCRITBONUS] = "weaponcritbonus",	
+	[LIBCOMBAT_STAT_WEAPONPENETRATION] = "weaponpen",
+	
+	[LIBCOMBAT_STAT_MAXHEALTH] = "maxhealth",
+	[LIBCOMBAT_STAT_PHYSICALRESISTANCE] = "physres",
+	[LIBCOMBAT_STAT_SPELLRESISTANCE] = "spellres",
+	[LIBCOMBAT_STAT_CRITICALRESISTANCE] = "critres",
+	
+}
+
+local statNamesCurrent = {}
+local statNamesMax = {}
+
+local statNameConversion = {}
+
+for id, text in pairs(statNames) do
+
+	statNameConversion[text] = id
+	statNamesCurrent[id] = "current" .. text
+	statNamesMax[id] = "max" .. text
+
+end
+
+function lib.GetStatName(id)	-- TODO: Is this function needed? 
+
+	return statNames[id]
+	
+end
+
+function lib.GetStatNameCurrent(id)	-- TODO: Is this function needed? 
+
+	return statNamesCurrent[id]
+	
+end
+
+function lib.GetStatNameMax(id)	-- TODO: Is this function needed? 
+
+	return statNamesMax[id]
+	
+end
+
+function lib.ConvertStatName(statName)	-- TODO: Is this function needed? 
+
+	return statNameConversion[statName]
+	
+end
 
 -- Strings
 
@@ -526,6 +611,8 @@ local function Print(message, ...)
 	df("[%s] %s", "libCombat", message:format(...))
 end
 
+local onCombatState
+
 function FightHandler:ResetFight()
 
 	if data.inCombat ~= true then return end
@@ -536,6 +623,8 @@ function FightHandler:ResetFight()
 	self:onUpdate()
 	
 	currentfight:PrepareFight()
+	
+	onCombatState(EVENT_PLAYER_COMBAT_STATE, IsUnitInCombat("player"))
 end
 
 function lib.ResetFight()
@@ -588,7 +677,7 @@ local function GetPlayerBuffs(timems)
 		
 		if abilityType == 5 and endTime > 0 and (not BadAbility[abilityId]) then 
 					
-			lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_EFFECTS_IN), LIBCOMBAT_EVENT_EFFECTS_IN, newtime, playerid, abilityId, EFFECT_RESULT_GAINED, effectType, stacks, unitType, buffSlot)
+			lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_EFFECTS_IN]), LIBCOMBAT_EVENT_EFFECTS_IN, newtime, playerid, abilityId, EFFECT_RESULT_GAINED, effectType, stacks, unitType, buffSlot)
 			--timems, unitId, abilityId, changeType, effectType, stacks, sourceType
 			
 		end
@@ -609,7 +698,7 @@ local function GetOtherBuffs(timems)
 			
 			logdata[2] = newtime
 			
-			lib.cm:FireCallbacks(("LibCombat"..logdata[1]), unpack(logdata))
+			lib.cm:FireCallbacks((CallbackKeys[logdata[1]]), unpack(logdata))
 		
 		end		
 	end
@@ -929,22 +1018,22 @@ local function GetStats()
 	local weaponcritbonus, spellcritbonus = GetCritbonus()
 	
 	return {
-		["maxmagicka"]		= GetStat(STAT_MAGICKA_MAX), 
-		["spellpower"]		= GetStat(STAT_SPELL_POWER), 
-		["spellcrit"]		= GetStat(STAT_SPELL_CRITICAL), 
-		["spellcritbonus"]	= spellcritbonus,
-		["spellpen"]		= GetStat(STAT_SPELL_PENETRATION), 
-							
-		["maxstamina"]		= GetStat(STAT_STAMINA_MAX), 
-		["weaponpower"]		= GetStat(STAT_POWER), 
-		["weaponcrit"]		= GetStat(STAT_CRITICAL_STRIKE), 
-		["weaponcritbonus"]	= weaponcritbonus,
-		["weaponpen"]		= GetStat(STAT_PHYSICAL_PENETRATION) + TFSBonus, 
-							
-		["maxhealth"]		= GetStat(STAT_HEALTH_MAX), 		
-		["physres"]			= GetStat(STAT_PHYSICAL_RESIST), 
-		["spellres"]		= GetStat(STAT_SPELL_RESIST), 
-		["critres"]			= GetStat(STAT_CRITICAL_RESISTANCE)
+		[LIBCOMBAT_STAT_MAXMAGICKA]			= GetStat(STAT_MAGICKA_MAX), 
+		[LIBCOMBAT_STAT_SPELLPOWER]			= GetStat(STAT_SPELL_POWER), 
+		[LIBCOMBAT_STAT_SPELLCRIT]			= GetStat(STAT_SPELL_CRITICAL), 
+		[LIBCOMBAT_STAT_SPELLCRITBONUS]		= spellcritbonus,
+		[LIBCOMBAT_STAT_SPELLPENETRATION]	= GetStat(STAT_SPELL_PENETRATION), 
+		
+		[LIBCOMBAT_STAT_MAXSTAMINA]			= GetStat(STAT_STAMINA_MAX), 
+		[LIBCOMBAT_STAT_WEAPONPOWER]		= GetStat(STAT_POWER), 
+		[LIBCOMBAT_STAT_WEAPONCRIT]			= GetStat(STAT_CRITICAL_STRIKE), 
+		[LIBCOMBAT_STAT_WEAPONCRITBONUS]	= weaponcritbonus,
+		[LIBCOMBAT_STAT_WEAPONPENETRATION]	= GetStat(STAT_PHYSICAL_PENETRATION) + TFSBonus, 
+		
+		[LIBCOMBAT_STAT_MAXHEALTH]			= GetStat(STAT_HEALTH_MAX), 		
+		[LIBCOMBAT_STAT_PHYSICALRESISTANCE]	= GetStat(STAT_PHYSICAL_RESIST), 
+		[LIBCOMBAT_STAT_SPELLRESISTANCE]	= GetStat(STAT_SPELL_RESIST), 
+		[LIBCOMBAT_STAT_CRITICALRESISTANCE]	= GetStat(STAT_CRITICAL_RESISTANCE)
 	}
 end
 
@@ -974,23 +1063,26 @@ function FightHandler:GetNewStats(timems)
 	
 	local stats = self.stats
 	
-	for statName, newValue in pairs(GetStats()) do
+	for statId, newValue in pairs(GetStats()) do
 	
-		if statName == "spellcrit" or statName == "weaponcrit" then newValue = math.min(newValue, maxcrit) end
+		if statId == LIBCOMBAT_STAT_SPELLCRIT or statId == LIBCOMBAT_STAT_WEAPONCRIT then newValue = math.min(newValue, maxcrit) end
+		
+		local currentkey = statNamesCurrent[statId]
+		local maxkey = statNamesMax[statId]
 	
-		if stats["current"..statName] == nil or stats["max"..statName] == nil then 
+		if stats[currentkey] == nil or stats[maxkey] == nil then 
 		
-			lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_PLAYERSTATS), LIBCOMBAT_EVENT_PLAYERSTATS, timems, 0, newValue, statName)
+			lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_PLAYERSTATS]), LIBCOMBAT_EVENT_PLAYERSTATS, timems, 0, newValue, statId)
 			
-			stats["current"..statName] = newValue 
-			stats["max"..statName] = newValue 
+			stats[currentkey] = newValue 
+			stats[maxkey] = newValue 
 			
-		elseif stats["current"..statName] ~= newValue and timems ~= nil and data.inCombat then 
+		elseif stats[currentkey] ~= newValue and timems ~= nil and data.inCombat then 
 		
-			lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_PLAYERSTATS), LIBCOMBAT_EVENT_PLAYERSTATS, timems, newValue - stats["current"..statName], newValue, statName)
+			lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_PLAYERSTATS]), LIBCOMBAT_EVENT_PLAYERSTATS, timems, newValue - stats[currentkey], newValue, statId)
 			
-			stats["current"..statName] = newValue
-			stats["max"..statName] = math.max(stats["max"..statName] or newValue, newValue)
+			stats[currentkey] = newValue
+			stats[maxkey] = math.max(stats[maxkey] or newValue, newValue)
 			
 		end
 	end
@@ -1075,8 +1167,8 @@ function FightHandler:UpdateStats()
 		["hpstime"] = hpstime,
 	}
 	
-	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_UNITS), LIBCOMBAT_EVENT_UNITS, self.units)
-	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_FIGHTRECAP), LIBCOMBAT_EVENT_FIGHTRECAP, data) 
+	lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_UNITS]), LIBCOMBAT_EVENT_UNITS, self.units)
+	lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_FIGHTRECAP]), LIBCOMBAT_EVENT_FIGHTRECAP, data) 
 	
 end
 
@@ -1136,13 +1228,13 @@ function FightHandler:UpdateGrpStats() -- called by onUpdate
 	
 	}
 	
-	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_GROUPRECAP), LIBCOMBAT_EVENT_GROUPRECAP, data)
+	lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_GROUPRECAP]), LIBCOMBAT_EVENT_GROUPRECAP, data)
 
 end
 
 function FightHandler:onUpdate()
 	--reset data
-	if reset == true or (data.inCombat==false and self.combatend>0 and (GetGameTimeMilliseconds() > (self.combatend + timeout)) ) then
+	if reset == true or (data.inCombat == false and self.combatend>0 and (GetGameTimeMilliseconds() > (self.combatend + timeout)) ) then
 	
 		reset = false	
 		
@@ -1169,7 +1261,7 @@ function FightHandler:onUpdate()
 		
 		self.grplog = {}
 		
-		lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_FIGHTSUMMARY), LIBCOMBAT_EVENT_FIGHTSUMMARY, self)
+		lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_FIGHTSUMMARY]), LIBCOMBAT_EVENT_FIGHTSUMMARY, self)
 
 		currentfight = FightHandler:New()
 		
@@ -1204,7 +1296,7 @@ local function onCombatState(event, inCombat)  -- Detect Combat Stage
 		
 			if showdebug == true or dev then df("[%.3f] Entering combat.", GetGameTimeMilliseconds()/1000) end
 			
-			lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_MESSAGES), LIBCOMBAT_EVENT_MESSAGES, timems, LIBCOMBAT_MESSAGE_COMBATSTART, 0)
+			lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_MESSAGES]), LIBCOMBAT_EVENT_MESSAGES, timems, LIBCOMBAT_MESSAGE_COMBATSTART, 0)
 			
 			currentfight:PrepareFight()
 			
@@ -1216,7 +1308,7 @@ local function onCombatState(event, inCombat)  -- Detect Combat Stage
 			
 			if charData == nil then return end
 
-			lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_MESSAGES), LIBCOMBAT_EVENT_MESSAGES, timems, LIBCOMBAT_MESSAGE_COMBATEND, 0)
+			lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_MESSAGES]), LIBCOMBAT_EVENT_MESSAGES, timems, LIBCOMBAT_MESSAGE_COMBATEND, 0)
 			
 		end
 	end
@@ -1321,7 +1413,7 @@ local function BuffEventHandler(isspecial, groupeffect, _, changeType, effectSlo
 	elseif inCombat == true then 
 	
 		if unitTag == "player" then currentfight:GetNewStats(timems) end
-		lib.cm:FireCallbacks(("LibCombat"..eventid), eventid, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, effectSlot)
+		lib.cm:FireCallbacks((CallbackKeys[eventid]), eventid, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, effectSlot)
 		
 	end
 end
@@ -1520,13 +1612,13 @@ local function onBaseResourceChanged(_,unitTag,_,powerType,powerValue,_,_)
 		if powerValueChange == GetStat(STAT_HEALTH_REGEN_COMBAT) and data.playerid then 
 
 			aId = 0
-			lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_HEAL_SELF), LIBCOMBAT_EVENT_HEAL_SELF, timems, ACTION_RESULT_HOT_TICK, data.playerid, data.playerid, aId, powerValueChange, powerType)
+			lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_HEAL_SELF]), LIBCOMBAT_EVENT_HEAL_SELF, timems, ACTION_RESULT_HOT_TICK, data.playerid, data.playerid, aId, powerValueChange, powerType)
 			return
 			
 		end
 	end
 	
-	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_RESOURCES), LIBCOMBAT_EVENT_RESOURCES, timems, aId, powerValueChange, powerType, powerValue)
+	lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_RESOURCES]), LIBCOMBAT_EVENT_RESOURCES, timems, aId, powerValueChange, powerType, powerValue)
 end
 
 local function onSlotUpdate(_, slot)
@@ -1584,7 +1676,7 @@ local function onWeaponSwap(_, _)
 	if inCombat == true then  
 	
 		local timems = GetGameTimeMilliseconds()
-		lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_MESSAGES), LIBCOMBAT_EVENT_MESSAGES, timems, LIBCOMBAT_MESSAGE_WEAPONSWAP, data.bar)
+		lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_MESSAGES]), LIBCOMBAT_EVENT_MESSAGES, timems, LIBCOMBAT_MESSAGE_WEAPONSWAP, data.bar)
 		
 		currentfight:GetNewStats(timems)
 		
@@ -1605,7 +1697,7 @@ local function OnDeathStateChanged(_, unitTag, isDead)
 	
 	if (lasttime and lasttime - timems < 100) or not unitId then return end
 	
-	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_DEATH), LIBCOMBAT_EVENT_DEATH, timems, unitId, -1)
+	lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_DEATH]), LIBCOMBAT_EVENT_DEATH, timems, unitId, -1)
 
 	if isDead then Print("[%.3f] DS: %s died!", timems/1000, name ) end
 	
@@ -1631,7 +1723,7 @@ local function OnDeath(_, result, _, abilityName, _, abilityActionSlotType, sour
 	
 	lastdeaths[name] = GetGameTimeMilliseconds()
 	
-	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_DEATH), LIBCOMBAT_EVENT_DEATH, timems, targetUnitId, abilityId)
+	lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_DEATH]), LIBCOMBAT_EVENT_DEATH, timems, targetUnitId, abilityId)
 	
 	Print("[%.3f] CE: %s died! (%d - %s) (%s -> %s)", GetGameTimeMilliseconds()/1000, name, result, GetFormattedAbilityName(abilityId), tostring(sourceUnitId), tostring(targetUnitId))
 	
@@ -1647,7 +1739,7 @@ local function OnResurrectResult(_, targetCharacterName, result, targetDisplayNa
 	
 	if not unitId then return end	
 
-	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_RESURRECTION), LIBCOMBAT_EVENT_RESURRECTION, timems, data.playerid, unitId)
+	lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_RESURRECTION]), LIBCOMBAT_EVENT_RESURRECTION, timems, data.playerid, unitId)
 	
 	Print("[%.3f] Rezzed %s", GetGameTimeMilliseconds()/1000, targetCharacterName )
 	
@@ -1661,7 +1753,7 @@ local function OnResurrectRequest(_, requesterCharacterName, timeLeftToAccept, r
 	
 	if not unitId then return end	
 
-	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_RESURRECTION), LIBCOMBAT_EVENT_RESURRECTION, timems, unitId, data.playerid)
+	lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_RESURRECTION]), LIBCOMBAT_EVENT_RESURRECTION, timems, unitId, data.playerid)
 
 	Print("[%.3f] Rezzed by %s", GetGameTimeMilliseconds()/1000, requesterCharacterName )
 
@@ -1742,7 +1834,7 @@ local function CombatEventHandler(isheal, _ , result , _ , _ , _ , _ , sourceNam
 	
 	currentfight:AddCombatEvent(timems, result, targetUnitId, hitValue, eventid)
 	
-	lib.cm:FireCallbacks(("LibCombat"..eventid), eventid, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType)
+	lib.cm:FireCallbacks((CallbackKeys[eventid]), eventid, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType)
 end
 
 local function onCombatEventDmg(...)
@@ -1843,7 +1935,7 @@ local function onAbilityUsed(eventCode, result, isError, abilityName, abilityGra
 		
 		local status = channeled and LIBCOMBAT_SKILLSTATUS_BEGIN_CHANNEL or LIBCOMBAT_SKILLSTATUS_BEGIN_DURATION
 		
-		lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_SKILL_TIMINGS), LIBCOMBAT_EVENT_SKILL_TIMINGS, timems, reducedslot, abilityId, status)
+		lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_SKILL_TIMINGS]), LIBCOMBAT_EVENT_SKILL_TIMINGS, timems, reducedslot, abilityId, status)
 		
 		if abilityId == -1 then 
 		
@@ -1851,7 +1943,7 @@ local function onAbilityUsed(eventCode, result, isError, abilityName, abilityGra
 			
 				local data = {reducedslot, abilityId, LIBCOMBAT_SKILLSTATUS_SUCCESS}
 			
-				lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_SKILL_TIMINGS), LIBCOMBAT_EVENT_SKILL_TIMINGS, GetGameTimeMilliseconds(), unpack(data))
+				lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_SKILL_TIMINGS]), LIBCOMBAT_EVENT_SKILL_TIMINGS, GetGameTimeMilliseconds(), unpack(data))
 			
 			end
 			
@@ -1865,7 +1957,7 @@ local function onAbilityUsed(eventCode, result, isError, abilityName, abilityGra
 	
 	else
 	
-		lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_SKILL_TIMINGS), LIBCOMBAT_EVENT_SKILL_TIMINGS, timems, reducedslot, abilityId, LIBCOMBAT_SKILLSTATUS_INSTANT)
+		lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_SKILL_TIMINGS]), LIBCOMBAT_EVENT_SKILL_TIMINGS, timems, reducedslot, abilityId, LIBCOMBAT_SKILLSTATUS_INSTANT)
 		lastCastTimeAbility = 0
 		
 	end
@@ -1885,7 +1977,7 @@ local function onAbilityFinished(eventCode, result, isError, abilityName, abilit
 		
 		-- if dev == true then df("[%.3f] Skill activated: %s (%d, R: %d)", GetGameTimeMilliseconds()/1000, GetAbilityName(abilityId), abilityId, result) end
 		
-		lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_SKILL_TIMINGS), LIBCOMBAT_EVENT_SKILL_TIMINGS, timems, reducedslot, abilityId, LIBCOMBAT_SKILLSTATUS_SUCCESS)
+		lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_SKILL_TIMINGS]), LIBCOMBAT_EVENT_SKILL_TIMINGS, timems, reducedslot, abilityId, LIBCOMBAT_SKILLSTATUS_SUCCESS)
 		
 		lastCastTimeAbility = 0
 		
@@ -1907,7 +1999,7 @@ local function onBossHealthChanged(eventid, unitTag, _, powerType, powerValue, p
 	
 	local bossId = tonumber(string.match(unitTag, "boss(%d+)"))
 	
-	lib.cm:FireCallbacks(("LibCombat"..LIBCOMBAT_EVENT_BOSSHP), LIBCOMBAT_EVENT_BOSSHP, timems, bossId, powerValue, powerMax)
+	lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_BOSSHP]), LIBCOMBAT_EVENT_BOSSHP, timems, bossId, powerValue, powerMax)
 	
 end
 
@@ -1956,14 +2048,14 @@ end
 
 function lib:RegisterCallbackType(callbacktype, callback, name)
 
-	lib.cm:RegisterCallback("LibCombat"..callbacktype, callback)
+	lib.cm:RegisterCallback(CallbackKeys[callbacktype], callback)
 	EditResource(callbacktype,true,name)
 	
 end
 
 function lib:UnregisterCallbackType(callbacktype, callback, name)
 	
-	lib.cm:UnregisterCallback("LibCombat"..callbacktype, callback)
+	lib.cm:UnregisterCallback(CallbackKeys[callbacktype], callback)
 	EditResource(callbacktype,false,name)
 	
 end
@@ -2353,23 +2445,23 @@ Events.BossHP = EventHandler:New(
 	end
 )
 
-local statnames = {
-	["spellpower"]		= "|c8888ff"..GetString(SI_DERIVEDSTATS25).."|r ", 							--|c8888ff blue
-	["spellcrit"]		= "|c8888ff"..GetString(SI_DERIVEDSTATS23).."|r ",
-	["maxmagicka"]		= "|c8888ff"..GetString(SI_DERIVEDSTATS4).."|r ",
-	["spellcritbonus"]	= "|c8888ff"..GetString(SI_LIBCOMBAT_LOG_STAT_SPELL_CRIT_DONE).."|r ",
-	["spellpen"]		= "|c8888ff"..GetString(SI_DERIVEDSTATS34).."|r ",
+local statStrings = {
+	[LIBCOMBAT_STAT_MAXMAGICKA]			= "|c8888ff"..GetString(SI_DERIVEDSTATS4).."|r ", 							--|c8888ff blue
+	[LIBCOMBAT_STAT_SPELLPOWER]			= "|c8888ff"..GetString(SI_DERIVEDSTATS25).."|r ",
+	[LIBCOMBAT_STAT_SPELLCRIT]			= "|c8888ff"..GetString(SI_DERIVEDSTATS23).."|r ",
+	[LIBCOMBAT_STAT_SPELLCRITBONUS]		= "|c8888ff"..GetString(SI_LIBCOMBAT_LOG_STAT_SPELL_CRIT_DONE).."|r ",
+	[LIBCOMBAT_STAT_SPELLPENETRATION]	= "|c8888ff"..GetString(SI_DERIVEDSTATS34).."|r ",
 		
-	["weaponpower"]		= "|c88ff88"..GetString(SI_DERIVEDSTATS1).."|r ",			--|c88ff88 green
-	["weaponcrit"]		= "|c88ff88"..GetString(SI_DERIVEDSTATS16).."|r ",
-	["maxstamina"]		= "|c88ff88"..GetString(SI_DERIVEDSTATS29).."|r ",
-	["weaponcritbonus"]	= "|c88ff88"..GetString(SI_LIBCOMBAT_LOG_STAT_WEAPON_CRIT_DONE).."|r ",
-	["weaponpen"]		= "|c88ff88"..GetString(SI_DERIVEDSTATS33).."|r ",
+	[LIBCOMBAT_STAT_MAXSTAMINA]			= "|c88ff88"..GetString(SI_DERIVEDSTATS29).."|r ",							--|c88ff88 green
+	[LIBCOMBAT_STAT_WEAPONPOWER]		= "|c88ff88"..GetString(SI_DERIVEDSTATS1).."|r ",
+	[LIBCOMBAT_STAT_WEAPONCRIT]			= "|c88ff88"..GetString(SI_DERIVEDSTATS16).."|r ",
+	[LIBCOMBAT_STAT_WEAPONCRITBONUS]	= "|c88ff88"..GetString(SI_LIBCOMBAT_LOG_STAT_WEAPON_CRIT_DONE).."|r ",
+	[LIBCOMBAT_STAT_WEAPONPENETRATION]	= "|c88ff88"..GetString(SI_DERIVEDSTATS33).."|r ",
 	
-	["maxhealth"]		= "|cffff88"..GetString(SI_DERIVEDSTATS7).."|r ",	--|cffff88 red
-	["physres"]			= "|cffff88"..GetString(SI_DERIVEDSTATS22).."|r ",	--|cffff88 red
-	["spellres"]		= "|cffff88"..GetString(SI_DERIVEDSTATS13).."|r ",
-	["critres"]			= "|cffff88"..GetString(SI_DERIVEDSTATS24).."|r ",
+	[LIBCOMBAT_STAT_MAXHEALTH]			= "|cffff88"..GetString(SI_DERIVEDSTATS7).."|r ",							--|cffff88 red
+	[LIBCOMBAT_STAT_PHYSICALRESISTANCE]	= "|cffff88"..GetString(SI_DERIVEDSTATS22).."|r ",	
+	[LIBCOMBAT_STAT_SPELLRESISTANCE]	= "|cffff88"..GetString(SI_DERIVEDSTATS13).."|r ",
+	[LIBCOMBAT_STAT_CRITICALRESISTANCE]	= "|cffff88"..GetString(SI_DERIVEDSTATS24).."|r ",
 }		
 
 local logColors={ 
@@ -2386,9 +2478,9 @@ local logColors={
 	[DAMAGE_TYPE_DISEASE] 	= "|cc48a9f", 
 	[DAMAGE_TYPE_POISON] 	= "|c9fb121", 
 	["heal"]				= "|c55ff55",
-	["buff"]		= "|c00cc00",
-	["debuff"]	= "|cff3333",
-	["resource"]	= "|cffffff",
+	["buff"]				= "|c00cc00",
+	["debuff"]				= "|cff3333",
+	["resource"]			= "|cffffff",
 }
 
 function lib.GetDamageColor(damageType)	
@@ -2571,21 +2663,20 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 
 	elseif logtype == LIBCOMBAT_EVENT_PLAYERSTATS then 
 	
-		local _, _, statchange, newvalue, statname = unpack(logline)
+		local _, _, statchange, newvalue, statId = unpack(logline)
 		
-		local stat = statnames[statname]
-		local percent = ""
+		local stat = statStrings[statId]
 		local change = statchange
 		local value = newvalue
 		
-		if statname == "spellcrit" or statname == "weaponcrit" then 
+		if statid == LIBCOMBAT_STAT_SPELLCRIT or statid == LIBCOMBAT_STAT_WEAPONCRIT then 
 		
 			value = string.format("%.1f%%", GetCriticalStrikeChance(newvalue))
 			change = string.format("%.1f%%", GetCriticalStrikeChance(statchange))
 			
 		end
 		
-		if statname=="spellcritbonus" or statname=="weaponcritbonus" then 
+		if statid == LIBCOMBAT_STAT_SPELLCRITBONUS or statid == LIBCOMBAT_STAT_WEAPONCRITBONUS then 
 		
 			value = string.format("%.1f%%", newvalue)
 			change = string.format("%.1f%%", statchange)
@@ -2597,12 +2688,12 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 		if statchange > 0 then
 
 			changeText = ZO_CachedStrFormat("|c00cc00<<1>>|r", GetString(SI_LIBCOMBAT_LOG_INCREASED))
-			changeValueText = ZO_CachedStrFormat(" |c00cc00(+<<1>>|r", change)
+			changeValueText = ZO_CachedStrFormat(" |c00cc00(+<<1>>)|r", change)
 			
 		elseif statchange < 0 then
 			
 			changeText = ZO_CachedStrFormat("|cff3333<<1>>|r", GetString(SI_LIBCOMBAT_LOG_DECREASED))			
-			changeValueText = ZO_CachedStrFormat(" |cff3333(<<1>>|r", change)
+			changeValueText = ZO_CachedStrFormat(" |cff3333(<<1>>)|r", change)
 			
 		else 
 		

@@ -4,7 +4,7 @@ local sv
 CombatMetricsFightData = {}
  
 local AddonName = "CombatMetricsFightData"
-local AddonVersion = 4
+local AddonVersion = 5
 
 local constants = 0
 
@@ -114,31 +114,23 @@ for key, value in pairs(CombatResultTableLoad) do
 
 end
 
-local statTableLoad = {
+local statTableConvert = {
 
-	[1] = "spellpower",
-	[2] = "spellcrit",
-	[3] = "maxmagicka",
-	[4] = "spellcritbonus",
-	[5] = "spellpen",
-	[6] = "weaponpower",
-	[7] = "weaponcrit",
-	[8] = "maxstamina",
-	[9] = "weaponcritbonus",
-	[10] = "weaponpen",
-	[11] = "maxhealth",
-	[12] = "physres",
-	[13] = "spellres",
-	[14] = "critres",
+	[1] = LIBCOMBAT_STAT_SPELLPOWER,
+	[2] = LIBCOMBAT_STAT_SPELLCRIT,
+	[3] = LIBCOMBAT_STAT_MAXMAGICKA,
+	[4] = LIBCOMBAT_STAT_SPELLCRITBONUS,
+	[5] = LIBCOMBAT_STAT_SPELLPENETRATION,
+	[6] = LIBCOMBAT_STAT_WEAPONPOWER,
+	[7] = LIBCOMBAT_STAT_WEAPONCRIT,
+	[8] = LIBCOMBAT_STAT_MAXSTAMINA,
+	[9] = LIBCOMBAT_STAT_WEAPONCRITBONUS,
+	[10] = LIBCOMBAT_STAT_WEAPONPENETRATION,
+	[11] = LIBCOMBAT_STAT_MAXHEALTH,
+	[12] = LIBCOMBAT_STAT_PHYSICALRESISTANCE,
+	[13] = LIBCOMBAT_STAT_SPELLRESISTANCE,
+	[14] = LIBCOMBAT_STAT_CRITICALRESISTANCE,
 }
-
-local statTableSave = {}
-
-for key, value in pairs(statTableLoad) do
-
-	statTableSave[value] = key
-
-end
 
 local LAYOUT_COMBAT = 4
 local LAYOUT_EVENT = 10
@@ -195,7 +187,9 @@ for id, layout in pairs(layouts) do
 	layoutsize[id] = sum
 end
 
-local function encodeCombatLogLine(line, unitConversion)
+local function encodeCombatLogLine(line, fight)
+
+	local unitConversion = fight.unitConversion
 
 	local layoutId = logTypeToLayout[line[1]]
 	
@@ -217,7 +211,6 @@ local function encodeCombatLogLine(line, unitConversion)
 		
 	elseif layoutId == LAYOUT_STATS then			-- type, timems, statchange, newvalue, statname
 		
-		line[5] = statTableSave[line[5]]
 		line[3] = line[3] + 8388608					-- avoid negative numbers
 	
 	elseif layoutId == LAYOUT_POWER then			-- type, timems, abilityId, powerValueChange, powerType
@@ -248,7 +241,7 @@ local function encodeCombatLogLine(line, unitConversion)
 	return logstring, size
 end
 
-local function decodeCombatLogLine(line)
+local function decodeCombatLogLine(line, fight)
 
 	local linetype = values[string.sub(line, 1, 1)]
 	
@@ -272,7 +265,7 @@ local function decodeCombatLogLine(line)
 		
 	elseif layoutId == LAYOUT_STATS then					-- type, timems, statchange, newvalue, statname
 		
-		logdata[5] = statTableLoad[logdata[5]]
+		if fight.svversion < 5 then logdata[5] = statTableConvert[logdata[5]] end
 		logdata[3] = logdata[3] - 8388608					-- recover negative numbers
 	
 	elseif layoutId == LAYOUT_POWER then					-- type, timems, abilityId, powerValueChange, powerType
@@ -335,7 +328,7 @@ local function convertCombatLog(savedFight, filters)
 			
 			line[2] = line[2] - starttime
 			
-			local logstring, size = encodeCombatLogLine(line, unitConversion)
+			local logstring, size = encodeCombatLogLine(line, savedFight)
 			
 			if logstring then 
 			
@@ -364,7 +357,7 @@ local function convertCombatLog(savedFight, filters)
 			
 				line[2] = line[2] - starttime
 			
-				local logstring, size = encodeCombatLogLine(line, unitConversion)
+				local logstring, size = encodeCombatLogLine(line, savedFight)
 				
 				if logstring then 
 				
@@ -414,7 +407,7 @@ local function recoverCombatLog(loadedFight)
 	
 		for line in string.gfind(data, ",?(.-),") do
 		
-			local logline = decodeCombatLogLine(line)
+			local logline = decodeCombatLogLine(line, loadedFight)
 			
 			if logline[2] < 16776016 then
 			

@@ -1132,8 +1132,8 @@ local function ProcessLogResources(fight, callbacktype, timems, abilityId, power
 	
 	if powerType == POWERTYPE_ULTIMATE then
 		
-		local tablekey = powerValueChange >= 0 and "gains" or "drains"
-		resourceData["total"..tablekey] = resourceData["total"..tablekey] + change	
+		local tablekey = powerValueChange >= 0 and "totalgains" or "totaldrains"
+		resourceData[tablekey] = resourceData[tablekey] + change	
 	
 	else
 	
@@ -1146,7 +1146,11 @@ end
 ProcessLog[LIBCOMBAT_EVENT_RESOURCES] = ProcessLogResources
 
 local function ProcessLogStats(fight, callbacktype, timems, statchange, newvalue, stat)
-	fight.calculated.stats["current"..stat] = newvalue
+
+	local key = LC.GetStatNameCurrent(stat)
+	
+	fight.calculated.stats[key] = newvalue
+	
 end
 
 ProcessLog[LIBCOMBAT_EVENT_PLAYERSTATS] = ProcessLogStats
