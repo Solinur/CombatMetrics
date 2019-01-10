@@ -315,7 +315,7 @@ local function GetFormattedAbilityIcon(id)
 	
 	local icon = AbilityIconCache[id]
 	
-	if name == nil then 
+	if icon == nil then 
 	
 		icon = CustomAbilityIcon[id] or GetAbilityIcon(id)
 		AbilityIconCache[id] = icon
@@ -341,7 +341,7 @@ local critbonusabilities = {
 	
 }
 
-local MajorForceAbility = {
+local MajorForceAbility = {		-- All AbilityId's that cause Major Force. Used to calculate the Critical Damage Bonus stat.
 
 	[40225] = true,
 	[46533] = true,
@@ -353,10 +353,11 @@ local MajorForceAbility = {
 	[86472] = true,
 	[86476] = true,
 	[88891] = true,
+	[112345] = true,
 
 }
 
-local MinorForceAbility = {
+local MinorForceAbility = {		-- All AbilityId's that cause Minor Force. Used to calculate the Critical Damage Bonus stat.
 
 	[61746] = true,
 	[68595] = true,
@@ -371,7 +372,6 @@ local MinorForceAbility = {
 	[68636] = true,
 	[68638] = true,
 	[68640] = true,
-	[75766] = true,
 	[76564] = true,
 	[80984] = true,
 	[80986] = true,
@@ -382,11 +382,15 @@ local MinorForceAbility = {
 	[81012] = true,
 	[81014] = true,
 	[85611] = true,
+	[103521] = true,
 	[103708] = true,
+	[103712] = true,
+	[104403] = true,
+	[106861] = true,
 
 }
 
-local SpecialBuffs = {
+local SpecialBuffs = {	-- buffs that the API doesn't show via EVENT_EFFECT_CHANGED and need to be specially tracked via EVENT_COMBAT_EVENT
 
 	21230,	-- Weapon/spell power enchant (Berserker)
 	21578,	-- Damage shield enchant (Hardening)
@@ -406,12 +410,14 @@ local SpecialBuffs = {
 	
 }
 
-		
-local SpecialDebuffs = {
+
+local SpecialDebuffs = {   -- debuffs that the API doesn't show via EVENT_EFFECT_CHANGED and need to be specially tracked via EVENT_COMBAT_EVENT
+	
 	17906,  -- Crusher Enchantment
+
 }
 
-local abilityConversions = {
+local abilityConversions = {	-- Ability conversions for tracking skill activations
 
 	[29012] = 48744, -- Dragon Leap --> CC Immunity
 	[32719] = 48753, -- Take Flight --> CC Immunity
