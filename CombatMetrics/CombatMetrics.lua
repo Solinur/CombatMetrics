@@ -159,8 +159,6 @@ function CMX.SetCrusher(value)
  
 end
 
-
-
 function CMX.spairs(t, order) -- from https://stackoverflow.com/questions/15706270/sort-a-table-in-lua
 
     -- collect the keys
