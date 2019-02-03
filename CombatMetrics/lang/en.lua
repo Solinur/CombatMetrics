@@ -198,6 +198,8 @@
 	SI_COMBAT_METRICS_RESOURCES_PM = "Resources\n +/-",  -- Resources\n +/-
 
 	SI_COMBAT_METRICS_BUFF = "Buff",  -- Buff
+	SI_COMBAT_METRICS_BUFFS = "Buffs",  -- Buffs
+	SI_COMBAT_METRICS_DEBUFFS = "Debuffs",  -- Debuffs
 	SI_COMBAT_METRICS_SHARP = "#",  -- #
 	SI_COMBAT_METRICS_BUFFCOUNT_TT = "Player / Overall",  -- Player / Overall
 	SI_COMBAT_METRICS_UPTIME = "Uptime",  -- Uptime

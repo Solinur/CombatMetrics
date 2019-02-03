@@ -1172,15 +1172,29 @@
 		<Line name="CombatMetrics_PlotLine" color="AAFFFF00" thickness="2" layer="1" level="2" virtual="true">
 		</Line>
 		
+		<Backdrop name="CombatMetrics_PlotBar" edgeColor="00000000" centerColor="66CCCCFF" layer="1" level="2" virtual="true">
+		</Backdrop>
+		
 		<Control name="CombatMetrics_PlotControlXY" virtual="true">
 			<AnchorFill/>
 		</Control>
 		
 		<Control name="CombatMetrics_PlotControlBar" virtual="true">
-			<AnchorFill/>
+			
+			<Controls>
+			
+				<Texture name="$(parent)Icon" inherits="CombatMetrics_TextureTooltip">
+				
+					<Anchor point="LEFT"/>
+					<Dimensions x="20" y="20"/>
+				
+				</Texture>			
+			
+			</Controls>
+		
 		</Control>
 		
-		<Line name="CombatMetrics_GraphTickY" color="FF888888" thickness="COMBAT_METRICS_LINE_SIZE" virtual="true">
+		<Line name="CombatMetrics_GraphTickY" color="FF444444" thickness="COMBAT_METRICS_LINE_SIZE" virtual="true">
 		
 			<Controls>
 			
@@ -1198,7 +1212,7 @@
 	
 		</Line>
 		
-		<Line name="CombatMetrics_GraphTickX" color="FF888888" thickness="COMBAT_METRICS_LINE_SIZE" virtual="true">
+		<Line name="CombatMetrics_GraphTickX" color="FF333333" thickness="COMBAT_METRICS_LINE_SIZE" virtual="true">
 		
 			<Controls>
 			
@@ -1217,7 +1231,7 @@
 			
 			<Controls>
 			
-				<Backdrop name="$(parent)ColorBox" centerColor="FFFFFF00" edgeColor="FF333333" mouseEnabled="true">
+				<Backdrop name="$(parent)ColorBox" centerColor="FF333333" edgeColor="FF333333" mouseEnabled="true">
 				
 					<Anchor point="LEFT" offsetX="0" offsetY="0" />
 					
@@ -1248,7 +1262,33 @@
 				</Label>
 				
 			</Controls>
-		</Control>	
+		</Control>
+		
+		<Control name="CombatMetrics_BuffSelector" virtual="true">
+		
+			<Dimensions y="24" />
+			
+			<Controls>
+			
+				<Backdrop name="$(parent)ColorBox" centerColor="FF333333" edgeColor="FF333333" mouseEnabled="true">
+				
+					<Anchor point="LEFT" offsetX="0" offsetY="0" />
+					
+					<Dimensions x="10" y="24"/>
+				
+					<Edge edgeSize="2"/>
+				
+				</Backdrop>
+				
+				<Label name="$(parent)Label" inherits="CombatMetrics_LabelFontControl" text="-" horizontalAlignment="LEFT" verticalAlignment="CENTER">
+					
+					<Anchor point="LEFT" relativeTo="$(parent)ColorBox" relativePoint="RIGHT" offsetX="8" offsetY="0" />
+					<Anchor point="RIGHT" offsetX="-4" offsetY="0" />
+					
+				</Label>
+				
+			</Controls>
+		</Control>
 		
 		<TopLevelControl name="CombatMetrics_Report" clampedToScreen="true" mouseEnabled="true" movable="true" hidden="true">
 			
@@ -2274,55 +2314,38 @@
 								
 									<Controls>
 										
-										<Control name="$(parent)DataSelector1" inherits="CombatMetrics_DataSelector">
+										<Control name="$(parent)ToggleSize" mouseEnabled="true"> 
 										
 											<Anchor point="TOPLEFT" offsetX="2" offsetY="4"/>
 											<Anchor point="TOPRIGHT" offsetX="-2" offsetY="4"/>
-											
-											<OnInitialized> self.id = 1 </OnInitialized>
-											
-										</Control>
+											<Dimensions y="20" />
 										
-										<Control name="$(parent)DataSelector2" inherits="CombatMetrics_DataSelector">
+											<Controls>
+											
+												<Backdrop name="$(parent)Bg" inherits="CombatMetrics_BackgroundFramed" centerColor="CC222222">
+													
+													<Anchor point="TOPLEFT" offsetX="0"/>
+													<Anchor point="BOTTOMRIGHT" offsetX="0"/>
+													
+												</Backdrop>
+												
+												<Label name="$(parent)Label" inherits="CombatMetrics_LabelFontControl" text="SI_COMBAT_METRICS_ENLARGE" verticalAlignment="CENTER" horizontalAlignment="CENTER">
+													
+													<Anchor point="TOPLEFT" relativeTo="$(parent)Bg"/>
+													<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Bg"/>
+												
+												</Label>
+											
+											</Controls>
+											
+											<OnMouseUp> CMX.ToggleGraphSize(self) </OnMouseUp>
 										
-											<Anchor point="TOPLEFT" relativeTo="$(parent)DataSelector1" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
-											<Anchor point="TOPRIGHT" relativeTo="$(parent)DataSelector1" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
-											
-											<OnInitialized> self.id = 2 </OnInitialized>
-											
-										</Control>	
-										
-										<Control name="$(parent)DataSelector3" inherits="CombatMetrics_DataSelector">
-										
-											<Anchor point="TOPLEFT" relativeTo="$(parent)DataSelector2" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
-											<Anchor point="TOPRIGHT" relativeTo="$(parent)DataSelector2" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
-											
-											<OnInitialized> self.id = 3 </OnInitialized>
-											
-										</Control>	
-										
-										<Control name="$(parent)DataSelector4" inherits="CombatMetrics_DataSelector">
-										
-											<Anchor point="TOPLEFT" relativeTo="$(parent)DataSelector3" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
-											<Anchor point="TOPRIGHT" relativeTo="$(parent)DataSelector3" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
-											
-											<OnInitialized> self.id = 4 </OnInitialized>
-											
-										</Control>	
-										
-										<Control name="$(parent)DataSelector5" inherits="CombatMetrics_DataSelector">
-										
-											<Anchor point="TOPLEFT" relativeTo="$(parent)DataSelector4" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
-											<Anchor point="TOPRIGHT" relativeTo="$(parent)DataSelector4" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
-											
-											<OnInitialized> self.id = 5 </OnInitialized>
-											
-										</Control>										
+										</Control>									
 									
 										<Control name="$(parent)SmoothControl" mouseEnabled="true"> 
 										
-											<Anchor point="TOPLEFT" relativeTo="$(parent)DataSelector5" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="12"/>
-											<Anchor point="TOPRIGHT" relativeTo="$(parent)DataSelector5" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="12"/>
+											<Anchor point="TOPLEFT" relativeTo="$(parent)ToggleSize" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
+											<Anchor point="TOPRIGHT" relativeTo="$(parent)ToggleSize" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
 											<Dimensions y="50" />
 											
 											<Controls>
@@ -2356,33 +2379,55 @@
 											
 										</Control>
 										
-										<Control name="$(parent)ToggleSize" mouseEnabled="true"> 
+										<Control name="$(parent)DataSelector1" inherits="CombatMetrics_DataSelector">
 										
-											<Anchor point="TOPLEFT" relativeTo="$(parent)SmoothControl" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="12"/>
-											<Anchor point="TOPRIGHT" relativeTo="$(parent)SmoothControl" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="12"/>
-											<Dimensions y="20" />
-										
-											<Controls>
+											<Anchor point="TOPLEFT" relativeTo="$(parent)SmoothControl" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
+											<Anchor point="TOPRIGHT" relativeTo="$(parent)SmoothControl" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
 											
-												<Backdrop name="$(parent)Bg" inherits="CombatMetrics_BackgroundFramed" centerColor="CC222222">
-													
-													<Anchor point="TOPLEFT" offsetX="0"/>
-													<Anchor point="BOTTOMRIGHT" offsetX="0"/>
-													
-												</Backdrop>
-												
-												<Label name="$(parent)Label" inherits="CombatMetrics_LabelFontControl" text="SI_COMBAT_METRICS_ENLARGE" verticalAlignment="CENTER" horizontalAlignment="CENTER">
-													
-													<Anchor point="TOPLEFT" relativeTo="$(parent)Bg"/>
-													<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Bg"/>
-												
-												</Label>
-											
-											</Controls>
-											
-											<OnMouseUp> CMX.ToggleGraphSize(self) </OnMouseUp>
-										
 										</Control>
+										
+										<Control name="$(parent)DataSelector2" inherits="CombatMetrics_DataSelector">
+										
+											<Anchor point="TOPLEFT" relativeTo="$(parent)DataSelector1" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
+											<Anchor point="TOPRIGHT" relativeTo="$(parent)DataSelector1" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
+											
+										</Control>	
+										
+										<Control name="$(parent)DataSelector3" inherits="CombatMetrics_DataSelector">
+										
+											<Anchor point="TOPLEFT" relativeTo="$(parent)DataSelector2" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
+											<Anchor point="TOPRIGHT" relativeTo="$(parent)DataSelector2" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
+											
+										</Control>	
+										
+										<Control name="$(parent)DataSelector4" inherits="CombatMetrics_DataSelector">
+										
+											<Anchor point="TOPLEFT" relativeTo="$(parent)DataSelector3" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
+											<Anchor point="TOPRIGHT" relativeTo="$(parent)DataSelector3" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
+											
+										</Control>	
+										
+										<Control name="$(parent)DataSelector5" inherits="CombatMetrics_DataSelector">
+										
+											<Anchor point="TOPLEFT" relativeTo="$(parent)DataSelector4" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
+											<Anchor point="TOPRIGHT" relativeTo="$(parent)DataSelector4" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
+											
+										</Control>
+										
+										<Control name="$(parent)BuffSelector1" inherits="CombatMetrics_BuffSelector">
+										
+											<Anchor point="TOPLEFT" relativeTo="$(parent)DataSelector5" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="12"/>
+											<Anchor point="TOPRIGHT" relativeTo="$(parent)DataSelector5" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="12"/>
+											
+										</Control>
+										
+										<Control name="$(parent)BuffSelector2" inherits="CombatMetrics_BuffSelector">
+										
+											<Anchor point="TOPLEFT" relativeTo="$(parent)BuffSelector1" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
+											<Anchor point="TOPRIGHT" relativeTo="$(parent)BuffSelector1" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
+											
+										</Control>	
+										
 									</Controls>
 									
 								</Control>
@@ -2445,7 +2490,7 @@
 											<Anchor point="LEFT" relativePoint="TOPLEFT" offsetX="-3"/>
 											<Anchor point="RIGHT" relativePoint="TOPRIGHT" offsetX="3"/>
 									
-										</Line>
+										</Line>									
 									
 										<Line name="$(parent)YTick4" inherits="CombatMetrics_GraphTickY">
 									
@@ -2474,7 +2519,7 @@
 											<Anchor point="RIGHT" relativePoint="BOTTOMRIGHT" offsetX="3"/>
 									
 										</Line> 
-									
+										
 										<Line name="$(parent)XTick1" color="FFFFFFFF" level="1" inherits="CombatMetrics_GraphTickX">
 									
 											<Anchor point="TOP" relativePoint="TOPLEFT" offsetY="0"/>

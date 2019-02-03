@@ -14,6 +14,8 @@ local SVHandler
 local ToggleFeedback
 local barKeyOffset = 1
 local enlargedGraph = false
+local maxXYPlots = 5
+local maxBarPlots = 8
 
 local CMX = CMX
 if CMX == nil then CMX = {} end
@@ -741,6 +743,7 @@ function CMX.SelectRightPanel(control)
 	panel.active = isbuffpanel and buffList or resourceList
 	
 	panel:Update()
+	CombatMetrics_Report_MainPanelGraph:Update()
 	
 end
 
@@ -1687,15 +1690,10 @@ local function buffSortFunction(data, a, b)
 
 end
 
-local function updateBuffPanel(panel)
+local function GetBuffData()
 
-	CMX.Print("dev", "Updating BuffPanel")
-
-	ResetBars(panel)
-	
-	if fightData == nil then return end
-	
 	local buffdata
+	
 	local rightpanel = db.FightReport.rightpanel
 	
 	if rightpanel == "buffsout" then 
@@ -1706,7 +1704,20 @@ local function updateBuffPanel(panel)
 	
 		buffdata = fightData.calculated 
 		
-	else return	end
+	end
+
+	return buffdata
+end
+
+local function updateBuffPanel(panel)
+
+	CMX.Print("dev", "Updating BuffPanel")
+
+	ResetBars(panel)
+	
+	if fightData == nil then return end
+	
+	local buffdata = GetBuffData()
 	
 	if buffdata == nil then return end
 	
@@ -1722,6 +1733,7 @@ local function updateBuffPanel(panel)
 	local favs = db.FightReport.FavouriteBuffs
 	
 	for buffName, buff in CMX.spairs(buffdata["buffs"], buffSortFunction) do
+	
 		if buff.groupUptime > 0 then
 
 			-- prepare contents
@@ -1967,7 +1979,6 @@ local function updateUnitPanel(panel)
 	local rightpanel = db.FightReport.rightpanel
 	
 	local showids = db.debuginfo.ids
-	local scale = db.FightReport.scale
 		
 	for unitId, unit in CMX.spairs(data.units, function(t, a, b) return t[a][totalAmountKey]>t[b][totalAmountKey] end) do -- i.e. for damageOut sort by damageOutTotal
 	
@@ -2601,6 +2612,8 @@ local function DrawLine(plot, coords, id)
 	
 	local line = lineControls[id]
 	
+	local PlotColors = db.FightReport.PlotColors
+	
 	line:SetThickness(dx * 2) 
 	line:SetColor(unpack(db.FightReport.PlotColors[plotid])) 
 	line:ClearAnchors()
@@ -2695,6 +2708,50 @@ local function DrawLine(plot, coords, id)
 	
 end
 
+local function DrawBar(plot, x1, x2, id)
+
+	local plotid = plot.id
+	local barControls = plot.barControls
+
+	if barControls[id] == nil then
+	
+		barControls[id] = CreateControlFromVirtual("$(parent)Bar", plot, "CombatMetrics_PlotBar", id)
+		
+	end	
+	
+	local bar = barControls[id]
+	
+	bar:ClearAnchors()
+	
+	local minX = 0
+	
+	local xoffset = plot.xoffset
+	
+	local maxX, _ = plot:GetDimensions() - xoffset
+	
+	local outOfRange = ( x2 < minX ) or ( x1 > maxX )
+	
+	if outOfRange then	-- bar is completely out of drawing area
+	
+		bar:SetHidden(false)
+		return
+		
+	end
+	
+	local left = math.max(x1, minX) + xoffset
+	local right = math.min(x2, maxX) + xoffset
+	
+	local PlotColors = db.FightReport.PlotColors
+	
+	local color = plot.effectType == BUFF_EFFECT_TYPE_BUFF and PlotColors[6] or PlotColors[7]
+	
+	bar:SetAnchor(TOPLEFT, plot, TOPLEFT, left, 0)
+	bar:SetAnchor(BOTTOMRIGHT, plot, BOTTOMLEFT, right, 0)
+	bar:SetCenterColor(unpack(color))
+	bar:SetHidden(false)
+	
+end
+
 local COMBAT_METRICS_YAXIS_LEFT = 1
 local COMBAT_METRICS_YAXIS_RIGHT = 2
 
@@ -2740,6 +2797,32 @@ local function DrawXYPlot(plot)
 		inRange0 = inRange
 	
 	end
+end
+
+local function DrawBarPlot(plot)
+
+	local plotWindow = plot:GetParent()
+
+	local bardata = plot.bardata
+	
+	if bardata == nil then return end
+	
+	for id, bar in ipairs(plot.barControls) do	-- hide previous Plot
+
+		bar:SetHidden(true)
+	
+	end
+	
+	for id, times in ipairs(bardata) do
+	
+		local t1, t2 = unpack(times)
+		local x1, inRange1 = plotWindow:MapValue(CMX_PLOT_DIMENSION_X, t1, false)
+		local x2, inRange2 = plotWindow:MapValue(CMX_PLOT_DIMENSION_X, t2, false)
+		
+		DrawBar(plot, x1, x2, id)
+	
+	end
+
 end
 
 local CMX_PLOT_TYPE_XY = 1
@@ -2933,7 +3016,7 @@ local function ResourceAbsolute(powerType)
 
 	local logData = fightData.log
 	
-	local starttime = fightData.combatstart/1000
+	local combatstart = fightData.combatstart/1000
 
 	local XYData = {}
 	
@@ -2943,9 +3026,9 @@ local function ResourceAbsolute(powerType)
 	
 		if lineData[1] == LIBCOMBAT_EVENT_RESOURCES and lineData[5] == powerType and lineData[6] then 
 	
-			local deltatime = math.floor(lineData[2]/1000 - starttime)
+			local deltatime = math.floor(lineData[2]/1000 - combatstart)
 			
-			value = lineData[6]
+			value = lineData[6] or 0
 			
 			updateXYData(XYData, deltatime, value)
 			
@@ -2975,7 +3058,7 @@ local function BossHPAbsolute()
 
 	local logData = fightData.log
 	
-	local starttime = fightData.combatstart/1000
+	local combatstart = fightData.combatstart/1000
 
 	local XYData = {}
 	
@@ -2988,7 +3071,7 @@ local function BossHPAbsolute()
 	
 		if lineData[1] == LIBCOMBAT_EVENT_BOSSHP then 
 	
-			local deltatime = math.floor(lineData[2]/1000 - starttime)
+			local deltatime = math.floor(lineData[2]/1000 - combatstart)
 			
 			maxhp = math.max(lineData[5], maxhp)
 			
@@ -3018,7 +3101,7 @@ local function StatAbsolute(statId)
 
 	local logData = fightData.log
 	
-	local starttime = fightData.combatstart/1000
+	local combatstart = fightData.combatstart/1000
 
 	local XYData = {}
 	
@@ -3034,7 +3117,7 @@ local function StatAbsolute(statId)
 			
 			maxvalue = math.max(value, maxvalue) 
 	
-			local deltatime = math.floor(lineData[2]/1000 - starttime)	
+			local deltatime = math.floor(lineData[2]/1000 - combatstart)	
 	
 			updateXYData(XYData, deltatime, value)
 			
@@ -3052,28 +3135,76 @@ local function StatAbsolute(statId)
 	return XYData, COMBAT_METRICS_YAXIS_RIGHT
 end
 
-local function AddUptimePlot(plotWindow, id, height)
+local function AcquireBuffData(buffName)
 
-	local plots = plotWindow.plots
-
-	if plots[id] == nil then
+	if fightData == nil then return end
 	
-		local newplot = CreateControlFromVirtual("CombatMetrics_Report_MainPanelGraphPlot", plotWindow, plotTypeTemplates[CMX_PLOT_TYPE_BAR], id)
+	local rightpanel = db.FightReport.rightpanel	
+	
+	local category = db.FightReport.category
+	
+	local unitselections = rightpanel == "buffs" and {[fightData.playerid] = 1} or selections.unit[category]
+
+	local logData = fightData.log
+	
+	local combatstart = fightData.combatstart/1000
+	local combattime = fightData.combattime
+	
+	local timeData = {}
+	
+	local first = true
+	local lastslot
+	
+	local slots = {}
+	
+	for line, lineData in ipairs(logData) do
+	
+		local unit = lineData[3]
+	
+		if (lineData[1] == LIBCOMBAT_EVENT_EFFECTS_IN or lineData[1] == LIBCOMBAT_EVENT_EFFECTS_OUT) and GetFormattedAbilityName(lineData[4]) == buffName and ((unitselections and unitselections[unit]) or (unitselections == nil)) then 
 		
-		newplot.plotType = CMX_PLOT_TYPE_BAR
-		
-		plots[id] = newplot
-		
+			local deltatime = lineData[2]/1000 - combatstart
+			
+			local effectSlot = lineData[9]			
+	
+			if lineData[5] == EFFECT_RESULT_GAINED and deltatime < combattime then
+				
+				slots[effectSlot] = deltatime
+				first = false
+				lastslot = effectSlot
+			
+			elseif lineData[5] == EFFECT_RESULT_FADED then
+			
+				local starttime = first and 0 or slots[effectSlot] or nil
+				
+				if starttime and deltatime > starttime and deltatime > 0 then 
+				
+					local previoustimes = timeData[#timeData]
+				
+					local prevend = previoustimes and previoustimes[2] or nil
+					local prevunit = previoustimes and previoustimes[3] or nil
+					
+					if prevend and (math.abs(starttime - prevend)) < 0.02 and prevunit == unit then 		-- to avoid drawing too many controls: if a buff is renewed within 20 ms, consider it continious
+					
+						previoustimes[2] = deltatime
+						
+					else 
+				
+						table.insert(timeData, {starttime, deltatime, unit}) 
+						
+					end				
+				end
+				
+				lastslot = nil
+			
+			end
+		end
 	end
 	
-	local plot = plots[id]
+	if lastslot and slots[lastslot] < fightData.combattime then table.insert(timeData, {slots[lastslot], fightData.combattime}) end
 	
-	plot:ClearAnchors()
-	plot:SetAnchor(TOPLEFT, plotWindow, TOPLEFT, -24, height)
-	plot:SetAnchor(TOPRIGHT, plotWindow, TOPRIGHT, 0, height)
-	plot:SetHeight(20 * dx)
-		
-	return plot
+	return timeData
+
 end
 
 local function GetScale(x1, x2)	-- e.g. 34596 and 42693
@@ -3199,7 +3330,7 @@ local function GetRequiredRange(plotWindow, newRange, startZero)
 
 end
 
-local function UpdatePlotXY(plot)
+local function UpdateXYPlot(plot)
 	
 	local func = plot.func
 	
@@ -3242,7 +3373,7 @@ local function UpdatePlotXY(plot)
 		
 			for i = 1, plot.id - 1 do
 			
-				plotWindow.plots[i]:DrawXYPlot()
+				plotWindow.plots[i]:DrawPlot()
 				
 			end
 		end
@@ -3253,8 +3384,78 @@ local function UpdatePlotXY(plot)
 	plot.XYData = XYData
 	plot.YAxisSide = YAxisSide
 	
-	plot:DrawXYPlot()
+	plot:DrawPlot()
 	
+end
+
+local PlotBuffSelection = {}
+
+local function UpdatePlotBuffSelection()
+
+	PlotBuffSelection = {}
+
+	local selectedbuffs = selections["buff"]["buff"]
+	
+	local buffdata = GetBuffData()
+	
+	if buffdata == nil then return end
+	
+	for buffName, buff in CMX.spairs(buffdata["buffs"], buffSortFunction) do
+	
+		if selectedbuffs and selectedbuffs[buffName] ~= nil then PlotBuffSelection[#PlotBuffSelection + 1] = buffName end
+		
+		if #PlotBuffSelection >= maxBarPlots then return end	
+		
+	end
+end
+
+local function UpdateBarPlot(plot)
+
+	local barId = plot.barId or 0
+	
+	local buffName = PlotBuffSelection[barId]	
+	local buffdata = GetBuffData()
+	
+	local data = buffName and buffdata and buffdata.buffs[buffName] or nil
+	
+	if buffName == nil then 
+	
+		plot:SetHidden(true)
+	
+		return 
+		
+	end
+	
+	local bardata = AcquireBuffData(buffName)
+	
+	plot:SetHidden(false)
+	
+	plotWindow = plot:GetParent()
+	
+	local plotheight = plotWindow:GetHeight()
+	
+	local totalSlots = #PlotBuffSelection > 4 and 8 or 4
+
+	local position = plotheight * (barId - 0.5)/totalSlots
+	
+	local scale = db.FightReport.scale
+	local xoffset = scale * 24
+	
+	plot:SetAnchor(LEFT, plotWindow, TOPLEFT, -xoffset, position)
+	plot:SetAnchor(RIGHT, plotWindow, TOPRIGHT, 0, position)
+	plot:SetHeight(scale * 20)
+	
+	local icon = plot:GetNamedChild("Icon")
+	
+	icon:SetTexture(GetFormattedAbilityIcon(data.icon))
+	icon.tooltip = {buffName}
+	
+	plot.bardata = bardata
+	plot.xoffset = xoffset
+	plot.effectType = data.effectType
+
+	plot:DrawPlot()
+
 end
 
 local function updateGraphPanel(panel)
@@ -3288,6 +3489,8 @@ local function updateGraphPanel(panel)
 	plotWindow:SetHidden(false)
 	plotWindow.RangesX = {0, 0, {}}
 	plotWindow.RangesY = {0, 0, {}}
+	
+	UpdatePlotBuffSelection()
 	
 	for id, plot in ipairs(plotWindow.plots) do
 	
@@ -3389,9 +3592,9 @@ do
 			
 			for id, plot in pairs(plotWindow.plots) do
 			
-				if plot.DrawXYPlot then
+				if plot.DrawPlot then
 				
-					plot:DrawXYPlot()
+					plot:DrawPlot()
 					
 				end
 			end
@@ -3413,9 +3616,9 @@ do
 
 			for id, plot in pairs(plotWindow.plots) do
 			
-				if plot.DrawXYPlot then
+				if plot.DrawPlot then
 				
-					plot:DrawXYPlot()
+					plot:DrawPlot()
 					
 				end
 			end
@@ -3427,9 +3630,9 @@ local PlotFunctions = {}
 
 local MainCategoryFunctions = {
 
-	[1] = {label = SI_COMBAT_METRICS_SMOOTHED, 	func = Smooth},
-	[2] = {label = SI_COMBAT_METRICS_ACCUMULATED, func = Accumulate},
-	[3] = {label = SI_COMBAT_METRICS_ABSOLUTE, func = Absolute},
+	[1] = {label = SI_COMBAT_METRICS_SMOOTHED, 		func = Smooth},
+	[2] = {label = SI_COMBAT_METRICS_ACCUMULATED, 	func = Accumulate},
+	[3] = {label = SI_COMBAT_METRICS_ABSOLUTE, 		func = Absolute},
 
 }
 
@@ -3538,22 +3741,6 @@ function CMX.PlotSelectionMenu(selector)
 		table.insert(submenu2, {label = GetString(data.label), callback = PlotFunctions[funcId]})
 		
 		funcId = funcId + 1
-		
-		--[[local submenu = {}
-	
-		for id2, data2 in ipairs(ResourceFunctions) do
-		
-			local stringid2 = data2.label
-		
-			table.insert(submenu, {label = GetString(stringid2), callback = PlotFunctions[funcId]})
-			
-			funcId = funcId + 1
-			
-		end
-		
-		local stringid = data.label
-		
-		AddCustomSubMenuItem(GetString(stringid), submenu)--]]
 	
 	end	
 	
@@ -3568,22 +3755,6 @@ function CMX.PlotSelectionMenu(selector)
 		funcId = funcId + 1
 		
 		if id == 5 or id == 10 then table.insert(submenu3, {label = "-"}) end
-		
-		--[[local submenu = {}
-	
-		for id2, data2 in ipairs(ResourceFunctions) do
-		
-			local stringid2 = data2.label
-		
-			table.insert(submenu, {label = GetString(stringid2), callback = PlotFunctions[funcId]})
-			
-			funcId = funcId + 1
-			
-		end
-		
-		local stringid = data.label
-		
-		AddCustomSubMenuItem(GetString(stringid), submenu)--]]
 	
 	end	
 	
@@ -3601,6 +3772,33 @@ local plotDefaultFunction = {
 	
 }
 
+local function InitBarPlot(plotWindow, id)
+
+	local plots = plotWindow.plots
+	
+	local newPlot = plots[id]
+
+	if newPlot == nil then
+	
+		newPlot = CreateControlFromVirtual("CombatMetrics_Report_MainPanelGraphPlot", plotWindow, plotTypeTemplates[CMX_PLOT_TYPE_BAR], id)
+		
+		newPlot.plotType = CMX_PLOT_TYPE_BAR
+		
+		newPlot.barControls = {} 
+		newPlot.DrawPlot = DrawBarPlot
+		
+		newPlot.Update = UpdateBarPlot	
+		
+		newPlot.id = id
+		newPlot.barId = id - maxXYPlots
+		
+		plots[id] = newPlot
+		
+	end
+	
+	return newPlot
+end
+
 local function InitXYPlot(plotWindow, id)
 
 	local plots = plotWindow.plots
@@ -3614,9 +3812,9 @@ local function InitXYPlot(plotWindow, id)
 		newPlot.plotType = CMX_PLOT_TYPE_XY
 		
 		newPlot.lineControls = {} 
-		newPlot.DrawXYPlot = DrawXYPlot
+		newPlot.DrawPlot = DrawXYPlot
 		
-		newPlot.Update = UpdatePlotXY		
+		newPlot.Update = UpdateXYPlot		
 		newPlot.autoRange = true		
 		
 		newPlot.id = id
@@ -3684,7 +3882,7 @@ local function initPlotWindow(plotWindow)
 	plotWindow.MapUIPos = MapUIPos
 	plotWindow.MapUIPosXY = MapUIPosXY
 	plotWindow.InitXYPlot = InitXYPlot
-	plotWindow.AddUptimePlot = AddUptimePlot
+	plotWindow.InitBarPlot = InitBarPlot
 	plotWindow.UpdateScales = UpdateScales
 	plotWindow.GetRequiredRange = GetRequiredRange
 	
@@ -3750,12 +3948,17 @@ local function initPlotWindow(plotWindow)
 		
 	end
 
-	for id = 1,5 do
+	for id = 1, maxXYPlots do
 	
 		plotWindow:InitXYPlot(id)
 		
 	end
 	
+	for id = maxXYPlots + 1, maxXYPlots + maxBarPlots do
+	
+		plotWindow:InitBarPlot(id)
+		
+	end	
 end
 
 function initPlotToolbar(toolbar)
@@ -3782,6 +3985,49 @@ function initPlotToolbar(toolbar)
 			selector.color = {r, g, b, a}
 			
 			PlotColors[i] = {r, g, b, a}
+			
+			toolbar:GetParent():Update()
+			
+		end
+
+		colorbox:SetHandler("OnMouseUp", function(self, button, upInside)
+
+				if upInside then
+				
+					local r, g, b, a = unpack(selector.color)
+					COLOR_PICKER:Show(updateColor, r, g, b, a)
+					
+				end
+			end
+		)		
+	end
+	
+	local labeltexts = {GetString(SI_COMBAT_METRICS_BUFFS), GetString(SI_COMBAT_METRICS_DEBUFFS)}
+
+	for i = 1,2 do
+	
+		local selector = toolbar:GetNamedChild("BuffSelector" .. i)
+
+		selector.id = i
+		
+		local label = selector:GetNamedChild("Label")
+		
+		label:SetText(labeltexts[i])
+		
+		local colorbox = selector:GetNamedChild("ColorBox")
+		
+		local color = PlotColors[i + 5]
+		
+		colorbox:SetCenterColor(unpack(color))
+		selector.color = color
+		
+		local function updateColor(r, g, b, a)
+		
+			colorbox:SetCenterColor(r, g, b, a)
+			
+			selector.color = {r, g, b, a}
+			
+			PlotColors[i + 5] = {r, g, b, a}
 			
 			toolbar:GetParent():Update()
 			
