@@ -96,7 +96,7 @@ SafeAddString(SI_COMBAT_METRICS_IN_COMBAT, "В бою: ") -- In Combat:
 
 SafeAddString(SI_COMBAT_METRICS_PLAYER, "Игрок") -- Player 
 
-SafeAddString(SI_COMBAT_METRICS_TOTAL, " Всего: ") -- Total: 
+SafeAddString(SI_COMBAT_METRICS_TOTALC, " Всего: ") -- Total: 
 SafeAddString(SI_COMBAT_METRICS_NORMAL, "Обычн.: ") -- Normal: 
 SafeAddString(SI_COMBAT_METRICS_CRITICAL, "Крит.: ") -- Critical: 
 SafeAddString(SI_COMBAT_METRICS_BLOCKED, "Блок.: ") -- Blocked: 

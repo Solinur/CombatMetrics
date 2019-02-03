@@ -1279,11 +1279,19 @@
 					<Edge edgeSize="2"/>
 				
 				</Backdrop>
+			
+				<Texture name="$(parent)GroupSelector" textureFile="esoui/art/journal/gamepad/gp_questtypeicon_group.dds" inherits="CombatMetrics_TextureTooltip">
+								
+					<Anchor point="RIGHT" offsetX="4" offsetY="0" />
+					
+					<Dimensions x="22" y="22"/>
+				
+				</Texture>
 				
 				<Label name="$(parent)Label" inherits="CombatMetrics_LabelFontControl" text="-" horizontalAlignment="LEFT" verticalAlignment="CENTER">
 					
 					<Anchor point="LEFT" relativeTo="$(parent)ColorBox" relativePoint="RIGHT" offsetX="8" offsetY="0" />
-					<Anchor point="RIGHT" offsetX="-4" offsetY="0" />
+					<Anchor point="RIGHT" relativeTo="$(parent)GroupSelector" relativePoint="RIGHT" offsetX="-8" offsetY="0" />
 					
 				</Label>
 				
@@ -1617,7 +1625,7 @@
 											<Anchor point="LEFT" relativeTo="$(parent)ActiveTimeLabel" constrains="X"/>
 											<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)StatTitleAmount" offsetY="4" constrains="Y"/>
 											<OnInitialized>
-												self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_TOTAL))
+												self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_TOTALC))
 											</OnInitialized>
 										</Control>
 										
@@ -1665,7 +1673,7 @@
 											<Anchor point="LEFT" relativeTo="$(parent)ActiveTimeLabel" constrains="X"/>
 											<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)StatTitleCount" offsetY="4" constrains="Y"/>
 											<OnInitialized>
-												self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_TOTAL))
+												self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_TOTALC))
 											</OnInitialized>
 										</Control>
 										
@@ -2363,7 +2371,7 @@
 													<Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT" offsetY="8"/>
 													<Anchor point="TOPRIGHT" relativeTo="$(parent)Label" relativePoint="BOTTOMRIGHT" offsetY="8"/>
 													
-													<Limits min="1" max="20" />
+													<Limits min="1" max="60" />
 													
 													<OnValueChanged>
 														CMX.SetSliderValue(self, value)
@@ -3125,7 +3133,7 @@
 											
 										</Label>										
 										
-										<Label name="$(parent)Label2" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_TOTAL" horizontalAlignment="LEFT">
+										<Label name="$(parent)Label2" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_TOTALC" horizontalAlignment="LEFT">
 										
 											<Anchor point="LEFT" offsetX="6" constrains="Y"/>
 											<Anchor point="TOPLEFT" relativePoint="TOP" constrains="X" offsetX="3" offsetY="0"/>

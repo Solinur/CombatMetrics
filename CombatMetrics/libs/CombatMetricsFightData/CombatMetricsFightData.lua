@@ -409,7 +409,7 @@ local function recoverCombatLog(loadedFight)
 		
 			local logline = decodeCombatLogLine(line, loadedFight)
 			
-			if logline[2] < 16776016 then
+			if logline[2] < 16600000 then
 			
 				logline[2] = logline[2] + starttime 
 

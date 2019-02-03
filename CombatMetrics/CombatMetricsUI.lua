@@ -932,14 +932,6 @@ do
 		CMX.PosttoChat("HPS", currentFight)
 		
 	end
-	
-	local function requestLuaSave()
-	
-		GetAddOnManager():RequestAddOnSavedVariablesPrioritySave("CombatMetrics")
-		GetAddOnManager():RequestAddOnSavedVariablesPrioritySave("CombatMetricsFightData")
-		d("Save Requested: " .. CMX.name)
-		
-	end
 
 	function CMX.SettingsContextMenu( settingsbutton, upInside )
 
@@ -984,8 +976,6 @@ do
 		
 		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_FEEDBACK), ToggleFeedback)
 		
-		if GetAPIVersion() > 100024 then AddCustomMenuItem(GetString(SI_COMBAT_METRICS_SAVEHDD), requestLuaSave) end 
-
 		ShowMenu(settingsbutton)
 		AnchorMenu(settingsbutton)		
 
@@ -2879,7 +2869,7 @@ local function Smooth(category)
 	return XYData, COMBAT_METRICS_YAXIS_LEFT
 end
 
-local function Accumulate(category)
+local function Total(category)
 
 	if fightData == nil then return end
 
@@ -3153,27 +3143,32 @@ local function AcquireBuffData(buffName)
 	local timeData = {}
 	
 	local first = true
-	local lastslot
+	local lastSlot
 	
 	local slots = {}
+		
+	local showGroupBuffs = db.FightReport.ShowGroupBuffsInPlots
 	
 	for line, lineData in ipairs(logData) do
-	
-		local unit = lineData[3]
-	
-		if (lineData[1] == LIBCOMBAT_EVENT_EFFECTS_IN or lineData[1] == LIBCOMBAT_EVENT_EFFECTS_OUT) and GetFormattedAbilityName(lineData[4]) == buffName and ((unitselections and unitselections[unit]) or (unitselections == nil)) then 
 		
-			local deltatime = lineData[2]/1000 - combatstart
-			
-			local effectSlot = lineData[9]			
+		local result, timems, unitId, abilityId, changeType = unpack(lineData)	-- unpack only runs until it encounters nil
+		local effectSlot = lineData[9]											-- so effectSlot has to be taken separately
+		
+		local isResult = result == LIBCOMBAT_EVENT_EFFECTS_IN or result == LIBCOMBAT_EVENT_EFFECTS_OUT
+		local isGroupResult = showGroupBuffs and (result == LIBCOMBAT_EVENT_GROUPEFFECTS_IN or result == LIBCOMBAT_EVENT_GROUPEFFECTS_OUT)
 	
-			if lineData[5] == EFFECT_RESULT_GAINED and deltatime < combattime then
+		if (isResult or isGroupResult) and GetFormattedAbilityName(abilityId) == buffName and ((unitselections and unitselections[unitId]) or (unitselections == nil)) then 
+		
+			local deltatime = timems/1000 - combatstart		
+	
+			if changeType == EFFECT_RESULT_GAINED and deltatime < combattime then
 				
 				slots[effectSlot] = deltatime
 				first = false
-				lastslot = effectSlot
+				lastSlot = effectSlot
+				lastUnit = unitId
 			
-			elseif lineData[5] == EFFECT_RESULT_FADED then
+			elseif changeType == EFFECT_RESULT_FADED then
 			
 				local starttime = first and 0 or slots[effectSlot] or nil
 				
@@ -3184,24 +3179,31 @@ local function AcquireBuffData(buffName)
 					local prevend = previoustimes and previoustimes[2] or nil
 					local prevunit = previoustimes and previoustimes[3] or nil
 					
-					if prevend and (math.abs(starttime - prevend)) < 0.02 and prevunit == unit then 		-- to avoid drawing too many controls: if a buff is renewed within 20 ms, consider it continious
+					if prevend and (math.abs(starttime - prevend)) < 0.02 and prevunit == unitId then 		-- to avoid drawing too many controls: if a buff is renewed within 20 ms, consider it continious
 					
 						previoustimes[2] = deltatime
 						
 					else 
 				
-						table.insert(timeData, {starttime, deltatime, unit}) 
+						table.insert(timeData, {starttime, deltatime, unitId}) 
 						
 					end				
 				end
 				
-				lastslot = nil
+				lastSlot = nil
 			
 			end
 		end
 	end
 	
-	if lastslot and slots[lastslot] < fightData.combattime then table.insert(timeData, {slots[lastslot], fightData.combattime}) end
+	if lastSlot then 
+		
+		local unittime = fightData.calculated.units[lastUnit].endtime
+		local endtime = unittime and (unittime/1000 - combatstart) or fightData.combattime
+	
+		if slots[lastSlot] < endtime then table.insert(timeData, {slots[lastSlot], endtime}) end
+		
+	end
 	
 	return timeData
 
@@ -3631,7 +3633,7 @@ local PlotFunctions = {}
 local MainCategoryFunctions = {
 
 	[1] = {label = SI_COMBAT_METRICS_SMOOTHED, 		func = Smooth},
-	[2] = {label = SI_COMBAT_METRICS_ACCUMULATED, 	func = Accumulate},
+	[2] = {label = SI_COMBAT_METRICS_TOTAL, 	func = Total},
 	[3] = {label = SI_COMBAT_METRICS_ABSOLUTE, 		func = Absolute},
 
 }
@@ -3768,7 +3770,7 @@ end
 local plotDefaultFunction = {
 
 	[1] = Smooth,
-	[2] = Accumulate,
+	[2] = Total,
 	
 }
 
@@ -4003,7 +4005,8 @@ function initPlotToolbar(toolbar)
 	end
 	
 	local labeltexts = {GetString(SI_COMBAT_METRICS_BUFFS), GetString(SI_COMBAT_METRICS_DEBUFFS)}
-
+	local showGroupBuffs = db.FightReport.ShowGroupBuffsInPlots
+	
 	for i = 1,2 do
 	
 		local selector = toolbar:GetNamedChild("BuffSelector" .. i)
@@ -4042,7 +4045,34 @@ function initPlotToolbar(toolbar)
 					
 				end
 			end
-		)		
+		)
+		
+		local groupSelector = selector:GetNamedChild("GroupSelector")
+		
+		groupSelector:SetAlpha(showGroupBuffs and 1 or 0.2)	
+
+		if i == 1 then 
+		
+			groupSelector:SetHandler("OnMouseUp", function(self, button, upInside)
+
+					if upInside then
+					
+						showGroupBuffs = not showGroupBuffs
+						db.FightReport.ShowGroupBuffsInPlots = showGroupBuffs
+						
+						groupSelector:SetAlpha(showGroupBuffs and 1 or 0.2)	
+						
+						toolbar:GetParent():Update()
+						
+					end
+				end
+			)
+		
+		else 
+		
+			groupSelector:SetHidden(true)
+			
+		end
 	end
 end
 
@@ -4189,7 +4219,7 @@ local function updateLeftInfoPanel(panel)
 		
 		local dpsratio, timeratio
 		
-		if barStats then
+		if barStats and type(barStats[category]) == "number" then
 		
 			dpsratio = (barStats[category] or 0) / data[category.."Total"]
 			

@@ -65,7 +65,7 @@ SafeAddString(SI_COMBAT_METRICS_IN_COMBAT, "戦闘中: ", 1) -- In Combat:
 
 SafeAddString(SI_COMBAT_METRICS_PLAYER, "プレイヤー", 1) -- Player
 
-SafeAddString(SI_COMBAT_METRICS_TOTAL, "合計: ", 1) -- Total: 
+SafeAddString(SI_COMBAT_METRICS_TOTALC, "合計: ", 1) -- Total: 
 SafeAddString(SI_COMBAT_METRICS_NORMAL, "通常: ", 1) -- Normal: 
 SafeAddString(SI_COMBAT_METRICS_CRITICAL, "クリティカル: ", 1) -- Critical: 
 SafeAddString(SI_COMBAT_METRICS_BLOCKED, "ブロック: ", 1) -- Blocked: 

@@ -1283,7 +1283,7 @@ end
 
 -- Event Functions 
 
-local function onCombatState(event, inCombat)  -- Detect Combat Stage
+function onCombatState(event, inCombat)  -- Detect Combat Stage, local is defined above - Don't Change !!!
 
 	if isInShadowWorld and IsUnitDead("player") == false then -- prevent fight reset in Cloudrest when using a portal.
 		
@@ -1417,6 +1417,15 @@ local function BuffEventHandler(isspecial, groupeffect, _, changeType, effectSlo
 		return 
 		
 	elseif inCombat == true then 
+
+		unit = currentfight.units[unitId]
+		
+		if unit then 
+
+			unit.starttime = unit.starttime or timems
+			unit.endtime = timems
+			
+		end
 	
 		if unitTag == "player" then currentfight:GetNewStats(timems) end
 		lib.cm:FireCallbacks((CallbackKeys[eventid]), eventid, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, effectSlot)
@@ -1805,6 +1814,9 @@ local function CheckUnit(unitName, unitId, unitType, timems)
 
 	unit.dpsstart = unit.dpsstart or timems
 	unit.dpsend = timems
+
+	unit.starttime = unit.starttime or timems
+	unit.endtime = timems
 	
 	if unitType == COMBAT_UNIT_TYPE_GROUP then 
 	

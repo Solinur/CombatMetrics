@@ -212,17 +212,21 @@ local BarStatsHandler = NewSubclass()
 local function AcquireUnitData(self, unitId, timems)
 
 	local units = self.calculated.units
-
-	if units[unitId] == nil then
 	
-		units[unitId] = UnitHandler:New()
-		units[unitId]["start"] = timems
+	local unit = units[unitId]
+
+	if unit == nil then
+	
+		unit = UnitHandler:New()
+		units[unitId] = unit
+		
+		unit.starttime = timems
 		
 	end
 	
-	units[unitId]["end"] = timems
+	unit.endtime = timems
 	
-	return units[unitId]
+	return unit
 end
 
 local function AcquireAbilityData(self, abilityId, ispet, damageType, tableKey)
@@ -765,7 +769,12 @@ function CMX.GenerateSelectionStats(fight, menuItem, selection) -- this is simil
 		
 		local unitData = fight.units[unitId]
 		
-		if unitData.name ~= CMX.playername and (unitTotalValue > 0 or NonContiguousCount(unit.buffs) > 0) and ((unitData.unitType~=COMBAT_UNIT_TYPE_GROUP and unitData.unitType~=COMBAT_UNIT_TYPE_PLAYER_PET and (menuItem=="damageIn" or menuItem=="damageOut")) or ((unitData.unitType==COMBAT_UNIT_TYPE_GROUP or unitData.unitType==COMBAT_UNIT_TYPE_PLAYER_PET) and (menuItem=="healingIn" or menuItem=="healingOut"))) then 
+		local isNotPlayer = unitData.name ~= CMX.playername
+		local isNotEmpty = unitTotalValue > 0 or NonContiguousCount(unit.buffs) > 0
+		local isEnemy = unitData.unitType ~= COMBAT_UNIT_TYPE_GROUP and unitData.unitType ~= COMBAT_UNIT_TYPE_PLAYER_PET 
+		local isDamageCategory = menuItem == "damageIn" or menuItem == "damageOut"
+		
+		if isNotPlayer and isNotEmpty and (isEnemy == isDamageCategory) then 
 			
 			for name, buff in pairs(unit.buffs) do
 			
@@ -783,11 +792,15 @@ function CMX.GenerateSelectionStats(fight, menuItem, selection) -- this is simil
 				selectiondata.buffs[name] = selectedbuff
 			end
 
-			selectiondata.totalUnitTime = (selectiondata.totalUnitTime or 0) + (math.min(fight.endtime, unitData.dpsend) - math.max(fight.starttime, unitData.dpsstart))
+			selectiondata.totalUnitTime = (selectiondata.totalUnitTime or 0) + (math.min(fight.endtime, unit.endtime or unitData.dpsend) - math.max(fight.starttime, unit.starttime or unitData.dpsstart))
+		
 		end
 	end
 	
 	selectiondata.totalValueSum = totalValueSum
+	
+	CMX.selectiondata = selectiondata
+	
 	return selectiondata
 end
 
@@ -920,7 +933,7 @@ local function ProcessLogDamage(fight, callbacktype, timems, result, sourceUnitI
 	
 	if callbacktype == LIBCOMBAT_EVENT_DAMAGE_OUT then 
 		
-		unit = fight:AcquireUnitData(targetUnitId)
+		unit = fight:AcquireUnitData(targetUnitId, timems)
 		abilitydata = unit:AcquireAbilityData(abilityId, ispet, damageType, "damageOut")	-- get table for ability (within the unittable)
 		isDamageOut = true
 		
@@ -930,7 +943,7 @@ local function ProcessLogDamage(fight, callbacktype, timems, result, sourceUnitI
 		
 	else																												-- incoming and self inflicted Damage are consolidated.
 		
-		abilitydata = fight:AcquireUnitData(sourceUnitId):AcquireAbilityData(abilityId, ispet, damageType, "damageIn")
+		abilitydata = fight:AcquireUnitData(sourceUnitId, timems):AcquireAbilityData(abilityId, ispet, damageType, "damageIn")
 		isDamageOut = false
 		
 		dmgkey = "damageIn" .. resultkey	-- determine categories. For normal incoming damage: dmgkey = "damageNormal", for critical outgoing damage: dmgkey = "damageCritical" ...
@@ -1040,7 +1053,7 @@ local function ProcessLogEffects(fight, callbacktype, timems, unitId, abilityId,
 
 	if timems < (fight.combatstart - 500) or fight.units[unitId] == nil then return end
 	
-	local unit = fight:AcquireUnitData(unitId)
+	local unit = fight:AcquireUnitData(unitId, timems)
 	local effectdata = unit:AcquireEffectData(abilityId, effectType, stacks)
 	
 	if (changeType == EFFECT_RESULT_GAINED or changeType == EFFECT_RESULT_UPDATED) and timems < fight.endtime then
@@ -1305,11 +1318,13 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 				
 			elseif unitCalc ~= nil then
 			
+				local endtime = math.min(unitCalc.endtime, fight.endtime)
+			
 				for k,effectdata in pairs(unitCalc.buffs) do	-- finish buffs
 				
 					if effectdata.lastGain ~= nil and fight.starttime ~= 0 then 
 					
-						effectdata.uptime = effectdata.uptime + (fight.endtime - effectdata.lastGain)   -- todo: maybe limit it to combattime... 
+						effectdata.uptime = effectdata.uptime + (endtime - effectdata.lastGain)   -- todo: maybe limit it to combattime... 
 						effectdata.lastGain = nil
 						effectdata.count = effectdata.count + 1
 						
@@ -1317,7 +1332,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 					
 					if effectdata.groupLastGain ~= nil and fight.starttime ~= 0 then 
 						
-						effectdata.groupUptime = effectdata.groupUptime + (fight.endtime - effectdata.groupLastGain)
+						effectdata.groupUptime = effectdata.groupUptime + (endtime - effectdata.groupLastGain)
 						effectdata.groupLastGain = nil
 						effectdata.groupCount = effectdata.groupCount + 1
 						
@@ -1946,6 +1961,8 @@ local svdefaults = {
 			[7]	= {1, 0.4, 0.9, 0.4},	-- Debuffs: violet
 	
 		},
+		
+		["ShowGroupBuffsInPlots"]	= true,
 	
 		["FavouriteBuffs"] = {},
 		

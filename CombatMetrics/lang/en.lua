@@ -84,7 +84,7 @@
 	
 	SI_COMBAT_METRICS_RECALCULATE = "Recalculate Fight",
 	SI_COMBAT_METRICS_SMOOTHED = "Smoothed",
-	SI_COMBAT_METRICS_ACCUMULATED = "Accumulated",
+	SI_COMBAT_METRICS_TOTAL = "Total",
 	SI_COMBAT_METRICS_ABSOLUTE = "Absolute",
 	SI_COMBAT_METRICS_SMOOTH_LABEL = "Smooth: %d s",
 	SI_COMBAT_METRICS_NONE = "None",
@@ -128,7 +128,7 @@
 
 	SI_COMBAT_METRICS_PLAYER = "Player", -- Player
 
-	SI_COMBAT_METRICS_TOTAL = " Total: ", -- Total: 
+	SI_COMBAT_METRICS_TOTALC = " Total: ", -- Total: 
 	SI_COMBAT_METRICS_NORMAL = "Normal: ", -- Normal: 
 	SI_COMBAT_METRICS_CRITICAL = "Critical: ", -- Critical: 
 	SI_COMBAT_METRICS_BLOCKED = "Blocked: ", -- Blocked: 
