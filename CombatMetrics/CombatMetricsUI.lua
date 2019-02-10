@@ -1590,12 +1590,12 @@ local function updateFightStatsPanelRight(panel)
 	end
 end
 
-local function updateFightStatsPanel(control)
+local function updateFightStatsPanel(panel)
 
 	CMX.Print("dev", "Updating FightStatsPanel")
 
-	control:GetNamedChild("Left"):Update(fightData, selectionData)
-	control:GetNamedChild("Right"):Update(fightData)
+	panel:GetNamedChild("Left"):Update(fightData, selectionData)
+	panel:GetNamedChild("Right"):Update(fightData)
 
 end
 
@@ -3467,6 +3467,8 @@ end
 
 local function updateGraphPanel(panel)
 
+	if panel:IsHidden() then return end
+
 	if enlargedGraph == true then 
 	
 		panel:SetParent(CombatMetrics_Report)
@@ -4433,7 +4435,7 @@ end
 local function updateInfoPanel(panel)
 
 	if panel:IsHidden() then return end
-
+	
 	updateLeftInfoPanel(panel:GetNamedChild("Left"))
 	updateRightInfoPanel(panel:GetNamedChild("Right"))
 	updateBottomInfoPanel(panel:GetNamedChild("Bottom"))
@@ -4539,7 +4541,7 @@ local function updateFightReport(control, fightId)
 	
 		local child = control:GetChild(i)
 		
-		if child.Update then child:Update(fightData, selectionData) end
+		if child.Update then child:Update() end
 		
 	end	
 end
@@ -5049,11 +5051,11 @@ local function initFightReport()
 		local combatLogPanel = mainPanel:GetNamedChild("CombatLog")
 		combatLogPanel.Update = updateCombatLog
 		
-		local combatLogPageButtonRow = GetControl(combatLogPanel, "HeaderPageButtonRow")
-		combatLogPageButtonRow.Update = updateCLPageButtons
+			local combatLogPageButtonRow = GetControl(combatLogPanel, "HeaderPageButtonRow")
+			combatLogPageButtonRow.Update = updateCLPageButtons
 		
-		local combatLogFilterButtonRow = GetControl(combatLogPanel, "HeaderFilterButtonRow")	
-		initCLButtonRow(combatLogFilterButtonRow)
+			local combatLogFilterButtonRow = GetControl(combatLogPanel, "HeaderFilterButtonRow")	
+			initCLButtonRow(combatLogFilterButtonRow)
 			
 		local graphPanel = mainPanel:GetNamedChild("Graph")
 		graphPanel.Update = updateGraphPanel

@@ -321,4 +321,5 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Info Panel: Equipment, CP, Weaving Metrics
 [*] Graph Panel
 [*] Uptime % in the (De-)Buffs Out Panel are now considered towards the total time the respective units have been engaged in combat. This should lead to more reasonable results when you fight different bosses in succession (e.g. the iterations of Z'Maja in Cloudrest). It won't however help for fights where units are inactive in between (e.g. The minibosses in Asylum)
+[*] Some of the columns in the abilities panel can now be changed. They are collored in a bright yellow. You can for example choose to show the minimum hit instead of the maximum or show the average critical hit instead of the overall average hit. Just try them out!
 
