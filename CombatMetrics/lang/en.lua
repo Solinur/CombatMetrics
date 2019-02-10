@@ -92,12 +92,12 @@
 	SI_COMBAT_METRICS_ENLARGE = "Enlarge",
 	SI_COMBAT_METRICS_SHRINK = "Shrink",
 	
-	SI_COMBAT_METRICS_FEEDBACK_MAIL = "Send Note",
+	SI_COMBAT_METRICS_FEEDBACK_MAIL = "Send Mail",
 	SI_COMBAT_METRICS_FEEDBACK_GOLD = "Donate 5000g",
-	SI_COMBAT_METRICS_FEEDBACK_GOLD2 = "Donate 50000g",
+	SI_COMBAT_METRICS_FEEDBACK_GOLD2 = "Donate 25000g",
 	SI_COMBAT_METRICS_FEEDBACK_ESOUI = "Site (ESOUI)",
-	SI_COMBAT_METRICS_FEEDBACK_PP = "PayPal",
-	SI_COMBAT_METRICS_FEEDBACK_TEXT = "If you found a bug, have a request or a suggestion, or simply wish to donate, send a mail.",
+	SI_COMBAT_METRICS_FEEDBACK_GITHUB = "GitHub",
+	SI_COMBAT_METRICS_FEEDBACK_TEXT = "\nIf you found a bug, have a request or a suggestion, send an ingame mail, create an issue on GitHub or post it in the comments on EsoUI. \n\nDonations are appreciated but not required or necessary. \nIf you want to donate real money please visit the addon site on EsoUI",
 
 	SI_COMBAT_METRICS_STORAGE_FULL = "The storage file is full. The fight you want to save needs <<1>> MB. Delete a fight to free some space or increase the allowed space in the settings!", -- The storage file is full. Delete a fight to free some space!
 

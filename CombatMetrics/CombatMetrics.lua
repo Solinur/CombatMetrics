@@ -38,14 +38,14 @@ function CMX.GetFeedBackData(parentcontrol)
 		{	
 			{0, GetString(SI_COMBAT_METRICS_FEEDBACK_MAIL), false},
 			{5000, GetString(SI_COMBAT_METRICS_FEEDBACK_GOLD), true},
-			{50000, GetString(SI_COMBAT_METRICS_FEEDBACK_GOLD2), true},
+			{25000, GetString(SI_COMBAT_METRICS_FEEDBACK_GOLD2), true},
 			{"https://www.esoui.com/downloads/info1360-CombatMetrics.html", GetString(SI_COMBAT_METRICS_FEEDBACK_ESOUI), false},
-			{"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=C83FDY9AQ6N3G", GetString(SI_COMBAT_METRICS_FEEDBACK_PP), false},
+			{"https://github.com/Solinur/CombatMetrics", GetString(SI_COMBAT_METRICS_FEEDBACK_GITHUB), false},
 		},
 		GetString(SI_COMBAT_METRICS_FEEDBACK_TEXT),
-		720,
-		100,
-		140,
+		700,
+		245,
+		145
 	}
 	
 	return data

@@ -17,6 +17,8 @@
 lang/en.lua
 lang/$(language).lua
 
+libs/LibFeedback/feedback.lua
+
 CombatMetrics.lua
 CombatMetricsMenu.lua
 CombatMetricsUI.lua
