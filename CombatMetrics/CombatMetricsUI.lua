@@ -2975,9 +2975,14 @@ local oldX, oldY
 
 local function updateXYData(XYData, x, y)
 
-	if #XYData == 0 then oldX = -1 end		
+	if #XYData == 0 then 
 	
-	if x - 1 > oldX and oldY ~= y and oldY then		
+		oldX = -1 
+		oldY = y
+		
+	end		
+	
+	if x - 1 > oldX and oldY and oldY ~= y then		
 		
 		table.insert(XYData, {oldX + 1, oldY})
 	
@@ -3025,7 +3030,7 @@ local function ResourceAbsolute(powerType)
 		end
 	end
 	
-	updateXYData(XYData, fightData.combattime, value)
+	if value then updateXYData(XYData, fightData.combattime, value) end
 	
 	local key = powerTypeKeyTable[powerType]
 	
