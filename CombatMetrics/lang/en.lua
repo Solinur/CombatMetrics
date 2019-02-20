@@ -169,6 +169,8 @@
 	SI_COMBAT_METRICS_STATS_HEALTH3 = "Spell Resistance",  -- Spell Resistance:
 	SI_COMBAT_METRICS_STATS_HEALTH4 = "Critical Resist.",  -- Critical Resist.:
 	SI_COMBAT_METRICS_STATS_HEALTH_FORMAT4 = "%.1f %%",  -- Critical Resist.:
+	
+	SI_COMBAT_METRICS_PENETRATION_TT = "Penetration: Damage",   -- Penetration: Damage
 
 	SI_COMBAT_METRICS_COMBAT_LOG = "Combat Log",  -- Combat Log
 

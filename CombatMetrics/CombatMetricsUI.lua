@@ -1554,7 +1554,7 @@ local function updateFightStatsPanelRight(panel)
 		
 		totaldamage = math.max(totaldamage, 1)
 		
-		local tooltiplines = {"Penetration: Damage"}  -- TODO use String
+		local tooltiplines = {GetString(SI_COMBAT_METRICS_PENETRATION_TT)}
 		
 		for penetration, damage in CMX.spairs(resistvalues) do
 		

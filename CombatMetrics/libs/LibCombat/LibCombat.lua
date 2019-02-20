@@ -6,7 +6,6 @@ Todo:
 work on the addon description 
 
 Implement Debug Functions
-Idea: Weaving Metrics
 Idea: Life and Death
 
 ]]
@@ -144,25 +143,25 @@ for id, text in pairs(statNames) do
 
 end
 
-function lib.GetStatName(id)	-- TODO: Is this function needed? 
+function lib.GetStatName(id)
 
 	return statNames[id]
 	
 end
 
-function lib.GetStatNameCurrent(id)	-- TODO: Is this function needed? 
+function lib.GetStatNameCurrent(id)
 
 	return statNamesCurrent[id]
 	
 end
 
-function lib.GetStatNameMax(id)	-- TODO: Is this function needed? 
+function lib.GetStatNameMax(id)
 
 	return statNamesMax[id]
 	
 end
 
-function lib.ConvertStatName(statName)	-- TODO: Is this function needed? 
+function lib.ConvertStatName(statName)
 
 	return statNameConversion[statName]
 	

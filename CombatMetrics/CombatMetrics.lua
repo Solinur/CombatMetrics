@@ -1328,7 +1328,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 				
 					if effectdata.lastGain ~= nil and fight.starttime ~= 0 then 
 					
-						effectdata.uptime = effectdata.uptime + (endtime - effectdata.lastGain)   -- todo: maybe limit it to combattime... 
+						effectdata.uptime = effectdata.uptime + (endtime - effectdata.lastGain)
 						effectdata.lastGain = nil
 						effectdata.count = effectdata.count + 1
 						
@@ -1573,8 +1573,6 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 			end
 		end
 		
-		currentbar = nil -- TODO: remove, this is only to test for contamination
-		
 		data.buffs = fight.playerid ~= nil and data.units[fight.playerid] and data.units[fight.playerid].buffs or {}
 		
 		data.totalSkillTime = totalSkillTime
@@ -1588,6 +1586,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		Print("calculationtime", "Time for final calculations: %.2f ms", (GetGameTimeSeconds() - scalcms) * 1000)
 
 		return
+		
 	else
 	
 		fight.cindex = iend
@@ -2073,7 +2072,7 @@ local function Initialize(event, addon)
 		
 		for id, fight in ipairs(olddata.fights) do
 		
-			fightdata.Save(fight)		-- TODO: test if this works with old format !
+			fightdata.Save(fight)
 		
 		end
 		
@@ -2088,7 +2087,7 @@ local function Initialize(event, addon)
 	SpellResistDebuffs[17906] = db.crusherValue
 	PhysResistDebuffs[17906] = db.crusherValue
 	
-	if db.chatLog.enabled then zo_callLater(CMX.InitializeChat, 200) end -- TODO: maybe move this to player activated?
+	if db.chatLog.enabled then zo_callLater(CMX.InitializeChat, 200) end
 	
 	CMX.playername = zo_strformat(SI_UNIT_NAME,GetUnitName("player"))
 	CMX.inCombat = IsUnitInCombat("player")
