@@ -1,6 +1,6 @@
 local em = GetEventManager()
 local wm = GetWindowManager()
-local dx = 1/(tonumber(GetCVar("WindowedWidth"))/GuiRoot:GetWidth())
+local dx = GuiRoot:GetWidth()/tonumber(GetCVar("WindowedWidth"))
 COMBAT_METRICS_LINE_SIZE = tostring(dx)
 local fontsize = 14
 local currentFight
@@ -206,7 +206,7 @@ function NavButtonFunctions.save(control, _, _, _, _, shiftkey )
 			local removed = table.remove(savedFights)
 			local _, removedSize = checkSaveLimit(removed)			
 			
-			errorstring = zo_strformat(SI_COMBAT_METRICS_STORAGE_FULL, removedSize)
+			local errorstring = zo_strformat(SI_COMBAT_METRICS_STORAGE_FULL, removedSize)
 			assert(false, errorstring) 
 			
 			CombatMetrics_Report:Update()
@@ -2040,7 +2040,7 @@ end
 
 local function selectHitCritOption1()
 
-	db.FightReport.hitCritLayout = {"Critical", "Total", "SI_COMBAT_METRICS_HITS", "SI_COMBAT_METRICS_CRITS"}
+	db.FightReport.hitCritLayout = {"Critical", "Total", "SI_COMBAT_METRICS_CRITS", "SI_COMBAT_METRICS_HITS"}
 	
 	CombatMetrics_Report_AbilityPanel:Update()
 	
@@ -2048,7 +2048,7 @@ end
 
 local function selectHitCritOption2()
 
-	db.FightReport.hitCritLayout = {"Total", "Critical", "SI_COMBAT_METRICS_CRITS", "SI_COMBAT_METRICS_HITS"}
+	db.FightReport.hitCritLayout = {"Total", "Critical", "SI_COMBAT_METRICS_HITS", "SI_COMBAT_METRICS_CRITS"}
 	
 	CombatMetrics_Report_AbilityPanel:Update()
 	
@@ -2345,7 +2345,8 @@ local function updateCLPageButtons(buttonrow, page, maxpage)
 	
 		local key = "Page" .. (i - first + 1)
 		
-		button = buttonrow:GetNamedChild(key)
+		local button = buttonrow:GetNamedChild(key)
+		
 		button.tooltip = {zo_strformat(SI_COMBAT_METRICS_PAGE, i)}
 		button.value = i
 		
@@ -3036,8 +3037,6 @@ local function ResourceAbsolute(powerType)
 	
 	local maxValue = powerType == POWERTYPE_ULTIMATE and 500 or fightData.stats[key]
 	
-	DATA = XYData
-	
 	for i, xyData in ipairs(XYData) do
 	
 		xyData[2] = xyData[2]/maxValue
@@ -3149,6 +3148,7 @@ local function AcquireBuffData(buffName)
 	
 	local first = true
 	local lastSlot
+	local lastUnit
 	
 	local slots = {}
 		
@@ -3368,7 +3368,7 @@ local function UpdateXYPlot(plot)
 		
 	end
 	
-	plotWindow = plot:GetParent()
+	local plotWindow = plot:GetParent()
 
 	if plot.autoRange then 
 		
@@ -3437,7 +3437,7 @@ local function UpdateBarPlot(plot)
 	
 	plot:SetHidden(false)
 	
-	plotWindow = plot:GetParent()
+	local plotWindow = plot:GetParent()
 	
 	local plotheight = plotWindow:GetHeight()
 	
@@ -3970,7 +3970,7 @@ local function initPlotWindow(plotWindow)
 	end	
 end
 
-function initPlotToolbar(toolbar)
+local function initPlotToolbar(toolbar)
 
 	local PlotColors = db.FightReport.PlotColors
 
@@ -4870,6 +4870,7 @@ local function updateLiveReport(self, data)
 	local DPSString
 	local HPSString
 	local DPSInString
+	local SDPSString
 	local maxtime = math.max(dpstime, hpstime)
 	local timeString = string.format("%d:%04.1f", maxtime/60, maxtime%60)
 		

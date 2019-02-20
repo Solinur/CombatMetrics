@@ -15,7 +15,7 @@ local values = {}
 
 for i = 1, 64 do
 
-	newchar = string.sub(charset, i, i) 
+	local newchar = string.sub(charset, i, i) 
 	chars[i-1] = newchar
 	values[newchar] = i-1
 
@@ -72,7 +72,7 @@ local function Decode(logstring, layout)
 	
 		offset = offset + chars
 	
-		_, value = GetValue(0, logstring, chars, offset)
+		local _, value = GetValue(0, logstring, chars, offset)
 		
 		if value then 
 		
@@ -249,7 +249,7 @@ local function decodeCombatLogLine(line, fight)
 	
 	if layoutId == nil then return end 
 		
-	layout = layouts[layoutId]
+	local layout = layouts[layoutId]
 	
 	local logdata = Decode(line, layout)
 		
@@ -502,7 +502,7 @@ end
 
 local function saveFight(fight, filters)
 
-	newSavedFight = {}
+	local newSavedFight = {}
 
 	ZO_DeepTableCopy(fight, newSavedFight)
 	
@@ -517,7 +517,7 @@ end
 
 local function loadFight(id)
 
-	loadedFight = {}
+	local loadedFight = {}
 
 	ZO_DeepTableCopy(sv[id], loadedFight)
 	

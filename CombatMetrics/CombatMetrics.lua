@@ -31,7 +31,7 @@ function CMX.GetFeedBackData(parentcontrol)
 	local data = {
 	
 		CMX,
-		"Combat Metrics", 
+		CMX.name .. " 0.9.0 alpha", 
 		parentcontrol,
 		"@Solinur",
 		{TOPLEFT, parentcontrol, TOPRIGHT, 10, 0},
@@ -901,7 +901,11 @@ local function IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitVa
 					
 				end
 
-				if unit then effectiveValue = currentValue + unit[resistancekey] end
+				if unit then 
+				
+					local effectiveValue = currentValue + unit[resistancekey] 
+					
+				end
 				
 				local data = unit[resistDataKey]
 				
@@ -1411,8 +1415,8 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 				
 				if stattype == STATTYPE_CRITICAL then 
 				
-					critablehits = damagevalues.hitsOutNormal + damagevalues.hitsOutCritical
-					totaldmgvalue = math.max(critablehits , 1)
+					local critablehits = damagevalues.hitsOutNormal + damagevalues.hitsOutCritical
+					totaldmgvalue = math.max(critablehits, 1)
 					totalhealvalue = math.max(data.healsOutTotal, 1)
 					
 				elseif stattype == STATTYPE_CRITICALBONUS then

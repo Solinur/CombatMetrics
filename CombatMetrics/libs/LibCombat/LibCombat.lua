@@ -614,7 +614,7 @@ function FightHandler:Initialize()
 end
 
 local function Print(message, ...)
-	df("[%s] %s", "libCombat", message:format(...))
+	--df("[%s] %s", "libCombat", message:format(...))
 end
 
 local onCombatState
@@ -643,7 +643,7 @@ local function GetShadowBonus()
 
 	for i, key in pairs({EQUIP_SLOT_HEAD, EQUIP_SLOT_SHOULDERS, EQUIP_SLOT_CHEST, EQUIP_SLOT_HAND, EQUIP_SLOT_WAIST, EQUIP_SLOT_LEGS, EQUIP_SLOT_FEET}) do
 	
-		trait, desc = GetItemLinkTraitInfo(GetItemLink(BAG_WORN, key, LINK_STYLE_DEFAULT))
+		local trait, desc = GetItemLinkTraitInfo(GetItemLink(BAG_WORN, key, LINK_STYLE_DEFAULT))
 	
 		if trait == ITEM_TRAIT_TYPE_ARMOR_DIVINES then 
 		
@@ -1418,7 +1418,7 @@ local function BuffEventHandler(isspecial, groupeffect, _, changeType, effectSlo
 		
 	elseif inCombat == true then 
 
-		unit = currentfight.units[unitId]
+		local unit = currentfight.units[unitId]
 		
 		if unit then 
 
@@ -1708,7 +1708,7 @@ local function OnDeathStateChanged(_, unitTag, isDead)
 	
 	local timems = GetGameTimeMilliseconds()
 	
-	unitId = data.groupmembers[name]
+	local unitId = data.groupmembers[name]
 	
 	if (lasttime and lasttime - timems < 100) or not unitId then return end
 	
@@ -1734,7 +1734,7 @@ local function OnDeath(_, result, _, abilityName, _, abilityActionSlotType, sour
 	
 	if unitdata == nil or unitdata.type ~= COMBAT_UNIT_TYPE_GROUP then return end
 	
-	name = unitdata.name or zo_strformat(SI_UNIT_NAME, targetName) or ""
+	local name = unitdata.name or zo_strformat(SI_UNIT_NAME, targetName) or ""
 	
 	lastdeaths[name] = GetGameTimeMilliseconds()
 	
@@ -1748,9 +1748,9 @@ local function OnResurrectResult(_, targetCharacterName, result, targetDisplayNa
 
 	if result ~= RESURRECT_RESULT_SUCCESS then return end
 
-	name = zo_strformat(SI_UNIT_NAME, targetCharacterName) or ""
+	local name = zo_strformat(SI_UNIT_NAME, targetCharacterName) or ""
 	
-	unitId = data.groupmembers[name]
+	local unitId = data.groupmembers[name]
 	
 	if not unitId then return end	
 
@@ -1762,9 +1762,9 @@ end
 
 local function OnResurrectRequest(_, requesterCharacterName, timeLeftToAccept, requesterDisplayName)
 
-	name = zo_strformat(SI_UNIT_NAME, requesterCharacterName) or ""
+	local name = zo_strformat(SI_UNIT_NAME, requesterCharacterName) or ""
 	
-	unitId = data.groupmembers[name]
+	local unitId = data.groupmembers[name]
 	
 	if not unitId then return end	
 
