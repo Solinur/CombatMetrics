@@ -5,6 +5,7 @@
 SafeAddString(SI_COMBAT_METRICS_LANG, "ru", 1)
 SafeAddString(SI_COMBAT_METRICS_STD_FONT, "RuESO/fonts/univers57.otf") -- EsoUi/Common/Fonts/Univers57.otf
 SafeAddString(SI_COMBAT_METRICS_ESO_FONT, "RuESO/fonts/univers67.otf") -- EsoUi/Common/Fonts/Univers67.otf
+SafeAddString(SI_COMBAT_METRICS_BOLD_FONT, "RuESO/fonts/univers67.otf") -- EsoUi/Common/Fonts/Univers67.otf
 
 SafeAddString(SI_COMBAT_METRICS_FONT_SIZE_SMALL, "14", 1) -- 14
 SafeAddString(SI_COMBAT_METRICS_FONT_SIZE, "15", 1) -- 15
@@ -96,7 +97,7 @@ SafeAddString(SI_COMBAT_METRICS_IN_COMBAT, "В бою: ") -- In Combat:
 
 SafeAddString(SI_COMBAT_METRICS_PLAYER, "Игрок") -- Player 
 
-SafeAddString(SI_COMBAT_METRICS_TOTALC, " Всего: ") -- Total: 
+SafeAddString(SI_COMBAT_METRICS_TOTAL, " Всего: ") -- Total: 
 SafeAddString(SI_COMBAT_METRICS_NORMAL, "Обычн.: ") -- Normal: 
 SafeAddString(SI_COMBAT_METRICS_CRITICAL, "Крит.: ") -- Critical: 
 SafeAddString(SI_COMBAT_METRICS_BLOCKED, "Блок.: ") -- Blocked: 
@@ -239,6 +240,9 @@ SafeAddString(SI_COMBAT_METRICS_MENU_ENABLE_TOOLTIP, "Включает окно 
 SafeAddString(SI_COMBAT_METRICS_MENU_LR_LOCK, "Заблокировать")  -- Lock NEW
 SafeAddString(SI_COMBAT_METRICS_MENU_LR_LOCK_TOOLTIP, "Блокирует окно текущей статистики, его будет нельзя переместить")  --  Lock the Live Report Window, so it can't be moved NEW
 
+SafeAddString(SI_COMBAT_METRICS_MENU_LR_ALIGNMENT, "Выравнивать по левому краю")
+SafeAddString(SI_COMBAT_METRICS_MENU_LR_ALIGNMENT_TOOLTIP, "Выравнивает цифры урона/исцеления и т.п. в окне текущей статистики по левому краю")
+	
 SafeAddString(SI_COMBAT_METRICS_MENU_LAYOUT_NAME, "Формат")  -- Layout
 SafeAddString(SI_COMBAT_METRICS_MENU_LAYOUT_TOOLTIP, "Выберите формат окна текущей статистики")  -- Select the Layout of the Live Report Window
 SafeAddString(SI_COMBAT_METRICS_MENU_SCALE_NAME, "Размер")  -- Scale
