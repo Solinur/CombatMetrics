@@ -900,10 +900,12 @@ local function IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitVa
 					resistDataKey = "spellResistance"
 					
 				end
-
+				
+				local effectiveValue
+				
 				if unit then 
 				
-					local effectiveValue = currentValue + unit[resistancekey] 
+					effectiveValue = currentValue + unit[resistancekey] 
 					
 				end
 				

@@ -3405,9 +3405,9 @@ local function UpdatePlotBuffSelection()
 	
 	local buffdata = GetBuffData()
 	
-	if buffdata == nil then return end
+	if buffdata == nil or buffdata.buffs == nil then return end
 	
-	for buffName, buff in CMX.spairs(buffdata["buffs"], buffSortFunction) do
+	for buffName, buff in CMX.spairs(buffdata.buffs, buffSortFunction) do
 	
 		if selectedbuffs and selectedbuffs[buffName] ~= nil then PlotBuffSelection[#PlotBuffSelection + 1] = buffName end
 		

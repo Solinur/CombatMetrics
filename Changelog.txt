@@ -317,9 +317,18 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*]API Bump to Wrathstone (100026)
 [*]Reorganized bundled libraries (Make sure to activate them in the Addon Panel). This should fix a lua error some received.
 
-0.9.0 
-[*] Info Panel: Equipment, CP, Weaving Metrics
-[*] Graph Panel
+0.9.0 (beta)
+[*] Added a new Info panel. It shows the Equipment, CP, and Skills used in the selected fight. Weaving Metrics
+[**] For the skill panel "Weaving Metrics" are shown. They give some info how fast you are able to cast subsequent abilities and the average time between two subsequent casts of the same ability.
+[**] Also some stats about how much time was spent and how much damage was done on each bar are shown. Werewolf is not supported at the moment but will be added in the future.
+[*] Added a new Graph panel.
+[**] Here you can view how DPS or HPS developed over time. You can also show Resources (e.g. Magicka) or Stats (e.g. Spell Damage).
+[**] You can click on the colour boxes on the left to change the plots colours
+[**] When you select buffs/debuffs in the buff panel, while the graph panel is shown, the buff uptime will also be visualized in the graph.
+[*] Note that some of the new features only work for new fights.
 [*] Uptime % in the (De-)Buffs Out Panel are now considered towards the total time the respective units have been engaged in combat. This should lead to more reasonable results when you fight different bosses in succession (e.g. the iterations of Z'Maja in Cloudrest). It won't however help for fights where units are inactive in between (e.g. The minibosses in Asylum)
-[*] Some of the columns in the abilities panel can now be changed. They are collored in a bright yellow. You can for example choose to show the minimum hit instead of the maximum or show the average critical hit instead of the overall average hit. Just try them out!
+[*] Some of the columns in the abilities panel can now be changed. They are coloured in a bright yellow. You can for example choose to show the minimum hit instead of the maximum or show the average critical hit instead of the overall average hit. Just try them out!
+[*] Added more options in the Combat Log. This includes Skill activations and for boss fights the remaining %HP.
+[*] Added the account to the bottom info bar
+[*] Updated russian localization (Thx @KiriX)
 
