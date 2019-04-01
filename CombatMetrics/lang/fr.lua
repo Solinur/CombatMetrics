@@ -1,5 +1,9 @@
 ﻿SafeAddString(SI_COMBAT_METRICS_LANG, "fr", 1)
 
+	
+-- Functionality
+
+SafeAddString(SI_COMBAT_METRICS_ENCHANTMENT_TRIM = "Enchantement de ", 1) -- this will be removed for the enchantments shown in infopanel
 -- UI&Control
 
 SafeAddString(SI_COMBAT_METRICS_SHOW_XPS, "<<1>> / <<2>> (<<3>>%)", 1)

@@ -271,7 +271,7 @@
 				<Label name="$(parent)Label" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="LEFT" mouseEnabled="true">
 				
 					<Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="4"/>
-					<Dimensions x="146" y="20"/>
+					<Dimensions x="137" y="20"/>
 			
 					<OnMouseEnter> if self:GetParent().id then CMX.SkillTooltip_OnMouseEnter(self) end </OnMouseEnter>
 					<OnMouseExit> CMX.SkillTooltip_OnMouseExit(self) </OnMouseExit>
@@ -281,7 +281,7 @@
 				<Label name="$(parent)Value1" inherits="CombatMetrics_ValueFontControl" text="-" horizontalAlignment="CENTER">
 				
 					<Anchor point="LEFT" relativeTo="$(parent)Label" relativePoint="RIGHT" offsetX="4"/>
-					<Dimensions x="18" y="20"/>
+					<Dimensions x="25" y="20"/>
 					
 				</Label>
 				
@@ -370,14 +370,14 @@
 						<Label name="$(parent)1" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_SKILL" horizontalAlignment="LEFT">
 						
 							<Anchor point="LEFT" offsetX="24"/>
-							<Dimensions x="146" y="20"/>
+							<Dimensions x="137" y="20"/>
 							
 						</Label>
 						
 						<Label name="$(parent)2" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip" text="SI_COMBAT_METRICS_SHARP" horizontalAlignment="CENTER">
 						
 							<Anchor point="LEFT" relativeTo="$(parent)1" relativePoint="RIGHT" offsetX="4"/>
-							<Dimensions x="18" y="20"/>
+							<Dimensions x="25" y="20"/>
 							
 							<OnInitialized>self.tooltip = {SI_COMBAT_METRICS_SKILLTIME_TT1}</OnInitialized>
 							
@@ -862,7 +862,7 @@
 		
 		</Control>
 		
-		<Control name="CombatMetrics_UnitRowTemplate" inherits="CombatMetrics_RowTemplate" virtual="true">
+		<Control name="CombatMetrics_UnitRowTemplate" resizeToFitDescendents="true" mouseEnabled="true" virtual="true">
 		
 			<Controls>	
 			
@@ -897,6 +897,20 @@
 				</Label>
 				
 			</Controls>
+			
+			<OnMouseUp> 
+				
+				if button == MOUSE_BUTTON_INDEX_RIGHT then 
+				
+					CMX.UnitContextMenu( self, upInside ) 
+					
+				else
+				
+					CMX.AddSelection( self, button, upInside, ctrl, alt, shift )
+				
+				end
+				
+			</OnMouseUp>
 			
 		</Control>
 		
@@ -945,8 +959,15 @@
 			
 			<OnMouseUp> 
 				
-				CMX.AddSelection( self, button, upInside, ctrl, alt, shift )
-				if button == MOUSE_BUTTON_INDEX_RIGHT then CMX.BuffContextMenu( self, upInside ) end
+				if button == MOUSE_BUTTON_INDEX_RIGHT then 
+				
+					CMX.BuffContextMenu( self, upInside ) 
+					
+				else
+				
+					CMX.AddSelection( self, button, upInside, ctrl, alt, shift )
+				
+				end
 				
 			</OnMouseUp>
 			
@@ -3016,14 +3037,14 @@
 									
 								</Label>
 								
-								<Label name="$(parent)CritRatio" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"  text="SI_COMBAT_METRICS_CRITS_PER" horizontalAlignment="RIGHT">
+								<Label name="$(parent)CritRatio" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip" text="SI_COMBAT_METRICS_CRITS_PER" horizontalAlignment="RIGHT">
 									
 									<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Hits" offsetX="2" offsetY="0"/>
 									<Dimensions x="35" y="20"/>
 									
 								</Label>
 								
-								<Label name="$(parent)Average" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"  text="SI_COMBAT_METRICS_AVE" color="FFFFFFCC" horizontalAlignment="RIGHT">
+								<Label name="$(parent)Average" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip" text="SI_COMBAT_METRICS_AVE" color="FFFFFFCC" horizontalAlignment="RIGHT">
 									
 									<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)CritRatio" offsetX="2" offsetY="0"/>
 									<Dimensions x="50" y="20"/>
@@ -3032,7 +3053,7 @@
 									
 								</Label>
 								
-								<Label name="$(parent)MinMax" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"  text="SI_COMBAT_METRICS_MAX" color="FFFFFFCC" horizontalAlignment="RIGHT">
+								<Label name="$(parent)MinMax" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip" text="SI_COMBAT_METRICS_MAX" color="FFFFFFCC" horizontalAlignment="RIGHT">
 									
 									<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Average" offsetX="2" offsetY="0"/>
 									<Dimensions x="50" y="20"/>

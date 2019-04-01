@@ -901,13 +901,7 @@ local function IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitVa
 					
 				end
 				
-				local effectiveValue
-				
-				if unit then 
-				
-					effectiveValue = currentValue + unit[resistancekey] 
-					
-				end
+				local effectiveValue = currentValue + unit[resistancekey] 
 				
 				local data = unit[resistDataKey]
 				
@@ -1633,7 +1627,7 @@ local function AddtoChatLog(...)
 	
 		local text, color = CMX.GetCombatLogString(nil, {...}, 12)
 		
-		chatContainer:AddMessageToWindow(chatWindow, text, unpack(color))
+		if chatContainer then chatContainer:AddMessageToWindow(chatWindow, text, unpack(color)) end -- in case the container got removed by the user or an addon
 	
 	end
 end

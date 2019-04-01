@@ -399,7 +399,7 @@ function CMX.InitializeCPRows(panel)
 		
 		local title = signcontrol:GetNamedChild("Title")
 		
-		title:SetText(GetChampionDisciplineName(discipline))
+		title:SetText(zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionDisciplineName(discipline)))
 		
 		local width = title:GetTextWidth() + 4
 		local height = title:GetHeight() 
@@ -413,7 +413,8 @@ function CMX.InitializeCPRows(panel)
 			local row = signcontrol:GetNamedChild("Row"..i)
 		
 			local label = row:GetNamedChild("Name")
-			label:SetText(GetChampionSkillName(discipline, i))
+			
+			label:SetText(zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionSkillName(discipline, i)))
 			
 			row.discipline = discipline
 			row.skillId = i
@@ -834,13 +835,25 @@ end
 
 --Slash Commands 
 
+CMX_POSTTOCHAT_MODE_NONE = 0
+CMX_POSTTOCHAT_MODE_SINGLE = 1
+CMX_POSTTOCHAT_MODE_MULTI = 2
+CMX_POSTTOCHAT_MODE_SINGLEANDMULTI = 3
+CMX_POSTTOCHAT_MODE_SMART = 4
+CMX_POSTTOCHAT_MODE_HEALING = 5
+CMX_POSTTOCHAT_MODE_SELECTION = 6
+CMX_POSTTOCHAT_MODE_SELECTION_HEALING = 7
+CMX_POSTTOCHAT_MODE_SELECTED_UNIT = 8
+CMX_POSTTOCHAT_MODE_SELECTED_UNITNAME = 9
+
+
 local function slashCommandFunction(extra)
 	
 	if 		extra == "reset" 	then CMX.ResetFight()
-	elseif 	extra == "dps" 		then CMX.PosttoChat("SmartDPS")
-	elseif 	extra == "totdps" 	then CMX.PosttoChat("DPSM")
-	elseif 	extra == "alldps" 	then CMX.PosttoChat("DPST")
-	elseif 	extra == "hps" 		then CMX.PosttoChat("HPS")
+	elseif 	extra == "dps" 		then CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SMART)
+	elseif 	extra == "totdps" 	then CMX.PosttoChat(CMX_POSTTOCHAT_MODE_MULTI)
+	elseif 	extra == "alldps" 	then CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SINGLEANDMULTI)
+	elseif 	extra == "hps" 		then CMX.PosttoChat(CMX_POSTTOCHAT_MODE_HEALING)
 	else 						CombatMetrics_Report:Toggle()
 	end
 	
@@ -894,6 +907,67 @@ do	-- Handling Favourite Buffs
 	end 
 end
 
+do	-- Handling Unit Context Menu
+
+	local UnitContextMenuUnitId
+	
+	local function postUnitDPS()
+	
+		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SELECTED_UNIT, currentFight, UnitContextMenuUnitId)
+		
+	end
+	
+	local function postUnitNameDPS()
+	
+		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SELECTED_UNITNAME, currentFight, UnitContextMenuUnitId)
+		
+	end
+	
+	local function postSelectionDPS()
+	
+		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SELECTION, currentFight)
+		
+	end
+	
+	local function postSelectionHPS()
+	
+		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SELECTION_HEALING, currentFight)
+		
+	end
+
+	function CMX.UnitContextMenu( unitItem, upInside )
+
+		local category = db.FightReport.category
+	
+		if not (upInside or category == "damageOut" or category == "healingOut") then return end
+		
+		local dataId = unitItem.dataId
+		
+		ClearMenu()
+		
+		if category == "damageOut" then 
+		
+			UnitContextMenuUnitId = dataId
+			
+			local unitName = fightData.units[dataId].name
+			
+			AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTUNITDPS), postUnitDPS)
+			AddCustomMenuItem(zo_strformat(GetString(SI_COMBAT_METRICS_POSTUNITNAMEDPS), unitName), postUnitNameDPS)
+			
+			if selections.unit[category] then AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTSELECTIONDPS), postSelectionDPS) end
+			
+		elseif category == "healingOut" and selections.unit[category] then
+		
+			AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTSELECTIONHPS), postSelectionHPS)
+		
+		end
+		
+		ShowMenu(unitItem)
+		
+	end
+	
+end
+
 do
 
 	local function toggleshowids()
@@ -905,31 +979,43 @@ do
 	
 	local function postSingleDPS()
 	
-		CMX.PosttoChat("DPSS", currentFight)
+		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SINGLE, currentFight)
 		
 	end
 	
 	local function postSmartDPS()
 	
-		CMX.PosttoChat("SmartDPS", currentFight)
+		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SMART, currentFight)
 		
 	end
 	
 	local function postMultiDPS()
 	
-		CMX.PosttoChat("DPSM", currentFight)
+		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_MULTI, currentFight)
 		
 	end
 	
 	local function postAllDPS()
 	
-		CMX.PosttoChat("DPST", currentFight)
+		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SINGLEANDMULTI, currentFight)
+		
+	end
+	
+	local function postSelectionDPS()
+	
+		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SELECTION, currentFight)
 		
 	end
 	
 	local function postHPS()
 	
-		CMX.PosttoChat("HPS", currentFight)
+		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_HEALING, currentFight)
+		
+	end
+	
+	local function postSelectionHPS()
+	
+		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SELECTION_HEALING, currentFight)
 		
 	end
 
@@ -953,7 +1039,22 @@ do
 		
 		table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTMULTIDPS), callback = postMultiDPS})
 		table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTALLDPS), callback = postAllDPS})
+		
+		local category = db.FightReport.category
+		
+		if category == "damageOut" and selections.unit[category] then 
+		
+			table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTSELECTIONDPS), callback = postSelectionDPS})
+			
+		end
+		
 		table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTHPS), callback = postHPS})
+		
+		if category == "healingOut" and selections.unit[category] then 
+		
+			table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTSELECTIONHPS), callback = postSelectionHPS})
+		
+		end
 		
 		ClearMenu()
 		
@@ -990,7 +1091,7 @@ function CMX.AddSelection( self, button, upInside, ctrlkey, alt, shiftkey )
 	local dataId = self.dataId
 	local selecttype = self.type
 	
-	if button ~= MOUSE_BUTTON_INDEX_LEFT and button ~= MOUSE_BUTTON_INDEX_RIGHT then return end
+	if button ~= MOUSE_BUTTON_INDEX_LEFT and button ~= MOUSE_BUTTON_INDEX_MIDDLE then return end
 	
 	local category = selecttype == "buff" and "buff" or selecttype == "resource" and "resource" or db.FightReport.category
 	
@@ -999,7 +1100,7 @@ function CMX.AddSelection( self, button, upInside, ctrlkey, alt, shiftkey )
 	local bars = self.panel.bars
 	
 	
-	if button == MOUSE_BUTTON_INDEX_RIGHT then
+	if button == MOUSE_BUTTON_INDEX_MIDDLE then
 	
 		selections[selecttype][category] = nil
 		lastSelections[selecttype][category] = nil
@@ -3008,7 +3109,7 @@ end
 
 local function ResourceAbsolute(powerType)
 
-	if powerType == nil or fightData == nil then return end
+	if powerType == nil or fightData == nil or fightData.log == nil then return end
 
 	local logData = fightData.log
 	
@@ -3048,7 +3149,7 @@ end
 
 local function BossHPAbsolute()
 
-	if fightData == nil then return end
+	if fightData == nil or fightData.log == nil then return end
 
 	local logData = fightData.log
 	
@@ -3091,7 +3192,7 @@ end
 
 local function StatAbsolute(statId)
 
-	if fightData == nil then return end
+	if fightData == nil or fightData.log == nil then return end
 
 	local logData = fightData.log
 	
@@ -3131,7 +3232,7 @@ end
 
 local function AcquireBuffData(buffName)
 
-	if fightData == nil then return end
+	if fightData == nil or fightData.log == nil then return end
 	
 	local rightpanel = db.FightReport.rightpanel	
 	
@@ -3140,6 +3241,8 @@ local function AcquireBuffData(buffName)
 	local unitselections = rightpanel == "buffs" and {[fightData.playerid] = 1} or selections.unit[category]
 
 	local logData = fightData.log
+	
+	if logData == nil then return end
 	
 	local combatstart = fightData.combatstart/1000
 	local combattime = fightData.combattime
@@ -3747,7 +3850,7 @@ function CMX.PlotSelectionMenu(selector)
 	
 	for id, data in ipairs(ResourceStrings) do
 	
-		table.insert(submenu2, {label = GetString(data.label), callback = PlotFunctions[funcId]})
+		table.insert(submenu2, {label = GetString(data.label).."%", callback = PlotFunctions[funcId]})
 		
 		funcId = funcId + 1
 	
@@ -3759,7 +3862,7 @@ function CMX.PlotSelectionMenu(selector)
 	
 	for id, data in ipairs(StatStrings) do
 	
-		table.insert(submenu3, {label = GetString(data.label), callback = PlotFunctions[funcId]})
+		table.insert(submenu3, {label = GetString(data.label).."%", callback = PlotFunctions[funcId]})
 		
 		funcId = funcId + 1
 		
@@ -3936,7 +4039,7 @@ local function initPlotWindow(plotWindow)
 		local resourceString = data.label
 		local powerType = data.powerType
 		
-		local labelString = GetString(resourceString)
+		local labelString = GetString(resourceString) .. "%"
 		
 		PlotFunctions[funcId] = getCustomMenuFunction(ResourceAbsolute, powerType, labelString)
 		
@@ -3949,7 +4052,7 @@ local function initPlotWindow(plotWindow)
 		local statString = data.label
 		local statId = data.statId
 		
-		local labelString = GetString(statString)
+		local labelString = GetString(statString) .. "%"
 		
 		PlotFunctions[funcId] = getCustomMenuFunction(StatAbsolute, statId, labelString)
 		
@@ -4674,7 +4777,7 @@ end
 
 local function GetSingleTargetDamage(data)	-- Gets highest Single Target Damage and counts enemy units.
 
-	local damage, groupDamage, units, name = 0, 0, 0, ""
+	local damage, groupDamage, units, unittime, name = 0, 0, 0, 0, ""
 	
 	for unitId, unit in pairs(data.units) do
 	
@@ -4687,17 +4790,25 @@ local function GetSingleTargetDamage(data)	-- Gets highest Single Target Damage 
 				name = unit.name
 				damage = totalUnitDamage
 				groupDamage = unit.groupDamageOut
+				unittime = (unit.dpsend or 0) - (unit.dpsstart or 0)
 				
 			end
 		end
 	end
 	
-	return damage, groupDamage, name
+	unittime = unittime > 0 and unittime/1000 or data.dpstime
+	
+	return damage, groupDamage, name, unittime
 end
 
 local function GetBossTargetDamage(data) -- Gets Damage done to bosses and counts enemy boss units.
 
-	local totalBossDamage, bossDamage, bossUnits, bossName = 0, 0, 0, ""
+	if not data.bossfight then return 0, 0, nil, 0 end
+	
+	local totalBossDamage, bossDamage, bossUnits = 0, 0, 0
+	local bossName
+	local starttime
+	local endtime
 	
 	for unitId, unit in pairs(data.units) do
 	
@@ -4708,6 +4819,9 @@ local function GetBossTargetDamage(data) -- Gets Damage done to bosses and count
 			totalBossDamage = totalBossDamage + totalUnitDamage
 			bossUnits = bossUnits + 1 
 			
+			starttime = math.min(starttime or unit.dpsstart or 0, unit.dpsstart or 0)
+			endtime = math.max(endtime or unit.dpsend or 0, unit.dpsend or 0)
+			
 			if totalUnitDamage > bossDamage then 
 			
 				bossName = unit.name
@@ -4716,33 +4830,109 @@ local function GetBossTargetDamage(data) -- Gets Damage done to bosses and count
 			end
 		end
 	end
+		
+	local bossTime = (endtime - starttime)/1000
+	bossTime = bossTime > 0 and bossTime or data.dpstime
 	
-	return totalBossDamage, bossUnits, bossName
+	return bossUnits, totalBossDamage, bossName, bossTime
 end
 
-local function GetFullDamage(data)	-- Gets highest Single Target Damage and counts enemy units.
+local function GetSelectionDamage(data, selection)	-- Gets highest Single Target Damage and counts enemy units.
 
-	local units, damage = 0, 0
+	local units = 0
+	local damage = 0
+	local starttime
+	local endtime
+	local bossDamage = 0	
+	local bossName = ""
 	
-	for unitId, unit in pairs(data.units) do
+	local unitdata = data.units
+	selection = selection or unitdata
 	
+	for unitId, _ in pairs(selection) do
+	
+		local unit = unitdata[unitId]	
 		local totalUnitDamage = unit.damageOutTotal
 		
 		if totalUnitDamage > 0 and unit.isFriendly == false then
 		
 			units = units + 1
 			damage = damage + totalUnitDamage
+			starttime = math.min(starttime or unit.dpsstart or 0, unit.dpsstart or 0)
+			endtime = math.max(endtime or unit.dpsend or 0, unit.dpsend or 0)
+			
+			if totalUnitDamage > bossDamage then 
+			
+				bossName = unit.name
+				bossDamage = totalUnitDamage
+				
+			end
 			
 		end
 	end
 	
-	return units, damage
+	local damageTime = (endtime - starttime)/1000
+	damageTime = damageTime > 0 and damageTime or data.dpstime
+	
+	return units, damage, bossName, damageTime
+end
+
+local function GetSelectionHeal(data, selection)	-- Gets highest Single Target Damage and counts enemy units.
+
+	local units = 0
+	local healing = 0
+	local starttime
+	local endtime
+	
+	local unitdata = data.units
+	selection = selection or unitdata
+	local calcdata = data.calculated.units
+	
+	if not calcdata then return end
+	
+	for unitId, _ in pairs(selection) do
+	
+		local unit = unitdata[unitId]	
+		local totalUnitHeal = calcdata[unitId].healingOutTotal
+		
+		if totalUnitHeal and unit.isFriendly == true then
+		
+			units = units + 1
+			healing = healing + totalUnitHeal
+			starttime = math.min(starttime or unit.hpsstart or 0, unit.hpsstart or 0)
+			endtime = math.max(endtime or unit.dpsend or 0, unit.dpsend or 0)
+			
+		end
+	end
+	
+	local healTime = (endtime - starttime)/1000
+	healTime = healTime > 0 and healTime or data.dpstime
+	
+	return units, healing, healTime
 end
 	
-function CMX.PosttoChat(mode, fight)
+local function GetUnitsByName(data, unitId)	-- Gets all units that share the name with the one provided by unitId
+
+	local selectedUnits = {}
+	
+	local unitName = data.units[unitId].name
+	
+	for unitId, unit in pairs(data.units) do
+	
+		if unit.name == unitName then
+		
+			selectedUnits[unitId] = true
+		
+		end
+	end
+	
+	return selectedUnits
+end
+	
+function CMX.PosttoChat(mode, fight, UnitContextMenuUnitId)
 
 	local data = fight and CMX.lastfights[fight] or GetCurrentData()
-	
+		
 	if data == nil then return end
 	
 	local timedata = ""
@@ -4752,32 +4942,29 @@ function CMX.PosttoChat(mode, fight)
 		local date = data.date
 	
 		local datestring = type(date) == "number" and GetDateStringFromTimestamp(date) or date
-		local timedata = string.format("[%s, %s] ", datestring, data.time)
+		timedata = string.format("[%s, %s] ", datestring, data.time)
 
 	end
 	
 	local output = ""
 	
-	local dpstime = data.dpstime
-	local timeString = string.format("%d:%04.1f", dpstime/60, dpstime%60)
+	local unitSelection = mode == CMX_POSTTOCHAT_MODE_SELECTION and selections.unit["damageOut"]
+		or mode == CMX_POSTTOCHAT_MODE_SELECTED_UNIT and {UnitContextMenuUnitId}
+		or mode == CMX_POSTTOCHAT_MODE_SELECTED_UNITNAME and GetUnitsByName(data, UnitContextMenuUnitId)
+
+	local units, damage, name, dpstime = GetSelectionDamage(data, unitSelection)
+	local bossUnits, bossDamage, bossName, bossTime = GetBossTargetDamage(data)		
+	local singleDamage, _, _, singleTime = GetSingleTargetDamage(data)
 	
-	local singleDamage, _, name = GetSingleTargetDamage(data)
-	local units, totalDamage = GetFullDamage(data)
-	local bossDamage, bossUnits, bossName = GetBossTargetDamage(data)
+	name = zo_strformat(SI_UNIT_NAME, bossName or name)
 	
-	name = zo_strformat(SI_UNIT_NAME, (bossName ~= "" and bossName) or name)
-	
-	local singleDPSString = ZO_CommaDelimitNumber(math.floor(singleDamage / dpstime))
-	local singleDamageString = ZO_CommaDelimitNumber(singleDamage)
-	
-	local bossDamage = bossUnits > 0 and bossDamage or singleDamage
-	local bossDPSString = ZO_CommaDelimitNumber(math.floor(bossDamage / dpstime))
-	local bossDamageString = ZO_CommaDelimitNumber(bossDamage)
+	local bossDamage = data.bossfight and bossDamage or singleDamage
+	local bossTime = data.bossfight and bossTime or singleTime
 	
 	local totalDPSString = ZO_CommaDelimitNumber(math.floor(data.DPSOut))
-	local totalDamageString = ZO_CommaDelimitNumber(totalDamage)
+	local totalDamageString = ZO_CommaDelimitNumber(damage)
 	
-	if mode == "HPS" then 
+	if mode == CMX_POSTTOCHAT_MODE_HEALING then 
 	
 		local hpstime = data.hpstime
 		local timeString = string.format("%d:%04.1f", hpstime/60, hpstime%60)
@@ -4785,31 +4972,82 @@ function CMX.PosttoChat(mode, fight)
 		local totalHPSString = ZO_CommaDelimitNumber(data.HPSOut)
 		local totalHealingString = ZO_CommaDelimitNumber(data.healingOutTotal)
 		
-		output = string.format("%s - HPS: %s (%s in %s)", name, totalHPSString, totalHealingString, timeString)
-		
-	elseif units == 1 or mode == "DPSS" then 
+		output = zo_strformat(GetString(SI_COMBAT_METRICS_POSTHPS_FORMAT), name, totalHPSString, totalHealingString, timeString)
 	
-		output = string.format("%s - DPS: %s (%s in %s)", name, singleDPSString, singleDamageString, timeString)
-		
-	elseif bossUnits > 0 and mode == "SmartDPS" then
+	elseif mode == CMX_POSTTOCHAT_MODE_SELECTION_HEALING then 
 	
-		local bosses = bossUnits > 1 and string.format("(+%d)", (bossUnits-1) )  or ""
-		output = string.format("%s %s - Boss DPS: %s (%s in %s)", name, bosses, bossDPSString, bossDamage, timeString)
+		local units, healing, healTime = GetSelectionHeal(data, selections.unit["healingOut"])
 		
-	elseif units > 1 and (mode == "DPSM" or mode == "SmartDPS") then
+		local timeString = string.format("%d:%04.1f", healTime/60, healTime%60)
 	
-		output = string.format("%s (+%d) - DPS: %s (%s in %s)", name, units-1, totalDPSString, totalDamageString, timeString)
+		local totalHealingString = ZO_CommaDelimitNumber(healing)
+		local totalHPSString = ZO_CommaDelimitNumber(math.floor(healing / healTime))
 		
-	elseif mode == "DPST" then 
+		output = zo_strformat(GetString(SI_COMBAT_METRICS_POSTSELECTIONHPS_FORMAT), name, units, totalHPSString, totalHealingString, timeString)
 		
-		local bossString = bossUnits > 0 and string.format("Boss DPS (+%d)", bossUnits-1) or  bossUnits == 1 and "Boss DPS" or "DPS"
-		output = string.format("%s (%s) - Total DPS (+%d): %s (%s Damage), %s: %s (%s Damage)", name, timeString, units-1, totalDPSString, totalDamageString, bossString, bossDPSString, bossDamageString)
+	elseif units == 1 or mode == CMX_POSTTOCHAT_MODE_SINGLE then 
 	
+		local singleDPSString = ZO_CommaDelimitNumber(math.floor(singleDamage / singleTime))
+		local singleDamageString = ZO_CommaDelimitNumber(singleDamage)
+		local timeString = string.format("%d:%04.1f", singleTime/60, singleTime%60)	
+	
+		output = zo_strformat(GetString(SI_COMBAT_METRICS_POSTDPS_FORMAT), name, singleDPSString, singleDamageString, timeString)
+		
+	elseif bossUnits > 0 and mode == CMX_POSTTOCHAT_MODE_SMART then
+	
+		local bosses = bossUnits > 1 and string.format(" (+%d)", (bossUnits-1) )  or ""
+		local bossTimeString = string.format("%d:%04.1f", bossTime/60, bossTime%60)
+		
+		local bossDPSString = ZO_CommaDelimitNumber(math.floor(bossDamage / bossTime))
+		local bossDamageString = ZO_CommaDelimitNumber(bossDamage)
+		
+		output = zo_strformat(GetString(SI_COMBAT_METRICS_POSTSMARTDPS_FORMAT), name, bosses, bossDPSString, bossDamageString, bossTimeString)
+		
+	elseif units > 1 and (mode == CMX_POSTTOCHAT_MODE_MULTI or mode == CMX_POSTTOCHAT_MODE_SMART) then
+	
+		local timeString = string.format("%d:%04.1f", dpstime/60, dpstime%60)
+		
+		local totalDPSString = ZO_CommaDelimitNumber(math.floor(data.DPSOut))
+		local totalDamageString = ZO_CommaDelimitNumber(damage)
+	
+		output = zo_strformat(GetString(SI_COMBAT_METRICS_POSTMULTIDPS_FORMAT), name, units-1, totalDPSString, totalDamageString, timeString)
+		
+	elseif mode == CMX_POSTTOCHAT_MODE_SINGLEANDMULTI then 
+		
+		local bossString = bossUnits > 1 and string.format("%s (+%d)", GetString(SI_COMBAT_METRICS_BOSS_DPS), bossUnits-1) or bossUnits == 1 and GetString(SI_COMBAT_METRICS_BOSS_DPS) or GetString(SI_COMBAT_METRICS_DPS)
+		local timeString = string.format("%d:%04.1f", dpstime/60, dpstime%60)	
+		local bossTimeString = string.format("%d:%04.1f", bossTime/60, bossTime%60)	
+		
+		local bossDPSString = ZO_CommaDelimitNumber(math.floor(bossDamage / bossTime))
+		local bossDamageString = ZO_CommaDelimitNumber(bossDamage)
+		
+		local totalDPSString = ZO_CommaDelimitNumber(math.floor(data.DPSOut))
+		local totalDamageString = ZO_CommaDelimitNumber(damage)
+		
+		local stringA = zo_strformat(GetString(SI_COMBAT_METRICS_POSTALLDPS_FORMAT_A), name, units-1, totalDPSString, totalDamageString, timeString)
+		local stringB = zo_strformat(GetString(SI_COMBAT_METRICS_POSTALLDPS_FORMAT_B), bossString, bossDPSString, bossDamageString, bossTimeString)
+		
+		output = string.format("%s, %s", stringA, stringB)
+	
+	elseif mode == CMX_POSTTOCHAT_MODE_SELECTION or mode == CMX_POSTTOCHAT_MODE_SELECTED_UNITNAME then
+	
+		if not unitSelection then return end
+	
+		local extraUnits = units > 1 and mode == CMX_POSTTOCHAT_MODE_SELECTED_UNITNAME and string.format(" (x%d)", units ) 
+			or units > 1 and string.format(" (+%d)", (units-1) ) 
+			or ""
+		
+		local DPSString = ZO_CommaDelimitNumber(math.floor(damage / dpstime))
+		local DamageString = ZO_CommaDelimitNumber(damage)
+		local timeString = string.format("%d:%04.1f", dpstime/60, dpstime%60)
+		
+		output = zo_strformat(GetString(SI_COMBAT_METRICS_POSTSELECTIONDPS_FORMAT), name, extraUnits, DPSString, DamageString, timeString)
+		
 	end
 		
 	-- Determine appropriate channel
 	
-	local channel = db.autoselectchatchannel==false and "" or IsUnitGrouped('player') and "/p " or "/say "
+	local channel = db.autoselectchatchannel == false and "" or IsUnitGrouped('player') and "/p " or "/say "
 
 	-- Print output to chat
 	
@@ -4860,10 +5098,10 @@ local function updateLiveReport(self, data)
 	
 	if db.liveReport.damageOutSingle then 
 	
-		local singleTargetDamage, singleTargetDamageGroup = GetSingleTargetDamage(data)
+		local singleTargetDamage, singleTargetDamageGroup, _, damageTime = GetSingleTargetDamage(data)
 		
-		SDPS = math.floor(singleTargetDamage / dpstime + 0.5)
-		groupSDPS = math.floor(singleTargetDamageGroup / dpstime + 0.5)
+		SDPS = zo_round(singleTargetDamage / damageTime)
+		groupSDPS = zo_round(singleTargetDamageGroup / damageTime)
 		
 	end
 

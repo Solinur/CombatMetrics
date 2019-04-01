@@ -68,6 +68,8 @@
 	SI_COMBAT_METRICS_TOGGLE_INFO = "Info", -- Info
 	SI_COMBAT_METRICS_TOGGLE_SETTINGS = "Options", -- Settings
 	
+	-- Options Menu Strings
+	
 	SI_COMBAT_METRICS_SHOWIDS = "Show IDs", -- Show IDs for units, buffs and abilities
 	SI_COMBAT_METRICS_HIDEIDS = "Hide IDs", -- Hide IDs for units, buffs and abilities
 	
@@ -77,10 +79,29 @@
 	SI_COMBAT_METRICS_POSTMULTIDPS = "Post total DPS",
 	SI_COMBAT_METRICS_POSTALLDPS = "Post single and total DPS",
 	SI_COMBAT_METRICS_POSTHPS = "Post HPS",
+	SI_COMBAT_METRICS_POSTUNITDPS = "Post DPS to this unit",
+	SI_COMBAT_METRICS_POSTUNITNAMEDPS = "Post DPS to '<<1>>' units", -- <<1>> is unitname
+	SI_COMBAT_METRICS_POSTSELECTIONDPS = "Post DPS to selected units",	
+	SI_COMBAT_METRICS_POSTSELECTIONHPS = "Post HPS to selected units",	
+	
+	-- Format Strings for DPS posting
+	
+	SI_COMBAT_METRICS_BOSS_DPS = "Boss DPS", 
+	
+	SI_COMBAT_METRICS_POSTDPS_FORMAT = "<<1>> - DPS: <<2>> (<<3>> in <<4>>)", -- for single target DPS (<<1>> = fightname, <<2>> = DPS, <<3>> = damage, <<4>> = time) e.g. Z'Maja - DPS: 10000 (1000000 in 1:40.0)
+	SI_COMBAT_METRICS_POSTSMARTDPS_FORMAT = "<<1>><<2>> - Boss DPS: <<3>> (<<4>> in <<5>>)", -- (<<1>> = fightname, <<2>> = extraunits (can be ""), <<3>> = DPS, <<4>> = damage, <<5>> = time) e.g. Valariel (+5) - Boss DPS: 10000 (1000000 in 1:40.0)
+	SI_COMBAT_METRICS_POSTMULTIDPS_FORMAT = "<<1>> (+<<2>>) - DPS: <<3>> (<<4>> in <<5>>)", -- (<<1>> = fightname, <<2>> = extraunits, <<3>> = DPS, <<4>> = damage, <<5>> = time) e.g. Some random Mob (+5) - DPS: 10000 (1000000 in 1:40.0)
+	SI_COMBAT_METRICS_POSTALLDPS_FORMAT_A = "<<1>> - Total DPS (+<<2>>): <<3>> (<<4>> in <<5>>)", -- multi target part (<<1>> = fightname, <<2>> = extraunits, <<3>> = DPS, <<4>> = damage, <<5>> = time) e.g. Valariel - Total DPS (+5): 10000 (1000000 in 1:40.0)
+	SI_COMBAT_METRICS_POSTALLDPS_FORMAT_B = "<<1>>: <<2>> (<<3>> in <<4>>)", --  single target part (<<1>> = Label, <<2>> = DPS, <<3>> = damage) e.g. Boss DPS (+2): 10000 (1000000 in 1:40.0)
+	SI_COMBAT_METRICS_POSTSELECTIONDPS_FORMAT = "<<1>><<2>> - Selection DPS: <<3>> (<<4>> in <<5>>)", -- (<<1>> = fightname, <<2>> = extraunits (can be ""), <<3>> = DPS, <<4>> = damage, <<5>> = time) e.g. Valariel (+5) - Boss DPS: 10000 (1000000 in 1:40.0)
+	SI_COMBAT_METRICS_POSTHPS_FORMAT = "<<1>> - HPS: <<2>> (<<3>> in <<4>>)", -- (<<1>> = fightname, <<2>> = HPS, <<3>> = damage, <<4>> = time)  e.g. Z'Maja - HPS: 10000 (1000000 in 1:40.0)
+	SI_COMBAT_METRICS_POSTSELECTIONHPS_FORMAT = "<<1>> - Selection HPS (x<<2>>): <<3>> (<<4>> in <<5>>)", -- (<<1>> = fightname, <<2>> = units, <<3>> = HPS, <<4>> = damage, <<5>> = time)  e.g. Z'Maja - HPS (12): 10000 (1000000 in 1:40.0)
 	
 	SI_COMBAT_METRICS_SETTINGS = "Addon Settings",
 	SI_COMBAT_METRICS_FEEDBACK = "Send Feedback / Donate",
 	SI_COMBAT_METRICS_SAVEHDD = "Save FightData to HDD",
+	
+	-- Graph
 	
 	SI_COMBAT_METRICS_RECALCULATE = "Recalculate Fight",
 	SI_COMBAT_METRICS_SMOOTHED = "Smoothed",
@@ -92,6 +113,8 @@
 	SI_COMBAT_METRICS_ENLARGE = "Enlarge",
 	SI_COMBAT_METRICS_SHRINK = "Shrink",
 	
+	-- Feedback
+	
 	SI_COMBAT_METRICS_FEEDBACK_MAIL = "Send Mail",
 	SI_COMBAT_METRICS_FEEDBACK_GOLD = "Donate 5000g",
 	SI_COMBAT_METRICS_FEEDBACK_GOLD2 = "Donate 25000g",
@@ -101,6 +124,8 @@
 
 	SI_COMBAT_METRICS_STORAGE_FULL = "The storage file is full. The fight you want to save needs <<1>> MB. Delete a fight to free some space or increase the allowed space in the settings!", -- The storage file is full. Delete a fight to free some space!
 
+	-- Fight Control Button Tooltips
+	
 	SI_COMBAT_METRICS_PREVIOUS_FIGHT = "Previous Fight", -- Previous Fight
 	SI_COMBAT_METRICS_NEXT_FIGHT = "Next Fight", -- Next Fight
 	SI_COMBAT_METRICS_MOST_RECENT_FIGHT = "Most Recent Fight", -- Most Recent Fight
@@ -110,6 +135,8 @@
 	SI_COMBAT_METRICS_DELETE_COMBAT_LOG = "Delete Combat Log", -- Delete Combat Log
 	SI_COMBAT_METRICS_DELETE_FIGHT = "Delete Fight", -- Delete Fight
 
+	-- Fight List
+	
 	SI_COMBAT_METRICS_RECENT_FIGHT = "Recent Fights", -- Recent Fights
 	SI_COMBAT_METRICS_DURATION = "Duration", -- Duration
 	SI_COMBAT_METRICS_CHARACTER = "Character", -- Character
@@ -122,6 +149,8 @@
 
 	SI_COMBAT_METRICS_SAVED_FIGHTS = "Saved Fights", -- Saved Fights
 
+	-- More UI Strings 
+	
 	SI_COMBAT_METRICS_ACTIVE_TIME = "Active Time: ", -- Active Time: 
 	SI_COMBAT_METRICS_ZERO_SEC = "0 s", -- 0 s
 	SI_COMBAT_METRICS_IN_COMBAT = "In Combat: ", -- In Combat: 

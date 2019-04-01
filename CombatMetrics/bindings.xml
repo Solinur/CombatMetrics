@@ -5,19 +5,19 @@
 				<Up>CombatMetrics_Report:Toggle()</Up>
 			</Action>
 			<Action name="CMX_POST_DPS">
-				<Up>CMX.PosttoChat("DPST")</Up>
+				<Up>CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SINGLEANDMULTI)</Up>
 			</Action>
 			<Action name="CMX_POST_DPS_SMART">
-				<Up>CMX.PosttoChat("SmartDPS")</Up>
+				<Up>CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SMART)</Up>
 			</Action>
 			<Action name="CMX_POST_DPS_SINGLE">
-				<Up>CMX.PosttoChat("DPSS")</Up>
+				<Up>CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SINGLE)</Up>
 			</Action>
 			<Action name="CMX_POST_DPS_MULTI">
-				<Up>CMX.PosttoChat("DPSM")</Up>
+				<Up>CMX.PosttoChat(CMX_POSTTOCHAT_MODE_MULTI)</Up>
 			</Action>
 			<Action name="CMX_POST_HPS">
-				<Up>CMX.PosttoChat("HPS")</Up>
+				<Up>CMX.PosttoChat(CMX_POSTTOCHAT_MODE_HEALING)</Up>
 			</Action>
 			<Action name="CMX_RESET_FIGHT">
 				<Up>CMX.ResetFight()</Up>

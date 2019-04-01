@@ -318,17 +318,31 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*]Reorganized bundled libraries (Make sure to activate them in the Addon Panel). This should fix a lua error some received.
 
 0.9.0 (beta)
-[*] Added a new Info panel. It shows the Equipment, CP, and Skills used in the selected fight. Weaving Metrics
+[*] Added a new Info panel. It shows the Equipment, CP, and Skills used in the selected fight.
 [**] For the skill panel "Weaving Metrics" are shown. They give some info how fast you are able to cast subsequent abilities and the average time between two subsequent casts of the same ability.
 [**] Also some stats about how much time was spent and how much damage was done on each bar are shown. Werewolf is not supported at the moment but will be added in the future.
 [*] Added a new Graph panel.
 [**] Here you can view how DPS or HPS developed over time. You can also show Resources (e.g. Magicka) or Stats (e.g. Spell Damage).
-[**] You can click on the colour boxes on the left to change the plots colours
+[**] You can click on the colour boxes on the left to change the colours of the plots.
 [**] When you select buffs/debuffs in the buff panel, while the graph panel is shown, the buff uptime will also be visualized in the graph.
+[**] By drawing a rectangle you can zoom in, a right click resets the zoom.
 [*] Note that some of the new features only work for new fights.
 [*] Uptime % in the (De-)Buffs Out Panel are now considered towards the total time the respective units have been engaged in combat. This should lead to more reasonable results when you fight different bosses in succession (e.g. the iterations of Z'Maja in Cloudrest). It won't however help for fights where units are inactive in between (e.g. The minibosses in Asylum)
 [*] Some of the columns in the abilities panel can now be changed. They are coloured in a bright yellow. You can for example choose to show the minimum hit instead of the maximum or show the average critical hit instead of the overall average hit. Just try them out!
 [*] Added more options in the Combat Log. This includes Skill activations and for boss fights the remaining %HP.
-[*] Added the account to the bottom info bar
+[*] Added accountname to the bottom info bar
+[*] Added a feedback/donation entry to the options menu on the fight report window, providing convenient access to give feedback in case you have suggestions or issues to report.
+[*] Added an option to go to the addon settings from the options menu on the fight report window.
 [*] Updated russian localization (Thx @KiriX)
 
+0.9.0 (beta2) 
+[*] Fix a lua error
+
+0.9.0 (beta3) 
+[*] Fix a lua error appearing when trying to show data in a graph that is not available
+[*] Fix some malformated labels in non-english localizations
+[*] Add option to post DPS/HPS to a selection of targets.
+[*] When right clicking a unit while in the DPS out panel, you can now post the DPS to that unit or all units that share that name
+[*] Right click is no longer used to reset the selection in the different list panels, instead this is now set to the 3rd mouse button. 
+(Note: You can also just click on a single unit to select it and then click again on it to deselect it)
+[*] Added detection for Khajit Passive and Minor Force from the 5 pc bonus of Tzogvin’s Warband to show correct Critical Damage Modifier values. Please let me know if anything is missing there.

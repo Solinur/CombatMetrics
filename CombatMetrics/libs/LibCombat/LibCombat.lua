@@ -331,11 +331,18 @@ local critbonusabilities = {
 
 	{
 		["id"] = 31698,
-		["effect"] = {[1] = 5, [2] = 10	}	-- Templar: Piercing Spear
+		["effect"] = {[1] = 5, [2] = 10	},	-- Templar: Piercing Spear
+		["requiresSkillFromLine"] = true,
 	},
 	{
 		["id"] = 36641,
-		["effect"] = {[1] = 5, [2] = 10	}	-- Nightblade: Hemorrhage
+		["effect"] = {[1] = 5, [2] = 10	},	-- Nightblade: Hemorrhage
+		["requiresSkillFromLine"] = true,
+	},
+	{
+		["id"] = 45301,		
+		["effect"] = {[1] = 3, [2] = 6, [3] = 10},	-- Khajit: Feline Ambush
+		["requiresSkillFromLine"] = false,
 	},
 	
 }
@@ -386,6 +393,7 @@ local MinorForceAbility = {		-- All AbilityId's that cause Minor Force. Used to 
 	[103712] = true,
 	[104403] = true,
 	[106861] = true,
+	[116775] = true,
 
 }
 
@@ -717,6 +725,8 @@ local function GetCritBonusFromPassives()
 	
 	local skillDataTable = SKILLS_DATA_MANAGER.abilityIdToProgressionDataMap
 	
+	local bonusdata = {}
+	
 	for k, ability in pairs(critbonusabilities) do
 	
 		local id = ability.id
@@ -725,16 +735,18 @@ local function GetCritBonusFromPassives()
 		
 		local purchased = skillData.isPurchased
 		local rank = skillData.currentRank
-		local lineData = skillData["skillLineData"]
+		local lineData = skillData.skillLineData
 		
 		local line = lineData.skillLineIndex
 		
+		local skillType = lineData.skillTypeData.skillType
+		
 		if purchased == true then bonus = ability.effect[rank] or 0 end
 	
-		if bonus > 0 then return {SKILL_TYPE_CLASS, line, bonus} end
+		if bonus > 0 then bonusdata[id] = {skillType, line, bonus, ability.requiresSkillFromLine} end
 	end
 	
-	return {}
+	return bonusdata
 	
 end
 
@@ -975,27 +987,36 @@ local function GetCritbonus()
 
 	local isactive = false
 	
-	local skillType, line, bonus = unpack(data.critBonusPassive)
-		
-	if bonus and bonus > 0 then 
+	local passiveBonus = 0
 	
-		for i = 1, 6 do
-		
-			if GetAssignedSlotFromSkillAbility(skillType, line, i) ~= nil then 		-- Determines if an ability is equiped which "activates" the passive. Works both for templars and nightblades.
-				
-				isactive = true 
-				break 
-				
+	for id, passiveData in pairs(data.critBonusPassive) do
+	
+		local skillType, line, bonus, requiresSkillFromLine = unpack(passiveData)
+			
+		if requiresSkillFromLine and bonus and bonus > 0 then 
+			
+			for i = 1, 6 do
+			
+				if GetAssignedSlotFromSkillAbility(skillType, line, i) ~= nil then 		-- Determines if an ability is equiped which "activates" the passive. Works both for templars and nightblades.
+					
+					isactive = true 
+					break 
+					
+				end
 			end
+			
+			bonus = isactive and bonus or 0
+		
 		end
+		
+		passiveBonus = passiveBonus + bonus or 0
+		
 	end
-	
-	bonus = isactive and bonus or 0
 	
 	local mightyCP = data.mightyCP
 	local elfbornCP = data.elfbornCP
 	
-	local total = 50 + data.critBonusMundus + bonus + data.majorForce + data.minorForce
+	local total = 50 + data.critBonusMundus + passiveBonus + data.majorForce + data.minorForce
 	local spelltotal = elfbornCP + total
 	local weapontotal = mightyCP + total
 	
