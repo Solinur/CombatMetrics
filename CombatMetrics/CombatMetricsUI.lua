@@ -2139,114 +2139,141 @@ local function updateUnitPanel(panel)
 	end 
 end
 
-local function selectHitCritOption1()
+local hitCritLayoutTable = {
 
-	db.FightReport.hitCritLayout = {"Critical", "Total", "SI_COMBAT_METRICS_CRITS", "SI_COMBAT_METRICS_HITS"}
-	
-	CombatMetrics_Report_AbilityPanel:Update()
-	
-end
+	[1] = {"Critical", "Total", GetString(SI_COMBAT_METRICS_CRITS), GetString(SI_COMBAT_METRICS_HITS)},
+	[2] = {"Total", "Critical", GetString(SI_COMBAT_METRICS_HITS), GetString(SI_COMBAT_METRICS_CRITS)},
+	[3] = {"Normal", "Critical", GetString(SI_COMBAT_METRICS_NORM), GetString(SI_COMBAT_METRICS_CRITS)},
 
-local function selectHitCritOption2()
+}
 
-	db.FightReport.hitCritLayout = {"Total", "Critical", "SI_COMBAT_METRICS_HITS", "SI_COMBAT_METRICS_CRITS"}
-	
-	CombatMetrics_Report_AbilityPanel:Update()
-	
-end
+do
 
-local function selectHitCritOption3()
+	local function selectHitCritOption1()
 
-	db.FightReport.hitCritLayout = {"Normal", "Critical", "SI_COMBAT_METRICS_NORM", "SI_COMBAT_METRICS_CRITS"}
-	
-	CombatMetrics_Report_AbilityPanel:Update()
-	
-end
+		db.FightReport.hitCritLayout = 1
+		
+		CombatMetrics_Report_AbilityPanel:Update()
+		
+	end
 
-function CMX.HitCritContextMenu(control, button)
+	local function selectHitCritOption2()
 
-	ClearMenu()
+		db.FightReport.hitCritLayout = 2
+		
+		CombatMetrics_Report_AbilityPanel:Update()
+		
+	end
+
+	local function selectHitCritOption3()
+
+		db.FightReport.hitCritLayout = 3
+		
+		CombatMetrics_Report_AbilityPanel:Update()
+		
+	end
 	
-	local text1 = string.format("%s/%s", GetString(SI_COMBAT_METRICS_HITS), GetString(SI_COMBAT_METRICS_CRITS))
-	local text2 = string.format("%s/%s", GetString(SI_COMBAT_METRICS_CRITS), GetString(SI_COMBAT_METRICS_HITS))
+	local text1 = string.format("%s/%s", GetString(SI_COMBAT_METRICS_CRITS), GetString(SI_COMBAT_METRICS_HITS))
+	local text2 = string.format("%s/%s", GetString(SI_COMBAT_METRICS_HITS), GetString(SI_COMBAT_METRICS_CRITS))
 	local text3 = string.format("%s/%s", GetString(SI_COMBAT_METRICS_NORM), GetString(SI_COMBAT_METRICS_CRITS))
-	
-	AddCustomMenuItem(text1, selectHitCritOption1)
-	AddCustomMenuItem(text2, selectHitCritOption2)
-	AddCustomMenuItem(text3, selectHitCritOption3)
-	
-	ShowMenu(control)
 
-end
+	function CMX.HitCritContextMenu(control, button)
 
-local function selectAverageOption1()
+		ClearMenu()
+		
+		AddCustomMenuItem(text1, selectHitCritOption1)
+		AddCustomMenuItem(text2, selectHitCritOption2)
+		AddCustomMenuItem(text3, selectHitCritOption3)
+		
+		ShowMenu(control)
 
-	db.FightReport.averageLayout = {"Total", ""}
-	
-	CombatMetrics_Report_AbilityPanel:Update()
+	end
 	
 end
 
-local function selectAverageOption2()
+local averageLayoutTable = {
 
-	db.FightReport.averageLayout = {"Normal", " N"}
-	
-	CombatMetrics_Report_AbilityPanel:Update()
-	
-end
+	[1] = {"Total", GetString(SI_COMBAT_METRICS_AVE)},
+	[2] = {"Normal", GetString(SI_COMBAT_METRICS_AVE_N)},
+	[3] = {"Critical", GetString(SI_COMBAT_METRICS_AVE_C)},
 
-local function selectAverageOption3()
+}
 
-	db.FightReport.averageLayout = {"Critical", " C"}
-	
-	CombatMetrics_Report_AbilityPanel:Update()
-	
-end
+do
 
-function CMX.AverageContextMenu(control, button)
+	local function selectAverageOption1()
 
-	ClearMenu()
-	
+		db.FightReport.averageLayout = 1
+		
+		CombatMetrics_Report_AbilityPanel:Update()
+		
+	end
+
+	local function selectAverageOption2()
+
+		db.FightReport.averageLayout = 2
+		
+		CombatMetrics_Report_AbilityPanel:Update()
+		
+	end
+
+	local function selectAverageOption3()
+
+		db.FightReport.averageLayout = 3
+		
+		CombatMetrics_Report_AbilityPanel:Update()
+		
+	end	
+
 	local text1 = string.format("%s %s", GetString(SI_COMBAT_METRICS_AVERAGE), GetString(SI_COMBAT_METRICS_HITS))
 	local text2 = string.format("%s %s", GetString(SI_COMBAT_METRICS_AVERAGE), GetString(SI_COMBAT_METRICS_NORMAL_HITS))
 	local text3 = string.format("%s %s", GetString(SI_COMBAT_METRICS_AVERAGE), GetString(SI_COMBAT_METRICS_CRITS))
-	
-	AddCustomMenuItem(text1, selectAverageOption1)
-	AddCustomMenuItem(text2, selectAverageOption2)
-	AddCustomMenuItem(text3, selectAverageOption3)
-	
-	ShowMenu(control)
 
+	function CMX.AverageContextMenu(control, button)
+
+		ClearMenu()
+
+		
+		AddCustomMenuItem(text1, selectAverageOption1)
+		AddCustomMenuItem(text2, selectAverageOption2)
+		AddCustomMenuItem(text3, selectAverageOption3)
+		
+		ShowMenu(control)
+
+	end
 end
 
-local function selectMinMaxOption1()
-
-	db.FightReport.maxValue = true
+do 	
 	
-	CombatMetrics_Report_AbilityPanel:Update()
-	
-end
+	local function selectMinMaxOption1()
 
-local function selectMinMaxOption2()
+		db.FightReport.maxValue = true
+		
+		CombatMetrics_Report_AbilityPanel:Update()
+		
+	end
 
-	db.FightReport.maxValue = false
-	
-	CombatMetrics_Report_AbilityPanel:Update()
-	
-end
+	local function selectMinMaxOption2()
 
-function CMX.MinMaxContextMenu(control, button)
-
-	ClearMenu()
-	
+		db.FightReport.maxValue = false
+		
+		CombatMetrics_Report_AbilityPanel:Update()
+		
+	end
+		
 	local text1 = string.format("%s", GetString(SI_COMBAT_METRICS_MAX))
 	local text2 = string.format("%s", GetString(SI_COMBAT_METRICS_MIN))
-	
-	AddCustomMenuItem(text1, selectMinMaxOption1)
-	AddCustomMenuItem(text2, selectMinMaxOption2)
-	
-	ShowMenu(control)
 
+	function CMX.MinMaxContextMenu(control, button)
+
+		ClearMenu()
+		
+		AddCustomMenuItem(text1, selectMinMaxOption1)
+		AddCustomMenuItem(text2, selectMinMaxOption2)
+		
+		ShowMenu(control)
+
+	end
 end
 
 local function updateAbilityPanel(panel)
@@ -2258,8 +2285,8 @@ local function updateAbilityPanel(panel)
 	local settings = db.FightReport
 	
 	local category = settings.category
-	local hitCritLayout = settings.hitCritLayout
-	local averageLayout = settings.averageLayout
+	local hitCritLayout = hitCritLayoutTable[settings.hitCritLayout]
+	local averageLayout = averageLayoutTable[settings.averageLayout]
 	local minmax = settings.maxValue
 	
 	local isDamage = category == "damageIn" or category == "damageOut"
@@ -2275,12 +2302,12 @@ local function updateAbilityPanel(panel)
 	local headerCrit = header:GetNamedChild("Crits")
 	local headerHit = header:GetNamedChild("Hits")
 	
-	headerCrit:SetText(GetString(_G[hitCritLayout[3]]))
-	headerHit:SetText("/" .. GetString(_G[hitCritLayout[4]]))
+	headerCrit:SetText(hitCritLayout[3])
+	headerHit:SetText("/" .. hitCritLayout[4])
 	
 	local headerAvg = header:GetNamedChild("Average")
 	
-	headerAvg:SetText(GetString(SI_COMBAT_METRICS_AVE) .. averageLayout[2])
+	headerAvg:SetText(averageLayout[2])
 	
 	local headerMinMax = header:GetNamedChild("MinMax")
 	
@@ -5522,6 +5549,10 @@ function CMX.InitializeUI()
 	
 	SVHandler = CombatMetricsFightData
 	savedFights = SVHandler.GetFights()
+	
+	
+	if type(db.FightReport.hitCritLayout) ~= "number" then db.FightReport.hitCritLayout = 1 end -- TODO: only for beta users, remove
+	if type(db.FightReport.averageLayout) ~= "number" then db.FightReport.averageLayout = 1 end -- TODO: only for beta users, remove
 	
 	local _, size = checkSaveLimit()
 	db.SVsize = size

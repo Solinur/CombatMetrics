@@ -169,7 +169,9 @@
 	SI_COMBAT_METRICS_RESOURCES = "Resources",  -- Resources
 
 	SI_COMBAT_METRICS_STATS = "Stats",  -- Stats
-	SI_COMBAT_METRICS_AVE = "Avg",  -- Average
+	SI_COMBAT_METRICS_AVE = "Avg",  -- Average, short
+	SI_COMBAT_METRICS_AVE_N = "Avg N",  -- Average Normal, short
+	SI_COMBAT_METRICS_AVE_C = "Avg C",  -- Average Crit, short
 	SI_COMBAT_METRICS_AVERAGE = "Average",  -- Average
 	SI_COMBAT_METRICS_NORMAL_HITS = "Normal Hits",  -- "Normal Hits"
 	SI_COMBAT_METRICS_MAX = "Max",  -- Maximum
