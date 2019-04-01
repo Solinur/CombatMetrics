@@ -879,6 +879,12 @@ do	-- Handling Favourite Buffs
 		CombatMetrics_Report:Update()
 		
 	end
+	
+	local function postBuffUptime()
+		
+		if buffname then CMX.PostBuffUptime(currentFight, buffname) end
+		
+	end
 
 	function CMX.BuffContextMenu( bufflistitem, upInside )
 
@@ -902,6 +908,7 @@ do	-- Handling Favourite Buffs
 		
 		ClearMenu()
 		AddCustomMenuItem(text, func)
+		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTBUFF), postBuffUptime)
 		ShowMenu(bufflistitem)
 		
 	end 
@@ -2147,7 +2154,7 @@ local hitCritLayoutTable = {
 
 }
 
-do
+do 	-- Context Menu for hit/crit column on ability panel
 
 	local function selectHitCritOption1()
 
@@ -2199,7 +2206,7 @@ local averageLayoutTable = {
 
 }
 
-do
+do 	-- Context Menu for average column on ability panel
 
 	local function selectAverageOption1()
 
@@ -2243,7 +2250,7 @@ do
 	end
 end
 
-do 	
+do 	-- Context Menu for Min/Max column on ability panel
 	
 	local function selectMinMaxOption1()
 
@@ -4954,6 +4961,67 @@ local function GetUnitsByName(data, unitId)	-- Gets all units that share the nam
 	end
 	
 	return selectedUnits
+end
+	
+function CMX.PostBuffUptime(fight, buffname)
+	
+	local data = fight and CMX.lastfights[fight]
+	
+	local category = db.FightReport.category or "damageOut"
+		
+	if not data or selections.unit[category] then return end
+	
+	local timedata = ""
+	
+	if data ~= GetCurrentData() then 
+
+		local date = data.date
+	
+		local datestring = type(date) == "number" and GetDateStringFromTimestamp(date) or date
+		timedata = string.format("[%s, %s] ", datestring, data.time)
+
+	end
+	
+	local activetime = data.dpstime
+	
+	if category == "healingOut" or category == "healingIn" then activetime = data.hpstime end
+	
+	local buffdata = data.calculated.buffs[buffname]
+	
+	local uptime = buffdata.uptime / 1000
+	local groupUptime = buffdata.groupUptime / 1000
+	
+	local relativeUptimeString = string.format("%.1f%%", uptime / activetime * 100)
+	local uptimeString = string.format("%d:%02d", uptime/60, uptime%60)
+	local timeString = string.format("%d:%02d", activetime/60, activetime%60)
+	
+	local output
+	
+	if groupUptime > uptime then 
+		
+		local relativeGroupUptimeString = string.format("%.1f%%", groupUptime / activetime * 100)
+		local groupUptimeString = string.format("%d:%02d", groupUptime/60, groupUptime%60)
+	
+		output = zo_strformat(GetString(SI_COMBAT_METRICS_POSTBUFF_FORMAT_GROUP), buffname, relativeUptimeString, uptimeString, timeString, relativeGroupUptimeString, groupUptimeString)
+	
+	else		
+		
+		output = zo_strformat(GetString(SI_COMBAT_METRICS_POSTBUFF_FORMAT), buffname, relativeUptimeString, uptimeString, timeString)
+	
+	end
+	
+	-- Determine appropriate channel
+	
+	local channel = db.autoselectchatchannel == false and "" or IsUnitGrouped('player') and "/p " or "/say "
+
+	-- Print output to chat
+	
+	local outputtext = string.format("%s%s", timedata, output)
+
+	CHAT_SYSTEM.textEntry:SetText( channel .. outputtext )
+	CHAT_SYSTEM:Maximize()
+	CHAT_SYSTEM.textEntry:Open()
+	CHAT_SYSTEM.textEntry:FadeIn()
 end
 	
 function CMX.PosttoChat(mode, fight, UnitContextMenuUnitId)
