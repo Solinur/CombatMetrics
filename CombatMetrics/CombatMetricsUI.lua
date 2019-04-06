@@ -908,6 +908,7 @@ do	-- Handling Favourite Buffs
 		
 		ClearMenu()
 		AddCustomMenuItem(text, func)
+		
 		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTBUFF), postBuffUptime)
 		ShowMenu(bufflistitem)
 		
@@ -1790,21 +1791,63 @@ end
 
 local function GetBuffData()
 
-	local buffdata
+	local buffData
 	
 	local rightpanel = db.FightReport.rightpanel
 	
 	if rightpanel == "buffsout" then 
 	
-		buffdata = selectionData
+		buffData = selectionData
 		
 	elseif rightpanel == "buffs" then 
 	
-		buffdata = fightData.calculated 
+		buffData = fightData.calculated 
 		
 	end
 
-	return buffdata
+	return buffData
+end
+
+local function GetBuffDataAndUnits()
+
+	local buffData
+	
+	local rightpanel = db.FightReport.rightpanel
+	
+	local units = 0
+	
+	if rightpanel == "buffsout" then 
+	
+		buffData = selectionData
+		
+		local category = db.FightReport.category
+		local unitselection = selections.unit[category]
+		
+		for unitId, _ in pairs(unitselection or fightData.units) do
+		
+			local unit = fightData.calculated.units[unitId]		
+			local unitData = fightData.units[unitId]			
+			local unitTotalValue = unit[category.."Total"]
+		
+			local isNotPlayer = unitData.name ~= CMX.playername
+			local isNotEmpty = unitTotalValue > 0 or NonContiguousCount(unit.buffs) > 0
+			local isEnemy = unitData.unitType ~= COMBAT_UNIT_TYPE_GROUP and unitData.unitType ~= COMBAT_UNIT_TYPE_PLAYER_PET 
+			local isDamageCategory = category == "damageIn" or category == "damageOut"
+			
+			if isNotPlayer and isNotEmpty and (isEnemy == isDamageCategory) then 
+			
+				units = units + 1
+				
+			end		
+		end
+		
+	elseif rightpanel == "buffs" then 
+	
+		buffData = fightData.calculated 
+		
+	end
+
+	return buffData, units
 end
 
 local function updateBuffPanel(panel)
@@ -1815,9 +1858,9 @@ local function updateBuffPanel(panel)
 	
 	if fightData == nil then return end
 	
-	local buffdata = GetBuffData()
+	local buffData = GetBuffData()
 	
-	if buffdata == nil then return end
+	if buffData == nil then return end
 	
 	local scrollchild = GetControl(panel, "PanelScrollChild")
 	
@@ -1826,11 +1869,11 @@ local function updateBuffPanel(panel)
 	
 	local maxtime = math.max(fightData.activetime or 0, fightData.dpstime or 0, fightData.hpstime or 0)
 	
-	local totalUnitTime = buffdata.totalUnitTime or maxtime * 1000
+	local totalUnitTime = buffData.totalUnitTime or maxtime * 1000
 	local showids = db.debuginfo.ids
 	local favs = db.FightReport.FavouriteBuffs
 	
-	for buffName, buff in CMX.spairs(buffdata["buffs"], buffSortFunction) do
+	for buffName, buff in CMX.spairs(buffData["buffs"], buffSortFunction) do
 	
 		if buff.groupUptime > 0 then
 
@@ -1846,8 +1889,8 @@ local function updateBuffPanel(panel)
 			local dbug = (showids and type(buff.icon) == "number") and string.format("(%d) ", buff.icon) or ""
 			local name = dbug .. buffName
 			
-			local uptimeRatio = buff.uptime / (totalUnitTime)
-			local groupUptimeRatio = buff.groupUptime / (totalUnitTime)
+			local uptimeRatio = buff.uptime / totalUnitTime
+			local groupUptimeRatio = buff.groupUptime / totalUnitTime
 			
 			local count = buff.count
 			local groupCount = buff.groupCount
@@ -3540,11 +3583,11 @@ local function UpdatePlotBuffSelection()
 
 	local selectedbuffs = selections["buff"]["buff"]
 	
-	local buffdata = GetBuffData()
+	local buffData = GetBuffData()
 	
-	if buffdata == nil or buffdata.buffs == nil then return end
+	if buffData == nil or buffData.buffs == nil then return end
 	
-	for buffName, buff in CMX.spairs(buffdata.buffs, buffSortFunction) do
+	for buffName, buff in CMX.spairs(buffData.buffs, buffSortFunction) do
 	
 		if selectedbuffs and selectedbuffs[buffName] ~= nil then PlotBuffSelection[#PlotBuffSelection + 1] = buffName end
 		
@@ -3558,9 +3601,9 @@ local function UpdateBarPlot(plot)
 	local barId = plot.barId or 0
 	
 	local buffName = PlotBuffSelection[barId]	
-	local buffdata = GetBuffData()
+	local buffData = GetBuffData()
 	
-	local data = buffName and buffdata and buffdata.buffs[buffName] or nil
+	local data = buffName and buffData and buffData.buffs[buffName] or nil
 	
 	if buffName == nil then 
 	
@@ -4934,7 +4977,7 @@ local function GetSelectionHeal(data, selection)	-- Gets highest Single Target D
 			units = units + 1
 			healing = healing + totalUnitHeal
 			starttime = math.min(starttime or unit.hpsstart or 0, unit.hpsstart or 0)
-			endtime = math.max(endtime or unit.dpsend or 0, unit.dpsend or 0)
+			endtime = math.max(endtime or unit.hpsend or 0, unit.hpsend or 0)
 			
 		end
 	end
@@ -4969,7 +5012,7 @@ function CMX.PostBuffUptime(fight, buffname)
 	
 	local category = db.FightReport.category or "damageOut"
 		
-	if not data or selections.unit[category] then return end
+	if not data then return end
 	
 	local timedata = ""
 	
@@ -4982,18 +5025,21 @@ function CMX.PostBuffUptime(fight, buffname)
 
 	end
 	
-	local activetime = data.dpstime
+	local buffDataTable, units = GetBuffDataAndUnits()
+	local buffData = buffDataTable.buffs[buffname]
+	local totalUnitTime = buffDataTable.totalUnitTime 
 	
-	if category == "healingOut" or category == "healingIn" then activetime = data.hpstime end
+	if totalUnitTime then totalUnitTime = totalUnitTime / 1000 end
 	
-	local buffdata = data.calculated.buffs[buffname]
+	local activetime = totalUnitTime or data.dpstime
 	
-	local uptime = buffdata.uptime / 1000
-	local groupUptime = buffdata.groupUptime / 1000
+	if category == "healingOut" or category == "healingIn" then activetime = totalUnitTime or data.hpstime end
+	
+	local uptime = buffData.uptime / 1000
+	local groupUptime = buffData.groupUptime / 1000
 	
 	local relativeUptimeString = string.format("%.1f%%", uptime / activetime * 100)
 	local uptimeString = string.format("%d:%02d", uptime/60, uptime%60)
-	local timeString = string.format("%d:%02d", activetime/60, activetime%60)
 	
 	local output
 	
@@ -5002,11 +5048,11 @@ function CMX.PostBuffUptime(fight, buffname)
 		local relativeGroupUptimeString = string.format("%.1f%%", groupUptime / activetime * 100)
 		local groupUptimeString = string.format("%d:%02d", groupUptime/60, groupUptime%60)
 	
-		output = zo_strformat(GetString(SI_COMBAT_METRICS_POSTBUFF_FORMAT_GROUP), buffname, relativeUptimeString, uptimeString, timeString, relativeGroupUptimeString, groupUptimeString)
+		output = zo_strformat(GetString(SI_COMBAT_METRICS_POSTBUFF_FORMAT_GROUP), buffname, relativeUptimeString, uptimeString, units, relativeGroupUptimeString, groupUptimeString)
 	
 	else		
 		
-		output = zo_strformat(GetString(SI_COMBAT_METRICS_POSTBUFF_FORMAT), buffname, relativeUptimeString, uptimeString, timeString)
+		output = zo_strformat(GetString(SI_COMBAT_METRICS_POSTBUFF_FORMAT), buffname, relativeUptimeString, uptimeString, units)
 	
 	end
 	
@@ -5261,7 +5307,7 @@ local function toggleFightReport()
 	end
 end
 
-function CMX.GetCMXData(dataType)	-- for external access to fightdata
+function CMX.GetCMXData(dataType)	-- for external access to fightData
 
 	local data = {}
 

@@ -98,8 +98,8 @@
 	SI_COMBAT_METRICS_POSTSELECTIONHPS_FORMAT = "<<1>> - Selection HPS (x<<2>>): <<3>> (<<4>> in <<5>>)", -- (<<1>> = fightname, <<2>> = units, <<3>> = HPS, <<4>> = damage, <<5>> = time) e.g. Z'Maja - HPS (12): 10000 (1000000 in 1:40.0)
 	
 	SI_COMBAT_METRICS_POSTBUFF = "Post Buff Uptime",
-	SI_COMBAT_METRICS_POSTBUFF_FORMAT = "<<1>> - HPS: <<2>> (<<3>> of <<4>>)", -- (<<1>> = buff name, <<2>> = relative uptime, <<3>> = uptime, <<4>> = time) e.g. Major Intellect - Uptime: 93.2% (9:26 in 10:07)
-	SI_COMBAT_METRICS_POSTBUFF_FORMAT_GROUP = "<<1>> - Uptime: <<2>>/<<5>> (<<3>>/<<6>> of <<4>>)", -- (<<1>> = buff name, <<2>> = relative uptime, <<3>> = uptime, <<4>> = time, <<5>> = relative group uptime, <<6>> = group uptime) e.g. Minor Sorcery - Uptime: 55.4%/100.6% (5:36/10:11 in 10:07)
+	SI_COMBAT_METRICS_POSTBUFF_FORMAT = "<<1>> - HPS: <<2>> (<<3>><<4[/ on one unit/ on $d units]>>)", -- (<<1>> = buff name, <<2>> = relative uptime, <<3>> = uptime, <<4>> = time) e.g. Major Intellect - Uptime: 93.2% (9:26 in 10:07)
+	SI_COMBAT_METRICS_POSTBUFF_FORMAT_GROUP = "<<1>> - Uptime: <<2>>/<<5>> (<<3>>/<<6>><<4[/ on one unit/ on $d units]>>)", -- (<<1>> = buff name, <<2>> = relative uptime, <<3>> = uptime, <<4>> = units, <<5>> = relative group uptime, <<6>> = group uptime) e.g. Minor Sorcery - Uptime: 55.4%/100.6% (5:36/10:11 in 10:07)
 	
 	SI_COMBAT_METRICS_SETTINGS = "Addon Settings",
 	SI_COMBAT_METRICS_FEEDBACK = "Send Feedback / Donate",

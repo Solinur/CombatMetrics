@@ -706,12 +706,12 @@ local function AccumulateStats(fight)
 	end
 end
 
-function CMX.GenerateSelectionStats(fight, menuItem, selection) -- this is similar to the function above, but instead it sums up stats from already calculated data.
+function CMX.GenerateSelectionStats(fight, menuItem, selections) -- this is similar to the function above, but instead it sums up stats from already calculated data.
 
 	if fight == nil then return end
 	
-	local abilityselection = selection.ability[menuItem]
-	local unitselection = selection.unit[menuItem]
+	local abilityselection = selections.ability[menuItem]
+	local unitselection = selections.unit[menuItem]
 	
 	-- if abilityselection == nil and unitselection == nil then return end
 
