@@ -341,9 +341,9 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 0.9.0 (beta3) 
 [*] Fix a lua error appearing when trying to show data in a graph that is not available
 [*] Fix some malformated labels in non-english localizations
-[*] Add option to post DPS/HPS to a selection of targets.
-[*] Add option to post Buff uptime (right click on buff). This will be extended to quickly post uptime on bosses or group members only.
-[*] When right clicking a unit while in the DPS out panel, you can now post the DPS to that unit or all units that share that name
+[*] Added option to post DPS/HPS to a selection of targets.
+[*] Added option to post Buff uptime (right click on buff). This will be extended to quickly post uptime on bosses or group members only.
+[*] When right clicking a unit while in the DPS out panel, you can now post the DPS to that unit or all units that share that name. Big Thanks to @Letho for the idea and help with this.
 [*] Right click is no longer used to reset the selection in the different list panels, instead this is now set to the 3rd mouse button. 
 (Note: You can also just click on a single unit to select it and then click again on it to deselect it)
 [*] Added detection for Khajit Passive and Minor Force from the 5 pc bonus of Tzogvin’s Warband to show correct Critical Damage Modifier values. Please let me know if anything is missing there.

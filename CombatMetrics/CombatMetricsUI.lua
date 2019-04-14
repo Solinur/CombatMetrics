@@ -861,7 +861,7 @@ end
 
 SLASH_COMMANDS["/cmx"] = slashCommandFunction
 
-do	-- Handling Favourite Buffs
+do	-- Handling Buffs Context Menu
 
 	local favs
 	local buffname
@@ -881,6 +881,14 @@ do	-- Handling Favourite Buffs
 	end
 	
 	local function postBuffUptime()
+		
+		if buffname then CMX.PostBuffUptime(currentFight, buffname) end
+		
+	end	
+	
+	local function postSelectionBuffUptime()
+	
+		local category = db.FightReport.category
 		
 		if buffname then CMX.PostBuffUptime(currentFight, buffname) end
 		
@@ -5025,7 +5033,7 @@ function CMX.PostBuffUptime(fight, buffname)
 
 	end
 	
-	local buffDataTable, units = GetBuffDataAndUnits()
+	local buffDataTable, units = GetBuffDataAndUnits() -- TODO provide the single unit if units is 1
 	local buffData = buffDataTable.buffs[buffname]
 	local totalUnitTime = buffDataTable.totalUnitTime 
 	

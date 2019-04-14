@@ -1483,14 +1483,15 @@ local function SpecialBuffEventHandler(isdebuff, _ , result , _ , _ , _ , _ , _ 
 
 	if BadAbility[abilityId] == true then return end
 	
-	if zo_strformat(SI_UNIT_NAME,unitName) ~= data.playername then return end
+	if zo_strformat(SI_UNIT_NAME, unitName) ~= data.playername then return end
 	
 	local changeType = result == ACTION_RESULT_EFFECT_GAINED_DURATION and 1 or result == ACTION_RESULT_EFFECT_FADED and 2 or nil
 	
 	if showdebug == true then d("Custom: "..(data.CustomAbilityName[abilityId] or zo_strformat(SI_ABILITY_NAME,GetAbilityName(abilityId))).."("..(changeType==1 and "gain" or changeType==2 and "loss" or "??" )..")") end
 	
 	local effectType = isdebuff and BUFF_EFFECT_TYPE_DEBUFF or BUFF_EFFECT_TYPE_BUFF
-	BuffEventHandler(true, GROUP_EFFECT_NONE, _, changeType, _, _, _, _, _, _, _, _, effectType, ABILITY_TYPE_BONUS, _, unitName, unitId, abilityId, sourceType)
+	BuffEventHandler(true, GROUP_EFFECT_NONE, _, changeType, 0, _, _, _, _, _, _, _, effectType, ABILITY_TYPE_BONUS, _, unitName, unitId, abilityId, sourceType)
+
 end
 
 local function onSpecialBuffEvent(...)
