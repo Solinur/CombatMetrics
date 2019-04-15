@@ -865,6 +865,7 @@ do	-- Handling Buffs Context Menu
 
 	local favs
 	local buffname
+	local unitType
 
 	local function addFavouriteBuff()
 		
@@ -887,10 +888,8 @@ do	-- Handling Buffs Context Menu
 	end	
 	
 	local function postSelectionBuffUptime()
-	
-		local category = db.FightReport.category
 		
-		if buffname then CMX.PostBuffUptime(currentFight, buffname) end
+		if buffname then CMX.PostBuffUptime(currentFight, buffname, unitType) end
 		
 	end
 
@@ -918,6 +917,21 @@ do	-- Handling Buffs Context Menu
 		AddCustomMenuItem(text, func)
 		
 		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTBUFF), postBuffUptime)
+		
+		local category = db.FightReport.category
+		
+		if (category == "damageOut" or category == "damageIn") and db.FightReport.rightpanel == "buffsout" then 
+		
+			unitType = "boss"
+			AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTBUFF_BOSS), postSelectionBuffUptime)
+			
+		elseif (category == "healingOut" or category == "healingIn") and db.FightReport.rightpanel == "buffsout" then 
+		
+			unitType = "group"
+			AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTBUFF_GROUP), postSelectionBuffUptime)
+			
+		end
+		
 		ShowMenu(bufflistitem)
 		
 	end 
@@ -1816,37 +1830,63 @@ local function GetBuffData()
 	return buffData
 end
 
-local function GetBuffDataAndUnits()
+local function GetUnitsByType(unitType)
+
+	if not unitType then return end
+
+	local units = {}
+	
+	for unitId, unit in pairs(fightData.units) do 
+	
+		if (unitType == "boss" and unit.bossId) or (unitType == "group" and (unit.unitType == COMBAT_UNIT_TYPE_GROUP or unit.unitType == COMBAT_UNIT_TYPE_PLAYER)) then 
+		
+			units[unitId] = true 
+			
+		end
+		
+	end
+	
+	return units
+	
+end
+
+local function GetBuffDataAndUnits(unitType)
 
 	local buffData
 	
 	local rightpanel = db.FightReport.rightpanel
 	
 	local units = 0
+	local unitName = ""
 	
 	if rightpanel == "buffsout" then 
 	
-		buffData = selectionData
-		
 		local category = db.FightReport.category
-		local unitselection = selections.unit[category]
+
+		local tempSelections = {}
+
+		ZO_DeepTableCopy(selections, tempSelections)
 		
-		for unitId, _ in pairs(unitselection or fightData.units) do
+		if unitType then tempSelections.unit[category] = GetUnitsByType(unitType) end	
+		
+		buffData = CMX.GenerateSelectionStats(fightData, category, tempSelections) -- yeah, yeah I'm lazy. 
+		
+		for unitId, _ in pairs(tempSelections.unit[category] or fightData.units) do
 		
 			local unit = fightData.calculated.units[unitId]		
 			local unitData = fightData.units[unitId]			
 			local unitTotalValue = unit[category.."Total"]
 		
-			local isNotPlayer = unitData.name ~= CMX.playername
 			local isNotEmpty = unitTotalValue > 0 or NonContiguousCount(unit.buffs) > 0
-			local isEnemy = unitData.unitType ~= COMBAT_UNIT_TYPE_GROUP and unitData.unitType ~= COMBAT_UNIT_TYPE_PLAYER_PET 
+			local isEnemy = unitData.unitType ~= COMBAT_UNIT_TYPE_GROUP and unitData.unitType ~= COMBAT_UNIT_TYPE_PLAYER_PET and unitData.unitType ~= COMBAT_UNIT_TYPE_PLAYER
 			local isDamageCategory = category == "damageIn" or category == "damageOut"
 			
-			if isNotPlayer and isNotEmpty and (isEnemy == isDamageCategory) then 
+			if isNotEmpty and (isEnemy == isDamageCategory) then 
 			
 				units = units + 1
+				unitName = unitData.name 
 				
-			end		
+			end
 		end
 		
 	elseif rightpanel == "buffs" then 
@@ -1854,6 +1894,8 @@ local function GetBuffDataAndUnits()
 		buffData = fightData.calculated 
 		
 	end
+	
+	if units == 1 then units = unitName end
 
 	return buffData, units
 end
@@ -5014,7 +5056,7 @@ local function GetUnitsByName(data, unitId)	-- Gets all units that share the nam
 	return selectedUnits
 end
 	
-function CMX.PostBuffUptime(fight, buffname)
+function CMX.PostBuffUptime(fight, buffname, unitType)
 	
 	local data = fight and CMX.lastfights[fight]
 	
@@ -5033,7 +5075,7 @@ function CMX.PostBuffUptime(fight, buffname)
 
 	end
 	
-	local buffDataTable, units = GetBuffDataAndUnits() -- TODO provide the single unit if units is 1
+	local buffDataTable, units = GetBuffDataAndUnits(unitType) -- TODO provide the single unit if units is 1
 	local buffData = buffDataTable.buffs[buffname]
 	local totalUnitTime = buffDataTable.totalUnitTime 
 	
