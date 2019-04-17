@@ -349,3 +349,10 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Added detection for Khajit Passive and Minor Force from the 5 pc bonus of Tzogvin’s Warband to show correct Critical Damage Modifier values. Please let me know if anything is missing there.
 
 0.9.0 (beta4)
+[*] Buff uptime from the "(De-)buffs out" panel can now also be directly posted for all bosses or group members without the need to select them in the unit panel first
+[*] When posting data for one unit only, the name of that unit is shown.
+[*] When in a healing category, the "(De-)buffs out" panel now also considers the uptime of the yourself
+[*] Added a change that hopefully fixes issues with Briarheart and similar buffs.
+[*] Added a cursor with a tooltip that shows the exact numbers. It can be toggled on an off by the cursor icon next to the enlarge button.
+[*] Fixed an issue with graph rescaling.
+[*] Added a tooltip to the groupbuff toggle in the graph panel
