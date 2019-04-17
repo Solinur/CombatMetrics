@@ -2081,8 +2081,10 @@ local function Initialize(event, addon)
 	
 	db = CMX.db	
 	
-	SpellResistDebuffs[17906] = db.crusherValue
-	PhysResistDebuffs[17906] = db.crusherValue
+	local crushername = GetFormattedAbilityName(17906)
+	
+	SpellResistDebuffs[crushername] = db.crusherValue
+	PhysResistDebuffs[crushername] = db.crusherValue
 	
 	if db.chatLog.enabled then zo_callLater(CMX.InitializeChat, 200) end
 	
