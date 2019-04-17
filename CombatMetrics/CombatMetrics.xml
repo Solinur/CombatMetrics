@@ -1215,11 +1215,28 @@
 		
 		</Control>
 		
+		<EditBox name="CombatMetrics_GraphTickLabel_Edit" hidden="true" inherits="ZO_DefaultEdit" virtual="true">	
+		
+			<Controls>
+				<Control name="$(parent)Font">
+					<AnchorFill/>
+					<OnInitialized>
+						self.font = {GetString(SI_COMBAT_METRICS_STD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE_SMALL), "soft-shadow-thin"}
+						self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
+					</OnInitialized>
+				</Control>
+			</Controls>
+			
+			<OnFocusLost>							
+				CMX.EditLabelEnd(self)
+			</OnFocusLost>
+		</EditBox>
+		
 		<Line name="CombatMetrics_GraphTickY" color="FF444444" thickness="COMBAT_METRICS_LINE_SIZE" virtual="true">
 		
 			<Controls>
 			
-				<Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0" horizontalAlignment="RIGHT" verticalAlignment="CENTER">
+				<Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0" horizontalAlignment="RIGHT" verticalAlignment="CENTER" mouseEnabled="true">
 					<Anchor point="RIGHT" relativePoint="LEFT" offsetX="-3"/>
 					<Dimensions x="45" y="20"/>
 				</Label>
@@ -2346,7 +2363,7 @@
 										<Control name="$(parent)ToggleSize" mouseEnabled="true"> 
 										
 											<Anchor point="TOPLEFT" offsetX="2" offsetY="4"/>
-											<Anchor point="TOPRIGHT" offsetX="-2" offsetY="4"/>
+											<Anchor point="TOPRIGHT" offsetX="-30" offsetY="4"/>
 											<Dimensions y="20" />
 										
 											<Controls>
@@ -2369,12 +2386,26 @@
 											
 											<OnMouseUp> CMX.ToggleGraphSize(self) </OnMouseUp>
 										
-										</Control>									
-									
+										</Control>
+										
+										<Texture name="$(parent)ToggleCursor" mouseEnabled="true" textureFile="esoui\art\compass\ava_returnpoint_neutral.dds" color="FFFFFFFF" inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton">
+											
+											<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" offsetX="-26" offsetY="2"/>
+											<Anchor point="TOPRIGHT" offsetX="-2" offsetY="2"/>
+											<Dimensions y="24" />
+											
+											<OnMouseUp> CMX.ToggleCursorDisplay(self) </OnMouseUp>
+											
+											<OnInitialized>
+												self.tooltip = {SI_COMBAT_METRICS_TOGGLE_CURSOR}
+											</OnInitialized>
+										
+										</Texture>
+										
 										<Control name="$(parent)SmoothControl" mouseEnabled="true"> 
 										
 											<Anchor point="TOPLEFT" relativeTo="$(parent)ToggleSize" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
-											<Anchor point="TOPRIGHT" relativeTo="$(parent)ToggleSize" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
+											<Anchor point="TOPRIGHT" relativeTo="$(parent)ToggleCursor" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="6"/>
 											<Dimensions y="50" />
 											
 											<Controls>
@@ -2486,6 +2517,13 @@
 											
 										</Backdrop>
 									
+										<Line name="$(parent)Cursor" color="66FFFFFF" level="0" thickness="COMBAT_METRICS_LINE_SIZE" hidden="true">
+									
+											<Anchor point="TOPLEFT"/>
+											<Anchor point="BOTTOMLEFT"/>
+									
+										</Line>	
+									
 										<Control name="$(parent)Spacer1">
 										
 											<Anchor point="TOPLEFT" relativePoint="TOPLEFT"/>
@@ -2588,6 +2626,8 @@
 									
 									<OnMouseDown> CMX.onPlotMouseDown(self, button) </OnMouseDown>
 									<OnMouseUp> CMX.onPlotMouseUp(self, button, upInside) </OnMouseUp>
+									<OnMouseEnter> CMX.onPlotMouseEnter(self) </OnMouseEnter>
+									<OnMouseExit> CMX.onPlotMouseExit(self) </OnMouseExit>
 									
 								</Control>
 								

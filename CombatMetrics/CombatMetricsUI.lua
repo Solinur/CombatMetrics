@@ -3095,7 +3095,7 @@ local function Smooth(category)
 		if t == t2 then table.insert(XYData, {totaltime, y}) end
 	end
 	
-	return XYData, COMBAT_METRICS_YAXIS_LEFT
+	return XYData, COMBAT_METRICS_YAXIS_LEFT, 1
 end
 
 local function Total(category)
@@ -3152,7 +3152,7 @@ local function Total(category)
 		end
 	end
 	
-	return XYData, COMBAT_METRICS_YAXIS_LEFT
+	return XYData, COMBAT_METRICS_YAXIS_LEFT, 1
 end
 
 local function Absolute(category)
@@ -3189,7 +3189,7 @@ local function Absolute(category)
 	
 	end
 	
-	return XYData, COMBAT_METRICS_YAXIS_RIGHT
+	return XYData, COMBAT_METRICS_YAXIS_RIGHT, sum
 end
 
 local powerTypeKeyTable = {
@@ -3271,7 +3271,7 @@ local function ResourceAbsolute(powerType)
 	
 	end
 	
-	return XYData, COMBAT_METRICS_YAXIS_RIGHT
+	return XYData, COMBAT_METRICS_YAXIS_RIGHT, maxValue
 end
 
 local function BossHPAbsolute()
@@ -3314,7 +3314,7 @@ local function BossHPAbsolute()
 	
 	end
 	
-	return XYData, COMBAT_METRICS_YAXIS_RIGHT
+	return XYData, COMBAT_METRICS_YAXIS_RIGHT, maxhp
 end
 
 local function StatAbsolute(statId)
@@ -3354,7 +3354,7 @@ local function StatAbsolute(statId)
 	
 	end
 	
-	return XYData, COMBAT_METRICS_YAXIS_RIGHT
+	return XYData, COMBAT_METRICS_YAXIS_RIGHT, maxvalue
 end
 
 local function AcquireBuffData(buffName)
@@ -3448,14 +3448,14 @@ local function GetScale(x1, x2)	-- e.g. 34596 and 42693
 
 	local distance = math.max(x2 - x1, 1)	-- 8097
 
-	local power = math.pow(10, math.floor(math.log10(distance)))	-- math.pow(10, math.floor(3.91) = math.pow(10, 3) = 1000
+	local power = math.pow(10, math.floor(math.log10(distance/2)))	-- math.pow(10, math.floor(3.61) = math.pow(10, 3) = 1000
 	
 	local high = math.ceil(x2 / power) * power	-- 43000
 	local low = math.floor(x1 / power) * power	-- 34000
 	
 	local size = (high - low) / power 	-- 9000 / 1000 = 9
 	
-	local rangesizes = {1, 2, 4, 8, 10, 20}
+	local rangesizes = {1, 2, 4, 6, 8, 10, 12, 16, 20}
 	
 	local cleansize
 	
@@ -3484,30 +3484,40 @@ local function GetScale(x1, x2)	-- e.g. 34596 and 42693
 	
 	local cleanDist = cleanHigh - cleanLow
 	
-	local tickValues = {cleanLow, 0, 0, 0, cleanHigh}
-	
-	for i = 2,4 do
-	
-		tickValues[i] = cleanLow + cleanDist * (i - 1) / 4
-	
-	end
-	
-	return cleanLow, cleanHigh, tickValues
+	return cleanLow, cleanHigh
 
 end
 
-local function UpdateScales(plotWindow, ranges)
+local function GetTickValues(low, high)
 
-	local x1, x2, y1, y2 = unpack(ranges)	
+	local tickValues = {low, 0, 0, 0, high}
 	
-	local RangesX = {GetScale(x1, x2)}
-	local RangesY = {GetScale(y1, y2)}
+	for i = 2,4 do
 	
-	plotWindow.RangesX = RangesX
-	plotWindow.RangesY = RangesY
+		tickValues[i] = math.floor(low + (high - low) * (i - 1) / 4)
 	
-	local ticksX = RangesX[3]
-	local ticksY = RangesY[3]
+	end
+	
+	return tickValues
+
+end
+
+local function UpdateScales(plotWindow, ranges, exact)
+
+	local xMin, xMax, yMin, yMax = unpack(ranges)	
+	
+	if not exact then 
+	
+		xMin, xMax = GetScale(xMin, xMax)
+		yMin, yMax = GetScale(yMin, yMax)
+		
+	end
+	
+	local ticksX = GetTickValues(xMin, xMax)
+	local ticksY = GetTickValues(yMin, yMax)
+	
+	plotWindow.RangesX = {xMin, xMax, ticksX}
+	plotWindow.RangesY = {yMin, yMax, ticksY}
 	
 	for i = 1,5 do
 	
@@ -3575,7 +3585,7 @@ local function UpdateXYPlot(plot)
 	
 	if func then 
 	
-		XYData, YAxisSide = func()
+		XYData, YAxisSide, plot.AbsoluteYRange = func()
 		
 	end
 	
@@ -3604,24 +3614,14 @@ local function UpdateXYPlot(plot)
 		
 		local newRange, isChanged = plotWindow:GetRequiredRange(range, true)
 		
-		plotWindow:UpdateScales(newRange)
+		if isChanged then plotWindow:UpdateScales(newRange) end
 		
-		if isChanged then 
-		
-			for i = 1, plot.id - 1 do
-			
-				plotWindow.plots[i]:DrawPlot()
-				
-			end
-		end
 	end
 	
 	plot.range = range
 	
 	plot.XYData = XYData
 	plot.YAxisSide = YAxisSide
-	
-	plot:DrawPlot()
 	
 end
 
@@ -3717,11 +3717,15 @@ local function updateGraphPanel(panel)
 	CombatMetrics_Report:GetNamedChild("_MainPanel"):SetHidden(enlargedGraph)
 
 	local plotWindow = panel:GetNamedChild("PlotWindow")
-	local smoothSlider = panel:GetNamedChild("Toolbar"):GetNamedChild("SmoothControl"):GetNamedChild("Slider")
+	local toolbar = panel:GetNamedChild("Toolbar")	
+	local smoothSlider = toolbar:GetNamedChild("SmoothControl"):GetNamedChild("Slider")
 	
 	local SmoothWindow = db.FightReport.SmoothWindow
 	
 	smoothSlider:SetValue(SmoothWindow)
+	
+	local groupSelector = toolbar:GetNamedChild("BuffSelector1"):GetNamedChild("GroupSelector")
+	groupSelector:SetHidden(db.FightReport.rightpanel ~= "buffsout")
 	
 	if fightData == nil then plotWindow:SetHidden(true) return end
 	
@@ -3736,6 +3740,15 @@ local function updateGraphPanel(panel)
 		plot:Update()
 		
 	end	
+	
+	for id, plot in pairs(plotWindow.plots) do
+			
+		if plot.DrawPlot then
+		
+			plot:DrawPlot()
+			
+		end
+	end
 end
 
 function CMX.SetSliderValue(self, value)
@@ -3762,11 +3775,10 @@ end
 
 do
 
-	local startX, startY
+	local startX, startY, plotWindow
 
 	local function UpdateZoomControl()
-
-		local plotWindow = _G["CombatMetrics_Report_MainPanelGraphPlotWindow"]
+	
 		local zoomcontrol = plotWindow:GetNamedChild("Zoom")
 		
 		local x2, y2 = GetUIMousePosition()
@@ -3783,10 +3795,87 @@ do
 		zoomcontrol:SetDimensions(width, height)
 		
 	end
+	
+	local oldx, oldy
+	
+	function updatePlotCursor()
+		
+		local x, y = GetUIMousePosition()
+		
+		if x == oldx and y == oldy then return end
+		
+		oldx, oldy = x, y
+		
+		local cursorTime, cursorValue = plotWindow:MapUIPosXY(x, y)
+		
+		dataAtCursorTime = {}
 
-	function CMX.onPlotMouseDown(plotWindow, button)
+		for _, plot in pairs(plotWindow.plots) do
+			
+			if plot.plotType == CMX_PLOT_TYPE_XY and plot.XYData then
+			
+				local coords = {0, 0, 0}
+		
+				for i, data in pairs(plot.XYData) do
+				
+					local t, v = unpack(data)
+				
+					if t > cursorTime then
+					
+						dataAtCursorTime[plot.id] = coords
+						break 
+						
+					end
+					
+					local percentV
+					
+					if plot.YAxisSide == COMBAT_METRICS_YAXIS_RIGHT then 
+					
+						percentV = v * 100
+						
+						v = v * plot.AbsoluteYRange
+					
+					end
+					
+					coords = {v, percentV}
+					
+				end 
+			end
+		end	
+		
+		InitializeTooltip(InformationTooltip, GuiRoot, TOPLEFT, x + 30, y + 30, TOPLEFT)
+		
+		local tooltipText = string.format("|cddddddTime: %d:%02d", cursorTime/60, math.floor(cursorTime%60))
+
+		AddTooltipLine(plotWindow, InformationTooltip, tooltipText)
+		
+		for plotId, data in CMX.spairs(dataAtCursorTime) do
+		
+			local r,g,b = unpack(db.FightReport.PlotColors[plotId])
+			
+			local formatter = data[2] and "|c%.2x%.2x%.2x%s: %d (%.1f%%)|r" or "|c%.2x%.2x%.2x%s: %d|r"
+			
+			local label = plotWindow.plots[plotId].label
+			
+			tooltipText = string.format(formatter, math.floor(r * 255), math.floor(g * 255), math.floor(b * 255), label, unpack(data))
+
+			AddTooltipLine(plotWindow, InformationTooltip, tooltipText)
+			
+		end
+		
+		local cursor = plotWindow:GetNamedChild("Cursor")
+		
+		cursor:ClearAnchors()
+		cursor:SetAnchor(TOPLEFT, plotWindow, TOPLEFT, x - plotWindow:GetLeft(), 0)
+		cursor:SetAnchor(BOTTOMLEFT, plotWindow, BOTTOMLEFT, x - plotWindow:GetLeft(), 0)
+		
+	end
+
+	function CMX.onPlotMouseDown(plotWindowControl, button)
 
 		if button ~= MOUSE_BUTTON_INDEX_LEFT then return end
+		
+		CMX.onPlotMouseExit(plotWindowControl)
 		
 		local zoomcontrol = plotWindow:GetNamedChild("Zoom")
 		
@@ -3799,15 +3888,28 @@ do
 		startX = x
 		startY = y
 		
-		em:RegisterForUpdate("CMX_Report_Zoom_Control", 25, UpdateZoomControl)
+		plotWindow = plotWindowControl
+		
+		em:RegisterForUpdate("CMX_Report_Zoom_Control", 40, UpdateZoomControl)		
 		
 	end
 
-	function CMX.onPlotMouseUp(plotWindow, button, upInside)
+	function CMX.onPlotMouseUp(plotWindow, button, upInside)		
 
 		if button == MOUSE_BUTTON_INDEX_LEFT then
 		
 			local x, y = GetUIMousePosition()
+			
+			em:UnregisterForUpdate("CMX_Report_Zoom_Control")
+			local zoomcontrol = plotWindow:GetNamedChild("Zoom")
+			zoomcontrol:SetHidden(true)			
+			
+			if x == startX and y == startY then 
+				
+				CMX.onPlotMouseEnter(plotWindow)
+				return 
+				
+			end
 			
 			local t1, v1 = plotWindow:MapUIPosXY(startX, startY)
 			local t2, v2 = plotWindow:MapUIPosXY(x, y)
@@ -3817,10 +3919,6 @@ do
 			
 			t2 = limit(t2, minT, maxT)
 			v2 = limit(v2, minV, maxV)
-			
-			em:UnregisterForUpdate("CMX_Report_Zoom_Control")
-			local zoomcontrol = plotWindow:GetNamedChild("Zoom")
-			zoomcontrol:SetHidden(true)
 			
 			local tMin = math.min(t1, t2)
 			local tMax = math.max(t1, t2)
@@ -3839,14 +3937,15 @@ do
 			end
 
 		elseif button == MOUSE_BUTTON_INDEX_RIGHT then
+			
+			plotWindow.RangesX = {0, 0, {}}
+			plotWindow.RangesY = {0, 0, {}}
 		
 			for id, plot in pairs(plotWindow.plots) do
 			
-				if plot.XYData and plot.autoRange then
-				
-					local range = AcquireRange(plot.XYData) 
-						
-					local newRange = plotWindow:GetRequiredRange(range, true)
+				if plot.XYData and plot.autoRange and plot:IsHidden() == false then
+					
+					local newRange = plotWindow:GetRequiredRange(plot.range, true)
 						
 					plotWindow:UpdateScales(newRange)
 					
@@ -3862,7 +3961,82 @@ do
 				end
 			end
 		end
+		
+		if upInside then CMX.onPlotMouseEnter(plotWindow) end
 	end
+	
+	function CMX.onPlotMouseEnter(plotWindowControl)
+	
+		plotWindow = plotWindowControl
+		
+		if db.FightReport.Cursor then 
+			
+			local cursor = plotWindow:GetNamedChild("Cursor")
+			cursor:SetHidden(false)
+
+			em:RegisterForUpdate("CMX_Report_Cursor_Control", 40, updatePlotCursor)
+		
+		end
+	end
+	
+	function CMX.onPlotMouseExit(plotWindowControl)
+
+		em:UnregisterForUpdate("CMX_Report_Cursor_Control")
+		ZO_Options_OnMouseExit(plotWindowControl)
+		
+		local cursor = plotWindow:GetNamedChild("Cursor")
+		cursor:SetHidden(true)
+		
+	end
+	
+	function CMX.EditLabelStart(label)
+
+		local editbox = label:GetParent():GetNamedChild("Edit")
+		
+		label:SetHidden(true)
+		editbox:SetHidden(false)
+		
+		editbox:SetText( label:GetText() )
+		editbox:SelectAll() 
+		editbox:TakeFocus() 
+		
+	end
+		
+	function CMX.EditLabelEnd(editbox)
+
+		local tickControl = editbox:GetParent()
+		local plotWindow = tickControl:GetParent()
+		local label = tickControl:GetNamedChild("Label")
+		
+		editbox:SetHidden(true)
+		label:SetHidden(false)
+		
+		local newtext = tonumber(editbox:GetText())
+		label:SetText(newtext)
+		
+		local t1 = tonumber(plotWindow:GetNamedChild("XTick1"):GetNamedChild("Label"):GetText())
+		local t2 = tonumber(plotWindow:GetNamedChild("XTick5"):GetNamedChild("Label"):GetText())		
+		local v1 = tonumber(plotWindow:GetNamedChild("YTick1"):GetNamedChild("Label"):GetText())
+		local v2 = tonumber(plotWindow:GetNamedChild("YTick5"):GetNamedChild("Label"):GetText())
+		
+		local tMin = math.min(t1, t2)
+		local tMax = math.max(t1, t2)
+		local vMin = math.min(v1, v2)
+		local vMax = math.max(v1, v2)
+		
+		plotWindow:UpdateScales({tMin, tMax, vMin, vMax}, true)
+			
+		for id, plot in pairs(plotWindow.plots) do
+		
+			if plot.DrawPlot then
+			
+				plot:DrawPlot()
+				
+			end
+		end
+
+	end
+
 end	
 
 local PlotFunctions = {}
@@ -3977,7 +4151,7 @@ function CMX.PlotSelectionMenu(selector)
 	
 	for id, data in ipairs(ResourceStrings) do
 	
-		table.insert(submenu2, {label = GetString(data.label).."%", callback = PlotFunctions[funcId]})
+		table.insert(submenu2, {label = GetString(data.label).." %", callback = PlotFunctions[funcId]})
 		
 		funcId = funcId + 1
 	
@@ -3989,7 +4163,7 @@ function CMX.PlotSelectionMenu(selector)
 	
 	for id, data in ipairs(StatStrings) do
 	
-		table.insert(submenu3, {label = GetString(data.label).."%", callback = PlotFunctions[funcId]})
+		table.insert(submenu3, {label = GetString(data.label).." %", callback = PlotFunctions[funcId]})
 		
 		funcId = funcId + 1
 		
@@ -4072,11 +4246,12 @@ local function InitXYPlot(plotWindow, id)
 		
 			local selectorLabel = plotWindow:GetParent():GetNamedChild("Toolbar"):GetNamedChild("DataSelector" .. id):GetNamedChild("Label")
 			
-			local labelString = zo_strformat("<<1>>: <<2>>", GetString(CategoryStrings[catId].label), GetString(MainCategoryFunctions[id].label))
+			local labelString = zo_strformat("<<1>> - <<2>>", GetString(CategoryStrings[catId].label), GetString(MainCategoryFunctions[id].label))
 			
 			selectorLabel:SetText(labelString)
 			
 			newPlot.func = function() return plotDefaultFunction[id](category) end
+			newPlot.label = labelString
 			
 		end
 		
@@ -4105,8 +4280,20 @@ local function getCustomMenuFunction(basefunc, parameter, labelString)
 		local plot = plotwindow.plots[id]
 		
 		plot.func = function() return basefunc(parameter) end
+		plot.label = labelString:gsub(" %%", "")
 		
 		plot:Update()
+		
+		local plotWindow = plot:GetParent()
+	
+		for id, plot in pairs(plotWindow.plots) do
+			
+			if plot.DrawPlot then
+			
+				plot:DrawPlot()
+				
+			end
+		end
 
 	end
 	
@@ -4129,11 +4316,34 @@ local function initPlotWindow(plotWindow)
 	
 	for i = 1, 5 do
 		
-		local label = plotWindow:GetNamedChild("YTick" .. i):GetNamedChild("LabelR")
+		local labelR = plotWindow:GetNamedChild("YTick" .. i):GetNamedChild("LabelR")
 		
 		local text = string.format("%d%%", (i - 1) * 25)
 		
-		label:SetText(text)
+		labelR:SetText(text)
+		
+	end
+	
+	local editableControls = {"XTick1", "XTick5", "YTick1", "YTick5"}
+	
+	for i = 1, 4 do 
+	
+		local name = editableControls[i]		
+		local control = plotWindow:GetNamedChild(name)
+		local label = control:GetNamedChild("Label")
+		
+		local editControlName = control:GetName() .. "Edit"
+		
+		local editControl = CreateControlFromVirtual(editControlName, control, "CombatMetrics_GraphTickLabel_Edit")
+		editControl:SetAnchorFill(label)		
+		
+		local font, size, style = unpack(editControl:GetNamedChild("Font").font)			-- Need to manually scale font since it's created late
+	
+		if size then size = tonumber(size) * (db.FightReport.scale + 0.2)/1.2 end			
+			
+		editControl:SetFont(string.format("%s|%s|%s", font, size, style))
+		
+		label:SetHandler("OnMouseDoubleClick", CMX.EditLabelStart)
 		
 	end
 	
@@ -4146,7 +4356,7 @@ local function initPlotWindow(plotWindow)
 			local categoryString = data.label
 			local category = data.category
 			
-			local labelString = zo_strformat("<<1>>: <<2>>", GetString(categoryString), GetString(data2.label))
+			local labelString = zo_strformat("<<1>> - <<2>>", GetString(categoryString), GetString(data2.label))
 			
 			local basefunc = data2.func
 			
@@ -4166,7 +4376,7 @@ local function initPlotWindow(plotWindow)
 		local resourceString = data.label
 		local powerType = data.powerType
 		
-		local labelString = GetString(resourceString) .. "%"
+		local labelString = GetString(resourceString) .. " %"
 		
 		PlotFunctions[funcId] = getCustomMenuFunction(ResourceAbsolute, powerType, labelString)
 		
@@ -4179,7 +4389,7 @@ local function initPlotWindow(plotWindow)
 		local statString = data.label
 		local statId = data.statId
 		
-		local labelString = GetString(statString) .. "%"
+		local labelString = GetString(statString) .. " %"
 		
 		PlotFunctions[funcId] = getCustomMenuFunction(StatAbsolute, statId, labelString)
 		
@@ -4203,6 +4413,10 @@ end
 local function initPlotToolbar(toolbar)
 
 	local PlotColors = db.FightReport.PlotColors
+	
+	local cursorToggle = toolbar:GetNamedChild("ToggleCursor")
+
+	cursorToggle:SetAlpha(db.FightReport.Cursor and 1 or 0.3)
 
 	for i = 1,5 do
 	
@@ -4288,7 +4502,11 @@ local function initPlotToolbar(toolbar)
 		
 		groupSelector:SetAlpha(showGroupBuffs and 1 or 0.2)	
 
-		if i == 1 then 
+		if i == 1 then
+		
+			groupSelector:SetHidden(db.FightReport.rightpanel ~= "buffsout")
+
+			groupSelector.tooltip = {SI_COMBAT_METRICS_GRAPH_BUFF_GROUP_SELECTOR}
 		
 			groupSelector:SetHandler("OnMouseUp", function(self, button, upInside)
 
@@ -4325,6 +4543,18 @@ function CMX.ToggleGraphSize(self)
 	graphPanel:Update()
 	
 end
+
+
+function CMX.ToggleCursorDisplay(self)
+
+	local enable = not db.FightReport.Cursor
+
+	self:SetAlpha(enable and 1 or 0.3)
+	
+	db.FightReport.Cursor = enable
+	
+end
+
 
 function CMX.SkillTooltip_OnMouseEnter(control)
 	

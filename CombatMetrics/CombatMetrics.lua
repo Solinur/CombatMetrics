@@ -24,7 +24,7 @@ local CMX = CMX
  
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "0.9.0 alpha"
+CMX.version = "0.9.0 (beta4)"
 
 function CMX.GetFeedBackData(parentcontrol)
 	
@@ -1947,6 +1947,8 @@ local svdefaults = {
 		["skilltimingbefore"] 	= true,
 		
 		["SmoothWindow"] 		= 5,
+		
+		["Cursor"]				= true,
 		
 		["PlotColors"]				= {
 		

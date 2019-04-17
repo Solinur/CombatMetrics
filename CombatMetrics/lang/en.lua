@@ -97,9 +97,9 @@
 	SI_COMBAT_METRICS_POSTHPS_FORMAT = "<<1>> - HPS: <<2>> (<<3>> in <<4>>)", -- (<<1>> = fightname, <<2>> = HPS, <<3>> = damage, <<4>> = time)  e.g. Z'Maja - HPS: 10000 (1000000 in 1:40.0)
 	SI_COMBAT_METRICS_POSTSELECTIONHPS_FORMAT = "<<1>> - Selection HPS (x<<2>>): <<3>> (<<4>> in <<5>>)", -- (<<1>> = fightname, <<2>> = units, <<3>> = HPS, <<4>> = damage, <<5>> = time) e.g. Z'Maja - HPS (12): 10000 (1000000 in 1:40.0)
 	
-	SI_COMBAT_METRICS_POSTBUFF = "Post Buff Uptime",
-	SI_COMBAT_METRICS_POSTBUFF_BOSS = "Post Buff Uptime on Bosses",
-	SI_COMBAT_METRICS_POSTBUFF_GROUP = "Post Buff Uptime on Group Members",
+	SI_COMBAT_METRICS_POSTBUFF = "Post buff uptime",
+	SI_COMBAT_METRICS_POSTBUFF_BOSS = "Post buff uptime on bosses",
+	SI_COMBAT_METRICS_POSTBUFF_GROUP = "Post Bbuff uptime on group members",
 	SI_COMBAT_METRICS_POSTBUFF_FORMAT = "<<1>> - HPS: <<2>> (<<3>><<4[/ on $d/ on $d units]>>)", -- (<<1>> = buff name, <<2>> = relative uptime, <<3>> = uptime, <<4>> = time) e.g. Major Intellect - Uptime: 93.2% (9:26 in 10:07)
 	SI_COMBAT_METRICS_POSTBUFF_FORMAT_GROUP = "<<1>> - Uptime: <<2>>/<<5>> (<<3>>/<<6>><<4[/ on $d/ on $d units]>>)", -- (<<1>> = buff name, <<2>> = relative uptime, <<3>> = uptime, <<4>> = units, <<5>> = relative group uptime, <<6>> = group uptime) e.g. Minor Sorcery - Uptime: 55.4%/100.6% (5:36/10:11 in 10:07)
 	
@@ -109,10 +109,13 @@
 	
 	-- Graph
 	
+	SI_COMBAT_METRICS_TOGGLE_CURSOR = "Toggle to show cursor and value tooltip",
+	SI_COMBAT_METRICS_GRAPH_BUFF_GROUP_SELECTOR = "Toggle to show group uptime",
+	
 	SI_COMBAT_METRICS_RECALCULATE = "Recalculate Fight",
 	SI_COMBAT_METRICS_SMOOTHED = "Smoothed",
 	SI_COMBAT_METRICS_TOTAL = "Total",
-	SI_COMBAT_METRICS_ABSOLUTE = "Absolute",
+	SI_COMBAT_METRICS_ABSOLUTE = "Absolute %",
 	SI_COMBAT_METRICS_SMOOTH_LABEL = "Smooth: %d s",
 	SI_COMBAT_METRICS_NONE = "None",
 	SI_COMBAT_METRICS_BOSS_HP = "Boss HP",
