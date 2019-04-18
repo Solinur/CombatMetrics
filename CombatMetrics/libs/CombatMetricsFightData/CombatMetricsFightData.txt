@@ -2,6 +2,7 @@
 ## APIVersion: 100026 100027
 ## Author: Solinur/decay
 ## Version: 5
+## IsLibrary: true
 ## DependsOn:
 ## OptionalDependsOn:
 ## SavedVariables: CombatMetricsFightDataSV
