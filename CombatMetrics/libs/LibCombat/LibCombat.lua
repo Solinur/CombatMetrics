@@ -13,7 +13,7 @@ Idea: Life and Death
 local _
 
 --Register with LibStub
-local MAJOR, MINOR = "LibCombat", 12
+local MAJOR, MINOR = "LibCombat", 13
 local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lib then return end --the same or newer version of this lib is already loaded into memory
 
@@ -1852,12 +1852,14 @@ end
 
 --(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId) 
 
-local function CombatEventHandler(isheal, _ , result , _ , _ , _ , _ , sourceName , sourceType , targetName , targetType , hitValue , powerType , damageType , _ , sourceUnitId , targetUnitId , abilityId)  -- called by Event
+local function CombatEventHandler(isheal, _ , result , _ , _ , _ , _ , sourceName , sourceType , targetName , targetType , hitValue , powerType , damageType , _ , sourceUnitId , targetUnitId , abilityId, overflow)  -- called by Event
 
 	-- d({eventCode=eventCode, result=result, isError=isError, abilityName=abilityName, abilityGraphic=abilityGraphic, abilityActionSlotType=abilityActionSlotType, sourceName=sourceName, sourceType=sourceType, targetName=targetName, targetType=targetType, hitValue=hitValue, powerType=powerType, damageType=damageType, log=log, sourceUnitId=sourceUnitId, targetUnitId=targetUnitId, abilityId})
 	
-	if hitValue<2 or (not (sourceUnitId > 0 and targetUnitId > 0)) or (data.inCombat == false and (result==ACTION_RESULT_DOT_TICK_CRITICAL or result==ACTION_RESULT_DOT_TICK or isheal) ) or targetType==2 then return end -- only record if both unitids are valid or player is in combat or a non dot damage action happens or the target is not a pet
+	if (hitValue + (overflow or 0) ) < 2 or (not (sourceUnitId > 0 and targetUnitId > 0)) or (data.inCombat == false and (result==ACTION_RESULT_DOT_TICK_CRITICAL or result==ACTION_RESULT_DOT_TICK or isheal) ) or targetType==2 then return end -- only record if both unitids are valid or player is in combat or a non dot damage action happens or the target is not a pet
 	local timems = GetGameTimeMilliseconds()
+	
+	local hitValue = hitValue + (overflow or 0)
 	
 	CheckUnit(sourceName, sourceUnitId, sourceType, timems)
 	CheckUnit(targetName, targetUnitId, targetType, timems)
@@ -1874,6 +1876,7 @@ local function CombatEventHandler(isheal, _ , result , _ , _ , _ , _ , sourceNam
 	currentfight:AddCombatEvent(timems, result, targetUnitId, hitValue, eventid)
 	
 	lib.cm:FireCallbacks((CallbackKeys[eventid]), eventid, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType)
+
 end
 
 local function onCombatEventDmg(...)
