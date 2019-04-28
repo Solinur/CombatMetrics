@@ -426,6 +426,8 @@ local SpecialDebuffs = {   -- debuffs that the API doesn't show via EVENT_EFFECT
 
 local abilityConversions = {	-- Ability conversions for tracking skill activations
 
+	--[[
+
 	[29012] = 48744, -- Dragon Leap --> CC Immunity
 	[32719] = 48753, -- Take Flight --> CC Immunity
 	[32715] = 48760, -- Ferocious Leap --> CC Immunity
@@ -513,10 +515,22 @@ local abilityConversions = {	-- Ability conversions for tracking skill activatio
 	[40232] = 40233,   -- Efficient Purge --> Purge
 
 
+	--]]	
 	-- unclear: Malevolent Offering 33308 -- Heal ?
 	-- unclear: Shrewd Offering 34721 -- Heal ?
 	-- unclear: healthy Offering 34721 -- Heal ?
 
+}
+
+local DirectHeavyAttacks = {	-- for special handling to detect their end
+
+	[16041] = true, -- 2H
+	[15279] = true, -- 1H+S
+	[16420] = true, -- DW
+	[16691] = true, -- Bow
+	[15383] = true, -- Inferno
+	[16261] = true, -- Frost
+	
 }
 
 local validSkillStartResults = {
@@ -530,6 +544,7 @@ local validSkillStartResults = {
 	[ACTION_RESULT_SNARED] = true, -- 2025
 	[ACTION_RESULT_BEGIN] = true, -- 2200
 	[ACTION_RESULT_EFFECT_GAINED] = true, -- 2240
+	[ACTION_RESULT_KNOCKBACK] = true, -- 2275
 	
 }
 
@@ -1657,32 +1672,6 @@ local function onBaseResourceChanged(_,unitTag,_,powerType,powerValue,_,_)
 	lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_RESOURCES]), LIBCOMBAT_EVENT_RESOURCES, timems, aId, powerValueChange, powerType, powerValue)
 end
 
-local function onSlotUpdate(_, slot)
-
-	if data.inCombat == false or slot > 8 then return end
-	
-	local timems = GetGameTimeMilliseconds()
-	local cost, powerType = GetSlotAbilityCost(slot)
-	local abilityId = GetSlotBoundId(slot)
-	local lastabilities = data.lastabilities
-	
-	if Events.Resources.active and slot > 2 and (powerType == POWERTYPE_HEALTH or powerType == POWERTYPE_MAGICKA or powerType == POWERTYPE_STAMINA) then 
-	
-		table.insert(lastabilities,{timems, abilityId, -cost, powerType})
-		
-		if #lastabilities > 10 then table.remove(lastabilities, 1) end
-	
-	end
-	
-	if Events.Skills.active then
-	
-		local convertedId = abilityConversions[abilityId] or abilityId
-	
-		lastskilluses[convertedId] = timems
-	
-	end
-end
-
 --(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId)
 local function onResourceChanged (_, result, _, _, _, _, _, _, targetName, _, powerValueChange, powerType, _, _, sourceUnitId, targetUnitId, abilityId) 
 	
@@ -1935,8 +1924,6 @@ local function onCombatEventHealGrp(_ , _ , _ , _ , _ , _ , _, _, _, targetType,
 	table.insert(currentfight.grplog,{targetUnitId,hitValue,"heal"})
 end
 
-local lastCastTimeAbility = 0
-
 local function GetReducedSlotId(reducedslot)
 
 	local bar = reducedslot > 10 and 2 or 1
@@ -1948,6 +1935,9 @@ local function GetReducedSlotId(reducedslot)
 	return origId
 	
 end
+
+local lastCastTimeAbility = 0
+local HeavyAttackCharging
 	
 local function onAbilityUsed(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId) 
 
@@ -1969,37 +1959,20 @@ local function onAbilityUsed(eventCode, result, isError, abilityName, abilityGra
 	
 	castTime = channeled and channelTime or castTime
 	
-	-- if dev == true then df("[%.3f] Skill used: %s (%d), Duration: %ds Target: %s", timems/1000, GetAbilityName(abilityId), abilityId, castTime/1000, tostring(target)) end
+	if dev == true then df("[%.3f] Skill fired: %s (%d), Duration: %ds Target: %s", timems/1000, GetAbilityName(origId), origId, castTime/1000, tostring(target)) end
+	
+	HeavyAttackCharging = DirectHeavyAttacks[origId] and origId or nil
 	
 	if castTime > 0 then
-	
-		abilityId = abilityConversions[abilityId] or abilityId
 		
 		local status = channeled and LIBCOMBAT_SKILLSTATUS_BEGIN_CHANNEL or LIBCOMBAT_SKILLSTATUS_BEGIN_DURATION
 		
-		lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_SKILL_TIMINGS]), LIBCOMBAT_EVENT_SKILL_TIMINGS, timems, reducedslot, abilityId, status)
-		
-		if abilityId == -1 then 
-		
-			local function delayedsuccess()
-			
-				local data = {reducedslot, abilityId, LIBCOMBAT_SKILLSTATUS_SUCCESS}
-			
-				lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_SKILL_TIMINGS]), LIBCOMBAT_EVENT_SKILL_TIMINGS, GetGameTimeMilliseconds(), unpack(data))
-			
-			end
-			
-			zo_callLater(delayedsuccess, castTime)
-			
-		else
-	
-			lastCastTimeAbility = abilityId
-			
-		end
+		lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_SKILL_TIMINGS]), LIBCOMBAT_EVENT_SKILL_TIMINGS, timems, reducedslot, origId, status)
+		lastCastTimeAbility = abilityId
 	
 	else
 	
-		lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_SKILL_TIMINGS]), LIBCOMBAT_EVENT_SKILL_TIMINGS, timems, reducedslot, abilityId, LIBCOMBAT_SKILLSTATUS_INSTANT)
+		lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_SKILL_TIMINGS]), LIBCOMBAT_EVENT_SKILL_TIMINGS, timems, reducedslot, origId, LIBCOMBAT_SKILLSTATUS_INSTANT)
 		lastCastTimeAbility = 0
 		
 	end
@@ -2013,16 +1986,52 @@ local function onAbilityFinished(eventCode, result, isError, abilityName, abilit
 	
 	local reducedslot = IdToReducedSlot[abilityId]	
 	
+	local origId = GetReducedSlotId(reducedslot)
+	
 	if abilityId == lastCastTimeAbility then
 
 		local timems = GetGameTimeMilliseconds()
 		
-		-- if dev == true then df("[%.3f] Skill activated: %s (%d, R: %d)", GetGameTimeMilliseconds()/1000, GetAbilityName(abilityId), abilityId, result) end
+		if dev == true then df("[%.3f] Skill finished: %s (%d, R: %d)", GetGameTimeMilliseconds()/1000, GetAbilityName(origId), origId, result) end
 		
-		lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_SKILL_TIMINGS]), LIBCOMBAT_EVENT_SKILL_TIMINGS, timems, reducedslot, abilityId, LIBCOMBAT_SKILLSTATUS_SUCCESS)
+		lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_SKILL_TIMINGS]), LIBCOMBAT_EVENT_SKILL_TIMINGS, timems, reducedslot, origId, LIBCOMBAT_SKILLSTATUS_SUCCESS)
 		
 		lastCastTimeAbility = 0
 		
+	end
+end
+
+local function onSlotUpdate(_, slot)
+
+	if data.inCombat == false or slot > 8 then return end
+	
+	local timems = GetGameTimeMilliseconds()
+	local cost, powerType = GetSlotAbilityCost(slot)
+	local abilityId = GetSlotBoundId(slot)
+	local lastabilities = data.lastabilities
+	
+	if Events.Resources.active and slot > 2 and (powerType == POWERTYPE_HEALTH or powerType == POWERTYPE_MAGICKA or powerType == POWERTYPE_STAMINA) then 
+	
+		table.insert(lastabilities,{timems, abilityId, -cost, powerType})
+		
+		if #lastabilities > 10 then table.remove(lastabilities, 1) end
+	
+	end
+	
+	if Events.Skills.active then
+	
+		local convertedId = abilityConversions[abilityId] or abilityId
+	
+		if HeavyAttackCharging == abilityId then 
+		
+			onAbilityFinished(EVENT_COMBAT_EVENT, ACTION_RESULT_EFFECT_FADED, _, _, _, ACTION_SLOT_TYPE_HEAVY_ATTACK, _, _, _, _, _, _, _, _, _, _, convertedId) 
+			HeavyAttackCharging = nil
+			
+		else 
+		
+			lastskilluses[convertedId] = timems
+			
+		end	
 	end
 end
 
