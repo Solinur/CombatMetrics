@@ -1,3 +1,5 @@
+-- Russian localization for CombatMetrics
+-- Author: @KiriX
 
 -- Functionality
 
