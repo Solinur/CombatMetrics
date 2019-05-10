@@ -15,7 +15,7 @@ local currentbar
 
 local infinity = math.huge
 	
-local LC = LibStub:GetLibrary("LibCombat")
+local LC = LibCombat
 if LC == nil then return end 
 
 -- namespace for thg addon
@@ -346,9 +346,13 @@ local CategoryList = {
 		"healingOutNormal",
 		"healingOutCritical",
 		"healingOutTotal",
+		"healingOutOverflow",
+		"healingOutEffective",
 		"healsOutNormal",
 		"healsOutCritical",
 		"healsOutTotal",
+		"healsOutOverflow",
+		"healsOutEffective",
 		
 	},
 	
@@ -358,9 +362,13 @@ local CategoryList = {
 		"healingInNormal",
 		"healingInCritical",
 		"healingInTotal",
+		"healingInOverflow",
+		"healingInEffective",
 		"healsInNormal",
 		"healsInCritical",
 		"healsInTotal",
+		"healsInOverflow",
+		"healsInEffective",
 		
 	},
 }
@@ -677,14 +685,18 @@ local function AccumulateStats(fight)
 					
 				elseif tablekey == "healingOut" then
 				
-					ability.healingOutTotal = ability.healingOutNormal + ability.healingOutCritical
-					ability.healsOutTotal = ability.healsOutNormal + ability.healsOutCritical
+					ability.healingOutEffective = ability.healingOutNormal + ability.healingOutCritical
+					ability.healsOutEffective = ability.healsOutNormal + ability.healsOutCritical
+					ability.healingOutTotal = ability.healingOutEffective + ability.healingOutOverflow
+					ability.healsOutTotal = ability.healsOutEffective + ability.healsOutOverflow
 					ability.HPSOut = ability.healingOutTotal / fight.hpstime
 					
 				elseif tablekey == "healingIn" then
 				
-					ability.healingInTotal = ability.healingInNormal + ability.healingInCritical
-					ability.healsInTotal = ability.healsInNormal + ability.healsInCritical
+					ability.healingInEffective = ability.healingInNormal + ability.healingInCritical
+					ability.healsInEffective = ability.healsInNormal + ability.healsInCritical
+					ability.healingInTotal = ability.healingInEffective + ability.healingInOverflow
+					ability.healsInTotal = ability.healsInEffective + ability.healsInOverflow
 					ability.HPSIn = ability.healingInTotal / fight.hpstime
 					
 				end
@@ -721,7 +733,8 @@ function CMX.GenerateSelectionStats(fight, menuItem, selections) -- this is simi
 	InitBasicValues(selectiondata)
 	selectiondata.units = {}
 	selectiondata.buffs = {}
-	
+			
+	local totalkey = (menuItem == "healingIn" or menuItem == "healingOut") and "Effective" or "Total"
 	local totalValueSum = 0
 	
 	for unitId,_ in pairs(unitselection or data.units) do	-- if a selection was made the content of the value will be "true" and not the table from the original data.
@@ -756,7 +769,7 @@ function CMX.GenerateSelectionStats(fight, menuItem, selections) -- this is simi
 			
 			selectiondata.units[unitId] = selectedunit
 			
-			unitTotalValue = unit[menuItem.."Total"]
+			unitTotalValue = unit[menuItem..totalkey]
 			totalValueSum = totalValueSum + unitTotalValue
 			
 			-- add unit stats to fight sum
@@ -936,8 +949,8 @@ local function ProcessLogDamage(fight, callbacktype, timems, result, sourceUnitI
 		abilitydata = unit:AcquireAbilityData(abilityId, ispet, damageType, "damageOut")	-- get table for ability (within the unittable)
 		isDamageOut = true
 		
-		dmgkey = "damageOut" .. resultkey	-- determine categories. For normal incoming damage: dmgkey = "damageNormal", for critical outgoing damage: dmgkey = "damageCritical" ...
-		hitkey = "hitsOut" .. resultkey
+		dmgkey = ZO_CachedStrFormat("damageOut<<1>>", resultkey)	-- determine categories. For normal incoming damage: dmgkey = "damageNormal", for critical outgoing damage: dmgkey = "damageCritical" ...
+		hitkey = ZO_CachedStrFormat("hitsOut<<1>>", resultkey)
 		graphkey = "damageOut"
 		
 	else																												-- incoming and self inflicted Damage are consolidated.
@@ -945,8 +958,8 @@ local function ProcessLogDamage(fight, callbacktype, timems, result, sourceUnitI
 		abilitydata = fight:AcquireUnitData(sourceUnitId, timems):AcquireAbilityData(abilityId, ispet, damageType, "damageIn")
 		isDamageOut = false
 		
-		dmgkey = "damageIn" .. resultkey	-- determine categories. For normal incoming damage: dmgkey = "damageNormal", for critical outgoing damage: dmgkey = "damageCritical" ...
-		hitkey = "hitsIn" .. resultkey
+		dmgkey = ZO_CachedStrFormat("damageIn<<1>>", resultkey)	-- determine categories. For normal incoming damage: dmgkey = "damageNormal", for critical outgoing damage: dmgkey = "damageCritical" ...
+		hitkey = ZO_CachedStrFormat("hitsIn<<1>>", resultkey)
 		graphkey = "damageIn"
 		
 	end
@@ -982,7 +995,7 @@ local healResultCategory={
 	[ACTION_RESULT_HOT_TICK_CRITICAL] = "Critical",
 }
 
-local function ProcessLogHeal(fight, callbacktype, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, powerType)
+local function ProcessLogHeal(fight, callbacktype, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, powerType, overflow)
 	if timems < (fight.combatstart-500) or fight.units[sourceUnitId] == nil or fight.units[targetUnitId] == nil then return end
 
 	local ispet = fight.units[sourceUnitId].unittype == COMBAT_UNIT_TYPE_PLAYER_PET 										-- determine if this is healing from a pet
@@ -992,43 +1005,49 @@ local function ProcessLogHeal(fight, callbacktype, timems, result, sourceUnitId,
 	
 	local resultkey = healResultCategory[result]
 	
-	local healkey 
-	local hitkey 
-	local graphkey 
+	local valuekey 
+	local hitkey  
+	local overFlowValuekey 
+	local overFlowHitkey 
 	
 	if callbacktype == LIBCOMBAT_EVENT_HEAL_OUT then 
 	
 		abilitydata = fight:AcquireUnitData(targetUnitId, timems):AcquireAbilityData(abilityId, ispet, powerType, "healingOut")	-- get table for ability (within the unittable)
 		isHealingOut = true
 		
-		healkey = "healingOut" .. resultkey		-- determine categories. For normal incoming healing: healkey = "healingNormal", for critical outgoing healing: healkey = "healingCritical" ...
-		hitkey = "healsOut" .. resultkey
-		graphkey = "healingOut"
+		valuekey = "healingOut"
+		hitkey = "healsOut"
 		
 	else
 	
 		abilitydata = fight:AcquireUnitData(sourceUnitId, timems):AcquireAbilityData(abilityId, ispet, powerType, "healingIn")
 		isHealingOut = false
 		
-		healkey = "healingIn" .. resultkey		-- determine categories. For normal incoming healing: healkey = "healingNormal", for critical outgoing healing: healkey = "healingCritical" ...
-		hitkey = "healsIn" .. resultkey
-		graphkey = "healingIn"
+		valuekey = "healingIn"
+		hitkey = "healsIn"
 		
 	end
 	
-	abilitydata[healkey] = abilitydata[healkey] + hitValue
-	abilitydata[hitkey] = abilitydata[hitkey] + 1
+	local healingkey = ZO_CachedStrFormat("<<1>><<2>>", valuekey, resultkey)	-- determine categories. For normal incoming healing: healkey = "healingInNormal", for critical outgoing healing: healkey = "healingOutCritical" ...
+	local healskey = ZO_CachedStrFormat("<<1>><<2>>", hitkey, resultkey)
+	local overflowHealingKey = ZO_CachedStrFormat("<<1>>Overflow", valuekey) 
+	local overflowHealskey = ZO_CachedStrFormat("<<1>>Overflow", hitkey)
+	
+	abilitydata[healingkey] = abilitydata[healingkey] + hitValue
+	abilitydata[healskey] = abilitydata[healskey] + 1
+	abilitydata[overflowHealingKey] = abilitydata[overflowHealingKey] + overflow
+	if hitValue == 0 and overflow > 0 then abilitydata[overflowHealskey] = abilitydata[overflowHealskey] + 1 end
 	
 	local inttime = math.floor((timems - fight.combatstart)/1000)
 	
 	if inttime >= 0 then 
 	
-		local data = fight.calculated.graph[graphkey]
+		local data = fight.calculated.graph[valuekey]
 		data[inttime] = (data[inttime] or 0) + hitValue
 		
 	end
 	
-	abilitydata.max = math.max(abilitydata.max,hitValue)
+	abilitydata.max = math.max(abilitydata.max, hitValue)
 	abilitydata.min = math.min(abilitydata.min, hitValue)
 	
 	IncrementStatSum(fight, powerType, resultkey, isHealingOut, hitValue, true)
@@ -1509,7 +1528,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 			
 				local times = skill[key]
 				
-				local avgkey = key .. "Avg"
+				local avgkey = ZO_CachedStrFormat("<<1>>Avg", key)
 				
 				local sum = 0
 				local count = 0

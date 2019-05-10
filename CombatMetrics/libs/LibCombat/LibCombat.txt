@@ -3,7 +3,7 @@
 ## Author: Solinur/decay
 ## AddOnVersion: 13
 ## IsLibrary: true
-## DependsOn: LibStub
+## DependsOn: 
 ## OptionalDependsOn:
 ## SavedVariables: 
 ## Description: This library handles the data collection of combat events for addons like CombatMetrics and GroupDamageShare

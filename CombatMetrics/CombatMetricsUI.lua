@@ -26,7 +26,7 @@ function CMX.GetAbilityStats()
 	return abilitystats, abilitystatsversion
 end
 
-local LC = LibStub:GetLibrary("LibCombat")
+local LC = LibCombat
 if LC == nil then return end 
 
 local LibFeedback = LibStub:GetLibrary('LibFeedback')
@@ -1394,7 +1394,7 @@ local function updateFightStatsPanelLeft(panel)
 	
 	header2:SetText(GetString(headerstring))
 	
-	local label1, label2, label3, rowlist
+	local label1, label2, label3, rowList, labelList
 	local activetime
 	
 	if category == "healingOut" or category == "healingIn" then
@@ -1403,7 +1403,8 @@ local function updateFightStatsPanelLeft(panel)
 		label2 = GetString(SI_COMBAT_METRICS_HEALING)
 		label3 = GetString(SI_COMBAT_METRICS_HEALS)
 		
-		rowlist = {Total = true, Normal = true, Critical = true, Blocked = false, Shielded = false}
+		rowList = {"Effective", "Normal", "Critical", "Overflow", "Total"}
+		labelList = {SI_COMBAT_METRICS_EFFECTIVE, SI_COMBAT_METRICS_NORMAL, SI_COMBAT_METRICS_CRITICAL, SI_COMBAT_METRICS_OVERFLOW, SI_COMBAT_METRICS_TOTALC}
 		
 		activetime = fightData and fightData.hpstime or 1
 		
@@ -1413,7 +1414,8 @@ local function updateFightStatsPanelLeft(panel)
 		label2 = GetString(SI_COMBAT_METRICS_DAMAGE)
 		label3 = GetString(SI_COMBAT_METRICS_HIT)
 		
-		rowlist = {Total = true, Normal = true, Critical = true, Blocked = true, Shielded = true}
+		rowList = {"Total", "Normal", "Critical", "Blocked", "Shielded"}
+		labelList = {SI_COMBAT_METRICS_TOTALC, SI_COMBAT_METRICS_NORMAL, SI_COMBAT_METRICS_CRITICAL, SI_COMBAT_METRICS_BLOCKED, SI_COMBAT_METRICS_SHIELDED}
 		
 		activetime = fightData and fightData.dpstime or 1
 		
@@ -1454,17 +1456,19 @@ local function updateFightStatsPanelLeft(panel)
 	dpsRow:GetNamedChild("Value2"):SetText(string.format("%.0f", aps2))
 	dpsRow:GetNamedChild("Value3"):SetText(string.format("%.1f%%", apsratio))
 	
-	for k, v in pairs(rowlist) do
+	for k, v in ipairs(rowList) do
 	
 		local rowcontrol1 = panel:GetNamedChild("StatRowAmount"..k)
 		local rowcontrol2 = panel:GetNamedChild("StatRowCount"..k)
 		
 		local amountlabel    = rowcontrol1:GetNamedChild("Label")
+		amountlabel:SetText(GetString(labelList[k]))
 		local amountcontrol1 = rowcontrol1:GetNamedChild("Value")
 		local amountcontrol2 = rowcontrol1:GetNamedChild("Value2")
 		local amountcontrol3 = rowcontrol1:GetNamedChild("Value3")
 		
 		local countlabel    = rowcontrol2:GetNamedChild("Label")
+		countlabel:SetText(GetString(labelList[k]))
 		local countcontrol1 = rowcontrol2:GetNamedChild("Value")
 		local countcontrol2 = rowcontrol2:GetNamedChild("Value2")
 		local countcontrol3 = rowcontrol2:GetNamedChild("Value3")
@@ -1472,22 +1476,24 @@ local function updateFightStatsPanelLeft(panel)
 		local hide2 = not v
 		local hide3 = not v
 		
-		if v == true then 
+		if v then 
 		
-			local amountkey = category..k
-			local countkey = CountStrings[category]..k
+			local amountkey = category..v
+			local countkey = CountStrings[category]..v
+			
+			if v == "Overflow" or v == "Total" then basekey = "Total" else basekey = rowList[1] end
 			
 			local amount1 = data[amountkey] or 0
 			local amount2 = 0
-			local amount3 = data[category.."Total"] or 0
+			local amount3 = data[category..basekey] or 0
 			local amountratio = 0
 			
 			local count1 = data[countkey] or 0
 			local count2 = 0
-			local count3 = data[CountStrings[category].."Total"] or 0
+			local count3 = data[CountStrings[category]..basekey] or 0
 			local countratio = 0
 			
-			if k == "Total" and noselection then 
+			if (k == 1 or v == "Total") and noselection then 
 			
 				amount2 = data["group"..zo_strformat("<<C:1>>", category)] or 0  -- first letter of category needs to be Capitalized
 				amountratio = (amount2 == 0 and 0) or amount1/amount2*100
@@ -1503,13 +1509,20 @@ local function updateFightStatsPanelLeft(panel)
 				
 			elseif noselection == false then
 			
-				amount2 = (selectionData and selectionData[amountkey]) or 0
-				if k ~= "Total" then amount3 = selectionData[category.."Total"] or 0 end
-				amountratio = (amount1 == 0 and 0) or amount2/amount3*100
+				df("%s / %s / %s", v, category..basekey, CountStrings[category]..basekey)
+			
+				if (k ~= 1 and v ~= "Total") then 
 				
-				count2 = (selectionData and selectionData[countkey]) or 0
-				if k ~= "Total" then count3 = (selectionData and selectionData[CountStrings[category].."Total"]) or 0 end
-				countratio = (count1 == 0 and 0) or count2/count3*100
+					amount3 = selectionData[category..basekey] or 0 
+					count3 = selectionData[CountStrings[category]..basekey] or 0
+				
+				end
+				
+				amount2 = selectionData[amountkey] or 0
+				amountratio = (amount3 == 0 and 0) or amount2/amount3*100
+				
+				count2 = selectionData[countkey] or 0
+				countratio = (count3 == 0 and 0) or count2/count3*100
 			
 			end
 			
@@ -2421,6 +2434,8 @@ local function updateAbilityPanel(panel)
 	local selectedabilities = selections["ability"][category]
 	local selectedunits = selections["unit"][category]
 	
+	local totalkey = isDamage and "Total" or "Effective"
+	
 	if selectedunits ~= nil then
 	
 		data = selectionData 
@@ -2429,15 +2444,15 @@ local function updateAbilityPanel(panel)
 	else 
 	
 		data = fightData.calculated
-		totaldmg = data[category.."Total"]
+		totaldmg = data[category..totalkey]
 		
 	end
 	
 	local scrollchild = GetControl(panel, "PanelScrollChild")
 	local currentanchor = {TOPLEFT, scrollchild, TOPLEFT, 0, 1}
 	
-	local totalAmountKey = category.."Total"
-	local totalHitKey = CountStrings[category].."Total"
+	local totalAmountKey = category..totalkey
+	local totalHitKey = CountStrings[category]..totalkey
 	local critKey = CountStrings[category].."Critical"
 	
 	local ratioKey1 = CountStrings[category]..hitCritLayout[1]	-- first value of the crits/hits column display

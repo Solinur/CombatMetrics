@@ -4,9 +4,10 @@
 
 
 --Register LAM with LibStub
-local MAJOR, MINOR = "LibAddonMenu-2.0", 27
+local MAJOR, MINOR = "LibAddonMenu-2.0", 29
 local lam, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
 if not lam then return end --the same or newer version of this lib is already loaded into memory
+LibAddonMenu2 = lam
 
 local messages = {}
 local MESSAGE_PREFIX = "[LAM2] "
@@ -153,7 +154,9 @@ local function RefreshReloadUIButton()
         end
     end
 
-    lam.applyButton:SetHidden(not lam.requiresReload)
+    if lam.applyButton then
+        lam.applyButton:SetHidden(not lam.requiresReload)
+    end
 end
 
 local function RequestRefreshIfNeeded(control)
@@ -322,9 +325,9 @@ local function UpdateWarning(control)
 
     if control.data.requiresReload then
         if not warning then
-            warning = string.format("|cff0000%s", util.L["RELOAD_UI_WARNING"])
+            warning = string.format("%s", util.L["RELOAD_UI_WARNING"])
         else
-            warning = string.format("%s\n\n|cff0000%s", warning, util.L["RELOAD_UI_WARNING"])
+            warning = string.format("%s\n\n%s", warning, util.L["RELOAD_UI_WARNING"])
         end
     end
 
@@ -346,9 +349,9 @@ local localization = {
         TRANSLATION = "Translation",
         DONATION = "Donate",
         PANEL_INFO_FONT = "$(CHAT_FONT)|14|soft-shadow-thin",
-        RELOAD_UI_WARNING = "Changes to this setting require an UI reload in order to take effect.",
-        RELOAD_DIALOG_TITLE = "UI Reload required",
-        RELOAD_DIALOG_TEXT = "Some changes require an UI reload in order to take effect. Do you want to reload now or discard the changes?",
+        RELOAD_UI_WARNING = "Changes to this setting require a UI reload in order to take effect.",
+        RELOAD_DIALOG_TITLE = "UI Reload Required",
+        RELOAD_DIALOG_TEXT = "Some changes require a UI reload in order to take effect. Do you want to reload now or discard the changes?",
         RELOAD_DIALOG_RELOAD_BUTTON = "Reload",
         RELOAD_DIALOG_DISCARD_BUTTON = "Discard",
     },
@@ -450,16 +453,19 @@ local localization = {
         RELOAD_DIALOG_RELOAD_BUTTON = "苈穜滠遨",
         RELOAD_DIALOG_DISCARD_BUTTON = "绀溽迨莌",
     },
-    br = { -- provided by mlsevero
+    br = { -- provided by mlsevero & FelipeS11
         PANEL_NAME = "Addons",
         AUTHOR = string.format("%s: <<X:1>>", GetString(SI_ADDON_MANAGER_AUTHOR)), -- "Autor: <<X:1>>"
         VERSION = "Versão: <<X:1>>",
         WEBSITE = "Visite o Website",
-        RELOAD_UI_WARNING = "Mudanças nessa configuração requer a releitura da UI para ter efeito.",
-        RELOAD_DIALOG_TITLE = "Releitura da UI requerida",
-        RELOAD_DIALOG_TEXT = "Algumas mudanças requerem a releitura da UI para ter efeito. Você deseja reler agora ou descartar as mudanças?",
-        RELOAD_DIALOG_RELOAD_BUTTON = "Relê",
-        RELOAD_DIALOG_DISCARD_BUTTON = "Descarta",
+        FEEDBACK = "Feedback",
+        TRANSLATION = "Tradução",
+        DONATION = "Doação",
+        RELOAD_UI_WARNING = "Mudanças nessa configuração requerem o recarregamento da UI para ter efeito.",
+        RELOAD_DIALOG_TITLE = "Recarregamento da UI requerida",
+        RELOAD_DIALOG_TEXT = "Algumas mudanças requerem o recarregamento da UI para ter efeito. Você deseja recarregar agora ou descartar as mudanças?",
+        RELOAD_DIALOG_RELOAD_BUTTON = "Recarregar",
+        RELOAD_DIALOG_DISCARD_BUTTON = "Descartar",
     },
 }
 
@@ -867,6 +873,22 @@ local function ToggleAddonPanels(panel) --called in OnShow of newly shown panel
 end
 
 local CheckSafetyAndInitialize
+local function ShowSetHandlerWarning(panel, handler)
+    local hint
+    if(handler == "OnShow" or handler == "OnEffectivelyShown") then
+        hint = "'LAM-PanelControlsCreated' or 'LAM-PanelOpened'"
+    elseif(handler == "OnHide" or handler == "OnEffectivelyHidden") then
+        hint = "'LAM-PanelClosed'"
+    end
+
+    if hint then
+        local message = ("Setting a handler on a panel is not recommended. Use the global callback %s instead. (%s on %s)"):format(hint, handler, panel.data.name)
+        PrintLater(message)
+        if logger then
+            logger:Warn(message)
+        end
+    end
+end
 
 --METHOD: REGISTER ADDON PANEL
 --registers your addon with LibAddonMenu and creates a panel
@@ -880,6 +902,7 @@ function lam:RegisterAddonPanel(addonID, panelData)
     panel:SetHidden(true)
     panel:SetAnchorFill(container)
     panel:SetHandler("OnEffectivelyShown", ToggleAddonPanels)
+    ZO_PreHook(panel, "SetHandler", ShowSetHandlerWarning)
 
     local function stripMarkup(str)
         return str:gsub("|[Cc]%x%x%x%x%x%x", ""):gsub("|[Rr]", "")

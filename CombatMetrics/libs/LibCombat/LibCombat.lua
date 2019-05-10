@@ -13,9 +13,7 @@ Idea: Life and Death
 local _
 
 --Register with LibStub
-local MAJOR, MINOR = "LibCombat", 13
-local lib, oldminor = LibStub:NewLibrary(MAJOR, MINOR)
-if not lib then return end --the same or newer version of this lib is already loaded into memory
+local lib = {}
 
 LibCombat = lib
 
@@ -28,7 +26,7 @@ local db
 local reset = false
 local data = {skillBars= {}}
 local showdebug = false --or GetDisplayName() == "@Solinur"
-local dev = GetDisplayName() == "@Solinur" -- or GetDisplayName() == "@Solinur"
+local dev = GetDisplayName() == "@Solinur"
 local timeout = 800
 local activetimeonheals = true
 local ActiveCallbackTypes = {}
@@ -426,101 +424,199 @@ local SpecialDebuffs = {   -- debuffs that the API doesn't show via EVENT_EFFECT
 
 local abilityConversions = {	-- Ability conversions for tracking skill activations
 
-	--[[
+	[29012] = {48744}, -- Dragon Leap --> CC Immunity
+	[32719] = {48753}, -- Take Flight --> CC Immunity
+	[32715] = {48760}, -- Ferocious Leap --> CC Immunity
 
-	[29012] = 48744, -- Dragon Leap --> CC Immunity
-	[32719] = 48753, -- Take Flight --> CC Immunity
-	[32715] = 48760, -- Ferocious Leap --> CC Immunity
+	[29043] = {92507}, -- Molten Weapons --> Major Sorcery
+	[31874] = {92503}, -- Igneous Weapons --> Major Sorcery
+	[31888] = {92512}, -- Molten Armaments --> Major Sorcery
 
-	[29043] = 92507, -- Molten Weapons --> Major Sorcery
-	[31874] = 92503, -- Igneous Weapons --> Major Sorcery
-	[31888] = 92512, -- Molten Armaments --> Major Sorcery
+	[23234] = {51392}, -- Bolt Escape --> Bolt Escape Fatigue
+	[23236] = {51392}, -- Streak --> Bolt Escape Fatigue
 
-	[23234] = 51392, -- Bolt Escape --> Bolt Escape Fatigue
-	[23236] = 51392, -- Streak --> Bolt Escape Fatigue
+	[33375] = {90587}, -- Blur --> Major Evasion
+	[35414] = {90593}, -- Mirage --> Major Evasion
+	[35419] = {90620}, -- Double Take --> Major Evasion
 
-	[33375] = 90587, -- Blur --> Major Evasion
-	[35414] = 90593, -- Mirage --> Major Evasion
-	[35419] = 90620, -- Double Take --> Major Evasion
+	[25375] = {25376}, -- Shadow Cloak --> Shadow Cloak
+	[25380] = {25381}, -- Shadowy Disguise --> Shadowy Disguise
 
-	[25375] = 25376, -- Shadow Cloak --> Shadow Cloak
-	[25380] = 25381, -- Shadowy Disguise --> Shadowy Disguise
+	[86122] = {86224}, -- Frost Cloak --> Major Resolve
+	[86126] = {88758}, -- Expansive Frost Cloak --> Major Resolve
+	[86130] = {88761}, -- Ice Fortress --> Major Resolve
 
-	[86122] = 86224, -- Frost Cloak --> Major Resolve
-	[86126] = 88758, -- Expansive Frost Cloak --> Major Resolve
-	[86130] = 88761, -- Ice Fortress --> Major Resolve
-
-	[22178] = 22179,  -- Sun Shield --> Sun Shield
-	[22182] = 22183,  -- Radiant Ward --> Radiant Ward
-	[22180] = 49091,  -- Blazing Shield --> Blazing Shield
+	[22178] = {22179}, -- Sun Shield --> Sun Shield
+	[22182] = {22183}, -- Radiant Ward --> Radiant Ward
+	[22180] = {49091}, -- Blazing Shield --> Blazing Shield
 					 
-	[22149] = 48532,  -- Focused Charge --> Charge Snare
-	[22161] = 48532,  -- Explosive Charge --> Charge Snare
-	[15540] = 48532,  -- Toppling Charge --> Charge Snare
+	[22149] = {48532}, -- Focused Charge --> Charge Snare
+	[22161] = {48532}, -- Explosive Charge --> Charge Snare
+	[15540] = {48532}, -- Toppling Charge --> Charge Snare
 					 
-	[26209] = 26220,  -- Restoring Aura --> Minor Magickasteal
-	[26807] = 26809,  -- Radiant Aura --> Minor Magickasteal
-	[26821] = 34366,  -- Repentance --> Repentance
+	[26209] = {26220}, -- Restoring Aura --> Minor Magickasteal
+	[26807] = {26809}, -- Radiant Aura --> Minor Magickasteal
+	[26821] = {34366}, -- Repentance --> Repentance
 					 
-	[22304] = 22307,  -- Healing Ritual --> Healing Ritual
-	[22327] = 22331,  -- Ritual of Rebirth --> Ritual of Rebirth
-	[22314] = 22318,  -- Hasty Prayer --> Hasty Prayer
+	[22304] = {22307}, -- Healing Ritual --> Healing Ritual
+	[22327] = {22331}, -- Ritual of Rebirth --> Ritual of Rebirth
+	[22314] = {22318}, -- Hasty Prayer --> Hasty Prayer
 					 
-	[28448] = 28450,  -- Critical Charge --> Critical Strike
-	[38788] = 38789,  -- Stampede --> Critical Strike
-	[38778] = 38781,  -- Critical Rush --> Critical Strike
+	[28448] = {28450}, -- Critical Charge --> Critical Strike
+	[38788] = {38789}, -- Stampede --> Critical Strike
+	[38778] = {38781}, -- Critical Rush --> Critical Strike
 					 
-	[28719] = 48532,  -- Shield Charge --> Charge Snare
-	[38401] = 48532,  -- Shielded Assault --> Charge Snare
-	[38405] = 38408,  -- Invasion --> Invasion
+	[28719] = {48532}, -- Shield Charge --> Charge Snare
+	[38401] = {48532}, -- Shielded Assault --> Charge Snare
+	[38405] = {38408}, -- Invasion --> Invasion
 					 
-	[83600] = 85156,  -- Lacerate --> Lacerate
-	[85187] = 85192,  -- Rend --> Rend
-	[85179] = 85182,  -- Thrive in Chaos --> Thrive in Chaos
+	[83600] = {85156}, -- Lacerate --> Lacerate
+	[85187] = {85192}, -- Rend --> Rend
+	[85179] = {85182}, -- Thrive in Chaos --> Thrive in Chaos
 					 
-	[29173] = 53881,  -- Weakness to Elements --> Major Breach
-	[39089] = 62775,  -- Elemental Susceptibility --> Major Breach
-	[39095] = 62787,  -- Elemental Drain --> Major Breach
+	[29173] = {53881}, -- Weakness to Elements --> Major Breach
+	[39089] = {62775}, -- Elemental Susceptibility --> Major Breach
+	[39095] = {62787}, -- Elemental Drain --> Major Breach
 					 
-	[40116] = 88606,  -- Quick Siphon --> Minor Lifesteal
+	[40116] = {88606}, -- Quick Siphon --> Minor Lifesteal
 					 
-	[29556] = 63015,  -- Evasion --> Major Evasion
-	[39195] = 63019,  -- Shuffle --> Major Evasion
-	[39192] = 63030,  -- Elude --> Major Evasion
+	[29556] = {63015}, -- Evasion --> Major Evasion
+	[39195] = {63019}, -- Shuffle --> Major Evasion
+	[39192] = {63030}, -- Elude --> Major Evasion
 					 
-	[32632] = 48532,  -- Pounce --> Charge Snare
-	[39105] = 48532,  -- Brutal Pounce --> Charge Snare
-	[39104] = 48532,  -- Feral Pounce --> Charge Snare
+	[32632] = {48532}, -- Pounce --> Charge Snare
+	[39105] = {48532}, -- Brutal Pounce --> Charge Snare
+	[39104] = {48532}, -- Feral Pounce --> Charge Snare
 
-	[103503] = 103521, -- Accelerate --> Minor Force
-	[103503] = 103712, -- Race Against Time --> Minor Force
+	[103503] = {103521}, -- Accelerate --> Minor Force
+	[103503] = {103712}, -- Race Against Time --> Minor Force
 
-	[103478] = 108609, -- Undo --> Undo
-	[103557] = 108621, -- Precognition --> Precognition
-	[103564] = 108641, -- Temporal Guard --> Temporal Guard
+	[103478] = {108609}, -- Undo --> Undo
+	[103557] = {108621}, -- Precognition --> Precognition
+	[103564] = {108641}, -- Temporal Guard --> Temporal Guard
 
-	[38566] = 101161,  -- Rapid Maneuver --> Major Expedition
-	[40211] = 101169,  -- Retreating Maneuver --> Major Expedition
-	[40215] = 101178,  -- Charging Maneuver --> Major Expedition
+	[38566] = {101161}, -- Rapid Maneuver --> Major Expedition
+	[40211] = {101169}, -- Retreating Maneuver --> Major Expedition
+	[40215] = {101178}, -- Charging Maneuver --> Major Expedition
 
-	[61503] = 61504,   -- Vigor --> Vigor
-	[61505] = 61506,   -- Echoing Vigor --> Echoing Vigor
-	[61507] = 61509,   -- Resolving Vigor --> Resolving Vigor
+	[61503] = {61504}, -- Vigor --> Vigor
+	[61505] = {61506}, -- Echoing Vigor --> Echoing Vigor
+	[61507] = {61509}, -- Resolving Vigor --> Resolving Vigor
 
-	[38563] = 38564,   -- War Horn --> War Horn
-	[40223] = 40224,   -- Aggressive Horn --> Aggressive Horn
-	[40220] = 40221,   -- Sturdy Horn --> Sturdy Horn
+	[38563] = {38564}, -- War Horn --> War Horn
+	[40223] = {40224}, -- Aggressive Horn --> Aggressive Horn
+	[40220] = {40221}, -- Sturdy Horn --> Sturdy Horn
 
-	[38571] = 38572,   -- Purge --> Purge
-	[40232] = 40233,   -- Efficient Purge --> Purge
+	[38571] = {38572}, -- Purge --> Purge
+	[40232] = {40233}, -- Efficient Purge --> Purge
+}
 
+local abilityConversions27 = {	-- Ability conversions for tracking skill activations Elsweyr
 
-	--]]	
-	-- unclear: Malevolent Offering 33308 -- Heal ?
-	-- unclear: Shrewd Offering 34721 -- Heal ?
-	-- unclear: healthy Offering 34721 -- Heal ?
+	[22178] = {22179, 2240, nil, nil}, --Sun Shield --> Sun Shield
+	[22182] = {22183, 2240, nil, nil}, --Radiant Ward --> Radiant Ward
+	[22180] = {49091, 2240, nil, nil}, --Blazing Shield --> Blazing Shield
+
+	[22304] = {22307, 2240, nil, nil}, --Healing Ritual --> Healing Ritual
+	[22327] = {22331, 2240, nil, nil}, --Ritual of Rebirth --> Ritual of Rebirth
+	[22314] = {22318, 2240, nil, nil}, --Hasty Prayer --> Hasty Prayer
+
+	[26209] = {26220, 2240, nil, nil}, --Restoring Aura --> Minor Magickasteal
+	[26807] = {26809, 2240, nil, nil}, --Radiant Aura --> Minor Magickasteal
+	[26821] = {29824, 16, nil, nil}, --Repentance? --> Repentance?
+
+	[29173] = {53881, 2240, nil, nil}, --Weakness to Elements --> Major Breach
+	[39089] = {62775, 2240, nil, nil}, --Elemental Susceptibility --> Major Breach
+	[39095] = {62787, 2240, nil, nil}, --Elemental Drain --> Major Breach
+
+	[29556] = {63015, 2240, nil, nil}, --Evasion --> Major Evasion
+	[39195] = {63019, 2240, nil, nil}, --Shuffle --> Major Evasion
+	[39192] = {63030, 2240, nil, nil}, --Elude --> Major Evasion
+
+	[103492] = {103492, 2240, 103492, 2250}, --Meditate --> Meditate
+	[103652] = {103652, 2240, 103652, 2250}, --Deep Thoughts --> Deep Thoughts
+	[103665] = {103665, 2240, 103665, 2250}, --Introspection --> Introspection
+
+	[103503] = {103521, 2240, nil, nil}, --Accelerate --> Minor Force
+	[103706] = {103706, nil, 103707, 2240}, --Channeled Acceleration --> Minor Force
+	[103710] = {103712, nil, nil, nil}, --Race Against Time --> Minor Force
+
+	[103478] = {108609, 2240, nil, nil}, --Undo --> Undo
+	[103557] = {108621, 2240, nil, nil}, --Precognition --> Precognition
+	[103564] = {108641, 2240, nil, nil}, --Temporal Guard --> Temporal Guard
+
+	[61503] = {61504, 2240, nil, nil}, --Vigor --> Vigor
+	[61505] = {61506, 2240, nil, nil}, --Echoing Vigor --> Echoing Vigor
+	[61507] = {61509, 2240, nil, nil}, --Resolving Vigor --> Resolving Vigor
+
+	[38566] = {101161, 2240, nil, nil}, --Rapid Maneuver --> Major Expedition
+	[40211] = {101169, 2240, nil, nil}, --Retreating Maneuver --> Major Expedition
+	[40215] = {101178, 2240, nil, nil}, --Charging Maneuver --> Major Expedition
+
+	[38563] = {38564, 2240, nil, nil}, --War Horn --> War Horn
+	[40223] = {40224, 2240, nil, nil}, --Aggressive Horn --> Aggressive Horn
+	[40220] = {40221, 2240, nil, nil}, --Sturdy Horn --> Sturdy Horn
+
+	[28279] = {28279, 2200, 28279, 1}, --Uppercut --> Uppercut
+	[38814] = {38814, 2200, 38814, 1}, --Dizzying Swing --> Dizzying Swing
+	[38807] = {38807, 2200, 38807, 1}, --Wrecking Blow --> Wrecking Blow
+
+	[83600] = {85156, 2240, nil, nil}, --Lacerate --> Lacerate
+	[85187] = {85192, 2240, nil, nil}, --Rend --> Rend
+	[85179] = {85182, 2240, nil, nil}, --Thrive in Chaos --> Thrive in Chaos
+
+	[31531] = {31531, 2200, 88565, 2240}, --Force Siphon --> Force Siphon
+	[40109] = {40109, 2200, 88575, 2240}, --Siphon Spirit --> Siphon Spirit
+	[40116] = {88606, nil, nil, nil}, --Quick Siphon --> Minor Lifesteal
+
+	[29043] = {92507, 2240, nil, nil}, --Molten Weapons --> Major Sorcery
+	[31874] = {92503, 2240, nil, nil}, --Igneous Weapons --> Major Sorcery
+	[31888] = {92512, 2240, nil, nil}, --Molten Armaments --> Major Sorcery
+
+	[33375] = {90587, 2240, nil, nil}, --Blur --> Major Evasion
+	[35414] = {90593, 2240, nil, nil}, --Mirage --> Major Evasion
+	[35419] = {90620, 2240, nil, nil}, --Phantasmal Escape --> Major Evasion
+
+	[25375] = {25376, 2240, nil, nil}, --Shadow Cloak --> Shadow Cloak
+	[25380] = {25381, 2240, nil, nil}, --Shadowy Disguise --> Shadowy Disguise
+
+	[35445] = {35451, 2250, nil, nil}, --Shadow Image Teleport --> Shadow
+
+	[24584] = {nil, nil, 114903, 2250}, --Dark Exchange --> 
+	[24595] = {nil, nil, 114908, 2250}, --Dark Deal --> 
+	[24589] = {nil, nil, 114909, 2250}, --Dark Conversion --> 
+
+	[108840] = {108842, 2240, nil, nil}, --Summon Unstable Familiar --> Unstable Familiar Damage Pulse
+	[76076] = {76078, 16, nil, nil}, --Summon Unstable Clannfear --> Clannfear Heal
+	[77182] = {77187, 2240, nil, nil}, --Summon Volatile Familiar --> Volatile Famliiar Damage Pulsi
+
+	[108845] = {108846, 16, nil, nil}, --Winged Twilight Restore --> Winged Twilight Restore
+	[77140] = {77354, 2240, nil, nil}, --Summon Twilight Tormentor  --> Twilight Tormentor Enrage
+	[77369] = {77371, 16, nil, nil}, --Twilight Matriarch Restore --> Twilight Matriarch Restore
+
+	[23234] = {51392, 2240, nil, nil}, --Bolt Escape --> Bolt Escape Fatigue
+	[23236] = {51392, 2240, nil, nil}, --Streak --> Bolt Escape Fatigue
+
+	[85922] = {85925, 32, nil, nil}, --Budding Seeds --> Budding Seeds Heal
+
+	[86122] = {86224, 2240, nil, nil}, --Frost Cloak --> Major Resolve
+	[86126] = {88758, 2240, nil, nil}, --Expansive Frost Cloak --> Major Resolve
+	[86130] = {88761, 2240, nil, nil}, --Ice Fortress --> Major Resolve
+
+	[115238] = {119372, 2240, nil, nil}, --Bitter Harvest --> Bitter Harvest
+	[118623] = {118624, 2240, nil, nil}, --Deaden Pain --> Deaden Pain
+	[118639] = {121797, 2240, nil, nil}, --Necrotic Potency --> Necrotic Potency
+
+	[117690] = {117691, 2240, nil, nil}, --Blighted Blastbones --> Blighted Blastbones
+	[117749] = {117750, 2240, nil, nil}, --Stalking Blastbones --> Stalking Blastbones
+
+	--[115307] = {???, nil, nil, nil}, --Expunge --> 
+	[117940] = {117947, 2240, nil, nil}, --Expunge and Modify --> Expunge and Modify
+	--[117919] = {???, nil, nil, nil}, --Hexproof --> 
 
 }
+
+if GetAPIVersion() > 100026 then abilityConversions = abilityConversions27 end
 
 local DirectHeavyAttacks = {	-- for special handling to detect their end
 
@@ -545,6 +641,7 @@ local validSkillStartResults = {
 	[ACTION_RESULT_BEGIN] = true, -- 2200
 	[ACTION_RESULT_EFFECT_GAINED] = true, -- 2240
 	[ACTION_RESULT_KNOCKBACK] = true, -- 2275
+	[ACTION_RESULT_IMMUNE] = true, -- 2000
 	
 }
 
@@ -834,14 +931,17 @@ local function UpdateSlotSkillEvents()
 		
 				local channeled, castTime = GetAbilityCastInfo(abilityId)
 				
-				local result = castTime > 0 and ACTION_RESULT_BEGIN or nil
+				local convertedId, result, convertedId2, result2 = unpack(abilityConversions[abilityId] or {})
 				
-				local result2 = castTime > 0 and ACTION_RESULT_EFFECT_GAINED or channeled and ACTION_RESULT_EFFECT_FADED or nil
+				local result = result or (castTime > 0 and ACTION_RESULT_BEGIN) or nil
 				
-				local convertedId = abilityConversions[abilityId] or abilityId
+				local result2 = result2 or (castTime > 0 and ACTION_RESULT_EFFECT_GAINED) or (channeled and ACTION_RESULT_EFFECT_FADED) or nil				
+				
+				local convertedId = convertedId or abilityId
+				local convertedId2 = convertedId2 or abilityId
 
 				table.insert(SlotSkills, {convertedId, result, false})
-				table.insert(SlotSkills, {convertedId, result2, true})
+				table.insert(SlotSkills, {convertedId2, result2, true})
 			end
 		end
 	end	
@@ -867,9 +967,13 @@ local function GetCurrentSkillBars()
 		
 		local reducedslot = (bar - 1) * 10 + i
 		
-		local convertedId = abilityConversions[id] or id
+		local conversion = abilityConversions[id]
+		
+		local convertedId = conversion and conversion[1] or id
 		
 		IdToReducedSlot[convertedId] = reducedslot
+		
+		if conversion and conversion[3] then IdToReducedSlot[conversion[3]] = reducedslot end
 		
 	end	
 	
@@ -1362,7 +1466,7 @@ local function onBossesChanged(_) -- Detect Bosses
 	
 	for i = 1, 12 do
 	
-		local unitTag = 'boss' .. i
+		local unitTag = ZO_CachedStrFormat("boss<<1>>", i)
 		
 		if DoesUnitExist(unitTag) then
 		
@@ -1663,7 +1767,7 @@ local function onBaseResourceChanged(_,unitTag,_,powerType,powerValue,_,_)
 		if powerValueChange == GetStat(STAT_HEALTH_REGEN_COMBAT) and data.playerid then 
 
 			aId = 0
-			lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_HEAL_SELF]), LIBCOMBAT_EVENT_HEAL_SELF, timems, ACTION_RESULT_HOT_TICK, data.playerid, data.playerid, aId, powerValueChange, powerType)
+			lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_HEAL_SELF]), LIBCOMBAT_EVENT_HEAL_SELF, timems, ACTION_RESULT_HOT_TICK, data.playerid, data.playerid, aId, powerValueChange, powerType, 0)
 			return
 			
 		end
@@ -1845,10 +1949,8 @@ local function CombatEventHandler(isheal, _ , result , _ , _ , _ , _ , sourceNam
 
 	-- d({eventCode=eventCode, result=result, isError=isError, abilityName=abilityName, abilityGraphic=abilityGraphic, abilityActionSlotType=abilityActionSlotType, sourceName=sourceName, sourceType=sourceType, targetName=targetName, targetType=targetType, hitValue=hitValue, powerType=powerType, damageType=damageType, log=log, sourceUnitId=sourceUnitId, targetUnitId=targetUnitId, abilityId})
 	
-	if (hitValue + (overflow or 0) ) < 2 or (not (sourceUnitId > 0 and targetUnitId > 0)) or (data.inCombat == false and (result==ACTION_RESULT_DOT_TICK_CRITICAL or result==ACTION_RESULT_DOT_TICK or isheal) ) or targetType==2 then return end -- only record if both unitids are valid or player is in combat or a non dot damage action happens or the target is not a pet
+	if (hitValue + (overflow or 0)) < 2 or (not (sourceUnitId > 0 and targetUnitId > 0)) or (data.inCombat == false and (result==ACTION_RESULT_DOT_TICK_CRITICAL or result==ACTION_RESULT_DOT_TICK or isheal) ) or targetType==2 then return end -- only record if both unitids are valid or player is in combat or a non dot damage action happens or the target is not a pet
 	local timems = GetGameTimeMilliseconds()
-	
-	local hitValue = hitValue + (overflow or 0)
 	
 	CheckUnit(sourceName, sourceUnitId, sourceType, timems)
 	CheckUnit(targetName, targetUnitId, targetType, timems)
@@ -1864,7 +1966,7 @@ local function CombatEventHandler(isheal, _ , result , _ , _ , _ , _ , sourceNam
 	
 	currentfight:AddCombatEvent(timems, result, targetUnitId, hitValue, eventid)
 	
-	lib.cm:FireCallbacks((CallbackKeys[eventid]), eventid, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType)
+	lib.cm:FireCallbacks((CallbackKeys[eventid]), eventid, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType, (overflow or 0))
 
 end
 
@@ -1882,9 +1984,9 @@ local function onCombatEventDmgIn(...)
 end
 
 local function onCombatEventHeal(...)  
-	local _, _, _, _, _, _, _, _, _, _, hitValue, _, _, _, _, _, _ = ...
+	local _, _, _, _, _, _, _, _, _, _, hitValue, _, _, _, _, _, _, overflow = ...
 	
-	if hitValue<2 or (data.inCombat == false and (GetGameTimeMilliseconds() - currentfight.combatend >= 50)) then return end				-- only record in combat, don't record pet incoming heal
+	if (hitValue + (overflow or 0)) < 2 or (data.inCombat == false and (GetGameTimeMilliseconds() - currentfight.combatend >= 50)) then return end				-- only record in combat, don't record pet incoming heal
 	
 	CombatEventHandler(true, ...)	-- (isheal, ...)
 end
@@ -1895,7 +1997,7 @@ local function onCombatEventHealIn(...)
 	
 	if (sourceType == COMBAT_UNIT_TYPE_PLAYER or sourceType == COMBAT_UNIT_TYPE_PLAYER_PET) and (targetType == COMBAT_UNIT_TYPE_PLAYER or targetType == COMBAT_UNIT_TYPE_PLAYER_PET) then return end
 	
-	onCombatEventHeal(...)	-- (isheal, ...)
+	onCombatEventHeal(...)
 end
 
 local function onCombatEventDmgGrp(_ , _ , _ , _ , _ , _ , _ , _ , targetName, targetType, hitValue, _ , _ , _ , _, targetUnitId, abilityId)  -- called by Event
@@ -1959,7 +2061,7 @@ local function onAbilityUsed(eventCode, result, isError, abilityName, abilityGra
 	
 	castTime = channeled and channelTime or castTime
 	
-	if dev == true then df("[%.3f] Skill fired: %s (%d), Duration: %ds Target: %s", timems/1000, GetAbilityName(origId), origId, castTime/1000, tostring(target)) end
+	-- if dev == true then df("[%.3f] Skill fired: %s (%d), Duration: %ds Target: %s", timems/1000, GetAbilityName(origId), origId, castTime/1000, tostring(target)) end
 	
 	HeavyAttackCharging = DirectHeavyAttacks[origId] and origId or nil
 	
@@ -1968,7 +2070,10 @@ local function onAbilityUsed(eventCode, result, isError, abilityName, abilityGra
 		local status = channeled and LIBCOMBAT_SKILLSTATUS_BEGIN_CHANNEL or LIBCOMBAT_SKILLSTATUS_BEGIN_DURATION
 		
 		lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_SKILL_TIMINGS]), LIBCOMBAT_EVENT_SKILL_TIMINGS, timems, reducedslot, origId, status)
-		lastCastTimeAbility = abilityId
+	
+		local convertedId = abilityConversions[origId] and abilityConversions[origId][3] or abilityId
+		
+		lastCastTimeAbility = convertedId
 	
 	else
 	
@@ -1980,19 +2085,21 @@ end
 
 local function onAbilityFinished(eventCode, result, isError, abilityName, abilityGraphic, abilityActionSlotType, sourceName, sourceType, targetName, targetType, hitValue, powerType, damageType, log, sourceUnitId, targetUnitId, abilityId) 
 	
-	if validSkillEndResults[result] ~= true then return end
-	
 	local timems = GetGameTimeMilliseconds()
 	
 	local reducedslot = IdToReducedSlot[abilityId]	
 	
 	local origId = GetReducedSlotId(reducedslot)
 	
+	local specialResult = abilityConversions[origId] and abilityConversions[origId][4] or false
+	
+	if validSkillEndResults[result] ~= true and result ~= specialResult then return end
+	
 	if abilityId == lastCastTimeAbility then
 
 		local timems = GetGameTimeMilliseconds()
 		
-		if dev == true then df("[%.3f] Skill finished: %s (%d, R: %d)", GetGameTimeMilliseconds()/1000, GetAbilityName(origId), origId, result) end
+		-- if dev == true then df("[%.3f] Skill finished: %s (%d, R: %d)", GetGameTimeMilliseconds()/1000, GetAbilityName(origId), origId, result) end
 		
 		lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_SKILL_TIMINGS]), LIBCOMBAT_EVENT_SKILL_TIMINGS, timems, reducedslot, origId, LIBCOMBAT_SKILLSTATUS_SUCCESS)
 		
@@ -2020,7 +2127,9 @@ local function onSlotUpdate(_, slot)
 	
 	if Events.Skills.active then
 	
-		local convertedId = abilityConversions[abilityId] or abilityId
+		local conversion = abilityConversions[abilityId]
+	
+		local convertedId = conversion and conversion[1] or abilityId
 	
 		if HeavyAttackCharging == abilityId then 
 		
@@ -2222,6 +2331,11 @@ local function GetAllCallbackTypes()
 	return t
 end
 
+local function GetCurrentSkillBarsDelayed()
+
+	zo_callLater(GetCurrentSkillBars, 400) 	-- temporary workaround for NB skill Assasins Will
+	
+end
 
 Events.General = EventHandler:New(GetAllCallbackTypes()
 	,
@@ -2465,6 +2579,10 @@ Events.Skills = EventHandler:New(
 	{LIBCOMBAT_EVENT_SKILL_TIMINGS},	
 	function (self)
 		
+		self:RegisterEvent(EVENT_COMBAT_EVENT, GetCurrentSkillBarsDelayed, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_EFFECT_GAINED, REGISTER_FILTER_ABILITY_ID, 24785)
+		self:RegisterEvent(EVENT_COMBAT_EVENT, GetCurrentSkillBarsDelayed, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_EFFECT_GAINED, REGISTER_FILTER_ABILITY_ID, 24806)
+		self:RegisterEvent(EVENT_COMBAT_EVENT, GetCurrentSkillBarsDelayed, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_EFFECT_GAINED, REGISTER_FILTER_ABILITY_ID, 24804)
+		self:RegisterEvent(EVENT_ACTION_SLOT_UPDATED, GetCurrentSkillBarsDelayed)
 		
 		for _, skill in pairs(SlotSkills) do
 		
@@ -2784,9 +2902,11 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 		
 		local isWeaponAttack = reducedslot == 1 or reducedslot == 2 or reducedslot == 11 or reducedslot == 12		
 		
-		local name = GetFormattedAbilityName(abilityId)		
+		local formatstring = " |cddffbb<<1>>|r"
 		
-		if isWeaponAttack then name = ZO_CachedStrFormat(" |cffffff<<1>>|r", name) end
+		if isWeaponAttack then formatstring = " |cffffff<<1>>|r" end
+		
+		local name = ZO_CachedStrFormat(formatstring, GetFormattedAbilityName(abilityId))
 		
 		color = {.9,.8,.7}
 		

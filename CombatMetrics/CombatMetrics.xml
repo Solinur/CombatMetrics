@@ -1659,7 +1659,7 @@
 											</OnInitialized>
 										</Control>
 										
-										<Control name="$(parent)StatRowAmountTotal" inherits="CombatMetrics_StatRowLine" resizeToFitDescendents="true">
+										<Control name="$(parent)StatRowAmount1" inherits="CombatMetrics_StatRowLine" resizeToFitDescendents="true">
 											<Anchor point="LEFT" relativeTo="$(parent)ActiveTimeLabel" constrains="X"/>
 											<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)StatTitleAmount" offsetY="4" constrains="Y"/>
 											<OnInitialized>
@@ -1667,47 +1667,47 @@
 											</OnInitialized>
 										</Control>
 										
-										<Control name="$(parent)StatRowAmountNormal" inherits="CombatMetrics_StatRowLine" resizeToFitDescendents="true">
+										<Control name="$(parent)StatRowAmount2" inherits="CombatMetrics_StatRowLine" resizeToFitDescendents="true">
 											<Anchor point="LEFT" relativeTo="$(parent)ActiveTimeLabel" constrains="X"/>
-											<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)StatRowAmountTotal" offsetY="4" constrains="Y"/>
+											<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)StatRowAmount1" offsetY="4" constrains="Y"/>
 											<OnInitialized>
 												self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_NORMAL))
 											</OnInitialized>
 										</Control>
 										
-										<Control name="$(parent)StatRowAmountCritical" inherits="CombatMetrics_StatRowLine" resizeToFitDescendents="true">
+										<Control name="$(parent)StatRowAmount3" inherits="CombatMetrics_StatRowLine" resizeToFitDescendents="true">
 											<Anchor point="LEFT" relativeTo="$(parent)ActiveTimeLabel" constrains="X"/>
-											<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)StatRowAmountNormal" offsetY="4" constrains="Y"/>
+											<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)StatRowAmount2" offsetY="4" constrains="Y"/>
 											<OnInitialized>
 												self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_CRITICAL))
 											</OnInitialized>
 										</Control>
 										
-										<Control name="$(parent)StatRowAmountBlocked" inherits="CombatMetrics_StatRowLine" resizeToFitDescendents="true">
+										<Control name="$(parent)StatRowAmount4" inherits="CombatMetrics_StatRowLine" resizeToFitDescendents="true">
 											<Anchor point="LEFT" relativeTo="$(parent)ActiveTimeLabel" constrains="X"/>
-											<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)StatRowAmountCritical" offsetY="4" constrains="Y"/>
+											<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)StatRowAmount3" offsetY="4" constrains="Y"/>
 											<OnInitialized>
 												self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_BLOCKED))
 											</OnInitialized>
 										</Control>
 										
-										<Control name="$(parent)StatRowAmountShielded" inherits="CombatMetrics_StatRowLine" resizeToFitDescendents="true">
+										<Control name="$(parent)StatRowAmount5" inherits="CombatMetrics_StatRowLine" resizeToFitDescendents="true">
 											<Anchor point="LEFT" relativeTo="$(parent)ActiveTimeLabel" constrains="X"/>
-											<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)StatRowAmountBlocked" offsetY="4" constrains="Y"/>
+											<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)StatRowAmount4" offsetY="4" constrains="Y"/>
 											<OnInitialized>
 												self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_SHIELDED))
 											</OnInitialized>
 										</Control>
 										
 										<Control name="$(parent)StatTitleCount" inherits="CombatMetrics_StatRowTitleLine" resizeToFitDescendents="true">
-											<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)StatRowAmountShielded" offsetY="4"/>
+											<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)StatRowAmount5" offsetY="4"/>
 											<Anchor point="TOPRIGHT" relativeTo="$(parent)Sep" constrains="X"/>
 											<OnInitialized>
 												self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_HITS))
 											</OnInitialized>
 										</Control>
 										
-										<Control name="$(parent)StatRowCountTotal" inherits="CombatMetrics_StatRowLine" resizeToFitDescendents="true">
+										<Control name="$(parent)StatRowCount1" inherits="CombatMetrics_StatRowLine" resizeToFitDescendents="true">
 											<Anchor point="LEFT" relativeTo="$(parent)ActiveTimeLabel" constrains="X"/>
 											<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)StatTitleCount" offsetY="4" constrains="Y"/>
 											<OnInitialized>
@@ -1715,33 +1715,33 @@
 											</OnInitialized>
 										</Control>
 										
-										<Control name="$(parent)StatRowCountNormal" inherits="CombatMetrics_StatRowLine" resizeToFitDescendents="true">
+										<Control name="$(parent)StatRowCount2" inherits="CombatMetrics_StatRowLine" resizeToFitDescendents="true">
 											<Anchor point="LEFT" relativeTo="$(parent)ActiveTimeLabel" constrains="X"/>
-											<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)StatRowCountTotal" offsetY="4" constrains="Y"/>
+											<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)StatRowCount1" offsetY="4" constrains="Y"/>
 											<OnInitialized>
 												self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_NORMAL))
 											</OnInitialized>
 										</Control>
 										
-										<Control name="$(parent)StatRowCountCritical" inherits="CombatMetrics_StatRowLine" resizeToFitDescendents="true">
+										<Control name="$(parent)StatRowCount3" inherits="CombatMetrics_StatRowLine" resizeToFitDescendents="true">
 											<Anchor point="LEFT" relativeTo="$(parent)ActiveTimeLabel" constrains="X"/>
-											<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)StatRowCountNormal" offsetY="4" constrains="Y"/>
+											<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)StatRowCount2" offsetY="4" constrains="Y"/>
 											<OnInitialized>
 												self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_CRITICAL))
 											</OnInitialized>
 										</Control>
 										
-										<Control name="$(parent)StatRowCountBlocked" inherits="CombatMetrics_StatRowLine" resizeToFitDescendents="true">
+										<Control name="$(parent)StatRowCount4" inherits="CombatMetrics_StatRowLine" resizeToFitDescendents="true">
 											<Anchor point="LEFT" relativeTo="$(parent)ActiveTimeLabel" constrains="X"/>
-											<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)StatRowCountCritical" offsetY="4" constrains="Y"/>
+											<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)StatRowCount3" offsetY="4" constrains="Y"/>
 											<OnInitialized>
 												self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_BLOCKED))
 											</OnInitialized>
 										</Control>
 										
-										<Control name="$(parent)StatRowCountShielded" inherits="CombatMetrics_StatRowLine" resizeToFitDescendents="true">
+										<Control name="$(parent)StatRowCount5" inherits="CombatMetrics_StatRowLine" resizeToFitDescendents="true">
 											<Anchor point="LEFT" relativeTo="$(parent)ActiveTimeLabel" constrains="X"/>
-											<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)StatRowCountBlocked" offsetY="4" constrains="Y"/>
+											<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)StatRowCount4" offsetY="4" constrains="Y"/>
 											<OnInitialized>
 												self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_SHIELDED))
 											</OnInitialized>
