@@ -2,7 +2,7 @@
 -- Functionality
 
 SafeAddString(SI_COMBAT_METRICS_LANG, "fr", 1) 
---SafeAddString(SI_COMBAT_METRICS_ENCHANTMENT_TRIM, " Enchantment", 1) -- this will be removed from the items enchantment string to show the rest in the info panel, e.g. "Spell Damage Enchantment" is reduced to "Spell Damage".
+SafeAddString(SI_COMBAT_METRICS_ENCHANTMENT_TRIM, " Enchantement", 1) -- this will be removed from the items enchantment string to show the rest in the info panel, e.g. "Spell Damage Enchantment" is reduced to "Spell Damage".
 
 -- Fonts
 
@@ -16,7 +16,7 @@ SafeAddString(SI_COMBAT_METRICS_LANG, "fr", 1)
 -- Main UI
 
 SafeAddString(SI_COMBAT_METRICS_CALC, "Calcul en Cours...", 1) 
---SafeAddString(SI_COMBAT_METRICS_FINALISING, "Finalising...", 1) 
+SafeAddString(SI_COMBAT_METRICS_FINALISING, "Finalisation...", 1) 
 SafeAddString(SI_COMBAT_METRICS_GROUP, "Groupe", 1) 
 SafeAddString(SI_COMBAT_METRICS_SELECTION, "Sélection", 1) 
 
@@ -28,15 +28,15 @@ SafeAddString(SI_COMBAT_METRICS_BLOCKS, "Bloqués", 1)
 SafeAddString(SI_COMBAT_METRICS_CRITS, "Crits", 1) 
 
 SafeAddString(SI_COMBAT_METRICS_DAMAGE, "Dégâts", 1) 
---SafeAddString(SI_COMBAT_METRICS_DAMAGEC, "Damage: ", 1) 
+SafeAddString(SI_COMBAT_METRICS_DAMAGEC, "Dégâts: ", 1) 
 SafeAddString(SI_COMBAT_METRICS_HIT, "Hit", 1) 
 SafeAddString(SI_COMBAT_METRICS_DPS, "DPS", 1) 
---SafeAddString(SI_COMBAT_METRICS_INCOMING_DPS, "Incoming DPS", 1) 
+SafeAddString(SI_COMBAT_METRICS_INCOMING_DPS, "DPS Entrant", 1) 
 
 SafeAddString(SI_COMBAT_METRICS_HEALING, "Soins", 1) 
 SafeAddString(SI_COMBAT_METRICS_HEALS, "Tics", 1) 
 SafeAddString(SI_COMBAT_METRICS_HPS, "HPS", 1) 
---SafeAddString(SI_COMBAT_METRICS_INCOMING_HPS, "Incoming HPS", 1) 
+SafeAddString(SI_COMBAT_METRICS_INCOMING_HPS, "HPS Entrant", 1) 
 
 SafeAddString(SI_COMBAT_METRICS_EDIT_TITLE, "Double clique pour changer le nom du Combat", 1) 
 
@@ -56,63 +56,63 @@ SafeAddString(SI_COMBAT_METRICS_TOGGLE_SETTINGS, "Options", 1)
 SafeAddString(SI_COMBAT_METRICS_SHOWIDS, "Afficher les IDs", 1) -- (for units, buffs and abilities)
 SafeAddString(SI_COMBAT_METRICS_HIDEIDS, "Cacher les IDs", 1) -- (for units, buffs and abilities)
 
---SafeAddString(SI_COMBAT_METRICS_POSTDPS, "Post DPS/HPS", 1) 
+SafeAddString(SI_COMBAT_METRICS_POSTDPS, "Poster DPS/HPS", 1) 
 SafeAddString(SI_COMBAT_METRICS_POSTSINGLEDPS, "Poster DPS Mono", 1) 
 SafeAddString(SI_COMBAT_METRICS_POSTSMARTDPS, "Poster DPS du Boss", 1) 
 SafeAddString(SI_COMBAT_METRICS_POSTMULTIDPS, "Poster DPS Total", 1) 
 SafeAddString(SI_COMBAT_METRICS_POSTALLDPS, "Poster DPS Mono + Total", 1) 
 SafeAddString(SI_COMBAT_METRICS_POSTHPS, "Poster HPS Total", 1) 
---SafeAddString(SI_COMBAT_METRICS_POSTUNITDPS, "Post DPS to this unit", 1) 
---SafeAddString(SI_COMBAT_METRICS_POSTUNITNAMEDPS, "Post DPS to '<<1>>' units", 1) -- <<1>> is unitname
---SafeAddString(SI_COMBAT_METRICS_POSTSELECTIONDPS, "Post DPS to selected units", 1) 
---SafeAddString(SI_COMBAT_METRICS_POSTSELECTIONHPS, "Post HPS to selected units", 1) 
+SafeAddString(SI_COMBAT_METRICS_POSTUNITDPS, "Poster le DPS sur cette unité", 1) 
+SafeAddString(SI_COMBAT_METRICS_POSTUNITNAMEDPS, "Poster le DPS sur '<<1>>'", 1) -- <<1>> is unitname
+SafeAddString(SI_COMBAT_METRICS_POSTSELECTIONDPS, "Poster le DPS sur les unités sélectionnées", 1) 
+SafeAddString(SI_COMBAT_METRICS_POSTSELECTIONHPS, "Poster le HPS sur les unités sélectionnées", 1) 
 
 -- Format Strings for DPS posting
 
---SafeAddString(SI_COMBAT_METRICS_BOSS_DPS, "Boss DPS", 1) 
+SafeAddString(SI_COMBAT_METRICS_BOSS_DPS, "Boss DPS", 1) 
 
---SafeAddString(SI_COMBAT_METRICS_POSTDPS_FORMAT, "<<1>> - DPS: <<2>> (<<3>> in <<4>>)", 1) -- for single target DPS (<<1>> = fightname, <<2>> = DPS, <<3>> = damage, <<4>> =  ) e.g. Z'Maja - DPS: 10000 (1000000 in 1:40.0)
---SafeAddString(SI_COMBAT_METRICS_POSTSMARTDPS_FORMAT, "<<1>><<2>> - Boss DPS: <<3>> (<<4>> in <<5>>)", 1) -- (<<1>> = fightname, <<2>> = extraunits (can be ""), <<3>> = DPS, <<4>> = damage, <<5>> = time) e.g. Valariel (+5) - Boss DPS: 10000 (1000000 in 1:40.0)
---SafeAddString(SI_COMBAT_METRICS_POSTMULTIDPS_FORMAT, "<<1>> (+<<2>>) - DPS: <<3>> (<<4>> in <<5>>)", 1) -- (<<1>> = fightname, <<2>> = extraunits, <<3>> = DPS, <<4>> = damage, <<5>> = time) e.g. Some random Mob (+5) - DPS: 10000 (1000000 in 1:40.0)
---SafeAddString(SI_COMBAT_METRICS_POSTALLDPS_FORMAT_A, "<<1>> - Total DPS (+<<2>>): <<3>> (<<4>> in <<5>>)", 1) -- multi target part (<<1>> = fightname, <<2>> = extraunits, <<3>> = DPS, <<4>> = damage, <<5>> = time) e.g. Valariel - Total DPS (+5): 10000 (1000000 in 1:40.0)
---SafeAddString(SI_COMBAT_METRICS_POSTALLDPS_FORMAT_B, "<<1>>: <<2>> (<<3>> in <<4>>)", 1) --  single target part (<<1>> = Label, <<2>> = DPS, <<3>> = damage) e.g. Boss DPS (+2): 10000 (1000000 in 1:40.0)
---SafeAddString(SI_COMBAT_METRICS_POSTSELECTIONDPS_FORMAT, "<<1>><<2>> - Selection DPS: <<3>> (<<4>> in <<5>>)", 1) -- (<<1>> = fightname, <<2>> = extraunits (can be ""), <<3>> = DPS, <<4>> = damage, <<5>> = time) e.g. Valariel (+5) - Boss DPS: 10000 (1000000 in 1:40.0)
---SafeAddString(SI_COMBAT_METRICS_POSTHPS_FORMAT, "<<1>> - HPS: <<2>> (<<3>> in <<4>>)", 1) -- (<<1>> = fightname, <<2>> = HPS, <<3>> = damage, <<4>> = time)  e.g. Z'Maja - HPS: 10000 (1000000 in 1:40.0)
---SafeAddString(SI_COMBAT_METRICS_POSTSELECTIONHPS_FORMAT, "<<1>> - Selection HPS (x<<2>>): <<3>> (<<4>> in <<5>>)", 1) -- (<<1>> = fightname, <<2>> = units, <<3>> = HPS, <<4>> = damage, <<5>> = time) e.g. Z'Maja - HPS (12): 10000 (1000000 in 1:40.0)
+SafeAddString(SI_COMBAT_METRICS_POSTDPS_FORMAT, "<<1>> - DPS: <<2>> (<<3>> sur <<4>>)", 1) -- for single target DPS (<<1>> = fightname, <<2>> = DPS, <<3>> = damage, <<4>> =  ) e.g. Z'Maja - DPS: 10000 (1000000 in 1:40.0)
+SafeAddString(SI_COMBAT_METRICS_POSTSMARTDPS_FORMAT, "<<1>><<2>> - Boss DPS: <<3>> (<<4>> sur <<5>>)", 1) -- (<<1>> = fightname, <<2>> = extraunits (can be ""), <<3>> = DPS, <<4>> = damage, <<5>> = time) e.g. Valariel (+5) - Boss DPS: 10000 (1000000 in 1:40.0)
+SafeAddString(SI_COMBAT_METRICS_POSTMULTIDPS_FORMAT, "<<1>> (+<<2>>) - DPS: <<3>> (<<4>> sur <<5>>)", 1) -- (<<1>> = fightname, <<2>> = extraunits, <<3>> = DPS, <<4>> = damage, <<5>> = time) e.g. Some random Mob (+5) - DPS: 10000 (1000000 in 1:40.0)
+SafeAddString(SI_COMBAT_METRICS_POSTALLDPS_FORMAT_A, "<<1>> - DPS Total (+<<2>>): <<3>> (<<4>> sur <<5>>)", 1) -- multi target part (<<1>> = fightname, <<2>> = extraunits, <<3>> = DPS, <<4>> = damage, <<5>> = time) e.g. Valariel - Total DPS (+5): 10000 (1000000 in 1:40.0)
+SafeAddString(SI_COMBAT_METRICS_POSTALLDPS_FORMAT_B, "<<1>>: <<2>> (<<3>> sur <<4>>)", 1) --  single target part (<<1>> = Label, <<2>> = DPS, <<3>> = damage) e.g. Boss DPS (+2): 10000 (1000000 in 1:40.0)
+SafeAddString(SI_COMBAT_METRICS_POSTSELECTIONDPS_FORMAT, "<<1>><<2>> - DPS Sélectionné: <<3>> (<<4>> sur <<5>>)", 1) -- (<<1>> = fightname, <<2>> = extraunits (can be ""), <<3>> = DPS, <<4>> = damage, <<5>> = time) e.g. Valariel (+5) - Boss DPS: 10000 (1000000 in 1:40.0)
+SafeAddString(SI_COMBAT_METRICS_POSTHPS_FORMAT, "<<1>> - HPS: <<2>> (<<3>> sur <<4>>)", 1) -- (<<1>> = fightname, <<2>> = HPS, <<3>> = damage, <<4>> = time)  e.g. Z'Maja - HPS: 10000 (1000000 in 1:40.0)
+SafeAddString(SI_COMBAT_METRICS_POSTSELECTIONHPS_FORMAT, "<<1>> - HPS Sélectionné (x<<2>>): <<3>> (<<4>> sur <<5>>)", 1) -- (<<1>> = fightname, <<2>> = units, <<3>> = HPS, <<4>> = damage, <<5>> = time) e.g. Z'Maja - HPS (12): 10000 (1000000 in 1:40.0)
 
---SafeAddString(SI_COMBAT_METRICS_POSTBUFF, "Post buff uptime", 1) 
---SafeAddString(SI_COMBAT_METRICS_POSTBUFF_BOSS, "Post buff uptime on bosses", 1) 
---SafeAddString(SI_COMBAT_METRICS_POSTBUFF_GROUP, "Post buff uptime on group members", 1) 
---SafeAddString(SI_COMBAT_METRICS_POSTBUFF_FORMAT, "<<1>> - HPS: <<2>> (<<3>><<4[/ on $d/ on $d units]>>)", 1) -- (<<1>> = buff name, <<2>> = relative uptime, <<3>> = uptime, <<4>> = time) e.g. Major Intellect - Uptime: 93.2% (9:26 in 10:07)
---SafeAddString(SI_COMBAT_METRICS_POSTBUFF_FORMAT_GROUP, "<<1>> - Uptime: <<2>>/<<5>> (<<3>>/<<6>><<4[/ on $d/ on $d units]>>)", 1) -- (<<1>> = buff name, <<2>> = relative uptime, <<3>> = uptime, <<4>> = units, <<5>> = relative group uptime, <<6>> = group uptime) e.g. Minor Sorcery - Uptime: 55.4%/100.6% (5:36/10:11 in 10:07)
+SafeAddString(SI_COMBAT_METRICS_POSTBUFF, "Poster l'uptime du buff", 1) 
+SafeAddString(SI_COMBAT_METRICS_POSTBUFF_BOSS, "Poster l'uptime du buff sur le(s) boss", 1) 
+SafeAddString(SI_COMBAT_METRICS_POSTBUFF_GROUP, "Poster l'uptime du buff sur le groupe", 1) 
+SafeAddString(SI_COMBAT_METRICS_POSTBUFF_FORMAT, "<<1>> - Uptime: <<2>> (<<3>><<4[/ sur $d/ sur $d units]>>)", 1) -- (<<1>> = buff name, <<2>> = relative uptime, <<3>> = uptime, <<4>> = time) e.g. Major Intellect - Uptime: 93.2% (9:26 in 10:07)
+SafeAddString(SI_COMBAT_METRICS_POSTBUFF_FORMAT_GROUP, "<<1>> - Uptime: <<2>>/<<5>> (<<3>>/<<6>><<4[/ sur $d/ sur $d units]>>)", 1) -- (<<1>> = buff name, <<2>> = relative uptime, <<3>> = uptime, <<4>> = units, <<5>> = relative group uptime, <<6>> = group uptime) e.g. Minor Sorcery - Uptime: 55.4%/100.6% (5:36/10:11 in 10:07)
 
---SafeAddString(SI_COMBAT_METRICS_SETTINGS, "Addon Settings", 1) 
---SafeAddString(SI_COMBAT_METRICS_FEEDBACK, "Send Feedback / Donate", 1) 
---SafeAddString(SI_COMBAT_METRICS_SAVEHDD, "Save FightData to HDD", 1) 
+SafeAddString(SI_COMBAT_METRICS_SETTINGS, "Réglages de l'Extension", 1) 
+SafeAddString(SI_COMBAT_METRICS_FEEDBACK, "Envoyer un retour / Dons", 1) 
+SafeAddString(SI_COMBAT_METRICS_SAVEHDD, "Sauvegarder les données sur le HDD", 1) 
 
 -- Graph
 
---SafeAddString(SI_COMBAT_METRICS_TOGGLE_CURSOR, "Toggle to show cursor and value tooltip", 1) 
---SafeAddString(SI_COMBAT_METRICS_GRAPH_BUFF_GROUP_SELECTOR, "Toggle to show group uptime", 1) 
+SafeAddString(SI_COMBAT_METRICS_TOGGLE_CURSOR, "Montrer le curseur et la valeur", 1) 
+SafeAddString(SI_COMBAT_METRICS_GRAPH_BUFF_GROUP_SELECTOR, "Montrer l'uptime du groupe", 1) 
 
---SafeAddString(SI_COMBAT_METRICS_RECALCULATE, "Recalculate Fight", 1) 
---SafeAddString(SI_COMBAT_METRICS_SMOOTHED, "Smoothed", 1) 
---SafeAddString(SI_COMBAT_METRICS_TOTAL, "Total", 1) 
---SafeAddString(SI_COMBAT_METRICS_ABSOLUTE, "Absolute %", 1) 
---SafeAddString(SI_COMBAT_METRICS_SMOOTH_LABEL, "Smooth: %d s", 1) 
---SafeAddString(SI_COMBAT_METRICS_NONE, "None", 1) 
---SafeAddString(SI_COMBAT_METRICS_BOSS_HP, "Boss HP", 1) 
---SafeAddString(SI_COMBAT_METRICS_ENLARGE, "Enlarge", 1) 
---SafeAddString(SI_COMBAT_METRICS_SHRINK, "Shrink", 1) 
+SafeAddString(SI_COMBAT_METRICS_RECALCULATE, "Recalculer le combat", 1) 
+SafeAddString(SI_COMBAT_METRICS_SMOOTHED, "Lissé", 1) 
+SafeAddString(SI_COMBAT_METRICS_TOTAL, "Total", 1) 
+SafeAddString(SI_COMBAT_METRICS_ABSOLUTE, "Absolue %", 1) 
+SafeAddString(SI_COMBAT_METRICS_SMOOTH_LABEL, "Lissé: %d s", 1) 
+SafeAddString(SI_COMBAT_METRICS_NONE, "Aucun", 1) 
+SafeAddString(SI_COMBAT_METRICS_BOSS_HP, "Boss HP", 1) 
+SafeAddString(SI_COMBAT_METRICS_ENLARGE, "Agrandir", 1) 
+SafeAddString(SI_COMBAT_METRICS_SHRINK, "Rétrécir", 1) 
 
 -- Feedback
 
---SafeAddString(SI_COMBAT_METRICS_FEEDBACK_MAIL, "Send Mail", 1) 
---SafeAddString(SI_COMBAT_METRICS_FEEDBACK_GOLD, "Donate 5000g", 1) 
---SafeAddString(SI_COMBAT_METRICS_FEEDBACK_GOLD2, "Donate 25000g", 1) 
---SafeAddString(SI_COMBAT_METRICS_FEEDBACK_ESOUI, "Site (ESOUI)", 1) 
---SafeAddString(SI_COMBAT_METRICS_FEEDBACK_GITHUB, "GitHub", 1) 
---SafeAddString(SI_COMBAT_METRICS_FEEDBACK_TEXT, "\nIf you found a bug, have a request or a suggestion, send an ingame mail, create an issue on GitHub or post it in the comments on EsoUI. \n\nDonations are appreciated but not required or necessary. \nIf you want to donate real money please visit the addon site on EsoUI", 1) 
+SafeAddString(SI_COMBAT_METRICS_FEEDBACK_MAIL, "Envoyer un Mail", 1) 
+SafeAddString(SI_COMBAT_METRICS_FEEDBACK_GOLD, "Donner 5000g", 1) 
+SafeAddString(SI_COMBAT_METRICS_FEEDBACK_GOLD2, "Donner 25000g", 1) 
+SafeAddString(SI_COMBAT_METRICS_FEEDBACK_ESOUI, "Site (ESOUI)", 1) 
+SafeAddString(SI_COMBAT_METRICS_FEEDBACK_GITHUB, "GitHub", 1) 
+SafeAddString(SI_COMBAT_METRICS_FEEDBACK_TEXT, "\nSi vous trouvez un bug, avez une requête ou une suggestion, envoyé moi un mail en jeu, créez une issue sur GitHub, ou postez dans les commentaires sur EsoUI. \n\nLes dons sont appréciés mais pas nécessaires ni obligatoires. \nSi vous voulez donner de l'argent réel merci de regarder sur EsoUI", 1) 
 
 SafeAddString(SI_COMBAT_METRICS_STORAGE_FULL, "Le fichier de stockage est plein. Supprimer un combat pour libérer de l'espace !", 1) 
 
@@ -134,7 +134,7 @@ SafeAddString(SI_COMBAT_METRICS_DURATION, "Durée", 1)
 SafeAddString(SI_COMBAT_METRICS_CHARACTER, "Personnage", 1) 
 SafeAddString(SI_COMBAT_METRICS_ZONE, "Zone", 1) 
 SafeAddString(SI_COMBAT_METRICS_TIME, "Date", 1) 
---SafeAddString(SI_COMBAT_METRICS_TIMEC, "Time: ", 1) 
+SafeAddString(SI_COMBAT_METRICS_TIMEC, "Temps: ", 1) 
 
 SafeAddString(SI_COMBAT_METRICS_SHOW, "Montrer", 1) 
 SafeAddString(SI_COMBAT_METRICS_DELETE, "Supprimer", 1) 
@@ -156,18 +156,18 @@ SafeAddString(SI_COMBAT_METRICS_BLOCKED, "Bloqué:", 1)
 SafeAddString(SI_COMBAT_METRICS_SHIELDED, "Shieldé:", 1) 
 
 SafeAddString(SI_COMBAT_METRICS_HITS, "Hits", 1) 
---SafeAddString(SI_COMBAT_METRICS_NORM, "Norm", 1) -- Normal, short
+SafeAddString(SI_COMBAT_METRICS_NORM, "Norm", 1) -- Normal, short
 
 SafeAddString(SI_COMBAT_METRICS_RESOURCES, "Ressources", 1) 
 
 SafeAddString(SI_COMBAT_METRICS_STATS, "Stats", 1) 
 SafeAddString(SI_COMBAT_METRICS_AVE, "Moy", 1) -- Average, short
---SafeAddString(SI_COMBAT_METRICS_AVE_N, "Avg N", 1) -- Average Normal, short
---SafeAddString(SI_COMBAT_METRICS_AVE_C, "Avg C", 1) -- Average Crit, short
---SafeAddString(SI_COMBAT_METRICS_AVERAGE, "Average", 1) 
---SafeAddString(SI_COMBAT_METRICS_NORMAL_HITS, "Normal Hits", 1) 
+SafeAddString(SI_COMBAT_METRICS_AVE_N, "Moy N", 1) -- Average Normal, short
+SafeAddString(SI_COMBAT_METRICS_AVE_C, "Moy C", 1) -- Average Crit, short
+SafeAddString(SI_COMBAT_METRICS_AVERAGE, "Moyen", 1) 
+SafeAddString(SI_COMBAT_METRICS_NORMAL_HITS, "Hits Normaux", 1) 
 SafeAddString(SI_COMBAT_METRICS_MAX, "Max", 1) -- Maximum
---SafeAddString(SI_COMBAT_METRICS_MIN, "Min", 1) -- Minimum
+SafeAddString(SI_COMBAT_METRICS_MIN, "Min", 1) -- Minimum
 
 SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA1, "Magie Max:", 1) 
 SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA2, "Dégâts des Sorts:", 1) 
@@ -193,7 +193,7 @@ SafeAddString(SI_COMBAT_METRICS_STATS_HEALTH3, "Résistance Mag:", 1)
 SafeAddString(SI_COMBAT_METRICS_STATS_HEALTH4, "Crit Résistance:", 1) 
 SafeAddString(SI_COMBAT_METRICS_STATS_HEALTH_FORMAT4, "%.1f %%", 1) -- e.g. 12.3%
 
---SafeAddString(SI_COMBAT_METRICS_PENETRATION_TT, "Penetration: Damage", 1) 
+SafeAddString(SI_COMBAT_METRICS_PENETRATION_TT, "Pénétration: Dégâts", 1) 
 
 SafeAddString(SI_COMBAT_METRICS_COMBAT_LOG, "Journal de Combat", 1) 
 
@@ -214,7 +214,7 @@ SafeAddString(SI_COMBAT_METRICS_TOGGLE_GROUPBUFFOUT_EVENTS, "Affiche les Buffs d
 SafeAddString(SI_COMBAT_METRICS_TOGGLE_RESOURCE_EVENTS, "Affiche les Événements sur les Ressources", 1) 
 SafeAddString(SI_COMBAT_METRICS_TOGGLE_STATS_CHANGE_EVENTS, "Affiche les Changements sur les Stats", 1) 
 SafeAddString(SI_COMBAT_METRICS_TOGGLE_MESSAGE_CHANGE_EVENTS, "Affiche les Informations, comme le Changement d'Armes", 1) 
---SafeAddString(SI_COMBAT_METRICS_TOGGLE_SKILL_USE_EVENTS, "Toggle used skills events", 1) 
+SafeAddString(SI_COMBAT_METRICS_TOGGLE_SKILL_USE_EVENTS, "Activer les Événements sur les Sorts Utilisés", 1) 
 
 -- \n = new line
 
@@ -225,8 +225,8 @@ SafeAddString(SI_COMBAT_METRICS_STAMINA_PM, "Ressources\n +/-", 1)
 SafeAddString(SI_COMBAT_METRICS_RESOURCES_PM, "Ressources\n +/-", 1) 
 
 SafeAddString(SI_COMBAT_METRICS_BUFF, "Buff", 1) 
---SafeAddString(SI_COMBAT_METRICS_BUFFS, "Buffs", 1) 
---SafeAddString(SI_COMBAT_METRICS_DEBUFFS, "Debuffs", 1) 
+SafeAddString(SI_COMBAT_METRICS_BUFFS, "Buffs", 1) 
+SafeAddString(SI_COMBAT_METRICS_DEBUFFS, "Debuffs", 1) 
 SafeAddString(SI_COMBAT_METRICS_SHARP, "#", 1) 
 SafeAddString(SI_COMBAT_METRICS_BUFFCOUNT_TT, "Joueur / Global", 1) 
 SafeAddString(SI_COMBAT_METRICS_UPTIME, "Uptime", 1) 
@@ -246,20 +246,20 @@ SafeAddString(SI_COMBAT_METRICS_CRITS_PER, "Crit %", 1)
 SafeAddString(SI_COMBAT_METRICS_FAVOURITE_ADD, "Ajouter aux Favoris", 1) 
 SafeAddString(SI_COMBAT_METRICS_FAVOURITE_REMOVE, "Enlever des Favoris", 1) 
 
---SafeAddString(SI_COMBAT_METRICS_SKILL, "Skill", 1) 
+SafeAddString(SI_COMBAT_METRICS_SKILL, "Sort", 1) 
 
---SafeAddString(SI_COMBAT_METRICS_BAR, "Bar ", 1) 
---SafeAddString(SI_COMBAT_METRICS_AVERAGEC, "Average: ", 1) 
+SafeAddString(SI_COMBAT_METRICS_BAR, "Barre ", 1) 
+SafeAddString(SI_COMBAT_METRICS_AVERAGEC, "Moyen: ", 1) 
 
---SafeAddString(SI_COMBAT_METRICS_SKILLTIME_LABEL2, "< W / S", 1) -- as in "Weapon / Skill"
---SafeAddString(SI_COMBAT_METRICS_SKILLTIME_LABEL3, "W / S >", 1) 
+SafeAddString(SI_COMBAT_METRICS_SKILLTIME_LABEL2, "< A / S", 1) -- as in "Weapon / Skill"
+SafeAddString(SI_COMBAT_METRICS_SKILLTIME_LABEL3, "A / S >", 1) 
 
---SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT1, "Number of casts of this skill", 1) 
---SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT2, "Time since the last weapon/skill activation and the ability activation.", 1) 
---SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT3, "Time between the ability activation and the next weapon/skill activation.", 1) 
---SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT4, "Average time between subsequent activations of this skill", 1) 
+SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT1, "Nombre d'utilisations de ce sort", 1) 
+SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT2, "Temps depuis la dernière attaque (arme/sort) et l'actication de ce sort", 1) 
+SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT3, "Temps ente l'activation de ce sort et la prochaine attaque (arme/sort)", 1) 
+SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT4, "Temps moyen entre deux activations de ce sort", 1) 
 
---SafeAddString(SI_COMBAT_METRICS_SAVED_DATA, "Saved Data", 1) 
+SafeAddString(SI_COMBAT_METRICS_SAVED_DATA, "Données Enregistrées", 1) 
 
 -- Live Report Window
 
