@@ -16,6 +16,7 @@ local barKeyOffset = 1
 local enlargedGraph = false
 local maxXYPlots = 5
 local maxBarPlots = 8
+local skillpage = 0
 
 local CMX = CMX
 if CMX == nil then CMX = {} end
@@ -1403,8 +1404,8 @@ local function updateFightStatsPanelLeft(panel)
 		label2 = GetString(SI_COMBAT_METRICS_HEALING)
 		label3 = GetString(SI_COMBAT_METRICS_HEALS)
 		
-		rowList = {"Effective", "Normal", "Critical", "Overflow", "Total"}
-		labelList = {SI_COMBAT_METRICS_EFFECTIVE, SI_COMBAT_METRICS_NORMAL, SI_COMBAT_METRICS_CRITICAL, SI_COMBAT_METRICS_OVERFLOW, SI_COMBAT_METRICS_TOTALC}
+		rowList = {"Total", "Normal", "Critical", "Overflow", "Absolute"}
+		labelList = {SI_COMBAT_METRICS_TOTALC, SI_COMBAT_METRICS_NORMAL, SI_COMBAT_METRICS_CRITICAL, SI_COMBAT_METRICS_OVERHEAL, SI_COMBAT_METRICS_ABSOLUTEC}
 		
 		activetime = fightData and fightData.hpstime or 1
 		
@@ -1473,15 +1474,16 @@ local function updateFightStatsPanelLeft(panel)
 		local countcontrol2 = rowcontrol2:GetNamedChild("Value2")
 		local countcontrol3 = rowcontrol2:GetNamedChild("Value3")
 		
-		local hide2 = not v
-		local hide3 = not v
+		local hide2 = false
+		local hide3 = false
+		local hide4 = false
 		
 		if v then 
 		
 			local amountkey = category..v
 			local countkey = CountStrings[category]..v
 			
-			if v == "Overflow" or v == "Total" then basekey = "Total" else basekey = rowList[1] end
+			if v == "Overflow" or v == "Absolute" then basekey = "Absolute" else basekey = rowList[1] end
 			
 			local amount1 = data[amountkey] or 0
 			local amount2 = 0
@@ -1493,13 +1495,20 @@ local function updateFightStatsPanelLeft(panel)
 			local count3 = data[CountStrings[category]..basekey] or 0
 			local countratio = 0
 			
-			if (k == 1 or v == "Total") and noselection then 
+			if k == 1 and noselection then 
 			
 				amount2 = data["group"..zo_strformat("<<C:1>>", category)] or 0  -- first letter of category needs to be Capitalized
 				amountratio = (amount2 == 0 and 0) or amount1/amount2*100
 				
 				hide2 = true
 				
+			elseif noselection and v == "Absolute" then
+			
+				amount2 = data["group"..zo_strformat("<<C:1>>", category)] or 0  -- first letter of category needs to be Capitalized
+				amountratio = (amount2 == 0 and 0) or amount1/amount2*100
+				
+				hide4 = true
+			
 			elseif noselection then
 				
 				hide3 = true
@@ -1509,9 +1518,7 @@ local function updateFightStatsPanelLeft(panel)
 				
 			elseif noselection == false then
 			
-				df("%s / %s / %s", v, category..basekey, CountStrings[category]..basekey)
-			
-				if (k ~= 1 and v ~= "Total") then 
+				if (k ~= 1 and v ~= "Absolute") then 
 				
 					amount3 = selectionData[category..basekey] or 0 
 					count3 = selectionData[CountStrings[category]..basekey] or 0
@@ -1536,15 +1543,13 @@ local function updateFightStatsPanelLeft(panel)
 			
 		end
 			
-		local hide = not v
+		--amountlabel:SetHidden(hide)
+		--amountcontrol1:SetHidden(hide)
+		amountcontrol2:SetHidden(hide3 or hide4)
+		amountcontrol3:SetHidden(hide4)
 		
-		amountlabel:SetHidden(hide)
-		amountcontrol1:SetHidden(hide)
-		amountcontrol2:SetHidden(hide3)
-		amountcontrol3:SetHidden(hide)
-		
-		countlabel:SetHidden(hide)
-		countcontrol1:SetHidden(hide)
+		--countlabel:SetHidden(hide)
+		--countcontrol1:SetHidden(hide)
 		countcontrol2:SetHidden(hide3 or hide2)
 		countcontrol3:SetHidden(hide2)
 	
@@ -2434,7 +2439,7 @@ local function updateAbilityPanel(panel)
 	local selectedabilities = selections["ability"][category]
 	local selectedunits = selections["unit"][category]
 	
-	local totalkey = isDamage and "Total" or "Effective"
+	local totalkey = "Total"
 	
 	if selectedunits ~= nil then
 	

@@ -172,8 +172,8 @@
 	SI_COMBAT_METRICS_CRITICAL = "Critical: ",
 	SI_COMBAT_METRICS_BLOCKED = "Blocked: ",
 	SI_COMBAT_METRICS_SHIELDED = "Shielded: ",
-	SI_COMBAT_METRICS_EFFECTIVE = "Effective: ",
-	SI_COMBAT_METRICS_OVERFLOW = "Overflow: ", -- as in overheal
+	SI_COMBAT_METRICS_ABSOLUTEC = "Absolute: ",
+	SI_COMBAT_METRICS_OVERHEAL = "Overheal: ", -- as in overheal
 
 	SI_COMBAT_METRICS_HITS = "Hits",
 	SI_COMBAT_METRICS_NORM = "Norm",  -- Normal, short

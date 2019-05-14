@@ -347,12 +347,12 @@ local CategoryList = {
 		"healingOutCritical",
 		"healingOutTotal",
 		"healingOutOverflow",
-		"healingOutEffective",
+		"healingOutAbsolute",
 		"healsOutNormal",
 		"healsOutCritical",
 		"healsOutTotal",
 		"healsOutOverflow",
-		"healsOutEffective",
+		"healsOutAbsolute",
 		
 	},
 	
@@ -363,12 +363,12 @@ local CategoryList = {
 		"healingInCritical",
 		"healingInTotal",
 		"healingInOverflow",
-		"healingInEffective",
+		"healingInAbsolute",
 		"healsInNormal",
 		"healsInCritical",
 		"healsInTotal",
 		"healsInOverflow",
-		"healsInEffective",
+		"healsInAbsolute",
 		
 	},
 }
@@ -685,18 +685,18 @@ local function AccumulateStats(fight)
 					
 				elseif tablekey == "healingOut" then
 				
-					ability.healingOutEffective = ability.healingOutNormal + ability.healingOutCritical
-					ability.healsOutEffective = ability.healsOutNormal + ability.healsOutCritical
-					ability.healingOutTotal = ability.healingOutEffective + ability.healingOutOverflow
-					ability.healsOutTotal = ability.healsOutEffective + ability.healsOutOverflow
+					ability.healingOutTotal = ability.healingOutNormal + ability.healingOutCritical
+					ability.healsOutTotal = ability.healsOutNormal + ability.healsOutCritical
+					ability.healingOutAbsolute = ability.healingOutTotal + ability.healingOutOverflow
+					ability.healsOutAbsolute = ability.healsOutTotal + ability.healsOutOverflow
 					ability.HPSOut = ability.healingOutTotal / fight.hpstime
 					
 				elseif tablekey == "healingIn" then
 				
-					ability.healingInEffective = ability.healingInNormal + ability.healingInCritical
-					ability.healsInEffective = ability.healsInNormal + ability.healsInCritical
-					ability.healingInTotal = ability.healingInEffective + ability.healingInOverflow
-					ability.healsInTotal = ability.healsInEffective + ability.healsInOverflow
+					ability.healingInTotal = ability.healingInNormal + ability.healingInCritical
+					ability.healsInTotal = ability.healsInNormal + ability.healsInCritical
+					ability.healingInAbsolute = ability.healingInTotal + ability.healingInOverflow
+					ability.healsInAbsolute = ability.healsInTotal + ability.healsInOverflow
 					ability.HPSIn = ability.healingInTotal / fight.hpstime
 					
 				end
@@ -734,7 +734,7 @@ function CMX.GenerateSelectionStats(fight, menuItem, selections) -- this is simi
 	selectiondata.units = {}
 	selectiondata.buffs = {}
 			
-	local totalkey = (menuItem == "healingIn" or menuItem == "healingOut") and "Effective" or "Total"
+	local totalkey = "Total"
 	local totalValueSum = 0
 	
 	for unitId,_ in pairs(unitselection or data.units) do	-- if a selection was made the content of the value will be "true" and not the table from the original data.
@@ -1508,7 +1508,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		
 		for reducedslot, skill in pairs(skilldata) do
 		
-			local isNotWeaponAttack = reducedslot ~= 1 and reducedslot ~= 2 and reducedslot ~= 11 and reducedslot ~= 12
+			local isNotWeaponAttack = reducedslot%10 ~= 1 and reducedslot%10 ~= 2
 		
 			local difftimes = {}
 			

@@ -317,7 +317,8 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*]API Bump to Wrathstone (100026)
 [*]Reorganized bundled libraries (Make sure to activate them in the Addon Panel). This should fix a lua error some received.
 
-0.9.0 (beta)
+0.9.0 1,509,277 (13.05.2019) 22:06
+[*] API Bump to Elsweyr (100027)
 [*] Added a new Info panel. It shows the Equipment, CP, and Skills used in the selected fight.
 [**] For the skill panel "Weaving Metrics" are shown. They give some info how fast you are able to cast subsequent abilities and the average time between two subsequent casts of the same ability.
 [**] Also some stats about how much time was spent and how much damage was done on each bar are shown. Werewolf is not supported at the moment but will be added in the future.
@@ -326,33 +327,24 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [**] You can click on the colour boxes on the left to change the colours of the plots.
 [**] When you select buffs/debuffs in the buff panel, while the graph panel is shown, the buff uptime will also be visualized in the graph.
 [**] By drawing a rectangle you can zoom in, a right click resets the zoom.
+[**] You can also activate a cursor with a tooltip that shows the exact numbers. It can be toggled on an off using the icon next to the enlarge button.
 [*] Note that some of the new features only work for new fights.
+[*] Elsweyr only: Added Overheal to healing category. All heal values will generally refer to effective (i.e. actually HP restoring) heal. Overheal and the absolute heal (i.e. effective + overheal) can be viewed in the healing category of the big fight report. Let me know if you need a display on the livereport, I could add it if necessary.
 [*] Uptime % in the (De-)Buffs Out Panel are now considered towards the total time the respective units have been engaged in combat. This should lead to more reasonable results when you fight different bosses in succession (e.g. the iterations of Z'Maja in Cloudrest). It won't however help for fights where units are inactive in between (e.g. The minibosses in Asylum)
+[*] When in a healing category, the "(De-)buffs out" panel now also considers the uptime of yourself
 [*] Some of the columns in the abilities panel can now be changed. They are coloured in a bright yellow. You can for example choose to show the minimum hit instead of the maximum or show the average critical hit instead of the overall average hit. Just try them out!
 [*] Added more options in the Combat Log. This includes Skill activations and for boss fights the remaining %HP.
 [*] Added accountname to the bottom info bar
 [*] Added a feedback/donation entry to the options menu on the fight report window, providing convenient access to give feedback in case you have suggestions or issues to report.
 [*] Added an option to go to the addon settings from the options menu on the fight report window.
-[*] Updated russian localization (Thx @KiriX)
-
-0.9.0 (beta2) 
-[*] Fix a lua error
-
-0.9.0 (beta3) 
-[*] Fix a lua error appearing when trying to show data in a graph that is not available
-[*] Fix some malformated labels in non-english localizations
-[*] Added option to post DPS/HPS to a selection of targets.
-[*] Added option to post Buff uptime (right click on buff). This will be extended to quickly post uptime on bosses or group members only.
-[*] When right clicking a unit while in the DPS out panel, you can now post the DPS to that unit or all units that share that name. Big Thanks to @Letho for the idea and help with this.
 [*] Right click is no longer used to reset the selection in the different list panels, instead this is now set to the 3rd mouse button. 
+[*] Added an option to post DPS/HPS to a selection of targets. When posting data for one unit only, the name of that unit is shown.
+[*] When right clicking a unit while in the DPS out panel, you can now post the DPS to that unit or all units that share that name. Big Thanks to @Letho for the idea and help with this.
+[*] Added an option to post Buff uptime (right click on buff).
+[*] Buff uptime from the "(De-)buffs out" panel can also be directly posted for all bosses or group members without the need to select them in the unit panel first
 (Note: You can also just click on a single unit to select it and then click again on it to deselect it)
 [*] Added detection for Khajit Passive and Minor Force from the 5 pc bonus of Tzogvin’s Warband to show correct Critical Damage Modifier values. Please let me know if anything is missing there.
-
-0.9.0 (beta4)
-[*] Buff uptime from the "(De-)buffs out" panel can now also be directly posted for all bosses or group members without the need to select them in the unit panel first
-[*] When posting data for one unit only, the name of that unit is shown.
-[*] When in a healing category, the "(De-)buffs out" panel now also considers the uptime of the yourself
-[*] Added a change that hopefully fixes issues with Briarheart and similar buffs.
-[*] Added a cursor with a tooltip that shows the exact numbers. It can be toggled on an off by the cursor icon next to the enlarge button.
-[*] Fixed an issue with graph rescaling.
-[*] Added a tooltip to the groupbuff toggle in the graph panel
+[*] Added a fix for issues with Briarheart and similar buffs.
+[*] Updated french localization (Thx @Floliroy).
+[*] Updated russian localization (Thx @KiriX). Note: This was done for the previolus version, so some translations will still be  missing.
+[*] Updated Libraries. Added LibFeedback.

@@ -25,8 +25,7 @@ local _
 local db
 local reset = false
 local data = {skillBars= {}}
-local showdebug = false --or GetDisplayName() == "@Solinur"
-local dev = GetDisplayName() == "@Solinur"
+lib.debug = false --or GetDisplayName() == "@Solinur"
 local timeout = 800
 local activetimeonheals = true
 local ActiveCallbackTypes = {}
@@ -614,6 +613,8 @@ local abilityConversions27 = {	-- Ability conversions for tracking skill activat
 	[117940] = {117947, 2240, nil, nil}, --Expunge and Modify --> Expunge and Modify
 	--[117919] = {???, nil, nil, nil}, --Hexproof --> 
 
+	[88158] = {88163, 1, nil, nil}, --Materialize --> Materialize
+
 }
 
 if GetAPIVersion() > 100026 then abilityConversions = abilityConversions27 end
@@ -626,6 +627,7 @@ local DirectHeavyAttacks = {	-- for special handling to detect their end
 	[16691] = true, -- Bow
 	[15383] = true, -- Inferno
 	[16261] = true, -- Frost
+	[32477] = true, -- Werewolf
 	
 }
 
@@ -733,7 +735,9 @@ function FightHandler:Initialize()
 end
 
 local function Print(message, ...)
-	--df("[%s] %s", "libCombat", message:format(...))
+
+	if lib.debug then df("[LibCombat] %s", message:format(...)) end
+	
 end
 
 local onCombatState
@@ -938,10 +942,9 @@ local function UpdateSlotSkillEvents()
 				local result2 = result2 or (castTime > 0 and ACTION_RESULT_EFFECT_GAINED) or (channeled and ACTION_RESULT_EFFECT_FADED) or nil				
 				
 				local convertedId = convertedId or abilityId
-				local convertedId2 = convertedId2 or abilityId
-
+				
 				table.insert(SlotSkills, {convertedId, result, false})
-				table.insert(SlotSkills, {convertedId2, result2, true})
+				if convertedId2 or result2 then table.insert(SlotSkills, {(convertedId2 or abilityId), result2, true}) end
 			end
 		end
 	end	
@@ -959,7 +962,7 @@ local function GetCurrentSkillBars()
 	
 	local currentbar = skillBars[bar]
 	
-	for i=1, 8 do 
+	for i = 1, 8 do 
 	
 		local id = GetSlotBoundId(i)
 	
@@ -974,6 +977,8 @@ local function GetCurrentSkillBars()
 		IdToReducedSlot[convertedId] = reducedslot
 		
 		if conversion and conversion[3] then IdToReducedSlot[conversion[3]] = reducedslot end
+		
+		Print("Bar: %d, Skill: (%d) %s, Slot: %d", bar, id, GetAbilityName(id), reducedslot)
 		
 	end	
 	
@@ -1385,24 +1390,24 @@ function FightHandler:onUpdate()
 		
 		self:UpdateStats()
 		
-		if showdebug == true and (self.damageOutTotal>0 or self.healingOutTotal>0 or self.damageInTotal>0) then
+		if false and lib.debug and (self.damageOutTotal>0 or self.healingOutTotal>0 or self.damageInTotal>0) then
 		
-			df("Time: %.2fs (DPS) | %.2fs (HPS) ", self.dpstime, self.hpstime)
-			df("Dmg: %d (DPS: %d)", self.damageOutTotal, self.DPSOut)
-			df("Heal: %d (HPS: %d)", self.healingOutTotal, self.HPSOut)
-			df("IncDmg: %d (Shield: %d, IncDPS: %d)", self.damageInTotal, self.damageInShielded, self.DPSIn)
-			df("IncHeal: %d (IncHPS: %d)", self.healingInTotal, self.HPSIn)
+			Print("Time: %.2fs (DPS) | %.2fs (HPS) ", self.dpstime, self.hpstime)
+			Print("Dmg: %d (DPS: %d)", self.damageOutTotal, self.DPSOut)
+			Print("Heal: %d (HPS: %d)", self.healingOutTotal, self.HPSOut)
+			Print("IncDmg: %d (Shield: %d, IncDPS: %d)", self.damageInTotal, self.damageInShielded, self.DPSIn)
+			Print("IncHeal: %d (IncHPS: %d)", self.healingInTotal, self.HPSIn)
 			
 			if data.inGroup and Events.CombatGrp.active then
 			
-				df("GrpDmg: %d (DPS: %d)", self.groupDamageOut, self.groupDPSOut)
-				df("GrpHeal: %d (HPS: %d)", self.groupHealOut, self.groupHPS)
-				df("GrpIncDmg: %d (IncDPS: %d)", self.groupDamageIn, self.groupDPSIn)
+				Print("GrpDmg: %d (DPS: %d)", self.groupDamageOut, self.groupDPSOut)
+				Print("GrpHeal: %d (HPS: %d)", self.groupHealOut, self.groupHPS)
+				Print("GrpIncDmg: %d (IncDPS: %d)", self.groupDamageIn, self.groupDPSIn)
 				
 			end
 		end
 		
-		if showdebug == true then d("lib: resetting...") end
+		Print("resetting...")
 		
 		self.grplog = {}
 		
@@ -1426,7 +1431,7 @@ function onCombatState(event, inCombat)  -- Detect Combat Stage, local is define
 
 	if isInShadowWorld and IsUnitDead("player") == false then -- prevent fight reset in Cloudrest when using a portal.
 		
-		if dev then d("[%.3f] Prevented combat state change due to Shadow World!", GetGameTimeMilliseconds()/1000) end
+		Print("[%.3f] Prevented combat state change due to Shadow World!", GetGameTimeMilliseconds()/1000) 
 		return 
 		
 	end
@@ -1439,7 +1444,7 @@ function onCombatState(event, inCombat)  -- Detect Combat Stage, local is define
 		
 		if inCombat then
 		
-			if showdebug == true or dev then df("[%.3f] Entering combat.", GetGameTimeMilliseconds()/1000) end
+			Print("[%.3f] Entering combat.", GetGameTimeMilliseconds()/1000) 
 			
 			lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_MESSAGES]), LIBCOMBAT_EVENT_MESSAGES, timems, LIBCOMBAT_MESSAGE_COMBATSTART, 0)
 			
@@ -1447,7 +1452,7 @@ function onCombatState(event, inCombat)  -- Detect Combat Stage, local is define
 			
 		else 
 		
-			if showdebug == true or dev then df("[%.3f] Leaving combat.", GetGameTimeMilliseconds()/1000) end
+			Print("[%.3f] Leaving combat.", GetGameTimeMilliseconds()/1000) 
 			
 			currentfight:FinishFight()
 			
@@ -1520,7 +1525,7 @@ end
 local function onShadowWorld( _, changeType)
 
 	isInShadowWorld = changeType == EFFECT_RESULT_GAINED
-	if dev then df("[%.3f] Shadow: %s", GetGameTimeMilliseconds()/1000, tostring(isInShadowWorld)) end
+	Print("[%.3f] Shadow: %s", GetGameTimeMilliseconds()/1000, tostring(isInShadowWorld)) 
 	
 end
 
@@ -1541,9 +1546,9 @@ local function BuffEventHandler(isspecial, groupeffect, _, changeType, effectSlo
 	
 	local timems = GetGameTimeMilliseconds()
 	
-	-- if dev then df("[%.3f] %s %s %s (%d)", timems/1000, unitName, changeType == EFFECT_RESULT_GAINED and "got" or "lost", GetFormattedAbilityName(abilityId), abilityId) end
+	-- Print("[%.3f] %s %s %s (%d)", timems/1000, unitName, changeType == EFFECT_RESULT_GAINED and "got" or "lost", GetFormattedAbilityName(abilityId), abilityId) 
 	
-	-- if dev then d(changeType..","..GetAbilityName(abilityId)..", ET:"..effectType..","..abilityType..","..unitTag) end
+	-- Print("%d, %s, ET:%d, %d, %s", changeType, GetAbilityName(abilityId), effectType, abilityType, unitTag) 
 	
 	local eventid = groupeffect == GROUP_EFFECT_IN and LIBCOMBAT_EVENT_GROUPEFFECTS_IN or groupeffect == GROUP_EFFECT_OUT and LIBCOMBAT_EVENT_GROUPEFFECTS_OUT or string.sub(unitTag, 1, 6) == "player" and LIBCOMBAT_EVENT_EFFECTS_IN or LIBCOMBAT_EVENT_EFFECTS_OUT
 	local stacks = (isspecial and 0) or math.max(1, stackCount)
@@ -1606,7 +1611,7 @@ local function SpecialBuffEventHandler(isdebuff, _ , result , _ , _ , _ , _ , _ 
 	
 	local changeType = result == ACTION_RESULT_EFFECT_GAINED_DURATION and 1 or result == ACTION_RESULT_EFFECT_FADED and 2 or nil
 	
-	if showdebug == true then d("Custom: "..(data.CustomAbilityName[abilityId] or zo_strformat(SI_ABILITY_NAME,GetAbilityName(abilityId))).."("..(changeType==1 and "gain" or changeType==2 and "loss" or "??" )..")") end
+	-- Print("Custom: "..(data.CustomAbilityName[abilityId] or zo_strformat(SI_ABILITY_NAME,GetAbilityName(abilityId))).."("..(changeType==1 and "gain" or changeType==2 and "loss" or "??" )..")")
 	
 	local effectType = isdebuff and BUFF_EFFECT_TYPE_DEBUFF or BUFF_EFFECT_TYPE_BUFF
 	BuffEventHandler(true, GROUP_EFFECT_NONE, _, changeType, 0, _, _, _, _, _, _, _, effectType, ABILITY_TYPE_BONUS, _, unitName, unitId, abilityId, sourceType)
@@ -1667,7 +1672,7 @@ local function checkLastAbilities(powerType, powerValueChange)
 	
 			local ratio = powerValueChange / values[3]
 			
-			if showdebug == true then d("Ratio: "..ratio) end
+			-- Print("Ratio: %.3f", ratio)
 			
 			local goodratio = ratio >= 0.98 and ratio <= 1.02
 			
@@ -1704,7 +1709,7 @@ local function onBaseResourceChanged(_,unitTag,_,powerType,powerValue,_,_)
 		
 		if powerValueChange == 0 then return end
 		
-		if showdebug == true then d("Skill cost: "..powerValueChange) end
+		-- Print("Skill cost: %d", powerValueChange)
 		
 		aId = checkLastAbilities(powerType, powerValueChange)
 			
@@ -1794,9 +1799,13 @@ local function onResourceChanged (_, result, _, _, _, _, _, _, targetName, _, po
 	if #lastabilities > 10 then table.remove(lastabilities, 1) end
 end
 
-local function onWeaponSwap(_, _)
+local function onWeaponSwap(_, isHotbarSwap)
+	
+	local newbar = ACTION_BAR_ASSIGNMENT_MANAGER.currentHotbarCategory + 1
+	
+	if data.bar == newbar then return end
 
-	data.bar = ACTION_BAR_ASSIGNMENT_MANAGER.currentHotbarCategory + 1
+	data.bar = newbar
 	
 	GetCurrentSkillBars()
 	
@@ -2006,7 +2015,7 @@ local function onCombatEventDmgGrp(_ , _ , _ , _ , _ , _ , _ , _ , targetName, t
 	
 	if hitValue > 150000 then
 	
-		if dev then df("[%.3f] (%d) %s did %d damage to %s", GetGameTimeMilliseconds(), abilityId, GetFormattedAbilityName(abilityId), hitValue, tostring(targetName)) end
+		Print("[%.3f] Big Damage Event: (%d) %s did %d damage to %s", GetGameTimeMilliseconds(), abilityId, GetFormattedAbilityName(abilityId), hitValue, tostring(targetName)) 
 	
 		return
 	
@@ -2028,7 +2037,7 @@ end
 
 local function GetReducedSlotId(reducedslot)
 
-	local bar = reducedslot > 10 and 2 or 1
+	local bar = math.floor(reducedslot/10) + 1
 
 	local slot = reducedslot%10
 	
@@ -2061,7 +2070,7 @@ local function onAbilityUsed(eventCode, result, isError, abilityName, abilityGra
 	
 	castTime = channeled and channelTime or castTime
 	
-	-- if dev == true then df("[%.3f] Skill fired: %s (%d), Duration: %ds Target: %s", timems/1000, GetAbilityName(origId), origId, castTime/1000, tostring(target)) end
+	Print("[%.3f] Skill fired: %s (%d), Duration: %ds Target: %s", timems/1000, GetAbilityName(origId), origId, castTime/1000, tostring(target))
 	
 	HeavyAttackCharging = DirectHeavyAttacks[origId] and origId or nil
 	
@@ -2099,7 +2108,7 @@ local function onAbilityFinished(eventCode, result, isError, abilityName, abilit
 
 		local timems = GetGameTimeMilliseconds()
 		
-		-- if dev == true then df("[%.3f] Skill finished: %s (%d, R: %d)", GetGameTimeMilliseconds()/1000, GetAbilityName(origId), origId, result) end
+		Print("[%.3f] Skill finished: %s (%d, R: %d)", GetGameTimeMilliseconds()/1000, GetAbilityName(origId), origId, result)
 		
 		lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_SKILL_TIMINGS]), LIBCOMBAT_EVENT_SKILL_TIMINGS, timems, reducedslot, origId, LIBCOMBAT_SKILLSTATUS_SUCCESS)
 		
@@ -2108,7 +2117,7 @@ local function onAbilityFinished(eventCode, result, isError, abilityName, abilit
 	end
 end
 
-local function onSlotUpdate(_, slot)
+local function onSlotUsed(_, slot)
 
 	if data.inCombat == false or slot > 8 then return end
 	
@@ -2139,6 +2148,7 @@ local function onSlotUpdate(_, slot)
 		else 
 		
 			lastskilluses[convertedId] = timems
+			HeavyAttackCharging = nil
 			
 		end	
 	end
@@ -2161,6 +2171,30 @@ local function onBossHealthChanged(eventid, unitTag, _, powerType, powerValue, p
 	
 	lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_BOSSHP]), LIBCOMBAT_EVENT_BOSSHP, timems, bossId, powerValue, powerMax)
 	
+end
+
+local lastSkillBarUpdate = 0 
+
+local function GetCurrentSkillBarsDelayed()
+
+	local timems = GetGameTimeMilliseconds()
+	
+	if timems - lastSkillBarUpdate < 400 then return end 
+	
+	lastSkillBarUpdate = timems
+
+	-- reregister skill
+	
+	zo_callLater(GetCurrentSkillBars, 400) 	-- temporary workaround for NB skill Assasins Will
+	
+end
+
+local function onSlotUpdate(_, slotNum)
+
+	if slotNum == 1 or slotNum == 2 then return end
+	
+	GetCurrentSkillBarsDelayed()
+
 end
 
 local function UpdateEventRegistrations()
@@ -2331,12 +2365,6 @@ local function GetAllCallbackTypes()
 	return t
 end
 
-local function GetCurrentSkillBarsDelayed()
-
-	zo_callLater(GetCurrentSkillBars, 400) 	-- temporary workaround for NB skill Assasins Will
-	
-end
-
 Events.General = EventHandler:New(GetAllCallbackTypes()
 	,
 	function (self)
@@ -2348,7 +2376,7 @@ Events.General = EventHandler:New(GetAllCallbackTypes()
 		self:RegisterEvent(EVENT_EFFECT_CHANGED, onMageExplode, REGISTER_FILTER_ABILITY_ID, 50184)
 		self:RegisterEvent(EVENT_EFFECT_CHANGED, onShadowWorld, REGISTER_FILTER_ABILITY_ID, 108045)
 		
-		if showdebug == true then self:RegisterEvent(EVENT_COMBAT_EVENT, onCustomEvent, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_EFFECT_GAINED_DURATION, REGISTER_FILTER_IS_ERROR, false) end		
+		if lib.debug == true then self:RegisterEvent(EVENT_COMBAT_EVENT, onCustomEvent, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_EFFECT_GAINED_DURATION, REGISTER_FILTER_IS_ERROR, false) end		
 		self.active = true
 	end
 )
@@ -2569,7 +2597,7 @@ Events.Slots = EventHandler:New(
 	{LIBCOMBAT_EVENT_RESOURCES, LIBCOMBAT_EVENT_SKILL_TIMINGS},
 	function (self)
 		
-		self:RegisterEvent(EVENT_ACTION_SLOT_ABILITY_USED , onSlotUpdate)
+		self:RegisterEvent(EVENT_ACTION_SLOT_ABILITY_USED , onSlotUsed)
 		
 		self.active = true
 	end
@@ -2579,16 +2607,18 @@ Events.Skills = EventHandler:New(
 	{LIBCOMBAT_EVENT_SKILL_TIMINGS},	
 	function (self)
 		
-		self:RegisterEvent(EVENT_COMBAT_EVENT, GetCurrentSkillBarsDelayed, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_EFFECT_GAINED, REGISTER_FILTER_ABILITY_ID, 24785)
-		self:RegisterEvent(EVENT_COMBAT_EVENT, GetCurrentSkillBarsDelayed, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_EFFECT_GAINED, REGISTER_FILTER_ABILITY_ID, 24806)
-		self:RegisterEvent(EVENT_COMBAT_EVENT, GetCurrentSkillBarsDelayed, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_EFFECT_GAINED, REGISTER_FILTER_ABILITY_ID, 24804)
-		self:RegisterEvent(EVENT_ACTION_SLOT_UPDATED, GetCurrentSkillBarsDelayed)
+		self:RegisterEvent(EVENT_COMBAT_EVENT, GetCurrentSkillBarsDelayed, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_EFFECT_GAINED, REGISTER_FILTER_ABILITY_ID, 24785) -- Overload & Morphs
+		self:RegisterEvent(EVENT_COMBAT_EVENT, GetCurrentSkillBarsDelayed, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_EFFECT_GAINED, REGISTER_FILTER_ABILITY_ID, 24806) -- Overload & Morphs
+		self:RegisterEvent(EVENT_COMBAT_EVENT, GetCurrentSkillBarsDelayed, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_EFFECT_GAINED, REGISTER_FILTER_ABILITY_ID, 24804) -- Overload & Morphs
+		self:RegisterEvent(EVENT_ACTION_SLOT_UPDATED, onSlotUpdate)
 		
 		for _, skill in pairs(SlotSkills) do
 		
 			local id, result, finish = unpack(skill)
 			
 			local func = finish and onAbilityFinished or onAbilityUsed
+			
+			-- Print("Skill registered: %d: %s (%s, end?: %s)", id, GetAbilityName(id), tostring(result), tostring(finish == true))
 			
 			if result then 
 			
@@ -2782,7 +2812,7 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 
 		local source = UnitTypeString[sourceType] == nil and "" or ZO_CachedStrFormat(" from <<1>>", UnitTypeString[sourceType])
 		
-		-- if dev and slot then source = ZO_CachedStrFormat("<<1>> (<<2>>)", source, slot) end
+		-- if lib.debug and slot then source = ZO_CachedStrFormat("<<1>> (<<2>>)", source, slot) end
 		
 		local colorKey = effectType == BUFF_EFFECT_TYPE_DEBUFF and "debuff" or "buff"
 		
@@ -2900,7 +2930,7 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 	
 		local _, _, reducedslot, abilityId, status = unpack(logline)
 		
-		local isWeaponAttack = reducedslot == 1 or reducedslot == 2 or reducedslot == 11 or reducedslot == 12		
+		local isWeaponAttack = reducedslot%10 == 1 or reducedslot%10 == 2
 		
 		local formatstring = " |cddffbb<<1>>|r"
 		

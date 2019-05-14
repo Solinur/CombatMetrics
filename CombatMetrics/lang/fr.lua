@@ -1,3 +1,5 @@
+-- Translation by Floliroy
+
 
 -- Functionality
 
@@ -154,6 +156,8 @@ SafeAddString(SI_COMBAT_METRICS_NORMAL, "Normal:", 1)
 SafeAddString(SI_COMBAT_METRICS_CRITICAL, "Critique:", 1) 
 SafeAddString(SI_COMBAT_METRICS_BLOCKED, "Bloqué:", 1) 
 SafeAddString(SI_COMBAT_METRICS_SHIELDED, "Shieldé:", 1) 
+SafeAddString(SI_COMBAT_METRICS_ABSOLUTEC, "Absolue:", 1) 
+SafeAddString(SI_COMBAT_METRICS_OVERHEAL, "Overheal:", 1) 
 
 SafeAddString(SI_COMBAT_METRICS_HITS, "Hits", 1) 
 SafeAddString(SI_COMBAT_METRICS_NORM, "Norm", 1) -- Normal, short

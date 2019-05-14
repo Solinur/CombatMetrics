@@ -1,0 +1,11 @@
+﻿## Title: LibFeedback
+## Author: Dolgubon
+## APIVersion: 100025 100026
+## Version: 1.21
+## Description: This is a library which allows Addon Authors to easily add a feedback window to their addon 
+## DependsOn: LibStub
+
+## This Add-On is not created by, affiliated with or sponsored by ZeniMax Media Inc. or its affiliates. The Elder Scrolls® and related logos are registered trademarks or trademarks of ZeniMax Media Inc. in the United States and/or other countries. All rights reserved.
+
+libs/LibStub.lua
+feedback.lua
