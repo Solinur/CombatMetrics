@@ -156,6 +156,8 @@ SafeAddString(SI_COMBAT_METRICS_NORMAL, "Обычн.:", 1)
 SafeAddString(SI_COMBAT_METRICS_CRITICAL, "Крит.:", 1) 
 SafeAddString(SI_COMBAT_METRICS_BLOCKED, "Блок.:", 1) 
 SafeAddString(SI_COMBAT_METRICS_SHIELDED, "Поглощено:", 1) 
+--SafeAddString(SI_COMBAT_METRICS_ABSOLUTEC, "Absolute: ", 1) 
+--SafeAddString(SI_COMBAT_METRICS_OVERHEAL, "Overheal: ", 1) -- as in overheal
 
 SafeAddString(SI_COMBAT_METRICS_HITS, "Удары", 1) 
 --SafeAddString(SI_COMBAT_METRICS_NORM, "Norm", 1) -- Normal, short

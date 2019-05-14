@@ -114,7 +114,7 @@ SafeAddString(SI_COMBAT_METRICS_FEEDBACK_GOLD, "Donner 5000g", 1)
 SafeAddString(SI_COMBAT_METRICS_FEEDBACK_GOLD2, "Donner 25000g", 1) 
 SafeAddString(SI_COMBAT_METRICS_FEEDBACK_ESOUI, "Site (ESOUI)", 1) 
 SafeAddString(SI_COMBAT_METRICS_FEEDBACK_GITHUB, "GitHub", 1) 
-SafeAddString(SI_COMBAT_METRICS_FEEDBACK_TEXT, "\nSi vous trouvez un bug, avez une requête ou une suggestion, envoyé moi un mail en jeu, créez une issue sur GitHub, ou postez dans les commentaires sur EsoUI. \n\nLes dons sont appréciés mais pas nécessaires ni obligatoires. \nSi vous voulez donner de l'argent réel merci de regarder sur EsoUI", 1) 
+SafeAddString(SI_COMBAT_METRICS_FEEDBACK_TEXT, "\nSi vous trouvez un bug, avez une requête ou une suggestion, envoyez moi un mail en jeu, créez une issue sur GitHub, ou postez dans les commentaires sur EsoUI. \n\nLes dons sont appréciés mais pas nécessaires ni obligatoires. \nSi vous voulez donner de l'argent réel merci de regarder sur EsoUI", 1) 
 
 SafeAddString(SI_COMBAT_METRICS_STORAGE_FULL, "Le fichier de stockage est plein. Supprimer un combat pour libérer de l'espace !", 1) 
 

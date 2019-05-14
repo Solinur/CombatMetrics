@@ -154,6 +154,8 @@
 --SafeAddString(SI_COMBAT_METRICS_CRITICAL, "Critical: ", 1) 
 --SafeAddString(SI_COMBAT_METRICS_BLOCKED, "Blocked: ", 1) 
 --SafeAddString(SI_COMBAT_METRICS_SHIELDED, "Shielded: ", 1) 
+--SafeAddString(SI_COMBAT_METRICS_ABSOLUTEC, "Absolute: ", 1) 
+--SafeAddString(SI_COMBAT_METRICS_OVERHEAL, "Overheal: ", 1) -- as in overheal
 
 --SafeAddString(SI_COMBAT_METRICS_HITS, "Hits", 1) 
 --SafeAddString(SI_COMBAT_METRICS_NORM, "Norm", 1) -- Normal, short

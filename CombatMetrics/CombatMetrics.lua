@@ -24,7 +24,7 @@ local CMX = CMX
  
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "0.9.0 (beta4)"
+CMX.version = "0.9.1"
 
 function CMX.GetFeedBackData(parentcontrol)
 	

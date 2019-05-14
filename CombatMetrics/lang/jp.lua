@@ -154,6 +154,8 @@ SafeAddString(SI_COMBAT_METRICS_NORMAL, "通常:", 1)
 SafeAddString(SI_COMBAT_METRICS_CRITICAL, "クリティカル:", 1) 
 SafeAddString(SI_COMBAT_METRICS_BLOCKED, "ブロック:", 1) 
 SafeAddString(SI_COMBAT_METRICS_SHIELDED, "シールド:", 1) 
+--SafeAddString(SI_COMBAT_METRICS_ABSOLUTEC, "Absolute: ", 1) 
+--SafeAddString(SI_COMBAT_METRICS_OVERHEAL, "Overheal: ", 1) -- as in overheal
 
 SafeAddString(SI_COMBAT_METRICS_HITS, "ヒット", 1) 
 --SafeAddString(SI_COMBAT_METRICS_NORM, "Norm", 1) -- Normal, short

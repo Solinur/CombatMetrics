@@ -1,4 +1,4 @@
-0.5.6: 3,172 User
+﻿0.5.6: 3,172 User
 [*]When all data has been deleted the panel will now properly reset.
 [*]You can now choose to hide the background for the live window
 [*]You can no longer save or load fights multiple times. The save button will be greyed out for fights which are already among the saved fights, when trying to load a fight which is already loaded you will jump to the fight instead.
@@ -348,3 +348,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Updated french localization (Thx @Floliroy).
 [*] Updated russian localization (Thx @KiriX). Note: This was done for the previolus version, so some translations will still be  missing.
 [*] Updated Libraries. Added LibFeedback.
+
+0.9.0 1,514,507 (14.05.2019) 02:16
+[*] Updated brazilian localozation (Thx @FelipeS11)
+[*] Fixed version numbers
