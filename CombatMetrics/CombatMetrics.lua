@@ -1259,7 +1259,7 @@ local function ProcessLogSkillTimings(fight, callbacktype, timems, reducedslot, 
 		
 		local delay = (channeled or castTime) and 200 or 0		-- there is a general 200ms delay after each cast time ability
 		
-		if isWeaponAttack then
+		if isWeaponAttack and lastUsedWeaponAttack then
 		
 			lastUsedWeaponAttack[3] = timems + delay
 			
@@ -1954,7 +1954,7 @@ local svdefaults = {
 	["autoscreenshotmintime"] = 30,
 	
 	["CombatMetrics_LiveReport"] = { x = 0, y = -500},
-	["CombatMetrics_Report"] = { x = 0, y = -75},
+	["CombatMetrics_Report"] = { x = GuiRoot:GetWidth(), y = GuiRoot:GetHeight()-75},
 	
 	["FightReport"] = {
 		

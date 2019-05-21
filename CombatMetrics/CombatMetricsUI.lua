@@ -5638,6 +5638,10 @@ local function initFightReport()
 	
 	local pos = db[fightReport:GetName()]
 	
+	local leftside = fightReport:GetNamedChild("_SelectorRow"):GetLeft()
+	
+	if leftside < 0 then pos.x = pos.x - leftside end
+	
 	fightReport:ClearAnchors()
 	fightReport:SetAnchor(CENTER, nil , TOPLEFT, pos.x, pos.y)
 	

@@ -2388,7 +2388,7 @@
 										
 										</Control>
 										
-										<Texture name="$(parent)ToggleCursor" mouseEnabled="true" textureFile="esoui\art\compass\ava_returnpoint_neutral.dds" color="FFFFFFFF" inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton">
+										<Texture name="$(parent)ToggleCursor" mouseEnabled="true" textureFile="esoui\art\compass\ava_returnpoint_neutral.dds" color="FFFFFFFF" inherits="CombatMetrics_TextureTooltip">
 											
 											<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" offsetX="-26" offsetY="2"/>
 											<Anchor point="TOPRIGHT" offsetX="-2" offsetY="2"/>

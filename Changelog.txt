@@ -349,6 +349,6 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Updated russian localization (Thx @KiriX). Note: This was done for the previolus version, so some translations will still be  missing.
 [*] Updated Libraries. Added LibFeedback.
 
-0.9.0 1,514,507 (14.05.2019) 02:16
+0.9.1 1,514,507 (14.05.2019) 02:16
 [*] Updated brazilian localozation (Thx @FelipeS11)
 [*] Fixed version numbers
