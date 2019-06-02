@@ -5979,16 +5979,15 @@ function CMX.InitializeUI()
 		["ability"]		= {}, 
 		["unit"] 		= {}, 
 		["buff"] 		= {}, 
-		["resource"] 	= {}, 
-		
-		}
+		["resource"] 	= {}, 		
+	}
 		
 	lastSelections = {
 		["ability"] 	= {}, 
 		["unit"] 		= {}, 
 		["buff"] 		= {}, 
 		["resource"] 	= {}, 
-		}
+	}
 	
 	currentFight = nil
 	currentCLPage = 1

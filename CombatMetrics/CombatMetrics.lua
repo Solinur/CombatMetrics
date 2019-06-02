@@ -1954,7 +1954,7 @@ local svdefaults = {
 	["autoscreenshotmintime"] = 30,
 	
 	["CombatMetrics_LiveReport"] = { x = 0, y = -500},
-	["CombatMetrics_Report"] = { x = GuiRoot:GetWidth(), y = GuiRoot:GetHeight()-75},
+	["CombatMetrics_Report"] = { x = GuiRoot:GetWidth()/2, y = GuiRoot:GetHeight()/2-75},
 	
 	["FightReport"] = {
 		
