@@ -352,3 +352,10 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 0.9.1 1,514,507 (14.05.2019) 02:16
 [*] Updated brazilian localozation (Thx @FelipeS11)
 [*] Fixed version numbers
+
+0.9.2 1,625,263 (05.06.2019) 22:35
+[*] Fixed an issue where divine armour pieces were not detected correctly, when calculating bonus from shadow mundus.
+[*] Fixed base value of shadow mundus. ( I relied on a bad source :( )
+[*] Fixed an issue where shadow mundus was still considered active when it was actually removed during the session.
+[*] Fixed an issue where critical damage passive bonus was incorrectly awarded in the calculation even when it was not available or active
+[*] Thx to @Pymad for reporting the issue which made me find all of those bugs.

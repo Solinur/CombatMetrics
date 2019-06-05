@@ -12,9 +12,7 @@ Idea: Life and Death
 
 local _
 
---Register with LibStub
 local lib = {}
-
 LibCombat = lib
 
 --aliases
@@ -760,22 +758,25 @@ function lib.ResetFight()
 	currentfight:ResetFight()
 end
 
+local DivineSlots = {EQUIP_SLOT_HEAD, EQUIP_SLOT_SHOULDERS, EQUIP_SLOT_CHEST, EQUIP_SLOT_HAND, EQUIP_SLOT_WAIST, EQUIP_SLOT_LEGS, EQUIP_SLOT_FEET}
+
 local function GetShadowBonus()
 
 	local divines = 0
 
-	for i, key in pairs({EQUIP_SLOT_HEAD, EQUIP_SLOT_SHOULDERS, EQUIP_SLOT_CHEST, EQUIP_SLOT_HAND, EQUIP_SLOT_WAIST, EQUIP_SLOT_LEGS, EQUIP_SLOT_FEET}) do
+	for i, key in pairs(DivineSlots) do
 	
 		local trait, desc = GetItemLinkTraitInfo(GetItemLink(BAG_WORN, key, LINK_STYLE_DEFAULT))
 	
 		if trait == ITEM_TRAIT_TYPE_ARMOR_DIVINES then 
 		
-			divines = tonumber(desc:match("%d%.%d")) or tonumber(desc:match("%d,%d")) or 0 + divines
+			divines = (tonumber(desc:match("%d%.%d")) or tonumber(desc:match("%d,%d")) or 0) + divines
 
 		end 
+		
 	end
-	
-	data.critBonusMundus = math.floor(9 * (1 + divines/100)) -- total mundus bonus, base is 9%
+		
+	data.critBonusMundus = math.floor(13 * (1 + divines/100)) -- total mundus bonus, base is 13%
 	
 end
 
@@ -791,6 +792,8 @@ local function GetPlayerBuffs(timems)
 		return
 		
 	end
+		
+	data.critBonusMundus = 0
 	
 	for i=1,GetNumBuffs("player") do
 	
@@ -857,12 +860,12 @@ local function GetCritBonusFromPassives()
 		
 		local skillType = lineData.skillTypeData.skillType
 		
-		if purchased == true then bonus = ability.effect[rank] or 0 end
+		bonus = purchased == true and ability.effect[rank] or 0
 	
 		if bonus > 0 then bonusdata[id] = {skillType, line, bonus, ability.requiresSkillFromLine} end
 	end
 	
-	return bonusdata
+	return bonusdata	
 	
 end
 
@@ -1131,7 +1134,7 @@ local function GetCritbonus()
 			
 			bonus = isactive and bonus or 0
 		
-		end
+		end		
 		
 		passiveBonus = passiveBonus + bonus or 0
 		
