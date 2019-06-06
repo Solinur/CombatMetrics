@@ -770,13 +770,17 @@ local function GetShadowBonus()
 	
 		if trait == ITEM_TRAIT_TYPE_ARMOR_DIVINES then 
 		
-			divines = (tonumber(desc:match("%d%.%d")) or tonumber(desc:match("%d,%d")) or 0) + divines
+			local bonus = desc:gsub("^.-(%d+)%p?(%d*)%s?.-$", "%1.%2")  	-- only get first argument to pass it to tonumber()
+		
+			divines = (tonumber(bonus) or 0) + divines
 
 		end 
 		
 	end
 		
 	data.critBonusMundus = math.floor(13 * (1 + divines/100)) -- total mundus bonus, base is 13%
+	
+	Print("Shadow Mundus: %d%% (Divines Bonus: %1.f%%)", data.critBonusMundus, divines)
 	
 end
 

@@ -359,3 +359,6 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Fixed an issue where shadow mundus was still considered active when it was actually removed during the session.
 [*] Fixed an issue where critical damage passive bonus was incorrectly awarded in the calculation even when it was not available or active
 [*] Thx to @Pymad for reporting the issue which made me find all of those bugs.
+
+0.9.3 1,646,586 (06.06.2019) 23:37
+[*] Fixed an issue where divine armour pieces were not detected correctly on languages which use comma as decimal separator. Thx again to @Pymad for pointing this out.
