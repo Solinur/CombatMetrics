@@ -562,6 +562,8 @@ local function GetEmtpyFightStats()
 	
 	data.totalSkillTime = 0
 	data.totalSkills = 0
+	data.totalWeaponAttacks = 0
+	data.totalSkillsFired =  0
 	
 	data.graph = {	
 		damageOut = {}, 
@@ -1033,9 +1035,12 @@ local function ProcessLogHeal(fight, callbacktype, timems, result, sourceUnitId,
 	local overflowHealingKey = ZO_CachedStrFormat("<<1>>Overflow", valuekey) 
 	local overflowHealskey = ZO_CachedStrFormat("<<1>>Overflow", hitkey)
 	
+	overflow = overflow or 0
+	
 	abilitydata[healingkey] = abilitydata[healingkey] + hitValue
 	abilitydata[healskey] = abilitydata[healskey] + 1
 	abilitydata[overflowHealingKey] = abilitydata[overflowHealingKey] + overflow
+	
 	if hitValue == 0 and overflow > 0 then abilitydata[overflowHealskey] = abilitydata[overflowHealskey] + 1 end
 	
 	local inttime = math.floor((timems - fight.combatstart)/1000)
@@ -1131,14 +1136,14 @@ local function ProcessLogEffects(fight, callbacktype, timems, unitId, abilityId,
 	if spellres then 
 	
 		unit:UpdateResistance(true, buffname)
-		Print("dev", "SR: %d", unit.currentSpellResistance)
+		--Print("dev", "SR: %d", unit.currentSpellResistance)
 		
 	end 
 	
 	if physres then 
 	
 		unit:UpdateResistance(false, buffname) 
-		Print("dev", "PR: %d", unit.currentPhysicalResistance)
+		--Print("dev", "PR: %d", unit.currentPhysicalResistance)
 		
 	end
 end
@@ -1184,11 +1189,15 @@ end
 
 ProcessLog[LIBCOMBAT_EVENT_PLAYERSTATS] = ProcessLogStats
 
+local delayedAbilities = {[63044] = true, [63029] = true, [63046] = true} -- Radiant Destruction and morphs have a 100ms delay after casting.
+
 ---[[
 local function ProcessLogSkillTimings(fight, callbacktype, timems, reducedslot, abilityId, status)
 
 	if reducedslot == nil then return end
 
+	--Print("misc", "[%d], %s: %d", timems, GetAbilityName(abilityId), status)
+	
 	local isWeaponAttack = reducedslot == 1 or reducedslot == 2 or reducedslot == 11 or reducedslot == 12
 
 	local newdata = {}
@@ -1216,6 +1225,7 @@ local function ProcessLogSkillTimings(fight, callbacktype, timems, reducedslot, 
 	local timenow = GetGameTimeMilliseconds()/1000
 	
 	local key = isWeaponAttack and "weaponAttackNext" or "skillNext"
+	local data = fight.calculated
 	
 	if lastSkillSuccessTime and not doubleWeaponAttack and status ~= LIBCOMBAT_SKILLSTATUS_SUCCESS then 
 	
@@ -1257,7 +1267,7 @@ local function ProcessLogSkillTimings(fight, callbacktype, timems, reducedslot, 
 		
 		local channeled, castTime = GetAbilityCastInfo(abilityId)
 		
-		local delay = (channeled or castTime) and 200 or 0		-- there is a general 200ms delay after each cast time ability
+		local delay = (delayedAbilities[abilityId]) and 100 or 0
 		
 		if isWeaponAttack and lastUsedWeaponAttack then
 		
@@ -1505,10 +1515,12 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		
 		local totalSkillTime = 0
 		local totalSkills = 0
+		local totalWeaponAttacks = 0
+		local totalSkillsFired = 0
 		
 		for reducedslot, skill in pairs(skilldata) do
 		
-			local isNotWeaponAttack = reducedslot%10 ~= 1 and reducedslot%10 ~= 2
+			local isWeaponAttack = reducedslot%10 == 1 or reducedslot%10 == 2
 		
 			local difftimes = {}
 			
@@ -1523,6 +1535,16 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 			end
 			
 			skill.difftimes = difftimes
+			
+			if isWeaponAttack then 
+				
+				totalWeaponAttacks = totalWeaponAttacks + skill.count
+				
+			else
+			
+				totalSkillsFired = totalSkillsFired + skill.count
+				
+			end
 		
 			for i, key in ipairs({"skillBefore", "weaponAttackBefore", "skillNext", "weaponAttackNext", "difftimes"}) do
 			
@@ -1546,13 +1568,15 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 				
 				skill[avgkey] = count > 0 and sum / count or 0
 				
-				if i == 1 and isNotWeaponAttack then
+				if i == 1 and not isWeaponAttack then
 					
 					totalSkillTime = totalSkillTime + sum
 					totalSkills = totalSkills + count
+					
+					--Print("misc", "Slot %d: Total: %d | Timing %d", reducedslot, skill.count, count)
 				
 				end	
-			end			
+			end				
 		end
 		
 		-- calculate bardata
@@ -1591,6 +1615,8 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		
 		data.totalSkillTime = totalSkillTime
 		data.totalSkills = totalSkills
+		data.totalWeaponAttacks = totalWeaponAttacks
+		data.totalSkillsFired = totalSkillsFired
 
 		fight.calculating = false
 		fight.cindex = nil

@@ -278,6 +278,14 @@
 	SI_COMBAT_METRICS_SKILLTIME_TT2 = "Time since the last weapon/skill activation and the ability activation.",
 	SI_COMBAT_METRICS_SKILLTIME_TT3 = "Time between the ability activation and the next weapon/skill activation.",
 	SI_COMBAT_METRICS_SKILLTIME_TT4 = "Average time between subsequent activations of this skill",
+	
+	SI_COMBAT_METRICS_SKILLAVG_TT = "Average time lost between two skill casts",
+	SI_COMBAT_METRICS_SKILLTOTAL_TT = "Total time lost between two skill casts",
+	
+	SI_COMBAT_METRICS_TOTALWA = "Weapon attacks: ",
+	SI_COMBAT_METRICS_TOTALWA_TT = "Total weapon attacks",
+	SI_COMBAT_METRICS_TOTALSKILLS = "Skills: ",
+	SI_COMBAT_METRICS_TOTALSKILLS_TT = "Total skills fired",
 
 	SI_COMBAT_METRICS_SAVED_DATA = "Saved Data",
 	

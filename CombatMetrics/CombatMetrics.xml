@@ -459,7 +459,40 @@
 				
 					<Anchor point="TOPLEFT" relativeTo="$(parent)Ability5" relativePoint="BOTTOMLEFT" offsetY="6"/>
 				
-				</Control>		
+				</Control>	
+				
+				<Line name="$(parent)Sep2" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+				
+					<Anchor point="TOPLEFT" relativeTo="$(parent)Ultimate" relativePoint="BOTTOMLEFT" offsetY="8"/>
+					<Anchor point="TOPRIGHT" relativeTo="$(parent)Ultimate" relativePoint="BOTTOMRIGHT" offsetY="8" offsetX="3"/>
+				
+				</Line>		
+				
+				<Control name="$(parent)Stats2">
+								
+					<Anchor point="TOPLEFT" relativeTo="$(parent)Sep2" relativePoint="BOTTOMLEFT" offsetY="2"/>
+					<Dimensions x="300" y="20"/>									
+
+					<Controls>
+						
+						<Label name="$(parent)Label" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip" text="SI_COMBAT_METRICS_AVERAGEC" horizontalAlignment="LEFT">
+						
+							<Anchor point="LEFT" offsetX="6"/>
+							<Dimensions x="126" y="20"/>
+							
+						</Label>									
+						
+						<Label name="$(parent)Label2" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip" text="SI_COMBAT_METRICS_TOTALC" horizontalAlignment="LEFT">
+						
+							<Anchor point="LEFT" offsetX="6" constrains="Y"/>
+							<Anchor point="TOPLEFT" relativePoint="TOP" constrains="X" offsetX="3" offsetY="0"/>
+							<Dimensions x="126" y="20"/>
+							
+						</Label>
+						
+					</Controls>
+				
+				</Control>
 				
 			</Controls>
 			
@@ -3157,61 +3190,14 @@
 									<Anchor point="TOP" offsetY="2"/>
 									<Anchor point="BOTTOM" offsetY="-2"/>
 									
-								</Line>
-				
-								<Line name="$(parent)Sep2" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
-								
-									<Anchor point="TOPLEFT" relativeTo="$(parent)AbilityBlock1" relativePoint="BOTTOMLEFT" offsetX="2" offsetY="8"/>
-									<Anchor point="TOPRIGHT" relativeTo="$(parent)AbilityBlock1" relativePoint="BOTTOMRIGHT" offsetX="-2" offsetY="8"/>
-								
-								</Line>		
+								</Line>	
 							
 								<Control name="$(parent)AbilityBlock2" inherits="CombatMetrics_InfoAbilityBlock">
 								
 									<Anchor point="TOPRIGHT" offsetX="0" offsetY="0"/>
 									<Anchor point="TOPLEFT" relativePoint="TOP" constrains="X" offsetX="3" offsetY="0"/>
 									
-								</Control>								
-				
-								<Control name="$(parent)Stats">
-								
-									<Anchor point="TOPLEFT" relativeTo="$(parent)AbilityBlock1" relativePoint="BOTTOMLEFT" offsetY="10"/>
-									<Dimensions x="300" y="20"/>									
-		
-									<Controls>
-										
-										<Label name="$(parent)Label" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_AVERAGEC" horizontalAlignment="LEFT">
-										
-											<Anchor point="LEFT" offsetX="6"/>
-											<Dimensions x="60" y="20"/>
-											
-										</Label>
-										
-										<Label name="$(parent)Value1" inherits="CombatMetrics_ValueFontControl" text="-" horizontalAlignment="CENTER">
-										
-											<Anchor point="LEFT" relativeTo="$(parent)Label" relativePoint="RIGHT" offsetX="4"/>
-											<Dimensions x="66" y="20"/>
-											
-										</Label>										
-										
-										<Label name="$(parent)Label2" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_TOTALC" horizontalAlignment="LEFT">
-										
-											<Anchor point="LEFT" offsetX="6" constrains="Y"/>
-											<Anchor point="TOPLEFT" relativePoint="TOP" constrains="X" offsetX="3" offsetY="0"/>
-											<Dimensions x="60" y="20"/>
-											
-										</Label>
-										
-										<Label name="$(parent)Value2" inherits="CombatMetrics_ValueFontControl" text="-" horizontalAlignment="CENTER">
-										
-											<Anchor point="LEFT" relativeTo="$(parent)Label2" relativePoint="RIGHT" offsetX="4"/>
-											<Dimensions x="66" y="20"/>
-											
-										</Label>
-										
-									</Controls>
-								
-								</Control>
+								</Control>	
 								
 							</Controls>
 							

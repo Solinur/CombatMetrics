@@ -162,10 +162,10 @@ local logTypeToLayout = {
 	
 local layouts = {
 
-	[LAYOUT_COMBAT] = {1, 4, 1, 2, 2, 3, 4, 1}, 		-- (19) type, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType
-	[LAYOUT_EVENT] = {1, 4, 2, 3, 1, 1, 1, 1, 4},		-- (19) type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, slot
+	[LAYOUT_COMBAT] = {1, 4, 1, 2, 2, 3, 4, 1, 4}, 		-- (23) type, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType, overflow
+	[LAYOUT_EVENT] = {1, 4, 2, 3, 1, 1, 1, 1, 4},		-- (20) type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, slot
 	[LAYOUT_STATS] = {1, 4, 4, 4, 1},		 			-- (15) type, timems, statchange, newvalue, statname
-	[LAYOUT_POWER] = {1, 4, 3, 3, 1, 3},		 		-- (13) type, timems, abilityId, powerValueChange, powerType, powerValue
+	[LAYOUT_POWER] = {1, 4, 3, 3, 1, 3},		 		-- (16) type, timems, abilityId, powerValueChange, powerType, powerValue
 	[LAYOUT_MESSAGE] = {1, 4, 1, 1}, 					-- (8)  type, timems, messageId (e.g. "weapon swap"), bar
 	[LAYOUT_SKILL] = {1, 4, 1, 3, 1}, 					-- (11) type, timems, reducedslot, abilityId, status
 	[LAYOUT_BOSSHP] = {1, 4, 1, 5, 5}, 					-- (17) type, timems, bossId, currenthp, maxhp
@@ -203,6 +203,7 @@ local function encodeCombatLogLine(line, fight)
 		line[4] = unitConversion[line[4]]
 		line[5] = unitConversion[line[5]]
 		line[6]	= line[6] > 0 and line[6] or 0
+		line[8]	= line[8] or 0
 	
 	elseif layoutId == LAYOUT_EVENT then			-- type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType
 		
@@ -257,6 +258,7 @@ local function decodeCombatLogLine(line, fight)
 	
 		logdata[3] = CombatResultTableLoad[logdata[3]]
 		logdata[6] = logdata[6] == 0 and -1 or logdata[6]
+		logdata[8]	= logdata[8] or 0
 	
 	elseif layoutId == LAYOUT_EVENT then					-- type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType
 		
@@ -405,7 +407,7 @@ local function recoverCombatLog(loadedFight)
 	
 	for i, data in ipairs(strings) do
 	
-		for line in string.gfind(data, ",?(.-),") do
+		for line in string.gmatch(data, "([^,]+)") do
 		
 			local logline = decodeCombatLogLine(line, loadedFight)
 			

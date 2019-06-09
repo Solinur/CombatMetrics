@@ -432,13 +432,34 @@ function CMX.InitializeCPRows(panel)
 end
 
 function CMX.InitializeSkillStats(panel)
-
-	for i = 1,2 do
 	
-		local title = panel:GetNamedChild("AbilityBlock" .. i):GetNamedChild("Title")
-		title:SetText(GetString(SI_COMBAT_METRICS_BAR) .. i)
-		
-	end
+	local block = panel:GetNamedChild("AbilityBlock1")
+	local title = block:GetNamedChild("Title")
+	title:SetText(GetString(SI_COMBAT_METRICS_BAR) .. 1)
+	
+	local statPanel = block:GetNamedChild("Stats2")
+	local label = statPanel:GetNamedChild("Label")
+	local label2 = statPanel:GetNamedChild("Label2")
+	
+	label.tooltip = {SI_COMBAT_METRICS_SKILLAVG_TT}
+	label:SetText(string.format("%s    -", GetString(SI_COMBAT_METRICS_AVERAGEC)))
+	label2.tooltip = {SI_COMBAT_METRICS_SKILLTOTAL_TT}
+	label2:SetText(string.format("%s    -", GetString(SI_COMBAT_METRICS_TOTALC)))
+	
+	local block2 = panel:GetNamedChild("AbilityBlock2")
+	local title2 = block2:GetNamedChild("Title")
+	title2:SetText(GetString(SI_COMBAT_METRICS_BAR) .. 2)
+	
+	local statPanel2 = block2:GetNamedChild("Stats2")
+	local label3 = statPanel2:GetNamedChild("Label")
+	local label4 = statPanel2:GetNamedChild("Label2")
+	
+	label3:SetText(string.format("%s    -", GetString(SI_COMBAT_METRICS_TOTALWA)))
+	label3.tooltip = {SI_COMBAT_METRICS_TOTALWA_TT}
+	
+	label4:SetText(string.format("%s    -", GetString(SI_COMBAT_METRICS_TOTALSKILLS)))
+	label4.tooltip = {SI_COMBAT_METRICS_TOTALSKILLS_TT}
+	
 end
 
 local function CLNavButtonFunction(self)
@@ -1422,6 +1443,8 @@ local function updateFightStatsPanelLeft(panel)
 		
 	end
 	
+	activetime = zo_roundToNearest(activetime, 0.01)
+	
 	local activetimestring = string.format("%d:%05.2f", activetime/60, activetime%60)
 	
 	local dpsRow = panel:GetNamedChild("StatRowAPS")
@@ -1430,7 +1453,7 @@ local function updateFightStatsPanelLeft(panel)
 	panel:GetNamedChild("StatTitleAmount"):GetNamedChild("Label"):SetText(label2) 	-- Damage or Healing
 	panel:GetNamedChild("StatTitleCount"):GetNamedChild("Label"):SetText(label3) 	-- Hits or Heals
 	
-	local combattime = fightData and fightData.combattime or 1	
+	local combattime = zo_roundToNearest(fightData and fightData.combattime or 1, 0.01)
 	local combattimestring = string.format("%d:%05.2f", combattime/60, combattime%60)
 	
 	panel:GetNamedChild("ActiveTimeValue"):SetText(activetimestring)
@@ -4723,7 +4746,7 @@ local function updateLeftInfoPanel(panel)
 		ratioControl:SetText(string.format("%.1f%%", (timeratio or 0) * 100))
 		timeControl:SetText(string.format("%.1f%%", (dpsratio or 0) * 100))
 		
-		for j = 4, row:GetNumChildren() - 1 do
+		for j = 5, row:GetNumChildren() - 2 do
 		
 			local strings = {"-", "-", "-", "-", "-", "-"}
 			
@@ -4733,7 +4756,7 @@ local function updateLeftInfoPanel(panel)
 			
 			local name = control:GetNamedChild("Label")
 			
-			local abilityId = bardata and bardata[j-3] or nil
+			local abilityId = bardata and bardata[j-4] or nil
 			
 			control.id = abilityId
 			
@@ -4745,7 +4768,7 @@ local function updateLeftInfoPanel(panel)
 
 			name:SetText(abilityName)
 			
-			local reducedslot = (barkey - 1) * 10 + j - 3 
+			local reducedslot = (barkey - 1) * 10 + j - 4 
 			
 			local slotdata = skilldata and skilldata[reducedslot] or nil
 			
@@ -4783,24 +4806,31 @@ local function updateLeftInfoPanel(panel)
 		header3.tooltip = GetString("SI_COMBAT_METRICS_SKILLTIME_TT", HeaderStringKey)
 	end
 	
-	local statrow = panel:GetNamedChild("Stats")	
+	local statrow = panel:GetNamedChild("AbilityBlock1"):GetNamedChild("Stats2")	
+	local statrow2 = panel:GetNamedChild("AbilityBlock2"):GetNamedChild("Stats2")	
 	
 	local totalSkills = data.totalSkills
-	
 	local totalTime = data.totalSkillTime
+	local totalWeaponAttacks = data.totalWeaponAttacks
+	local totalSkillsFired = data.totalSkillsFired
 	
-	local value1string = "-"
-	local value2string = "-"
+	local value1string = " -"
+	local value2string = " -"
 	
 	if totalSkills and totalSkills > 0 and totalTime then 
 	
 		value1string = (totalTime and totalSkills) and string.format("%.3f s", totalTime / (1000 * totalSkills)) or "-"
-		value2string = totalTime and string.format("%.3f s", totalTime / 1000) or "-"
+		value2string = totalTime and string.format("%.3f s", totalTime / 1000) or "-"		
 		
 	end
 	
-	statrow:GetNamedChild("Value1"):SetText(value1string)
-	statrow:GetNamedChild("Value2"):SetText(value2string)
+	local value3string = totalWeaponAttacks or " -"	
+	local value4string = totalSkillsFired or " -"
+	
+	statrow:GetNamedChild("Label"):SetText(string.format("%s   %s", GetString(SI_COMBAT_METRICS_AVERAGEC), value1string))
+	statrow:GetNamedChild("Label2"):SetText(string.format("%s   %s", GetString(SI_COMBAT_METRICS_TOTALC), value2string))
+	statrow2:GetNamedChild("Label"):SetText(string.format("%s   %s", GetString(SI_COMBAT_METRICS_TOTALWA), value3string))
+	statrow2:GetNamedChild("Label2"):SetText(string.format("%s   %s", GetString(SI_COMBAT_METRICS_TOTALSKILLS), value4string))
 end
 
 function CMX.ToggleSkillTimingData(control) 
@@ -5053,11 +5083,11 @@ local function updateFightListPanel(panel, data, issaved)
 			
 			if category == "healingOut" or category == "healingIn" then 
 			
-				activetime = fight.hpstime or 1
+				activetime = zo_roundToNearest(fight.hpstime or 1, 0.1)
 			
 			else 
 			
-				activetime = fight.dpstime or 1
+				activetime = zo_roundToNearest(fight.dpstime or 1, 0.1)
 			
 			end
 
@@ -5397,17 +5427,20 @@ function CMX.PosttoChat(mode, fight, UnitContextMenuUnitId)
 	local bossUnits, bossDamage, bossName, bossTime = GetBossTargetDamage(data)		
 	local singleDamage, _, _, singleTime = GetSingleTargetDamage(data)
 	
+	dpstime = zo_roundToNearest(dpstime, 0.1)
+	singleTime = zo_roundToNearest(singleTime, 0.1)
+	
 	name = zo_strformat(SI_UNIT_NAME, bossName or name)
 	
 	local bossDamage = data.bossfight and bossDamage or singleDamage
-	local bossTime = data.bossfight and bossTime or singleTime
+	local bossTime = zo_roundToNearest(data.bossfight and bossTime or singleTime, 0.1)
 	
 	local totalDPSString = ZO_CommaDelimitNumber(math.floor(data.DPSOut))
 	local totalDamageString = ZO_CommaDelimitNumber(damage)
 	
 	if mode == CMX_POSTTOCHAT_MODE_HEALING then 
 	
-		local hpstime = data.hpstime
+		local hpstime = zo_roundToNearest(data.hpstime, 0.01)
 		local timeString = string.format("%d:%04.1f", hpstime/60, hpstime%60)
 	
 		local totalHPSString = ZO_CommaDelimitNumber(data.HPSOut)
@@ -5418,6 +5451,8 @@ function CMX.PosttoChat(mode, fight, UnitContextMenuUnitId)
 	elseif mode == CMX_POSTTOCHAT_MODE_SELECTION_HEALING then 
 	
 		local units, healing, healTime = GetSelectionHeal(data, selections.unit["healingOut"])
+		
+		healTime = zo_roundToNearest(healTime, 0.1)
 		
 		local timeString = string.format("%d:%04.1f", healTime/60, healTime%60)
 	
@@ -5550,7 +5585,7 @@ local function updateLiveReport(self, data)
 	local HPSString
 	local DPSInString
 	local SDPSString
-	local maxtime = math.max(dpstime, hpstime)
+	local maxtime = zo_roundToNearest(math.max(dpstime, hpstime), 0.1)
 	local timeString = string.format("%d:%04.1f", maxtime/60, maxtime%60)
 		
 	-- maybe add data from group
