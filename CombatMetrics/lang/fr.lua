@@ -38,6 +38,7 @@ SafeAddString(SI_COMBAT_METRICS_INCOMING_DPS, "DPS Entrant", 1)
 SafeAddString(SI_COMBAT_METRICS_HEALING, "Soins", 1) 
 SafeAddString(SI_COMBAT_METRICS_HEALS, "Tics", 1) 
 SafeAddString(SI_COMBAT_METRICS_HPS, "HPS", 1) 
+SafeAddString(SI_COMBAT_METRICS_HPSA, "HPS + Overheal", 1) 
 SafeAddString(SI_COMBAT_METRICS_INCOMING_HPS, "HPS Entrant", 1) 
 
 SafeAddString(SI_COMBAT_METRICS_EDIT_TITLE, "Double clique pour changer le nom du Combat", 1) 
@@ -57,6 +58,9 @@ SafeAddString(SI_COMBAT_METRICS_TOGGLE_SETTINGS, "Options", 1)
 
 SafeAddString(SI_COMBAT_METRICS_SHOWIDS, "Afficher les IDs", 1) -- (for units, buffs and abilities)
 SafeAddString(SI_COMBAT_METRICS_HIDEIDS, "Cacher les IDs", 1) -- (for units, buffs and abilities)
+
+SafeAddString(SI_COMBAT_METRICS_SHOWOVERHEAL, "Afficher l'overheal", 1) -- (for units, buffs and abilities)
+SafeAddString(SI_COMBAT_METRICS_HIDEOVERHEAL, "Cacher l'overheal", 1) -- (for units, buffs and abilities)
 
 SafeAddString(SI_COMBAT_METRICS_POSTDPS, "Poster DPS/HPS", 1) 
 SafeAddString(SI_COMBAT_METRICS_POSTSINGLEDPS, "Poster DPS Mono", 1) 
@@ -162,6 +166,7 @@ SafeAddString(SI_COMBAT_METRICS_OVERHEAL, "Overheal:", 1)
 
 SafeAddString(SI_COMBAT_METRICS_HITS, "Hits", 1) 
 SafeAddString(SI_COMBAT_METRICS_NORM, "Norm", 1) -- Normal, short
+SafeAddString(SI_COMBAT_METRICS_OH, "OH", 1)  -- Overheal, short
 
 SafeAddString(SI_COMBAT_METRICS_RESOURCES, "Ressources", 1) 
 

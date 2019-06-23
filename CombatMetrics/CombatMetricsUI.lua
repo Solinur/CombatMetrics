@@ -1022,9 +1022,16 @@ end
 
 do
 
-	local function toggleshowids()
+	local function toggleShowIds()
 	
 		db.debuginfo.ids = not db.debuginfo.ids
+		CombatMetrics_Report:Update()
+		
+	end
+	
+	local function toggleOverhealMode()
+	
+		CMX.showOverHeal = not CMX.showOverHeal		
 		CombatMetrics_Report:Update()
 		
 	end
@@ -1076,6 +1083,7 @@ do
 		if not upInside then return end
 		
 		local showIdString = db.debuginfo.ids and SI_COMBAT_METRICS_HIDEIDS or SI_COMBAT_METRICS_SHOWIDS
+		local showOverhealString = CMX.showOverHeal and SI_COMBAT_METRICS_HIDEOVERHEAL or SI_COMBAT_METRICS_SHOWOVERHEAL
 		
 		local postoptions = {}
 		
@@ -1110,7 +1118,8 @@ do
 		
 		ClearMenu()
 		
-		AddCustomMenuItem(GetString(showIdString), toggleshowids)		
+		AddCustomMenuItem(GetString(showIdString), toggleShowIds)		
+		AddCustomMenuItem(GetString(showOverhealString), toggleOverhealMode)		
 		AddCustomSubMenuItem(GetString(SI_COMBAT_METRICS_POSTDPS), postoptions)
 		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_SETTINGS), CMX.OpenSettings)
 		
@@ -1419,9 +1428,11 @@ local function updateFightStatsPanelLeft(panel)
 	local label1, label2, label3, rowList, labelList
 	local activetime
 	
+	local showOverHeal = category == "healingOut" and CMX.showOverHeal
+	
 	if category == "healingOut" or category == "healingIn" then
 	
-		label1 = GetString(SI_COMBAT_METRICS_HPS)
+		label1 = GetString(showOverHeal and SI_COMBAT_METRICS_HPSA or SI_COMBAT_METRICS_HPS)
 		label2 = GetString(SI_COMBAT_METRICS_HEALING)
 		label3 = GetString(SI_COMBAT_METRICS_HEALS)
 		
@@ -1459,19 +1470,20 @@ local function updateFightStatsPanelLeft(panel)
 	panel:GetNamedChild("ActiveTimeValue"):SetText(activetimestring)
 	panel:GetNamedChild("CombatTimeValue"):SetText(combattimestring)
 	
-	local key = DPSstrings[category]
+	local key = showOverHeal and "HPSAOut" or DPSstrings[category]
 	
 	local aps1 = data[key] or 0
 	local aps2, apsratio
 	
-	if not noselection then 
+	if not noselection or showOverHeal then 
 	
 		aps2 = selectionData and selectionData[key] or 0
 		apsratio = (aps1 == 0 and 0) or aps2/aps1*100
 	
 	else
 	
-		aps2 = data["group"..zo_strformat("<<C:1>>", key)] or 0
+		local groupkey = zo_strformat("group<<C:1>>", key)
+		aps2 = data[groupkey] or 0
 		apsratio = (aps2 == 0 and 0) or aps1/aps2*100
 	
 	end
@@ -2431,20 +2443,23 @@ local function updateAbilityPanel(panel)
 	local minmax = settings.maxValue
 	
 	local isDamage = category == "damageIn" or category == "damageOut"
+	local showOverHeal = CMX.showOverHeal and category == "healingOut"
 	
-	local ratioColumnLabel = category == "damageIn" and GetString(SI_COMBAT_METRICS_BLOCKS) or category == "damageOut" and GetString(SI_COMBAT_METRICS_CRITS) or GetString(SI_COMBAT_METRICS_HEALS) 
 	local valueColumnLabel = isDamage and GetString(SI_COMBAT_METRICS_DAMAGE) or GetString(SI_COMBAT_METRICS_HEALING)
+
+	if showOverHeal then valueColumnLabel = valueColumnLabel .. "*" end
 
 	local header = panel:GetNamedChild("Header")
 	
 	header:GetNamedChild("Total"):SetText(valueColumnLabel)
-	header:GetNamedChild("Crits"):SetText(ratioColumnLabel)
 	
-	local headerCrit = header:GetNamedChild("Crits")
-	local headerHit = header:GetNamedChild("Hits")
+	local headerCritString = showOverHeal and GetString(SI_COMBAT_METRICS_OH) or category == "damageIn" and GetString(SI_COMBAT_METRICS_BLOCKS) or hitCritLayout[3]
+	local headerHitString = showOverHeal and GetString(SI_COMBAT_METRICS_HEALS) or category == "damageIn" and GetString(SI_COMBAT_METRICS_HITS) or hitCritLayout[4]
+	local headerCritRatioString = showOverHeal and GetString(SI_COMBAT_METRICS_OH) or category == "damageIn" and GetString(SI_COMBAT_METRICS_BLOCKS) or GetString(SI_COMBAT_METRICS_CRITS)
 	
-	headerCrit:SetText(hitCritLayout[3])
-	headerHit:SetText("/" .. hitCritLayout[4])
+	header:GetNamedChild("Crits"):SetText(headerCritString)
+	header:GetNamedChild("Hits"):SetText("/" ..  headerHitString)
+	header:GetNamedChild("CritRatio"):SetText(headerCritRatioString.. "%")
 	
 	local headerAvg = header:GetNamedChild("Average")
 	
@@ -2463,6 +2478,8 @@ local function updateAbilityPanel(panel)
 	local selectedunits = selections["unit"][category]
 	
 	local totalkey = "Total"
+	local totalAmountKey = showOverHeal and "healingOutAbsolute" or category..totalkey
+	local countString = CountStrings[category]
 	
 	if selectedunits ~= nil then
 	
@@ -2472,24 +2489,23 @@ local function updateAbilityPanel(panel)
 	else 
 	
 		data = fightData.calculated
-		totaldmg = data[category..totalkey]
+		totaldmg = data[totalAmountKey]
 		
 	end
 	
 	local scrollchild = GetControl(panel, "PanelScrollChild")
 	local currentanchor = {TOPLEFT, scrollchild, TOPLEFT, 0, 1}
 	
-	local totalAmountKey = category..totalkey
-	local totalHitKey = CountStrings[category]..totalkey
-	local critKey = CountStrings[category].."Critical"
+	local totalHitKey = showOverHeal and "healsOutAbsolute" or countString..totalkey
+	local critKey = showOverHeal and "healsOutOverflow" or countString.."Critical"
 	
-	local ratioKey1 = CountStrings[category]..hitCritLayout[1]	-- first value of the crits/hits column display
-	local ratioKey2 = CountStrings[category]..hitCritLayout[2]  -- second value of the crits/hits column display
+	local ratioKey1 = showOverHeal and "healsOutOverflow" or category == "damageIn" and countString.."Blocked" or countString..hitCritLayout[1]	-- first value of the crits/hits column display
+	local ratioKey2 = showOverHeal and "healsOutAbsolute" or category == "damageIn" and totalHitKey or countString..hitCritLayout[2]  -- second value of the crits/hits column display
 	
-	local avgKey1 = category..averageLayout[1]					-- damage value of the avg column display
-	local avgKey2 = CountStrings[category]..averageLayout[1]	-- hits value of the avg column display
+	local avgKey1 = showOverHeal and "healingOutAbsolute" or category..averageLayout[1]					-- damage value of the avg column display
+	local avgKey2 = showOverHeal and "healsOutAbsolute" or countString..averageLayout[1]	-- hits value of the avg column display
 	
-	local DPSKey = DPSstrings[category]	
+	local DPSKey = showOverHeal and "HPSAOut" or DPSstrings[category]	
 	
 	local showids = db.debuginfo.ids
 	
@@ -2514,20 +2530,20 @@ local function updateAbilityPanel(panel)
 			
 			local dps = ability[DPSKey]
 			local total = ability[totalAmountKey]
-			local ratio = total / totaldmg
+			local ratio = total and totaldmg and totaldmg > 0 and (total / totaldmg)
 			
 			local crits = ability[critKey]
 			local hits = ability[totalHitKey]
-			local critratio = 100 * crits / hits
+			local critratio = crits and hits and hits > 0 and (100 * crits / hits)
 			
 			local ratio1 = ability[ratioKey1]
 			local ratio2 = ability[ratioKey2]
 			
-			local avg1 = ability[avgKey1] 
-			local avg2 = ability[avgKey2]
+			local avg1 = ability[avgKey1]
+			local avg2 = ability[avgKey2] or 0
 			
-			local avg = avg2 == 0 and 0 or (avg1 / avg2)
-			local minmaxValue = minmax and ability.max or (ability.min or 0)
+			local avg = avg2 ~= 0 and (avg1 / avg2)
+			local minmaxValue = (showOverHeal and "-") or (minmax and ability.max) or (ability.min or 0)
 			
 			local rowId = #panel.bars + 1
 			
@@ -2552,25 +2568,25 @@ local function updateAbilityPanel(panel)
 			barControl:SetWidth(maxwidth * ratio)
 			
 			local fractionControl = row:GetNamedChild("Fraction")
-			fractionControl:SetText(string.format("%.1f%%", 100 * ratio))
+			fractionControl:SetText(ratio and string.format("%.1f%%", 100 * ratio) or "-")
 			
 			local rateControl = row:GetNamedChild("PerSecond")
-			rateControl:SetText(string.format("%.0f", dps))
+			rateControl:SetText(dps and string.format("%.0f", dps) or "-")
 			
 			local amountControl = row:GetNamedChild("Total")
-			amountControl:SetText(total)
+			amountControl:SetText(total or "-")
 			
 			local critControl = row:GetNamedChild("Crits")
-			critControl:SetText(ratio1)
+			critControl:SetText(ratio1 or "-")
 			
 			local hitsControl = row:GetNamedChild("Hits")
-			hitsControl:SetText(string.format("/%d", ratio2))			
+			hitsControl:SetText(string.format("/%d", ratio2 or "-"))			
 			
 			local critFractionControl = row:GetNamedChild("CritRatio")
-			critFractionControl:SetText(string.format("%.0f%%", critratio))
+			critFractionControl:SetText(critratio and string.format("%.0f%%", critratio) or "-")
 			
 			local avgControl = row:GetNamedChild("Average")
-			avgControl:SetText(string.format("%.0f", avg))
+			avgControl:SetText(avg and string.format("%.0f", avg) or "-")
 			
 			local maxControl = row:GetNamedChild("MinMax")
 			maxControl:SetText(minmaxValue)

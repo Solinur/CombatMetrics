@@ -719,13 +719,13 @@ function FightHandler:Initialize()
 	self.groupHPSIn = 0					-- group hps
 	self.damageOutTotal = 0				-- total damage out
 	self.healingOutTotal = 0			-- total healing out
-	self.healingOutAbsolute = 0			-- total healing out including overheal
+	self.healingOutAbsolute = 0			-- total healing out including Overheal
 	self.damageInTotal = 0				-- total damage in
 	self.damageInShielded = 0			-- total damage in shielded
 	self.healingInTotal = 0				-- total healing in
 	self.DPSOut = 0						-- dps
 	self.HPSOut = 0						-- hps
-	self.HPSAOut = 0					-- hps including overheal
+	self.HPSAOut = 0					-- hps including Overheal
 	self.DPSIn = 0						-- incoming dps			
 	self.HPSIn = 0						-- incoming hps		
 	self.group = data.inGroup

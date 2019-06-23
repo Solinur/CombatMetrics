@@ -343,6 +343,7 @@ local CategoryList = {
 	healingOut = {
 	
 		"HPSOut",
+		"HPSAOut",
 		"healingOutNormal",
 		"healingOutCritical",
 		"healingOutTotal",
@@ -599,7 +600,7 @@ local function CalculateFight(fight) -- called by CMX.update or on user interact
 	data.groupHealIn 	= fight.groupHealIn
 	data.groupDPSOut 	= fight.groupDPSOut
 	data.groupHPSOut 	= fight.groupHPSOut
-	data.groupHPSIn 	= fight.groupHPSOut
+	data.groupHPSIn 	= fight.groupHPSIn
 	data.groupDPSIn 	= fight.groupDPSIn
 	
 	fight.calculating = true
@@ -692,6 +693,7 @@ local function AccumulateStats(fight)
 					ability.healingOutAbsolute = ability.healingOutTotal + ability.healingOutOverflow
 					ability.healsOutAbsolute = ability.healsOutTotal + ability.healsOutOverflow
 					ability.HPSOut = ability.healingOutTotal / fight.hpstime
+					ability.HPSAOut = ability.healingOutAbsolute / fight.hpstime
 					
 				elseif tablekey == "healingIn" then
 				
@@ -727,6 +729,8 @@ function CMX.GenerateSelectionStats(fight, menuItem, selections) -- this is simi
 	local abilityselection = selections.ability[menuItem]
 	local unitselection = selections.unit[menuItem]
 	
+	local showOverHeal = CMX.showOverHeal and menuItem == "healingOut"
+	
 	-- if abilityselection == nil and unitselection == nil then return end
 
 	local data = fight.calculated	
@@ -735,9 +739,9 @@ function CMX.GenerateSelectionStats(fight, menuItem, selections) -- this is simi
 	InitBasicValues(selectiondata)
 	selectiondata.units = {}
 	selectiondata.buffs = {}
-			
-	local totalkey = "Total"
+	
 	local totalValueSum = 0
+	local totalkey = showOverHeal and "healingOutAbsolute" or ZO_CachedStrFormat("<<1>>Total", menuItem)
 	
 	for unitId,_ in pairs(unitselection or data.units) do	-- if a selection was made the content of the value will be "true" and not the table from the original data.
 		
@@ -771,7 +775,7 @@ function CMX.GenerateSelectionStats(fight, menuItem, selections) -- this is simi
 			
 			selectiondata.units[unitId] = selectedunit
 			
-			unitTotalValue = unit[menuItem..totalkey]
+			unitTotalValue = unit[totalkey]
 			totalValueSum = totalValueSum + unitTotalValue
 			
 			-- add unit stats to fight sum
@@ -1652,7 +1656,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 end
 
 local function InitCurrentData()
-	CMX.currentdata = {log={}, DPSOut = 0, DPSIn = 0, HPSOut = 0, HPSIn = 0, dpstime = 0, hpstime = 0, groupDPSOut = 0, groupDPSIn = 0, groupHPSOut = 0, groupHPS = 0}	-- reset currentdata, the previous log is now only linked to the fight.
+	CMX.currentdata = {log={}, DPSOut = 0, DPSIn = 0, HPSOut = 0, HPSAOut = 0, HPSIn = 0, dpstime = 0, hpstime = 0, groupDPSOut = 0, groupDPSIn = 0, groupHPSOut = 0, groupHPS = 0}	-- reset currentdata, the previous log is now only linked to the fight.
 end
 
 local function AddtoChatLog(...)
@@ -2174,6 +2178,8 @@ local function Initialize(event, addon)
 	
 	CMX.ResetFight = LC.ResetFight
 	CMX.GetDamageColor = LC.GetDamageColor
+	
+	CMX.showOverHeal = false
 	
 	CMX.init = true
 end

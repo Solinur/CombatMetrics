@@ -54,6 +54,7 @@
 	SI_COMBAT_METRICS_HEALING = "Healing",
 	SI_COMBAT_METRICS_HEALS = "Heals",
 	SI_COMBAT_METRICS_HPS = "HPS",
+	SI_COMBAT_METRICS_HPSA = "HPS + Overheal",
 	SI_COMBAT_METRICS_INCOMING_HPS = "Incoming HPS",
 	
 	SI_COMBAT_METRICS_EDIT_TITLE = "Double click to edit fight name",
@@ -73,6 +74,9 @@
 	
 	SI_COMBAT_METRICS_SHOWIDS = "Show IDs", -- (for units, buffs and abilities)
 	SI_COMBAT_METRICS_HIDEIDS = "Hide IDs", -- (for units, buffs and abilities)
+	
+	SI_COMBAT_METRICS_SHOWOVERHEAL = "Show overheal", -- (for units, buffs and abilities)
+	SI_COMBAT_METRICS_HIDEOVERHEAL = "Hide overheal", -- (for units, buffs and abilities)
 	
 	SI_COMBAT_METRICS_POSTDPS = "Post DPS/HPS",
 	SI_COMBAT_METRICS_POSTSINGLEDPS = "Post single target DPS",
@@ -178,6 +182,7 @@
 
 	SI_COMBAT_METRICS_HITS = "Hits",
 	SI_COMBAT_METRICS_NORM = "Norm",  -- Normal, short
+	SI_COMBAT_METRICS_OH = "OH",  -- Overheal, short
 
 	SI_COMBAT_METRICS_RESOURCES = "Resources",
 
