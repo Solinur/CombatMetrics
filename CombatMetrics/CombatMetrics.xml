@@ -733,7 +733,7 @@
 							
 						</Label>
 						
-						<Label name="$(parent)Time" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_TIME" horizontalAlignment="LEFT">
+						<Label name="$(parent)Time" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_TIME2" horizontalAlignment="LEFT">
 							
 							<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Zone" offsetX="4" offsetY="0"/>
 							<Dimensions x="128" y="20"/>

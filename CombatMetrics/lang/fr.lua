@@ -135,7 +135,8 @@ SafeAddString(SI_COMBAT_METRICS_RECENT_FIGHT, "Combats Récents", 1)
 SafeAddString(SI_COMBAT_METRICS_DURATION, "Durée", 1) 
 SafeAddString(SI_COMBAT_METRICS_CHARACTER, "Personnage", 1) 
 SafeAddString(SI_COMBAT_METRICS_ZONE, "Zone", 1) 
-SafeAddString(SI_COMBAT_METRICS_TIME, "Date", 1) 
+SafeAddString(SI_COMBAT_METRICS_TIME, "Temps", 1) 
+SafeAddString(SI_COMBAT_METRICS_TIME2, "Date", 1) 
 SafeAddString(SI_COMBAT_METRICS_TIMEC, "Temps: ", 1) 
 
 SafeAddString(SI_COMBAT_METRICS_SHOW, "Montrer", 1) 
@@ -263,6 +264,14 @@ SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT2, "Temps depuis la dernière attaqu
 SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT3, "Temps ente l'activation de ce sort et la prochaine attaque (arme/sort)", 1) 
 SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT4, "Temps moyen entre deux activations de ce sort", 1) 
 
+SafeAddString(SI_COMBAT_METRICS_SKILLAVG_TT, "Temps moyen perdu entre deux utlisations de sorts", 1) 
+SafeAddString(SI_COMBAT_METRICS_SKILLTOTAL_TT, "Temps total perdu entre deux utlisations de sorts", 1) 
+
+SafeAddString(SI_COMBAT_METRICS_TOTALWA, "Attaques de l'arme: ", 1) 
+SafeAddString(SI_COMBAT_METRICS_TOTALWA_TT, "Nombre total d'attaques de l'arme", 1) 
+SafeAddString(SI_COMBAT_METRICS_TOTALSKILLS, "Sorts : ", 1) 
+SafeAddString(SI_COMBAT_METRICS_TOTALSKILLS_TT, "Nombre total de sorts envoyés", 1) 
+
 SafeAddString(SI_COMBAT_METRICS_SAVED_DATA, "Données Enregistrées", 1) 
 
 -- Live Report Window
@@ -345,6 +354,8 @@ SafeAddString(SI_COMBAT_METRICS_MENU_SHOW_SDPS_NAME, "Affiche le DPS mono", 1)
 SafeAddString(SI_COMBAT_METRICS_MENU_SHOW_SDPS_TOOLTIP, "Affiche le DPS mono que vous faites dans la fenêtre de rapport en direct.", 1) 
 SafeAddString(SI_COMBAT_METRICS_MENU_SHOW_HPS_NAME, "Affiche le HPS", 1) 
 SafeAddString(SI_COMBAT_METRICS_MENU_SHOW_HPS_TOOLTIP, "Affiche le HPS sortant dans la fenêtre de rapport en direct.", 1) 
+SafeAddString(SI_COMBAT_METRICS_MENU_SHOW_HPSA_NAME, "Affiche les soins et l'overheal", 1) 
+SafeAddString(SI_COMBAT_METRICS_MENU_SHOW_HPSA_TOOLTIP, "Affiche les soins incluant l'overheal dans la fenêtre de rapport en direct", 1) 
 SafeAddString(SI_COMBAT_METRICS_MENU_SHOW_INC_DPS_NAME, "Affiche le DPS entrant", 1) 
 SafeAddString(SI_COMBAT_METRICS_MENU_SHOW_INC_DPS_TOOLTIP, "Affiche le DPS entrant dans la fenêtre de rapport en direct.", 1) 
 SafeAddString(SI_COMBAT_METRICS_MENU_SHOW_INC_HPS_NAME, "Affiche le HPS entrant", 1) 
