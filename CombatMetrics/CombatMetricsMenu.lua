@@ -324,6 +324,19 @@ function CMX.MakeMenu(svdefaults)
 		},
 		{
 			type = "checkbox",
+			name = GetString(SI_COMBAT_METRICS_MENU_SHOW_HPSA_NAME),
+			width = "half",
+			tooltip = GetString(SI_COMBAT_METRICS_MENU_SHOW_HPSA_TOOLTIP),
+			default = def.liveReport.healOutAbsolute,
+			getFunc = function() return db.liveReport.healOutAbsolute end,
+			setFunc = function(value) 
+				db.liveReport.healOutAbsolute = value 
+				CombatMetrics_LiveReport:Refresh() 
+			end,
+			disabled = function() return not db.liveReport.enabled end,
+		},
+		{
+			type = "checkbox",
 			name = GetString(SI_COMBAT_METRICS_MENU_SHOW_HPS_NAME),
 			width = "half",
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_SHOW_HPS_TOOLTIP),

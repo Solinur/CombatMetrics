@@ -478,7 +478,7 @@
 						<Label name="$(parent)Label" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip" text="SI_COMBAT_METRICS_AVERAGEC" horizontalAlignment="LEFT">
 						
 							<Anchor point="LEFT" offsetX="6"/>
-							<Dimensions x="126" y="20"/>
+							<Dimensions x="136" y="20"/>
 							
 						</Label>									
 						
@@ -486,7 +486,7 @@
 						
 							<Anchor point="LEFT" offsetX="6" constrains="Y"/>
 							<Anchor point="TOPLEFT" relativePoint="TOP" constrains="X" offsetX="3" offsetY="0"/>
-							<Dimensions x="126" y="20"/>
+							<Dimensions x="136" y="20"/>
 							
 						</Label>
 						
@@ -3567,6 +3567,27 @@
 					
 					<Controls>
 						<Texture name="$(parent)Icon" textureFile="/esoui/art/buttons/gamepad/pointsplus_up.dds">
+							<Anchor point="LEFT" offsetX="2"/>
+							<Dimensions x="20" y="20"/>
+						
+						</Texture>
+						
+						<Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0" horizontalAlignment="RIGHT" verticalAlignment="CENTER">
+							<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="2"/>
+							<Dimensions x="120" y="24"/>
+						</Label>
+					</Controls>
+					
+					<OnInitialized> self.blocksize = 1 </OnInitialized>
+					
+				</Control>
+				
+				<Control name="$(parent)HealOutAbsolute">
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DamageOut"/>
+					<Dimensions x="150" y="26"/>
+					
+					<Controls>
+						<Texture name="$(parent)Icon" textureFile="/esoui/art/buttons/gamepad/pointsplus_up.dds" color="FF888888">
 							<Anchor point="LEFT" offsetX="2"/>
 							<Dimensions x="20" y="20"/>
 						

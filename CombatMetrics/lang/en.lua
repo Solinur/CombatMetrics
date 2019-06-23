@@ -369,6 +369,8 @@
 	SI_COMBAT_METRICS_MENU_SHOW_SDPS_TOOLTIP = "Show single target DPS you deal in Live Report Window",
 	SI_COMBAT_METRICS_MENU_SHOW_HPS_NAME = "Show HPS",
 	SI_COMBAT_METRICS_MENU_SHOW_HPS_TOOLTIP = "Show HPS you cast in Live Report Window",
+	SI_COMBAT_METRICS_MENU_SHOW_HPSA_NAME = "Show HPS + overheal",
+	SI_COMBAT_METRICS_MENU_SHOW_HPSA_TOOLTIP = "Show HPS including overheal that you cast in Live Report Window",
 	SI_COMBAT_METRICS_MENU_SHOW_INC_DPS_NAME = "Show Incoming DPS",
 	SI_COMBAT_METRICS_MENU_SHOW_INC_DPS_TOOLTIP = "Show DPS you receive in Live Report Window",
 	SI_COMBAT_METRICS_MENU_SHOW_INC_HPS_NAME = "Show Incoming HPS",

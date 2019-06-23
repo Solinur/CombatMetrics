@@ -5559,12 +5559,14 @@ local function updateLiveReport(self, data)
 	local DPSOut = data.DPSOut
 	local DPSIn = data.DPSIn
 	local HPSOut = data.HPSOut
+	local HPSAOut = data.HPSAOut
 	local HPSIn = data.HPSIn
 	local dpstime = data.dpstime
 	local hpstime = data.hpstime
 	local groupDPSOut = data.groupDPSOut
 	local groupDPSIn = data.groupDPSIn
 	local groupHPSOut = data.groupHPSOut
+	local groupHPSAOut = data.groupHPSAOut
 	
 	-- Bail out if there is no damage to report
 	if (DPSOut == 0 and HPSOut == 0 and DPSIn == 0) or livereport:IsHidden() then return end
@@ -5583,6 +5585,7 @@ local function updateLiveReport(self, data)
 
 	local DPSString
 	local HPSString
+	local HPSAString
 	local DPSInString
 	local SDPSString
 	local maxtime = zo_roundToNearest(math.max(dpstime, hpstime), 0.1)
@@ -5595,12 +5598,13 @@ local function updateLiveReport(self, data)
 		
 		if groupDPSOut > 0  then dpsratio  = (math.floor(DPSOut / groupDPSOut * 1000) / 10) end 
 		if groupDPSIn > 0 then idpsratio = (math.floor(DPSIn / groupDPSIn * 1000) / 10) end 
-		if groupHPSOut > 0  then hpsratio  = (math.floor(HPSOut / groupHPSOut * 1000) / 10) end
+		if groupHPSAOut > 0  then hpsaratio  = (math.floor(HPSAOut / groupHPSAOut * 1000) / 10) end
 		if groupSDPS > 0  then sdpsratio  = (math.floor(SDPS / groupSDPS * 1000) / 10) end
 
 		DPSString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), DPSOut, groupDPSOut, dpsratio)
 		DPSInString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), DPSIn, groupDPSIn, idpsratio)
 		HPSString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), HPSOut, groupHPSOut, hpsratio)
+		HPSAString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), HPSAOut, groupHPSAOut, hpsaratio)
 		SDPSString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), SDPS, groupSDPS, sdpsratio)
 		
 	else
@@ -5608,6 +5612,7 @@ local function updateLiveReport(self, data)
 		DPSString  = DPSOut 
 		DPSInString = DPSIn
 		HPSString  = HPSOut
+		HPSAString  = HPSAOut
 		SDPSString = SDPS
 		
 	end
@@ -5617,6 +5622,7 @@ local function updateLiveReport(self, data)
 	livereport:GetNamedChild("DamageOutSingle"):GetNamedChild("Label"):SetText( SDPSString )
 	livereport:GetNamedChild("DamageOut"):GetNamedChild("Label"):SetText( DPSString )
 	livereport:GetNamedChild("HealOut"):GetNamedChild("Label"):SetText( HPSString )
+	livereport:GetNamedChild("HealOutAbsolute"):GetNamedChild("Label"):SetText( HPSAString )
 	livereport:GetNamedChild("DamageIn"):GetNamedChild("Label"):SetText( DPSInString )
 	livereport:GetNamedChild("HealIn"):GetNamedChild("Label"):SetText( HPSIn )
 	livereport:GetNamedChild("Time"):GetNamedChild("Label"):SetText( timeString )
@@ -5672,10 +5678,6 @@ local function initFightReport()
 	storeOrigLayout(fightReport)
 	
 	local pos = db[fightReport:GetName()]
-	
-	local leftside = fightReport:GetNamedChild("_SelectorRow"):GetLeft()
-	
-	if leftside < 0 then pos.x = pos.x - leftside end
 	
 	fightReport:ClearAnchors()
 	fightReport:SetAnchor(CENTER, nil , TOPLEFT, pos.x, pos.y)
@@ -5816,6 +5818,17 @@ local function initFightReport()
 	
 	local selectorButtons = fightReport:GetNamedChild("_SelectorRow")
 	initSelectorButtons(selectorButtons)
+	
+	fightReport:Resize(db.FightReport.scale)
+	
+	local left = selectorButtons:GetLeft()
+	
+	if left < 0 then 
+	
+		fightReport:ClearAnchors()
+		fightReport:SetAnchor(CENTER, nil , TOPLEFT, pos.x - left, pos.y)
+		
+	end
 end
 
 local function initLiveReport()
@@ -5854,6 +5867,7 @@ local function initLiveReport()
 	end
 	
 	local setLR = db.liveReport	
+	local bg = liveReport:GetNamedChild("BG")
 	
 	function liveReport.Refresh(liveReport)
 	
@@ -5947,14 +5961,14 @@ local function initLiveReport()
 				-- set label alignments
 				
 				local label = child:GetNamedChild("Label")
-				local alignment = db.liveReport.alignmentleft and TEXT_ALIGN_LEFT or TEXT_ALIGN_RIGHT
+				local alignment = setLR.alignmentleft and TEXT_ALIGN_LEFT or TEXT_ALIGN_RIGHT
 				
 				label:SetHorizontalAlignment(alignment)
 			
 			end
 		end
 		
-		zo_callLater(function() liveReport:GetNamedChild("BG"):SetDimensions(liveReport:GetWidth(), liveReport:GetHeight()) end, 1)
+		zo_callLater(function() bg:SetDimensions(liveReport:GetWidth(), liveReport:GetHeight()) end, 1)
 		
 	end
 	
@@ -5994,6 +6008,12 @@ local function initLiveReport()
 	
 	liveReport.Update = updateLiveReport
 	
+	liveReport:Toggle(setLR.enabled)
+	liveReport:Resize(setLR.scale)
+	liveReport:SetMovable(not setLR.locked) 
+	
+	bg:SetAlpha(setLR.bgalpha/100)
+	
 end
 
 function CMX.InitializeUI()
@@ -6030,20 +6050,13 @@ function CMX.InitializeUI()
 	initFightReport()
 	initLiveReport()
 	
-	CombatMetrics_LiveReport:Toggle(db.liveReport.enabled)
-	CombatMetrics_LiveReport:Resize(db.liveReport.scale)
-	CombatMetrics_LiveReportBG:SetAlpha(db.liveReport.bgalpha/100)
-	CombatMetrics_LiveReport:SetMovable(not db.liveReport.locked) 
-				
-	CombatMetrics_Report:Resize(db.FightReport.scale)
-	
 	local settingsbutton = CombatMetrics_Report_SelectorRowSettingsButton
 	
 	local data = CMX.GetFeedBackData(settingsbutton)
-					
+	
 	local button, feedbackWindow = LibFeedback:initializeFeedbackWindow(unpack(data))
 	button:SetHidden(true)
-			
+	
 	function ToggleFeedback() 
 		
 		feedbackWindow:ToggleHidden()

@@ -719,11 +719,13 @@ function FightHandler:Initialize()
 	self.groupHPSIn = 0					-- group hps
 	self.damageOutTotal = 0				-- total damage out
 	self.healingOutTotal = 0			-- total healing out
+	self.healingOutAbsolute = 0			-- total healing out including overheal
 	self.damageInTotal = 0				-- total damage in
 	self.damageInShielded = 0			-- total damage in shielded
 	self.healingInTotal = 0				-- total healing in
 	self.DPSOut = 0						-- dps
 	self.HPSOut = 0						-- hps
+	self.HPSAOut = 0					-- hps including overheal
 	self.DPSIn = 0						-- incoming dps			
 	self.HPSIn = 0						-- incoming hps		
 	self.group = data.inGroup
@@ -1245,7 +1247,7 @@ function FightHandler:GetNewStats(timems)
 	end
 end
 
-function FightHandler:AddCombatEvent(timems, result, targetUnitId, value, eventid)
+function FightHandler:AddCombatEvent(timems, result, targetUnitId, value, eventid, overflow)
 
 	if eventid == LIBCOMBAT_EVENT_DAMAGE_OUT then 		--outgoing dmg
 	
@@ -1271,6 +1273,7 @@ function FightHandler:AddCombatEvent(timems, result, targetUnitId, value, eventi
 	elseif eventid == LIBCOMBAT_EVENT_HEAL_OUT then --outgoing heal
 	
 		self.healingOutTotal = self.healingOutTotal + value
+		self.healingOutAbsolute = self.healingOutAbsolute + value + (overflow or 0)
 		
 		if activetimeonheals then 
 		
@@ -1287,6 +1290,7 @@ function FightHandler:AddCombatEvent(timems, result, targetUnitId, value, eventi
 		
 		self.healingInTotal = self.healingInTotal + value
 		self.healingOutTotal = self.healingOutTotal + value
+		self.healingOutAbsolute = self.healingOutAbsolute + value + (overflow or 0)
 		
 		if activetimeonheals then 
 		
@@ -1311,6 +1315,7 @@ function FightHandler:UpdateStats()
 
 	self.DPSOut = math.floor(self.damageOutTotal / dpstime + 0.5)
 	self.HPSOut = math.floor(self.healingOutTotal / hpstime + 0.5)
+	self.HPSAOut = math.floor(self.healingOutAbsolute / hpstime + 0.5)
 	self.DPSIn = math.floor(self.damageInTotal / dpstime + 0.5)
 	self.HPSIn = math.floor(self.healingInTotal / hpstime + 0.5)
 	
@@ -1318,6 +1323,7 @@ function FightHandler:UpdateStats()
 		["DPSOut"] = self.DPSOut, 
 		["DPSIn"] = self.DPSIn,  
 		["HPSOut"] = self.HPSOut,  
+		["HPSAOut"] = self.HPSAOut,  
 		["HPSIn"] = self.HPSIn,  
 		["healingOutTotal"] = self.healingOutTotal,  
 		["dpstime"] = dpstime,  
@@ -1980,7 +1986,7 @@ local function CombatEventHandler(isheal, _ , result , _ , _ , _ , _ , sourceNam
 	
 	damageType = (isheal and powerType) or damageType
 	
-	currentfight:AddCombatEvent(timems, result, targetUnitId, hitValue, eventid)
+	currentfight:AddCombatEvent(timems, result, targetUnitId, hitValue, eventid, overflow)
 	
 	lib.cm:FireCallbacks((CallbackKeys[eventid]), eventid, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType, (overflow or 0))
 

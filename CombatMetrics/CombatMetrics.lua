@@ -31,7 +31,7 @@ function CMX.GetFeedBackData(parentcontrol)
 	local data = {
 	
 		CMX,
-		CMX.name .. " 0.9.0 alpha", 
+		CMX.name .. " " .. CMX.version, 
 		parentcontrol,
 		"@Solinur",
 		{TOPLEFT, parentcontrol, TOPRIGHT, 10, 0},
@@ -1189,7 +1189,7 @@ end
 
 ProcessLog[LIBCOMBAT_EVENT_PLAYERSTATS] = ProcessLogStats
 
-local delayedAbilities = {[63044] = true, [63029] = true, [63046] = true} -- Radiant Destruction and morphs have a 100ms delay after casting.
+local abilityDelay = {[63044] = 100, [63029] = 100, [63046] = 100} -- Radiant Destruction and morphs have a 100ms delay after casting.
 
 ---[[
 local function ProcessLogSkillTimings(fight, callbacktype, timems, reducedslot, abilityId, status)
@@ -1198,7 +1198,7 @@ local function ProcessLogSkillTimings(fight, callbacktype, timems, reducedslot, 
 
 	--Print("misc", "[%d], %s: %d", timems, GetAbilityName(abilityId), status)
 	
-	local isWeaponAttack = reducedslot == 1 or reducedslot == 2 or reducedslot == 11 or reducedslot == 12
+	local isWeaponAttack = reducedslot%10 < 3
 
 	local newdata = {}
 	
@@ -1267,7 +1267,7 @@ local function ProcessLogSkillTimings(fight, callbacktype, timems, reducedslot, 
 		
 		local channeled, castTime = GetAbilityCastInfo(abilityId)
 		
-		local delay = (delayedAbilities[abilityId]) and 100 or 0
+		local delay = abilityDelay[abilityId] or 0
 		
 		if isWeaponAttack and lastUsedWeaponAttack then
 		
@@ -1867,13 +1867,16 @@ do
 	 * Fix Combat Log window settings
 	 ]]--
 	local function fixCombatLog(cc, window)
+	
 		local tabIndex = window.tab.index
 
 		cc:SetInteractivity(tabIndex, true)
 		cc:SetLocked(tabIndex, true)
 		
 		for category = 1, GetNumChatCategories() do
+		
 			cc:SetWindowFilterEnabled(tabIndex, category, false)
+			
 		end
 	end
 
@@ -1882,17 +1885,24 @@ do
 	 * Prepare Combat Log window
 	 ]]--
 	local function getCombatLog()
+	
 		for k, cc in ipairs(CHAT_SYSTEM.containers) do
+		
 			for i = 1, #cc.windows do
+			
 				if cc:GetTabName(i) == db.chatLog.name then
+				
 					return cc, cc.windows[i]
+					
 				end
 			end
 		end
 
 		-- previous lookup did not find proper window, so create it in primary container
+		
 		local cc = CHAT_SYSTEM.primaryContainer
 		local window, key = cc.windowPool:AcquireObject()
+		
 		window.key = key
 		
 		cc:AddRawWindow(window, db.chatLog.name)
@@ -2045,7 +2055,8 @@ local svdefaults = {
 		["healOut"] 		= true, 
 		["damageIn"] 		= true, 
 		["healIn"] 			= true, 
-		["time"] 			= true
+		["time"] 			= true,
+		["healOutAbsolute"]	= false,
 		
 	},
 	
