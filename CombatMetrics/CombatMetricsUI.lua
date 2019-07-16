@@ -5262,6 +5262,8 @@ end
 
 local function GetSelectionDamage(data, selection)	-- Gets highest Single Target Damage and counts enemy units.
 
+	d(selection)
+
 	local units = 0
 	local damage = 0
 	local starttime
@@ -5293,7 +5295,7 @@ local function GetSelectionDamage(data, selection)	-- Gets highest Single Target
 			
 		end
 	end
-	
+		
 	local damageTime = (endtime - starttime)/1000
 	damageTime = damageTime > 0 and damageTime or data.dpstime
 	
@@ -5436,7 +5438,7 @@ function CMX.PosttoChat(mode, fight, UnitContextMenuUnitId)
 	local output = ""
 	
 	local unitSelection = mode == CMX_POSTTOCHAT_MODE_SELECTION and selections.unit["damageOut"]
-		or mode == CMX_POSTTOCHAT_MODE_SELECTED_UNIT and {UnitContextMenuUnitId}
+		or mode == CMX_POSTTOCHAT_MODE_SELECTED_UNIT and {[UnitContextMenuUnitId] = true}
 		or mode == CMX_POSTTOCHAT_MODE_SELECTED_UNITNAME and GetUnitsByName(data, UnitContextMenuUnitId)
 
 	local units, damage, name, dpstime = GetSelectionDamage(data, unitSelection)
@@ -5446,7 +5448,7 @@ function CMX.PosttoChat(mode, fight, UnitContextMenuUnitId)
 	dpstime = zo_roundToNearest(dpstime, 0.1)
 	singleTime = zo_roundToNearest(singleTime, 0.1)
 	
-	name = zo_strformat(SI_UNIT_NAME, bossName or name)
+	name = zo_strformat(SI_UNIT_NAME, (not unitSelection) and bossName or name)
 	
 	local bossDamage = data.bossfight and bossDamage or singleDamage
 	local bossTime = zo_roundToNearest(data.bossfight and bossTime or singleTime, 0.1)
@@ -5479,9 +5481,12 @@ function CMX.PosttoChat(mode, fight, UnitContextMenuUnitId)
 		
 	elseif units == 1 or mode == CMX_POSTTOCHAT_MODE_SINGLE then 
 	
-		local singleDPSString = ZO_CommaDelimitNumber(math.floor(singleDamage / singleTime))
-		local singleDamageString = ZO_CommaDelimitNumber(singleDamage)
-		local timeString = string.format("%d:%04.1f", singleTime/60, singleTime%60)	
+		local damage = mode == CMX_POSTTOCHAT_MODE_SELECTED_UNIT and damage or singleDamage
+		local damageTime = mode == CMX_POSTTOCHAT_MODE_SELECTED_UNIT and dpstime or singleTime
+	
+		local singleDPSString = ZO_CommaDelimitNumber(math.floor(damage / damageTime))
+		local singleDamageString = ZO_CommaDelimitNumber(damage)
+		local timeString = string.format("%d:%04.1f", damageTime/60, damageTime%60)	
 	
 		output = zo_strformat(GetString(SI_COMBAT_METRICS_POSTDPS_FORMAT), name, singleDPSString, singleDamageString, timeString)
 		
@@ -5522,6 +5527,8 @@ function CMX.PosttoChat(mode, fight, UnitContextMenuUnitId)
 		output = string.format("%s, %s", stringA, stringB)
 	
 	elseif mode == CMX_POSTTOCHAT_MODE_SELECTION or mode == CMX_POSTTOCHAT_MODE_SELECTED_UNITNAME then
+	
+		d("post")
 	
 		if not unitSelection then return end
 	
