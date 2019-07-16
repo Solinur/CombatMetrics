@@ -13,6 +13,7 @@ Idea: Life and Death
 local _
 
 local lib = {}
+lib.version = 17
 LibCombat = lib
 
 --aliases
@@ -2346,9 +2347,9 @@ function EventHandler:UnregisterEvents()
 
 	for k,reg in pairs(self.data) do
 		
-		local incative = EVENT_MANAGER:UnregisterForEvent(lib.name..reg.id, reg.event)
+		local inactive = EVENT_MANAGER:UnregisterForEvent(lib.name..reg.id, reg.event)
 		
-		if incative then 
+		if inactive then 
 		
 			ZO_ClearTable(reg)
 			self.data[k] = nil 
@@ -2377,6 +2378,8 @@ local function GetAllCallbackTypes()
 	end
 	return t
 end
+
+if GetAPIVersion() > 100027 then EVENT_ACTION_SLOT_ABILITY_SLOTTED = EVENT_HOTBAR_SLOT_CHANGE_REQUESTED end
 
 Events.General = EventHandler:New(GetAllCallbackTypes()
 	,

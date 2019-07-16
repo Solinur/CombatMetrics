@@ -5582,7 +5582,6 @@ local function updateLiveReport(self, data)
 	local groupDPSOut = data.groupDPSOut
 	local groupDPSIn = data.groupDPSIn
 	local groupHPSOut = data.groupHPSOut
-	local groupHPSAOut = data.groupHPSAOut
 	
 	-- Bail out if there is no damage to report
 	if (DPSOut == 0 and HPSOut == 0 and DPSIn == 0) or livereport:IsHidden() then return end
@@ -5601,7 +5600,6 @@ local function updateLiveReport(self, data)
 
 	local DPSString
 	local HPSString
-	local HPSAString
 	local DPSInString
 	local SDPSString
 	local maxtime = zo_roundToNearest(math.max(dpstime, hpstime), 0.1)
@@ -5614,13 +5612,11 @@ local function updateLiveReport(self, data)
 		
 		if groupDPSOut > 0  then dpsratio  = (math.floor(DPSOut / groupDPSOut * 1000) / 10) end 
 		if groupDPSIn > 0 then idpsratio = (math.floor(DPSIn / groupDPSIn * 1000) / 10) end 
-		if groupHPSAOut > 0  then hpsaratio  = (math.floor(HPSAOut / groupHPSAOut * 1000) / 10) end
 		if groupSDPS > 0  then sdpsratio  = (math.floor(SDPS / groupSDPS * 1000) / 10) end
 
 		DPSString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), DPSOut, groupDPSOut, dpsratio)
 		DPSInString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), DPSIn, groupDPSIn, idpsratio)
 		HPSString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), HPSOut, groupHPSOut, hpsratio)
-		HPSAString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), HPSAOut, groupHPSAOut, hpsaratio)
 		SDPSString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), SDPS, groupSDPS, sdpsratio)
 		
 	else
@@ -5628,7 +5624,6 @@ local function updateLiveReport(self, data)
 		DPSString  = DPSOut 
 		DPSInString = DPSIn
 		HPSString  = HPSOut
-		HPSAString  = HPSAOut
 		SDPSString = SDPS
 		
 	end
@@ -5638,7 +5633,7 @@ local function updateLiveReport(self, data)
 	livereport:GetNamedChild("DamageOutSingle"):GetNamedChild("Label"):SetText( SDPSString )
 	livereport:GetNamedChild("DamageOut"):GetNamedChild("Label"):SetText( DPSString )
 	livereport:GetNamedChild("HealOut"):GetNamedChild("Label"):SetText( HPSString )
-	livereport:GetNamedChild("HealOutAbsolute"):GetNamedChild("Label"):SetText( HPSAString )
+	livereport:GetNamedChild("HealOutAbsolute"):GetNamedChild("Label"):SetText( HPSAOut )
 	livereport:GetNamedChild("DamageIn"):GetNamedChild("Label"):SetText( DPSInString )
 	livereport:GetNamedChild("HealIn"):GetNamedChild("Label"):SetText( HPSIn )
 	livereport:GetNamedChild("Time"):GetNamedChild("Label"):SetText( timeString )

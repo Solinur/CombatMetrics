@@ -3595,11 +3595,11 @@
 						
 						<Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0" horizontalAlignment="RIGHT" verticalAlignment="CENTER">
 							<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="2"/>
-							<Dimensions x="120" y="24"/>
+							<Dimensions x="55" y="24"/>
 						</Label>
-					</Controls>
+					</Controls> 
 					
-					<OnInitialized> self.blocksize = 1 </OnInitialized>
+					<OnInitialized> self.blocksize = 0.6 </OnInitialized>
 					
 				</Control>
 				
