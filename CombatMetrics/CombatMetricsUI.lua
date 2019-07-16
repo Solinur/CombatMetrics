@@ -5262,8 +5262,6 @@ end
 
 local function GetSelectionDamage(data, selection)	-- Gets highest Single Target Damage and counts enemy units.
 
-	d(selection)
-
 	local units = 0
 	local damage = 0
 	local starttime
@@ -5527,8 +5525,6 @@ function CMX.PosttoChat(mode, fight, UnitContextMenuUnitId)
 		output = string.format("%s, %s", stringA, stringB)
 	
 	elseif mode == CMX_POSTTOCHAT_MODE_SELECTION or mode == CMX_POSTTOCHAT_MODE_SELECTED_UNITNAME then
-	
-		d("post")
 	
 		if not unitSelection then return end
 	
