@@ -362,3 +362,16 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 
 0.9.3 1,646,586 (06.06.2019) 23:37
 [*] Fixed an issue where divine armour pieces were not detected correctly on languages which use comma as decimal separator. Thx again to @Pymad for pointing this out.
+
+0.9.4 1,760,997 (18.07.2019) 00:52
+[*] Added total weapon and skill attacks on info panel.
+[*] Add an option to show absolute heal (= effective + overheal) to live report window. it can be accessed in the addon settings or via the cogwheel button in the fight report window.
+[*] Added an option to show absolute heal in ability panel
+[*] Added some code to ensure functionality with scale breaker due to API changes
+[*] Updated French translation (thx to @Floliroy)
+[*] Fixed an issue where fights were not completely loaded
+[*] Fixed cast delay of channeled and cast time abilities 
+[*] Fixed a rounding issue on combat time
+[*] Fixed an issue where the main window position was changing between relog / reloadui
+[*] Fixed an issue that resulted in a lua error or wrong data when posting the DPS to a selection of units.
+[*] Fixed an issue that resulted in wrong versions to be sent when submitting feedback ingame

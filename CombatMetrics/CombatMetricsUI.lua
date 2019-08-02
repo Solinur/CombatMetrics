@@ -1530,16 +1530,18 @@ local function updateFightStatsPanelLeft(panel)
 			local count3 = data[CountStrings[category]..basekey] or 0
 			local countratio = 0
 			
+			local groupAmountKey = zo_strformat("group<<C:1>>", category)
+			
 			if k == 1 and noselection then 
 			
-				amount2 = data["group"..zo_strformat("<<C:1>>", category)] or 0  -- first letter of category needs to be Capitalized
+				amount2 = data[groupAmountKey] or 0  -- first letter of category needs to be Capitalized
 				amountratio = (amount2 == 0 and 0) or amount1/amount2*100
 				
 				hide2 = true
 				
 			elseif noselection and v == "Absolute" then
 			
-				amount2 = data["group"..zo_strformat("<<C:1>>", category)] or 0  -- first letter of category needs to be Capitalized
+				amount2 = data[groupAmountKey] or 0  -- first letter of category needs to be Capitalized
 				amountratio = (amount2 == 0 and 0) or amount1/amount2*100
 				
 				hide4 = true
@@ -4618,8 +4620,13 @@ end
 function CMX.SkillTooltip_OnMouseEnter(control)
 	
 	InitializeTooltip(SkillTooltip, control, TOPLEFT, 0, 5, BOTTOMLEFT)
-	SkillTooltip:SetAbilityId(control:GetParent().id)
 	
+	local id = control:GetParent().id
+	local font = string.format("%s|%s|%s", GetString(SI_COMBAT_METRICS_STD_FONT), 16, "soft-shadow-thin")
+
+	SkillTooltip:SetAbilityId(id)
+	SkillTooltip:AddVerticalPadding(15)
+	SkillTooltip:AddLine(string.format("ID: %d", id), font, .7, .7, .8 , TOP, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER)
 end
 
 function CMX.SkillTooltip_OnMouseExit(control)
@@ -4776,11 +4783,11 @@ local function updateLeftInfoPanel(panel)
 			
 			control.id = abilityId
 			
-			local texture = abilityId and GetFormattedAbilityIcon(abilityId) or "EsoUI/Art/crafting/gamepad/crafting_alchemy_trait_unknown.dds"
+			local texture = abilityId and abilityId > 0 and GetFormattedAbilityIcon(abilityId) or "EsoUI/Art/crafting/gamepad/crafting_alchemy_trait_unknown.dds"
 			
 			icon:SetTexture(texture)
 			
-			local abilityName = abilityId and GetFormattedAbilityName(abilityId) or ""
+			local abilityName = abilityId and abilityId > 0 and GetFormattedAbilityName(abilityId) or ""
 
 			name:SetText(abilityName)
 			
@@ -5254,6 +5261,8 @@ local function GetBossTargetDamage(data) -- Gets Damage done to bosses and count
 		end
 	end
 		
+	if bossUnits == 0 then return 0, 0, nil, 0 end
+		
 	local bossTime = (endtime - starttime)/1000
 	bossTime = bossTime > 0 and bossTime or data.dpstime
 	
@@ -5611,11 +5620,12 @@ local function updateLiveReport(self, data)
 	-- maybe add data from group
 	if db.recordgrp == true and (groupDPSOut > 0 or groupDPSIn > 0 or groupHPSOut > 0) then
 	
-		local dpsratio, hpsratio, idpsratio , sdpsratio = 0, 0, 0, 0
+		local dpsratio, hpsratio, idpsratio, sdpsratio = 0, 0, 0, 0
 		
 		if groupDPSOut > 0  then dpsratio  = (math.floor(DPSOut / groupDPSOut * 1000) / 10) end 
 		if groupDPSIn > 0 then idpsratio = (math.floor(DPSIn / groupDPSIn * 1000) / 10) end 
 		if groupSDPS > 0  then sdpsratio  = (math.floor(SDPS / groupSDPS * 1000) / 10) end
+		if groupHPSOut > 0 then hpsratio  = (math.floor(HPSOut / groupHPSOut * 1000) / 10) end
 
 		DPSString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), DPSOut, groupDPSOut, dpsratio)
 		DPSInString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), DPSIn, groupDPSIn, idpsratio)
