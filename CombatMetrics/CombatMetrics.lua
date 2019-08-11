@@ -13,8 +13,19 @@ local lastUsedWeaponAttack
 
 local currentbar
 
+
+-- localize some module functions for performance
+
+local stringformat = string.format
+local mathfloor = math.floor
+local mathmax = math.max
+local mathmin = math.min
+local mathabs = math.abs
+local mathceil = math.ceil
 local infinity = math.huge
-	
+
+-- init Lib
+
 local LC = LibCombat
 if LC == nil then return end 
 
@@ -24,7 +35,7 @@ local CMX = CMX
  
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "0.9.4"
+CMX.version = "0.9.5"
 
 function CMX.GetFeedBackData(parentcontrol)
 	
@@ -447,7 +458,7 @@ local function initBaseAbility(self, tablekey)
 	local list = CategoryList[tablekey]
 
 	self.max = 0 -- max hit 
-	self.min = math.huge -- min hit 
+	self.min = infinity -- min hit 
 	
 	for _,key in pairs(list) do
 		
@@ -647,11 +658,11 @@ local function sumUnitTables(target, source, reference) -- adds values from sour
 		
 			if key == "max" then 
 			
-				target[key] = math.max((target[key] or 0), (source[key] or 0))
+				target[key] = mathmax((target[key] or 0), (source[key] or 0))
 				
 			elseif key == "min" then 				
 			
-				target[key] = math.min((target[key] or infinity), (source[key] or infinity))
+				target[key] = mathmin((target[key] or infinity), (source[key] or infinity))
 				
 			else
 			
@@ -810,7 +821,7 @@ function CMX.GenerateSelectionStats(fight, menuItem, selections) -- this is simi
 				selectiondata.buffs[name] = selectedbuff
 			end
 
-			selectiondata.totalUnitTime = (selectiondata.totalUnitTime or 0) + (math.min(fight.endtime, unit.endtime or unitData.dpsend) - math.max(fight.starttime, unit.starttime or unitData.dpsstart))
+			selectiondata.totalUnitTime = (selectiondata.totalUnitTime or 0) + (mathmin(fight.endtime, unit.endtime or unitData.dpsend) - mathmax(fight.starttime, unit.starttime or unitData.dpsstart))
 		
 		end
 	end
@@ -973,7 +984,7 @@ local function ProcessLogDamage(fight, callbacktype, timems, result, sourceUnitI
 	abilitydata[dmgkey] = abilitydata[dmgkey] + hitValue
 	abilitydata[hitkey] = abilitydata[hitkey] + 1
 	
-	local inttime = math.floor((timems - fight.combatstart)/1000)
+	local inttime = mathfloor((timems - fight.combatstart)/1000)
 	
 	if inttime >= 0 then 
 	
@@ -982,8 +993,8 @@ local function ProcessLogDamage(fight, callbacktype, timems, result, sourceUnitI
 		
 	end
 	
-	abilitydata.max = math.max(abilitydata.max, hitValue)
-	abilitydata.min = math.min(abilitydata.min, hitValue)
+	abilitydata.max = mathmax(abilitydata.max, hitValue)
+	abilitydata.min = mathmin(abilitydata.min, hitValue)
 	
 	IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitValue, false, unit)
 end
@@ -1047,7 +1058,7 @@ local function ProcessLogHeal(fight, callbacktype, timems, result, sourceUnitId,
 	
 	if hitValue == 0 and overflow > 0 then abilitydata[overflowHealskey] = abilitydata[overflowHealskey] + 1 end
 	
-	local inttime = math.floor((timems - fight.combatstart)/1000)
+	local inttime = mathfloor((timems - fight.combatstart)/1000)
 	
 	if inttime >= 0 then 
 	
@@ -1056,8 +1067,8 @@ local function ProcessLogHeal(fight, callbacktype, timems, result, sourceUnitId,
 		
 	end
 	
-	abilitydata.max = math.max(abilitydata.max, hitValue)
-	abilitydata.min = math.min(abilitydata.min, hitValue)
+	abilitydata.max = mathmax(abilitydata.max, hitValue)
+	abilitydata.min = mathmin(abilitydata.min, hitValue)
 	
 	IncrementStatSum(fight, powerType, resultkey, isHealingOut, hitValue, true)
 end
@@ -1087,18 +1098,18 @@ local function ProcessLogEffects(fight, callbacktype, timems, unitId, abilityId,
 	
 		if sourceType == COMBAT_UNIT_TYPE_PLAYER or sourceType == COMBAT_UNIT_TYPE_PLAYER_PET then 
 		
-			effectdata.lastGain = math.max(effectdata.lastGain or timems, fight.starttime)
+			effectdata.lastGain = mathmax(effectdata.lastGain or timems, fight.starttime)
 			effectdata.lastSlot = slotId
 			
 		--[[elseif effectdata.lastGain ~= nil then	-- treat this as if the player effect stopped, the group timer will continue though. 
 		
-			effectdata.uptime = effectdata.uptime + (math.min(timems, fight.endtime) - effectdata.lastGain)	
+			effectdata.uptime = effectdata.uptime + (mathmin(timems, fight.endtime) - effectdata.lastGain)	
 			effectdata.lastGain = nil
 			effectdata.count = effectdata.count + 1]]
 			
 		end
 		
-		effectdata.groupLastGain = math.max(effectdata.groupLastGain or timems, fight.starttime)
+		effectdata.groupLastGain = mathmax(effectdata.groupLastGain or timems, fight.starttime)
 		effectdata.groupLastSlot = slotId		
 		
 	elseif changeType == EFFECT_RESULT_FADED then
@@ -1116,7 +1127,7 @@ local function ProcessLogEffects(fight, callbacktype, timems, unitId, abilityId,
 				
 			if effectdata.lastGain ~= nil and slotId == effectdata.lastSlot and (sourceType == COMBAT_UNIT_TYPE_PLAYER or sourceType == COMBAT_UNIT_TYPE_PLAYER_PET) then
 				
-				effectdata.uptime = effectdata.uptime + (math.min(timems,fight.endtime) - effectdata.lastGain)
+				effectdata.uptime = effectdata.uptime + (mathmin(timems,fight.endtime) - effectdata.lastGain)
 				effectdata.lastGain = nil
 				effectdata.count = effectdata.count + 1
 				
@@ -1124,7 +1135,7 @@ local function ProcessLogEffects(fight, callbacktype, timems, unitId, abilityId,
 			
 			if effectdata.groupLastGain ~= nil and slotId == effectdata.groupLastSlot and not ignore then 
 				
-				effectdata.groupUptime = effectdata.groupUptime + (math.min(timems,fight.endtime) - effectdata.groupLastGain)
+				effectdata.groupUptime = effectdata.groupUptime + (mathmin(timems,fight.endtime) - effectdata.groupLastGain)
 				effectdata.groupLastGain = nil
 				effectdata.groupCount = effectdata.groupCount + 1
 				
@@ -1166,7 +1177,7 @@ local function ProcessLogResources(fight, callbacktype, timems, abilityId, power
 
 	local resourceData = fight:AcquireResourceData(abilityId, powerValueChange, powerType)
 	
-	local change = math.abs(powerValueChange)
+	local change = mathabs(powerValueChange)
 	
 	if powerType == POWERTYPE_ULTIMATE then
 		
@@ -1318,7 +1329,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 	local logdata = fight.log
 	
 	local istart = fight.cindex
-	local iend = math.min(istart+db.chunksize, #logdata)
+	local iend = mathmin(istart+db.chunksize, #logdata)
 	
 	for i=istart+1,iend do
 	
@@ -1350,7 +1361,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 				
 			elseif unitCalc ~= nil then
 			
-				local endtime = math.min(unitCalc.endtime, fight.endtime)
+				local endtime = mathmin(unitCalc.endtime, fight.endtime)
 			
 				for k,effectdata in pairs(unitCalc.buffs) do	-- finish buffs
 				
@@ -1438,19 +1449,19 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 				local value = fightstats["max"..statname]
 				local value2 = fightstats["max"..statname]
 				
-				local totaldmgvalue = math.max(damagevalues.damageOutTotal, 1)
-				local totalhealvalue = math.max(data.healingOutTotal, 1)
+				local totaldmgvalue = mathmax(damagevalues.damageOutTotal, 1)
+				local totalhealvalue = mathmax(data.healingOutTotal, 1)
 				
 				if stattype == STATTYPE_CRITICAL then 
 				
 					local critablehits = damagevalues.hitsOutNormal + damagevalues.hitsOutCritical
-					totaldmgvalue = math.max(critablehits, 1)
-					totalhealvalue = math.max(data.healsOutTotal, 1)
+					totaldmgvalue = mathmax(critablehits, 1)
+					totalhealvalue = mathmax(data.healsOutTotal, 1)
 					
 				elseif stattype == STATTYPE_CRITICALBONUS then
 
-					totaldmgvalue = math.max(damagevalues.damageOutCritical, 1)
-					totalhealvalue = math.max(data.healingOutCritical, 1)
+					totaldmgvalue = mathmax(damagevalues.damageOutCritical, 1)
+					totalhealvalue = mathmax(data.healingOutCritical, 1)
 					
 				end
 					
@@ -1491,19 +1502,19 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 			
 			local value = fightstats["max"..statname]
 			
-			local totaldmgvalue = math.max(data.damageInTotal, 1)
+			local totaldmgvalue = mathmax(data.damageInTotal, 1)
 			
 			if stattype == STATTYPE_CRITICALBONUS then 
 				
-				totaldmgvalue = math.max(data.damageInCritical, 1)
+				totaldmgvalue = mathmax(data.damageInCritical, 1)
 				
 			elseif stattype == STATTYPE_INCSPELL then 
 			
-				totaldmgvalue = math.max(data.damageInSpells, 1)
+				totaldmgvalue = mathmax(data.damageInSpells, 1)
 			
 			elseif stattype == STATTYPE_INCWEAPON then 
 			
-				totaldmgvalue = math.max(data.damageInWeapon, 1)
+				totaldmgvalue = mathmax(data.damageInWeapon, 1)
 				
 			end
 		
@@ -1640,7 +1651,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 	
 	local chunktime = GetGameTimeSeconds() - scalcms
 
-	local newchunksize = math.min(math.ceil(desiredtime / math.max(chunktime, 0.001) * db.chunksize / stepsize) * stepsize, 20000)
+	local newchunksize = mathmin(mathceil(desiredtime / mathmax(chunktime, 0.001) * db.chunksize / stepsize) * stepsize, 20000)
 	
 	Print("calculationtime", "Chunk calculation time: %.2f ms, new chunk size: %d", chunktime * 1000, newchunksize)
 	
@@ -1648,7 +1659,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 	
 	local progress = iend/#logdata
 	
-	fightlabel:SetText(string.format("%s (%.1f%%)", GetString(SI_COMBAT_METRICS_CALC), 100 * progress))
+	fightlabel:SetText(stringformat("%s (%.1f%%)", GetString(SI_COMBAT_METRICS_CALC), 100 * progress))
 	
 	titleBar:SetValue(progress)
 	

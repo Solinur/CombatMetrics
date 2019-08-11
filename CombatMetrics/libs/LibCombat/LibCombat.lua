@@ -41,6 +41,18 @@ local isInShadowWorld = false	-- used to prevent fight reset in Cloudrest when u
 
 local lastBossHealthValue = 2
 
+-- localize some functions for performance
+
+local stringformat = string.format
+local stringsub = string.sub
+local stringmatch = string.match
+local mathfloor = math.floor
+local mathmax = math.max
+local mathmin = math.min
+local mathabs = math.abs
+
+local ZO_CachedStrFormat = ZO_CachedStrFormat
+
 -- types of callbacks: Units, DPS/HPS, DPS/HPS for Group, Logevents
 
 LIBCOMBAT_EVENT_MIN = 0
@@ -355,7 +367,7 @@ local MajorForceAbility = {		-- All AbilityId's that cause Major Force. Used to 
 	[86472] = true,
 	[86476] = true,
 	[88891] = true,
-	[112345] = true,
+	[120013] = true,
 
 }
 
@@ -807,7 +819,7 @@ local function GetShadowBonus()
 		
 	end
 		
-	data.critBonusMundus = math.floor(13 * (1 + divines/100)) -- total mundus bonus, base is 13%
+	data.critBonusMundus = mathfloor(13 * (1 + divines/100)) -- total mundus bonus, base is 13%
 	
 	Print("Shadow Mundus: %d%% (Divines Bonus: %1.f%%)", data.critBonusMundus, divines)
 	
@@ -836,7 +848,7 @@ local function GetPlayerBuffs(timems)
 		
 		local unitType = castByPlayer and COMBAT_UNIT_TYPE_PLAYER or COMBAT_UNIT_TYPE_NONE
 		
-		local stacks = math.max(stackCount,1)
+		local stacks = mathmax(stackCount,1)
 		
 		local playerid = data.playerid
 		
@@ -910,8 +922,8 @@ local function GetCritBonusFromCP()
 	local mightyValue = 0.25 * mightyCP * (2 - mightyCP) + (mightyCP - 1) * (mightyCP - 0.5) * mightyCP * 2/250
 	local elfbornValue = 0.25 * elfbornCP * (2 - elfbornCP) + (elfbornCP - 1) * (elfbornCP - 0.5) * elfbornCP * 2 / 250
 
-	mightyValue = math.floor(mightyValue * 100)
-	elfbornValue = math.floor(elfbornValue * 100)
+	mightyValue = mathfloor(mightyValue * 100)
+	elfbornValue = mathfloor(elfbornValue * 100)
 	
 	return mightyValue, elfbornValue
 end
@@ -1127,9 +1139,9 @@ function FightHandler:FinishFight()
 	self.combatend = timems
 	self.combattime = zo_round((timems - self.combatstart)/10)/100
 	
-	self.starttime = math.min(self.dpsstart or self.hpsstart or 0, self.hpsstart or self.dpsstart or 0)
-	self.endtime = math.max(self.dpsend or 0, self.hpsend or 0)
-	self.activetime = math.max((self.endtime - self.starttime) / 1000, 1)
+	self.starttime = mathmin(self.dpsstart or self.hpsstart or 0, self.hpsstart or self.dpsstart or 0)
+	self.endtime = mathmax(self.dpsend or 0, self.hpsend or 0)
+	self.activetime = mathmax((self.endtime - self.starttime) / 1000, 1)
 	
 	data.majorForce = 0
 	data.minorForce = 0	
@@ -1251,7 +1263,7 @@ function FightHandler:GetNewStats(timems)
 	
 	for statId, newValue in pairs(GetStats()) do
 	
-		if statId == LIBCOMBAT_STAT_SPELLCRIT or statId == LIBCOMBAT_STAT_WEAPONCRIT then newValue = math.min(newValue, maxcrit) end
+		if statId == LIBCOMBAT_STAT_SPELLCRIT or statId == LIBCOMBAT_STAT_WEAPONCRIT then newValue = mathmin(newValue, maxcrit) end
 		
 		local currentkey = statNamesCurrent[statId]
 		local maxkey = statNamesMax[statId]
@@ -1268,7 +1280,7 @@ function FightHandler:GetNewStats(timems)
 			lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_PLAYERSTATS]), LIBCOMBAT_EVENT_PLAYERSTATS, timems, newValue - stats[currentkey], newValue, statId)
 			
 			stats[currentkey] = newValue
-			stats[maxkey] = math.max(stats[maxkey] or newValue, newValue)
+			stats[maxkey] = mathmax(stats[maxkey] or newValue, newValue)
 			
 		end
 	end
@@ -1332,19 +1344,19 @@ function FightHandler:UpdateStats()
 
 	if (self.dpsend == nil and self.hpsend == nil) or (self.dpsstart == nil and self.hpsstart == nil) then return end
 	
-	local dpstime = math.max(((self.dpsend or 1) - (self.dpsstart or 0)) / 1000, 1)
-	local hpstime = math.max(((self.hpsend or 1) - (self.hpsstart or 0)) / 1000, 1)
+	local dpstime = mathmax(((self.dpsend or 1) - (self.dpsstart or 0)) / 1000, 1)
+	local hpstime = mathmax(((self.hpsend or 1) - (self.hpsstart or 0)) / 1000, 1)
 	
 	self.dpstime = dpstime
 	self.hpstime = hpstime
 	
 	self:UpdateGrpStats()
 
-	self.DPSOut = math.floor(self.damageOutTotal / dpstime + 0.5)
-	self.HPSOut = math.floor(self.healingOutTotal / hpstime + 0.5)
-	self.HPSAOut = math.floor(self.healingOutAbsolute / hpstime + 0.5)
-	self.DPSIn = math.floor(self.damageInTotal / dpstime + 0.5)
-	self.HPSIn = math.floor(self.healingInTotal / hpstime + 0.5)
+	self.DPSOut = mathfloor(self.damageOutTotal / dpstime + 0.5)
+	self.HPSOut = mathfloor(self.healingOutTotal / hpstime + 0.5)
+	self.HPSAOut = mathfloor(self.healingOutAbsolute / hpstime + 0.5)
+	self.DPSIn = mathfloor(self.damageInTotal / dpstime + 0.5)
+	self.HPSIn = mathfloor(self.healingInTotal / hpstime + 0.5)
 	
 	local data = {
 		["DPSOut"] = self.DPSOut, 
@@ -1402,9 +1414,9 @@ function FightHandler:UpdateGrpStats() -- called by onUpdate
 	
 	self.groupHealingIn = self.groupHealingOut
 	
-	self.groupDPSOut = math.floor(self.groupDamageOut / dpstime + 0.5)
-	self.groupDPSIn = math.floor(self.groupDamageIn / dpstime + 0.5)
-	self.groupHPSOut = math.floor(self.groupHealingOut / hpstime + 0.5)
+	self.groupDPSOut = mathfloor(self.groupDamageOut / dpstime + 0.5)
+	self.groupDPSIn = mathfloor(self.groupDamageIn / dpstime + 0.5)
+	self.groupHPSOut = mathfloor(self.groupHealingOut / hpstime + 0.5)
 	
 	self.groupHPSIn = self.groupHPSOut
 	
@@ -1522,7 +1534,9 @@ local function onBossesChanged(_) -- Detect Bosses
 			data.bossnames[name] = i
 			currentfight.bossfight = true
 			
-		else return
+		elseif i >= 2 then
+		
+			return
 		
 		end
 	end
@@ -1579,8 +1593,8 @@ local function BuffEventHandler(isspecial, groupeffect, _, changeType, effectSlo
 
 	if BadAbility[abilityId] == true then return end
 
-	if unitTag and string.sub(unitTag, 1, 5) == "group" and AreUnitsEqual(unitTag, "player") then return end
-	if unitTag and string.sub(unitTag, 1, 11) ~= "reticleover" and (AreUnitsEqual(unitTag, "reticleover") or AreUnitsEqual(unitTag, "reticleoverplayer") or AreUnitsEqual(unitTag, "reticleovertarget")) then return end
+	if unitTag and stringsub(unitTag, 1, 5) == "group" and AreUnitsEqual(unitTag, "player") then return end
+	if unitTag and stringsub(unitTag, 1, 11) ~= "reticleover" and (AreUnitsEqual(unitTag, "reticleover") or AreUnitsEqual(unitTag, "reticleoverplayer") or AreUnitsEqual(unitTag, "reticleovertarget")) then return end
 
 	if (changeType ~= EFFECT_RESULT_GAINED and changeType ~= EFFECT_RESULT_FADED and (changeType ~= EFFECT_RESULT_UPDATED and stackCount > 1)) or unitName == "Offline" or unitId == nil then return end
 	
@@ -1590,8 +1604,8 @@ local function BuffEventHandler(isspecial, groupeffect, _, changeType, effectSlo
 	
 	-- Print("%d, %s, ET:%d, %d, %s", changeType, GetAbilityName(abilityId), effectType, abilityType, unitTag) 
 	
-	local eventid = groupeffect == GROUP_EFFECT_IN and LIBCOMBAT_EVENT_GROUPEFFECTS_IN or groupeffect == GROUP_EFFECT_OUT and LIBCOMBAT_EVENT_GROUPEFFECTS_OUT or string.sub(unitTag, 1, 6) == "player" and LIBCOMBAT_EVENT_EFFECTS_IN or LIBCOMBAT_EVENT_EFFECTS_OUT
-	local stacks = (isspecial and 0) or math.max(1, stackCount)
+	local eventid = groupeffect == GROUP_EFFECT_IN and LIBCOMBAT_EVENT_GROUPEFFECTS_IN or groupeffect == GROUP_EFFECT_OUT and LIBCOMBAT_EVENT_GROUPEFFECTS_OUT or stringsub(unitTag, 1, 6) == "player" and LIBCOMBAT_EVENT_EFFECTS_IN or LIBCOMBAT_EVENT_EFFECTS_OUT
+	local stacks = (isspecial and 0) or mathmax(1, stackCount)
 	
 	local inCombat = currentfight.prepared
 	
@@ -2077,7 +2091,7 @@ end
 
 local function GetReducedSlotId(reducedslot)
 
-	local bar = math.floor(reducedslot/10) + 1
+	local bar = mathfloor(reducedslot/10) + 1
 
 	local slot = reducedslot%10
 	
@@ -2207,7 +2221,7 @@ local function onBossHealthChanged(eventid, unitTag, _, powerType, powerValue, p
 
 	lastBossHealthValue = BossHealthValue	
 	
-	local bossId = tonumber(string.match(unitTag, "boss(%d+)"))
+	local bossId = tonumber(stringmatch(unitTag, "boss(%d+)"))
 	
 	lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_BOSSHP]), LIBCOMBAT_EVENT_BOSSHP, timems, bossId, powerValue, powerMax)
 	
@@ -2753,8 +2767,8 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 	local color, text
 	
 	local timeValue = fight.combatstart < 0 and 0 or (logline[2] - fight.combatstart)/1000
-	local timeString = string.format("|ccccccc[%.3fs]|r", timeValue)
-	local stringFormat = logtype == LIBCOMBAT_EVENT_SKILL_TIMINGS and GetString("SI_LIBCOMBAT_LOG_FORMATSTRING_SKILLS", logline[5]) or GetString("SI_LIBCOMBAT_LOG_FORMATSTRING", logtype)
+	local timeString = stringformat("|ccccccc[%.3fs]|r", timeValue)
+	local logFormat = logtype == LIBCOMBAT_EVENT_SKILL_TIMINGS and GetString("SI_LIBCOMBAT_LOG_FORMATSTRING_SKILLS", logline[5]) or GetString("SI_LIBCOMBAT_LOG_FORMATSTRING", logtype)
 	
 	local units = fight.units
 
@@ -2772,7 +2786,7 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 		local ability = GetAbilityString(abilityId, damageType, fontsize)
 		
 		color = {1.0,0.6,0.6}
-		text = ZO_CachedStrFormat(stringFormat, timeString, crit, targetString, ability, hitValue)
+		text = ZO_CachedStrFormat(logFormat, timeString, crit, targetString, ability, hitValue)
 		
 	elseif logtype == LIBCOMBAT_EVENT_DAMAGE_IN then
 	
@@ -2789,7 +2803,7 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 		
 		color = {0.8,0.4,0.4}	
 		
-		text = ZO_CachedStrFormat(stringFormat, timeString, sourceName, crit, targetString, ability, hitValue)
+		text = ZO_CachedStrFormat(logFormat, timeString, sourceName, crit, targetString, ability, hitValue)
 				
 	elseif logtype == LIBCOMBAT_EVENT_DAMAGE_SELF then
 	
@@ -2803,7 +2817,7 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 		local ability = GetAbilityString(abilityId, damageType, fontsize)
 		
 		color = {0.8,0.4,0.4}	
-		text = ZO_CachedStrFormat(stringFormat, timeString, crit, targetString, ability, hitValue)
+		text = ZO_CachedStrFormat(logFormat, timeString, crit, targetString, ability, hitValue)
 			
 	elseif logtype == LIBCOMBAT_EVENT_HEAL_OUT then
 		
@@ -2816,7 +2830,7 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 		local ability = GetAbilityString(abilityId, "heal", fontsize)
 		
 		color = {0.6,1.0,0.6}
-		text = ZO_CachedStrFormat(stringFormat, timeString, crit, targetname, ability, hitValue)
+		text = ZO_CachedStrFormat(logFormat, timeString, crit, targetname, ability, hitValue)
 		
 	elseif logtype == LIBCOMBAT_EVENT_HEAL_IN then
 	
@@ -2829,7 +2843,7 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 		local ability = GetAbilityString(abilityId, "heal", fontsize)
 		
 		color = {0.4,0.8,0.4}
-		text = ZO_CachedStrFormat(stringFormat, timeString, sourceName, crit, ability, hitValue)
+		text = ZO_CachedStrFormat(logFormat, timeString, sourceName, crit, ability, hitValue)
 		
 	elseif logtype == LIBCOMBAT_EVENT_HEAL_SELF then 
 	
@@ -2840,7 +2854,7 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 		local ability = GetAbilityString(abilityId, "heal", fontsize)
 		
 		color = {0.8,1.0,0.6}		
-		text = ZO_CachedStrFormat(stringFormat, timeString, crit, ability, hitValue)
+		text = ZO_CachedStrFormat(logFormat, timeString, crit, ability, hitValue)
 		
 	elseif logtype == LIBCOMBAT_EVENT_EFFECTS_IN or logtype == LIBCOMBAT_EVENT_EFFECTS_OUT or logtype == LIBCOMBAT_EVENT_GROUPEFFECTS_IN or logtype == LIBCOMBAT_EVENT_GROUPEFFECTS_OUT then 
 	
@@ -2861,7 +2875,7 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 		local buff = GetAbilityString(abilityId, colorKey, fontsize)
 		
 		color = {0.8,0.8,0.8}
-		text = ZO_CachedStrFormat(stringFormat, timeString, unitString, changeTypeString, buff, source)
+		text = ZO_CachedStrFormat(logFormat, timeString, unitString, changeTypeString, buff, source)
 		
 	elseif logtype == LIBCOMBAT_EVENT_RESOURCES then 		
 	
@@ -2890,14 +2904,14 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 			
 			local changeTypeString = ZO_CachedStrFormat("<<1>><<2>>|r", changeColor, changeString)
 			
-			local amount = powerValueChange~=0 and tostring(math.abs(powerValueChange)) or ""
+			local amount = powerValueChange~=0 and tostring(mathabs(powerValueChange)) or ""
 			
 			local resource = (powerType == POWERTYPE_MAGICKA and GetString(SI_ATTRIBUTES2)) or (powerType == POWERTYPE_STAMINA and GetString(SI_ATTRIBUTES3)) or (powerType == POWERTYPE_ULTIMATE and GetString(SI_LIBCOMBAT_LOG_ULTIMATE))
 			
 			local ability = abilityId and ZO_CachedStrFormat("(<<1>>)", GetAbilityString(abilityId, "resource", fontsize)) or ""
 			
 			color = (powerType == POWERTYPE_MAGICKA and {0.7,0.7,1}) or (powerType == POWERTYPE_STAMINA and {0.7,1,0.7}) or (powerType == POWERTYPE_ULTIMATE and {1,1,0.7})
-			text = ZO_CachedStrFormat(stringFormat, timeString, changeTypeString, amount, resource, ability)
+			text = ZO_CachedStrFormat(logFormat, timeString, changeTypeString, amount, resource, ability)
 		
 		else return
 		end
@@ -2912,15 +2926,15 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 		
 		if statid == LIBCOMBAT_STAT_SPELLCRIT or statid == LIBCOMBAT_STAT_WEAPONCRIT then 
 		
-			value = string.format("%.1f%%", GetCriticalStrikeChance(newvalue))
-			change = string.format("%.1f%%", GetCriticalStrikeChance(statchange))
+			value = stringformat("%.1f%%", GetCriticalStrikeChance(newvalue))
+			change = stringformat("%.1f%%", GetCriticalStrikeChance(statchange))
 			
 		end
 		
 		if statid == LIBCOMBAT_STAT_SPELLCRITBONUS or statid == LIBCOMBAT_STAT_WEAPONCRITBONUS then 
 		
-			value = string.format("%.1f%%", newvalue)
-			change = string.format("%.1f%%", statchange)
+			value = stringformat("%.1f%%", newvalue)
+			change = stringformat("%.1f%%", statchange)
 			
 		end
 		
@@ -2944,7 +2958,7 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 		end
 		
 		color = {0.8,0.8,0.8}
-		text = ZO_CachedStrFormat(stringFormat, timeString, stat, changeText, value, changeValueText)
+		text = ZO_CachedStrFormat(logFormat, timeString, stat, changeText, value, changeValueText)
 
 	elseif logtype == LIBCOMBAT_EVENT_MESSAGES then 
 	
@@ -2982,7 +2996,7 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 		
 		color = {.9,.8,.7}
 		
-		text = ZO_CachedStrFormat(stringFormat, timeString, name)
+		text = ZO_CachedStrFormat(logFormat, timeString, name)
 		
 	elseif logtype == LIBCOMBAT_EVENT_BOSSHP then
 	
@@ -2996,7 +3010,7 @@ function lib:GetCombatLogString(fight, logline, fontsize)
 		
 		color = {.7,.7,.7}
 		
-		text = ZO_CachedStrFormat(stringFormat, timeString, bossName, percent, currenthp, maxhp)
+		text = ZO_CachedStrFormat(logFormat, timeString, bossName, percent, currenthp, maxhp)
 		
 	end
 
@@ -3036,7 +3050,7 @@ local function Initialize()
 
   if data.LoadCustomizations then data.LoadCustomizations() end
   
-  maxcrit = math.floor(100/GetCriticalStrikeChance(1))
+  maxcrit = mathfloor(100/GetCriticalStrikeChance(1))
 end
 
 Initialize()
