@@ -37,7 +37,7 @@ local lastdeaths = {}
 local SlotSkills = {}
 local IdToReducedSlot = {}
 local lastskilluses = {}
-local isInShadowWorld = false	-- used to prevent fight reset in Cloudrest when using a portal.
+local isInShadowWorld = false	-- used to prevent fight reset in Cloudrest/Sunspire when using a portal.
 
 local lastBossHealthValue = 2
 
@@ -2431,6 +2431,7 @@ Events.General = EventHandler:New(GetAllCallbackTypes()
 		self:RegisterEvent(EVENT_PLAYER_ACTIVATED, onPlayerActivated)
 		self:RegisterEvent(EVENT_EFFECT_CHANGED, onMageExplode, REGISTER_FILTER_ABILITY_ID, 50184)
 		self:RegisterEvent(EVENT_EFFECT_CHANGED, onShadowWorld, REGISTER_FILTER_ABILITY_ID, 108045)
+		self:RegisterEvent(EVENT_EFFECT_CHANGED, onShadowWorld, REGISTER_FILTER_ABILITY_ID, 121216)
 		
 		if lib.debug == true then self:RegisterEvent(EVENT_COMBAT_EVENT, onCustomEvent, REGISTER_FILTER_COMBAT_RESULT, ACTION_RESULT_EFFECT_GAINED_DURATION, REGISTER_FILTER_IS_ERROR, false) end		
 		self.active = true
