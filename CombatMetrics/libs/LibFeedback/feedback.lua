@@ -191,11 +191,11 @@ function LibFeedback:initializeFeedbackWindow(parentAddonNameSpace, parentAddonN
             local sendGold = (not isButtonInfoDeep and (type(buttonData) == "number" and buttonData > 0) or (isButtonInfoDeep and buttonData[3])) or false
 
             if LibFeedback.debug then
-                --d(zo_strformat("|cFF0000[LibFeedback]|r <<1>> - Button <<2>>: isButtonInfoDeep: <<3>>, isString: <<4>>, sendGold: <<5>>,", tostring(parentAddonName), tostring(i), tostring(isButtonInfoDeep), tostring(isString), tostring(sendGold)))
+                d(zo_strformat("|cFF0000[LibFeedback]|r <<1>> - Button <<2>>: isButtonInfoDeep: <<3>>, isString: <<4>>, sendGold: <<5>>,", tostring(parentAddonName), tostring(i), tostring(isButtonInfoDeep), tostring(isString), tostring(sendGold)))
                 if isButtonInfoDeep then
-                    --d(zo_strformat("> Param1: <<1>>, Param2: <<2>>, Param3: <<3>>,", tostring(buttonData[1]), tostring(buttonData[2]), tostring(buttonData[3])))
+                    d(zo_strformat("> Param1: <<1>>, Param2: <<2>>, Param3: <<3>>,", tostring(buttonData[1]), tostring(buttonData[2]), tostring(buttonData[3])))
                 else
-                    --d(zo_strformat("> Value: <<1>>", tostring(buttonData)))
+                    d(zo_strformat("> Value: <<1>>", tostring(buttonData)))
                 end
             end
 

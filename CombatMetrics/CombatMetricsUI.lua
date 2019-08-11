@@ -4923,6 +4923,9 @@ local function updateBottomInfoPanel(panel)
 	
 	local equipdata = charData and charData.equip or {}
 	
+	local poison1 = equipdata[EQUIP_SLOT_POISON]
+	local poison2 = equipdata[EQUIP_SLOT_BACKUP_POISON]
+	
 	for i = 1, 14 do
 	
 		local equipline = panel:GetNamedChild("EquipLine" .. i)
@@ -4930,7 +4933,7 @@ local function updateBottomInfoPanel(panel)
 		local icon = equipline:GetNamedChild("Icon")
 		local icon2 = equipline:GetNamedChild("Icon2")	-- textures are added twice since icons are so low in contrast
 		local trait = equipline:GetNamedChild("Trait")	
-		local enchant = equipline:GetNamedChild("Enchant")	
+		local enchant = equipline:GetNamedChild("Enchant")
 	
 		local slot = equipslots[i]
 		
@@ -4956,11 +4959,29 @@ local function updateBottomInfoPanel(panel)
 		local traitType, _ = GetItemLinkTraitInfo(item) 
 		local traitName = traitType > 0 and GetString("SI_ITEMTRAITTYPE", traitType) or ""
 		
-		trait:SetText(traitName)
+		trait:SetText(traitName)		
 		
-		local _, enchantstring = GetItemLinkEnchantInfo(item) 
+		local enchantstring
 		
-		enchant:SetText(enchantstring:gsub(GetString(SI_COMBAT_METRICS_ENCHANTMENT_TRIM), ""))
+		if (slot == EQUIP_SLOT_MAIN_HAND or slot == EQUIP_SLOT_OFF_HAND) and poison1:len() > 0 then
+		
+			enchantstring = poison1
+			enchant.itemLink = poison1
+		
+		elseif (slot == EQUIP_SLOT_BACKUP_MAIN or slot == EQUIP_SLOT_BACKUP_OFF) and poison2:len() > 0 then
+		
+			enchantstring = poison2
+			enchant.itemLink = poison2
+			
+		else
+			
+			_, enchantstring = GetItemLinkEnchantInfo(item)
+			enchantstring = enchantstring:gsub(GetString(SI_COMBAT_METRICS_ENCHANTMENT_TRIM), "")
+			enchant.itemLink = ""
+			
+		end
+		
+		enchant:SetText(enchantstring)
 		
 	end
 end

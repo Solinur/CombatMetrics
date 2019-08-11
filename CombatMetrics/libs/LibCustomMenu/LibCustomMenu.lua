@@ -2,7 +2,7 @@
 -- thanks to: baertram & circonian
 
 -- Register with LibStub
-local MAJOR, MINOR = "LibCustomMenu", 6.6
+local MAJOR, MINOR = "LibCustomMenu", 6.8
 local lib, oldminor = LibStub and LibStub:NewLibrary(MAJOR, MINOR)
 if LibStub and not lib then return end -- the same or newer version of this lib is already loaded into memory
 lib = lib or { }
@@ -37,6 +37,28 @@ end
 
 lib.DIVIDER = "-"
 
+local function GetValueOrCallback(arg, ...)
+	if type(arg) == "function" then
+		return arg(...)
+	else
+		return arg
+	end
+end
+
+local function runTooltip(control, inside)
+	if control.tooltip then
+		local text = GetValueOrCallback(control.tooltip, control, inside)
+		if inside then
+			if type(text) == "string" and text ~= "" then
+				InitializeTooltip(InformationTooltip, control, BOTTOM, 0, -10)
+				SetTooltipText(InformationTooltip, text)
+			end
+		elseif InformationTooltip:GetOwner() == control then
+			ClearTooltip(InformationTooltip)
+		end
+	end
+end
+	
 ----- Sub Menu -----
 
 local Submenu = ZO_Object:Subclass()
@@ -64,14 +86,6 @@ local function SetTimeout(callback)
 		ClearTimeout()
 		if callback then callback() end
 	end )
-end
-
-local function GetValueOrCallback(arg, ...)
-	if type(arg) == "function" then
-		return arg(...)
-	else
-		return arg
-	end
 end
 
 function Submenu:New(...)
@@ -119,12 +133,14 @@ function Submenu:Initialize(name)
 		upInside = true
 		ClearTimeout()
 		self:SetSelectedIndex(control.index)
+		runTooltip(control, upInside)
 	end
 	local function MouseExit(control)
 		upInside = false
 		if (self.selectedIndex == control.index) then
 			self:SetSelectedIndex(nil)
 		end
+		runTooltip(control, upInside)
 	end
 	local function MouseUp(control, button)
 		if upInside == true and button == MOUSE_BUTTON_INDEX_LEFT then
@@ -310,6 +326,7 @@ function Submenu:AddItem(entry, myfont, normalColor, highlightColor, itemYPad)
 	end
 
 	item.OnSelect = entry.callback
+	item.tooltip = entry.tooltip
 	item.index = #self.items + 1
 	self.items[item.index] = item
 
@@ -420,17 +437,19 @@ local function ResetMenuItem(button)
 	button:ClearAnchors()
 	button.menuIndex = nil
 	button.OnSelect = nil
+	button.tooltip = nil
 end
 
 local function ResetCheckBox(checkBox)
 	ResetMenuItem(checkBox)
 	ZO_CheckButton_SetToggleFunction(checkBox, nil)
+    ZO_CheckButton_SetUnchecked(checkBox)
 end
 
 local upInside = false
 
 local function MenuItemFactory(pool)
-	local control = CreateControlFromVirtual("ZO_CustomMenuItem", ZO_Menu, "ZO_NotificationsRowButton", pool:GetNextControlId())
+	local control = CreateControlFromVirtual("ZO_CustomMenuItem", ZO_Menu, "ZO_MenuItem", pool:GetNextControlId())
 	local function MouseEnter()
 		upInside = true
 		ZO_Menu_EnterItem(control)
@@ -445,8 +464,7 @@ local function MenuItemFactory(pool)
 		end
 	end
 
-	local label = wm:CreateControl("$(parent)Name", control, CT_LABEL)
-	label:SetAnchor(TOPLEFT)
+	local label = control:GetNamedChild("Name")
 	control.nameLabel = label
 
 	control:SetHandler("OnMouseEnter", MouseEnter)
@@ -458,18 +476,7 @@ local function MenuItemFactory(pool)
 end
 
 local function CheckBoxFactory(pool)
-	local control = CreateControlFromVirtual("ZO_CustomMenuItemCheckButton", ZO_Menu, "ZO_CheckButton", pool:GetNextControlId())
-	control.nameLabel = control
-
-	local function MouseEnter()
-		ZO_Menu_EnterItem(control)
-	end
-	local function MouseExit()
-		ZO_Menu_ExitItem(control)
-	end
-	control:SetHandler("OnMouseEnter", MouseEnter)
-	control:SetHandler("OnMouseExit", MouseExit)
-	return control
+	return CreateControlFromVirtual("ZO_CustomMenuItemCheckButton", ZO_Menu, "ZO_MenuItemCheckButton", pool:GetNextControlId())
 end
 
 local function DividerFactory(pool)
@@ -557,7 +564,17 @@ function AddCustomMenuItem(mytext, myfunction, itemType, myFont, normalColor, hi
 	ZO_Menu.itemPool = mytext ~= lib.DIVIDER and lib.itemPool or lib.dividerPool
 	ZO_Menu.checkBoxPool = lib.checkBoxPool
 
+	if itemType == MENU_ADD_OPTION_CHECKBOX then
+		mytext = string.format(" |u16:0::|u%s", mytext)
+		itemYPad = itemYPad and (itemYPad + 2) or 2
+	end
+
 	local index = AddMenuItem(mytext, myfunction, itemType, myFont, normalColor, highlightColor, itemYPad, horizontalAlignment)
+
+	if itemType == MENU_ADD_OPTION_CHECKBOX then
+		local lastAdded = ZO_Menu.items[#ZO_Menu.items]
+		lastAdded.item:SetAnchor(TOPLEFT, lastAdded.checkbox, TOPLEFT, 0, -2)
+	end
 
 	ZO_Menu.itemPool = orgItemPool
 	ZO_Menu.checkBoxPool = orgCheckboxItemPool
@@ -565,18 +582,22 @@ function AddCustomMenuItem(mytext, myfunction, itemType, myFont, normalColor, hi
 	return index
 end
 
+function AddCustomMenuTooltip(tooltip, index)
+	index = index or #ZO_Menu.items
+	assert(index > 0 and index <= #ZO_Menu.items, "no menu item")
+	ZO_Menu.items[index].item.tooltip = tooltip
+end
+
 function AddCustomSubMenuItem(mytext, entries, myfont, normalColor, highlightColor, itemYPad)
 	local function CreateSubMenu(control, state)
-		if (state == SUBMENU_ITEM_MOUSE_ENTER) then
+		if state == SUBMENU_ITEM_MOUSE_ENTER then
 			lib.submenu:Clear()
 			local currentEntries = GetValueOrCallback(entries, ZO_Menu, control)
-			local entry
 			for i = 1, #currentEntries do
-				entry = currentEntries[i]
-				lib.submenu:AddItem(entry, myfont, normalColor, highlightColor, itemYPad)
+				lib.submenu:AddItem(currentEntries[i], myfont, normalColor, highlightColor, itemYPad)
 			end
 			lib.submenu:Show(control)
-		elseif (state == SUBMENU_ITEM_MOUSE_EXIT) then
+		elseif state == SUBMENU_ITEM_MOUSE_EXIT then
 			lib.submenu:Clear()
 		end
 	end
@@ -605,6 +626,21 @@ local function HookClearMenu()
 		lib.checkBoxPool:ReleaseAllObjects()
 		lib.dividerPool:ReleaseAllObjects()
 		lib.submenu:Clear()
+	end
+end
+
+local function HookMenuEnter()
+	local orgZO_Menu_EnterItem=ZO_Menu_EnterItem
+	function ZO_Menu_EnterItem(...)
+		local control = ...
+		runTooltip(control, true)
+		return orgZO_Menu_EnterItem(...)
+	end
+	local orgZO_Menu_ExitItem=ZO_Menu_ExitItem
+	function ZO_Menu_ExitItem(...)
+		local control = ...
+		runTooltip(control, false)
+		return orgZO_Menu_ExitItem(...)
 	end
 end
 
@@ -648,6 +684,7 @@ local function OnAddonLoaded(event, name)
 	lib.dividerPool = ZO_ObjectPool:New(DividerFactory, ResetMenuItem)
 	lib.submenu = Submenu:New("LibCustomMenuSubmenu")
 	HookClearMenu()
+	HookMenuEnter()
 	HookAddSlotAction()
 	HookContextMenu()
 end

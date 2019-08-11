@@ -544,12 +544,22 @@
 					
 				</Label>
 				
-				<Label name="$(parent)Enchant" text="" inherits="CombatMetrics_ValueFontControl" mouseEnabled="true" >
+				<Label name="$(parent)Enchant" text="" inherits="CombatMetrics_ValueFontControl" linkEnabled="true" mouseEnabled="true" >
 					
 					<Anchor point="LEFT" relativeTo="$(parent)Trait" relativePoint="RIGHT" offsetX="10" offsetY="0"/>
 					<Anchor point="RIGHT" offsetX="-4" />
 					
 					<Dimensions y="22"/>
+					
+					<OnLinkClicked> 
+					
+						ClearTooltip(ItemTooltip)
+						ZO_LinkHandler_OnLinkClicked(linkText, button) 
+					
+					</OnLinkClicked>
+					
+					<OnMouseEnter> CMX.ItemTooltip_OnMouseEnter(self) </OnMouseEnter>
+					<OnMouseExit> CMX.ItemTooltip_OnMouseExit(self) </OnMouseExit>
 					
 				</Label>
 				

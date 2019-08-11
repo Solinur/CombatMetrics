@@ -13,7 +13,7 @@ Idea: Life and Death
 local _
 
 local lib = {}
-lib.version = 18
+lib.version = 19
 LibCombat = lib
 
 --aliases

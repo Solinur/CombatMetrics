@@ -380,3 +380,9 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Fixed an issue where heal ratio in live report was always 0%.
 [*] Fixed an issue where group heal amount in fight report was always 0.
 [*] Added Entropy and Soul Trap ability detection for Scalebreaker.
+
+0.9.6 1,858,134 (12.08.2019) 00:08
+[*] Made some performance improvements. (thx to @andy.s for the idea)
+[*] Attempted a fix where the fight could reset once you enter a portal in the Nahviintaas fight.
+[*] Replaced enchants with poison in equip overview when a poison was equipped.
+[*] Updated Libraries
