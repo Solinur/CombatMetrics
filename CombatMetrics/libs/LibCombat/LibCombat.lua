@@ -13,7 +13,7 @@ Idea: Life and Death
 local _
 
 local lib = {}
-lib.version = 19
+lib.version = 20
 LibCombat = lib
 
 --aliases
@@ -536,125 +536,18 @@ local abilityConversions = {	-- Ability conversions for tracking skill activatio
 	--[117919] = {???, nil, nil, nil}, --Hexproof --> 
 
 	[88158] = {88163, 1, nil, nil}, --Materialize --> Materialize
-
-}
-
-local abilityConversions28 = {	-- Ability conversions for tracking skill activations Elsweyr
-
-	[22178] = {22179, 2240, nil, nil}, --Sun Shield --> Sun Shield
-	[22182] = {22183, 2240, nil, nil}, --Radiant Ward --> Radiant Ward
-	[22180] = {49091, 2240, nil, nil}, --Blazing Shield --> Blazing Shield
-
-	[22304] = {22307, 2240, nil, nil}, --Healing Ritual --> Healing Ritual
-	[22327] = {22331, 2240, nil, nil}, --Ritual of Rebirth --> Ritual of Rebirth
-	[22314] = {22318, 2240, nil, nil}, --Hasty Prayer --> Hasty Prayer
-
-	[26209] = {26220, 2240, nil, nil}, --Restoring Aura --> Minor Magickasteal
-	[26807] = {26809, 2240, nil, nil}, --Radiant Aura --> Minor Magickasteal
-	[26821] = {29824, 16, nil, nil}, --Repentance? --> Repentance?
-
-	[29173] = {53881, 2240, nil, nil}, --Weakness to Elements --> Major Breach
-	[39089] = {62775, 2240, nil, nil}, --Elemental Susceptibility --> Major Breach
-	[39095] = {62787, 2240, nil, nil}, --Elemental Drain --> Major Breach
-
-	[29556] = {63015, 2240, nil, nil}, --Evasion --> Major Evasion
-	[39195] = {63019, 2240, nil, nil}, --Shuffle --> Major Evasion
-	[39192] = {63030, 2240, nil, nil}, --Elude --> Major Evasion
-
-	[103492] = {103492, 2240, 103492, 2250}, --Meditate --> Meditate
-	[103652] = {103652, 2240, 103652, 2250}, --Deep Thoughts --> Deep Thoughts
-	[103665] = {103665, 2240, 103665, 2250}, --Introspection --> Introspection
-
-	[103503] = {103521, 2240, nil, nil}, --Accelerate --> Minor Force
-	[103706] = {103706, nil, 103707, 2240}, --Channeled Acceleration --> Minor Force
-	[103710] = {103712, nil, nil, nil}, --Race Against Time --> Minor Force
-
-	[103478] = {108609, 2240, nil, nil}, --Undo --> Undo
-	[103557] = {108621, 2240, nil, nil}, --Precognition --> Precognition
-	[103564] = {108641, 2240, nil, nil}, --Temporal Guard --> Temporal Guard
-
-	[61503] = {61504, 2240, nil, nil}, --Vigor --> Vigor
-	[61505] = {61506, 2240, nil, nil}, --Echoing Vigor --> Echoing Vigor
-	[61507] = {61509, 2240, nil, nil}, --Resolving Vigor --> Resolving Vigor
-
-	[38566] = {101161, 2240, nil, nil}, --Rapid Maneuver --> Major Expedition
-	[40211] = {101169, 2240, nil, nil}, --Retreating Maneuver --> Major Expedition
-	[40215] = {101178, 2240, nil, nil}, --Charging Maneuver --> Major Expedition
-
-	[38563] = {38564, 2240, nil, nil}, --War Horn --> War Horn
-	[40223] = {40224, 2240, nil, nil}, --Aggressive Horn --> Aggressive Horn
-	[40220] = {40221, 2240, nil, nil}, --Sturdy Horn --> Sturdy Horn
-
-	[28279] = {28279, 2200, 28279, 1}, --Uppercut --> Uppercut
-	[38814] = {38814, 2200, 38814, 1}, --Dizzying Swing --> Dizzying Swing
-	[38807] = {38807, 2200, 38807, 1}, --Wrecking Blow --> Wrecking Blow
-
-	[83600] = {85156, 2240, nil, nil}, --Lacerate --> Lacerate
-	[85187] = {85192, 2240, nil, nil}, --Rend --> Rend
-	[85179] = {85182, 2240, nil, nil}, --Thrive in Chaos --> Thrive in Chaos
-
-	[31531] = {31531, 2200, 88565, 2240}, --Force Siphon --> Force Siphon
-	[40109] = {40109, 2200, 88575, 2240}, --Siphon Spirit --> Siphon Spirit
-	[40116] = {88606, nil, nil, nil}, --Quick Siphon --> Minor Lifesteal
-
-	[29043] = {92507, 2240, nil, nil}, --Molten Weapons --> Major Sorcery
-	[31874] = {92503, 2240, nil, nil}, --Igneous Weapons --> Major Sorcery
-	[31888] = {92512, 2240, nil, nil}, --Molten Armaments --> Major Sorcery
-
-	[33375] = {90587, 2240, nil, nil}, --Blur --> Major Evasion
-	[35414] = {90593, 2240, nil, nil}, --Mirage --> Major Evasion
-	[35419] = {90620, 2240, nil, nil}, --Phantasmal Escape --> Major Evasion
-
-	[25375] = {25376, 2240, nil, nil}, --Shadow Cloak --> Shadow Cloak
-	[25380] = {25381, 2240, nil, nil}, --Shadowy Disguise --> Shadowy Disguise
-
-	[35445] = {35451, 2250, nil, nil}, --Shadow Image Teleport --> Shadow
-
-	[24584] = {nil, nil, 114903, 2250}, --Dark Exchange --> 
-	[24595] = {nil, nil, 114908, 2250}, --Dark Deal --> 
-	[24589] = {nil, nil, 114909, 2250}, --Dark Conversion --> 
-
-	[108840] = {108842, 2240, nil, nil}, --Summon Unstable Familiar --> Unstable Familiar Damage Pulse
-	[76076] = {76078, 16, nil, nil}, --Summon Unstable Clannfear --> Clannfear Heal
-	[77182] = {77187, 2240, nil, nil}, --Summon Volatile Familiar --> Volatile Famliiar Damage Pulsi
-
-	[108845] = {108846, 16, nil, nil}, --Winged Twilight Restore --> Winged Twilight Restore
-	[77140] = {77354, 2240, nil, nil}, --Summon Twilight Tormentor  --> Twilight Tormentor Enrage
-	[77369] = {77371, 16, nil, nil}, --Twilight Matriarch Restore --> Twilight Matriarch Restore
-
-	[23234] = {51392, 2240, nil, nil}, --Bolt Escape --> Bolt Escape Fatigue
-	[23236] = {51392, 2240, nil, nil}, --Streak --> Bolt Escape Fatigue
-
-	[85922] = {85925, 32, nil, nil}, --Budding Seeds --> Budding Seeds Heal
-
-	[86122] = {86224, 2240, nil, nil}, --Frost Cloak --> Major Resolve
-	[86126] = {88758, 2240, nil, nil}, --Expansive Frost Cloak --> Major Resolve
-	[86130] = {88761, 2240, nil, nil}, --Ice Fortress --> Major Resolve
-
-	[115238] = {119372, 2240, nil, nil}, --Bitter Harvest --> Bitter Harvest
-	[118623] = {118624, 2240, nil, nil}, --Deaden Pain --> Deaden Pain
-	[118639] = {121797, 2240, nil, nil}, --Necrotic Potency --> Necrotic Potency
-
-	[117690] = {117691, 2240, nil, nil}, --Blighted Blastbones --> Blighted Blastbones
-	[117749] = {117750, 2240, nil, nil}, --Stalking Blastbones --> Stalking Blastbones
-
-	--[115307] = {???, nil, nil, nil}, --Expunge --> 
-	[117940] = {117947, 2240, nil, nil}, --Expunge and Modify --> Expunge and Modify
-	--[117919] = {???, nil, nil, nil}, --Hexproof --> 
-
-	[88158] = {88163, 1, nil, nil}, --Materialize --> Materialize
 	
 	[28567] = {126370, 2240, nil, nil}, --Entropy --> Entropy
 	[40457] = {126374, 2240, nil, nil}, --Degeneration --> Degeneration
 	[40452] = {126371, 2240, nil, nil}, --Structured Entropy --> Structured Entropy
 
-	[26768] = {126891, 2240, nil, nil}, --Soul Trap --> Soul Trap
+	[26768] = {126890, 2240, nil, nil}, --Soul Trap --> Soul Trap
 	[40328] = {126894, 2240, nil, nil}, --Soul Splitting Trap --> Soul Splitting Trap
-	[40317] = {126898, 2240, nil, nil}, --Consuming Trap --> Consuming Trap
+	[40317] = {126897, 2240, nil, nil}, --Consuming Trap --> Consuming Trap
 
 }
 
-if GetAPIVersion() > 100027 then abilityConversions = abilityConversions28 end
+-- if GetAPIVersion() > 100027 then abilityConversions = abilityConversions28 end
 
 local DirectHeavyAttacks = {	-- for special handling to detect their end
 
@@ -1367,6 +1260,7 @@ function FightHandler:UpdateStats()
 		["healingOutTotal"] = self.healingOutTotal,  
 		["dpstime"] = dpstime,  
 		["hpstime"] = hpstime,
+		["bossfight"] = self.bossfight,
 	}
 	
 	lib.cm:FireCallbacks((CallbackKeys[LIBCOMBAT_EVENT_UNITS]), LIBCOMBAT_EVENT_UNITS, self.units)

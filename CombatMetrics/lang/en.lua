@@ -385,6 +385,8 @@
 	SI_COMBAT_METRICS_MENU_SHOW_TIME_TOOLTIP = "Show Time you have been dealing damage in Live Report Window",
 
 	SI_COMBAT_METRICS_MENU_CHAT_TITLE = "Stream Combat Log to chat", 
+	SI_COMBAT_METRICS_MENU_CHAT_WARNING = "Use with caution! Creating text lines requires a lot of work from the CPU. It is better to disable this if you expect heavy fights (trials, cyrodil)",
+	
 	SI_COMBAT_METRICS_MENU_CHAT_DH_TOOLTIP = "Streams Damage and Heal Events to chat window",
 	SI_COMBAT_METRICS_MENU_CHAT_TITLE_NAME = "Chat Log Title",
 	SI_COMBAT_METRICS_MENU_CHAT_TITLE_TOOLTIP = "Show damage you deal in chat stream",
