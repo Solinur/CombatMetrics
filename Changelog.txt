@@ -386,3 +386,8 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Attempted a fix where the fight could reset once you enter a portal in the Nahviintaas fight.
 [*] Replaced enchants with poison in equip overview when a poison was equipped.
 [*] Updated Libraries
+
+0.9.7 1,955,029 (17.09.2019) 20:10
+[*] API Bump to Dragonhold (100029)
+[*] Added bossfight to LIBCOMBAT_EVENT_FIGHTRECAP callback object by request
+[*] Added a warning to stream log to chat option to indicate that it uses quite a lot of CPU.
