@@ -391,3 +391,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] API Bump to Dragonhold (100029)
 [*] Added bossfight to LIBCOMBAT_EVENT_FIGHTRECAP callback object by request
 [*] Added a warning to stream log to chat option to indicate that it uses quite a lot of CPU.
+
+0.9.8 2,024,353 (20.10.2019) 23:02
+[*] added a small fix to LibCombat to properly detect Soul Trap activations on both magicka and stamina chars.
+[*] Info: The next update will remove bundled libraries. This won't affect internal libraries (CombatMetricsFightData and LibCombat).

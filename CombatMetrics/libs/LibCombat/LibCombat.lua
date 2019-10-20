@@ -13,7 +13,7 @@ Idea: Life and Death
 local _
 
 local lib = {}
-lib.version = 20
+lib.version = 21
 LibCombat = lib
 
 --aliases
@@ -543,9 +543,30 @@ local abilityConversions = {	-- Ability conversions for tracking skill activatio
 
 	[26768] = {126890, 2240, nil, nil}, --Soul Trap --> Soul Trap
 	[40328] = {126894, 2240, nil, nil}, --Soul Splitting Trap --> Soul Splitting Trap
-	[40317] = {126897, 2240, nil, nil}, --Consuming Trap --> Consuming Trap
+	[40317] = {126898, 2240, nil, nil}, --Consuming Trap --> Consuming Trap
 
 }
+
+local function SetAmbiguousSkillData(stats)
+
+	local spellPower = stats.currentspellpower + stats.currentmaxmagicka/10.5
+	local weaponPower = stats.currentweaponpower + stats.currentmaxstamina/10.5
+	
+	if spellPower > weaponPower then 
+	
+		abilityConversions[26768] = {126890, 2240, nil, nil} --Soul Trap --> Soul Trap
+		abilityConversions[40328] = {126895, 2240, nil, nil} --Soul Splitting Trap --> Soul Splitting Trap
+		abilityConversions[40317] = {126897, 2240, nil, nil} --Consuming Trap --> Consuming Trap
+
+	else 
+		
+		abilityConversions[26768] = {126891, 2240, nil, nil} --Soul Trap --> Soul Trap
+		abilityConversions[40328] = {126894, 2240, nil, nil} --Soul Splitting Trap --> Soul Splitting Trap
+		abilityConversions[40317] = {126898, 2240, nil, nil} --Consuming Trap --> Consuming Trap
+	
+	end
+end
+
 
 -- if GetAPIVersion() > 100027 then abilityConversions = abilityConversions28 end
 
@@ -974,8 +995,8 @@ function FightHandler:PrepareFight()
 		GetOtherBuffs(timems)
 		
 		self.stats.currenthealth, _, _ = GetUnitPower("player", POWERTYPE_HEALTH) 
-		self.stats.currentmagicka, _, _ = GetUnitPower("player", POWERTYPE_MAGICKA) 
-		self.stats.currentstamina, _, _ = GetUnitPower("player", POWERTYPE_STAMINA) 		
+		self.stats.currentmagicka, maxmag, _ = GetUnitPower("player", POWERTYPE_MAGICKA) 
+		self.stats.currentstamina, maxstam, _ = GetUnitPower("player", POWERTYPE_STAMINA) 		
 		self.stats.currentulti, _, _ = GetUnitPower("player", POWERTYPE_ULTIMATE)
 		
 		data.critBonusPassive = GetCritBonusFromPassives()
@@ -984,9 +1005,13 @@ function FightHandler:PrepareFight()
 		self.prepared = true
 		
 		self.stats = {}
+		
 		self.startBar = data.bar
+		
+		self:GetNewStats(timems)
+		SetAmbiguousSkillData(self.stats)
+		
 		GetCurrentSkillBars()
-		self:GetNewStats(timems)	
 		
 		lastBossHealthValue = 2
 		
