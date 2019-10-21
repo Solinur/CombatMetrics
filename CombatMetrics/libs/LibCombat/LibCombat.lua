@@ -13,7 +13,7 @@ Idea: Life and Death
 local _
 
 local lib = {}
-lib.version = 21
+lib.version = 22
 LibCombat = lib
 
 --aliases
@@ -548,11 +548,24 @@ local abilityConversions = {	-- Ability conversions for tracking skill activatio
 }
 
 local function SetAmbiguousSkillData(stats)
+    
+    local spellPower, weaponPower
 
-	local spellPower = stats.currentspellpower + stats.currentmaxmagicka/10.5
-	local weaponPower = stats.currentweaponpower + stats.currentmaxstamina/10.5
+    if stats.currentspellpower == nil or stats.currentmaxmagicka == nil or stats.currentweaponpower == nil or stats.currentmaxstamina == nil then 
+    
+        _, spellPower, _ = GetUnitPower("player", POWERTYPE_MAGICKA) 
+        _, weaponPower, _ = GetUnitPower("player", POWERTYPE_STAMINA)
+        
+        if spellPower == nil or weaponPower == nil then return end
+    
+    else 
+
+        local spellPower = stats.currentspellpower + stats.currentmaxmagicka/10.5
+        local weaponPower = stats.currentweaponpower + stats.currentmaxstamina/10.5
+
+    end
 	
-	if spellPower > weaponPower then 
+	if spellPower > weaponPower then
 	
 		abilityConversions[26768] = {126890, 2240, nil, nil} --Soul Trap --> Soul Trap
 		abilityConversions[40328] = {126895, 2240, nil, nil} --Soul Splitting Trap --> Soul Splitting Trap
