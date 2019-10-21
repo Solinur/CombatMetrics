@@ -395,3 +395,6 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 0.9.8 2,024,353 (20.10.2019) 23:02
 [*] added a small fix to LibCombat to properly detect Soul Trap activations on both magicka and stamina chars.
 [*] Info: The next update will remove bundled libraries. This won't affect internal libraries (CombatMetricsFightData and LibCombat).
+
+0.9.9 2,031,155 (21.10.2019) 13:09
+[*] Added a fix to prevent the lua error introduced in last update
