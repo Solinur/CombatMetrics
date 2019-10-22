@@ -13,7 +13,7 @@ Idea: Life and Death
 local _
 
 local lib = {}
-lib.version = 22
+lib.version = 23
 LibCombat = lib
 
 --aliases
@@ -303,6 +303,7 @@ local function GetFormattedAbilityName(id)
 	if name == nil then 
 	
 		name = CustomAbilityName[id] or zo_strformat(SI_ABILITY_NAME, GetAbilityName(id))
+		if name == "Off-Balance" then name = "Off Balance" end
 		AbilityNameCache[id] = name
 		
 	end  
@@ -560,8 +561,8 @@ local function SetAmbiguousSkillData(stats)
     
     else 
 
-        local spellPower = stats.currentspellpower + stats.currentmaxmagicka/10.5
-        local weaponPower = stats.currentweaponpower + stats.currentmaxstamina/10.5
+        spellPower = stats.currentspellpower + stats.currentmaxmagicka/10.5
+        weaponPower = stats.currentweaponpower + stats.currentmaxstamina/10.5
 
     end
 	

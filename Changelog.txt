@@ -398,3 +398,10 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 
 0.9.9 2,031,155 (21.10.2019) 13:09
 [*] Added a fix to prevent the lua error introduced in last update
+
+0.9.10 2,041,371 (21.10.2019) 19:49
+[*] Added a fix to fix the fix. I shouldn't try fixing from work where I can't check ingame if I didn't break things :D.
+[*] Combined instances of different spellings of Off Balanced so they are treated as always.
+[*] Updated LibAddonMenu
+
+

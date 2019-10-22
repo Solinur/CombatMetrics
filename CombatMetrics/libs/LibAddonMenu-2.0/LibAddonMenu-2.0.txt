@@ -1,7 +1,7 @@
-## APIVersion: 100026 100027
+## APIVersion: 100029 100030
 ## Title: LibAddonMenu-2.0
-## Version: 2.0 r29
-## AddOnVersion: 29
+## Version: 2.0 r30
+## AddOnVersion: 30
 ## IsLibrary: true
 ## OptionalDependsOn: LibStub LibDebugLogger
 ## Author: Seerah, sirinsidiator, et al.
