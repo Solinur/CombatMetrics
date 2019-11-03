@@ -2,7 +2,7 @@ local _
 local em = GetEventManager()
 local sv
 CombatMetricsFightData = {}
- 
+
 local AddonName = "CombatMetricsFightData"
 local AddonVersion = 5
 
@@ -15,7 +15,7 @@ local values = {}
 
 for i = 1, 64 do
 
-	local newchar = string.sub(charset, i, i) 
+	local newchar = string.sub(charset, i, i)
 	chars[i-1] = newchar
 	values[newchar] = i-1
 
@@ -26,11 +26,11 @@ local lastid = 0
 local function GetChar(value, logstringdata, length)
 
 	table.insert(logstringdata, chars[value%64])
-	
+
 	local newvalue = math.floor(value/64)
-	
+
 	if length > 1 then GetChar(newvalue, logstringdata, length - 1) end
-	
+
 end
 
 local function Encode(line, layout)
@@ -38,28 +38,28 @@ local function Encode(line, layout)
 	local logstringdata = {}
 
 	for i, size in ipairs(layout) do
-	
-		GetChar(line[i], logstringdata, size) 
-		
+
+		GetChar(line[i], logstringdata, size)
+
 	end
-	
+
 	local logstring = table.concat(logstringdata,"")
-	
+
 	return logstring
 end
 
 local function GetValue(value, logstring, length, offset)
 
 	local newchar = string.sub(logstring, offset, offset)
-	
+
 	if newchar == "" or newchar == nil then return end
 
 	value = value * 64 + values[newchar]
 
-	offset = offset - 1 
+	offset = offset - 1
 
 	if length > 1 then offset, value = GetValue(value, logstring, length - 1, offset) end
-	
+
 	return offset, value
 end
 
@@ -69,41 +69,41 @@ local function Decode(logstring, layout)
 	local line = {}
 
 	for i, chars in ipairs(layout) do
-	
+
 		offset = offset + chars
-	
+
 		local _, value = GetValue(0, logstring, chars, offset)
-		
-		if value then 
-		
+
+		if value then
+
 			line[i] = value
-			
-		else 
+
+		else
 
 			line[i] = nil
-		
+
 		end
-		
+
 	end
-	
+
 	return line
 end
 
 local CombatResultTableLoad = {
 
 	[1] = ACTION_RESULT_DAMAGE,
-	[2] = ACTION_RESULT_DOT_TICK,		
-	[3] = ACTION_RESULT_CRITICAL_DAMAGE,	
-	[4] = ACTION_RESULT_DOT_TICK_CRITICAL,	
+	[2] = ACTION_RESULT_DOT_TICK,
+	[3] = ACTION_RESULT_CRITICAL_DAMAGE,
+	[4] = ACTION_RESULT_DOT_TICK_CRITICAL,
 	[5] = ACTION_RESULT_BLOCKED_DAMAGE,
 	[6] = ACTION_RESULT_DAMAGE_SHIELDED,
 	[7] = ACTION_RESULT_HEAL,
 	[8] = ACTION_RESULT_HOT_TICK,
 	[9] = ACTION_RESULT_CRITICAL_HEAL,
-	[10] = ACTION_RESULT_HOT_TICK_CRITICAL,	
+	[10] = ACTION_RESULT_HOT_TICK_CRITICAL,
 	[11] = ACTION_RESULT_EFFECT_GAINED_DURATION,
 	[12] = ACTION_RESULT_EFFECT_FADED,
-	
+
 }
 
 local CombatResultTableSave = {}
@@ -157,9 +157,9 @@ local logTypeToLayout = {
 	[16] = LAYOUT_MESSAGE,
 	[19] = LAYOUT_SKILL,
 	[20] = LAYOUT_BOSSHP,
-	
+
 }
-	
+
 local layouts = {
 
 	[LAYOUT_COMBAT] = {1, 4, 1, 2, 2, 3, 4, 1, 4}, 		-- (23) type, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType, overflow
@@ -177,13 +177,13 @@ for id, layout in pairs(layouts) do
 
 	-- sum layout
 	local sum = 1 -- offset by one due to separator
-	
+
 	for _, size in ipairs(layout) do
-	
+
 		sum = sum + size
-		
+
 	end
-	
+
 	layoutsize[id] = sum
 end
 
@@ -192,246 +192,246 @@ local function encodeCombatLogLine(line, fight)
 	local unitConversion = fight.unitConversion
 
 	local layoutId = logTypeToLayout[line[1]]
-	
+
 	if layoutId == nil then
 
 		return
-		
+
 	elseif layoutId == LAYOUT_COMBAT then			-- type, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType
-	
+
 		line[3] = CombatResultTableSave[line[3]]
 		line[4] = unitConversion[line[4]]
 		line[5] = unitConversion[line[5]]
 		line[6]	= line[6] > 0 and line[6] or 0
 		line[8]	= line[8] or 0
-	
+
 	elseif layoutId == LAYOUT_EVENT then			-- type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType
-		
+
 		line[3] = unitConversion[line[3]] or 0
 		line[8] = line[8] or 0
-		
+
 	elseif layoutId == LAYOUT_STATS then			-- type, timems, statchange, newvalue, statname
-		
+
 		line[3] = line[3] + 8388608					-- avoid negative numbers
-	
+
 	elseif layoutId == LAYOUT_POWER then			-- type, timems, abilityId, powerValueChange, powerType
 
-		line[3] = line[3] or -3						
+		line[3] = line[3] or -3
 		line[4] = line[4] + 131072					-- avoid negative numbers
 		line[6] = line[6] or 0
-	
+
 	elseif layoutId == LAYOUT_MESSAGE and type(line[3]) ~= "number" then					-- type, timems, messageId
 
 		return
-		
-	elseif layoutId == LAYOUT_MESSAGE then 
-	
+
+	elseif layoutId == LAYOUT_MESSAGE then
+
 		line[4] = line[4] or 0
-		
-	elseif layoutId ~= LAYOUT_SKILL and layoutId ~= LAYOUT_BOSSHP then 
+
+	elseif layoutId ~= LAYOUT_SKILL and layoutId ~= LAYOUT_BOSSHP then
 
 		return
-	
-	end	
-	
+
+	end
+
 	local layout = layouts[layoutId]
 	local size = layoutsize[layoutId]
 
 	local logstring = Encode(line, layout)
-	
+
 	return logstring, size
 end
 
 local function decodeCombatLogLine(line, fight)
 
 	local linetype = values[string.sub(line, 1, 1)]
-	
+
 	local layoutId = logTypeToLayout[linetype]
-	
-	if layoutId == nil then return end 
-		
+
+	if layoutId == nil then return end
+
 	local layout = layouts[layoutId]
-	
+
 	local logdata = Decode(line, layout)
-		
+
 	if layoutId == LAYOUT_COMBAT then						-- type, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType
-	
+
 		logdata[3] = CombatResultTableLoad[logdata[3]]
 		logdata[6] = logdata[6] == 0 and -1 or logdata[6]
 		logdata[8]	= logdata[8] or 0
-	
+
 	elseif layoutId == LAYOUT_EVENT then					-- type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType
-		
+
 		if logdata[3] == 0 then logdata[3] = nil end
 		if logdata[8] == 0 then logdata[8] = nil end
-		
+
 	elseif layoutId == LAYOUT_STATS then					-- type, timems, statchange, newvalue, statname
-		
+
 		if fight.svversion < 5 then logdata[5] = statTableConvert[logdata[5]] end
 		logdata[3] = logdata[3] - 8388608					-- recover negative numbers
-	
+
 	elseif layoutId == LAYOUT_POWER then					-- type, timems, abilityId, powerValueChange, powerType
 
 		if logdata[3] == 262141 then
-		
+
 			logdata[3] = nil
-		
+
 		elseif logdata[3] > 262140 then
-		
+
 			logdata[3] = logdata[3] - 262144
-			
-		end			
-		
+
+		end
+
 		logdata[4] = logdata[4] - 131072
-		
+
 		if logdata[5] > POWERTYPE_ITERATION_END then logdata[5] = logdata[5] - 64 end -- POWERTYPE_HEALTH is -2
-		if logdata[6] == 0 then logdata[6] = nil end	
-	
+		if logdata[6] == 0 then logdata[6] = nil end
+
 	elseif layoutId == LAYOUT_MESSAGE then
-	
+
 		logdata[4] = logdata[4] or 0
 
 	elseif layoutId ~= LAYOUT_SKILL and layoutId ~= LAYOUT_BOSSHP then					-- type, timems, message (e.g. "weapon swap")
 
 		return
-	
-	end	
-	
+
+	end
+
 	return logdata
 
 end
-	
+
 local function convertCombatLog(savedFight, filters)
 
 	local combatlog = savedFight.log
-	savedFight.log = nil 
+	savedFight.log = nil
 
-	if filters == false or combatlog == nil or #combatlog == 0 then 
-	
-		return 	
-		
-	elseif filters == nil then 
-	
-		filters = true 
-		
+	if filters == false or combatlog == nil or #combatlog == 0 then
+
+		return
+
+	elseif filters == nil then
+
+		filters = true
+
 	end
-	
+
 	local starttime = (savedFight.starttime or combatlog[1][2] or 0) - 1000 -- prevent negative numbers
-	
+
 	local tempLogTable = {}
 	local tempLog = {}
 	local currentsize = 0
-	
+
 	local unitConversion = savedFight.unitConversion
-	
+
 	if filters == true then
-		
+
 		for i, line in ipairs(combatlog) do
-			
+
 			line[2] = line[2] - starttime
-			
+
 			local logstring, size = encodeCombatLogLine(line, savedFight)
-			
-			if logstring then 
-			
+
+			if logstring then
+
 				table.insert(tempLog, logstring)
-				
+
 				currentsize = currentsize + size
-				
+
 			end
-			
+
 			if currentsize > 975 then
-			
+
 				local longstring = table.concat(tempLog, ",")
 				table.insert(tempLogTable, longstring)
-				
+
 				tempLog = {}
 				currentsize = 0
-				
+
 			end
-		end	
-		
+		end
+
 	elseif type(filters) == "table" then
-	
+
 		for i, line in ipairs(combatlog) do
-		
-			if filters[line[1]] == true then 
-			
+
+			if filters[line[1]] == true then
+
 				line[2] = line[2] - starttime
-			
+
 				local logstring, size = encodeCombatLogLine(line, savedFight)
-				
-				if logstring then 
-				
+
+				if logstring then
+
 					table.insert(tempLog, logstring)
-					
+
 					currentsize = currentsize + size
-					
+
 				end
-				
+
 				if currentsize > 975 then
-				
+
 					local longstring = table.concat(tempLog, ",")
 					table.insert(tempLogTable, longstring)
-					
+
 					tempLog = {}
 					currentsize = 0
-					
+
 				end
-				
+
 			end
 		end
 	end
-	
-	if currentsize > 0 then 
-	
+
+	if currentsize > 0 then
+
 		local longstring = table.concat(tempLog, ",")
 		table.insert(tempLogTable, longstring)
-		
+
 	end
-	
-	savedFight.stringlog = tempLogTable	-- pin converted log on saved fight 
+
+	savedFight.stringlog = tempLogTable	-- pin converted log on saved fight
 end
 
 local function recoverCombatLog(loadedFight)
 
 	local strings = loadedFight.stringlog
-	
+
 	local timeOffset = 0
 	if loadedFight.svversion >= 3 then timeOffset = 1000 end
-	
+
 	if strings == nil or #strings == 0 then return end
-	
+
 	local combatlog = {}
 	local starttime = loadedFight.starttime - timeOffset
-	
-	for i, data in ipairs(strings) do
-	
-		for line in string.gmatch(data, "([^,]+)") do
-		
-			local logline = decodeCombatLogLine(line, loadedFight)
-			
-			if logline[2] < 16600000 then
-			
-				logline[2] = logline[2] + starttime 
 
-			else 
-			
+	for i, data in ipairs(strings) do
+
+		for line in string.gmatch(data, "([^,]+)") do
+
+			local logline = decodeCombatLogLine(line, loadedFight)
+
+			if logline[2] < 16600000 then
+
+				logline[2] = logline[2] + starttime
+
+			else
+
 				logline[2] = logline[2] + starttime - 16777216
-			
+
 			end
-			
+
 			table.insert(combatlog, logline)
-			
+
 		end
 	end
-	
+
 	loadedFight.log = combatlog
 	loadedFight.stringlog = nil
 	loadedFight.unitConversion = nil
 end
 
-local function reduceUnitIds(fight) 
+local function reduceUnitIds(fight)
 
 	local newUnits = {}
 	local newCalcUnits = {}
@@ -439,29 +439,29 @@ local function reduceUnitIds(fight)
 
 	local calcData = fight.calculated
 	local calcUnits = calcData.units
-	
+
 	local newId = 1
 
 	for id, unit in pairs(fight.units) do
-	
+
 		newUnits[newId] = unit
 		newCalcUnits[newId] = calcUnits[id]
 		unitConversion[id] = newId
-		
+
 		if unit.unitType == 1 then fight.playerid = newId end
-		
-		newId = newId + 1		
-		
+
+		newId = newId + 1
+
 	end
-	
-	local bosses = fight.bosses 
-	
+
+	local bosses = fight.bosses
+
 	for id, boss in pairs(bosses) do
-		
+
 		bosses[id] = unitConversion[bosses[id]]
-		
+
 	end
-	
+
 	fight.units = newUnits
 	fight.unitConversion = unitConversion
 	calcData.units = newCalcUnits
@@ -471,25 +471,25 @@ end
 local function getSavedVariableSize(sv)
 
 	local copy = {}
-	
+
 	collectgarbage("stop")
-		
+
 	local before = collectgarbage("count")
-		
+
 	ZO_DeepTableCopy(sv, copy)
-		
+
 	local after = collectgarbage("count")
-		
+
 	local size = (after - before) / 1024
-	
+
 	collectgarbage("restart")
-	
+
 	collectgarbage()
-	
+
 	copy = nil
-	
+
 	return size
-	
+
 end
 
 local function checkSavedVariable(data)
@@ -497,9 +497,9 @@ local function checkSavedVariable(data)
 	data = data or sv
 
 	local size = getSavedVariableSize(data)
-		
+
 	return size
-	
+
 end
 
 local function saveFight(fight, filters)
@@ -507,13 +507,13 @@ local function saveFight(fight, filters)
 	local newSavedFight = {}
 
 	ZO_DeepTableCopy(fight, newSavedFight)
-	
+
 	newSavedFight.svversion = AddonVersion
-	
+
 	reduceUnitIds(newSavedFight)
-	
+
 	convertCombatLog(newSavedFight, filters)
-	
+
 	table.insert(sv, newSavedFight)
 end
 
@@ -522,16 +522,16 @@ local function loadFight(id)
 	local loadedFight = {}
 
 	ZO_DeepTableCopy(sv[id], loadedFight)
-	
+
 	recoverCombatLog(loadedFight)
-	
+
 	return loadedFight
 end
 
 local function GetFights()
 
 	return sv
-	
+
 end
 
 local function ConvertSV(version)
@@ -539,14 +539,14 @@ local function ConvertSV(version)
 	if version < 2 then -- convert format if coming from CombatMetrics < 0.8
 
 		for i = 1, #sv do
-		
+
 			saveFight(sv[1])
 			table.remove(sv, 1)
-			
+
 		end
-	
+
 	end
-	
+
 	sv.version = AddonVersion
 
 end
@@ -560,22 +560,22 @@ CombatMetricsFightData.GetFights = GetFights
 local function Initialize(event, addon)
 
 	if addon ~= AddonName then return end
-	
+
 	em:UnregisterForEvent(AddonName, EVENT_ADD_ON_LOADED)
-	
+
 	sv = _G["CombatMetricsFightDataSV"]
-	
-	if sv == nil or sv.version == nil then 
-	
-		sv = {["version"] = AddonVersion} 
+
+	if sv == nil or sv.version == nil then
+
+		sv = {["version"] = AddonVersion}
 		_G["CombatMetricsFightDataSV"] = sv
-	
+
 	end
-	
+
 	local svversion = sv.version
-	
+
 	if svversion ~= AddonVersion then ConvertSV(svversion) end
-	
+
 end
 
 em:RegisterForEvent(AddonName, EVENT_ADD_ON_LOADED, function(...) Initialize(...) end)

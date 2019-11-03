@@ -34,7 +34,7 @@ function CMX.MakeMenu(svdefaults)
 			getFunc = function() return CombatMetrics_Save.Default[GetDisplayName()]['$AccountWide']["Settings"]["accountwide"] end,
 			setFunc = function(value) CombatMetrics_Save.Default[GetDisplayName()]['$AccountWide']["Settings"]["accountwide"] = value end,
 			requiresReload = true,
-		},		
+		},
 		{
 			type = "custom",
 		},
@@ -57,7 +57,7 @@ function CMX.MakeMenu(svdefaults)
 			type = "slider",
 			name = GetString(SI_COMBAT_METRICS_MENU_SVSIZE_NAME),
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_SVSIZE_TOOLTIP),
-			warning = GetString(SI_COMBAT_METRICS_MENU_SVSIZE_WARNING), 
+			warning = GetString(SI_COMBAT_METRICS_MENU_SVSIZE_WARNING),
 			min = 5,
 			max = 50,
 			step = 1,
@@ -71,7 +71,7 @@ function CMX.MakeMenu(svdefaults)
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_BOSSFIGHTS_TOOLTIP),
 			default = def.keepbossfights,
 			getFunc = function() return db.keepbossfights end,
-			setFunc = function(value) 
+			setFunc = function(value)
 				db.keepbossfights = value
 			end,
 		},
@@ -81,9 +81,9 @@ function CMX.MakeMenu(svdefaults)
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_MG_TOOLTIP),
 			default = def.recordgrp,
 			getFunc = function() return db.recordgrp end,
-			setFunc = function(value) 
+			setFunc = function(value)
 				db.recordgrp = value
-				CMX.UpdateEvents() 
+				CMX.UpdateEvents()
 			end,
 		},
 		{
@@ -109,8 +109,8 @@ function CMX.MakeMenu(svdefaults)
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_LM_TOOLTIP),
 			default = def.lightmode,
 			getFunc = function() return db.lightmode end,
-			setFunc = function(value) 
-				db.lightmode = value	
+			setFunc = function(value)
+				db.lightmode = value
 				CMX.UpdateEvents()
 			end,
 		},
@@ -120,8 +120,8 @@ function CMX.MakeMenu(svdefaults)
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_NOPVP_TOOLTIP),
 			default = def.offincyrodil,
 			getFunc = function() return db.offincyrodil end,
-			setFunc = function(value) 
-				db.offincyrodil = value 
+			setFunc = function(value)
+				db.offincyrodil = value
 				CMX.UpdateEvents()
 			end,
 		},
@@ -131,8 +131,8 @@ function CMX.MakeMenu(svdefaults)
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_LMPVP_TOOLTIP),
 			default = def.lightmodeincyrodil,
 			getFunc = function() return db.lightmodeincyrodil end,
-			setFunc = function(value) 
-				db.lightmodeincyrodil = value 
+			setFunc = function(value)
+				db.lightmodeincyrodil = value
 				CMX.UpdateEvents()
 			end,
 			disabled = function() return (db.offincyrodil or db.lightmode) end,
@@ -144,7 +144,7 @@ function CMX.MakeMenu(svdefaults)
 			default = def.autoselectchatchannel,
 			getFunc = function() return db.autoselectchatchannel end,
 			setFunc = function(value) db.autoselectchatchannel = value end,
-		},	
+		},
 		{
 			type = "checkbox",
 			name = GetString(SI_COMBAT_METRICS_MENU_AS_NAME),
@@ -152,7 +152,7 @@ function CMX.MakeMenu(svdefaults)
 			default = def.autoscreenshot,
 			getFunc = function() return db.autoscreenshot end,
 			setFunc = function(value) db.autoscreenshot = value end,
-		},		
+		},
 		{
 			type = "slider",
 			name = GetString(SI_COMBAT_METRICS_MENU_ML_NAME),
@@ -174,9 +174,9 @@ function CMX.MakeMenu(svdefaults)
 			step = 10,
 			default = def.FightReport.scale,
 			getFunc = function() return db.FightReport.scale*100  end,
-			setFunc = function(value) 
-					db.FightReport.scale = value/100 
-					CombatMetrics_Report:Resize(value/100)	
+			setFunc = function(value)
+					db.FightReport.scale = value/100
+					CombatMetrics_Report:Resize(value/100)
 				end,
 		},
 		{
@@ -192,12 +192,12 @@ function CMX.MakeMenu(svdefaults)
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_CRUSHER_TOOLTIP),
 			default = def.crusherValue,
 			getFunc = function() return db.crusherValue end,
-			setFunc = function(value) 
+			setFunc = function(value)
 					if value then
-					
+
 						local number = zo_round(tonumber(value) or def.crusherValue)
 						CMX.SetCrusher(number)
-					
+
 					end
 				end
 		},
@@ -207,12 +207,12 @@ function CMX.MakeMenu(svdefaults)
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_MOBRESISTANCE_TOOLTIP),
 			default = def.unitresistance,
 			getFunc = function() return db.unitresistance end,
-			setFunc = function(value) 				
+			setFunc = function(value)
 					if value then
-					
+
 						local number = zo_round(tonumber(value) or def.unitresistance)
 						db.unitresistance = number
-					
+
 					end
 				end
 		},
@@ -226,9 +226,9 @@ function CMX.MakeMenu(svdefaults)
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_ENABLE_TOOLTIP),
 			default = def.liveReport.enabled,
 			getFunc = function() return db.liveReport.enabled end,
-			setFunc = function(value) 
-				CombatMetrics_LiveReport:Toggle(value) 
-				db.liveReport.enabled = value 
+			setFunc = function(value)
+				CombatMetrics_LiveReport:Toggle(value)
+				db.liveReport.enabled = value
 			end,
 		},
 		{
@@ -237,9 +237,9 @@ function CMX.MakeMenu(svdefaults)
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_LR_LOCK_TOOLTIP),
 			default = def.liveReport.locked,
 			getFunc = function() return db.liveReport.locked end,
-			setFunc = function(value) 
-				CombatMetrics_LiveReport:SetMovable(not value) 
-				db.liveReport.locked = value 
+			setFunc = function(value)
+				CombatMetrics_LiveReport:SetMovable(not value)
+				db.liveReport.locked = value
 			end,
 		},
 		{
@@ -249,9 +249,9 @@ function CMX.MakeMenu(svdefaults)
 			default = def.liveReport.layout,
 			choices = {"Compact", "Horizontal", "Vertical"},
 			getFunc = function() return db.liveReport.layout end,
-			setFunc = function(value) 
-				db.liveReport.layout = value 
-				CombatMetrics_LiveReport:Refresh() 
+			setFunc = function(value)
+				db.liveReport.layout = value
+				CombatMetrics_LiveReport:Refresh()
 			end,
 			disabled = function() return not db.liveReport.enabled end,
 		},
@@ -264,8 +264,8 @@ function CMX.MakeMenu(svdefaults)
 			step = 10,
 			default = def.liveReport.scale,
 			getFunc = function() return db.liveReport.scale*100  end,
-			setFunc = function(value) 
-					db.liveReport.scale = value/100 
+			setFunc = function(value)
+					db.liveReport.scale = value/100
 					CombatMetrics_LiveReport:Resize(value/100)
 				end,
 			disabled = function() return not db.liveReport.enabled end,
@@ -279,9 +279,9 @@ function CMX.MakeMenu(svdefaults)
 			step = 1,
 			default = def.liveReport.bgalpha,
 			getFunc = function() return db.liveReport.bgalpha end,
-			setFunc = function(value) 
-				db.liveReport.bgalpha = value 
-				CombatMetrics_LiveReportBG:SetAlpha(value/100) 
+			setFunc = function(value)
+				db.liveReport.bgalpha = value
+				CombatMetrics_LiveReportBG:SetAlpha(value/100)
 			end,
 			disabled = function() return not db.liveReport.enabled end,
 		},
@@ -291,9 +291,9 @@ function CMX.MakeMenu(svdefaults)
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_LR_ALIGNMENT_TOOLTIP),
 			default = def.liveReport.alignmentleft,
 			getFunc = function() return db.liveReport.alignmentleft end,
-			setFunc = function(value) 
-				db.liveReport.alignmentleft = value 
-				CombatMetrics_LiveReport:Refresh() 
+			setFunc = function(value)
+				db.liveReport.alignmentleft = value
+				CombatMetrics_LiveReport:Refresh()
 			end,
 		},
 		{
@@ -303,9 +303,9 @@ function CMX.MakeMenu(svdefaults)
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_SHOW_DPS_TOOLTIP),
 			default = def.liveReport.damageOut,
 			getFunc = function() return db.liveReport.damageOut end,
-			setFunc = function(value) 
+			setFunc = function(value)
 				db.liveReport.damageOut = value
-				CombatMetrics_LiveReport:Refresh() 
+				CombatMetrics_LiveReport:Refresh()
 			end,
 			disabled = function() return not db.liveReport.enabled end,
 		},
@@ -316,9 +316,9 @@ function CMX.MakeMenu(svdefaults)
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_SHOW_SDPS_TOOLTIP),
 			default = def.liveReport.damageOutSingle,
 			getFunc = function() return db.liveReport.damageOutSingle end,
-			setFunc = function(value) 
+			setFunc = function(value)
 				db.liveReport.damageOutSingle = value
-				CombatMetrics_LiveReport:Refresh() 
+				CombatMetrics_LiveReport:Refresh()
 			end,
 			disabled = function() return not db.liveReport.enabled end,
 		},
@@ -329,9 +329,9 @@ function CMX.MakeMenu(svdefaults)
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_SHOW_HPSA_TOOLTIP),
 			default = def.liveReport.healOutAbsolute,
 			getFunc = function() return db.liveReport.healOutAbsolute end,
-			setFunc = function(value) 
-				db.liveReport.healOutAbsolute = value 
-				CombatMetrics_LiveReport:Refresh() 
+			setFunc = function(value)
+				db.liveReport.healOutAbsolute = value
+				CombatMetrics_LiveReport:Refresh()
 			end,
 			disabled = function() return not db.liveReport.enabled end,
 		},
@@ -342,9 +342,9 @@ function CMX.MakeMenu(svdefaults)
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_SHOW_HPS_TOOLTIP),
 			default = def.liveReport.healOut,
 			getFunc = function() return db.liveReport.healOut end,
-			setFunc = function(value) 
-				db.liveReport.healOut = value 
-				CombatMetrics_LiveReport:Refresh() 
+			setFunc = function(value)
+				db.liveReport.healOut = value
+				CombatMetrics_LiveReport:Refresh()
 			end,
 			disabled = function() return not db.liveReport.enabled end,
 		},
@@ -355,9 +355,9 @@ function CMX.MakeMenu(svdefaults)
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_SHOW_INC_DPS_TOOLTIP),
 			default = def.liveReport.damageIn,
 			getFunc = function() return db.liveReport.damageIn end,
-			setFunc = function(value) 
-				db.liveReport.damageIn = value 
-				CombatMetrics_LiveReport:Refresh() 
+			setFunc = function(value)
+				db.liveReport.damageIn = value
+				CombatMetrics_LiveReport:Refresh()
 			end,
 			disabled = function() return not db.liveReport.enabled end,
 		},
@@ -368,9 +368,9 @@ function CMX.MakeMenu(svdefaults)
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_SHOW_INC_HPS_TOOLTIP),
 			default = def.liveReport.healIn,
 			getFunc = function() return db.liveReport.healIn end,
-			setFunc = function(value) 
-				db.liveReport.healIn = value 
-				CombatMetrics_LiveReport:Refresh() 
+			setFunc = function(value)
+				db.liveReport.healIn = value
+				CombatMetrics_LiveReport:Refresh()
 			end,
 			disabled = function() return not db.liveReport.enabled end,
 		},
@@ -381,16 +381,16 @@ function CMX.MakeMenu(svdefaults)
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_SHOW_TIME_TOOLTIP),
 			default = def.liveReport.time,
 			getFunc = function() return db.liveReport.time end,
-			setFunc = function(value) 
-				db.liveReport.time = value 
-				CombatMetrics_LiveReport:Refresh() 
+			setFunc = function(value)
+				db.liveReport.time = value
+				CombatMetrics_LiveReport:Refresh()
 			end,
 			disabled = function() return not db.liveReport.enabled end,
 		},
 		{
 			type = "custom",
 			width = "half",
-			
+
 		},
 		{
 			type = "custom",
@@ -403,8 +403,8 @@ function CMX.MakeMenu(svdefaults)
 			type = "checkbox",
 			name = GetString(SI_COMBAT_METRICS_MENU_ENABLE_NAME),
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_CHAT_DH_TOOLTIP),
-			default = def.chatLog.enabled,			
-			warning = GetString(SI_COMBAT_METRICS_MENU_CHAT_WARNING), 
+			default = def.chatLog.enabled,
+			warning = GetString(SI_COMBAT_METRICS_MENU_CHAT_WARNING),
 			getFunc = function() return db.chatLog.enabled end,
 			setFunc = function(value) if value then CMX.InitializeChat() else CMX.RemoveCombatLog() end db.chatLog.enabled = value end,
 		},
@@ -544,7 +544,7 @@ function CMX.MakeMenu(svdefaults)
 	}
 
 	if GetDisplayName() == "@Solinur" then options[#options+1] = {
-			
+
 			type = "checkbox",
 			name = "Developer Debug",
 			tooltip = "Developer Debug",
@@ -553,16 +553,16 @@ function CMX.MakeMenu(svdefaults)
 			setFunc = function(value) db.debuginfo.dev = value end,
 			hidden = GetDisplayName() == "@Solinur",
 			width = "half",
-			
+
 		}
 	end
-	
+
 	local panel = menu:RegisterAddonPanel("CMX_Options", panelData)
 	menu:RegisterOptionControls("CMX_Options", options)
-	
+
 	function CMX.OpenSettings()
-	
+
 		menu:OpenToPanel(panel)
-		
+
 	end
 end
