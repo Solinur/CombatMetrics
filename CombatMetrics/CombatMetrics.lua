@@ -799,10 +799,10 @@ function CMX.GenerateSelectionStats(fight, menuItem, selections) -- this is simi
 		local unitData = fight.units[unitId]
 
 		local isNotEmpty = unitTotalValue > 0 or NonContiguousCount(unit.buffs) > 0
-		local isEnemy = unitData.unitType ~= COMBAT_UNIT_TYPE_GROUP and unitData.unitType ~= COMBAT_UNIT_TYPE_PLAYER_PET and unitData.unitType ~= COMBAT_UNIT_TYPE_PLAYER
+		local isEnemy = unitData and (unitData.unitType ~= COMBAT_UNIT_TYPE_GROUP and unitData.unitType ~= COMBAT_UNIT_TYPE_PLAYER_PET and unitData.unitType ~= COMBAT_UNIT_TYPE_PLAYER) -- some user had unitData go to nil so make sure that unit will be ignored
 		local isDamageCategory = menuItem == "damageIn" or menuItem == "damageOut"
 
-		if isNotEmpty and (isEnemy == isDamageCategory) then
+		if isNotEmpty and (isEnemy == isDamageCategory) and unitData then
 
 			for name, buff in pairs(unit.buffs) do
 

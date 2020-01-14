@@ -1517,6 +1517,7 @@ local function updateFightStatsPanelLeft(panel)
 
 			local amountkey = category..v
 			local countkey = CountStrings[category]..v
+			local basekey
 
 			if v == "Overflow" or v == "Absolute" then basekey = "Absolute" else basekey = rowList[1] end
 
@@ -3186,13 +3187,13 @@ local function Total(category)
 
 	if category == "healingOut" or category == "healingIn" then
 
-		t0 = (fightData.hpsstart - combatstart) / 1000 or 0
-		tmax = (fightData.hpsend - combatstart) / 1000 or 1
+		t0 = ((fightData.hpsstart - combatstart) / 1000) or 0
+		tmax = ((fightData.hpsend - combatstart) / 1000) or 1
 
 	else
 
-		t0 = (fightData.dpsstart - combatstart) / 1000 or 0
-		tmax = (fightData.dpsend - combatstart) / 1000 or 1
+		t0 = ((fightData.dpsstart - combatstart) / 1000) or 0
+		tmax = ((fightData.dpsend - combatstart) / 1000) or 1
 
 	end
 

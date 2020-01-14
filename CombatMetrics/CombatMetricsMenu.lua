@@ -6,7 +6,9 @@ local _
 
 function CMX.MakeMenu(svdefaults)
     -- load the settings->addons menu library
-	local menu = LibStub("LibAddonMenu-2.0")
+	local menu = LibAddonMenu2
+	if not LibAddonMenu2 then return end
+	
 	local db = CMX.db
 	local def = svdefaults
 
