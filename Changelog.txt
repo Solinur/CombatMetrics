@@ -404,4 +404,8 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Combined instances of different spellings of Off Balanced so they are treated as always.
 [*] Updated LibAddonMenu
 
-
+0.9.11
+[*] Removed embedded libraries. Please install them yourself. Check the Addon description page for a list of required libraries.
+[*] Fixed a display issue in fight stats panel
+[*] Some code formatting and cleanup
+[*] Small fixes to prevent rare luza errors
