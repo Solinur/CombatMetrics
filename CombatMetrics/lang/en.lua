@@ -190,6 +190,7 @@
 	SI_COMBAT_METRICS_AVE = "Avg",  -- Average, short
 	SI_COMBAT_METRICS_AVE_N = "Avg N",  -- Average Normal, short
 	SI_COMBAT_METRICS_AVE_C = "Avg C",  -- Average Crit, short
+	SI_COMBAT_METRICS_AVE_B = "Avg B",  -- Average Blocked, short
 	SI_COMBAT_METRICS_AVERAGE = "Average",
 	SI_COMBAT_METRICS_NORMAL_HITS = "Normal Hits",
 	SI_COMBAT_METRICS_MAX = "Max",  -- Maximum

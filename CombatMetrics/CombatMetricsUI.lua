@@ -810,8 +810,6 @@ function CMX.LoadItem(listitem)
 
 	end
 
-	local category = db.FightReport.category
-
 	ClearSelections()
 
 	toggleFightList()
@@ -2300,46 +2298,47 @@ local hitCritLayoutTable = {
 	[1] = {"Critical", "Total", GetString(SI_COMBAT_METRICS_CRITS), GetString(SI_COMBAT_METRICS_HITS)},
 	[2] = {"Total", "Critical", GetString(SI_COMBAT_METRICS_HITS), GetString(SI_COMBAT_METRICS_CRITS)},
 	[3] = {"Normal", "Critical", GetString(SI_COMBAT_METRICS_NORM), GetString(SI_COMBAT_METRICS_CRITS)},
+	[4] = {"Blocked", "Total", GetString(SI_COMBAT_METRICS_BLOCKS), GetString(SI_COMBAT_METRICS_HITS)},
+	[5] = {"Total", "Blocked", GetString(SI_COMBAT_METRICS_HITS), GetString(SI_COMBAT_METRICS_BLOCKS)},
+	[6] = {"Normal", "Blocked", GetString(SI_COMBAT_METRICS_NORM), GetString(SI_COMBAT_METRICS_BLOCKS)},
 
 }
 
 do 	-- Context Menu for hit/crit column on ability panel
 
-	local function selectHitCritOption1()
+	local function getMenuData(id)
 
-		db.FightReport.hitCritLayout = 1
+		local category = db.FightReport.category
+		local hitCritLayout = hitCritLayoutTable[id]
+		local text = string.format("%s/%s", hitCritLayout[3], hitCritLayout[4])
 
-		CombatMetrics_Report_AbilityPanel:Update()
+		local function callback()
 
-	end
+			db.FightReport.hitCritLayout[category] = id
 
-	local function selectHitCritOption2()
+			CombatMetrics_Report_AbilityPanel:Update()
 
-		db.FightReport.hitCritLayout = 2
+		end
 
-		CombatMetrics_Report_AbilityPanel:Update()
-
-	end
-
-	local function selectHitCritOption3()
-
-		db.FightReport.hitCritLayout = 3
-
-		CombatMetrics_Report_AbilityPanel:Update()
+		return text, callback
 
 	end
-
-	local text1 = string.format("%s/%s", GetString(SI_COMBAT_METRICS_CRITS), GetString(SI_COMBAT_METRICS_HITS))
-	local text2 = string.format("%s/%s", GetString(SI_COMBAT_METRICS_HITS), GetString(SI_COMBAT_METRICS_CRITS))
-	local text3 = string.format("%s/%s", GetString(SI_COMBAT_METRICS_NORM), GetString(SI_COMBAT_METRICS_CRITS))
 
 	function CMX.HitCritContextMenu(control, button)
 
 		ClearMenu()
 
-		AddCustomMenuItem(text1, selectHitCritOption1)
-		AddCustomMenuItem(text2, selectHitCritOption2)
-		AddCustomMenuItem(text3, selectHitCritOption3)
+		if db.FightReport.category == "damageIn" then
+
+			AddCustomMenuItem(getMenuData(4))
+			AddCustomMenuItem(getMenuData(5))
+			AddCustomMenuItem(getMenuData(6))
+
+		end
+
+		AddCustomMenuItem(getMenuData(1))
+		AddCustomMenuItem(getMenuData(2))
+		AddCustomMenuItem(getMenuData(3))
 
 		ShowMenu(control)
 
@@ -2349,50 +2348,48 @@ end
 
 local averageLayoutTable = {
 
-	[1] = {"Total", GetString(SI_COMBAT_METRICS_AVE)},
-	[2] = {"Normal", GetString(SI_COMBAT_METRICS_AVE_N)},
-	[3] = {"Critical", GetString(SI_COMBAT_METRICS_AVE_C)},
+	[1] = {"Total", GetString(SI_COMBAT_METRICS_AVE), GetString(SI_COMBAT_METRICS_HITS)},
+	[2] = {"Normal", GetString(SI_COMBAT_METRICS_AVE_N), GetString(SI_COMBAT_METRICS_NORMAL_HITS)},
+	[3] = {"Critical", GetString(SI_COMBAT_METRICS_AVE_C), GetString(SI_COMBAT_METRICS_CRITS)},
+	[4] = {"Blocked", GetString(SI_COMBAT_METRICS_AVE_B), GetString(SI_COMBAT_METRICS_BLOCKS)},
 
 }
 
 do 	-- Context Menu for average column on ability panel
 
-	local function selectAverageOption1()
+	local function getMenuData(id)
 
-		db.FightReport.averageLayout = 1
+		local averageLayout = averageLayoutTable[id]
 
-		CombatMetrics_Report_AbilityPanel:Update()
+		local text = string.format("%s %s", GetString(SI_COMBAT_METRICS_AVERAGE), averageLayout[3])
 
-	end
+		local category = db.FightReport.category
 
-	local function selectAverageOption2()
+		local function callback()
 
-		db.FightReport.averageLayout = 2
+			db.FightReport.averageLayout[category] = id
 
-		CombatMetrics_Report_AbilityPanel:Update()
+			CombatMetrics_Report_AbilityPanel:Update()
 
-	end
+		end
 
-	local function selectAverageOption3()
-
-		db.FightReport.averageLayout = 3
-
-		CombatMetrics_Report_AbilityPanel:Update()
+		return text, callback
 
 	end
-
-	local text1 = string.format("%s %s", GetString(SI_COMBAT_METRICS_AVERAGE), GetString(SI_COMBAT_METRICS_HITS))
-	local text2 = string.format("%s %s", GetString(SI_COMBAT_METRICS_AVERAGE), GetString(SI_COMBAT_METRICS_NORMAL_HITS))
-	local text3 = string.format("%s %s", GetString(SI_COMBAT_METRICS_AVERAGE), GetString(SI_COMBAT_METRICS_CRITS))
 
 	function CMX.AverageContextMenu(control, button)
 
 		ClearMenu()
 
+		AddCustomMenuItem(getMenuData(1))
+		AddCustomMenuItem(getMenuData(2))
+		AddCustomMenuItem(getMenuData(3))
 
-		AddCustomMenuItem(text1, selectAverageOption1)
-		AddCustomMenuItem(text2, selectAverageOption2)
-		AddCustomMenuItem(text3, selectAverageOption3)
+		if db.FightReport.category == "damageIn" then
+
+			AddCustomMenuItem(getMenuData(4))
+
+		end
 
 		ShowMenu(control)
 
@@ -2403,7 +2400,9 @@ do 	-- Context Menu for Min/Max column on ability panel
 
 	local function selectMinMaxOption1()
 
-		db.FightReport.maxValue = true
+		local category = db.FightReport.category
+
+		db.FightReport.maxValue[category] = true
 
 		CombatMetrics_Report_AbilityPanel:Update()
 
@@ -2411,7 +2410,9 @@ do 	-- Context Menu for Min/Max column on ability panel
 
 	local function selectMinMaxOption2()
 
-		db.FightReport.maxValue = false
+		local category = db.FightReport.category
+
+		db.FightReport.maxValue[category] = false
 
 		CombatMetrics_Report_AbilityPanel:Update()
 
@@ -2441,8 +2442,10 @@ local function updateAbilityPanel(panel)
 	local settings = db.FightReport
 
 	local category = settings.category
-	local hitCritLayout = hitCritLayoutTable[settings.hitCritLayout]
-	local averageLayout = averageLayoutTable[settings.averageLayout]
+	local hitCritLayoutId = settings.hitCritLayout[category]
+	local averageLayoutId = settings.averageLayout[category]
+	local hitCritLayout = hitCritLayoutTable[hitCritLayoutId]
+	local averageLayout = averageLayoutTable[averageLayoutId]
 	local minmax = settings.maxValue
 
 	local isDamage = category == "damageIn" or category == "damageOut"
@@ -2456,9 +2459,9 @@ local function updateAbilityPanel(panel)
 
 	header:GetNamedChild("Total"):SetText(valueColumnLabel)
 
-	local headerCritString = showOverHeal and GetString(SI_COMBAT_METRICS_OH) or category == "damageIn" and GetString(SI_COMBAT_METRICS_BLOCKS) or hitCritLayout[3]
-	local headerHitString = showOverHeal and GetString(SI_COMBAT_METRICS_HEALS) or category == "damageIn" and GetString(SI_COMBAT_METRICS_HITS) or hitCritLayout[4]
-	local headerCritRatioString = showOverHeal and GetString(SI_COMBAT_METRICS_OH) or category == "damageIn" and GetString(SI_COMBAT_METRICS_BLOCKS) or GetString(SI_COMBAT_METRICS_CRITS)
+	local headerCritString = showOverHeal and GetString(SI_COMBAT_METRICS_OH) or hitCritLayout[3]
+	local headerHitString = showOverHeal and GetString(SI_COMBAT_METRICS_HEALS) or hitCritLayout[4]
+	local headerCritRatioString = showOverHeal and GetString(SI_COMBAT_METRICS_OH) or hitCritLayoutId > 3 and GetString(SI_COMBAT_METRICS_BLOCKS) or GetString(SI_COMBAT_METRICS_CRITS)
 
 	header:GetNamedChild("Crits"):SetText(headerCritString)
 	header:GetNamedChild("Hits"):SetText("/" ..  headerHitString)
@@ -2500,12 +2503,12 @@ local function updateAbilityPanel(panel)
 	local currentanchor = {TOPLEFT, scrollchild, TOPLEFT, 0, 1}
 
 	local totalHitKey = showOverHeal and "healsOutAbsolute" or countString..totalkey
-	local critKey = showOverHeal and "healsOutOverflow" or countString.."Critical"
+	local critKey = showOverHeal and "healsOutOverflow" or hitCritLayoutId > 3 and countString.."Blocked" or countString.."Critical"
 
-	local ratioKey1 = showOverHeal and "healsOutOverflow" or category == "damageIn" and countString.."Blocked" or countString..hitCritLayout[1]	-- first value of the crits/hits column display
-	local ratioKey2 = showOverHeal and "healsOutAbsolute" or category == "damageIn" and totalHitKey or countString..hitCritLayout[2]  -- second value of the crits/hits column display
+	local ratioKey1 = showOverHeal and "healsOutOverflow" or countString..hitCritLayout[1]	-- first value of the crits/hits column display
+	local ratioKey2 = showOverHeal and "healsOutAbsolute" or countString..hitCritLayout[2]  -- second value of the crits/hits column display
 
-	local avgKey1 = showOverHeal and "healingOutAbsolute" or category..averageLayout[1]					-- damage value of the avg column display
+	local avgKey1 = showOverHeal and "healingOutAbsolute" or category..averageLayout[1]		-- damage value of the avg column display
 	local avgKey2 = showOverHeal and "healsOutAbsolute" or countString..averageLayout[1]	-- hits value of the avg column display
 
 	local DPSKey = showOverHeal and "HPSAOut" or DPSstrings[category]
@@ -3860,7 +3863,7 @@ do
 
 	local oldx, oldy
 
-	function updatePlotCursor()
+	local function updatePlotCursor()
 
 		local x, y = GetUIMousePosition()
 
@@ -3870,7 +3873,7 @@ do
 
 		local cursorTime, cursorValue = plotWindow:MapUIPosXY(x, y)
 
-		dataAtCursorTime = {}
+		local dataAtCursorTime = {}
 
 		for _, plot in pairs(plotWindow.plots) do
 
@@ -6068,10 +6071,6 @@ function CMX.InitializeUI()
 
 	SVHandler = CombatMetricsFightData
 	savedFights = SVHandler.GetFights()
-
-
-	if type(db.FightReport.hitCritLayout) ~= "number" then db.FightReport.hitCritLayout = 1 end -- TODO: only for beta users, remove
-	if type(db.FightReport.averageLayout) ~= "number" then db.FightReport.averageLayout = 1 end -- TODO: only for beta users, remove
 
 	local _, size = checkSaveLimit()
 	db.SVsize = size

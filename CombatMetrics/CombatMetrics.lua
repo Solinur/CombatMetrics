@@ -34,7 +34,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "0.9.10"
+CMX.version = "0.9.12"
 
 function CMX.GetFeedBackData(parentcontrol)
 
@@ -2051,9 +2051,26 @@ local svdefaults = {
 
 		},
 
-		["hitCritLayout"] = {"Critical", "Total", "SI_COMBAT_METRICS_HITS", "SI_COMBAT_METRICS_CRITS"},
-		["averageLayout"] = {"Total", "SI_COMBAT_METRICS_HITS"},
-		["maxValue"] = true,
+		["hitCritLayout"] = {
+			damageOut = 1,
+			damageIn = 1,
+			healingOut = 1,
+			healingIn = 1,
+		},
+
+		["averageLayout"] = {
+			damageOut = 1,
+			damageIn = 1,
+			healingOut = 1,
+			healingIn = 1,
+		},
+
+		["maxValue"] = {
+			damageOut = true,
+			damageIn = true,
+			healingOut = true,
+			healingIn = true,
+		}
 	},
 
 	["liveReport"] = {
@@ -2127,9 +2144,40 @@ local function Initialize(event, addon)
 	CMX.db = ZO_SavedVars:NewAccountWide("CombatMetrics_Save", 5, "Settings", svdefaults)
 	if not CMX.db.accountwide then CMX.db = ZO_SavedVars:NewCharacterIdSettings("CombatMetrics_Save", 5, "Settings", svdefaults) end
 
+	db = CMX.db
+
 	local fightdata = CombatMetricsFightData
 
 	-- convert legacy data into new format
+
+	if type(db.FightReport.hitCritLayout) == "number" then
+
+		local oldValue1 = db.FightReport.hitCritLayout
+		local oldValue2 = db.FightReport.averageLayout
+		local oldValue3 = db.FightReport.maxValue
+
+		db.FightReport.hitCritLayout = {
+			["damageOut"] 	= oldValue1,
+			["damageIn"] 	= oldValue1,
+			["healingOut"] 	= oldValue1,
+			["healingIn"] 	= oldValue1,
+		}
+
+		db.FightReport.averageLayout = {
+			["damageOut"] 	= oldValue2,
+			["damageIn"] 	= oldValue2,
+			["healingOut"] 	= oldValue2,
+			["healingIn"] 	= oldValue2,
+		}
+
+		db.FightReport.maxValue = {
+			["damageOut"] 	= oldValue3,
+			["damageIn"] 	= oldValue3,
+			["healingOut"] 	= oldValue3,
+			["healingIn"] 	= oldValue3,
+		}
+
+	end
 
 	local oldsv = CombatMetrics_Save["Default"][GetDisplayName()]["$AccountWide"]
 
@@ -2149,14 +2197,12 @@ local function Initialize(event, addon)
 
 	--
 
-	db = CMX.db
-
 	local crushername = GetFormattedAbilityName(17906)
 
 	SpellResistDebuffs[crushername] = db.crusherValue
 	PhysResistDebuffs[crushername] = db.crusherValue
 
-	if db.chatLog.enabled then zo_callLater(CMX.InitializeChat, 200) end
+	if db.chatLog.enabled then zo_callLater(CMX.InitializeChat, 500) end
 
 	CMX.playername = zo_strformat(SI_UNIT_NAME,GetUnitName("player"))
 	CMX.inCombat = IsUnitInCombat("player")

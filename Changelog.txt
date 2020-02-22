@@ -404,8 +404,13 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Combined instances of different spellings of Off Balanced so they are treated as always.
 [*] Updated LibAddonMenu
 
-0.9.11
+0.9.11 2,173,600 (22.01.2020) 00:11
 [*] Removed embedded libraries. Please install them yourself. Check the Addon description page for a list of required libraries.
 [*] Fixed a display issue in fight stats panel
 [*] Some code formatting and cleanup
-[*] Small fixes to prevent rare luza errors
+[*] Small fixes to prevent rare lua errors
+
+0.9.12 2,246,385 (22.02.2020) 23:20
+[*] Fixed an issue where in the incoming damage page inconsistant data was shown. You can now select to show block or crit data with the % column adjusting accordingly.
+[*] Average column can now also show the average block values.
+[*] Let me know if you'd find block statistics also useful for the damage out page.
