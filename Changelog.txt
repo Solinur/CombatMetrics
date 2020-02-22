@@ -411,6 +411,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Small fixes to prevent rare lua errors
 
 0.9.12 2,246,385 (22.02.2020) 23:20
+[*] API Bump to Harrowstorm (100030)
 [*] Fixed an issue where in the incoming damage page inconsistant data was shown. You can now select to show block or crit data with the % column adjusting accordingly.
 [*] Average column can now also show the average block values.
 [*] Let me know if you'd find block statistics also useful for the damage out page.
