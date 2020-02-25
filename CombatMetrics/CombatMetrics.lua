@@ -34,7 +34,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "0.9.12"
+CMX.version = "0.9.13"
 
 function CMX.GetFeedBackData(parentcontrol)
 
@@ -137,8 +137,8 @@ local IsMagickaAbility = {				-- nil for oblivion and other damage types that ar
 
 local SpellResistDebuffs = {
 
-	[GetFormattedAbilityName(62795)] = 5280, --Major Breach
-	[GetFormattedAbilityName(68589)] = 1320, --Minor Breach
+	[GetFormattedAbilityName(62787)] = 5280, --Major Breach
+	[GetFormattedAbilityName(68588)] = 1320, --Minor Breach
 
 	[GetFormattedAbilityName(17906)] = 2108, -- Crusher, can get changed by settings !
 	[GetFormattedAbilityName(75753)] = 3010, -- Alkosh
@@ -147,8 +147,8 @@ local SpellResistDebuffs = {
 
 local PhysResistDebuffs = {
 
-	[GetFormattedAbilityName(62490)] = 5280, --Major Fracture
-	[GetFormattedAbilityName(64147)] = 1320, --Minor Fracture
+	[GetFormattedAbilityName(62484)] = 5280, --Major Fracture
+	[GetFormattedAbilityName(64144)] = 1320, --Minor Fracture
 
 	[GetFormattedAbilityName(17906)] = 2108, -- Crusher, can get changed by settings !
 	[GetFormattedAbilityName(75753)] = 3010, -- Alkosh

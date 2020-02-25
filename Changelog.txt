@@ -415,3 +415,8 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Fixed an issue where in the incoming damage page inconsistant data was shown. You can now select to show block or crit data with the % column adjusting accordingly.
 [*] Average column can now also show the average block values.
 [*] Let me know if you'd find block statistics also useful for the damage out page.
+
+0.9.13 2,284,845 (25.02.2020) 23:18
+[*] Fixed a few issues caused by some removed ability ids that were removed by ZOS. (Thx to SnakE for the report)
+[*] If you see some irregularities regarding stats (like penetration or critical damage), please let me know.
+[*] Combat Metrics will now generally require the latest version of LibCombat, please make sure to update both.
