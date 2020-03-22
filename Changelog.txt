@@ -420,3 +420,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Fixed a few issues caused by some removed ability ids that were removed by ZOS. (Thx to SnakE for the report)
 [*] If you see some irregularities regarding stats (like penetration or critical damage), please let me know.
 [*] Combat Metrics will now generally require the latest version of LibCombat, please make sure to update both.
+
+0.9.14 2,360,514 (22.03.2020) 17:07
+[*] Added an option to show display names (@names) in the fight reports.
+[*] Added an option to toggle pets shown in heal panels in the fight report window. You can also set it via the settings menu in the opened fight report window.

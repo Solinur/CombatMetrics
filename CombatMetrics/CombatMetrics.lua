@@ -2015,6 +2015,9 @@ local svdefaults = {
 		["fightstatspanel"] 	= maxStat(),
 		["skilltimingbefore"] 	= true,
 
+		["useDisplayNames"] = false,
+		["showPets"] = true,
+
 		["SmoothWindow"] 		= 5,
 
 		["Cursor"]				= true,

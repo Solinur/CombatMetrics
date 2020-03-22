@@ -1027,6 +1027,13 @@ do
 
 	end
 
+	local function toggleShowPets()
+
+		db.FightReport.showPets = not db.FightReport.showPets
+		CombatMetrics_Report:Update()
+
+	end
+
 	local function toggleOverhealMode()
 
 		CMX.showOverHeal = not CMX.showOverHeal
@@ -1082,6 +1089,7 @@ do
 
 		local showIdString = db.debuginfo.ids and SI_COMBAT_METRICS_HIDEIDS or SI_COMBAT_METRICS_SHOWIDS
 		local showOverhealString = CMX.showOverHeal and SI_COMBAT_METRICS_HIDEOVERHEAL or SI_COMBAT_METRICS_SHOWOVERHEAL
+		local showPetString = db.FightReport.showPets and SI_COMBAT_METRICS_MENU_HIDEPETS or SI_COMBAT_METRICS_MENU_SHOWPETS_NAME
 
 		local postoptions = {}
 
@@ -1118,6 +1126,7 @@ do
 
 		AddCustomMenuItem(GetString(showIdString), toggleShowIds)
 		AddCustomMenuItem(GetString(showOverhealString), toggleOverhealMode)
+		AddCustomMenuItem(GetString(showPetString), toggleShowPets)
 		AddCustomSubMenuItem(GetString(SI_COMBAT_METRICS_POSTDPS), postoptions)
 		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_SETTINGS), CMX.OpenSettings)
 
@@ -2221,7 +2230,9 @@ local function updateUnitPanel(panel)
 	local scrollchild = GetControl(panel, "PanelScrollChild")
 	local currentanchor = {TOPLEFT, scrollchild, TOPLEFT, 0, 1}
 
-	local rightpanel = db.FightReport.rightpanel
+	local FRsettings = db.FightReport
+
+	local rightpanel = FRsettings.rightpanel
 
 	local showids = db.debuginfo.ids
 
@@ -2231,14 +2242,14 @@ local function updateUnitPanel(panel)
 
 		local unitData = fightData.units[unitId]
 
-		if (totalUnitAmount > 0 or (rightpanel == "buffsout" and NonContiguousCount(unit.buffs) > 0 and (fightData.units[unitId].isFriendly == false and isdamage) or (unitData.isFriendly and not isdamage))) then
+		if (totalUnitAmount > 0 or (rightpanel == "buffsout" and NonContiguousCount(unit.buffs) > 0 and (unitData.isFriendly == false and isdamage) or (unitData.isFriendly and not isdamage))) and (not (unitData.unitType == 2 and FRsettings.showPets == false)) then
 
 			local highlight = false
 			if selectedunits ~= nil then highlight = selectedunits[unitId] ~= nil end
 
 			local dbug = showids and string.format("(%d) ", unitId) or ""
 
-			local name = dbug .. unitData.name
+			local name = dbug .. (FRsettings.useDisplayNames and unitData.displayname or unitData.name)
 
 			local isboss = unitData.bossId
 			local namecolor = (isboss and {1, .8, .3, 1}) or {1, 1, 1, 1}
@@ -5106,8 +5117,8 @@ end
 
 local function updateFightListPanel(panel, data, issaved)
 
-	local scrolllist = GetControl(panel, "PanelScrollChild")
-	local currentanchor = {TOPLEFT, scrolllist, TOPLEFT, 0, 1}
+	local scrollchild = GetControl(panel, "PanelScrollChild")
+	local currentanchor = {TOPLEFT, scrollchild, TOPLEFT, 0, 1}
 
 	if #data>0 then
 
@@ -5144,8 +5155,8 @@ local function updateFightListPanel(panel, data, issaved)
 			local DPSKey = DPSstrings[db.FightReport.category]
 			local dps = fight[DPSKey] or 0
 
-			local rowName = scrolllist:GetName() .. "Row" .. id
-			local row = _G[rowName] or CreateControlFromVirtual(rowName, scrolllist, "CombatMetrics_FightlistRowTemplate")
+			local rowName = scrollchild:GetName() .. "Row" .. id
+			local row = _G[rowName] or CreateControlFromVirtual(rowName, scrollchild, "CombatMetrics_FightlistRowTemplate")
 			row:SetAnchor(unpack(currentanchor))
 			row:SetHidden(false)
 

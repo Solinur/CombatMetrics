@@ -182,6 +182,22 @@ function CMX.MakeMenu(svdefaults)
 				end,
 		},
 		{
+			type = "checkbox",
+			name = GetString(SI_COMBAT_METRICS_MENU_DISPLAYNAMES_NAME),
+			tooltip = GetString(SI_COMBAT_METRICS_MENU_DISPLAYNAMES_TOOLTIP),
+			default = def.FightReport.useDisplayNames,
+			getFunc = function() return db.FightReport.useDisplayNames end,
+			setFunc = function(value) db.FightReport.useDisplayNames = value end,
+		},
+		{
+			type = "checkbox",
+			name = GetString(SI_COMBAT_METRICS_MENU_SHOWPETS_NAME),
+			tooltip = GetString(SI_COMBAT_METRICS_MENU_SHOWPETS_TOOLTIP),
+			default = def.FightReport.showPets,
+			getFunc = function() return db.FightReport.showPets end,
+			setFunc = function(value) db.FightReport.showPets = value end,
+		},
+		{
 			type = "custom",
 		},
 		{
