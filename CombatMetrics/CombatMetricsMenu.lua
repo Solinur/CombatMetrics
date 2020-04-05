@@ -198,6 +198,18 @@ function CMX.MakeMenu(svdefaults)
 			setFunc = function(value) db.FightReport.showPets = value end,
 		},
 		{
+			type = "checkbox",
+			name = GetString(SI_COMBAT_METRICS_MENU_NOTIFICATIONS),
+			tooltip = GetString(SI_COMBAT_METRICS_MENU_NOTIFICATIONS_TOOLTIP),
+			default = def.NotificationAllowed,
+			getFunc = function() return db.NotificationAllowed end,
+			setFunc = function(value) 
+				db.NotificationAllowed = value 
+				if value == true then db.NotificationRead = 0 end
+			
+			end,
+		},
+		{
 			type = "custom",
 		},
 		{
@@ -561,7 +573,9 @@ function CMX.MakeMenu(svdefaults)
 		},
 	}
 
-	if GetDisplayName() == "@Solinur" then options[#options+1] = {
+	if GetDisplayName() == "@Solinur" then 
+		
+		options[#options+1] = {
 
 			type = "checkbox",
 			name = "Developer Debug",
@@ -569,8 +583,22 @@ function CMX.MakeMenu(svdefaults)
 			default = def.debuginfo.dev,
 			getFunc = function() return db.debuginfo.dev end,
 			setFunc = function(value) db.debuginfo.dev = value end,
-			hidden = GetDisplayName() == "@Solinur",
 			width = "half",
+
+		}
+
+		options[#options+1] = {
+			type = "custom",
+		}
+
+		options[#options+1] = {
+
+			type = "checkbox",
+			name = "Force Notification",
+			tooltip = "Force Notification",
+			default = def.ForceNotification,
+			getFunc = function() return db.ForceNotification end,
+			setFunc = function(value) db.ForceNotification = value end,
 
 		}
 	end

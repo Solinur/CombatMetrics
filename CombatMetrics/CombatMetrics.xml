@@ -2776,6 +2776,17 @@
 							<OnMouseUp> CMX.SettingsContextMenu( self, upInside ) </OnMouseUp>
 							
 						</Texture>
+						
+						<Texture name="$(parent)NotificationButton" mouseEnabled="true" textureFile="esoui/art/mainmenu/menubar_notifications_down.dds" color="FFFFFFFF" inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton" hidden="false">
+							<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)SettingsButton" offsetY="8"/>
+							<OnInitialized>
+								self.tooltip = {SI_COMBAT_METRICS_NOTIFICATION}
+								self.category = "Notification"
+							</OnInitialized>
+							
+							<OnMouseUp> CMX.NotificationContextMenu( self, upInside ) </OnMouseUp>
+							
+						</Texture>
 					
 						<Backdrop name="$(parent)BG" inherits="CombatMetrics_BackgroundFramed" excludeFromResizeToFitExtents="true" edgeColor="FF000000" centerColor="EE000000">
 							<AnchorFill/>

@@ -157,6 +157,13 @@ local PhysResistDebuffs = {
 
 }
 
+local ignoredAbilityTiming = {
+
+    [118008] = true,    -- Mystic Syphon (currently ignores global cooldown)
+    [118763] = true,    -- Detonating Syphon (currently ignores global cooldown)
+
+}
+
 
 function CMX.SetCrusher(value)
 
@@ -1218,6 +1225,13 @@ local function ProcessLogSkillTimings(fight, callbacktype, timems, reducedslot, 
 
 	local slotdata = fight:AcquireSkillTimingData(reducedslot)
 
+	if ignoredAbilityTiming[abilityId] then
+
+		table.insert(slotdata.times, timems)
+		return
+
+	end
+
 	local lastSkillTime, lastSkillSlot, lastSkillSuccessTime
 	local lastWeaponAttackTime, lastWeaponAttackSlot, lastWeaponAttackSuccessTime
 
@@ -1532,13 +1546,15 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		local totalWeaponAttacks = 0
 		local totalSkillsFired = 0
 
+		local skillBars = fight.charData.skillBars
+
 		for reducedslot, skill in pairs(skilldata) do
 
 			local isWeaponAttack = reducedslot%10 == 1 or reducedslot%10 == 2
+			local timedata = skill["times"]
+			local skillId = skillBars[reducedslot>10 and 2 or 1][reducedslot%10]
 
 			local difftimes = {}
-
-			local timedata = skill["times"]
 
 			skill.count = #timedata
 
@@ -1554,7 +1570,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 				totalWeaponAttacks = totalWeaponAttacks + skill.count
 
-			else
+			elseif not ignoredAbilityTiming[skillId] then
 
 				totalSkillsFired = totalSkillsFired + skill.count
 
@@ -1580,9 +1596,9 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 				end
 
-				skill[avgkey] = count > 0 and sum / count or 0
+				skill[avgkey] = count > 0 and (sum / count) or 0
 
-				if i == 1 and not isWeaponAttack then
+				if i == 1 and not (isWeaponAttack or ignoredAbilityTiming[skillId]) then
 
 					totalSkillTime = totalSkillTime + sum
 					totalSkills = totalSkills + count
@@ -2003,6 +2019,11 @@ local svdefaults = {
 	["autoscreenshot"] = false,
 	["autoscreenshotmintime"] = 30,
 
+	["currentNotificationVersion"] = 0,
+	["NotificationRead"] = 0,
+	["NotificationAllowed"] = true,
+	["ForceNotification"] = false,	-- for dev use
+
 	["CombatMetrics_LiveReport"] = { x = 0, y = -500},
 	["CombatMetrics_Report"] = { x = GuiRoot:GetWidth()/2, y = GuiRoot:GetHeight()/2-75},
 
@@ -2240,7 +2261,10 @@ local function Initialize(event, addon)
 
 	CMX.showOverHeal = false
 
+	if GetDisplayName() == "@Solinur" then db.NotificationRead = 0 end -- for dev purposes
+
 	CMX.init = true
+
 end
 
 -- register event handler function to initialize when addon is loaded

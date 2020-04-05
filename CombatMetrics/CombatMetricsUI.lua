@@ -30,8 +30,6 @@ end
 local LC = LibCombat
 if LC == nil then return end
 
-local LibFeedback = LibStub:GetLibrary('LibFeedback')
-
 local GetFormattedAbilityName = LC.GetFormattedAbilityName
 
 local GetFormattedAbilityIcon = LC.GetFormattedAbilityIcon
@@ -355,6 +353,50 @@ local function toggleInfoPanel(button)
 	mainpanel:SetHidden(true)
 	rightpanel:SetHidden(true)
 	infopanel:SetHidden(false)
+
+end
+
+local ValidRaids = {
+
+	[7] = true, -- vHoF
+	[8] = true, -- vAS
+	[9] = true, -- vCR
+	[12] = true, -- vSS
+
+}
+
+local function updateSelectorButtons(selectorButtons)
+
+	db.currentNotificationVersion = 1
+
+	local date = GetDate()
+
+	local isGerman = GetCVar("Language.2") == "de"
+	local isEUServer = GetWorldName() == "EU Megaserver"
+	local isNotInGuild = not IsPlayerInGuild(64745)
+	local isNotificationAllowed = db.NotificationAllowed and db.currentNotificationVersion > db.NotificationRead
+	local isVeteranRaid = ValidRaids[GetCurrentParticipatingRaidId()] == true
+	local isNotInSCoreRun = not IsRaidInProgress()
+	local isMe = GetDisplayName() == "@Solinur"
+	local isWithinAllowedTime = date >= 20200405 and date <= 20200412
+
+	local show = db.ForceNotification or ((isGerman or isMe) and isEUServer and (isNotInGuild or isMe) and isNotificationAllowed and isVeteranRaid and isNotInSCoreRun and isWithinAllowedTime)
+
+	df("Result: %s, De: %s, EU: %s, G: %s, R: %s, P: %s, T: %s, Set: %s (%s, %d / %d)",
+		tostring(show),
+		tostring(isGerman),
+		tostring(isEUServer),
+		tostring(isNotInGuild),
+		tostring(isVeteranRaid),
+		tostring(isNotInSCoreRun),
+		tostring(isWithinAllowedTime),
+		tostring(isNotificationAllowed),
+		tostring(db.NotificationAllowed),
+		db.currentNotificationVersion,
+		db.NotificationRead
+	)
+
+	selectorButtons:GetNamedChild("NotificationButton"):SetHidden(not show)
 
 end
 
@@ -1144,6 +1186,47 @@ do
 		end
 
 		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_FEEDBACK), ToggleFeedback)
+
+		ShowMenu(settingsbutton)
+		AnchorMenu(settingsbutton)
+
+	end
+end
+
+do
+
+	local function ShowGuildInfo()
+
+		GUILD_BROWSER_GUILD_INFO_KEYBOARD:SetGuildToShow(64745)
+        MAIN_MENU_KEYBOARD:ShowSceneGroup("guildsSceneGroup", "linkGuildInfoKeyboard")
+        GUILD_BROWSER_GUILD_INFO_KEYBOARD.closeCallback = CombatMetrics_Report.Toggle
+
+	end
+
+	local function NotificationRead()
+
+		db.NotificationRead = db.currentNotificationVersion
+		CombatMetrics_Report:Update(currentFight)
+
+	end
+
+	local function DisableNotifications()
+
+		db.NotificationRead = db.currentNotificationVersion
+		db.NotificationAllowed = false
+		CombatMetrics_Report:Update(currentFight)
+
+	end
+
+	function CMX.NotificationContextMenu( settingsbutton, upInside )
+
+		if not upInside then return end
+
+		ClearMenu()
+
+		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_NOTIFICATION_GUILD), ShowGuildInfo)
+		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_NOTIFICATION_ACCEPT), NotificationRead)
+		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_NOTIFICATION_DISCARD), DisableNotifications)
 
 		ShowMenu(settingsbutton)
 		AnchorMenu(settingsbutton)
@@ -5877,6 +5960,7 @@ local function initFightReport()
 	-- setup buttons:
 
 	local selectorButtons = fightReport:GetNamedChild("_SelectorRow")
+	selectorButtons.Update = updateSelectorButtons
 	initSelectorButtons(selectorButtons)
 
 	fightReport:Resize(db.FightReport.scale)
