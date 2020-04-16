@@ -1,7 +1,7 @@
 local em = GetEventManager()
 local wm = GetWindowManager()
-local dx = GuiRoot:GetWidth()/tonumber(GetCVar("WindowedWidth"))
-COMBAT_METRICS_LINE_SIZE = tostring(dx)
+COMBAT_METRICS_LINE_SIZE = LIBCOMBAT_LINE_SIZE
+local dx = LIBCOMBAT_LINE_SIZE
 local fontsize = 14
 local currentFight
 local abilitystats
@@ -382,19 +382,23 @@ local function updateSelectorButtons(selectorButtons)
 
 	local show = db.ForceNotification or ((isGerman or isMe) and isEUServer and (isNotInGuild or isMe) and isNotificationAllowed and isVeteranRaid and isNotInSCoreRun and isWithinAllowedTime)
 
-	df("Result: %s, De: %s, EU: %s, G: %s, R: %s, P: %s, T: %s, Set: %s (%s, %d / %d)",
-		tostring(show),
-		tostring(isGerman),
-		tostring(isEUServer),
-		tostring(isNotInGuild),
-		tostring(isVeteranRaid),
-		tostring(isNotInSCoreRun),
-		tostring(isWithinAllowedTime),
-		tostring(isNotificationAllowed),
-		tostring(db.NotificationAllowed),
-		db.currentNotificationVersion,
-		db.NotificationRead
-	)
+	if isMe then
+
+		df("Result: %s, De: %s, EU: %s, G: %s, R: %s, P: %s, T: %s, Set: %s (%s, %d / %d)",
+			tostring(show),
+			tostring(isGerman),
+			tostring(isEUServer),
+			tostring(isNotInGuild),
+			tostring(isVeteranRaid),
+			tostring(isNotInSCoreRun),
+			tostring(isWithinAllowedTime),
+			tostring(isNotificationAllowed),
+			tostring(db.NotificationAllowed),
+			db.currentNotificationVersion,
+			db.NotificationRead
+		)
+
+	end
 
 	selectorButtons:GetNamedChild("NotificationButton"):SetHidden(not show)
 
@@ -1044,7 +1048,7 @@ do	-- Handling Unit Context Menu
 			local unitName = fightData.units[dataId].name
 
 			AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTUNITDPS), postUnitDPS)
-			AddCustomMenuItem(zo_strformat(GetString(SI_COMBAT_METRICS_POSTUNITNAMEDPS), unitName), postUnitNameDPS)
+			AddCustomMenuItem(zo_strformat(GetString(SI_COMBAT_METRICS_POSTUNITNAMEDPS), unitName, 2), postUnitNameDPS)
 
 			if selections.unit[category] then AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTSELECTIONDPS), postSelectionDPS) end
 

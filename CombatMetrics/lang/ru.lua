@@ -90,7 +90,6 @@ SafeAddString(SI_COMBAT_METRICS_POSTHPS, "Вывести в чат HPS", 1)
 
 --SafeAddString(SI_COMBAT_METRICS_SETTINGS, "Addon Settings", 1) 
 --SafeAddString(SI_COMBAT_METRICS_FEEDBACK, "Send Feedback / Donate", 1) 
---SafeAddString(SI_COMBAT_METRICS_SAVEHDD, "Save FightData to HDD", 1) 
 
 -- Graph
 

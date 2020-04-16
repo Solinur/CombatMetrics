@@ -90,7 +90,7 @@
 	SI_COMBAT_METRICS_POSTALLDPS = "Post single and total DPS",
 	SI_COMBAT_METRICS_POSTHPS = "Post HPS",
 	SI_COMBAT_METRICS_POSTUNITDPS = "Post DPS to this unit",
-	SI_COMBAT_METRICS_POSTUNITNAMEDPS = "Post DPS to '<<1>>' units", -- <<1>> is unitname
+	SI_COMBAT_METRICS_POSTUNITNAMEDPS = "Post DPS to '<<tm:1>>' units", -- <<tm:1>> is unitname
 	SI_COMBAT_METRICS_POSTSELECTIONDPS = "Post DPS to selected units",
 	SI_COMBAT_METRICS_POSTSELECTIONHPS = "Post HPS to selected units",
 
@@ -115,7 +115,6 @@
 
 	SI_COMBAT_METRICS_SETTINGS = "Addon Settings",
 	SI_COMBAT_METRICS_FEEDBACK = "Send Feedback / Donate",
-	SI_COMBAT_METRICS_SAVEHDD = "Save FightData to HDD",
 
 	-- Graph
 

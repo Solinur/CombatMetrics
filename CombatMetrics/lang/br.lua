@@ -88,7 +88,6 @@ SafeAddString(SI_COMBAT_METRICS_POSTBUFF_FORMAT_GROUP, "<<1>> - Atividade: <<2>>
 
 SafeAddString(SI_COMBAT_METRICS_SETTINGS, "Opções do Addon", 1) 
 SafeAddString(SI_COMBAT_METRICS_FEEDBACK, "Envie Feedback / Doe", 1) 
-SafeAddString(SI_COMBAT_METRICS_SAVEHDD, "Salve Dados de Luta no HDD", 1) 
 
 -- Graph
 

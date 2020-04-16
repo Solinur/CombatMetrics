@@ -206,7 +206,6 @@ function CMX.MakeMenu(svdefaults)
 			setFunc = function(value) 
 				db.NotificationAllowed = value 
 				if value == true then db.NotificationRead = 0 end
-			
 			end,
 		},
 		{

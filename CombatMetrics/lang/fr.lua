@@ -94,7 +94,6 @@ SafeAddString(SI_COMBAT_METRICS_POSTBUFF_FORMAT_GROUP, "<<1>> - Uptime: <<2>>/<<
 
 SafeAddString(SI_COMBAT_METRICS_SETTINGS, "Réglages de l'Extension", 1) 
 SafeAddString(SI_COMBAT_METRICS_FEEDBACK, "Envoyer un retour / Dons", 1) 
-SafeAddString(SI_COMBAT_METRICS_SAVEHDD, "Sauvegarder les données sur le HDD", 1) 
 
 -- Graph
 
