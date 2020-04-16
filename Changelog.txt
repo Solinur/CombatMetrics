@@ -424,3 +424,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 0.9.14 2,360,514 (22.03.2020) 17:07
 [*] Added an option to show display names (@names) in the fight reports.
 [*] Added an option to toggle pets shown in heal panels in the fight report window. You can also set it via the settings menu in the opened fight report window.
+
+0.9.15 2,444,437 (16.04.2020) 20:42
+[*] Fixed an issue with skill timings due to the Necromancers siphon ignoring the global cooldown.
+[*] Added a notification icon on the fight report window to help me finding players for my raid group. At the moment it's only shown sometimes on german clients and can be disabled. 

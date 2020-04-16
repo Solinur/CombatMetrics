@@ -371,26 +371,24 @@ local function updateSelectorButtons(selectorButtons)
 
 	local date = GetDate()
 
+	local isMe = GetDisplayName() == "@Solinur"
 	local isGerman = GetCVar("Language.2") == "de"
 	local isEUServer = GetWorldName() == "EU Megaserver"
 	local isNotInGuild = not IsPlayerInGuild(64745)
 	local isNotificationAllowed = db.NotificationAllowed and db.currentNotificationVersion > db.NotificationRead
 	local isVeteranRaid = ValidRaids[GetCurrentParticipatingRaidId()] == true
-	local isNotInSCoreRun = not IsRaidInProgress()
-	local isMe = GetDisplayName() == "@Solinur"
-	local isWithinAllowedTime = date >= 20200405 and date <= 20200412
+	local isWithinAllowedTime = date >= 20200417 and date <= 20200423
 
-	local show = db.ForceNotification or ((isGerman or isMe) and isEUServer and (isNotInGuild or isMe) and isNotificationAllowed and isVeteranRaid and isNotInSCoreRun and isWithinAllowedTime)
+	local show = db.ForceNotification or ((isGerman or isMe) and isEUServer and isNotificationAllowed and isVeteranRaid and isWithinAllowedTime)
 
 	if isMe then
 
-		df("Result: %s, De: %s, EU: %s, G: %s, R: %s, P: %s, T: %s, Set: %s (%s, %d / %d)",
+		df("Result: %s, De: %s, EU: %s, G: %s, R: %s, T: %s, Set: %s (%s, %d / %d)",
 			tostring(show),
 			tostring(isGerman),
 			tostring(isEUServer),
 			tostring(isNotInGuild),
 			tostring(isVeteranRaid),
-			tostring(isNotInSCoreRun),
 			tostring(isWithinAllowedTime),
 			tostring(isNotificationAllowed),
 			tostring(db.NotificationAllowed),
