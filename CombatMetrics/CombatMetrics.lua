@@ -12,7 +12,6 @@ local lastUsedWeaponAttack
 
 local currentbar
 
-
 -- localize some module functions for performance
 
 local stringformat = string.format
@@ -38,27 +37,26 @@ local LDL = LibDebugLogger
 if LDL == nil then
 
 	assert(false, "LibDebugLogger not found!")
-	return 
+	return
 
 end
 
 local logger = LibDebugLogger(CMX.name)
 
--- init Libs
+-- init and check for libs
 
 local LC = LibCombat
 if LC == nil then
 
-	logger:Error("LibCombat not found. Please (re-)install.")
+	logger:Error("LibCombat not found!")
 	return
 
-elseif LC.version < 26 then 
+elseif LibFeedback == nil then
 
-	logger:Error("LibCombat version is not supported anymore. Please update LibCombat")
+	logger:Error("LibFeedback not found! Make sure the latest version is installed.")
 	return
 
 end
-
 
 function CMX.GetFeedBackData(parentcontrol)
 
@@ -606,6 +604,8 @@ local function GetEmtpyFightStats()
 	data.totalSkills = 0
 	data.totalWeaponAttacks = 0
 	data.totalSkillsFired =  0
+
+	data.performance = {count = 0}
 
 	data.graph = {
 		damageOut = {},
@@ -1245,8 +1245,6 @@ local function ProcessLogSkillTimings(fight, callbacktype, timems, reducedslot, 
 
 	local isWeaponAttack = reducedslot%10 < 3
 
-	local newdata = {}
-
 	local slotdata = fight:AcquireSkillTimingData(reducedslot)
 
 	if ignoredAbilityTiming[abilityId] then
@@ -1274,10 +1272,7 @@ local function ProcessLogSkillTimings(fight, callbacktype, timems, reducedslot, 
 	local doubleWeaponAttack = isWeaponAttack and lastUsedWeaponAttack and lastUsedSkill and (lastWeaponAttackTime > lastSkillTime)
 	local doubleSkillUse = (not isWeaponAttack) and lastUsedWeaponAttack and lastUsedSkill and (lastSkillTime > lastWeaponAttackTime)
 
-	local timenow = GetGameTimeMilliseconds()/1000
-
 	local key = isWeaponAttack and "weaponAttackNext" or "skillNext"
-	local data = fight.calculated
 
 	if lastSkillSuccessTime and not doubleWeaponAttack and status ~= LIBCOMBAT_SKILLSTATUS_SUCCESS then
 
@@ -1317,8 +1312,6 @@ local function ProcessLogSkillTimings(fight, callbacktype, timems, reducedslot, 
 
 	else
 
-		local channeled, castTime = GetAbilityCastInfo(abilityId)
-
 		local delay = abilityDelay[abilityId] or 0
 
 		if isWeaponAttack and lastUsedWeaponAttack then
@@ -1356,6 +1349,40 @@ ProcessLog[LIBCOMBAT_EVENT_MESSAGES] = ProcessMessages
 
 ProcessLog[LIBCOMBAT_EVENT_BOSSHP] = function() end
 
+local function ProcessPerformanceStats(fight, callbacktype, timems, avg, min, max, ping, skillDelay)
+
+	local performance = fight.calculated.performance
+
+	performance.count = performance.count + 1
+
+	performance.minMin = mathmin(performance.minMin or min, min)
+	performance.maxMin = mathmax(performance.maxMin or min, min)
+	performance.sumMin = min + (performance.sumMin or 0)
+
+	performance.minMax = mathmin(performance.minMax or max, max)
+	performance.maxMax = mathmax(performance.maxMax or max, max)
+	performance.sumMax = max + (performance.sumMax or 0)
+
+	performance.minAvg = mathmin(performance.minAvg or avg, avg)
+	performance.maxAvg = mathmax(performance.maxAvg or avg, avg)
+	performance.sumAvg = avg + (performance.sumAvg or 0)
+
+	performance.minPing = mathmin(performance.minPing or ping, ping)
+	performance.maxPing = mathmax(performance.maxPing or ping, ping)
+	performance.sumPing = ping + (performance.sumPing or 0)
+
+	if skillDelay then
+
+		performance.minDelay = mathmin(performance.minDelay or skillDelay, skillDelay)
+		performance.maxDelay = mathmax(performance.maxDelay or skillDelay, skillDelay)
+		performance.sumDelay = skillDelay + (performance.sumDelay or 0)
+		performance.countDelay = (performance.countDelay or 0) + 1
+
+	end
+end
+
+ProcessLog[LIBCOMBAT_EVENT_PERFORMANCE] = ProcessPerformanceStats
+
 --]]
 
 local function CalculateChunk(fight)  -- called by CalculateFight or itself
@@ -1372,7 +1399,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 		local logline = logdata[i]
 
-		if ProcessLog[logline[1]] then ProcessLog[logline[1]](fight,unpack(logline)) end -- logline[1] is the callbacktype e.g. LIBCOMBAT_EVENT_DAMAGEOUT
+		if ProcessLog[logline[1]] then ProcessLog[logline[1]](fight, unpack(logline)) end -- logline[1] is the callbacktype e.g. LIBCOMBAT_EVENT_DAMAGEOUT
 
 	end
 
@@ -1664,6 +1691,23 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 			end
 		end
+
+		-- calculate avh performance values
+
+		local performance = data.performance
+		local count = performance.count
+
+		if count > 0 then 
+
+			performance.avgMin   = performance.sumMin/count
+			performance.avgMax   = performance.sumMax/count
+			performance.avgAvg   = performance.sumAvg/count
+			performance.avgPing  = performance.sumPing/count
+			performance.avgDelay = performance.sumDelay and performance.sumDelay/performance.countDelay or nil
+
+		end
+
+		-- remaining stuff
 
 		data.buffs = fight.playerid ~= nil and data.units[fight.playerid] and data.units[fight.playerid].buffs or {}
 

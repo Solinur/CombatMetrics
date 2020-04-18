@@ -30,6 +30,8 @@ end
 local LC = LibCombat
 if LC == nil then return end
 
+local LibFeedback = LibFeedback
+
 local GetFormattedAbilityName = LC.GetFormattedAbilityName
 
 local GetFormattedAbilityIcon = LC.GetFormattedAbilityIcon
@@ -87,7 +89,12 @@ local function toggleFightList(panel, show)
 
 	panel:SetHidden(not show)
 
-	if show then panel:Update() end
+	if show then 
+		
+		panel:Update()
+		panel:GetParent():GetNamedChild("_InfoRow"):Update()
+	
+	end
 
 end
 
@@ -236,9 +243,6 @@ function NavButtonFunctions.delete(control)
 		table.remove(CMX.lastfights, currentFight)
 		ClearSelections()
 
-		local _, size = checkSaveLimit()
-		db.SVsize = size
-
 		if #CMX.lastfights == 0 then CombatMetrics_Report:Update() else CombatMetrics_Report:Update(math.min(currentFight, #CMX.lastfights)) end
 
 	end
@@ -381,7 +385,7 @@ local function updateSelectorButtons(selectorButtons)
 
 	local show = db.ForceNotification or ((isGerman or isMe) and isEUServer and isNotificationAllowed and isVeteranRaid and isWithinAllowedTime)
 
-	if isMe then
+	if false then
 
 		df("Result: %s, De: %s, EU: %s, G: %s, R: %s, T: %s, Set: %s (%s, %d / %d)",
 			tostring(show),
@@ -839,6 +843,8 @@ function CMX.LoadItem(listitem)
 
 	end
 
+	toggleFightList()
+
 	if issaved and isLoaded == false then
 
 		local loadedfight = SVHandler.Load(id)
@@ -856,8 +862,6 @@ function CMX.LoadItem(listitem)
 
 	ClearSelections()
 
-	toggleFightList()
-
 end
 
 function CMX.DeleteItem(control)
@@ -869,6 +873,11 @@ function CMX.DeleteItem(control)
 	if issaved then
 
 		table.remove(savedFights, id)
+
+		local _, size = checkSaveLimit()
+		db.SVsize = size
+
+		CombatMetrics_Report:Update()
 
 	else
 
@@ -5101,9 +5110,9 @@ local function updateInfoRowPanel(panel)
 	CMX.Print("dev", "Updating InfoRow")
 
 	local datetimecontrol = panel:GetNamedChild("DateTime")
-	local versioncontrol = panel:GetNamedChild("ESOVersion")
+	local versioncontrol = panel:GetNamedChild("ESOVersion")	
 	local barcontrol = panel:GetNamedChild("Bar")
-	local barlabelcontrol = barcontrol:GetNamedChild("Label")
+	local performancecontrol = panel:GetNamedChild("Performance")
 
 	local data = fightData or {
 
@@ -5126,11 +5135,40 @@ local function updateInfoRowPanel(panel)
 	datetimecontrol:SetText(timestring)
 	versioncontrol:SetText(versionstring)
 
-	local usedSpace = db.SVsize/db.maxSVsize
+	local hideBar = fightData ~= nil and panel:GetParent():GetNamedChild("_FightList"):IsHidden()
 
-	barcontrol:SetValue(usedSpace)
-	barlabelcontrol:SetText(string.format("%s: %.1f MB / %d MB (%.1f%%)", GetString(SI_COMBAT_METRICS_SAVED_DATA), db.SVsize, db.maxSVsize, usedSpace * 100))
+	barcontrol:SetHidden(hideBar)
 
+	if not hideBar then
+
+		performancecontrol:SetHidden(true)
+
+		local usedSpace = db.SVsize/db.maxSVsize
+		barcontrol:SetValue(usedSpace)
+
+		local barlabelcontrol = barcontrol:GetNamedChild("Label")
+		barlabelcontrol:SetText(string.format("%s: %.1f MB / %d MB (%.1f%%)", GetString(SI_COMBAT_METRICS_SAVED_DATA), db.SVsize, db.maxSVsize, usedSpace * 100))
+
+	else	-- show performance stats
+
+		local data = fightData and fightData.calculated
+		local performance = data and data.performance
+		local count = performance and performance.count or 0
+
+		if count > 0 then
+
+			performancecontrol:SetHidden(false)
+
+			local fpsString = string.format("FPS: %d  |cAAAAAA(%d - %d)|r ", performance.avgAvg, performance.minAvg, performance.maxAvg)
+			local pingString = string.format("Ping: %d ms", performance.avgPing)
+			local delayString = string.format("Desync: %d ms", performance.avgDelay)
+
+			local fullString = string.format("%s - %s - %s", fpsString, pingString, delayString)
+
+			performancecontrol:SetText(fullString)
+
+		end
+	end
 end
 
 local function updateFightReport(control, fightId)

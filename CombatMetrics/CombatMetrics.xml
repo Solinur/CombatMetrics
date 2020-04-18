@@ -3454,6 +3454,15 @@
 							
 						</Label>
 						
+						<Label name="$(parent)Performance" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="CENTER" hidden="true">
+						
+							<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DateTime" offsetX="80"/>
+							<Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)ESOVersion" offsetX="-30"/>
+
+							<Dimensions y="20"/>
+							
+						</Label>
+						
 						<StatusBar name="$(parent)Bar" orientation="HORIZONTAL" color="CCBBBB77">
 						
 							<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DateTime" offsetX="120"/>
