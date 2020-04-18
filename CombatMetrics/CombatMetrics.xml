@@ -1387,6 +1387,15 @@
 				<Backdrop name="$(parent)BG" inherits="CombatMetrics_BackgroundFramed" edgeColor="FF000000" centerColor="EE000000">
 					<AnchorFill/>
 				</Backdrop>
+
+				<Backdrop name="$(parent)ResizeFrame" inherits="CombatMetrics_BackgroundFramed" edgeColor="00000000" centerColor="00000000" mouseEnabled="true" resizeHandleSize="10">
+					<AnchorFill/>
+
+					<OnRectChanged>CMX.NewSize(self, newLeft, newTop, newRight, newBottom, oldLeft, oldTop, oldRight, oldBottom)</OnRectChanged>
+					<OnResizeStart>CMX.Resizing(self, true)</OnResizeStart>
+					<OnResizeStop>CMX.Resizing(self, false)</OnResizeStop>
+
+				</Backdrop>
 				
 				<Control name="$(parent)_Title">
 					<Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="4" offsetY="4"/>
@@ -3526,7 +3535,7 @@
 				</Control>
 			</Controls>
 			
-			<OnMoveStop> CMX.SavePosition(self) </OnMoveStop>
+			<OnMoveStop>CMX.SavePosition(self)</OnMoveStop>
 			
 		</TopLevelControl>
 		
@@ -3537,8 +3546,20 @@
 			<Controls>
 				<Backdrop name="$(parent)BG" inherits="CombatMetrics_BackgroundFramed" edgeColor="FF000000" centerColor="FF000000">
 					<AnchorFill/>
-					<Edge edgeSize="2"/>
-				</Backdrop>	
+				</Backdrop>
+
+				<Backdrop name="$(parent)ResizeFrame" excludeFromResizeToFitExtents="true" inherits="CombatMetrics_BackgroundFramed" edgeColor="00000000" centerColor="00000000" mouseEnabled="true" resizeHandleSize="10">
+					<AnchorFill/>
+
+					<OnRectChanged>CMX.NewSize(self, newLeft, newTop, newRight, newBottom, oldLeft, oldTop, oldRight, oldBottom)</OnRectChanged>
+					<OnResizeStart>CMX.Resizing(self, true)</OnResizeStart>
+					<OnResizeStop>CMX.Resizing(self, false)</OnResizeStop>
+							
+					<OnMouseDown>
+						CombatMetrics_LiveReport:StartMoving()
+					</OnMouseDown>
+
+				</Backdrop>
 				
 				<Control name="$(parent)DamageOutSingle">
 					<Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="2" offsetY="2"/>

@@ -428,3 +428,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 0.9.15 2,444,437 (16.04.2020) 20:42
 [*] Fixed an issue with skill timings due to the Necromancers siphon ignoring the global cooldown.
 [*] Added a notification icon on the fight report window to help me finding players for my raid group. At the moment it's only shown sometimes on german clients and can be disabled. 
+
+0.9.16
+[*] Sligthly increased minimum size of main report window. To help a little when some ppl set the slider too low.
+[*] Fixed duplicate heading of sections in the settings menu.

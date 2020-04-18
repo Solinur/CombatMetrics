@@ -5814,6 +5814,77 @@ function CMX.GetCMXData(dataType)	-- for external access to fightData
 	return data
 end
 
+local lastResize
+
+function CMX.Resizing(control, resizing)
+
+	if control:IsHidden() then return end
+
+	if resizing then
+
+		control:SetEdgeColor(1,1,1,1)
+		control:SetCenterColor(1,1,1,.2)
+
+	else
+
+		control:SetEdgeColor(1,1,1,0)
+		control:SetCenterColor(1,1,1,0)
+
+		local scale, newpos = unpack(lastResize)
+		local parent = control:GetParent()
+
+		db[parent:GetName()] = newpos
+
+		parent:ClearAnchors()
+		parent:SetAnchor(CENTER, nil , TOPLEFT, newpos.x, newpos.y)
+		parent:Resize(scale)
+
+	end
+end
+
+function CMX.NewSize(control, newLeft, newTop, newRight, newBottom, oldLeft, oldTop, oldRight, oldBottom)
+
+	if control.sizes == nil or control:IsHidden() then return end
+
+	TEST = control
+
+	local baseWidth, baseHeight = unpack(control.sizes)
+
+	local newHeight = newBottom - newTop
+	local newWidth = newRight - newLeft
+
+	local oldHeight = oldBottom - oldTop
+	local oldWidth = oldRight - oldLeft
+
+	local heightChange = (newHeight-oldHeight)/oldHeight
+	local widthChange = (newWidth-oldWidth)/oldWidth
+
+	local newscale
+
+	if math.abs(heightChange) > math.abs(widthChange) then
+
+		newscale = newHeight / baseHeight
+		newWidth = baseWidth * newscale
+
+		control:SetWidth(newWidth)
+
+	else
+
+		newscale = newWidth / baseWidth
+		newHeight = baseHeight * newscale
+
+		control:SetHeight(newHeight)
+
+	end
+
+	newscale = zo_roundToNearest(newscale, 0.01)
+
+	local centerX, centerY = control:GetCenter()
+	local newpos = { x = centerX, y = centerY}
+
+	lastResize = {newscale, newpos}
+end
+
 local scene = ZO_Scene:New("CMX_REPORT_SCENE", SCENE_MANAGER)
 
 local function initFightReport()
@@ -5832,6 +5903,8 @@ local function initFightReport()
 	scene:AddFragment(fragment)
 
 	local function resize(control, scale)
+
+		db.FightReport.scale = scale
 
 		if control.sizes == nil and control.anchors == nil then return end
 
@@ -6069,7 +6142,7 @@ local function initLiveReport()
 
 		local firstBlock = nil	-- to anchor 2nd row to
 
-		for i = 2, liveReport:GetNumChildren() do
+		for i = 3, liveReport:GetNumChildren() do
 
 			local child = liveReport:GetChild(i)
 			local name = string.gsub(string.gsub(child:GetName(), liveReport:GetName(), ""), "^%u", string.lower) -- difference in names is the child name e.g. "DamageOut". Outer gsub changes first letter to lowercase to match the settings, e.g. "damageOut".
@@ -6119,6 +6192,8 @@ local function initLiveReport()
 	end
 
 	local function resize(control, scale)
+
+		db.liveReport.scale = scale
 
 		local width, height = unpack(control.sizes)
 

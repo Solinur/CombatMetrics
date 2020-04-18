@@ -171,9 +171,9 @@ function CMX.MakeMenu(svdefaults)
 			type = "slider",
 			name = GetString(SI_COMBAT_METRICS_MENU_SF_NAME),
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_SF_TOOLTIP),
-			min = 30,
-			max = (math.ceil(GuiRoot:GetHeight()/75)*10) or 200,
-			step = 10,
+			min = 50,
+			max = 200,
+			step = 1,
 			default = def.FightReport.scale,
 			getFunc = function() return db.FightReport.scale*100  end,
 			setFunc = function(value)
@@ -213,7 +213,7 @@ function CMX.MakeMenu(svdefaults)
 		},
 		{
 			type = "header",
-			name = GetString(SI_COMBAT_METRICS_MENU_GS_NAME)
+			name = GetString(SI_COMBAT_METRICS_MENU_RESPEN_NAME)
 		},
 		{
 			type = "editbox",

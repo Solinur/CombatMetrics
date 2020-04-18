@@ -23,11 +23,6 @@ local mathabs = math.abs
 local mathceil = math.ceil
 local infinity = math.huge
 
--- init Lib
-
-local LC = LibCombat
-if LC == nil then return end
-
 -- namespace for thg addon
 if CMX == nil then CMX = {} end
 local CMX = CMX
@@ -35,6 +30,35 @@ local CMX = CMX
 -- Basic values
 CMX.name = "CombatMetrics"
 CMX.version = "0.9.15"
+
+-- Logger
+
+local LDL = LibDebugLogger
+
+if LDL == nil then
+
+	assert(false, "LibDebugLogger not found!")
+	return 
+
+end
+
+local logger = LibDebugLogger(CMX.name)
+
+-- init Libs
+
+local LC = LibCombat
+if LC == nil then
+
+	logger:Error("LibCombat not found. Please (re-)install.")
+	return
+
+elseif LC.version < 26 then 
+
+	logger:Error("LibCombat version is not supported anymore. Please update LibCombat")
+	return
+
+end
+
 
 function CMX.GetFeedBackData(parentcontrol)
 
@@ -1685,10 +1709,9 @@ local function InitCurrentData()
 	CMX.currentdata = {log={}, DPSOut = 0, DPSIn = 0, HPSOut = 0, HPSAOut = 0, HPSIn = 0, dpstime = 0, hpstime = 0, groupDPSOut = 0, groupDPSIn = 0, groupHPSOut = 0, groupHPS = 0}	-- reset currentdata, the previous log is now only linked to the fight.
 end
 
-local function AddtoChatLog(...)
+local function AddtoChatLog(logType, ...)
 
-	local logLine = {...}
-	local logType = logLine[1]
+	local logLine = {logType, ...}
 
 	local isEnabled =
 	((logType == LIBCOMBAT_EVENT_DAMAGE_OUT or logType == LIBCOMBAT_EVENT_DAMAGE_SELF) and db.chatLog.damageOut == true)
@@ -1699,15 +1722,18 @@ local function AddtoChatLog(...)
 
 	if isEnabled then
 
-		local text, color = CMX.GetCombatLogString(nil, {...}, 12)
+		local text, color = CMX.GetCombatLogString(nil, logLine, 12)
 
 		if chatContainer then chatContainer:AddMessageToWindow(chatWindow, text, unpack(color)) end -- in case the container got removed by the user or an addon
 
 	end
 end
 
-local function AddToLog(...)
-	table.insert(CMX.currentdata.log,{...})
+local function AddToLog(logType, ...)
+
+	if LC.data.inCombat ~= true and logType == LIBCOMBAT_EVENT_PERFORMANCE then return end
+
+	table.insert(CMX.currentdata.log,{logType, ...})
 
 	if db.chatLog.enabled then AddtoChatLog(...) end
 end
@@ -1840,7 +1866,7 @@ local function UpdateEvents()
 
 		if newstatus == CMX_STATUS_DISABLED then
 
-			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_BOSSHP do
+			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_PERFORMANCE do
 				LC:UnregisterCallbackType(i, AddToLog, CMX.name)
 			end
 
@@ -1850,7 +1876,7 @@ local function UpdateEvents()
 
 		elseif newstatus == CMX_STATUS_LIGHTMODE then
 
-			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_BOSSHP do
+			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_PERFORMANCE do
 				LC:UnregisterCallbackType(i, AddToLog, CMX.name)
 			end
 
@@ -1861,7 +1887,7 @@ local function UpdateEvents()
 
 		elseif newstatus == CMX_STATUS_ENABLED then
 
-			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_BOSSHP do
+			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_PERFORMANCE do
 
 				LC:RegisterCallbackType(i, AddToLog ,CMX.name)
 
@@ -2024,7 +2050,7 @@ local svdefaults = {
 	["NotificationAllowed"] = true,
 	["ForceNotification"] = false,	-- for dev use
 
-	["CombatMetrics_LiveReport"] = { x = 0, y = -500},
+	["CombatMetrics_LiveReport"] = { x = 700, y = 500},
 	["CombatMetrics_Report"] = { x = GuiRoot:GetWidth()/2, y = GuiRoot:GetHeight()/2-75},
 
 	["FightReport"] = {
