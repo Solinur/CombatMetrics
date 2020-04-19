@@ -3511,7 +3511,7 @@ local function PerformancePlot(dataType)
 				x = deltatime
 				y = lineData[dataType]
 
-				table.insert(XYData, {x, y})
+				if y then table.insert(XYData, {x, y}) end
 			end
 		end
 	end
@@ -4294,13 +4294,13 @@ local StatStrings = {
 
 }
 
-PerformanceStrings = {
+local PerformanceStrings = {
 
 	[1] = {label = SI_COMBAT_METRICS_PERFORMANCE_FPSAVG, 	statId = 3},
 	[2] = {label = SI_COMBAT_METRICS_PERFORMANCE_FPSMIN, 	statId = 4},
 	[3] = {label = SI_COMBAT_METRICS_PERFORMANCE_FPSMAX, 	statId = 5},
 	[4] = {label = SI_COMBAT_METRICS_PERFORMANCE_FPSPING, 	statId = 6},
-	[5] = {label = SI_COMBAT_METRICS_PERFORMANCE_DELAY, 	statId = 7},
+	[5] = {label = SI_COMBAT_METRICS_PERFORMANCE_DESYNC, 	statId = 7},
 
 }
 
@@ -4383,6 +4383,8 @@ function CMX.PlotSelectionMenu(selector)
 
 	end
 
+	AddCustomSubMenuItem(GetString(SI_COMBAT_METRICS_STATS), submenu3)
+
 	local submenu4 = {}
 
 	for id, data in ipairs(PerformanceStrings) do
@@ -4393,7 +4395,7 @@ function CMX.PlotSelectionMenu(selector)
 
 	end
 
-	AddCustomSubMenuItem(GetString(SI_COMBAT_METRICS_STATS), submenu3)
+	AddCustomSubMenuItem(GetString(SI_COMBAT_METRICS_PERFORMANCE), submenu4)
 
 	ShowMenu(selector)
 	AnchorMenu(selector)
@@ -4624,7 +4626,9 @@ local function initPlotWindow(plotWindow)
 		local perfString = data.label
 		local perfId = data.statId
 
-		PlotFunctions[funcId] = getCustomMenuFunction(PerformancePlot, perfId, perfString)
+		local labelString = GetString(perfString)
+
+		PlotFunctions[funcId] = getCustomMenuFunction(PerformancePlot, perfId, labelString)
 
 		funcId = funcId + 1
 
@@ -5224,9 +5228,10 @@ local function updateInfoRowPanel(panel)
 
 			local fpsString = string.format("FPS: %d  |cAAAAAA(%d - %d)|r ", performance.avgAvg, performance.minAvg, performance.maxAvg)
 			local pingString = string.format("Ping: %d ms", performance.avgPing)
-			local delayString = string.format("Desync: %d ms", performance.avgDelay)
 
-			local fullString = string.format("%s - %s - %s", fpsString, pingString, delayString)
+			local delayString = performance.countDelay and string.format(" - Desync: %d ms", performance.avgDelay) or ""
+
+			local fullString = string.format("%s - %s%s", fpsString, pingString, delayString)
 
 			performancecontrol:SetText(fullString)
 
@@ -5939,6 +5944,7 @@ function CMX.Resizing(control, resizing)
 		parent:ClearAnchors()
 		parent:SetAnchor(CENTER, nil , TOPLEFT, newpos.x, newpos.y)
 		parent:Resize(scale)
+		parent:Update()
 
 	end
 end
