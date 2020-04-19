@@ -1,7 +1,7 @@
 local em = GetEventManager()
 local wm = GetWindowManager()
-COMBAT_METRICS_LINE_SIZE = LIBCOMBAT_LINE_SIZE or math.ceil(GuiRoot:GetWidth()/tonumber(GetCVar("WindowedWidth"))*1000)/1000
-local dx = COMBAT_METRICS_LINE_SIZE
+local dx = LIBCOMBAT_LINE_SIZE or math.ceil(GuiRoot:GetWidth()/tonumber(GetCVar("WindowedWidth"))*1000)/1000
+COMBAT_METRICS_LINE_SIZE = tostring(dx)
 local fontsize = 14
 local currentFight
 local abilitystats
@@ -3487,6 +3487,38 @@ local function BossHPAbsolute()
 	return XYData, COMBAT_METRICS_YAXIS_RIGHT, maxhp
 end
 
+local function PerformancePlot(dataType)
+
+	if fightData == nil or fightData.log == nil then return end
+
+	local logData = fightData.log
+
+	local combatstart = fightData.combatstart/1000
+
+	local XYData = {}
+
+	local x	= -1
+	local y
+
+	for line, lineData in ipairs(logData) do
+
+		if lineData[1] == LIBCOMBAT_EVENT_PERFORMANCE then
+
+			local deltatime = math.floor(lineData[2]/1000 - combatstart)
+
+			if deltatime > x then
+
+				x = deltatime
+				y = lineData[dataType]
+
+				table.insert(XYData, {x, y})
+			end
+		end
+	end
+
+	return XYData, COMBAT_METRICS_YAXIS_LEFT, 1
+end
+
 local function StatAbsolute(statId)
 
 	if fightData == nil or fightData.log == nil then return end
@@ -4214,7 +4246,7 @@ local PlotFunctions = {}
 local MainCategoryFunctions = {
 
 	[1] = {label = SI_COMBAT_METRICS_SMOOTHED, 		func = Smooth},
-	[2] = {label = SI_COMBAT_METRICS_TOTAL, 	func = Total},
+	[2] = {label = SI_COMBAT_METRICS_TOTAL, 		func = Total},
 	[3] = {label = SI_COMBAT_METRICS_ABSOLUTE, 		func = Absolute},
 
 }
@@ -4259,6 +4291,16 @@ local StatStrings = {
 	[12] = {label = SI_COMBAT_METRICS_STATS_HEALTH2, 	statId = LIBCOMBAT_STAT_PHYSICALRESISTANCE},
 	[13] = {label = SI_COMBAT_METRICS_STATS_HEALTH3, 	statId = LIBCOMBAT_STAT_SPELLRESISTANCE},
 	[14] = {label = SI_COMBAT_METRICS_STATS_HEALTH4, 	statId = LIBCOMBAT_STAT_CRITICALRESISTANCE},
+
+}
+
+PerformanceStrings = {
+
+	[1] = {label = SI_COMBAT_METRICS_PERFORMANCE_FPSAVG, 	statId = 3},
+	[2] = {label = SI_COMBAT_METRICS_PERFORMANCE_FPSMIN, 	statId = 4},
+	[3] = {label = SI_COMBAT_METRICS_PERFORMANCE_FPSMAX, 	statId = 5},
+	[4] = {label = SI_COMBAT_METRICS_PERFORMANCE_FPSPING, 	statId = 6},
+	[5] = {label = SI_COMBAT_METRICS_PERFORMANCE_DELAY, 	statId = 7},
 
 }
 
@@ -4338,6 +4380,16 @@ function CMX.PlotSelectionMenu(selector)
 		funcId = funcId + 1
 
 		if id == 5 or id == 10 then table.insert(submenu3, {label = "-"}) end
+
+	end
+
+	local submenu4 = {}
+
+	for id, data in ipairs(PerformanceStrings) do
+
+		table.insert(submenu4, {label = GetString(data.label), callback = PlotFunctions[funcId]})
+
+		funcId = funcId + 1
 
 	end
 
@@ -4562,6 +4614,17 @@ local function initPlotWindow(plotWindow)
 		local labelString = GetString(statString) .. " %"
 
 		PlotFunctions[funcId] = getCustomMenuFunction(StatAbsolute, statId, labelString)
+
+		funcId = funcId + 1
+
+	end
+
+	for id, data in ipairs(PerformanceStrings) do
+
+		local perfString = data.label
+		local perfId = data.statId
+
+		PlotFunctions[funcId] = getCustomMenuFunction(PerformancePlot, perfId, perfString)
 
 		funcId = funcId + 1
 
