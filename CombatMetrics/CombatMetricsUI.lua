@@ -1,7 +1,7 @@
 local em = GetEventManager()
 local wm = GetWindowManager()
-COMBAT_METRICS_LINE_SIZE = LIBCOMBAT_LINE_SIZE
-local dx = LIBCOMBAT_LINE_SIZE
+COMBAT_METRICS_LINE_SIZE = LIBCOMBAT_LINE_SIZE or math.ceil(GuiRoot:GetWidth()/tonumber(GetCVar("WindowedWidth"))*1000)/1000
+local dx = COMBAT_METRICS_LINE_SIZE
 local fontsize = 14
 local currentFight
 local abilitystats
