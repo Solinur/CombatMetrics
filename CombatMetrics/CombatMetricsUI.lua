@@ -1187,7 +1187,7 @@ do
 
 		end
 
-		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_FEEDBACK), ToggleFeedback)
+		if LibFeedback then AddCustomMenuItem(GetString(SI_COMBAT_METRICS_FEEDBACK), ToggleFeedback) end
 
 		ShowMenu(settingsbutton)
 		AnchorMenu(settingsbutton)
@@ -6194,14 +6194,17 @@ function CMX.InitializeUI()
 
 	local settingsbutton = CombatMetrics_Report_SelectorRowSettingsButton
 
-	local data = CMX.GetFeedBackData(settingsbutton)
+	if LibFeedback then
 
-	local button, feedbackWindow = LibFeedback:initializeFeedbackWindow(unpack(data))
-	button:SetHidden(true)
+		local data = CMX.GetFeedBackData(settingsbutton)
 
-	function ToggleFeedback()
+		local button, feedbackWindow = LibFeedback:initializeFeedbackWindow(unpack(data))
+		button:SetHidden(true)
 
-		feedbackWindow:ToggleHidden()
+		function ToggleFeedback()
 
+			feedbackWindow:ToggleHidden()
+
+		end
 	end
 end

@@ -28,13 +28,19 @@ local infinity = math.huge
 local LC = LibCombat
 if LC == nil then return end
 
+if LibFeedback == nil then 
+
+	assert(false, "Combat Metrics: LibFeedback not found! Make sure LibFeedback version 1.32 or higher is installed.") 
+
+end
+
 -- namespace for thg addon
 if CMX == nil then CMX = {} end
 local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "0.9.16"
+CMX.version = "0.9.17"
 
 function CMX.GetFeedBackData(parentcontrol)
 
