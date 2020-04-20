@@ -28,12 +28,6 @@ local infinity = math.huge
 local LC = LibCombat
 if LC == nil then return end
 
-if LibFeedback == nil then 
-
-	assert(false, "Combat Metrics: LibFeedback not found! Make sure LibFeedback version 1.32 or higher is installed.") 
-
-end
-
 -- namespace for thg addon
 if CMX == nil then CMX = {} end
 local CMX = CMX
@@ -2269,7 +2263,13 @@ local function Initialize(event, addon)
 
 	if GetDisplayName() == "@Solinur" then db.NotificationRead = 0 end -- for dev purposes
 
-	CMX.init = true
+	CMX.init = true	
+
+	if LibFeedback == nil then
+
+		assert(false, "Combat Metrics: LibFeedback not found! Make sure LibFeedback version 1.32 or higher is installed.") 
+
+	end
 
 end
 

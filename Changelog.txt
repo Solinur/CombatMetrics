@@ -432,3 +432,5 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 0.9.16 2,474,163 (19.04.2020) 11:59
 [*] Fixed a bug introduced in last version that could cause display issues and a lua error during graph creation. (Thx at Benny for reporting this)
 
+0.9.17 2,497,009 (21.04.2020) 00:30
+[*] Added an error handler for the issue when a too old version of LibFeedback is installed. When you see it, please update LibFeedback to the latest version.
