@@ -1894,7 +1894,9 @@ local CMX_STATUS_ENABLED = 2
 local registrationStatus
 local registeredGroup
 
-local function UpdateEvents()
+local function UpdateEvents(event)
+
+	logger:Info("Update Events: %d", event)
 
 	local isGrouped = IsUnitGrouped("player")
 	local ava = IsPlayerInAvAWorld()
@@ -2304,8 +2306,7 @@ local function Initialize(event, addon)
 	CMX.InitializeUI()
 
 	em:RegisterForEvent(CMX.name.."zone", EVENT_ZONE_CHANGED, UpdateEvents)
-	em:RegisterForEvent(CMX.name.."group1", EVENT_UNIT_CREATED, UpdateEvents)
-	em:RegisterForEvent(CMX.name.."group2", EVENT_UNIT_DESTROYED, UpdateEvents)
+	em:RegisterForEvent(CMX.name.."group1", EVENT_GROUP_UPDATE, UpdateEvents)
 	em:RegisterForEvent(CMX.name.."port", EVENT_PLAYER_ACTIVATED, UpdateEvents)
 
 	CMX.UpdateEvents = UpdateEvents
@@ -2334,7 +2335,6 @@ local function Initialize(event, addon)
 	if GetDisplayName() == "@Solinur" then db.NotificationRead = 0 end -- for dev purposes
 
 	CMX.init = true
-
 end
 
 -- register event handler function to initialize when addon is loaded
