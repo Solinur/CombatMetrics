@@ -457,10 +457,11 @@ local function reduceUnitIds(fight)
 	end
 
 	if fight.bosses == nil then fight.bosses = {} end
+	local bosses = fight.bosses
 
-	for id, boss in pairs(fight.bosses) do
+	for bossid, unitId in pairs(bosses) do
 
-		bosses[id] = unitConversion[bosses[id]]
+		bosses[bossid] = unitConversion[unitId]
 
 	end
 

@@ -434,3 +434,6 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 
 0.9.17 2,497,009 (21.04.2020) 00:30
 [*] Added an error handler for the issue when a too old version of LibFeedback is installed. When you see it, please update LibFeedback to the latest version.
+
+0.9.18 2,517,837 (22.04.2020) 09:31
+[*] Fixed a lua error that occured when saving fights with bosses
