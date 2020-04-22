@@ -1896,8 +1896,6 @@ local registeredGroup
 
 local function UpdateEvents(event)
 
-	logger:Info("Update Events: %d", event)
-
 	local isGrouped = IsUnitGrouped("player")
 	local ava = IsPlayerInAvAWorld()
 
