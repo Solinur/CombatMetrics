@@ -5,7 +5,7 @@ COMBAT_METRICS_LINE_SIZE = tostring(dx)
 local fontsize = 14
 local currentFight
 local abilitystats
-local abilitystatsversion = 2
+local abilitystatsversion = 3
 local fightData, selectionData
 local currentCLPage
 local selections, lastSelections
@@ -24,7 +24,10 @@ local _
 local db
 
 function CMX.GetAbilityStats()
-	return abilitystats, abilitystatsversion
+
+	local isSelection = selections.unit.damageOut ~= nil
+	return abilitystats, abilitystatsversion, isSelection
+
 end
 
 local LC = LibCombat
@@ -2822,6 +2825,7 @@ local function updateCombatLog(panel)
 			or (logtype == LIBCOMBAT_EVENT_DAMAGE_SELF and (CLSelection[LIBCOMBAT_EVENT_DAMAGE_IN] or CLSelection[LIBCOMBAT_EVENT_DAMAGE_OUT]))
 			or (logtype == LIBCOMBAT_EVENT_HEAL_SELF and (CLSelection[LIBCOMBAT_EVENT_HEAL_IN] or CLSelection[LIBCOMBAT_EVENT_HEAL_OUT]))
 			or (logtype == LIBCOMBAT_EVENT_BOSSHP and (CLSelection[LIBCOMBAT_EVENT_MESSAGES]))
+			or (logtype == LIBCOMBAT_EVENT_DEATH and (CLSelection[LIBCOMBAT_EVENT_MESSAGES]))
 
 		if condition1 == true then
 
@@ -2884,7 +2888,7 @@ local function updateCombatLog(panel)
 
 				condition2 = powerType ~= POWERTYPE_HEALTH and (resourceSelection == nil or resourceSelection[abilityId or 0] ~= nil)
 
-			elseif logtype == LIBCOMBAT_EVENT_PLAYERSTATS or logtype == LIBCOMBAT_EVENT_MESSAGES or logtype == LIBCOMBAT_EVENT_SKILL_TIMINGS or logtype == LIBCOMBAT_EVENT_BOSSHP then
+			elseif logtype == LIBCOMBAT_EVENT_PLAYERSTATS or logtype == LIBCOMBAT_EVENT_MESSAGES or logtype == LIBCOMBAT_EVENT_SKILL_TIMINGS or logtype == LIBCOMBAT_EVENT_BOSSHP or logtype == LIBCOMBAT_EVENT_DEATH or logtype == LIBCOMBAT_EVENT_PERFORMANCE then
 
 				condition2 = true
 
@@ -3465,23 +3469,15 @@ local function BossHPAbsolute()
 
 			local deltatime = math.floor(lineData[2]/1000 - combatstart)
 
-			maxhp = math.max(lineData[5], maxhp)
-
 			if deltatime > x then
 
 				x = deltatime
 
-				y = lineData[4]
+				y = lineData[4]/lineData[5]
 
 				table.insert(XYData, {x, y})
 			end
 		end
-	end
-
-	for i, xyData in ipairs(XYData) do
-
-		xyData[2] = xyData[2]/maxhp
-
 	end
 
 	return XYData, COMBAT_METRICS_YAXIS_RIGHT, maxhp
@@ -5026,10 +5022,10 @@ local function updateLeftInfoPanel(panel)
 	local value3string = totalWeaponAttacks or " -"
 	local value4string = totalSkillsFired or " -"
 
-	statrow:GetNamedChild("Label"):SetText(string.format("%s   %s", GetString(SI_COMBAT_METRICS_AVERAGEC), value1string))
-	statrow:GetNamedChild("Label2"):SetText(string.format("%s   %s", GetString(SI_COMBAT_METRICS_TOTALC), value2string))
-	statrow2:GetNamedChild("Label"):SetText(string.format("%s   %s", GetString(SI_COMBAT_METRICS_TOTALWA), value3string))
-	statrow2:GetNamedChild("Label2"):SetText(string.format("%s   %s", GetString(SI_COMBAT_METRICS_TOTALSKILLS), value4string))
+	statrow:GetNamedChild("Label"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_AVERAGEC), value1string))
+	statrow:GetNamedChild("Label2"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALC), value2string))
+	statrow2:GetNamedChild("Label"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALWA), value3string))
+	statrow2:GetNamedChild("Label2"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALSKILLS), value4string))
 end
 
 function CMX.ToggleSkillTimingData(control)
@@ -5293,7 +5289,7 @@ local function updateFightReport(control, fightId)
 
 	selectionData = fightData and CMX.GenerateSelectionStats(fightData, category, selections) or nil
 
-	abilitystats = {fightData, selections.unit.damageOut ~= nil and selectionData or nil}
+	abilitystats = {fightData, selectionData}
 
 	-- Update Panels
 

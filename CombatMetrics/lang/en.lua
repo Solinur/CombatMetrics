@@ -138,7 +138,7 @@
 	SI_COMBAT_METRICS_FEEDBACK_GOLD2 = "Donate 25000g",
 	SI_COMBAT_METRICS_FEEDBACK_ESOUI = "Site (ESOUI)",
 	SI_COMBAT_METRICS_FEEDBACK_GITHUB = "GitHub",
-	SI_COMBAT_METRICS_FEEDBACK_TEXT = "\nIf you found a bug, have a request or a suggestion, send an ingame mail, create an issue on GitHub or post it in the comments on EsoUI. \n\nDonations are appreciated but not required or necessary. \nIf you want to donate real money please visit the addon site on EsoUI",
+	SI_COMBAT_METRICS_FEEDBACK_TEXT = "\nIf you found a bug, have a request or a suggestion, send an ingame mail, create an issue on GitHub or post it in the comments on EsoUI. \n\nDonations are gladly accepted, but are not urgently needed. \nIf you want to buy me a coffee or a beer you can donate via Paypal on the ESOUI page.",
 
 	SI_COMBAT_METRICS_STORAGE_FULL = "The storage file is full. The fight you want to save needs <<1>> MB. Delete a fight to free some space or increase the allowed space in the settings!",
 
@@ -253,8 +253,9 @@
 	SI_COMBAT_METRICS_TOGGLE_STATS_CHANGE_EVENTS = "Toggle stats change events",
 	SI_COMBAT_METRICS_TOGGLE_MESSAGE_CHANGE_EVENTS = "Toggle info events (e.g. weapon swap)",
 	SI_COMBAT_METRICS_TOGGLE_SKILL_USE_EVENTS = "Toggle used skills events",
+	SI_COMBAT_METRICS_TOGGLE_PERFORMANCE_EVENTS = "Toggle performance info",
 
-														-- \n = new line
+	-- \n = new line
 
 	SI_COMBAT_METRICS_DEBUFF_IN = "(De-)Buffs\nIn",
 	SI_COMBAT_METRICS_DEBUFF_OUT = "(De-)Buffs\nOut",

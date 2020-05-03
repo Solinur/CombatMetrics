@@ -28,7 +28,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "0.9.17"
+CMX.version = "1.0.0"
 
 -- Logger
 
@@ -1602,60 +1602,64 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		for reducedslot, skill in pairs(skilldata) do
 
 			local isWeaponAttack = reducedslot%10 == 1 or reducedslot%10 == 2
-			local timedata = skill["times"]
-			local skillId = skillBars[reducedslot>10 and 2 or 1][reducedslot%10]
+			local timedata = skill.times
+			local bar = math.floor(reducedslot/10) + 1
+			local skillId = skillBars[bar][reducedslot%10]
 
-			local difftimes = {}
+			if bar <= 2 and skillId then
 
-			skill.count = #timedata
+				local difftimes = {}
 
-			for i = 1, #timedata - 1 do
+				skill.count = #timedata
 
-				difftimes[i] = timedata[i+1] - timedata[i]
+				for i = 1, #timedata - 1 do
 
-			end
-
-			skill.difftimes = difftimes
-
-			if isWeaponAttack then
-
-				totalWeaponAttacks = totalWeaponAttacks + skill.count
-
-			elseif not ignoredAbilityTiming[skillId] then
-
-				totalSkillsFired = totalSkillsFired + skill.count
-
-			end
-
-			for i, key in ipairs({"skillBefore", "weaponAttackBefore", "skillNext", "weaponAttackNext", "difftimes"}) do
-
-				local times = skill[key]
-
-				local avgkey = ZO_CachedStrFormat("<<1>>Avg", key)
-
-				local sum = 0
-				local count = 0
-
-				for _, v in pairs(times) do
-
-					if type(v) == 'number' then
-
-						sum = sum + v
-						count = count + 1
-
-					end
+					difftimes[i] = timedata[i+1] - timedata[i]
 
 				end
 
-				skill[avgkey] = count > 0 and (sum / count) or 0
+				skill.difftimes = difftimes
 
-				if i == 1 and not (isWeaponAttack or ignoredAbilityTiming[skillId]) then
+				if isWeaponAttack then
 
-					totalSkillTime = totalSkillTime + sum
-					totalSkills = totalSkills + count
+					totalWeaponAttacks = totalWeaponAttacks + skill.count
 
-					--Print("misc", "Slot %d: Total: %d | Timing %d", reducedslot, skill.count, count)
+				elseif not ignoredAbilityTiming[skillId] then
 
+					totalSkillsFired = totalSkillsFired + skill.count
+
+				end
+
+				for i, key in ipairs({"skillBefore", "weaponAttackBefore", "skillNext", "weaponAttackNext", "difftimes"}) do
+
+					local times = skill[key]
+
+					local avgkey = ZO_CachedStrFormat("<<1>>Avg", key)
+
+					local sum = 0
+					local count = 0
+
+					for _, v in pairs(times) do
+
+						if type(v) == 'number' then
+
+							sum = sum + v
+							count = count + 1
+
+						end
+
+					end
+
+					skill[avgkey] = count > 0 and (sum / count) or 0
+
+					if i == 3 and not (isWeaponAttack or ignoredAbilityTiming[skillId]) then
+
+						totalSkillTime = totalSkillTime + sum
+						totalSkills = totalSkills + count
+
+						--Print("misc", "Slot %d: Total: %d | Timing %d", reducedslot, skill.count, count)
+
+					end
 				end
 			end
 		end

@@ -432,8 +432,15 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 0.9.16 2,474,163 (19.04.2020) 11:59
 [*] Fixed a bug introduced in last version that could cause display issues and a lua error during graph creation. (Thx at Benny for reporting this)
 
-0.9.17
+0.9.17 2,497,009 (21.04.2020) 00:30
+[*] Added an error handler for the issue when a too old version of LibFeedback is installed. When you see it, please update LibFeedback to the latest version.
+
+0.9.18 2,517,837 (22.04.2020) 09:31
+[*] Fixed a lua error that occured when saving fights with bosses.
+
+1.0.0
 [*] Sligthly increased minimum size of main report window. To help a little when some ppl set the slider too low.
 [*] Size can now be changed by dragging the corners
 [*] Fixed duplicate heading of sections in the settings menu.
-[*] Added performance stats
+[*] Added performance stats they are shown at the bottom of the main window and can also be viewed in the graph and the log
+[*] Added deaths and resurrections to combat log. To show allow info messages which also show weapon swaps.

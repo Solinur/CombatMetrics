@@ -470,7 +470,7 @@
 				
 				<Control name="$(parent)Stats2">
 								
-					<Anchor point="TOPLEFT" relativeTo="$(parent)Sep2" relativePoint="BOTTOMLEFT" offsetY="2"/>
+					<Anchor point="TOPLEFT" relativeTo="$(parent)Sep2" relativePoint="BOTTOMLEFT" offsetY="4"/>
 					<Dimensions x="300" y="20"/>									
 
 					<Controls>
@@ -478,7 +478,7 @@
 						<Label name="$(parent)Label" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip" text="SI_COMBAT_METRICS_AVERAGEC" horizontalAlignment="LEFT">
 						
 							<Anchor point="LEFT" offsetX="6"/>
-							<Dimensions x="136" y="20"/>
+							<Dimensions x="156" y="20"/>
 							
 						</Label>									
 						
@@ -486,7 +486,7 @@
 						
 							<Anchor point="LEFT" offsetX="6" constrains="Y"/>
 							<Anchor point="TOPLEFT" relativePoint="TOP" constrains="X" offsetX="3" offsetY="0"/>
-							<Dimensions x="136" y="20"/>
+							<Dimensions x="116" y="20"/>
 							
 						</Label>
 						
@@ -2179,8 +2179,18 @@
 											<Dimensions x="120"/>
 											
 											<Controls>
-												<Control name="$(parent)Skills" inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
+												<Control name="$(parent)Performance" inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
 													<Anchor point="LEFT" offsetX="0" offsetY="0"/>										
+													
+													<OnInitialized>
+														self.tooltip = {SI_COMBAT_METRICS_TOGGLE_PERFORMANCE_EVENTS}
+														self.func = LIBCOMBAT_EVENT_PERFORMANCE
+														self.texture = "EsoUI/Art/Campaign/campaignBrowser_hiPop.dds"
+													</OnInitialized>
+												</Control>
+
+												<Control name="$(parent)Skills" inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
+													<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Performance" offsetX="3" offsetY="0"/>									
 													
 													<OnInitialized>
 														self.tooltip = {SI_COMBAT_METRICS_TOGGLE_SKILL_USE_EVENTS}
@@ -2205,7 +2215,7 @@
 													<OnInitialized>
 														self.tooltip = {SI_COMBAT_METRICS_TOGGLE_STATS_CHANGE_EVENTS}
 														self.func = LIBCOMBAT_EVENT_PLAYERSTATS
-														self.texture = "EsoUI/Art/Campaign/campaignBrowser_hiPop.dds"
+														self.texture = "esoui/art/menubar/gamepad/gp_playermenu_icon_cadwell.dds"
 													</OnInitialized>
 												</Control>
 												
