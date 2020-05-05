@@ -571,6 +571,9 @@ function SkillTimingHandler:Initialize()
 	self.weaponAttackBefore = {} 	-- holds times since last light or heavy attack completed
 	self.skillNext = {} 			-- holds times until a new skill is cast afterwards
 	self.weaponAttackNext = {} 		-- holds times until a new light or heavy attack is cast afterwards
+	self.sumdelays = 0
+	self.countdelays = 0
+	--self.delays = {} 				-- holds times between button press is registered and the ability activating
 
 end
 
@@ -1234,10 +1237,10 @@ end
 
 ProcessLog[LIBCOMBAT_EVENT_PLAYERSTATS] = ProcessLogStats
 
-local abilityDelay = {[63044] = 100, [63029] = 100, [63046] = 100} -- Radiant Destruction and morphs have a 100ms delay after casting.
+local abilityExtraDelay = {[63044] = 100, [63029] = 100, [63046] = 100} -- Radiant Destruction and morphs have a 100ms delay after casting.
 
 ---[[
-local function ProcessLogSkillTimings(fight, callbacktype, timems, reducedslot, abilityId, status)
+local function ProcessLogSkillTimings(fight, callbacktype, timems, reducedslot, abilityId, status, skillDelay)
 
 	if reducedslot == nil then return end
 
@@ -1310,20 +1313,27 @@ local function ProcessLogSkillTimings(fight, callbacktype, timems, reducedslot, 
 
 		end
 
-	else
+		if skillDelay then
 
-		local delay = abilityDelay[abilityId] or 0
-
-		if isWeaponAttack and lastUsedWeaponAttack then
-
-			lastUsedWeaponAttack[3] = timems + delay
-
-		elseif lastUsedSkill then
-
-			lastUsedSkill[3] = timems + delay
+			slotdata.sumdelays = slotdata.sumdelays + skillDelay
+			slotdata.countdelays = slotdata.countdelays + 1
+			--table.insert(slotdata.delays, skillDelay)
 
 		end
 
+	else
+
+		local extraDelay = abilityExtraDelay[abilityId] or 0		-- some abilities require a extra delay due to animation
+
+		if isWeaponAttack and lastUsedWeaponAttack then
+
+			lastUsedWeaponAttack[3] = timems + extraDelay
+
+		elseif lastUsedSkill then
+
+			lastUsedSkill[3] = timems + extraDelay
+
+		end
 	end
 end
 
@@ -1349,7 +1359,7 @@ ProcessLog[LIBCOMBAT_EVENT_MESSAGES] = ProcessMessages
 
 ProcessLog[LIBCOMBAT_EVENT_BOSSHP] = function() end
 
-local function ProcessPerformanceStats(fight, callbacktype, timems, avg, min, max, ping, skillDelay)
+local function ProcessPerformanceStats(fight, callbacktype, timems, avg, min, max, ping)
 
 	local performance = fight.calculated.performance
 
@@ -1370,15 +1380,6 @@ local function ProcessPerformanceStats(fight, callbacktype, timems, avg, min, ma
 	performance.minPing = mathmin(performance.minPing or ping, ping)
 	performance.maxPing = mathmax(performance.maxPing or ping, ping)
 	performance.sumPing = ping + (performance.sumPing or 0)
-
-	if skillDelay then
-
-		performance.minDelay = mathmin(performance.minDelay or skillDelay, skillDelay)
-		performance.maxDelay = mathmax(performance.maxDelay or skillDelay, skillDelay)
-		performance.sumDelay = skillDelay + (performance.sumDelay or 0)
-		performance.countDelay = (performance.countDelay or 0) + 1
-
-	end
 end
 
 ProcessLog[LIBCOMBAT_EVENT_PERFORMANCE] = ProcessPerformanceStats
@@ -1596,6 +1597,8 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		local totalSkills = 0
 		local totalWeaponAttacks = 0
 		local totalSkillsFired = 0
+		local totalDelay = 0
+		local totalDelayCount = 0
 
 		local skillBars = fight.charData.skillBars
 
@@ -1620,6 +1623,10 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 				skill.difftimes = difftimes
 
+				local countdelays = skill.countdelays
+
+				if countdelays and countdelays > 0 then skill.delayAvg = skill.sumdelays / skill.countdelays end
+
 				if isWeaponAttack then
 
 					totalWeaponAttacks = totalWeaponAttacks + skill.count
@@ -1627,6 +1634,8 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 				elseif not ignoredAbilityTiming[skillId] then
 
 					totalSkillsFired = totalSkillsFired + skill.count
+					totalDelay = totalDelay + skill.sumdelays
+					totalDelayCount = totalDelayCount + skill.countdelays
 
 				end
 
@@ -1701,13 +1710,12 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		local performance = data.performance
 		local count = performance.count
 
-		if count > 0 then 
+		if count > 0 then
 
 			performance.avgMin   = performance.sumMin/count
 			performance.avgMax   = performance.sumMax/count
 			performance.avgAvg   = performance.sumAvg/count
 			performance.avgPing  = performance.sumPing/count
-			performance.avgDelay = performance.sumDelay and performance.sumDelay/performance.countDelay or nil
 
 		end
 
@@ -1719,6 +1727,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		data.totalSkills = totalSkills
 		data.totalWeaponAttacks = totalWeaponAttacks
 		data.totalSkillsFired = totalSkillsFired
+		data.delayAvg = totalDelay / totalDelayCount
 
 		fight.calculating = false
 		fight.cindex = nil

@@ -172,9 +172,9 @@ local layouts = {
 	[LAYOUT_POWER] = {1, 4, 3, 3, 1, 3},		 		-- (16) type, timems, abilityId, powerValueChange, powerType, powerValue
 	[LAYOUT_MESSAGE] = {1, 4, 1, 1}, 					-- (8)  type, timems, messageId (e.g. "weapon swap"), bar
 	[LAYOUT_DEATH] = {1, 4, 1, 2, 3}, 					-- (8)  type, timems, state, unitId, abilityId/unitId
-	[LAYOUT_SKILL] = {1, 4, 1, 3, 1}, 					-- (11) type, timems, reducedslot, abilityId, status
+	[LAYOUT_SKILL] = {1, 4, 1, 3, 1, 2}, 				-- (13) type, timems, reducedslot, abilityId, status
 	[LAYOUT_BOSSHP] = {1, 4, 1, 5, 5}, 					-- (17) type, timems, bossId, currenthp, maxhp
-	[LAYOUT_PERFORMANCE] = {1, 4, 2, 2, 2, 2, 2}, 		-- (16) type, timems, avg, min, max, ping, skillDelay
+	[LAYOUT_PERFORMANCE] = {1, 4, 2, 2, 2, 2}, 		-- (14) type, timems, avg, min, max, ping, skillDelay
 }
 
 local layoutsize = {} -- get total sizes of layouts
@@ -251,7 +251,6 @@ local function encodeCombatLogLine(line, fight)
 		line[4] = math.floor(line[4])
 		line[5] = math.floor(line[5])
 		line[6] = math.floor(line[6])
-		line[7] = math.floor(line[7] or 0)
 
 	elseif layoutId ~= LAYOUT_SKILL and layoutId ~= LAYOUT_BOSSHP then
 

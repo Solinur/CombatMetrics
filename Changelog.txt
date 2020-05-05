@@ -439,8 +439,9 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Fixed a lua error that occured when saving fights with bosses.
 
 1.0.0
-[*] Sligthly increased minimum size of main report window. To help a little when some ppl set the slider too low.
-[*] Size can now be changed by dragging the corners
-[*] Fixed duplicate heading of sections in the settings menu.
-[*] Added performance stats they are shown at the bottom of the main window and can also be viewed in the graph and the log
-[*] Added deaths and resurrections to combat log. To show allow info messages which also show weapon swaps.
+[*] Sligthly increased minimum size of main report window.
+[*] The size of the main report can now be changed by dragging the corners
+[*] Added skill input lag to skill timing events. It shows the time difference between activating a skill on your bar and the skill actually firing.
+[*] Added performance stats in form of ping and fps. Together with input lag their averages are shown at the bottom of the main window and can also be viewed in the graph and the log
+[*] Added deaths and resurrections to combat log. To show them you have allow info messages (which also show weapon swaps).
+[*] Minor Fixes

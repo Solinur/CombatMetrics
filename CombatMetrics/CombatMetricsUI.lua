@@ -3496,18 +3496,21 @@ local function PerformancePlot(dataType)
 	local x	= -1
 	local y
 
+	local event = dataType == 7 and LIBCOMBAT_EVENT_SKILL_TIMINGS or LIBCOMBAT_EVENT_PERFORMANCE	-- skill delay is recorded with another logtype
+	local key = dataType == 7 and 6 or dataType
+
 	for line, lineData in ipairs(logData) do
 
-		if lineData[1] == LIBCOMBAT_EVENT_PERFORMANCE then
+		if lineData[1] == event and lineData[key] then
 
 			local deltatime = math.floor(lineData[2]/1000 - combatstart)
 
 			if deltatime > x then
 
 				x = deltatime
-				y = lineData[dataType]
+				y = lineData[key]
 
-				if y then table.insert(XYData, {x, y}) end
+				table.insert(XYData, {x, y})
 			end
 		end
 	end
@@ -3652,10 +3655,12 @@ local function GetScale(x1, x2)	-- e.g. 34596 and 42693
 	local low = math.floor(x1 / power) * power	-- 34000
 
 	local size = (high - low) / power 	-- 9000 / 1000 = 9
+	
+	local cleansize = math.floor(size)
+	--[[
+	local rangesizes = {1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20}
 
-	local rangesizes = {1, 2, 4, 6, 8, 10, 12, 16, 20}
-
-	local cleansize
+	local cleansize = rangesizes[#rangesizes]
 
 	for i, value in ipairs(rangesizes) do
 
@@ -3664,9 +3669,9 @@ local function GetScale(x1, x2)	-- e.g. 34596 and 42693
 			cleansize = value	-- 10
 			break
 
-		end
-
+		end -- sometimes somehow a too big value comes out ??
 	end
+	--]]
 
 	local delta = cleansize - size -- 1
 
@@ -4793,12 +4798,16 @@ function CMX.SkillTooltip_OnMouseEnter(control)
 
 	InitializeTooltip(SkillTooltip, control, TOPLEFT, 0, 5, BOTTOMLEFT)
 
-	local id = control:GetParent().id
+	local rowControl = control:GetParent()
+
+	local id = rowControl.id
+	local delay = rowControl.delay
 	local font = string.format("%s|%s|%s", GetString(SI_COMBAT_METRICS_STD_FONT), 16, "soft-shadow-thin")
 
 	SkillTooltip:SetAbilityId(id)
 	SkillTooltip:AddVerticalPadding(15)
 	SkillTooltip:AddLine(string.format("ID: %d", id), font, .7, .7, .8 , TOP, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER)
+	if delay then SkillTooltip:AddLine(string.format("Average delay: %d ms", delay), font, .7, .7, .8 , TOP, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER) end
 end
 
 function CMX.SkillTooltip_OnMouseExit(control)
@@ -4970,12 +4979,13 @@ local function updateLeftInfoPanel(panel)
 			if slotdata then
 
 				strings[1] = string.format("%d", slotdata[skillkeys[1]])
+				control.delay = slotdata.delayAvg
 
 				for k = 2, #skillkeys do
 
 					local value = slotdata[skillkeys[k]]
 
-					if type(value) == "number" and k > 1 then
+					if type(value) == "number" then
 
 						strings[k] = string.format("%.2f", value / 1000)
 
@@ -5225,7 +5235,7 @@ local function updateInfoRowPanel(panel)
 			local fpsString = string.format("FPS: %d  |cAAAAAA(%d - %d)|r ", performance.avgAvg, performance.minAvg, performance.maxAvg)
 			local pingString = string.format("Ping: %d ms", performance.avgPing)
 
-			local delayString = performance.countDelay and string.format(" - Desync: %d ms", performance.avgDelay) or ""
+			local delayString = data.delayAvg and string.format(" - Desync: %d ms", data.delayAvg) or ""
 
 			local fullString = string.format("%s - %s%s", fpsString, pingString, delayString)
 
