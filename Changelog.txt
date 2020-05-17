@@ -438,7 +438,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 0.9.18 2,517,837 (22.04.2020) 09:31
 [*] Fixed a lua error that occured when saving fights with bosses.
 
-1.0.0
+1.0.0 2,601,425 (17.05.2020) 22:31
 [*] Rewrote buff/debuff calculation system. It can now handle cases of stacked buffs or minor/major buffs from various sources properly.
 [*] In the buff/debuff display you can now open/collapse buffs with additional data (like uptimes of individual stacks, different sources)
 [*] If a buff has multiple stacks the total uptime now reflects the maximum number of stacks and their averaged uptime. This allows to directly calculate the benefit of this buff. E.g. for Siroria given 20 stacks with a total uptime shown of 53% the total benefit is 20 * 0.53 multiplied by the sets spell damage bonus.
@@ -447,5 +447,5 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Added deaths and resurrections to combat log. To show them you have to allow info messages (which also show weapon swaps).
 [*] Combat Metrics now optionally depends on libdebuglogger. It is set up to handle all debug output and also saves them for later review. When it is not installed no debug output will be shown. Consequently, the debug settings have been removed.
 [*] The size of the main report window can now be changed by dragging the corners/edges.
-[*] The settings that apply if the player is in cyrodil now also include battlegrounds.
-[*] Additional minor fixes and improvements.
+[*] The settings that apply when the player is in cyrodil, now also include battlegrounds.
+[*] Additional minor fixes and performance improvements.
