@@ -232,7 +232,7 @@ SafeAddString(SI_COMBAT_METRICS_BUFF, "Бафф", 1)
 --SafeAddString(SI_COMBAT_METRICS_DEBUFFS, "Debuffs", 1) 
 SafeAddString(SI_COMBAT_METRICS_SHARP, "#", 1) 
 SafeAddString(SI_COMBAT_METRICS_BUFFCOUNT_TT, "Игрок / Всего", 1) 
-SafeAddString(SI_COMBAT_METRICS_UPTIME, "Время", 1) 
+SafeAddString(SI_COMBAT_METRICS_UPTIME, "Время %", 1) 
 SafeAddString(SI_COMBAT_METRICS_UPTIME_TT, "Игрок % / Всего %", 1) 
 
 SafeAddString(SI_COMBAT_METRICS_REGENERATION, "Восстановление", 1) 

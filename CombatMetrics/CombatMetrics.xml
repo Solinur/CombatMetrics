@@ -962,10 +962,31 @@
 			<Controls>	
 			
 				<Backdrop name="$(parent)HighLight" inherits="CombatMetrics_HighLight"/>
-				
-				<Texture name="$(parent)Icon">
-					<Anchor point="LEFT" relativePoint="LEFT" offsetX="2"/>
+
+				<Control name="$(parent)Indicator">
+					<Anchor point="LEFT" offsetX="0" offsetY="0"/>
 					<Dimensions x="10" y="10"/>
+				</Control>
+
+				<Button name="$(parent)IndicatorSwitch" hidden="true">
+
+					<Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Indicator" offsetX="-2" offsetY="0"/>
+					<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Indicator" offsetX="0" offsetY="0"/>
+
+					<Textures 
+						normal="esoui/art/buttons/dropbox_arrow_normal.dds" 
+						mouseOver="esoui/art/buttons/dropbox_arrow_mouseover.dds"
+						pressed="esoui/art/buttons/dropbox_arrow_mousedown.dds"
+						disabled="esoui/art/buttons/dropbox_arrow_disabled.dds"
+					/>					
+			
+					<OnClicked> CMX.CollapseButton( self, upInside ) </OnClicked> 
+
+				</Button>
+
+				<Texture name="$(parent)Icon">
+					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Indicator" offsetX="2"/>
+					<Dimensions x="20" y="20"/>
 				</Texture>
 				
 				<Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="LEFT" verticalAlignment="CENTER">
@@ -975,15 +996,14 @@
 				
 				<Backdrop name="$(parent)GroupBar" edgeColor="00000000" centerColor="CC000099">
 					<Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Name" offsetX="-2" />
-					<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Name" />
-					<Dimensions x="50"/>
-					
+					<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Name" constrains="Y"/>
+					<Dimensions x="50"/>					
 					<Edge edgeSize="1" />
 				</Backdrop>
 				
 				<Backdrop name="$(parent)PlayerBar" edgeColor="00000000" centerColor="CC000099">
 					<Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Name" offsetX="-2" />
-					<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Name" />
+					<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Name" constrains="Y"/>
 					<Dimensions x="50"/>
 					<Edge edgeSize="1" />
 				</Backdrop>
@@ -2450,7 +2470,7 @@
 										
 										</Control>
 										
-										<Texture name="$(parent)ToggleCursor" mouseEnabled="true" textureFile="esoui\art\compass\ava_returnpoint_neutral.dds" color="FFFFFFFF" inherits="CombatMetrics_TextureTooltip">
+										<Texture name="$(parent)ToggleCursor" mouseEnabled="true" textureFile="esoui/art/compass/ava_returnpoint_neutral.dds" color="FFFFFFFF" inherits="CombatMetrics_TextureTooltip">
 											
 											<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" offsetX="-26" offsetY="2"/>
 											<Anchor point="TOPRIGHT" offsetX="-2" offsetY="2"/>
@@ -2919,22 +2939,27 @@
 									
 									<Controls>
 									
+										<Control name="$(parent)Indicator">
+											<Anchor point="LEFT" offsetX="0" offsetY="0"/>
+											<Dimensions x="10" y="10"/>
+										</Control>
+									
 										<Control name="$(parent)Icon">
-											<Anchor point="BOTTOMLEFT" offsetX="2"/>
+											<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Indicator" offsetX="2" offsetY="0"/>
 											<Dimensions x="20" y="20"/>
 										</Control>
 										
 										<Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_BUFF" horizontalAlignment="LEFT" verticalAlignment="CENTER">
 											
-											<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="2" offsetY="0"/>
-											<Dimensions x="176" y="20"/>
+											<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="4" offsetY="0"/>
+											<Dimensions x="180" y="20"/>
 											
 										</Label>
 										
 										<Label name="$(parent)Count" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip" text="SI_COMBAT_METRICS_SHARP" horizontalAlignment="CENTER" verticalAlignment="CENTER">
 											
 											<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="2" offsetY="0"/>
-											<Dimensions x="52" y="20"/>
+											<Dimensions x="58" y="20"/>
 											<OnInitialized>self.tooltip = {SI_COMBAT_METRICS_BUFFCOUNT_TT}</OnInitialized>
 											
 										</Label>
@@ -2942,7 +2967,7 @@
 										<Label name="$(parent)Uptime" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"  text="SI_COMBAT_METRICS_UPTIME" horizontalAlignment="CENTER" verticalAlignment="CENTER">
 											
 											<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Count" offsetX="2" offsetY="0"/>
-											<Dimensions x="80" y="20"/>
+											<Dimensions x="58" y="20"/>
 											<OnInitialized>self.tooltip = {SI_COMBAT_METRICS_UPTIME_TT}</OnInitialized>
 											
 										</Label>

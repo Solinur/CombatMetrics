@@ -230,7 +230,7 @@ SafeAddString(SI_COMBAT_METRICS_BUFF, "バフ", 1)
 --SafeAddString(SI_COMBAT_METRICS_DEBUFFS, "Debuffs", 1) 
 SafeAddString(SI_COMBAT_METRICS_SHARP, "回数", 1) 
 --SafeAddString(SI_COMBAT_METRICS_BUFFCOUNT_TT, "Player / Overall", 1) 
-SafeAddString(SI_COMBAT_METRICS_UPTIME, "時間", 1) 
+SafeAddString(SI_COMBAT_METRICS_UPTIME, "時間 %", 1) 
 --SafeAddString(SI_COMBAT_METRICS_UPTIME_TT, "Player % / Overall %", 1) 
 
 --SafeAddString(SI_COMBAT_METRICS_REGENERATION, "Regeneration", 1) 

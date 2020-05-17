@@ -990,7 +990,7 @@ do	-- Handling Buffs Context Menu
 
 		end
 
-		CombatMetrics_Report:Update()
+		CombatMetrics_Report:GetNamedChild("_RightPanel"):GetNamedChild("BuffList"):Update()
 
 	end
 
@@ -1044,6 +1044,28 @@ do	-- Handling Buffs Context Menu
 		ShowMenu(bufflistitem)
 
 	end
+end
+
+function CMX.CollapseButton( button, upInside )
+
+	local buffname = button:GetParent().dataId
+
+	if buffname then
+
+		if uncollapsedBuffs[buffname] == true then
+
+			uncollapsedBuffs[buffname] = nil
+
+		else
+
+			uncollapsedBuffs[buffname] = true
+
+		end
+
+	end
+
+	CombatMetrics_Report:GetNamedChild("_RightPanel"):GetNamedChild("BuffList"):Update()
+
 end
 
 do	-- Handling Unit Context Menu
@@ -2141,7 +2163,7 @@ local function updateBuffPanelLegacy(panel)
 			local hideGroupValues = count == groupCount and uptimeRatio == groupUptimeRatio
 
 			local countFormat = hideGroupValues and "%d" or "%d/%d"
-			local uptimeFormat = hideGroupValues and "%.0f%%" or "%.0f%%/%.0f%%"
+			local uptimeFormat = hideGroupValues and "%.0f" or "%.0f/%.0f"
 
 			local rowId = #panel.bars + 1
 
@@ -2200,7 +2222,7 @@ local function addBuffPanelRow(panel, scrollchild, anchor, rowdata, parentrow)
 	local hideGroupValues = rowdata.count == rowdata.groupCount and rowdata.uptimeRatio == rowdata.groupUptimeRatio
 
 	local countFormat = hideGroupValues and "%d" or "%d/%d"
-	local uptimeFormat = hideGroupValues and "%.0f%%" or "%.0f%%/%.0f%%"
+	local uptimeFormat = hideGroupValues and "%d" or "%d/%d"
 
 	local rowId = #panel.bars + 1
 
@@ -2224,7 +2246,19 @@ local function addBuffPanelRow(panel, scrollchild, anchor, rowdata, parentrow)
 	nameControl:SetText(rowdata.label)
 	nameControl:SetColor(unpack(rowdata.textcolor))
 
-	local maxwidth = nameControl:GetWidth()
+	local maxwidth = header:GetNamedChild("Name"):GetWidth()
+
+	local indent = rowdata.indent * iconControl:GetWidth() / 2
+
+	if indent > 0 then maxwidth = maxwidth - indent end
+
+	nameControl:SetWidth(maxwidth)
+
+	local anchor = {select(2, iconControl:GetAnchor(0))}
+
+	anchor[4] = 2 * dx + indent
+	iconControl:ClearAnchors()
+	iconControl:SetAnchor(unpack(anchor))
 
 	local groupBarControl = row:GetNamedChild("GroupBar")
 	groupBarControl:SetWidth(maxwidth * rowdata.groupUptimeRatio)
@@ -2239,6 +2273,12 @@ local function addBuffPanelRow(panel, scrollchild, anchor, rowdata, parentrow)
 
 	local uptimeControl = row:GetNamedChild("Uptime")
 	uptimeControl:SetText(string.format(uptimeFormat, rowdata.uptimeRatio * 100, rowdata.groupUptimeRatio * 100))
+
+	-- local indicatorControl = row:GetNamedChild("Indicator")
+	-- indicatorControl:SetHidden(not rowdata.hasDetails)
+
+	local indicatorSwitchControl = row:GetNamedChild("IndicatorSwitch")
+	indicatorSwitchControl:SetHidden(not rowdata.hasDetails)
 
 	panel.bars[rowId] = row
 
@@ -2330,11 +2370,12 @@ local function updateBuffPanel(panel)
 
 				rowdata.indent = 1
 				rowdata.highlight = false
+				rowdata.hasDetails = false
 
 				for abilityId, instance in pairs(buff.instances) do
 
 					rowdata.icon = GetFormattedAbilityIcon(abilityId)
-					rowdata.label = ZO_CachedStrFormat("+ (<<1>>) <<2>>", abilityId, buffName)
+					rowdata.label = ZO_CachedStrFormat("(<<1>>) <<2>>", abilityId, buffName)
 
 					rowdata.uptimeRatio = instance.uptime / totalUnitTime
 					rowdata.groupUptimeRatio = instance.groupUptime / totalUnitTime
@@ -2349,6 +2390,7 @@ local function updateBuffPanel(panel)
 
 				rowdata.indent = 1
 				rowdata.highlight = false
+				rowdata.hasDetails = false
 
 				for stacks, stackData in pairs(buff.instances[buff.iconId]) do
 

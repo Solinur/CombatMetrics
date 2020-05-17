@@ -230,7 +230,7 @@ SafeAddString(SI_COMBAT_METRICS_BUFFS, "Bônus", 1)
 SafeAddString(SI_COMBAT_METRICS_DEBUFFS, "(De-)Bônus", 1) 
 SafeAddString(SI_COMBAT_METRICS_SHARP, "#", 1) 
 SafeAddString(SI_COMBAT_METRICS_BUFFCOUNT_TT, "Jogador / Geral", 1) 
-SafeAddString(SI_COMBAT_METRICS_UPTIME, "Atividade", 1) 
+SafeAddString(SI_COMBAT_METRICS_UPTIME, "Atividade %", 1) 
 SafeAddString(SI_COMBAT_METRICS_UPTIME_TT, "Jogador % / Geral %", 1) 
 
 SafeAddString(SI_COMBAT_METRICS_REGENERATION, "Regeneração", 1) 

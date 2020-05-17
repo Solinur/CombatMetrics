@@ -238,7 +238,7 @@ SafeAddString(SI_COMBAT_METRICS_BUFFS, "Buffs", 1)
 SafeAddString(SI_COMBAT_METRICS_DEBUFFS, "Debuffs", 1) 
 SafeAddString(SI_COMBAT_METRICS_SHARP, "#", 1) 
 SafeAddString(SI_COMBAT_METRICS_BUFFCOUNT_TT, "Joueur / Global", 1) 
-SafeAddString(SI_COMBAT_METRICS_UPTIME, "Uptime", 1) 
+SafeAddString(SI_COMBAT_METRICS_UPTIME, "Uptime %", 1) 
 SafeAddString(SI_COMBAT_METRICS_UPTIME_TT, "Joueur % / Global %", 1) 
 
 SafeAddString(SI_COMBAT_METRICS_REGENERATION, "Régénération", 1) 

@@ -440,11 +440,11 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 
 1.0.0
 [*] Rewrote buff/debuff calculation system. It can now handle cases of stacked buffs or minor/major buffs from various sources properly.
-[*] In the buff/debuff display you can now open/collapse buffs with additional data (like uptimes of individual stacks, deifferent sources)
+[*] In the buff/debuff display you can now open/collapse buffs with additional data (like uptimes of individual stacks, different sources)
 [*] If a buff has multiple stacks the total uptime now reflects the maximum number of stacks and their averaged uptime. This allows to directly calculate the benefit of this buff. E.g. for Siroria given 20 stacks with a total uptime shown of 53% the total benefit is 20 * 0.53 multiplied by the sets spell damage bonus.
 [*] Added skill input lag to skill timing events. It shows the time difference between activating a skill on your bar and the skill actually firing.
 [*] Added performance stats in form of ping and fps. Together with input lag their averages are shown at the bottom of the main window and can also be viewed in the graph and the log
-[*] Added deaths and resurrections to combat log. To show them you have allow info messages (which also show weapon swaps).
+[*] Added deaths and resurrections to combat log. To show them you have to allow info messages (which also show weapon swaps).
 [*] Combat Metrics now optionally depends on libdebuglogger. It is set up to handle all debug output and also saves them for later review. When it is not installed no debug output will be shown. Consequently, the debug settings have been removed.
 [*] The size of the main report window can now be changed by dragging the corners/edges.
 [*] The settings that apply if the player is in cyrodil now also include battlegrounds.

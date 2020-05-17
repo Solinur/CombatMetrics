@@ -28,7 +28,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.0.0_alpha"
+CMX.version = "1.0.0 rc"
 
 -- Logger
 
@@ -917,6 +917,56 @@ function CMX.GenerateSelectionStats(fight, menuItem, selections) -- this is simi
 
 				selectedbuff.maxStacks = mathmax(selectedbuff.maxStacks, buff.maxStacks or 0)
 
+				if buff.instances then
+
+					local selinstances = selectedbuff.instances
+
+					if selinstances == nil then
+
+						selectedbuff.instances = {}
+						ZO_DeepTableCopy(buff.instances, selectedbuff.instances)
+
+					else
+
+						for abilityId, instance in pairs(buff.instances) do
+
+							local selInstance = selinstances[abilityId]
+
+							if selInstance == nil then
+
+								selinstances[abilityId] = {}
+								ZO_DeepTableCopy(instance, selinstances[abilityId])
+
+							else
+								for stacks = 1, selectedbuff.maxStacks do
+
+									local stackdata = instance[stacks]
+									local selstackdata = selInstance[stacks]
+
+									if selstackdata == nil then
+
+										selInstance[stacks] = {}
+										ZO_DeepTableCopy(stackdata, selInstance[stacks])
+
+									else
+
+										selstackdata.uptime = selstackdata.uptime + buff.uptime
+										selstackdata.count = selstackdata.count + buff.count
+										selstackdata.groupUptime = selstackdata.groupUptime + buff.groupUptime
+										selstackdata.groupCount = selstackdata.groupCount + buff.groupCount
+
+									end
+								end
+
+								selInstance.uptime = selInstance.uptime + buff.uptime
+								selInstance.count = selInstance.count + buff.count
+								selInstance.groupUptime = selInstance.groupUptime + buff.groupUptime
+								selInstance.groupCount = selInstance.groupCount + buff.groupCount
+							end
+						end
+					end
+				end
+
 				selectedbuff.effectType = buff.effectType
 				selectedbuff.iconId = selectedbuff.iconId or buff.iconId
 
@@ -1237,7 +1287,7 @@ local function ProcessLogEffects(fight, logline)
 
 		local starttime = mathmax(effectdata.lastGain or timems, fight.starttime)
 
-		if slotcount == 0 and isPlayerSource then effectdata.firstStartTime = starttime end	
+		if slotcount == 0 and isPlayerSource then effectdata.firstStartTime = starttime end
 		if groupSlotCount == 0 then effectdata.firstGroupStartTime = starttime end
 
 		if slotdata == nil then
@@ -1276,11 +1326,13 @@ local function ProcessLogEffects(fight, logline)
 
 					stackData.uptime = stackData.uptime + duration
 					stackData.count = stackData.count + 1
+					effectdata.count = effectdata.count + 1
 
 				end
 
 				stackData.groupUptime = stackData.groupUptime + duration
 				stackData.groupCount = stackData.groupCount + 1
+				effectdata.groupCount = effectdata.groupCount + 1
 			end
 
 			if slotcount == 0 and effectdata.firstStartTime then
@@ -1288,7 +1340,6 @@ local function ProcessLogEffects(fight, logline)
 				local duration = mathmin(timems, fight.endtime) - effectdata.firstStartTime
 
 				effectdata.uptime = effectdata.uptime + duration
-				effectdata.count = effectdata.count + 1
 
 				effectdata.firstStartTime = nil
 
@@ -1299,7 +1350,6 @@ local function ProcessLogEffects(fight, logline)
 				local duration = mathmin(timems,fight.endtime) - effectdata.firstGroupStartTime
 
 				effectdata.groupUptime = effectdata.groupUptime + duration
-				effectdata.groupCount = effectdata.groupCount + 1
 
 				effectdata.firstGroupStartTime = nil
 
@@ -1541,7 +1591,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		local logline = logdata[i]
 		local logType = logline[1] -- logline[1] is the callbacktype e.g. LIBCOMBAT_EVENT_DAMAGEOUT
 
-		if ProcessLog[logType] then ProcessLog[logType](fight, logline) end 
+		if ProcessLog[logType] then ProcessLog[logType](fight, logline) end
 
 	end
 
@@ -1613,14 +1663,14 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 							local duration = endtime - effectdata.firstStartTime
 
 							effectdata.uptime = effectdata.uptime + duration
-							effectdata.count = effectdata.count + 1
+							effectdata.count = effectdata.count + slotcount
 
 						end
 
 						local duration = endtime - effectdata.firstGroupStartTime
 
 						effectdata.groupUptime = effectdata.groupUptime + duration
-						effectdata.groupCount = effectdata.groupCount + 1
+						effectdata.groupCount = effectdata.groupCount + groupSlotCount
 
 					end
 
@@ -1717,11 +1767,11 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 			for key, value in pairs(datatable or {}) do
 
-				if key == "min" or key == "max" then 
+				if key == "min" or key == "max" then
 
 					datatable[key] = math[key](ability[key], datatable[key])
 
-				else 
+				else
 
 					datatable[key] = ability[key] + datatable[key]
 
