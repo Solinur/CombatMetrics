@@ -285,6 +285,9 @@
 	SI_COMBAT_METRICS_FAVOURITE_ADD = "Add to Favourites",
 	SI_COMBAT_METRICS_FAVOURITE_REMOVE = "Remove from Favourites",
 
+	SI_COMBAT_METRICS_UNCOLLAPSE = "Show Details",
+	SI_COMBAT_METRICS_COLLAPSE = "Collapse",
+
 	SI_COMBAT_METRICS_SKILL = "Skill",
 
 	SI_COMBAT_METRICS_BAR = "Bar ",
@@ -421,26 +424,6 @@
 	SI_COMBAT_METRICS_MENU_CHAT_SID_TOOLTIP = "Show damage you receive in chat stream",
 	SI_COMBAT_METRICS_MENU_CHAT_SIH_NAME = "Show Incoming heal",
 	SI_COMBAT_METRICS_MENU_CHAT_SIH_TOOLTIP = "Show heals you receive in chat stream",
-
-	SI_COMBAT_METRICS_MENU_DEBUG_TITLE = "Debug options",
-	SI_COMBAT_METRICS_MENU_DEBUG_SF_NAME = "Show Fight Recap",
-	SI_COMBAT_METRICS_MENU_DEBUG_SF_TOOLTIP = "Print Combat Results to the system chat window",
-	SI_COMBAT_METRICS_MENU_DEBUG_SA_NAME = "Show ability IDs",
-	SI_COMBAT_METRICS_MENU_DEBUG_SA_TOOLTIP = "Show ability ids in the fight report window",
-	SI_COMBAT_METRICS_MENU_DEBUG_SFC_NAME = "Show Fight Calculation Info",
-	SI_COMBAT_METRICS_MENU_DEBUG_SFC_TOOLTIP = "Print Info about the calculation timings to the system chat window",
-	SI_COMBAT_METRICS_MENU_DEBUG_BI_NAME = "Show Buff Info",
-	SI_COMBAT_METRICS_MENU_DEBUG_BI_TOOLTIP = " Print Buff events to the system chat window (Spammy)",
-	SI_COMBAT_METRICS_MENU_DEBUG_US_NAME = "Show used Skill Info",
-	SI_COMBAT_METRICS_MENU_DEBUG_US_TOOLTIP = "Print used skill events to the system chat window",
-	SI_COMBAT_METRICS_MENU_DEBUG_SG_NAME = "Show group Info",
-	SI_COMBAT_METRICS_MENU_DEBUG_SG_TOOLTIP = "Print group joining and leave events to the system chat window",
-	SI_COMBAT_METRICS_MENU_DEBUG_MD_NAME = "Show miscellaneous debug Info",
-	SI_COMBAT_METRICS_MENU_DEBUG_MD_TOOLTIP = "Print some other events to the system chat window",
-	SI_COMBAT_METRICS_MENU_DEBUG_SPECIAL_NAME = "Show special debug Info",
-	SI_COMBAT_METRICS_MENU_DEBUG_SPECIAL_TOOLTIP = "Print certain special events to the system chat window",
-	SI_COMBAT_METRICS_MENU_DEBUG_SAVE_NAME = "Show save data Info",
-	SI_COMBAT_METRICS_MENU_DEBUG_SAVE_TOOLTIP = "Print debug info about saved and loaded fights to the system chat window",
 
 -- make a label for keybinding
 
