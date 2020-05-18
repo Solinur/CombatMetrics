@@ -449,3 +449,8 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] The size of the main report window can now be changed by dragging the corners/edges.
 [*] The settings that apply when the player is in cyrodil, now also include battlegrounds.
 [*] Additional minor fixes and performance improvements.
+
+1.0.1 2,618,699 (18.05.2020) 23:29
+[*] Fixed a lua error that happened when showing Parses.
+[*] some small fixes
+[*] renamed Cyrodil options to PvP for clarification (They work for Cyrodil and BGs now)

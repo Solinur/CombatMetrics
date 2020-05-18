@@ -6630,8 +6630,6 @@ function CMX.InitializeUI()
 
 	local settingsbutton = CombatMetrics_Report_SelectorRowSettingsButton
 
-	local data = CMX.GetFeedBackData(settingsbutton)
-
 	if LibFeedback then
 
 		local data = CMX.GetFeedBackData(settingsbutton)
