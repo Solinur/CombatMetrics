@@ -932,36 +932,36 @@ function CMX.GenerateSelectionStats(fight, menuItem, selections) -- this is simi
 
 							local selInstance = selinstances[abilityId]
 
-							if selInstance == nil then
+							if instance and selInstance == nil then
 
 								selinstances[abilityId] = {}
 								ZO_DeepTableCopy(instance, selinstances[abilityId])
 
-							else
+							elseif instance then
 								for stacks = 1, selectedbuff.maxStacks do
 
 									local stackdata = instance[stacks]
 									local selstackdata = selInstance[stacks]
 
-									if selstackdata == nil then
+									if stackdata and selstackdata == nil then
 
 										selInstance[stacks] = {}
 										ZO_DeepTableCopy(stackdata, selInstance[stacks])
 
-									else
+									elseif stackdata then
 
-										selstackdata.uptime = selstackdata.uptime + buff.uptime
-										selstackdata.count = selstackdata.count + buff.count
-										selstackdata.groupUptime = selstackdata.groupUptime + buff.groupUptime
-										selstackdata.groupCount = selstackdata.groupCount + buff.groupCount
+										selstackdata.uptime = selstackdata.uptime + stackdata.uptime
+										selstackdata.count = selstackdata.count + stackdata.count
+										selstackdata.groupUptime = selstackdata.groupUptime + stackdata.groupUptime
+										selstackdata.groupCount = selstackdata.groupCount + stackdata.groupCount
 
 									end
 								end
 
-								selInstance.uptime = selInstance.uptime + buff.uptime
-								selInstance.count = selInstance.count + buff.count
-								selInstance.groupUptime = selInstance.groupUptime + buff.groupUptime
-								selInstance.groupCount = selInstance.groupCount + buff.groupCount
+								selInstance.uptime = selInstance.uptime + instance.uptime
+								selInstance.count = selInstance.count + instance.count
+								selInstance.groupUptime = selInstance.groupUptime + instance.groupUptime
+								selInstance.groupCount = selInstance.groupCount + instance.groupCount
 							end
 						end
 					end

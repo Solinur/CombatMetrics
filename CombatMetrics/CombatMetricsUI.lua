@@ -38,8 +38,6 @@ end
 local LC = LibCombat
 if LC == nil then return end
 
-local LibFeedback = LibFeedback
-
 local GetFormattedAbilityName = LC.GetFormattedAbilityName
 
 local GetFormattedAbilityIcon = LC.GetFormattedAbilityIcon
@@ -1254,7 +1252,7 @@ do
 
 		end
 
-		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_FEEDBACK), ToggleFeedback)
+		if LibFeedback then AddCustomMenuItem(GetString(SI_COMBAT_METRICS_FEEDBACK), ToggleFeedback) end
 
 		ShowMenu(settingsbutton)
 		AnchorMenu(settingsbutton)
@@ -6634,12 +6632,17 @@ function CMX.InitializeUI()
 
 	local data = CMX.GetFeedBackData(settingsbutton)
 
-	local button, feedbackWindow = LibFeedback:initializeFeedbackWindow(unpack(data))
-	button:SetHidden(true)
+	if LibFeedback then
 
-	function ToggleFeedback()
+		local data = CMX.GetFeedBackData(settingsbutton)
 
-		feedbackWindow:ToggleHidden()
+		local button, feedbackWindow = LibFeedback:initializeFeedbackWindow(unpack(data))
+		button:SetHidden(true)
 
+		function ToggleFeedback()
+
+			feedbackWindow:ToggleHidden()
+
+		end
 	end
 end
