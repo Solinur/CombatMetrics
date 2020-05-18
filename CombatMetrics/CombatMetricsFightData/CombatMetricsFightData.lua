@@ -1,6 +1,8 @@
 local _
 local em = GetEventManager()
 local sv
+local LOG_LEVEL_VERBOSE, LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR
+
 CombatMetricsFightData = {}
 
 local AddonName = "CombatMetricsFightData"
@@ -25,7 +27,11 @@ local lastid = 0
 
 local function GetChar(value, logstringdata, length)
 
-	table.insert(logstringdata, chars[value%64])
+	local char = chars[value%64]
+
+	if char == nil then CMX.Print("save", LOG_LEVEL_WARNING, "Invalid value during log encoding: %s", tostring(value)) end
+
+	table.insert(logstringdata, char)
 
 	local newvalue = math.floor(value/64)
 
@@ -39,11 +45,11 @@ local function Encode(line, layout)
 
 	for i, size in ipairs(layout) do
 
-		GetChar(line[i], logstringdata, size)
+		if line[i] then GetChar(line[i], logstringdata, size) end
 
 	end
 
-	local logstring = table.concat(logstringdata,"")
+	local logstring = table.concat(logstringdata, "")
 
 	return logstring
 end
@@ -137,8 +143,10 @@ local LAYOUT_EVENT = 10
 local LAYOUT_STATS = 14
 local LAYOUT_POWER = 15
 local LAYOUT_MESSAGE = 16
+local LAYOUT_DEATH = 17
 local LAYOUT_SKILL = 19
 local LAYOUT_BOSSHP = 20
+local LAYOUT_PERFORMANCE = 21
 
 local logTypeToLayout = {
 
@@ -155,8 +163,10 @@ local logTypeToLayout = {
 	[14] = LAYOUT_STATS,
 	[15] = LAYOUT_POWER,
 	[16] = LAYOUT_MESSAGE,
+	[17] = LAYOUT_DEATH,
 	[19] = LAYOUT_SKILL,
 	[20] = LAYOUT_BOSSHP,
+	[21] = LAYOUT_PERFORMANCE,
 
 }
 
@@ -167,8 +177,10 @@ local layouts = {
 	[LAYOUT_STATS] = {1, 4, 4, 4, 1},		 			-- (15) type, timems, statchange, newvalue, statname
 	[LAYOUT_POWER] = {1, 4, 3, 3, 1, 3},		 		-- (16) type, timems, abilityId, powerValueChange, powerType, powerValue
 	[LAYOUT_MESSAGE] = {1, 4, 1, 1}, 					-- (8)  type, timems, messageId (e.g. "weapon swap"), bar
-	[LAYOUT_SKILL] = {1, 4, 1, 3, 1}, 					-- (11) type, timems, reducedslot, abilityId, status
+	[LAYOUT_DEATH] = {1, 4, 1, 2, 3}, 					-- (8)  type, timems, state, unitId, abilityId/unitId
+	[LAYOUT_SKILL] = {1, 4, 1, 3, 1, 2}, 				-- (13) type, timems, reducedslot, abilityId, status, skillDelay
 	[LAYOUT_BOSSHP] = {1, 4, 1, 5, 5}, 					-- (17) type, timems, bossId, currenthp, maxhp
+	[LAYOUT_PERFORMANCE] = {1, 4, 2, 2, 2, 2}, 			-- (14) type, timems, avg, min, max, ping
 }
 
 local layoutsize = {} -- get total sizes of layouts
@@ -205,7 +217,7 @@ local function encodeCombatLogLine(line, fight)
 		line[6]	= line[6] > 0 and line[6] or 0
 		line[8]	= line[8] or 0
 
-	elseif layoutId == LAYOUT_EVENT then			-- type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType
+	elseif layoutId == LAYOUT_EVENT then			-- type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, slot
 
 		line[3] = unitConversion[line[3]] or 0
 		line[8] = line[8] or 0
@@ -227,6 +239,28 @@ local function encodeCombatLogLine(line, fight)
 	elseif layoutId == LAYOUT_MESSAGE then
 
 		line[4] = line[4] or 0
+
+	elseif layoutId == LAYOUT_DEATH then
+
+		line[4] = unitConversion[line[4]]
+		line[5] = line[5] or 0
+
+		if line[3] > 2 then
+
+			line[5] = unitConversion[line[5]]
+
+		end
+
+	elseif layoutId == LAYOUT_SKILL then -- type, timems, reducedslot, abilityId, status, skillDelay
+
+		line[6] = line[6] or 0
+
+	elseif layoutId == LAYOUT_PERFORMANCE then -- type, timems, avg, min, max, ping
+
+		line[3] = math.floor(line[3])
+		line[4] = math.floor(line[4])
+		line[5] = math.floor(line[5])
+		line[6] = math.floor(line[6])
 
 	elseif layoutId ~= LAYOUT_SKILL and layoutId ~= LAYOUT_BOSSHP then
 
@@ -263,7 +297,6 @@ local function decodeCombatLogLine(line, fight)
 	elseif layoutId == LAYOUT_EVENT then					-- type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType
 
 		if logdata[3] == 0 then logdata[3] = nil end
-		if logdata[8] == 0 then logdata[8] = nil end
 
 	elseif layoutId == LAYOUT_STATS then					-- type, timems, statchange, newvalue, statname
 
@@ -291,7 +324,15 @@ local function decodeCombatLogLine(line, fight)
 
 		logdata[4] = logdata[4] or 0
 
-	elseif layoutId ~= LAYOUT_SKILL and layoutId ~= LAYOUT_BOSSHP then					-- type, timems, message (e.g. "weapon swap")
+	elseif layoutId == LAYOUT_DEATH then
+
+		if logdata[5] == 0 then logdata[5] = nil end
+	
+	elseif layoutId == LAYOUT_SKILL then
+
+		if logdata[6] == 0 then logdata[6] = nil end
+
+	elseif layoutId ~= LAYOUT_PERFORMANCE and layoutId ~= LAYOUT_BOSSHP then					-- type, timems, message (e.g. "weapon swap")
 
 		return
 
@@ -456,6 +497,7 @@ local function reduceUnitIds(fight)
 
 	end
 
+	
 	if fight.bosses == nil then fight.bosses = {} end
 	local bosses = fight.bosses
 
@@ -532,6 +574,8 @@ local function loadFight(id)
 end
 
 local function GetFights()
+
+	LOG_LEVEL_VERBOSE, LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR = CMX.GetDebugLevels()
 
 	return sv
 

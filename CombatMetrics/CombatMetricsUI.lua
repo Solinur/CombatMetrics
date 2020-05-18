@@ -1,11 +1,11 @@
 local em = GetEventManager()
 local wm = GetWindowManager()
-COMBAT_METRICS_LINE_SIZE = LIBCOMBAT_LINE_SIZE or math.ceil(GuiRoot:GetWidth()/tonumber(GetCVar("WindowedWidth"))*1000)/1000
-local dx = COMBAT_METRICS_LINE_SIZE
-local fontsize = 14
+local dx = LIBCOMBAT_LINE_SIZE or math.ceil(GuiRoot:GetWidth()/tonumber(GetCVar("WindowedWidth"))*1000)/1000
+COMBAT_METRICS_LINE_SIZE = tostring(dx)
+local fontsize = tonumber(GetString(SI_COMBAT_METRICS_FONT_SIZE_SMALL))
 local currentFight
 local abilitystats
-local abilitystatsversion = 2
+local abilitystatsversion = 3
 local fightData, selectionData
 local currentCLPage
 local selections, lastSelections
@@ -17,6 +17,11 @@ local enlargedGraph = false
 local maxXYPlots = 5
 local maxBarPlots = 8
 local skillpage = 0
+local uncollapsedBuffs = {
+
+}
+
+local LOG_LEVEL_VERBOSE, LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR = CMX.GetDebugLevels()
 
 local CMX = CMX
 if CMX == nil then CMX = {} end
@@ -24,7 +29,10 @@ local _
 local db
 
 function CMX.GetAbilityStats()
-	return abilitystats, abilitystatsversion
+
+	local isSelection = selections.unit.damageOut ~= nil
+	return abilitystats, abilitystatsversion, isSelection
+
 end
 
 local LC = LibCombat
@@ -87,7 +95,12 @@ local function toggleFightList(panel, show)
 
 	panel:SetHidden(not show)
 
-	if show then panel:Update() end
+	if show then
+
+		panel:Update()
+		panel:GetParent():GetNamedChild("_InfoRow"):Update()
+
+	end
 
 end
 
@@ -170,7 +183,7 @@ local function checkSaveLimit(fight)
 
 	if fight == nil then
 
-		CMX.Print("save", "SV Size: %.3f MB, %.1f%%", size, size*100/db.maxSVsize)
+		CMX.Print("save", LOG_LEVEL_DEBUG, "SV Size: %.3f MB, %.1f%%", size, size*100/db.maxSVsize)
 
 	end
 
@@ -235,9 +248,6 @@ function NavButtonFunctions.delete(control)
 
 		table.remove(CMX.lastfights, currentFight)
 		ClearSelections()
-
-		local _, size = checkSaveLimit()
-		db.SVsize = size
 
 		if #CMX.lastfights == 0 then CombatMetrics_Report:Update() else CombatMetrics_Report:Update(math.min(currentFight, #CMX.lastfights)) end
 
@@ -381,7 +391,7 @@ local function updateSelectorButtons(selectorButtons)
 
 	local show = db.ForceNotification or ((isGerman or isMe) and isEUServer and isNotificationAllowed and isVeteranRaid and isWithinAllowedTime)
 
-	if isMe then
+	if false then
 
 		df("Result: %s, De: %s, EU: %s, G: %s, R: %s, T: %s, Set: %s (%s, %d / %d)",
 			tostring(show),
@@ -839,6 +849,8 @@ function CMX.LoadItem(listitem)
 
 	end
 
+	toggleFightList()
+
 	if issaved and isLoaded == false then
 
 		local loadedfight = SVHandler.Load(id)
@@ -856,8 +868,6 @@ function CMX.LoadItem(listitem)
 
 	ClearSelections()
 
-	toggleFightList()
-
 end
 
 function CMX.DeleteItem(control)
@@ -869,6 +879,11 @@ function CMX.DeleteItem(control)
 	if issaved then
 
 		table.remove(savedFights, id)
+
+		local _, size = checkSaveLimit()
+		db.SVsize = size
+
+		CombatMetrics_Report:Update()
 
 	else
 
@@ -957,6 +972,26 @@ do	-- Handling Buffs Context Menu
 
 	end
 
+	local function toggleCollapseBuff()
+
+		if buffname then
+
+			if uncollapsedBuffs[buffname] == true then
+
+				uncollapsedBuffs[buffname] = nil
+
+			else
+
+				uncollapsedBuffs[buffname] = true
+
+			end
+
+		end
+
+		CombatMetrics_Report:GetNamedChild("_RightPanel"):GetNamedChild("BuffList"):Update()
+
+	end
+
 	function CMX.BuffContextMenu( bufflistitem, upInside )
 
 		if not upInside then return end
@@ -996,9 +1031,39 @@ do	-- Handling Buffs Context Menu
 
 		end
 
+		if bufflistitem.hasDetails == true then
+
+			local stringId = uncollapsedBuffs[buffname] and SI_COMBAT_METRICS_COLLAPSE or SI_COMBAT_METRICS_UNCOLLAPSE
+
+			AddCustomMenuItem(GetString(stringId), toggleCollapseBuff)
+
+		end
+
 		ShowMenu(bufflistitem)
 
 	end
+end
+
+function CMX.CollapseButton( button, upInside )
+
+	local buffname = button:GetParent().dataId
+
+	if buffname then
+
+		if uncollapsedBuffs[buffname] == true then
+
+			uncollapsedBuffs[buffname] = nil
+
+		else
+
+			uncollapsedBuffs[buffname] = true
+
+		end
+
+	end
+
+	CombatMetrics_Report:GetNamedChild("_RightPanel"):GetNamedChild("BuffList"):Update()
+
 end
 
 do	-- Handling Unit Context Menu
@@ -1333,7 +1398,7 @@ end
 
 local function updateTitlePanel(panel)
 
-	CMX.Print("dev", "Updating TitlePanel")
+	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating TitlePanel")
 
 	-- update character info
 
@@ -1502,7 +1567,7 @@ local CountStrings = {
 
 local function updateFightStatsPanelLeft(panel)
 
-	CMX.Print("dev", "Updating FightStatsPanelLeft")
+	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating FightStatsPanelLeft")
 
 	local data = fightData and fightData.calculated or {}
 	local category = db.FightReport.category
@@ -1724,7 +1789,7 @@ local attackStatsKeys = { 			-- {label, format, convert}
 
 local function updateFightStatsPanelRight(panel)
 
-	CMX.Print("dev", "Updating FightStatsPanelRight")
+	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating FightStatsPanelRight")
 
 	local data = fightData or {}
 	local powerType = db.FightReport.fightstatspanel
@@ -1871,7 +1936,7 @@ end
 
 local function updateFightStatsPanel(panel)
 
-	CMX.Print("dev", "Updating FightStatsPanel")
+	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating FightStatsPanel")
 
 	panel:GetNamedChild("Left"):Update(fightData, selectionData)
 	panel:GetNamedChild("Right"):Update(fightData)
@@ -1880,7 +1945,7 @@ end
 
 local function updateMainPanel(mainpanel)
 
-	CMX.Print("dev", "Updating MainPanel")
+	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating MainPanel")
 
 	mainpanel.active:Update()
 
@@ -2048,9 +2113,9 @@ local function GetBuffDataAndUnits(unitType)
 	return buffData, units
 end
 
-local function updateBuffPanel(panel)
+local function updateBuffPanelLegacy(panel)
 
-	CMX.Print("dev", "Updating BuffPanel")
+	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating BuffPanel")
 
 	ResetBars(panel)
 
@@ -2096,7 +2161,7 @@ local function updateBuffPanel(panel)
 			local hideGroupValues = count == groupCount and uptimeRatio == groupUptimeRatio
 
 			local countFormat = hideGroupValues and "%d" or "%d/%d"
-			local uptimeFormat = hideGroupValues and "%.0f%%" or "%.0f%%/%.0f%%"
+			local uptimeFormat = hideGroupValues and "%.0f" or "%.0f/%.0f"
 
 			local rowId = #panel.bars + 1
 
@@ -2146,6 +2211,201 @@ local function updateBuffPanel(panel)
 			row.type = "buff"
 			row.id = rowId
 			row.panel = panel
+		end
+	end
+end
+
+local function addBuffPanelRow(panel, scrollchild, anchor, rowdata, parentrow)
+
+	local hideGroupValues = rowdata.count == rowdata.groupCount and rowdata.uptimeRatio == rowdata.groupUptimeRatio
+
+	local countFormat = hideGroupValues and "%d" or "%d/%d"
+	local uptimeFormat = hideGroupValues and "%d" or "%d/%d"
+
+	local rowId = #panel.bars + 1
+
+	local rowName = scrollchild:GetName() .. "Row" .. rowId
+	local row = _G[rowName] or CreateControlFromVirtual(rowName, scrollchild, "CombatMetrics_BuffRowTemplate")
+	row:SetAnchor(unpack(anchor))
+	row:SetHidden(false)
+
+	local header = panel:GetNamedChild("Header")
+	adjustRowSize(row, header)
+
+	-- update controls with contents
+
+	local highlightControl = row:GetNamedChild("HighLight")
+	highlightControl:SetHidden(not rowdata.highlight)
+
+	local iconControl = row:GetNamedChild("Icon")
+	iconControl:SetTexture(rowdata.icon)
+
+	local nameControl = row:GetNamedChild("Name")
+	nameControl:SetText(rowdata.label)
+	nameControl:SetColor(unpack(rowdata.textcolor))
+
+	local maxwidth = header:GetNamedChild("Name"):GetWidth()
+
+	local indent = rowdata.indent * iconControl:GetWidth() / 2
+
+	if indent > 0 then maxwidth = maxwidth - indent end
+
+	nameControl:SetWidth(maxwidth)
+
+	local anchor = {select(2, iconControl:GetAnchor(0))}
+
+	anchor[4] = 2 * dx + indent
+	iconControl:ClearAnchors()
+	iconControl:SetAnchor(unpack(anchor))
+
+	local groupBarControl = row:GetNamedChild("GroupBar")
+	groupBarControl:SetWidth(maxwidth * rowdata.groupUptimeRatio)
+	groupBarControl:SetCenterColor(unpack(rowdata.groupColor))
+
+	local playerBarControl = row:GetNamedChild("PlayerBar")
+	playerBarControl:SetWidth(maxwidth * rowdata.uptimeRatio)
+	playerBarControl:SetCenterColor(unpack(rowdata.color))
+
+	local countControl = row:GetNamedChild("Count")
+	countControl:SetText(string.format(countFormat, rowdata.count, rowdata.groupCount))
+
+	local uptimeControl = row:GetNamedChild("Uptime")
+	uptimeControl:SetText(string.format(uptimeFormat, rowdata.uptimeRatio * 100, rowdata.groupUptimeRatio * 100))
+
+	-- local indicatorControl = row:GetNamedChild("Indicator")
+	-- indicatorControl:SetHidden(not rowdata.hasDetails)
+
+	local indicatorSwitchControl = row:GetNamedChild("IndicatorSwitch")
+	indicatorSwitchControl:SetHidden(not rowdata.hasDetails)
+
+	panel.bars[rowId] = row
+
+	row.dataId = rowdata.buffName
+	row.type = "buff"
+	row.id = rowId
+	row.panel = panel
+	row.parentrow = parentrow
+	row.hasDetails = rowdata.hasDetails
+
+	local currentanchor = {TOPLEFT, row, BOTTOMLEFT, 0, dx}
+
+	return currentanchor, row
+
+end
+
+local function updateBuffPanel(panel)
+
+	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating BuffPanel")
+
+	ResetBars(panel)
+
+	if fightData == nil then return end
+
+	local buffDataVersion = fightData.calculated.buffVersion or 0
+
+	if buffDataVersion < 2 then updateBuffPanelLegacy(panel) return end
+
+	local buffData = GetBuffData()
+
+	if buffData == nil then return end
+
+	local scrollchild = GetControl(panel, "PanelScrollChild")
+
+	local selectedbuffs = selections["buff"]["buff"]
+	local currentanchor = {TOPLEFT, scrollchild, TOPLEFT, 0, 1}
+
+	local maxtime = math.max(fightData.activetime or 0, fightData.dpstime or 0, fightData.hpstime or 0)
+
+	local totalUnitTime = buffData.totalUnitTime or maxtime * 1000
+	local showids = db.debuginfo.ids
+	local favs = db.FightReport.FavouriteBuffs
+
+	local parentrow
+
+	for buffName, buff in CMX.spairs(buffData["buffs"], buffSortFunction) do
+
+		if buff.groupUptime > 0 then
+
+			local labelFormat = showids and "(<<1>>) <<2>>" or "<<2>>"
+			local rowdata = {}
+
+			local shownUptime = buff.uptime
+			local shownGroupUptime = buff.groupUptime
+
+			local hasInstances = buff.instances and NonContiguousCount(buff.instances) > 1
+			local hasStacks = buff.instances and buff.maxStacks > 1
+
+			local showName = buffName
+
+			if hasStacks then
+
+				local mainInstance = buff.instances[buff.iconId]
+
+				shownUptime = mainInstance.uptime
+				shownGroupUptime = mainInstance.groupUptime
+
+				showName = ZO_CachedStrFormat("<<2>>x <<1>>", buffName, buff.maxStacks)
+
+			end
+
+			rowdata.buffName = buffName
+			rowdata.color = (buff.effectType == BUFF_EFFECT_TYPE_BUFF and {0, 0.6, 0, 0.6}) or (buff.effectType == BUFF_EFFECT_TYPE_DEBUFF and {0.75, 0, 0.6, 0.6}) or {0.6, 0.6, 0.6, 0.6}
+			rowdata.groupColor = (buff.effectType == BUFF_EFFECT_TYPE_BUFF and {0, 0.6, 0, 0.3}) or (buff.effectType == BUFF_EFFECT_TYPE_DEBUFF and {0.75, 0, 0.6, 0.3}) or {0.6, 0.6, 0.6, 0.3}
+			rowdata.highlight = selectedbuffs ~= nil and (selectedbuffs[buffName] ~= nil) or false
+			rowdata.icon = GetFormattedAbilityIcon(buff.iconId)
+			rowdata.label = ZO_CachedStrFormat(labelFormat, buff.iconId, showName)
+			rowdata.uptimeRatio = shownUptime / totalUnitTime
+			rowdata.groupUptimeRatio = shownGroupUptime / totalUnitTime
+			rowdata.count = buff.count
+			rowdata.groupCount = buff.groupCount
+			rowdata.textcolor = favs[buffName] and {1, .8, .3, 1} or {1, 1, 1, 1} -- show favs in different color
+			rowdata.indent = 0
+			rowdata.hasDetails = hasInstances or hasStacks
+
+			currentanchor, parentrow = addBuffPanelRow(panel, scrollchild, currentanchor, rowdata)
+
+			if hasInstances and uncollapsedBuffs[buffName] then
+
+				rowdata.indent = 1
+				rowdata.highlight = false
+				rowdata.hasDetails = false
+
+				for abilityId, instance in pairs(buff.instances) do
+
+					rowdata.icon = GetFormattedAbilityIcon(abilityId)
+					rowdata.label = ZO_CachedStrFormat("(<<1>>) <<2>>", abilityId, buffName)
+
+					rowdata.uptimeRatio = instance.uptime / totalUnitTime
+					rowdata.groupUptimeRatio = instance.groupUptime / totalUnitTime
+					rowdata.count = instance.count
+					rowdata.groupCount = instance.groupCount
+
+					currentanchor = addBuffPanelRow(panel, scrollchild, currentanchor, rowdata, parentrow)
+				end
+			end
+
+			if hasStacks and uncollapsedBuffs[buffName] then
+
+				rowdata.indent = 1
+				rowdata.highlight = false
+				rowdata.hasDetails = false
+
+				for stacks, stackData in pairs(buff.instances[buff.iconId]) do
+
+					if type(stacks) == "number" then
+
+						rowdata.label = ZO_CachedStrFormat("<<1>>x <<2>>", stacks, buffName)
+
+						rowdata.uptimeRatio = stackData.uptime / totalUnitTime
+						rowdata.groupUptimeRatio = stackData.groupUptime / totalUnitTime
+						rowdata.count = stackData.count
+						rowdata.groupCount = stackData.groupCount
+
+						currentanchor = addBuffPanelRow(panel, scrollchild, currentanchor, rowdata, parentrow)
+
+					end
+				end
+			end
 		end
 	end
 end
@@ -2216,7 +2476,7 @@ end
 
 local function updateResourcePanel(panel)
 
-	CMX.Print("dev", "Updating ResourcePanel")
+	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating ResourcePanel")
 
 	local subpanel1 = panel:GetNamedChild("Gains")
 	local subpanel2 = panel:GetNamedChild("Drains")
@@ -2262,7 +2522,7 @@ end
 
 local function updateRightPanel(rightPanel)
 
-	CMX.Print("dev", "Updating RightPanel")
+	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating RightPanel")
 
 	rightPanel.active:Update()
 
@@ -2281,7 +2541,7 @@ end
 
 local function updateUnitPanel(panel)
 
-	CMX.Print("dev", "Updating UnitPanel")
+	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating UnitPanel")
 
 	ResetBars(panel)
 
@@ -2531,7 +2791,7 @@ end
 
 local function updateAbilityPanel(panel)
 
-	CMX.Print("dev", "Updating AbilityPanel")
+	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating AbilityPanel")
 
 	ResetBars(panel)
 
@@ -2755,7 +3015,7 @@ local function updateCombatLog(panel)
 
 	if fightData == nil or panel:IsHidden() then return end
 
-	CMX.Print("dev", "Updating CombatLog")
+	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating CombatLog")
 
 	local CLSelection = db.FightReport.CLSelection
 
@@ -2813,6 +3073,7 @@ local function updateCombatLog(panel)
 			or (logtype == LIBCOMBAT_EVENT_DAMAGE_SELF and (CLSelection[LIBCOMBAT_EVENT_DAMAGE_IN] or CLSelection[LIBCOMBAT_EVENT_DAMAGE_OUT]))
 			or (logtype == LIBCOMBAT_EVENT_HEAL_SELF and (CLSelection[LIBCOMBAT_EVENT_HEAL_IN] or CLSelection[LIBCOMBAT_EVENT_HEAL_OUT]))
 			or (logtype == LIBCOMBAT_EVENT_BOSSHP and (CLSelection[LIBCOMBAT_EVENT_MESSAGES]))
+			or (logtype == LIBCOMBAT_EVENT_DEATH and (CLSelection[LIBCOMBAT_EVENT_MESSAGES]))
 
 		if condition1 == true then
 
@@ -2875,7 +3136,7 @@ local function updateCombatLog(panel)
 
 				condition2 = powerType ~= POWERTYPE_HEALTH and (resourceSelection == nil or resourceSelection[abilityId or 0] ~= nil)
 
-			elseif logtype == LIBCOMBAT_EVENT_PLAYERSTATS or logtype == LIBCOMBAT_EVENT_MESSAGES or logtype == LIBCOMBAT_EVENT_SKILL_TIMINGS or logtype == LIBCOMBAT_EVENT_BOSSHP then
+			elseif logtype == LIBCOMBAT_EVENT_PLAYERSTATS or logtype == LIBCOMBAT_EVENT_MESSAGES or logtype == LIBCOMBAT_EVENT_SKILL_TIMINGS or logtype == LIBCOMBAT_EVENT_BOSSHP or logtype == LIBCOMBAT_EVENT_DEATH or logtype == LIBCOMBAT_EVENT_PERFORMANCE then
 
 				condition2 = true
 
@@ -3456,26 +3717,53 @@ local function BossHPAbsolute()
 
 			local deltatime = math.floor(lineData[2]/1000 - combatstart)
 
-			maxhp = math.max(lineData[5], maxhp)
-
 			if deltatime > x then
 
 				x = deltatime
 
-				y = lineData[4]
+				y = lineData[4]/lineData[5]
 
 				table.insert(XYData, {x, y})
 			end
 		end
 	end
 
-	for i, xyData in ipairs(XYData) do
+	return XYData, COMBAT_METRICS_YAXIS_RIGHT, maxhp
+end
 
-		xyData[2] = xyData[2]/maxhp
+local function PerformancePlot(dataType)
 
+	if fightData == nil or fightData.log == nil then return end
+
+	local logData = fightData.log
+
+	local combatstart = fightData.combatstart/1000
+
+	local XYData = {}
+
+	local x	= -1
+	local y
+
+	local event = dataType == 7 and LIBCOMBAT_EVENT_SKILL_TIMINGS or LIBCOMBAT_EVENT_PERFORMANCE	-- skill delay is recorded with another logtype
+	local key = dataType == 7 and 6 or dataType
+
+	for line, lineData in ipairs(logData) do
+
+		if lineData[1] == event and lineData[key] then
+
+			local deltatime = math.floor(lineData[2]/1000 - combatstart)
+
+			if deltatime > x then
+
+				x = deltatime
+				y = lineData[key]
+
+				table.insert(XYData, {x, y})
+			end
+		end
 	end
 
-	return XYData, COMBAT_METRICS_YAXIS_RIGHT, maxhp
+	return XYData, COMBAT_METRICS_YAXIS_LEFT, 1
 end
 
 local function StatAbsolute(statId)
@@ -3616,9 +3904,11 @@ local function GetScale(x1, x2)	-- e.g. 34596 and 42693
 
 	local size = (high - low) / power 	-- 9000 / 1000 = 9
 
-	local rangesizes = {1, 2, 4, 6, 8, 10, 12, 16, 20}
+	local cleansize = math.floor(size)
+	--[[
+	local rangesizes = {1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20}
 
-	local cleansize
+	local cleansize = rangesizes[#rangesizes]
 
 	for i, value in ipairs(rangesizes) do
 
@@ -3627,9 +3917,9 @@ local function GetScale(x1, x2)	-- e.g. 34596 and 42693
 			cleansize = value	-- 10
 			break
 
-		end
-
+		end -- sometimes somehow a too big value comes out ??
 	end
+	--]]
 
 	local delta = cleansize - size -- 1
 
@@ -4205,7 +4495,7 @@ local PlotFunctions = {}
 local MainCategoryFunctions = {
 
 	[1] = {label = SI_COMBAT_METRICS_SMOOTHED, 		func = Smooth},
-	[2] = {label = SI_COMBAT_METRICS_TOTAL, 	func = Total},
+	[2] = {label = SI_COMBAT_METRICS_TOTAL, 		func = Total},
 	[3] = {label = SI_COMBAT_METRICS_ABSOLUTE, 		func = Absolute},
 
 }
@@ -4250,6 +4540,16 @@ local StatStrings = {
 	[12] = {label = SI_COMBAT_METRICS_STATS_HEALTH2, 	statId = LIBCOMBAT_STAT_PHYSICALRESISTANCE},
 	[13] = {label = SI_COMBAT_METRICS_STATS_HEALTH3, 	statId = LIBCOMBAT_STAT_SPELLRESISTANCE},
 	[14] = {label = SI_COMBAT_METRICS_STATS_HEALTH4, 	statId = LIBCOMBAT_STAT_CRITICALRESISTANCE},
+
+}
+
+local PerformanceStrings = {
+
+	[1] = {label = SI_COMBAT_METRICS_PERFORMANCE_FPSAVG, 	statId = 3},
+	[2] = {label = SI_COMBAT_METRICS_PERFORMANCE_FPSMIN, 	statId = 4},
+	[3] = {label = SI_COMBAT_METRICS_PERFORMANCE_FPSMAX, 	statId = 5},
+	[4] = {label = SI_COMBAT_METRICS_PERFORMANCE_FPSPING, 	statId = 6},
+	[5] = {label = SI_COMBAT_METRICS_PERFORMANCE_DESYNC, 	statId = 7},
 
 }
 
@@ -4333,6 +4633,18 @@ function CMX.PlotSelectionMenu(selector)
 	end
 
 	AddCustomSubMenuItem(GetString(SI_COMBAT_METRICS_STATS), submenu3)
+
+	local submenu4 = {}
+
+	for id, data in ipairs(PerformanceStrings) do
+
+		table.insert(submenu4, {label = GetString(data.label), callback = PlotFunctions[funcId]})
+
+		funcId = funcId + 1
+
+	end
+
+	AddCustomSubMenuItem(GetString(SI_COMBAT_METRICS_PERFORMANCE), submenu4)
 
 	ShowMenu(selector)
 	AnchorMenu(selector)
@@ -4558,6 +4870,19 @@ local function initPlotWindow(plotWindow)
 
 	end
 
+	for id, data in ipairs(PerformanceStrings) do
+
+		local perfString = data.label
+		local perfId = data.statId
+
+		local labelString = GetString(perfString)
+
+		PlotFunctions[funcId] = getCustomMenuFunction(PerformancePlot, perfId, labelString)
+
+		funcId = funcId + 1
+
+	end
+
 	for id = 1, maxXYPlots do
 
 		plotWindow:InitXYPlot(id)
@@ -4721,12 +5046,16 @@ function CMX.SkillTooltip_OnMouseEnter(control)
 
 	InitializeTooltip(SkillTooltip, control, TOPLEFT, 0, 5, BOTTOMLEFT)
 
-	local id = control:GetParent().id
+	local rowControl = control:GetParent()
+
+	local id = rowControl.id
+	local delay = rowControl.delay
 	local font = string.format("%s|%s|%s", GetString(SI_COMBAT_METRICS_STD_FONT), 16, "soft-shadow-thin")
 
 	SkillTooltip:SetAbilityId(id)
 	SkillTooltip:AddVerticalPadding(15)
 	SkillTooltip:AddLine(string.format("ID: %d", id), font, .7, .7, .8 , TOP, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER)
+	if delay then SkillTooltip:AddLine(string.format("Average delay: %d ms", delay), font, .7, .7, .8 , TOP, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER) end
 end
 
 function CMX.SkillTooltip_OnMouseExit(control)
@@ -4898,12 +5227,13 @@ local function updateLeftInfoPanel(panel)
 			if slotdata then
 
 				strings[1] = string.format("%d", slotdata[skillkeys[1]])
+				control.delay = slotdata.delayAvg
 
 				for k = 2, #skillkeys do
 
 					local value = slotdata[skillkeys[k]]
 
-					if type(value) == "number" and k > 1 then
+					if type(value) == "number" then
 
 						strings[k] = string.format("%.2f", value / 1000)
 
@@ -4950,10 +5280,10 @@ local function updateLeftInfoPanel(panel)
 	local value3string = totalWeaponAttacks or " -"
 	local value4string = totalSkillsFired or " -"
 
-	statrow:GetNamedChild("Label"):SetText(string.format("%s   %s", GetString(SI_COMBAT_METRICS_AVERAGEC), value1string))
-	statrow:GetNamedChild("Label2"):SetText(string.format("%s   %s", GetString(SI_COMBAT_METRICS_TOTALC), value2string))
-	statrow2:GetNamedChild("Label"):SetText(string.format("%s   %s", GetString(SI_COMBAT_METRICS_TOTALWA), value3string))
-	statrow2:GetNamedChild("Label2"):SetText(string.format("%s   %s", GetString(SI_COMBAT_METRICS_TOTALSKILLS), value4string))
+	statrow:GetNamedChild("Label"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_AVERAGEC), value1string))
+	statrow:GetNamedChild("Label2"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALC), value2string))
+	statrow2:GetNamedChild("Label"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALWA), value3string))
+	statrow2:GetNamedChild("Label2"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALSKILLS), value4string))
 end
 
 function CMX.ToggleSkillTimingData(control)
@@ -5098,12 +5428,12 @@ end
 
 local function updateInfoRowPanel(panel)
 
-	CMX.Print("dev", "Updating InfoRow")
+	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating InfoRow")
 
 	local datetimecontrol = panel:GetNamedChild("DateTime")
 	local versioncontrol = panel:GetNamedChild("ESOVersion")
 	local barcontrol = panel:GetNamedChild("Bar")
-	local barlabelcontrol = barcontrol:GetNamedChild("Label")
+	local performancecontrol = panel:GetNamedChild("Performance")
 
 	local data = fightData or {
 
@@ -5126,16 +5456,46 @@ local function updateInfoRowPanel(panel)
 	datetimecontrol:SetText(timestring)
 	versioncontrol:SetText(versionstring)
 
-	local usedSpace = db.SVsize/db.maxSVsize
+	local hideBar = fightData ~= nil and panel:GetParent():GetNamedChild("_FightList"):IsHidden()
 
-	barcontrol:SetValue(usedSpace)
-	barlabelcontrol:SetText(string.format("%s: %.1f MB / %d MB (%.1f%%)", GetString(SI_COMBAT_METRICS_SAVED_DATA), db.SVsize, db.maxSVsize, usedSpace * 100))
+	barcontrol:SetHidden(hideBar)
 
+	if not hideBar then
+
+		performancecontrol:SetHidden(true)
+
+		local usedSpace = db.SVsize/db.maxSVsize
+		barcontrol:SetValue(usedSpace)
+
+		local barlabelcontrol = barcontrol:GetNamedChild("Label")
+		barlabelcontrol:SetText(string.format("%s: %.1f MB / %d MB (%.1f%%)", GetString(SI_COMBAT_METRICS_SAVED_DATA), db.SVsize, db.maxSVsize, usedSpace * 100))
+
+	else	-- show performance stats
+
+		local data = fightData and fightData.calculated
+		local performance = data and data.performance
+		local count = performance and performance.count or 0
+
+		if count > 0 then
+
+			performancecontrol:SetHidden(false)
+
+			local fpsString = string.format("FPS: %d  |cAAAAAA(%d - %d)|r ", performance.avgAvg, performance.minAvg, performance.maxAvg)
+			local pingString = string.format("Ping: %d ms", performance.avgPing)
+
+			local delayString = data.delayAvg and string.format(" - Desync: %d ms", data.delayAvg) or ""
+
+			local fullString = string.format("%s - %s%s", fpsString, pingString, delayString)
+
+			performancecontrol:SetText(fullString)
+
+		end
+	end
 end
 
 local function updateFightReport(control, fightId)
 
-	CMX.Print("dev", "Updating FightReport")
+	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating FightReport")
 
 	em:UnregisterForUpdate("CMX_Report_Update_Delay")
 
@@ -5187,7 +5547,7 @@ local function updateFightReport(control, fightId)
 
 	selectionData = fightData and CMX.GenerateSelectionStats(fightData, category, selections) or nil
 
-	abilitystats = {fightData, selections.unit.damageOut ~= nil and selectionData or nil}
+	abilitystats = {fightData, selectionData}
 
 	-- Update Panels
 
@@ -5283,7 +5643,7 @@ end
 
 local function updateFightList(panel)
 
-	CMX.Print("dev", "Updating FightListPanel")
+	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating FightListPanel")
 
 	if panel:IsHidden() then return end
 
@@ -5814,6 +6174,78 @@ function CMX.GetCMXData(dataType)	-- for external access to fightData
 	return data
 end
 
+local lastResize
+
+function CMX.Resizing(control, resizing)
+
+	if control:IsHidden() then return end
+
+	if resizing then
+
+		control:SetEdgeColor(1,1,1,1)
+		control:SetCenterColor(1,1,1,.2)
+
+	else
+
+		control:SetEdgeColor(1,1,1,0)
+		control:SetCenterColor(1,1,1,0)
+
+		local scale, newpos = unpack(lastResize)
+		local parent = control:GetParent()
+
+		db[parent:GetName()] = newpos
+
+		parent:ClearAnchors()
+		parent:SetAnchor(CENTER, nil , TOPLEFT, newpos.x, newpos.y)
+		parent:Resize(scale)
+		parent:Update()
+
+	end
+end
+
+function CMX.NewSize(control, newLeft, newTop, newRight, newBottom, oldLeft, oldTop, oldRight, oldBottom)
+
+	if control.sizes == nil or control:IsHidden() then return end
+
+	TEST = control
+
+	local baseWidth, baseHeight = unpack(control.sizes)
+
+	local newHeight = newBottom - newTop
+	local newWidth = newRight - newLeft
+
+	local oldHeight = oldBottom - oldTop
+	local oldWidth = oldRight - oldLeft
+
+	local heightChange = (newHeight-oldHeight)/oldHeight
+	local widthChange = (newWidth-oldWidth)/oldWidth
+
+	local newscale
+
+	if math.abs(heightChange) > math.abs(widthChange) then
+
+		newscale = newHeight / baseHeight
+		newWidth = baseWidth * newscale
+
+		control:SetWidth(newWidth)
+
+	else
+
+		newscale = newWidth / baseWidth
+		newHeight = baseHeight * newscale
+
+		control:SetHeight(newHeight)
+
+	end
+
+	newscale = zo_roundToNearest(newscale, 0.01)
+
+	local centerX, centerY = control:GetCenter()
+	local newpos = { x = centerX, y = centerY}
+
+	lastResize = {newscale, newpos}
+end
+
 local scene = ZO_Scene:New("CMX_REPORT_SCENE", SCENE_MANAGER)
 
 local function initFightReport()
@@ -5832,6 +6264,8 @@ local function initFightReport()
 	scene:AddFragment(fragment)
 
 	local function resize(control, scale)
+
+		db.FightReport.scale = scale
 
 		if control.sizes == nil and control.anchors == nil then return end
 
@@ -6069,7 +6503,7 @@ local function initLiveReport()
 
 		local firstBlock = nil	-- to anchor 2nd row to
 
-		for i = 2, liveReport:GetNumChildren() do
+		for i = 3, liveReport:GetNumChildren() do
 
 			local child = liveReport:GetChild(i)
 			local name = string.gsub(string.gsub(child:GetName(), liveReport:GetName(), ""), "^%u", string.lower) -- difference in names is the child name e.g. "DamageOut". Outer gsub changes first letter to lowercase to match the settings, e.g. "damageOut".
@@ -6119,6 +6553,8 @@ local function initLiveReport()
 	end
 
 	local function resize(control, scale)
+
+		db.liveReport.scale = scale
 
 		local width, height = unpack(control.sizes)
 
@@ -6193,6 +6629,8 @@ function CMX.InitializeUI()
 	initLiveReport()
 
 	local settingsbutton = CombatMetrics_Report_SelectorRowSettingsButton
+
+	local data = CMX.GetFeedBackData(settingsbutton)
 
 	if LibFeedback then
 

@@ -171,9 +171,9 @@ function CMX.MakeMenu(svdefaults)
 			type = "slider",
 			name = GetString(SI_COMBAT_METRICS_MENU_SF_NAME),
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_SF_TOOLTIP),
-			min = 30,
-			max = (math.ceil(GuiRoot:GetHeight()/75)*10) or 200,
-			step = 10,
+			min = 50,
+			max = 200,
+			step = 1,
 			default = def.FightReport.scale,
 			getFunc = function() return db.FightReport.scale*100  end,
 			setFunc = function(value)
@@ -213,7 +213,7 @@ function CMX.MakeMenu(svdefaults)
 		},
 		{
 			type = "header",
-			name = GetString(SI_COMBAT_METRICS_MENU_GS_NAME)
+			name = GetString(SI_COMBAT_METRICS_MENU_RESPEN_NAME)
 		},
 		{
 			type = "editbox",
@@ -485,106 +485,9 @@ function CMX.MakeMenu(svdefaults)
 		{
 			type = "custom",
 		},
-		{
-			type = "header",
-			name = GetString(SI_COMBAT_METRICS_MENU_DEBUG_TITLE),
-		},
-		{
-			type = "checkbox",
-			name = GetString(SI_COMBAT_METRICS_MENU_DEBUG_SF_NAME),
-			tooltip = GetString(SI_COMBAT_METRICS_MENU_DEBUG_SF_TOOLTIP),
-			default = def.debuginfo.fightsummary,
-			getFunc = function() return db.debuginfo.fightsummary end,
-			setFunc = function(value) db.debuginfo.fightsummary = value end,
-			width = "half",
-		},
-		{
-			type = "checkbox",
-			name = GetString(SI_COMBAT_METRICS_MENU_DEBUG_SA_NAME),
-			tooltip = GetString(SI_COMBAT_METRICS_MENU_DEBUG_SA_TOOLTIP),
-			default = def.debuginfo.ids,
-			getFunc = function() return db.debuginfo.ids end,
-			setFunc = function(value) db.debuginfo.ids = value	end,
-			width = "half",
-		},
-		{
-			type = "checkbox",
-			name = GetString(SI_COMBAT_METRICS_MENU_DEBUG_SFC_NAME),
-			tooltip = GetString(SI_COMBAT_METRICS_MENU_DEBUG_SFC_TOOLTIP),
-			default = def.debuginfo.calculationtime,
-			getFunc = function() return db.debuginfo.calculationtime end,
-			setFunc = function(value) db.debuginfo.calculationtime = value	end,
-			width = "half",
-		},
-		{
-			type = "checkbox",
-			name = GetString(SI_COMBAT_METRICS_MENU_DEBUG_BI_NAME),
-			tooltip = GetString(SI_COMBAT_METRICS_MENU_DEBUG_BI_TOOLTIP),
-			default = def.debuginfo.buffs,
-			getFunc = function() return db.debuginfo.buffs end,
-			setFunc = function(value) db.debuginfo.buffs = value end,
-			width = "half",
-		},
-		{
-			type = "checkbox",
-			name = GetString(SI_COMBAT_METRICS_MENU_DEBUG_US_NAME),
-			tooltip = GetString(SI_COMBAT_METRICS_MENU_DEBUG_US_TOOLTIP),
-			default = def.debuginfo.skills,
-			getFunc = function() return db.debuginfo.skills end,
-			setFunc = function(value) db.debuginfo.skills = value end,
-			width = "half",
-		},
-		{
-			type = "checkbox",
-			name = GetString(SI_COMBAT_METRICS_MENU_DEBUG_SG_NAME),
-			tooltip = GetString(SI_COMBAT_METRICS_MENU_DEBUG_SG_TOOLTIP),
-			default = def.debuginfo.group,
-			getFunc = function() return db.debuginfo.group end,
-			setFunc = function(value) db.debuginfo.group = value end,
-			width = "half",
-		},
-		{
-			type = "checkbox",
-			name = GetString(SI_COMBAT_METRICS_MENU_DEBUG_MD_NAME),
-			tooltip = GetString(SI_COMBAT_METRICS_MENU_DEBUG_MD_TOOLTIP),
-			default = def.debuginfo.misc,
-			getFunc = function() return db.debuginfo.misc end,
-			setFunc = function(value) db.debuginfo.misc = value end,
-			width = "half",
-		},
-		{
-			type = "checkbox",
-			name = GetString(SI_COMBAT_METRICS_MENU_DEBUG_SAVE_NAME),
-			tooltip = GetString(SI_COMBAT_METRICS_MENU_DEBUG_SAVE_TOOLTIP),
-			default = def.debuginfo.save,
-			getFunc = function() return db.debuginfo.save end,
-			setFunc = function(value) db.debuginfo.save = value end,
-			width = "half",
-		},
-		{
-			type = "checkbox",
-			name = GetString(SI_COMBAT_METRICS_MENU_DEBUG_SPECIAL_NAME),
-			tooltip = GetString(SI_COMBAT_METRICS_MENU_DEBUG_SPECIAL_TOOLTIP),
-			default = def.debuginfo.special,
-			getFunc = function() return db.debuginfo.special end,
-			setFunc = function(value) db.debuginfo.special = value end,
-			width = "half",
-		},
 	}
 
 	if GetDisplayName() == "@Solinur" then 
-		
-		options[#options+1] = {
-
-			type = "checkbox",
-			name = "Developer Debug",
-			tooltip = "Developer Debug",
-			default = def.debuginfo.dev,
-			getFunc = function() return db.debuginfo.dev end,
-			setFunc = function(value) db.debuginfo.dev = value end,
-			width = "half",
-
-		}
 
 		options[#options+1] = {
 			type = "custom",

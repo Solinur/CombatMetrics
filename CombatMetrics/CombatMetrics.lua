@@ -12,7 +12,6 @@ local lastUsedWeaponAttack
 
 local currentbar
 
-
 -- localize some module functions for performance
 
 local stringformat = string.format
@@ -23,18 +22,70 @@ local mathabs = math.abs
 local mathceil = math.ceil
 local infinity = math.huge
 
--- init Lib
-
-local LC = LibCombat
-if LC == nil then return end
-
 -- namespace for thg addon
 if CMX == nil then CMX = {} end
 local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "0.9.18"
+CMX.version = "1.0.0"
+
+-- Logger
+
+local mainlogger
+local subloggers = {}
+local LOG_LEVEL_VERBOSE = "V"
+local LOG_LEVEL_DEBUG = "D"
+local LOG_LEVEL_INFO = "I"
+local LOG_LEVEL_WARNING ="W"
+local LOG_LEVEL_ERROR = "E"
+
+if LibDebugLogger then
+
+	mainlogger = LibDebugLogger(CMX.name)
+
+	LOG_LEVEL_VERBOSE = LibDebugLogger.LOG_LEVEL_VERBOSE
+	LOG_LEVEL_DEBUG = LibDebugLogger.LOG_LEVEL_DEBUG
+	LOG_LEVEL_INFO = LibDebugLogger.LOG_LEVEL_INFO
+	LOG_LEVEL_WARNING = LibDebugLogger.LOG_LEVEL_WARNING
+	LOG_LEVEL_ERROR = LibDebugLogger.LOG_LEVEL_ERROR
+
+	subloggers["main"] = mainlogger
+	subloggers["calc"] = mainlogger:Create("calc")
+	subloggers["group"] = mainlogger:Create("group")
+	subloggers["other"] = mainlogger:Create("other")
+	subloggers["UI"] = mainlogger:Create("UI")
+	subloggers["save"] = mainlogger:Create("save")
+
+end
+
+local function Print(category, level, ...)
+
+	if mainlogger == nil then return end
+
+	local logger = category and subloggers[category] or mainlogger
+
+	logger:Log(level, ...)
+
+end
+
+CMX.Print = Print
+
+function CMX.GetDebugLevels()
+
+	return 	LOG_LEVEL_VERBOSE, LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR
+
+end
+
+-- init and check for libs
+
+local LC = LibCombat
+if LC == nil then
+
+	Print("main", LOG_LEVEL_ERROR, "LibCombat not found!")
+	return
+
+end
 
 function CMX.GetFeedBackData(parentcontrol)
 
@@ -64,12 +115,6 @@ end
 local GetFormattedAbilityName = LC.GetFormattedAbilityName
 
 local GetFormattedAbilityIcon = LC.GetFormattedAbilityIcon
-
-local function Print(category, message, ...)
-	if db.debuginfo[category] then df("[%.2f - %s] %s", GetGameTimeSeconds(), "CMX", message:format(...)) end
-end
-
-CMX.Print = Print
 
 local offstatlist= {
 	"maxmagicka",
@@ -152,6 +197,8 @@ local PhysResistDebuffs = {
 
 	[GetFormattedAbilityName(17906)] = 2108, -- Crusher, can get changed by settings !
 	[GetFormattedAbilityName(75753)] = 3010, -- Alkosh
+
+	[GetFormattedAbilityName(100302)] = 6600, -- Piercing Spray
 
 	--Corrosive Armor ignores all resistance
 
@@ -261,16 +308,21 @@ end
 
 local function AcquireEffectData(self, abilityId, effectType, stacks)
 
-	local stacktext = (stacks <= 1 or db.showstacks == false) and "" or (" (x"..stacks..")")
-	local name = GetFormattedAbilityName(abilityId)..stacktext
+	local name = GetFormattedAbilityName(abilityId)
 
 	local buffs = self.buffs
 
 	if buffs[name] == nil then
 
-		buffs[name] = EffectHandler:New(effectType, abilityId, stacks)
+		buffs[name] = EffectHandler:New(effectType, name, abilityId)
 
 	end
+
+	local buffdata = buffs[name]
+
+	buffdata:CheckInstance(abilityId, stacks)
+
+	buffdata.maxStacks = mathmax(stacks, buffdata.maxStacks)
 
 	return buffs[name]
 
@@ -442,7 +494,7 @@ function UnitHandler:UpdateResistance(ismagic, debuffName)
 
 	local debuff = self.buffs[debuffName]
 
-	local isactive = debuff.groupLastGain ~= nil or debuff.lastGain ~= nil
+	local isactive = NonContiguousCount(debuff.slots) > 0
 
 	if isactive == true and debuffData[debuffName] ~= true then
 
@@ -493,18 +545,51 @@ function AbilityHandler:Initialize(abilityId, pet, damageType, tablekey)
 
 end
 
-function EffectHandler:Initialize(effectType, abilityId, stacks)
+function EffectHandler:Initialize(effectType, name, abilityId)
 
-	self.name = GetFormattedAbilityName(abilityId)
+	self.name = name
+	self.iconId = abilityId
 	self.uptime = 0						-- uptime of effect caused by player
 	self.count = 0						-- count of effect applications caused by player
 	self.groupUptime = 0				-- uptime of effect caused by the whole group
 	self.groupCount = 0					-- count of effect applications caused by the whole group
-	self.lastGain = nil					-- temp var for storing when effect was last gained
 	self.effectType = effectType		-- buff or debuff
-	self.icon = abilityId				-- icon of this effect
-	self.stacks = stacks				-- stacks = 0 if the effect wasn't tracked trough EVENT_EFFECT_CHANGED
+	self.maxStacks = 0					-- stacks = 0 if the effect wasn't tracked trough EVENT_EFFECT_CHANGED
+	self.firstStartTime = nil			-- temp variable to track when uptime for a buff initially started
+	self.firstGroupStartTime = nil		-- temp variable to track when uptime for a buff from the group initially started
+	self.slots = {}						-- slotid is unique for each application, this is the temporary place to track them
+	self.instances = {}					-- some buff, epecially major/minor ones can be applied via several buff Id's
 
+end
+
+function EffectHandler:CheckInstance(abilityId, stacks)
+
+	local instances = self.instances
+	local instance = instances[abilityId]
+
+	if instance == nil then
+
+		instance = {}
+		instances[abilityId] = instance
+
+	end
+
+	local stackData = instance[stacks]
+
+	if stackData == nil then
+
+		stackData = {
+
+			uptime = 0,			-- uptime of effect caused by player
+			count = 0,			-- count of effect applications caused by player
+			groupUptime = 0,	-- uptime of effect caused by the whole group
+			groupCount = 0,		-- count of effect applications caused by the whole group}
+
+		}
+
+		instance[stacks] = stackData
+
+	end
 end
 
 function ResourceTable:Initialize()
@@ -549,6 +634,9 @@ function SkillTimingHandler:Initialize()
 	self.weaponAttackBefore = {} 	-- holds times since last light or heavy attack completed
 	self.skillNext = {} 			-- holds times until a new skill is cast afterwards
 	self.weaponAttackNext = {} 		-- holds times until a new light or heavy attack is cast afterwards
+	self.sumdelays = 0
+	self.countdelays = 0
+	--self.delays = {} 				-- holds times between button press is registered and the ability activating
 
 end
 
@@ -582,6 +670,8 @@ local function GetEmtpyFightStats()
 	data.totalSkills = 0
 	data.totalWeaponAttacks = 0
 	data.totalSkillsFired =  0
+
+	data.performance = {count = 0}
 
 	data.graph = {
 		damageOut = {},
@@ -806,23 +896,74 @@ function CMX.GenerateSelectionStats(fight, menuItem, selections) -- this is simi
 		local unitData = fight.units[unitId]
 
 		local isNotEmpty = unitTotalValue > 0 or NonContiguousCount(unit.buffs) > 0
-		local isEnemy = unitData and (unitData.unitType ~= COMBAT_UNIT_TYPE_GROUP and unitData.unitType ~= COMBAT_UNIT_TYPE_PLAYER_PET and unitData.unitType ~= COMBAT_UNIT_TYPE_PLAYER) -- some user had unitData go to nil so make sure that unit will be ignored
+		local isEnemy = unitData and (unitData.unitType ~= COMBAT_UNIT_TYPE_GROUP and unitData.unitType ~= COMBAT_UNIT_TYPE_PLAYER_PET and unitData.unitType ~= COMBAT_UNIT_TYPE_PLAYER)
 		local isDamageCategory = menuItem == "damageIn" or menuItem == "damageOut"
 
 		if isNotEmpty and (isEnemy == isDamageCategory) and unitData then
 
 			for name, buff in pairs(unit.buffs) do
 
-				local selectedbuff = selectiondata.buffs[name] or { uptime = 0, count = 0, groupUptime = 0, groupCount = 0 }
+				local selectedbuff = selectiondata.buffs[name] or { uptime = 0, count = 0, groupUptime = 0, groupCount = 0, maxStacks = 0 }
 
-				for key,value in pairs(selectedbuff) do
+				selectedbuff.uptime = selectedbuff.uptime + buff.uptime
+				selectedbuff.count = selectedbuff.count + buff.count
+				selectedbuff.groupUptime = selectedbuff.groupUptime + buff.groupUptime
+				selectedbuff.groupCount = selectedbuff.groupCount + buff.groupCount
 
-					selectedbuff[key] = value + buff[key]
+				selectedbuff.maxStacks = mathmax(selectedbuff.maxStacks, buff.maxStacks or 0)
 
+				if buff.instances then
+
+					local selinstances = selectedbuff.instances
+
+					if selinstances == nil then
+
+						selectedbuff.instances = {}
+						ZO_DeepTableCopy(buff.instances, selectedbuff.instances)
+
+					else
+
+						for abilityId, instance in pairs(buff.instances) do
+
+							local selInstance = selinstances[abilityId]
+
+							if instance and selInstance == nil then
+
+								selinstances[abilityId] = {}
+								ZO_DeepTableCopy(instance, selinstances[abilityId])
+
+							elseif instance then
+								for stacks = 1, selectedbuff.maxStacks do
+
+									local stackdata = instance[stacks]
+									local selstackdata = selInstance[stacks]
+
+									if stackdata and selstackdata == nil then
+
+										selInstance[stacks] = {}
+										ZO_DeepTableCopy(stackdata, selInstance[stacks])
+
+									elseif stackdata then
+
+										selstackdata.uptime = selstackdata.uptime + stackdata.uptime
+										selstackdata.count = selstackdata.count + stackdata.count
+										selstackdata.groupUptime = selstackdata.groupUptime + stackdata.groupUptime
+										selstackdata.groupCount = selstackdata.groupCount + stackdata.groupCount
+
+									end
+								end
+
+								selInstance.uptime = selInstance.uptime + instance.uptime
+								selInstance.count = selInstance.count + instance.count
+								selInstance.groupUptime = selInstance.groupUptime + instance.groupUptime
+								selInstance.groupCount = selInstance.groupCount + instance.groupCount
+							end
+						end
+					end
 				end
 
 				selectedbuff.effectType = buff.effectType
-				selectedbuff.icon = buff.icon
+				selectedbuff.iconId = selectedbuff.iconId or buff.iconId
 
 				selectiondata.buffs[name] = selectedbuff
 			end
@@ -949,8 +1090,15 @@ local function IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitVa
 	end
 end
 
+local function unpackLogline(t, i, j)
+	if i <= j then
+		return t[i], unpackLogline(t, i + 1, j)
+	end
+end
 
-local function ProcessLogDamage(fight, callbacktype, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType)
+local function ProcessLogDamage(fight, logline)
+
+	local callbacktype, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType = unpackLogline(logline, 1, 9)
 
 	if timems < (fight.combatstart-500) or fight.units[sourceUnitId] == nil or fight.units[targetUnitId] == nil then return end
 
@@ -1018,7 +1166,10 @@ local healResultCategory={
 	[ACTION_RESULT_HOT_TICK_CRITICAL] = "Critical",
 }
 
-local function ProcessLogHeal(fight, callbacktype, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, powerType, overflow)
+local function ProcessLogHeal(fight, logline)
+
+	local callbacktype, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, powerType, overflow = unpackLogline(logline, 1, 9)
+
 	if timems < (fight.combatstart-500) or fight.units[sourceUnitId] == nil or fight.units[targetUnitId] == nil then return end
 
 	local ispet = fight.units[sourceUnitId].unittype == COMBAT_UNIT_TYPE_PLAYER_PET 										-- determine if this is healing from a pet
@@ -1030,8 +1181,6 @@ local function ProcessLogHeal(fight, callbacktype, timems, result, sourceUnitId,
 
 	local valuekey
 	local hitkey
-	local overFlowValuekey
-	local overFlowHitkey
 
 	if callbacktype == LIBCOMBAT_EVENT_HEAL_OUT then
 
@@ -1082,10 +1231,13 @@ end
 ProcessLog[LIBCOMBAT_EVENT_HEAL_OUT] = ProcessLogHeal
 ProcessLog[LIBCOMBAT_EVENT_HEAL_IN] = ProcessLogHeal
 
-local function ProcessLogHealSelf (fight,callbacktype,...)
+local function ProcessLogHealSelf (fight, logline)
 
-	ProcessLogHeal(fight,LIBCOMBAT_EVENT_HEAL_OUT,...)
-	ProcessLogHeal(fight,LIBCOMBAT_EVENT_HEAL_IN,...)
+	logline[1] = LIBCOMBAT_EVENT_HEAL_OUT
+	ProcessLogHeal(fight, logline)
+
+	logline[1] = LIBCOMBAT_EVENT_HEAL_IN
+	ProcessLogHeal(fight, logline)
 
 end
 
@@ -1093,59 +1245,111 @@ ProcessLog[LIBCOMBAT_EVENT_HEAL_SELF] = ProcessLogHealSelf
 
 -- Buffs/Debuffs
 
-local function ProcessLogEffects(fight, callbacktype, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, slotId)
+local function CountSlots(slots)
+
+	local slotcount = 0
+	local groupSlotCount = 0
+
+	for _, slotData in pairs(slots) do
+
+		if slotData.isPlayerSource then slotcount = slotcount + 1 end
+		groupSlotCount = groupSlotCount + 1
+
+	end
+
+	return slotcount, groupSlotCount
+end
+
+local function ProcessLogEffects(fight, logline)
+
+	local callbacktype, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, slotId = unpackLogline(logline, 1, 9)
+
+	stacks = stacks or 0
 
 	if timems < (fight.combatstart - 500) or fight.units[unitId] == nil then return end
 
 	local unit = fight:AcquireUnitData(unitId, timems)
 	local effectdata = unit:AcquireEffectData(abilityId, effectType, stacks)
 
+	local isPlayerSource = sourceType == COMBAT_UNIT_TYPE_PLAYER or sourceType == COMBAT_UNIT_TYPE_PLAYER_PET
+
+	local slots = effectdata.slots
+	local slotcount, groupSlotCount = CountSlots(slots)
+
+	local slotdata = slots[slotId]
+
 	if (changeType == EFFECT_RESULT_GAINED or changeType == EFFECT_RESULT_UPDATED) and timems < fight.endtime then
 
-		if sourceType == COMBAT_UNIT_TYPE_PLAYER or sourceType == COMBAT_UNIT_TYPE_PLAYER_PET then
+		local starttime = mathmax(effectdata.lastGain or timems, fight.starttime)
 
-			effectdata.lastGain = mathmax(effectdata.lastGain or timems, fight.starttime)
-			effectdata.lastSlot = slotId
+		if slotcount == 0 and isPlayerSource then effectdata.firstStartTime = starttime end
+		if groupSlotCount == 0 then effectdata.firstGroupStartTime = starttime end
 
-		--[[elseif effectdata.lastGain ~= nil then	-- treat this as if the player effect stopped, the group timer will continue though.
+		if slotdata == nil then
 
-			effectdata.uptime = effectdata.uptime + (mathmin(timems, fight.endtime) - effectdata.lastGain)
-			effectdata.lastGain = nil
-			effectdata.count = effectdata.count + 1]]
+			slotdata = {
+				["isPlayerSource"] = isPlayerSource,
+				["abilityId"] = abilityId,
+			}
+
+			slots[slotId] = slotdata
 
 		end
 
-		effectdata.groupLastGain = mathmax(effectdata.groupLastGain or timems, fight.starttime)
-		effectdata.groupLastSlot = slotId
+		slotdata[stacks] = slotdata[stacks] or starttime
 
 	elseif changeType == EFFECT_RESULT_FADED then
 
-		for i = 1, stacks do
+		slots[slotId] = nil
 
-			local effectdata = unit:AcquireEffectData(abilityId, effectType, i)
+		local instance = effectdata.instances[abilityId]
 
-			if timems <= fight.starttime and (effectdata.lastGain ~= nil or effectdata.groupLastGain ~= nil) then
+		if slotdata and timems > fight.starttime then
 
-				if slotId == effectdata.lastSlot then effectdata.lastGain = nil end
-				if slotId == effectdata.groupLastSlot then effectdata.groupLastGain = nil end
+			if slotdata.isPlayerSource then slotcount = slotcount - 1 end
+			groupSlotCount = groupSlotCount - 1
 
-			end
+			slotdata.isPlayerSource = nil	-- remove, so the loop gets only stackData
+			slotdata.abilityId = nil
 
-			if effectdata.lastGain ~= nil and slotId == effectdata.lastSlot and (sourceType == COMBAT_UNIT_TYPE_PLAYER or sourceType == COMBAT_UNIT_TYPE_PLAYER_PET) then
+			for stacks, starttime in pairs(slotdata) do
 
-				effectdata.uptime = effectdata.uptime + (mathmin(timems,fight.endtime) - effectdata.lastGain)
-				effectdata.lastGain = nil
-				effectdata.count = effectdata.count + 1
+				local stackData = instance[stacks]
+				local duration = mathmin(timems, fight.endtime) - starttime
 
-			end
+				if isPlayerSource then
 
-			if effectdata.groupLastGain ~= nil and slotId == effectdata.groupLastSlot then
+					stackData.uptime = stackData.uptime + duration
+					stackData.count = stackData.count + 1
+					effectdata.count = effectdata.count + 1
 
-				effectdata.groupUptime = effectdata.groupUptime + (mathmin(timems,fight.endtime) - effectdata.groupLastGain)
-				effectdata.groupLastGain = nil
+				end
+
+				stackData.groupUptime = stackData.groupUptime + duration
+				stackData.groupCount = stackData.groupCount + 1
 				effectdata.groupCount = effectdata.groupCount + 1
+			end
+
+			if slotcount == 0 and effectdata.firstStartTime then
+
+				local duration = mathmin(timems, fight.endtime) - effectdata.firstStartTime
+
+				effectdata.uptime = effectdata.uptime + duration
+
+				effectdata.firstStartTime = nil
 
 			end
+
+			if groupSlotCount == 0 and effectdata.firstGroupStartTime then
+
+				local duration = mathmin(timems,fight.endtime) - effectdata.firstGroupStartTime
+
+				effectdata.groupUptime = effectdata.groupUptime + duration
+
+				effectdata.firstGroupStartTime = nil
+
+			end
+
 		end
 	end
 
@@ -1157,14 +1361,12 @@ local function ProcessLogEffects(fight, callbacktype, timems, unitId, abilityId,
 	if spellres then
 
 		unit:UpdateResistance(true, buffname)
-		--Print("dev", "SR: %d", unit.currentSpellResistance)
 
 	end
 
 	if physres then
 
 		unit:UpdateResistance(false, buffname)
-		--Print("dev", "PR: %d", unit.currentPhysicalResistance)
 
 	end
 end
@@ -1175,7 +1377,9 @@ ProcessLog[LIBCOMBAT_EVENT_GROUPEFFECTS_IN] = ProcessLogEffects
 ProcessLog[LIBCOMBAT_EVENT_GROUPEFFECTS_OUT] = ProcessLogEffects
 
 
-local function ProcessLogResources(fight, callbacktype, timems, abilityId, powerValueChange, powerType)
+local function ProcessLogResources(fight, logline)
+
+	local callbacktype, timems, abilityId, powerValueChange, powerType = unpackLogline(logline, 1, 5)
 
 	if powerType == POWERTYPE_HEALTH then return end
 
@@ -1200,7 +1404,9 @@ end
 
 ProcessLog[LIBCOMBAT_EVENT_RESOURCES] = ProcessLogResources
 
-local function ProcessLogStats(fight, callbacktype, timems, statchange, newvalue, stat)
+local function ProcessLogStats(fight, logline)
+
+	local callbacktype, timems, statchange, newvalue, stat = unpackLogline(logline, 1, 5)
 
 	local key = LC.GetStatNameCurrent(stat)
 
@@ -1210,18 +1416,16 @@ end
 
 ProcessLog[LIBCOMBAT_EVENT_PLAYERSTATS] = ProcessLogStats
 
-local abilityDelay = {[63044] = 100, [63029] = 100, [63046] = 100} -- Radiant Destruction and morphs have a 100ms delay after casting.
+local abilityExtraDelay = {[63044] = 100, [63029] = 100, [63046] = 100} -- Radiant Destruction and morphs have a 100ms delay after casting.
 
 ---[[
-local function ProcessLogSkillTimings(fight, callbacktype, timems, reducedslot, abilityId, status)
+local function ProcessLogSkillTimings(fight, logline)
+
+	local callbacktype, timems, reducedslot, abilityId, status, skillDelay = unpackLogline(logline, 1, 6)
 
 	if reducedslot == nil then return end
 
-	--Print("misc", "[%d], %s: %d", timems, GetAbilityName(abilityId), status)
-
 	local isWeaponAttack = reducedslot%10 < 3
-
-	local newdata = {}
 
 	local slotdata = fight:AcquireSkillTimingData(reducedslot)
 
@@ -1250,10 +1454,7 @@ local function ProcessLogSkillTimings(fight, callbacktype, timems, reducedslot, 
 	local doubleWeaponAttack = isWeaponAttack and lastUsedWeaponAttack and lastUsedSkill and (lastWeaponAttackTime > lastSkillTime)
 	local doubleSkillUse = (not isWeaponAttack) and lastUsedWeaponAttack and lastUsedSkill and (lastSkillTime > lastWeaponAttackTime)
 
-	local timenow = GetGameTimeMilliseconds()/1000
-
 	local key = isWeaponAttack and "weaponAttackNext" or "skillNext"
-	local data = fight.calculated
 
 	if lastSkillSuccessTime and not doubleWeaponAttack and status ~= LIBCOMBAT_SKILLSTATUS_SUCCESS then
 
@@ -1291,28 +1492,35 @@ local function ProcessLogSkillTimings(fight, callbacktype, timems, reducedslot, 
 
 		end
 
-	else
+		if skillDelay then
 
-		local channeled, castTime = GetAbilityCastInfo(abilityId)
-
-		local delay = abilityDelay[abilityId] or 0
-
-		if isWeaponAttack and lastUsedWeaponAttack then
-
-			lastUsedWeaponAttack[3] = timems + delay
-
-		elseif lastUsedSkill then
-
-			lastUsedSkill[3] = timems + delay
+			slotdata.sumdelays = slotdata.sumdelays + skillDelay
+			slotdata.countdelays = slotdata.countdelays + 1
+			--table.insert(slotdata.delays, skillDelay)
 
 		end
 
+	else
+
+		local extraDelay = abilityExtraDelay[abilityId] or 0		-- some abilities require a extra delay due to animation
+
+		if isWeaponAttack and lastUsedWeaponAttack then
+
+			lastUsedWeaponAttack[3] = timems + extraDelay
+
+		elseif lastUsedSkill then
+
+			lastUsedSkill[3] = timems + extraDelay
+
+		end
 	end
 end
 
 ProcessLog[LIBCOMBAT_EVENT_SKILL_TIMINGS] = ProcessLogSkillTimings
 
-local function ProcessMessages(fight, callbacktype, timems, messageId, value)
+local function ProcessMessages(fight, logline)
+
+	local callbacktype, timems, messageId, value = unpackLogline(logline, 1, 4)
 
 	if messageId ~= LIBCOMBAT_MESSAGE_WEAPONSWAP then return end
 
@@ -1332,6 +1540,35 @@ ProcessLog[LIBCOMBAT_EVENT_MESSAGES] = ProcessMessages
 
 ProcessLog[LIBCOMBAT_EVENT_BOSSHP] = function() end
 
+local function ProcessPerformanceStats(fight, logline)
+
+	local callbacktype, timems, avg, min, max, ping = unpackLogline(logline, 1, 6)
+
+	if not (avg and min and max and ping) then return end
+
+	local performance = fight.calculated.performance
+
+	performance.count = performance.count + 1
+
+	performance.minMin = mathmin(performance.minMin or min, min)
+	performance.maxMin = mathmax(performance.maxMin or min, min)
+	performance.sumMin = min + (performance.sumMin or 0)
+
+	performance.minMax = mathmin(performance.minMax or max, max)
+	performance.maxMax = mathmax(performance.maxMax or max, max)
+	performance.sumMax = max + (performance.sumMax or 0)
+
+	performance.minAvg = mathmin(performance.minAvg or avg, avg)
+	performance.maxAvg = mathmax(performance.maxAvg or avg, avg)
+	performance.sumAvg = avg + (performance.sumAvg or 0)
+
+	performance.minPing = mathmin(performance.minPing or ping, ping)
+	performance.maxPing = mathmax(performance.maxPing or ping, ping)
+	performance.sumPing = ping + (performance.sumPing or 0)
+end
+
+ProcessLog[LIBCOMBAT_EVENT_PERFORMANCE] = ProcessPerformanceStats
+
 --]]
 
 local function CalculateChunk(fight)  -- called by CalculateFight or itself
@@ -1347,8 +1584,9 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 	for i=istart+1,iend do
 
 		local logline = logdata[i]
+		local logType = logline[1] -- logline[1] is the callbacktype e.g. LIBCOMBAT_EVENT_DAMAGEOUT
 
-		if ProcessLog[logline[1]] then ProcessLog[logline[1]](fight,unpack(logline)) end -- logline[1] is the callbacktype e.g. LIBCOMBAT_EVENT_DAMAGEOUT
+		if ProcessLog[logType] then ProcessLog[logType](fight, logline) end
 
 	end
 
@@ -1357,7 +1595,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 	if iend >= #logdata then
 
-		Print("calculationtime", "Start end routine")
+		Print("calc", LOG_LEVEL_DEBUG, "Start end routine")
 
 		fightlabel:SetText(GetString(SI_COMBAT_METRICS_FINALIZING))
 
@@ -1376,22 +1614,102 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 				local endtime = mathmin(unitCalc.endtime, fight.endtime)
 
-				for k,effectdata in pairs(unitCalc.buffs) do	-- finish buffs
+				for _, effectdata in pairs(unitCalc.buffs) do	-- finish buffs that didn't end before end of combat
 
-					if effectdata.lastGain ~= nil and fight.starttime ~= 0 then
+					local instances = effectdata.instances
 
-						effectdata.uptime = effectdata.uptime + (endtime - effectdata.lastGain)
-						effectdata.lastGain = nil
-						effectdata.count = effectdata.count + 1
+					local slots = effectdata.slots
+
+					local slotcount, groupSlotCount = CountSlots(effectdata.slots)
+
+					if groupSlotCount > 0 and fight.starttime ~= 0 then
+
+						for slotId, slotdata in pairs(slots) do
+
+							local abilityId = slotdata.abilityId
+							local isPlayerSource = slotdata.isPlayerSource
+
+							local instance = instances[abilityId]
+
+							slotdata.abilityId = nil
+							slotdata.isPlayerSource = nil
+
+							for stacks, starttime in pairs(slotdata) do
+
+								local stackData = instance[stacks]
+								local duration = endtime - starttime
+
+								if isPlayerSource then
+
+									stackData.uptime = stackData.uptime + duration
+									stackData.count = stackData.count + 1
+
+								end
+
+								stackData.groupUptime = stackData.groupUptime + duration
+								stackData.groupCount = stackData.groupCount + 1
+							end
+
+
+						end
+
+						if slotcount > 0 then
+
+							local duration = endtime - effectdata.firstStartTime
+
+							effectdata.uptime = effectdata.uptime + duration
+							effectdata.count = effectdata.count + slotcount
+
+						end
+
+						local duration = endtime - effectdata.firstGroupStartTime
+
+						effectdata.groupUptime = effectdata.groupUptime + duration
+						effectdata.groupCount = effectdata.groupCount + groupSlotCount
 
 					end
 
-					if effectdata.groupLastGain ~= nil and fight.starttime ~= 0 then
+					effectdata.slots = nil
 
-						effectdata.groupUptime = effectdata.groupUptime + (endtime - effectdata.groupLastGain)
-						effectdata.groupLastGain = nil
-						effectdata.groupCount = effectdata.groupCount + 1
+					-- calculate efective instance and stack uptime
 
+					local maxDuration = 0
+
+					for abilityId, instance in pairs(instances) do
+
+						local sumStackUptime = 0
+						local sumStackGroupUptime = 0
+
+						local maxStacks = 1
+
+						local count = 0
+						local groupCount = 0
+
+						for stacks, stackData in pairs(instance) do
+
+							sumStackUptime = sumStackUptime + stackData.uptime
+							sumStackGroupUptime = sumStackGroupUptime + stackData.groupUptime
+
+							maxStacks = mathmax(maxStacks, stacks)
+							count = mathmax(stackData.count, count)
+							groupCount = mathmax(stackData.groupCount, groupCount)
+
+						end
+
+						local uptime = sumStackUptime/maxStacks
+						local groupUptime = sumStackGroupUptime/maxStacks
+
+						instance.uptime = uptime
+						instance.groupUptime = groupUptime
+						instance.count = count
+						instance.groupCount = groupCount
+
+						if uptime > maxDuration or groupUptime > maxDuration then
+
+							maxDuration = mathmax(maxDuration, uptime, maxDuration)
+							effectdata.iconId = abilityId
+
+						end
 					end
 				end
 			end
@@ -1444,11 +1762,20 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 			for key, value in pairs(datatable or {}) do
 
-				datatable[key] = ability[key] + datatable[key]
+				if key == "min" or key == "max" then
 
+					datatable[key] = math[key](ability[key], datatable[key])
+
+				else
+
+					datatable[key] = ability[key] + datatable[key]
+
+				end
 			end
-
 		end
+
+		if data.damageOutSpells.min == infinity then data.damageOutSpells.min = 0 end
+		if data.damageOutWeapon.min == infinity then data.damageOutWeapon.min = 0 end
 
 		for key, list in pairs(StatListTable) do
 
@@ -1545,66 +1872,76 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		local totalSkills = 0
 		local totalWeaponAttacks = 0
 		local totalSkillsFired = 0
+		local totalDelay = 0
+		local totalDelayCount = 0
 
 		local skillBars = fight.charData.skillBars
 
 		for reducedslot, skill in pairs(skilldata) do
 
 			local isWeaponAttack = reducedslot%10 == 1 or reducedslot%10 == 2
-			local timedata = skill["times"]
-			local skillId = skillBars[reducedslot>10 and 2 or 1][reducedslot%10]
+			local timedata = skill.times
+			local bar = mathfloor(reducedslot/10) + 1
+			local skillId = skillBars[bar][reducedslot%10]
 
-			local difftimes = {}
+			if bar <= 2 and skillId then
 
-			skill.count = #timedata
+				local difftimes = {}
 
-			for i = 1, #timedata - 1 do
+				skill.count = #timedata
 
-				difftimes[i] = timedata[i+1] - timedata[i]
+				for i = 1, #timedata - 1 do
 
-			end
-
-			skill.difftimes = difftimes
-
-			if isWeaponAttack then
-
-				totalWeaponAttacks = totalWeaponAttacks + skill.count
-
-			elseif not ignoredAbilityTiming[skillId] then
-
-				totalSkillsFired = totalSkillsFired + skill.count
-
-			end
-
-			for i, key in ipairs({"skillBefore", "weaponAttackBefore", "skillNext", "weaponAttackNext", "difftimes"}) do
-
-				local times = skill[key]
-
-				local avgkey = ZO_CachedStrFormat("<<1>>Avg", key)
-
-				local sum = 0
-				local count = 0
-
-				for _, v in pairs(times) do
-
-					if type(v) == 'number' then
-
-						sum = sum + v
-						count = count + 1
-
-					end
+					difftimes[i] = timedata[i+1] - timedata[i]
 
 				end
 
-				skill[avgkey] = count > 0 and (sum / count) or 0
+				skill.difftimes = difftimes
 
-				if i == 1 and not (isWeaponAttack or ignoredAbilityTiming[skillId]) then
+				local countdelays = skill.countdelays
 
-					totalSkillTime = totalSkillTime + sum
-					totalSkills = totalSkills + count
+				if countdelays and countdelays > 0 then skill.delayAvg = skill.sumdelays / countdelays end
 
-					--Print("misc", "Slot %d: Total: %d | Timing %d", reducedslot, skill.count, count)
+				if isWeaponAttack then
 
+					totalWeaponAttacks = totalWeaponAttacks + skill.count
+
+				elseif not ignoredAbilityTiming[skillId] then
+
+					totalSkillsFired = totalSkillsFired + skill.count
+					totalDelay = totalDelay + skill.sumdelays
+					totalDelayCount = totalDelayCount + skill.countdelays
+
+				end
+
+				for i, key in ipairs({"skillBefore", "weaponAttackBefore", "skillNext", "weaponAttackNext", "difftimes"}) do
+
+					local times = skill[key]
+
+					local avgkey = ZO_CachedStrFormat("<<1>>Avg", key)
+
+					local sum = 0
+					local count = 0
+
+					for _, v in pairs(times) do
+
+						if type(v) == 'number' then
+
+							sum = sum + v
+							count = count + 1
+
+						end
+
+					end
+
+					skill[avgkey] = count > 0 and (sum / count) or 0
+
+					if i == 3 and not (isWeaponAttack or ignoredAbilityTiming[skillId]) then
+
+						totalSkillTime = totalSkillTime + sum
+						totalSkills = totalSkills + count
+
+					end
 				end
 			end
 		end
@@ -1636,24 +1973,42 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 			else
 
-				Print("misc", "Time Array lengthes doesn't match for bar %d", bar)
+				Print("misc", LOG_LEVEL_WARNING, "Time Array lengthes doesn't match for bar %d", bar)
 
 			end
 		end
 
+		-- calculate avh performance values
+
+		local performance = data.performance
+		local count = performance.count
+
+		if count > 0 then
+
+			performance.avgMin   = performance.sumMin/count
+			performance.avgMax   = performance.sumMax/count
+			performance.avgAvg   = performance.sumAvg/count
+			performance.avgPing  = performance.sumPing/count
+
+		end
+
+		-- remaining stuff
+
 		data.buffs = fight.playerid ~= nil and data.units[fight.playerid] and data.units[fight.playerid].buffs or {}
+		data.buffVersion = 2
 
 		data.totalSkillTime = totalSkillTime
 		data.totalSkills = totalSkills
 		data.totalWeaponAttacks = totalWeaponAttacks
 		data.totalSkillsFired = totalSkillsFired
+		data.delayAvg = (totalDelayCount > 0 and totalDelay / totalDelayCount) or 0
 
 		fight.calculating = false
 		fight.cindex = nil
 
 		titleBar:SetHidden(true)
 
-		Print("calculationtime", "Time for final calculations: %.2f ms", (GetGameTimeSeconds() - scalcms) * 1000)
+		Print("calc", LOG_LEVEL_DEBUG, "Time for final calculations: %.2f ms", (GetGameTimeSeconds() - scalcms) * 1000)
 
 		return
 
@@ -1668,7 +2023,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 	local newchunksize = mathmin(mathceil(desiredtime / mathmax(chunktime, 0.001) * db.chunksize / stepsize) * stepsize, 20000)
 
-	Print("calculationtime", "Chunk calculation time: %.2f ms, new chunk size: %d", chunktime * 1000, newchunksize)
+	Print("calc", LOG_LEVEL_DEBUG, "Chunk calculation time: %.2f ms, new chunk size: %d", chunktime * 1000, newchunksize)
 
 	db.chunksize = newchunksize
 
@@ -1685,10 +2040,9 @@ local function InitCurrentData()
 	CMX.currentdata = {log={}, DPSOut = 0, DPSIn = 0, HPSOut = 0, HPSAOut = 0, HPSIn = 0, dpstime = 0, hpstime = 0, groupDPSOut = 0, groupDPSIn = 0, groupHPSOut = 0, groupHPS = 0}	-- reset currentdata, the previous log is now only linked to the fight.
 end
 
-local function AddtoChatLog(...)
+local function AddtoChatLog(logType, ...)
 
-	local logLine = {...}
-	local logType = logLine[1]
+	local logLine = {logType, ...}
 
 	local isEnabled =
 	((logType == LIBCOMBAT_EVENT_DAMAGE_OUT or logType == LIBCOMBAT_EVENT_DAMAGE_SELF) and db.chatLog.damageOut == true)
@@ -1699,15 +2053,18 @@ local function AddtoChatLog(...)
 
 	if isEnabled then
 
-		local text, color = CMX.GetCombatLogString(nil, {...}, 12)
+		local text, color = CMX.GetCombatLogString(nil, logLine, 12)
 
 		if chatContainer then chatContainer:AddMessageToWindow(chatWindow, text, unpack(color)) end -- in case the container got removed by the user or an addon
 
 	end
 end
 
-local function AddToLog(...)
-	table.insert(CMX.currentdata.log,{...})
+local function AddToLog(logType, ...)
+
+	if LC.data.inCombat ~= true and logType == LIBCOMBAT_EVENT_PERFORMANCE then return end
+
+	table.insert(CMX.currentdata.log,{logType, ...})
 
 	if db.chatLog.enabled then AddtoChatLog(...) end
 end
@@ -1824,10 +2181,10 @@ local CMX_STATUS_ENABLED = 2
 local registrationStatus
 local registeredGroup
 
-local function UpdateEvents()
+local function UpdateEvents(event)
 
 	local isGrouped = IsUnitGrouped("player")
-	local ava = IsPlayerInAvAWorld()
+	local ava = IsPlayerInAvAWorld() or IsActiveWorldBattleground()
 
 	local IsLightMode = db.lightmode or (db.lightmodeincyrodil and ava == true)
 	local isOff = ava == true and db.offincyrodil == true
@@ -1840,7 +2197,7 @@ local function UpdateEvents()
 
 		if newstatus == CMX_STATUS_DISABLED then
 
-			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_BOSSHP do
+			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_PERFORMANCE do
 				LC:UnregisterCallbackType(i, AddToLog, CMX.name)
 			end
 
@@ -1850,7 +2207,7 @@ local function UpdateEvents()
 
 		elseif newstatus == CMX_STATUS_LIGHTMODE then
 
-			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_BOSSHP do
+			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_PERFORMANCE do
 				LC:UnregisterCallbackType(i, AddToLog, CMX.name)
 			end
 
@@ -1861,7 +2218,7 @@ local function UpdateEvents()
 
 		elseif newstatus == CMX_STATUS_ENABLED then
 
-			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_BOSSHP do
+			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_PERFORMANCE do
 
 				LC:RegisterCallbackType(i, AddToLog ,CMX.name)
 
@@ -1889,7 +2246,7 @@ local function UpdateEvents()
 		registeredGroup = false
 	end
 
-	Print("special", "State: %d, Group: %s", registrationStatus or 0, tostring(registeredGroup or false))
+	Print("group", LOG_LEVEL_DEBUG, "State: %d, Group: %s", registrationStatus or 0, tostring(registeredGroup or false))
 end
 
 do
@@ -2024,7 +2381,7 @@ local svdefaults = {
 	["NotificationAllowed"] = true,
 	["ForceNotification"] = false,	-- for dev use
 
-	["CombatMetrics_LiveReport"] = { x = 0, y = -500},
+	["CombatMetrics_LiveReport"] = { x = 700, y = 500},
 	["CombatMetrics_Report"] = { x = GuiRoot:GetWidth()/2, y = GuiRoot:GetHeight()/2-75},
 
 	["FightReport"] = {
@@ -2125,21 +2482,6 @@ local svdefaults = {
 		["healingIn"] 	= false,
 
 	},
-
-	["debuginfo"] = {
-
-		["fightsummary"] 	= false,
-		["ids"] 			= false,
-		["calculationtime"] = false,
-		["buffs"] 			= false,
-		["skills"] 			= false,
-		["group"] 			= false,
-		["misc"] 			= false,
-		["special"] 		= false,
-		["save"] 			= false,
-		["dev"] 			= false,
-
-	},
 }
 
 -- Next we create a function that will initialize our addon
@@ -2234,8 +2576,7 @@ local function Initialize(event, addon)
 	CMX.InitializeUI()
 
 	em:RegisterForEvent(CMX.name.."zone", EVENT_ZONE_CHANGED, UpdateEvents)
-	em:RegisterForEvent(CMX.name.."group1", EVENT_UNIT_CREATED, UpdateEvents)
-	em:RegisterForEvent(CMX.name.."group2", EVENT_UNIT_DESTROYED, UpdateEvents)
+	em:RegisterForEvent(CMX.name.."group1", EVENT_GROUP_UPDATE, UpdateEvents)
 	em:RegisterForEvent(CMX.name.."port", EVENT_PLAYER_ACTIVATED, UpdateEvents)
 
 	CMX.UpdateEvents = UpdateEvents
@@ -2263,14 +2604,13 @@ local function Initialize(event, addon)
 
 	if GetDisplayName() == "@Solinur" then db.NotificationRead = 0 end -- for dev purposes
 
-	CMX.init = true	
+	CMX.init = true
 
 	if LibFeedback == nil then
 
-		assert(false, "Combat Metrics: LibFeedback not found! Make sure LibFeedback version 1.32 or higher is installed.") 
+		Print("main", LOG_LEVEL_ERROR, "LibFeedback not found! Make sure the latest version is installed.")
 
 	end
-
 end
 
 -- register event handler function to initialize when addon is loaded

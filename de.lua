@@ -98,201 +98,200 @@ SafeAddString(SI_COMBAT_METRICS_FEEDBACK, "Feedback / Spenden senden", 1)
 
 -- Graph
 
---SafeAddString(SI_COMBAT_METRICS_TOGGLE_CURSOR, "Toggle to show cursor and value tooltip", 1)
---SafeAddString(SI_COMBAT_METRICS_GRAPH_BUFF_GROUP_SELECTOR, "Toggle to show group uptime", 1)
+SafeAddString(SI_COMBAT_METRICS_TOGGLE_CURSOR, "Cursor und Tooltip ein-/ausschalten", 1)
+SafeAddString(SI_COMBAT_METRICS_GRAPH_BUFF_GROUP_SELECTOR, "Gruppen/Solo Modus für Buffs", 1)
 
---SafeAddString(SI_COMBAT_METRICS_RECALCULATE, "Recalculate Fight", 1)
---SafeAddString(SI_COMBAT_METRICS_SMOOTHED, "Smoothed", 1)
---SafeAddString(SI_COMBAT_METRICS_TOTAL, "Total", 1)
---SafeAddString(SI_COMBAT_METRICS_ABSOLUTE, "Absolute %", 1)
---SafeAddString(SI_COMBAT_METRICS_SMOOTH_LABEL, "Smooth: %d s", 1)
---SafeAddString(SI_COMBAT_METRICS_NONE, "None", 1)
---SafeAddString(SI_COMBAT_METRICS_BOSS_HP, "Boss HP", 1)
---SafeAddString(SI_COMBAT_METRICS_ENLARGE, "Enlarge", 1)
---SafeAddString(SI_COMBAT_METRICS_SHRINK, "Shrink", 1)
+SafeAddString(SI_COMBAT_METRICS_RECALCULATE, "Kampf neu berechnen", 1)
+SafeAddString(SI_COMBAT_METRICS_SMOOTHED, "Geglättet", 1)
+SafeAddString(SI_COMBAT_METRICS_TOTAL, "Gesamt", 1)
+SafeAddString(SI_COMBAT_METRICS_ABSOLUTE, "Absolut %", 1)
+SafeAddString(SI_COMBAT_METRICS_SMOOTH_LABEL, "Glätten: %d s", 1)
+SafeAddString(SI_COMBAT_METRICS_NONE, "Aus", 1)
+SafeAddString(SI_COMBAT_METRICS_BOSS_HP, "Boss HP", 1)
+SafeAddString(SI_COMBAT_METRICS_ENLARGE, "Maximieren", 1)
+SafeAddString(SI_COMBAT_METRICS_SHRINK, "Minimieren", 1)
 
 -- Feedback
 
---SafeAddString(SI_COMBAT_METRICS_FEEDBACK_MAIL, "Send Mail", 1)
---SafeAddString(SI_COMBAT_METRICS_FEEDBACK_GOLD, "Donate 5000g", 1)
---SafeAddString(SI_COMBAT_METRICS_FEEDBACK_GOLD2, "Donate 25000g", 1)
---SafeAddString(SI_COMBAT_METRICS_FEEDBACK_ESOUI, "Site (ESOUI)", 1)
---SafeAddString(SI_COMBAT_METRICS_FEEDBACK_GITHUB, "GitHub", 1)
---SafeAddString(SI_COMBAT_METRICS_FEEDBACK_TEXT, "\nIf you found a bug, have a request or a suggestion, send an ingame mail, create an issue on GitHub or post it in the comments on EsoUI. \n\nDonations are appreciated but not required or necessary. \nIf you want to donate real money please visit the addon site on EsoUI", 1)
+SafeAddString(SI_COMBAT_METRICS_FEEDBACK_MAIL, "Nachricht senden", 1)
+SafeAddString(SI_COMBAT_METRICS_FEEDBACK_GOLD, "5000g spenden", 1)
+SafeAddString(SI_COMBAT_METRICS_FEEDBACK_GOLD2, "25000g spenden", 1)
+SafeAddString(SI_COMBAT_METRICS_FEEDBACK_ESOUI, "Webseite (ESOUI)", 1)
+SafeAddString(SI_COMBAT_METRICS_FEEDBACK_GITHUB, "GitHub", 1)
+SafeAddString(SI_COMBAT_METRICS_FEEDBACK_TEXT, "\nFalls du einen Bug melden willst, einen Vorschlag oder eine Frage hast, sende eine Nachricht, erstelle eine Meldung auf Github oder schreibe in die Kommentare auf ESOUI. \n\nSpenden werden gern entgegen genommen, werden aber nicht dringend gebraucht. \nFalls du mir nen Kaffee oder ein Bier ausgeben möchtest kannst du auf der ESOUI-Seite über Paypal spenden.", 1)
 
---SafeAddString(SI_COMBAT_METRICS_STORAGE_FULL, "The storage file is full. The fight you want to save needs <<1>> MB. Delete a fight to free some space or increase the allowed space in the settings!", 1)
+SafeAddString(SI_COMBAT_METRICS_STORAGE_FULL, "Der Datenspeicher ist voll. Der Kampf, den du speichern möchtest benötigt <<1>> MB. Lösche einen Kampf oder Kampflog, um Platz zu schaffen oder erhöhe die erlaubte Größe des Speichers in den Einstellungen.", 1)
 
 -- Fight Control Button Tooltips
 
---SafeAddString(SI_COMBAT_METRICS_PREVIOUS_FIGHT, "Previous Fight", 1)
---SafeAddString(SI_COMBAT_METRICS_NEXT_FIGHT, "Next Fight", 1)
---SafeAddString(SI_COMBAT_METRICS_MOST_RECENT_FIGHT, "Most Recent Fight", 1)
---SafeAddString(SI_COMBAT_METRICS_LOAD_FIGHT, "Load Fight", 1)
---SafeAddString(SI_COMBAT_METRICS_SAVE_FIGHT, "Click: Save fight", 1)
---SafeAddString(SI_COMBAT_METRICS_SAVE_FIGHT2, "Shift+Click: Save fight with combat log", 1)
---SafeAddString(SI_COMBAT_METRICS_DELETE_COMBAT_LOG, "Delete Combat Log", 1)
---SafeAddString(SI_COMBAT_METRICS_DELETE_FIGHT, "Delete Fight", 1)
+SafeAddString(SI_COMBAT_METRICS_PREVIOUS_FIGHT, "Vorheriger Kampf", 1)
+SafeAddString(SI_COMBAT_METRICS_NEXT_FIGHT, "Nächster Kampf", 1)
+SafeAddString(SI_COMBAT_METRICS_MOST_RECENT_FIGHT, "Letzter Kampf", 1)
+SafeAddString(SI_COMBAT_METRICS_LOAD_FIGHT, "Kampf laden", 1)
+SafeAddString(SI_COMBAT_METRICS_SAVE_FIGHT, "Klick: Kampf speichern", 1)
+SafeAddString(SI_COMBAT_METRICS_SAVE_FIGHT2, "Shift+Klick: Kampf inklusive Log speichern", 1)
+SafeAddString(SI_COMBAT_METRICS_DELETE_COMBAT_LOG, "Kampf Log löschen", 1)
+SafeAddString(SI_COMBAT_METRICS_DELETE_FIGHT, "Kampf löschen", 1)
 
 -- Fight List
 
---SafeAddString(SI_COMBAT_METRICS_RECENT_FIGHT, "Recent Fights", 1)
---SafeAddString(SI_COMBAT_METRICS_DURATION, "Duration", 1)
---SafeAddString(SI_COMBAT_METRICS_CHARACTER, "Character", 1)
---SafeAddString(SI_COMBAT_METRICS_ZONE, "Zone", 1)
---SafeAddString(SI_COMBAT_METRICS_TIME, "Time", 1)
---SafeAddString(SI_COMBAT_METRICS_TIMEC, "Time: ", 1)
+SafeAddString(SI_COMBAT_METRICS_RECENT_FIGHT, "Letzte Kämpfe", 1)
+SafeAddString(SI_COMBAT_METRICS_DURATION, "Dauer", 1)
+SafeAddString(SI_COMBAT_METRICS_CHARACTER, "Charakter", 1)
+SafeAddString(SI_COMBAT_METRICS_ZONE, "Zone", 1)
+SafeAddString(SI_COMBAT_METRICS_TIME, "Zeit", 1)
+SafeAddString(SI_COMBAT_METRICS_TIMEC, "Zeit: ", 1)
 
---SafeAddString(SI_COMBAT_METRICS_SHOW, "Show", 1)
---SafeAddString(SI_COMBAT_METRICS_DELETE, "Delete", 1)
+SafeAddString(SI_COMBAT_METRICS_SHOW, "Zeigen", 1)
+SafeAddString(SI_COMBAT_METRICS_DELETE, "Löschen", 1)
 
---SafeAddString(SI_COMBAT_METRICS_SAVED_FIGHTS, "Saved Fights", 1)
+SafeAddString(SI_COMBAT_METRICS_SAVED_FIGHTS, "Gespeicherte Kämpfe", 1)
 
 -- More UI Strings
 
---SafeAddString(SI_COMBAT_METRICS_ACTIVE_TIME, "Active Time: ", 1)
---SafeAddString(SI_COMBAT_METRICS_ZERO_SEC, "0 s", 1)
---SafeAddString(SI_COMBAT_METRICS_IN_COMBAT, "In Combat: ", 1)
+SafeAddString(SI_COMBAT_METRICS_ACTIVE_TIME, "Aktive Zeit: ", 1)
+SafeAddString(SI_COMBAT_METRICS_ZERO_SEC, "0 s", 1)
+SafeAddString(SI_COMBAT_METRICS_IN_COMBAT, "Im Kampf: ", 1)
 
---SafeAddString(SI_COMBAT_METRICS_PLAYER, "Player", 1)
+SafeAddString(SI_COMBAT_METRICS_PLAYER, "Spieler", 1)
 
---SafeAddString(SI_COMBAT_METRICS_TOTALC, " Total: ", 1)
---SafeAddString(SI_COMBAT_METRICS_NORMAL, "Normal: ", 1)
---SafeAddString(SI_COMBAT_METRICS_CRITICAL, "Critical: ", 1)
---SafeAddString(SI_COMBAT_METRICS_BLOCKED, "Blocked: ", 1)
---SafeAddString(SI_COMBAT_METRICS_SHIELDED, "Shielded: ", 1)
---SafeAddString(SI_COMBAT_METRICS_ABSOLUTEC, "Absolute: ", 1)
---SafeAddString(SI_COMBAT_METRICS_OVERHEAL, "Overheal: ", 1) -- as in overheal
+SafeAddString(SI_COMBAT_METRICS_TOTALC, " Gesamt: ", 1)
+SafeAddString(SI_COMBAT_METRICS_NORMAL, "Normal: ", 1)
+SafeAddString(SI_COMBAT_METRICS_CRITICAL, "Kritisch: ", 1)
+SafeAddString(SI_COMBAT_METRICS_BLOCKED, "Geblockt: ", 1)
+SafeAddString(SI_COMBAT_METRICS_SHIELDED, "Absorbiert: ", 1)
+SafeAddString(SI_COMBAT_METRICS_ABSOLUTEC, "Absolut: ", 1)
+SafeAddString(SI_COMBAT_METRICS_OVERHEAL, "Overheal: ", 1) -- as in overheal
 
---SafeAddString(SI_COMBAT_METRICS_HITS, "Hits", 1)
---SafeAddString(SI_COMBAT_METRICS_NORM, "Norm", 1) -- Normal, short
+SafeAddString(SI_COMBAT_METRICS_HITS, "Treffer", 1)
+SafeAddString(SI_COMBAT_METRICS_NORM, "Norm", 1) -- Normal, short
 
---SafeAddString(SI_COMBAT_METRICS_RESOURCES, "Resources", 1)
+SafeAddString(SI_COMBAT_METRICS_RESOURCES, "Ressourcen", 1)
 
---SafeAddString(SI_COMBAT_METRICS_STATS, "Stats", 1)
---SafeAddString(SI_COMBAT_METRICS_AVE, "Avg", 1) -- Average, short
---SafeAddString(SI_COMBAT_METRICS_AVE_N, "Avg N", 1) -- Average Normal, short
---SafeAddString(SI_COMBAT_METRICS_AVE_C, "Avg C", 1) -- Average Crit, short
---SafeAddString(SI_COMBAT_METRICS_AVERAGE, "Average", 1)
---SafeAddString(SI_COMBAT_METRICS_NORMAL_HITS, "Normal Hits", 1)
---SafeAddString(SI_COMBAT_METRICS_MAX, "Max", 1) -- Maximum
---SafeAddString(SI_COMBAT_METRICS_MIN, "Min", 1) -- Minimum
+SafeAddString(SI_COMBAT_METRICS_STATS, "Stats", 1)
+SafeAddString(SI_COMBAT_METRICS_AVE, "MW", 1) -- Average, short
+SafeAddString(SI_COMBAT_METRICS_AVE_N, "MW N", 1) -- Average Normal, short
+SafeAddString(SI_COMBAT_METRICS_AVE_C, "MW C", 1) -- Average Crit, short
+SafeAddString(SI_COMBAT_METRICS_AVERAGE, "Mittelwert", 1)
+SafeAddString(SI_COMBAT_METRICS_NORMAL_HITS, "Normale Treffer", 1)
+SafeAddString(SI_COMBAT_METRICS_MAX, "Max", 1) -- Maximum
+SafeAddString(SI_COMBAT_METRICS_MIN, "Min", 1) -- Minimum
 
---SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA1, "Max Magicka", 1)
---SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA2, "Spell Damage", 1)
---SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA3, "Spell Critical", 1)
---SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA_FORMAT3, "%.1f %%", 1) -- e.g. 12.3%
---SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA4, "Critical Damage", 1)
---SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA5, "Spell Penetration", 1)
---SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA6, "Overpenetration", 1)
---SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA_FORMAT6, "%.1f %%", 1) -- e.g. 12.3%
+SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA1, "Max Magicka", 1)
+SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA2, "Zauberschaden", 1)
+SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA3, "Krit. Trefferrate", 1)
+SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA_FORMAT3, "%.1f %%", 1) -- e.g. 12.3%
+SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA4, "Kritischer Schaden", 1)
+SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA5, "Zauberdurchdringung", 1)
+SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA6, "Overpenetration", 1)
+SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA_FORMAT6, "%.1f %%", 1) -- e.g. 12.3%
 
---SafeAddString(SI_COMBAT_METRICS_STATS_STAMINA1, "Max Stamina", 1)
---SafeAddString(SI_COMBAT_METRICS_STATS_STAMINA2, "Weapon Damage", 1)
---SafeAddString(SI_COMBAT_METRICS_STATS_STAMINA3, "Weapon Critical", 1)
---SafeAddString(SI_COMBAT_METRICS_STATS_STAMINA_FORMAT3, "%.1f %%", 1) -- e.g. 12.3%
---SafeAddString(SI_COMBAT_METRICS_STATS_STAMINA4, "Critical Damage", 1)
---SafeAddString(SI_COMBAT_METRICS_STATS_STAMINA5, "Phys. Penetration", 1)
---SafeAddString(SI_COMBAT_METRICS_STATS_STAMINA6, "Overpenetration", 1)
---SafeAddString(SI_COMBAT_METRICS_STATS_STAMINA_FORMAT6, "%.1f %%", 1) -- e.g. 12.3%
+SafeAddString(SI_COMBAT_METRICS_STATS_STAMINA1, "Max Stamina", 1)
+SafeAddString(SI_COMBAT_METRICS_STATS_STAMINA2, "Waffenschaden", 1)
+SafeAddString(SI_COMBAT_METRICS_STATS_STAMINA3, "Krit. Trefferrate", 1)
+SafeAddString(SI_COMBAT_METRICS_STATS_STAMINA_FORMAT3, "%.1f %%", 1) -- e.g. 12.3%
+SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA4, "Kritischer Schaden", 1)
+SafeAddString(SI_COMBAT_METRICS_STATS_STAMINA5, "Waffendurchdringung", 1)
+SafeAddString(SI_COMBAT_METRICS_STATS_STAMINA6, "Overpenetration", 1)
+SafeAddString(SI_COMBAT_METRICS_STATS_STAMINA_FORMAT6, "%.1f %%", 1) -- e.g. 12.3%
 
---SafeAddString(SI_COMBAT_METRICS_STATS_HEALTH1, "Max Health", 1)
---SafeAddString(SI_COMBAT_METRICS_STATS_HEALTH2, "Physical Resist.", 1)
---SafeAddString(SI_COMBAT_METRICS_STATS_HEALTH3, "Spell Resistance", 1)
---SafeAddString(SI_COMBAT_METRICS_STATS_HEALTH4, "Critical Resist.", 1)
---SafeAddString(SI_COMBAT_METRICS_STATS_HEALTH_FORMAT4, "%.1f %%", 1) -- e.g. 12.3%
+SafeAddString(SI_COMBAT_METRICS_STATS_HEALTH1, "Max Leben", 1)
+SafeAddString(SI_COMBAT_METRICS_STATS_HEALTH2, "Waffenresistenz", 1)
+SafeAddString(SI_COMBAT_METRICS_STATS_HEALTH3, "Zauberresistenz", 1)
+SafeAddString(SI_COMBAT_METRICS_STATS_HEALTH4, "Kritische Resistenz", 1)
+SafeAddString(SI_COMBAT_METRICS_STATS_HEALTH_FORMAT4, "%.1f %%", 1) -- e.g. 12.3%
 
---SafeAddString(SI_COMBAT_METRICS_PENETRATION_TT, "Penetration: Damage", 1)
+SafeAddString(SI_COMBAT_METRICS_PENETRATION_TT, "Durchdringung: Schaden", 1)
 
---SafeAddString(SI_COMBAT_METRICS_COMBAT_LOG, "Combat Log", 1)
+SafeAddString(SI_COMBAT_METRICS_COMBAT_LOG, "Kampf Log", 1)
 
---SafeAddString(SI_COMBAT_METRICS_GOTO_PREVIOUS, "Go to previous page", 1)
---SafeAddString(SI_COMBAT_METRICS_PAGE, "Go to page <<1>>", 1) -- <<1>> = page number
---SafeAddString(SI_COMBAT_METRICS_GOTO_NEXT, "Go to next page", 1)
+SafeAddString(SI_COMBAT_METRICS_GOTO_PREVIOUS, "Vorherige Seite", 1)
+SafeAddString(SI_COMBAT_METRICS_PAGE, "Seite <<1>>", 1) -- <<1>> = page number
+SafeAddString(SI_COMBAT_METRICS_GOTO_NEXT, "Nächste Seite", 1)
 
---SafeAddString(SI_COMBAT_METRICS_TOGGLE_HEAL, "Toggle received healing events", 1)
---SafeAddString(SI_COMBAT_METRICS_TOGGLE_DAMAGE, "Toggle received damage events", 1)
+SafeAddString(SI_COMBAT_METRICS_TOGGLE_HEAL, "Erhaltene Heilung: ein/aus", 1)
+SafeAddString(SI_COMBAT_METRICS_TOGGLE_DAMAGE, "Erhaltener Schaden: ein/aus", 1)
+SafeAddString(SI_COMBAT_METRICS_TOGGLE_YOUR_HEAL, "Gewirkte Heilung: ein/aus", 1)
+SafeAddString(SI_COMBAT_METRICS_TOGGLE_YOUR_DAMAGE, "Erzielter Schaden: ein/aus", 1)
 
---SafeAddString(SI_COMBAT_METRICS_TOGGLE_YOUR_HEAL, "Toggle your healing events", 1)
---SafeAddString(SI_COMBAT_METRICS_TOGGLE_YOUR_DAMAGE, "Toggle your damage events", 1)
-
---SafeAddString(SI_COMBAT_METRICS_TOGGLE_BUFFIN_EVENTS, "Toggle incoming buff events", 1)
---SafeAddString(SI_COMBAT_METRICS_TOGGLE_BUFFOUT_EVENTS, "Toggle outbound buff events", 1)
---SafeAddString(SI_COMBAT_METRICS_TOGGLE_GROUPBUFFIN_EVENTS, "Toggle incoming groupbuff events", 1)
---SafeAddString(SI_COMBAT_METRICS_TOGGLE_GROUPBUFFOUT_EVENTS, "Toggle outbound groupbuff events", 1)
---SafeAddString(SI_COMBAT_METRICS_TOGGLE_RESOURCE_EVENTS, "Toggle resource events", 1)
---SafeAddString(SI_COMBAT_METRICS_TOGGLE_STATS_CHANGE_EVENTS, "Toggle stats change events", 1)
---SafeAddString(SI_COMBAT_METRICS_TOGGLE_MESSAGE_CHANGE_EVENTS, "Toggle info events (e.g. weapon swap)", 1)
---SafeAddString(SI_COMBAT_METRICS_TOGGLE_SKILL_USE_EVENTS, "Toggle used skills events", 1)
+SafeAddString(SI_COMBAT_METRICS_TOGGLE_BUFFIN_EVENTS, "Erhaltene Buffs: ein/aus", 1)
+SafeAddString(SI_COMBAT_METRICS_TOGGLE_BUFFOUT_EVENTS, "Gewirkte Buffs: ein/aus", 1)
+SafeAddString(SI_COMBAT_METRICS_TOGGLE_GROUPBUFFIN_EVENTS, "Erhaltene Buffs der Gruppe: ein/aus", 1)
+SafeAddString(SI_COMBAT_METRICS_TOGGLE_GROUPBUFFOUT_EVENTS, "Gewirkte Buffs der Gruppe: ein/aus", 1)
+SafeAddString(SI_COMBAT_METRICS_TOGGLE_RESOURCE_EVENTS, "Ressourcen: ein/aus", 1)
+SafeAddString(SI_COMBAT_METRICS_TOGGLE_STATS_CHANGE_EVENTS, "Änderungen der Charakterwerte: ein/aus", 1)
+SafeAddString(SI_COMBAT_METRICS_TOGGLE_MESSAGE_CHANGE_EVENTS, "Infor Events (z.B. Waffenwechsel): ein/aus", 1)
+SafeAddString(SI_COMBAT_METRICS_TOGGLE_SKILL_USE_EVENTS, "Benutzte Fertigkeiten: ein/aus", 1)
 
 -- \n = new line
 
---SafeAddString(SI_COMBAT_METRICS_DEBUFF_IN, "(De-)Buffs\nIn", 1)
---SafeAddString(SI_COMBAT_METRICS_DEBUFF_OUT, "(De-)Buffs\nOut", 1)
---SafeAddString(SI_COMBAT_METRICS_MAGICKA_PM, "Magicka\n +/-", 1)
---SafeAddString(SI_COMBAT_METRICS_STAMINA_PM, "Stamina\n +/-", 1)
---SafeAddString(SI_COMBAT_METRICS_RESOURCES_PM, "Resources\n +/-", 1)
+SafeAddString(SI_COMBAT_METRICS_DEBUFF_IN, "(De-)Buffs\n erhalten", 1)
+SafeAddString(SI_COMBAT_METRICS_DEBUFF_OUT, "(De-)Buffs\n gewirkt", 1)
+SafeAddString(SI_COMBAT_METRICS_MAGICKA_PM, "Magicka\n +/-", 1)
+SafeAddString(SI_COMBAT_METRICS_STAMINA_PM, "Stamina\n +/-", 1)
+SafeAddString(SI_COMBAT_METRICS_RESOURCES_PM, "Ressourcen\n +/-", 1)
 
---SafeAddString(SI_COMBAT_METRICS_BUFF, "Buff", 1)
---SafeAddString(SI_COMBAT_METRICS_BUFFS, "Buffs", 1)
---SafeAddString(SI_COMBAT_METRICS_DEBUFFS, "Debuffs", 1)
---SafeAddString(SI_COMBAT_METRICS_SHARP, "#", 1)
---SafeAddString(SI_COMBAT_METRICS_BUFFCOUNT_TT, "Player / Overall", 1)
---SafeAddString(SI_COMBAT_METRICS_UPTIME, "Uptime", 1)
---SafeAddString(SI_COMBAT_METRICS_UPTIME_TT, "Player % / Overall %", 1)
+SafeAddString(SI_COMBAT_METRICS_BUFF, "Buff", 1)
+SafeAddString(SI_COMBAT_METRICS_BUFFS, "Buffs", 1)
+SafeAddString(SI_COMBAT_METRICS_DEBUFFS, "Debuffs", 1)
+SafeAddString(SI_COMBAT_METRICS_SHARP, "#", 1)
+SafeAddString(SI_COMBAT_METRICS_BUFFCOUNT_TT, "Spieler / Gesamt", 1)
+SafeAddString(SI_COMBAT_METRICS_UPTIME, "Uptime", 1)
+SafeAddString(SI_COMBAT_METRICS_UPTIME_TT, "Spieler % / Gesamt %", 1)
 
---SafeAddString(SI_COMBAT_METRICS_REGENERATION, "Regeneration", 1)
---SafeAddString(SI_COMBAT_METRICS_CONSUMPTION, "Consumption", 1)
---SafeAddString(SI_COMBAT_METRICS_PM_SEC, "±/s", 1)
---SafeAddString(SI_COMBAT_METRICS_TARGET, "Target", 1)
---SafeAddString(SI_COMBAT_METRICS_PERCENT, "%", 1)
---SafeAddString(SI_COMBAT_METRICS_UNITDPS_TT, "Real DPS, e.g. the damage per second between your first and your last hit to that target", 1)
+SafeAddString(SI_COMBAT_METRICS_REGENERATION, "Regeneration", 1)
+SafeAddString(SI_COMBAT_METRICS_CONSUMPTION, "Verbrauch", 1)
+SafeAddString(SI_COMBAT_METRICS_PM_SEC, "±/s", 1)
+SafeAddString(SI_COMBAT_METRICS_TARGET, "Ziel", 1)
+SafeAddString(SI_COMBAT_METRICS_PERCENT, "%", 1)
+SafeAddString(SI_COMBAT_METRICS_UNITDPS_TT, "Reale DPS, also der Schaden pro Sekunde zwischen dem ersten und letzten Treffer auf das Ziel", 1)
 
---SafeAddString(SI_COMBAT_METRICS_ABILITY, "Ability", 1)
---SafeAddString(SI_COMBAT_METRICS_PER_HITS, "/Hits", 1)
---SafeAddString(SI_COMBAT_METRICS_CRITS_PER, "Crit %", 1)
+SafeAddString(SI_COMBAT_METRICS_ABILITY, "Fähigkeit", 1)
+SafeAddString(SI_COMBAT_METRICS_PER_HITS, "/Treffer", 1)
+SafeAddString(SI_COMBAT_METRICS_CRITS_PER, "Krit. %", 1)
 
---SafeAddString(SI_COMBAT_METRICS_FAVOURITE_ADD, "Add to Favourites", 1)
---SafeAddString(SI_COMBAT_METRICS_FAVOURITE_REMOVE, "Remove from Favourites", 1)
+SafeAddString(SI_COMBAT_METRICS_FAVOURITE_ADD, "Zu Favouriten hinzufügen", 1)
+SafeAddString(SI_COMBAT_METRICS_FAVOURITE_REMOVE, "Aus Favouriten entfernen", 1)
 
---SafeAddString(SI_COMBAT_METRICS_SKILL, "Skill", 1)
+SafeAddString(SI_COMBAT_METRICS_SKILL, "Fertigkeit", 1)
 
---SafeAddString(SI_COMBAT_METRICS_BAR, "Bar ", 1)
---SafeAddString(SI_COMBAT_METRICS_AVERAGEC, "Average: ", 1)
+SafeAddString(SI_COMBAT_METRICS_BAR, "Leiste ", 1)
+SafeAddString(SI_COMBAT_METRICS_AVERAGEC, "Mittelwert: ", 1)
 
---SafeAddString(SI_COMBAT_METRICS_SKILLTIME_LABEL2, "< W / S", 1) -- as in "Weapon / Skill"
---SafeAddString(SI_COMBAT_METRICS_SKILLTIME_LABEL3, "W / S >", 1)
+SafeAddString(SI_COMBAT_METRICS_SKILLTIME_LABEL2, "< W / F", 1) -- as in "Weapon / Skill"
+SafeAddString(SI_COMBAT_METRICS_SKILLTIME_LABEL3, "W / F >", 1)
 
---SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT1, "Number of casts of this skill", 1)
---SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT2, "Time since the last weapon/skill activation and the ability activation.", 1)
---SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT3, "Time between the ability activation and the next weapon/skill activation.", 1)
---SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT4, "Average time between subsequent activations of this skill", 1)
+SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT1, "Anzahl der Nutzungen", 1)
+SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT2, "Zeit zwischen der letzten Aktivierung von Waffe/Fertigkeit und dieser Fertigkeit.", 1)
+SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT3, "Zeit zwischen der letzten Aktivierung dieser Fertigkeit und dem folgenden Einsatz von einer Waffe/Fertigkeit.", 1)
+SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT4, "Durchschnittliche Zeit zwischen zwei Aktivierungen dieser Fertigkeit", 1)
 
---SafeAddString(SI_COMBAT_METRICS_SAVED_DATA, "Saved Data", 1)
+SafeAddString(SI_COMBAT_METRICS_SAVED_DATA, "Gespeicherte Daten", 1)
 
 -- Live Report Window
 
---SafeAddString(SI_COMBAT_METRICS_SHOW_XPS, "<<1>> / <<2>> (<<3>>%)", 1) -- Format to show DPS/HPS. <<1>> = own value, <<2>> = group value, <<3>> = percentage
+SafeAddString(SI_COMBAT_METRICS_SHOW_XPS, "<<1>> / <<2>> (<<3>>%)", 1) -- Format to show DPS/HPS. <<1>> = own value, <<2>> = group value, <<3>> = percentage
 
 -- Settings Menu
 
---SafeAddString(SI_COMBAT_METRICS_MENU_PROFILES, "Profiles", 1)
+SafeAddString(SI_COMBAT_METRICS_MENU_PROFILES, "Profile", 1)
 
---SafeAddString(SI_COMBAT_METRICS_MENU_AC_NAME, "Use accountwide settings", 1)
---SafeAddString(SI_COMBAT_METRICS_MENU_AC_TOOLTIP, "If enabled all chars of an account will share their settings", 1)
+SafeAddString(SI_COMBAT_METRICS_MENU_AC_NAME, "Konto-weite Einstellungen", 1)
+SafeAddString(SI_COMBAT_METRICS_MENU_AC_TOOLTIP, "Wenn aktiviert, teilen alle Charaktere eines Kontos die Einstellungen", 1)
 
---SafeAddString(SI_COMBAT_METRICS_MENU_GS_NAME, "General Settings", 1)
+SafeAddString(SI_COMBAT_METRICS_MENU_GS_NAME, "Allgemeine Einstellungen", 1)
 
---SafeAddString(SI_COMBAT_METRICS_MENU_FH_NAME, "Fight History", 1)
---SafeAddString(SI_COMBAT_METRICS_MENU_FH_TOOLTIP, "Number of recent fights to save", 1)
+SafeAddString(SI_COMBAT_METRICS_MENU_FH_NAME, "Kampfverlauf", 1)
+SafeAddString(SI_COMBAT_METRICS_MENU_FH_TOOLTIP, "Anzahl der letzen Kämpfe, die angezeigt werden", 1)
 
---SafeAddString(SI_COMBAT_METRICS_MENU_SVSIZE_NAME, "Saved Fight Memory", 1)
---SafeAddString(SI_COMBAT_METRICS_MENU_SVSIZE_TOOLTIP, "Maximum memory size for saved fights in MB", 1)
---SafeAddString(SI_COMBAT_METRICS_MENU_SVSIZE_WARNING, "Use with caution! Lots of saved data significantly increase loading times. If the file gets too large, the client might crash when attempting to load it.", 1)
+SafeAddString(SI_COMBAT_METRICS_MENU_SVSIZE_NAME, "Datenspeicher für Kämpfe", 1)
+SafeAddString(SI_COMBAT_METRICS_MENU_SVSIZE_TOOLTIP, "Maximale Größe des Datenspeichers für Kämpfe in MB", 1)
+SafeAddString(SI_COMBAT_METRICS_MENU_SVSIZE_WARNING, "Mit Vorsicht benutzen! Viele gespeicherte Daten führen zu deutlich längeren Ladezeiten beim einloggen. In Extremfällen kann das Spiel dabei sogar abstürzen.", 1)
 
---SafeAddString(SI_COMBAT_METRICS_MENU_BOSSFIGHTS_NAME, "Keep Boss Fights", 1)
---SafeAddString(SI_COMBAT_METRICS_MENU_BOSSFIGHTS_TOOLTIP, "Delete trash fights first before deleting boss fights when limit of fights is reached", 1)
+SafeAddString(SI_COMBAT_METRICS_MENU_BOSSFIGHTS_NAME, "Bosskämpfe erhalten", 1)
+SafeAddString(SI_COMBAT_METRICS_MENU_BOSSFIGHTS_TOOLTIP, "Bosskämpfe im Verlauf bevorzugt behalten wenn die maximale Zahl an Kämpfen im Verlauf erreicht ist.", 1)
 
---SafeAddString(SI_COMBAT_METRICS_MENU_MG_NAME, "Monitor Group Damage", 1)
+SafeAddString(SI_COMBAT_METRICS_MENU_MG_NAME, "Schaden der Gruppe ermitteln", 1)
 --SafeAddString(SI_COMBAT_METRICS_MENU_MG_TOOLTIP, "Monitor the events of the whole group", 1)
 
 --SafeAddString(SI_COMBAT_METRICS_MENU_STACKS_NAME, "Show stacks of buffs", 1)
@@ -368,26 +367,6 @@ SafeAddString(SI_COMBAT_METRICS_FEEDBACK, "Feedback / Spenden senden", 1)
 --SafeAddString(SI_COMBAT_METRICS_MENU_CHAT_SID_TOOLTIP, "Show damage you receive in chat stream", 1)
 --SafeAddString(SI_COMBAT_METRICS_MENU_CHAT_SIH_NAME, "Show Incoming heal", 1)
 --SafeAddString(SI_COMBAT_METRICS_MENU_CHAT_SIH_TOOLTIP, "Show heals you receive in chat stream", 1)
-
---SafeAddString(SI_COMBAT_METRICS_MENU_DEBUG_TITLE, "Debug options", 1)
---SafeAddString(SI_COMBAT_METRICS_MENU_DEBUG_SF_NAME, "Show Fight Recap", 1)
---SafeAddString(SI_COMBAT_METRICS_MENU_DEBUG_SF_TOOLTIP, "Print Combat Results to the system chat window", 1)
---SafeAddString(SI_COMBAT_METRICS_MENU_DEBUG_SA_NAME, "Show ability IDs", 1)
---SafeAddString(SI_COMBAT_METRICS_MENU_DEBUG_SA_TOOLTIP, "Show ability ids in the fight report window", 1)
---SafeAddString(SI_COMBAT_METRICS_MENU_DEBUG_SFC_NAME, "Show Fight Calculation Info", 1)
---SafeAddString(SI_COMBAT_METRICS_MENU_DEBUG_SFC_TOOLTIP, "Print Info about the calculation timings to the system chat window", 1)
---SafeAddString(SI_COMBAT_METRICS_MENU_DEBUG_BI_NAME, "Show Buff Info", 1)
---SafeAddString(SI_COMBAT_METRICS_MENU_DEBUG_BI_TOOLTIP, " Print Buff events to the system chat window (Spammy)", 1)
---SafeAddString(SI_COMBAT_METRICS_MENU_DEBUG_US_NAME, "Show used Skill Info", 1)
---SafeAddString(SI_COMBAT_METRICS_MENU_DEBUG_US_TOOLTIP, "Print used skill events to the system chat window", 1)
---SafeAddString(SI_COMBAT_METRICS_MENU_DEBUG_SG_NAME, "Show group Info", 1)
---SafeAddString(SI_COMBAT_METRICS_MENU_DEBUG_SG_TOOLTIP, "Print group joining and leave events to the system chat window", 1)
---SafeAddString(SI_COMBAT_METRICS_MENU_DEBUG_MD_NAME, "Show miscellaneous debug Info", 1)
---SafeAddString(SI_COMBAT_METRICS_MENU_DEBUG_MD_TOOLTIP, "Print some other events to the system chat window", 1)
---SafeAddString(SI_COMBAT_METRICS_MENU_DEBUG_SPECIAL_NAME, "Show special debug Info", 1)
---SafeAddString(SI_COMBAT_METRICS_MENU_DEBUG_SPECIAL_TOOLTIP, "Print certain special events to the system chat window", 1)
---SafeAddString(SI_COMBAT_METRICS_MENU_DEBUG_SAVE_NAME, "Show save data Info", 1)
---SafeAddString(SI_COMBAT_METRICS_MENU_DEBUG_SAVE_TOOLTIP, "Print debug info about saved and loaded fights to the system chat window", 1)
 
 -- make a label for keybinding
 

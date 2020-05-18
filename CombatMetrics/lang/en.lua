@@ -138,7 +138,7 @@
 	SI_COMBAT_METRICS_FEEDBACK_GOLD2 = "Donate 25000g",
 	SI_COMBAT_METRICS_FEEDBACK_ESOUI = "Site (ESOUI)",
 	SI_COMBAT_METRICS_FEEDBACK_GITHUB = "GitHub",
-	SI_COMBAT_METRICS_FEEDBACK_TEXT = "\nIf you found a bug, have a request or a suggestion, send an ingame mail, create an issue on GitHub or post it in the comments on EsoUI. \n\nDonations are appreciated but not required or necessary. \nIf you want to donate real money please visit the addon site on EsoUI",
+	SI_COMBAT_METRICS_FEEDBACK_TEXT = "\nIf you found a bug, have a request or a suggestion, send an ingame mail, create an issue on GitHub or post it in the comments on EsoUI. \n\nDonations are gladly accepted, but are not urgently needed. \nIf you want to buy me a coffee or a beer you can donate via Paypal on the ESOUI page.",
 
 	SI_COMBAT_METRICS_STORAGE_FULL = "The storage file is full. The fight you want to save needs <<1>> MB. Delete a fight to free some space or increase the allowed space in the settings!",
 
@@ -224,6 +224,13 @@
 	SI_COMBAT_METRICS_STATS_HEALTH4 = "Critical Resist.",
 	SI_COMBAT_METRICS_STATS_HEALTH_FORMAT4 = "%.1f %%",-- e.g. 12.3%
 
+	SI_COMBAT_METRICS_PERFORMANCE = "Performance",
+	SI_COMBAT_METRICS_PERFORMANCE_FPSAVG = "Average FPS",
+	SI_COMBAT_METRICS_PERFORMANCE_FPSMIN = "Minimum FPS",
+	SI_COMBAT_METRICS_PERFORMANCE_FPSMAX = "Maximum FPS",
+	SI_COMBAT_METRICS_PERFORMANCE_FPSPING = "Ping",
+	SI_COMBAT_METRICS_PERFORMANCE_DESYNC = "Skill Desync",
+
 	SI_COMBAT_METRICS_PENETRATION_TT = "Penetration: Damage",
 
 	SI_COMBAT_METRICS_COMBAT_LOG = "Combat Log",
@@ -246,8 +253,9 @@
 	SI_COMBAT_METRICS_TOGGLE_STATS_CHANGE_EVENTS = "Toggle stats change events",
 	SI_COMBAT_METRICS_TOGGLE_MESSAGE_CHANGE_EVENTS = "Toggle info events (e.g. weapon swap)",
 	SI_COMBAT_METRICS_TOGGLE_SKILL_USE_EVENTS = "Toggle used skills events",
+	SI_COMBAT_METRICS_TOGGLE_PERFORMANCE_EVENTS = "Toggle performance info",
 
-														-- \n = new line
+	-- \n = new line
 
 	SI_COMBAT_METRICS_DEBUFF_IN = "(De-)Buffs\nIn",
 	SI_COMBAT_METRICS_DEBUFF_OUT = "(De-)Buffs\nOut",
@@ -260,7 +268,7 @@
 	SI_COMBAT_METRICS_DEBUFFS = "Debuffs",
 	SI_COMBAT_METRICS_SHARP = "#",
 	SI_COMBAT_METRICS_BUFFCOUNT_TT = "Player / Overall",
-	SI_COMBAT_METRICS_UPTIME = "Uptime",
+	SI_COMBAT_METRICS_UPTIME = "Uptime %",
 	SI_COMBAT_METRICS_UPTIME_TT = "Player % / Overall %",
 
 	SI_COMBAT_METRICS_REGENERATION = "Regeneration",
@@ -276,6 +284,9 @@
 
 	SI_COMBAT_METRICS_FAVOURITE_ADD = "Add to Favourites",
 	SI_COMBAT_METRICS_FAVOURITE_REMOVE = "Remove from Favourites",
+
+	SI_COMBAT_METRICS_UNCOLLAPSE = "Show Details",
+	SI_COMBAT_METRICS_COLLAPSE = "Collapse",
 
 	SI_COMBAT_METRICS_SKILL = "Skill",
 
@@ -335,11 +346,11 @@
 	SI_COMBAT_METRICS_MENU_LM_NAME = "Light Mode",
 	SI_COMBAT_METRICS_MENU_LM_TOOLTIP = "When in light mode, combat metrics will only calculate the DPS/HPS in the live report window. No statistics will be calculated and the fight report window will be disabled",
 
-	SI_COMBAT_METRICS_MENU_NOPVP_NAME = "Turn off in Cyrodil",
-	SI_COMBAT_METRICS_MENU_NOPVP_TOOLTIP = "Turns all fight logging off in Cyrodil",
+	SI_COMBAT_METRICS_MENU_NOPVP_NAME = "Turn off in PvP",
+	SI_COMBAT_METRICS_MENU_NOPVP_TOOLTIP = "Turns all fight logging off in Cyrodil and Battlegrounds",
 
-	SI_COMBAT_METRICS_MENU_LMPVP_NAME = "Light Mode in Cyrodil",
-	SI_COMBAT_METRICS_MENU_LMPVP_TOOLTIP = "Swiches to light mode in Cyrodil. When in light mode, Combat Metrics will only calculate the DPS/HPS in the live report window. No statistics will be calculated and the fight report window will be disabled",
+	SI_COMBAT_METRICS_MENU_LMPVP_NAME = "Light Mode in PvP",
+	SI_COMBAT_METRICS_MENU_LMPVP_TOOLTIP = "Swiches to light mode in Cyrodil and Battlegrounds. When in light mode, Combat Metrics will only calculate the DPS/HPS in the live report window. No statistics will be calculated and the fight report window will be disabled",
 
 	SI_COMBAT_METRICS_MENU_ASCC_NAME = "Auto Select Channel",
 	SI_COMBAT_METRICS_MENU_ASCC_TOOLTIP = "Automatically select the channel when posting DPS/HPS to chat. When in group the /group chat is used otherwise the /say chat.",
@@ -413,26 +424,6 @@
 	SI_COMBAT_METRICS_MENU_CHAT_SID_TOOLTIP = "Show damage you receive in chat stream",
 	SI_COMBAT_METRICS_MENU_CHAT_SIH_NAME = "Show Incoming heal",
 	SI_COMBAT_METRICS_MENU_CHAT_SIH_TOOLTIP = "Show heals you receive in chat stream",
-
-	SI_COMBAT_METRICS_MENU_DEBUG_TITLE = "Debug options",
-	SI_COMBAT_METRICS_MENU_DEBUG_SF_NAME = "Show Fight Recap",
-	SI_COMBAT_METRICS_MENU_DEBUG_SF_TOOLTIP = "Print Combat Results to the system chat window",
-	SI_COMBAT_METRICS_MENU_DEBUG_SA_NAME = "Show ability IDs",
-	SI_COMBAT_METRICS_MENU_DEBUG_SA_TOOLTIP = "Show ability ids in the fight report window",
-	SI_COMBAT_METRICS_MENU_DEBUG_SFC_NAME = "Show Fight Calculation Info",
-	SI_COMBAT_METRICS_MENU_DEBUG_SFC_TOOLTIP = "Print Info about the calculation timings to the system chat window",
-	SI_COMBAT_METRICS_MENU_DEBUG_BI_NAME = "Show Buff Info",
-	SI_COMBAT_METRICS_MENU_DEBUG_BI_TOOLTIP = " Print Buff events to the system chat window (Spammy)",
-	SI_COMBAT_METRICS_MENU_DEBUG_US_NAME = "Show used Skill Info",
-	SI_COMBAT_METRICS_MENU_DEBUG_US_TOOLTIP = "Print used skill events to the system chat window",
-	SI_COMBAT_METRICS_MENU_DEBUG_SG_NAME = "Show group Info",
-	SI_COMBAT_METRICS_MENU_DEBUG_SG_TOOLTIP = "Print group joining and leave events to the system chat window",
-	SI_COMBAT_METRICS_MENU_DEBUG_MD_NAME = "Show miscellaneous debug Info",
-	SI_COMBAT_METRICS_MENU_DEBUG_MD_TOOLTIP = "Print some other events to the system chat window",
-	SI_COMBAT_METRICS_MENU_DEBUG_SPECIAL_NAME = "Show special debug Info",
-	SI_COMBAT_METRICS_MENU_DEBUG_SPECIAL_TOOLTIP = "Print certain special events to the system chat window",
-	SI_COMBAT_METRICS_MENU_DEBUG_SAVE_NAME = "Show save data Info",
-	SI_COMBAT_METRICS_MENU_DEBUG_SAVE_TOOLTIP = "Print debug info about saved and loaded fights to the system chat window",
 
 -- make a label for keybinding
 
