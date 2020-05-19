@@ -4135,7 +4135,7 @@ local function UpdateBarPlot(plot)
 
 	local icon = plot:GetNamedChild("Icon")
 
-	icon:SetTexture(GetFormattedAbilityIcon(data.icon))
+	icon:SetTexture(GetFormattedAbilityIcon(data.iconId))
 	icon.tooltip = {buffName}
 
 	plot.bardata = bardata
@@ -5894,16 +5894,12 @@ function CMX.PostBuffUptime(fight, buffname, unitType)
 
 	-- Determine appropriate channel
 
-	local channel = db.autoselectchatchannel == false and "" or IsUnitGrouped('player') and "/p " or "/say "
+	local channel = db.autoselectchatchannel == true and (IsUnitGrouped('player') and CHAT_CHANNEL_PARTY or CHAT_CHANNEL_SAY) or nil
 
 	-- Print output to chat
 
 	local outputtext = string.format("%s%s", timedata, output)
-
-	CHAT_SYSTEM.textEntry:SetText( channel .. outputtext )
-	CHAT_SYSTEM:Maximize()
-	CHAT_SYSTEM.textEntry:Open()
-	CHAT_SYSTEM.textEntry:FadeIn()
+	StartChatInput(outputtext, channel)
 end
 
 function CMX.PosttoChat(mode, fight, UnitContextMenuUnitId)

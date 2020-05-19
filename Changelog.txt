@@ -454,3 +454,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Fixed a lua error that happened when showing Parses.
 [*] some small fixes
 [*] renamed Cyrodil options to PvP for clarification (They work for Cyrodil and BGs now)
+
+1.0.2 2,635,996 (19.05.2020) 22:14
+[*] Improved some code for posting to chat (thx @Scootworks)
+[*] Fixed missing buff/debuff Icons in graph
