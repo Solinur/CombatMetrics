@@ -1131,7 +1131,7 @@ do
 
 	local function toggleShowIds()
 
-		db.debuginfo.ids = not db.debuginfo.ids
+		db.showDebugIds = not db.showDebugIds
 		CombatMetrics_Report:Update()
 
 	end
@@ -1196,7 +1196,7 @@ do
 
 		if not upInside then return end
 
-		local showIdString = db.debuginfo.ids and SI_COMBAT_METRICS_HIDEIDS or SI_COMBAT_METRICS_SHOWIDS
+		local showIdString = db.showDebugIds and SI_COMBAT_METRICS_HIDEIDS or SI_COMBAT_METRICS_SHOWIDS
 		local showOverhealString = CMX.showOverHeal and SI_COMBAT_METRICS_HIDEOVERHEAL or SI_COMBAT_METRICS_SHOWOVERHEAL
 		local showPetString = db.FightReport.showPets and SI_COMBAT_METRICS_MENU_HIDEPETS or SI_COMBAT_METRICS_MENU_SHOWPETS_NAME
 
@@ -2133,7 +2133,7 @@ local function updateBuffPanelLegacy(panel)
 	local maxtime = math.max(fightData.activetime or 0, fightData.dpstime or 0, fightData.hpstime or 0)
 
 	local totalUnitTime = buffData.totalUnitTime or maxtime * 1000
-	local showids = db.debuginfo.ids
+	local showids = db.showDebugIds
 	local favs = db.FightReport.FavouriteBuffs
 
 	for buffName, buff in CMX.spairs(buffData["buffs"], buffSortFunction) do
@@ -2317,7 +2317,7 @@ local function updateBuffPanel(panel)
 	local maxtime = math.max(fightData.activetime or 0, fightData.dpstime or 0, fightData.hpstime or 0)
 
 	local totalUnitTime = buffData.totalUnitTime or maxtime * 1000
-	local showids = db.debuginfo.ids
+	local showids = db.showDebugIds
 	local favs = db.FightReport.FavouriteBuffs
 
 	local parentrow
@@ -2414,7 +2414,7 @@ local function updateResourceBars(panel, currentanchor, data, totalRate, selecte
 
 	local scrollchild = GetControl(panel, "PanelScrollChild")
 
-	local showids = db.debuginfo.ids
+	local showids = db.showDebugIds
 
 	for abilityId, ability in CMX.spairs(data, function(t, a, b) return t[a].value>t[b].value end) do
 
@@ -2579,7 +2579,7 @@ local function updateUnitPanel(panel)
 
 	local rightpanel = FRsettings.rightpanel
 
-	local showids = db.debuginfo.ids
+	local showids = db.showDebugIds
 
 	for unitId, unit in CMX.spairs(data.units, function(t, a, b) return t[a][totalAmountKey]>t[b][totalAmountKey] end) do -- i.e. for damageOut sort by damageOutTotal
 
@@ -2869,7 +2869,7 @@ local function updateAbilityPanel(panel)
 
 	local DPSKey = showOverHeal and "HPSAOut" or DPSstrings[category]
 
-	local showids = db.debuginfo.ids
+	local showids = db.showDebugIds
 
 	for abilityId, ability in CMX.spairs(data[category], function(t, a, b) return t[a][totalAmountKey]>t[b][totalAmountKey] end) do
 

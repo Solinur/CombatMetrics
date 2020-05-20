@@ -458,3 +458,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 1.0.2 2,635,996 (19.05.2020) 22:14
 [*] Improved some code for posting to chat (thx @Scootworks)
 [*] Fixed missing buff/debuff Icons in graph
+
+1.0.3 2,635,996 (19.05.2020) 22:14
+[*] Fixed an issue causing a lua error when previous saved vars didn't exist (e.g. new char or when they were deleted)
+[*] Fixed an issue where icons where missing in the buff panel for older fights

@@ -963,7 +963,16 @@ function CMX.GenerateSelectionStats(fight, menuItem, selections) -- this is simi
 				end
 
 				selectedbuff.effectType = buff.effectType
-				selectedbuff.iconId = selectedbuff.iconId or buff.iconId
+
+				if data.buffVersion == nil then 
+					
+					selectedbuff.icon = buff.icon 
+				
+				elseif data.buffVersion >= 2 then
+
+					selectedbuff.iconId = data.buffVersion and (selectedbuff.iconId or buff.iconId) or buff.icon
+				
+				end				
 
 				selectiondata.buffs[name] = selectedbuff
 			end
@@ -2380,6 +2389,8 @@ local svdefaults = {
 	["NotificationRead"] = 0,
 	["NotificationAllowed"] = true,
 	["ForceNotification"] = false,	-- for dev use
+
+	["showDebugIds"] = false,
 
 	["CombatMetrics_LiveReport"] = { x = 700, y = 500},
 	["CombatMetrics_Report"] = { x = GuiRoot:GetWidth()/2, y = GuiRoot:GetHeight()/2-75},
