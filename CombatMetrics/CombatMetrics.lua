@@ -28,7 +28,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.0.2"
+CMX.version = "1.0.4"
 
 -- Logger
 
@@ -1052,8 +1052,8 @@ local function IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitVa
 
 	for statkey, stattype in pairs(statlist) do
 
-		local sumkey = "sum"..statkey
-		local currentkey = "current"..statkey
+		local sumkey = ZO_CachedStrFormat("sum<<1>>", statkey)
+		local currentkey = ZO_CachedStrFormat("current<<1>>", statkey)
 
 		local currentValue = stats[currentkey]
 		local value = hitValue
@@ -1086,7 +1086,7 @@ local function IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitVa
 
 				end
 
-				local effectiveValue = currentValue + unit[resistancekey]
+				local effectiveValue = (currentValue or 0) + unit[resistancekey]
 
 				local data = unit[resistDataKey]
 
