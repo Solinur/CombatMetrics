@@ -2075,7 +2075,7 @@ local function AddToLog(logType, ...)
 
 	table.insert(CMX.currentdata.log,{logType, ...})
 
-	if db.chatLog.enabled then AddtoChatLog(...) end
+	if db.chatLog.enabled then AddtoChatLog(logType, ...) end
 end
 
 local function UnitsCallback(_, units)
