@@ -198,7 +198,7 @@ local PhysResistDebuffs = {
 	[GetFormattedAbilityName(17906)] = 2108, -- Crusher, can get changed by settings !
 	[GetFormattedAbilityName(75753)] = 3010, -- Alkosh
 
-	[GetFormattedAbilityName(100302)] = 6600, -- Piercing Spray
+	--[GetFormattedAbilityName(100302)] = 6600, -- Piercing Spray
 
 	--Corrosive Armor ignores all resistance
 
