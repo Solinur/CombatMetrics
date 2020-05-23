@@ -42,7 +42,7 @@ local LOG_LEVEL_ERROR = "E"
 
 if LibDebugLogger then
 
-	mainlogger = LibDebugLogger(CMX.name)
+	mainlogger = LibDebugLogger.Create(CMX.name)
 
 	LOG_LEVEL_VERBOSE = LibDebugLogger.LOG_LEVEL_VERBOSE
 	LOG_LEVEL_DEBUG = LibDebugLogger.LOG_LEVEL_DEBUG
@@ -65,7 +65,7 @@ local function Print(category, level, ...)
 
 	local logger = category and subloggers[category] or mainlogger
 
-	logger:Log(level, ...)
+	if type(logger.Log) then logger:Log(level, ...) end
 
 end
 

@@ -467,4 +467,4 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Fixed an issue where streaming the log to chat was not working.
 [*] Fixed an issue where a lua error would appear during fight calculation.
 [*] Removed preliminary code to handle penetration given by the new Piercing Spray set (vAS Bow). As this is a conditional resistance modifier it is more complicated to implement and will be added in a future patch.
-
+[*] Added handling for a lua error that would show if libdebuglogger wasn't up to date. 
