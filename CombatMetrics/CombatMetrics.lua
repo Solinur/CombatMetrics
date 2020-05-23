@@ -65,7 +65,7 @@ local function Print(category, level, ...)
 
 	local logger = category and subloggers[category] or mainlogger
 
-	if type(logger.Log) then logger:Log(level, ...) end
+	if type(logger.Log)=="function" then logger:Log(level, ...) end
 
 end
 

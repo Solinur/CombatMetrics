@@ -463,7 +463,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Fixed an issue causing a lua error when previous saved vars didn't exist (e.g. new char or when they were deleted)
 [*] Fixed an issue where icons where missing in the buff panel for older fights
 
-1.0.4 
+1.0.4 2,678,907 (23.05.2020) 22:53
 [*] Fixed an issue where streaming the log to chat was not working.
 [*] Fixed an issue where a lua error would appear during fight calculation.
 [*] Removed preliminary code to handle penetration given by the new Piercing Spray set (vAS Bow). As this is a conditional resistance modifier it is more complicated to implement and will be added in a future patch.
