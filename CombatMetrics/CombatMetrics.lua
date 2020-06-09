@@ -28,7 +28,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.0.4"
+CMX.version = "1.0.5"
 
 -- Logger
 
@@ -204,10 +204,11 @@ local PhysResistDebuffs = {
 
 }
 
-local ignoredAbilityTiming = {
+local ignoredAbilityTiming = { -- Skills which ignore global cooldown
 
-    [118008] = true,    -- Mystic Syphon (currently ignores global cooldown)
-    [118763] = true,    -- Detonating Syphon (currently ignores global cooldown)
+    [132141] = true,    -- Blood Frenzy (Vampire Toggle)
+    [134160] = true,    -- Simmering Frenzy (Vampire Toggle)
+    [135841] = true,    -- Sated Fury (Vampire Toggle)
 
 }
 

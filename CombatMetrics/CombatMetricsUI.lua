@@ -3751,9 +3751,11 @@ local function PerformancePlot(dataType)
 
 		if lineData[1] == event and lineData[key] then
 
-			local deltatime = math.floor(lineData[2]/1000 - combatstart)
+			local deltatime = lineData[2]/1000 - combatstart
+		
+			local isSkill = dataType ~= 7 or (lineData[3]%10) > 2
 
-			if deltatime > x then
+			if deltatime > x and isSkill then
 
 				x = deltatime
 				y = lineData[key]
@@ -3762,6 +3764,8 @@ local function PerformancePlot(dataType)
 			end
 		end
 	end
+
+	TEST = XYData
 
 	return XYData, COMBAT_METRICS_YAXIS_LEFT, 1
 end
@@ -6059,6 +6063,8 @@ end
 
 local function updateLiveReport(self, data)
 
+	if data == nil then return end
+
 	local livereport = self
 
 	local DPSOut = data.DPSOut
@@ -6194,7 +6200,6 @@ function CMX.Resizing(control, resizing)
 		parent:ClearAnchors()
 		parent:SetAnchor(CENTER, nil , TOPLEFT, newpos.x, newpos.y)
 		parent:Resize(scale)
-		parent:Update()
 
 	end
 end
@@ -6202,8 +6207,6 @@ end
 function CMX.NewSize(control, newLeft, newTop, newRight, newBottom, oldLeft, oldTop, oldRight, oldBottom)
 
 	if control.sizes == nil or control:IsHidden() then return end
-
-	TEST = control
 
 	local baseWidth, baseHeight = unpack(control.sizes)
 
@@ -6261,11 +6264,15 @@ local function initFightReport()
 
 	local function resize(control, scale)
 
-		db.FightReport.scale = scale
-
 		if control.sizes == nil and control.anchors == nil then return end
 
 		local width, height = unpack(control.sizes)
+
+		local maxwidth, maxheight = GuiRoot:GetDimensions()
+
+		scale = math.min(math.max(scale or 1, 0.5), 3, maxwidth/width, maxheight/height)
+
+		db.FightReport.scale = scale
 
 		if width then control:SetWidth(width*scale) end
 		if height then control:SetHeight(height*scale) end
@@ -6318,7 +6325,13 @@ local function initFightReport()
 		end
 	end
 
-	fightReport.Resize = resize
+	function fightReport:Resize(scale)
+
+		resize(fightReport, scale)
+
+		if not fightReport:IsHidden() then fightReport:Update() end
+
+	end
 
 	-- assign update functions for panels
 
@@ -6445,7 +6458,17 @@ local function initLiveReport()
 	local setLR = db.liveReport
 	local bg = liveReport:GetNamedChild("BG")
 
-	function liveReport.Refresh(liveReport)
+	function liveReport.RefreshBG()
+
+		local resizeFrame = liveReport:GetNamedChild("ResizeFrame")
+
+		bg:SetDimensions(liveReport:GetWidth(), liveReport:GetHeight())
+		resizeFrame:SetDimensions(liveReport:GetWidth(), liveReport:GetHeight())
+		resizeFrame:SetAnchorFill(liveReport)
+
+	end
+
+	function liveReport:Refresh()
 
 		local anchors = (setLR.layout == "Horizontal" and {
 
@@ -6459,7 +6482,7 @@ local function initLiveReport()
 			{TOPLEFT, BOTTOMLEFT, 0, 0},
 			{LEFT, RIGHT, 0, 0}
 
-		}) or { -- layout = compact
+		}) or { -- layout == "compact"
 
 			{TOPLEFT, TOPLEFT, 0, 0, liveReport},
 			{LEFT, RIGHT, 0, 0},
@@ -6476,7 +6499,7 @@ local function initLiveReport()
 
 		local totalBlocks = 0
 
-		for i = 2, liveReport:GetNumChildren() do
+		for i = 3, liveReport:GetNumChildren() do
 
 			local child = liveReport:GetChild(i)
 			local name = string.gsub(string.gsub(child:GetName(), liveReport:GetName(), ""), "^%u", string.lower) -- difference in names is the child name e.g. "DamageOut". Outer gsub changes first letter to lowercase to match the settings, e.g. "damageOut".
@@ -6544,15 +6567,21 @@ local function initLiveReport()
 			end
 		end
 
-		zo_callLater(function() bg:SetDimensions(liveReport:GetWidth(), liveReport:GetHeight()) end, 1)
+		zo_callLater(liveReport.RefreshBG, 1)
 
 	end
 
 	local function resize(control, scale)
 
-		db.liveReport.scale = scale
+		if control:GetType() == CT_BACKDROP or control.sizes == nil and control.anchors == nil then return end
 
 		local width, height = unpack(control.sizes)
+
+		local maxwidth, maxheight = GuiRoot:GetDimensions()
+
+		scale = math.min(math.max(scale or 1, 0.5), 3, maxwidth/width, maxheight/height)
+
+		db.liveReport.scale = scale
 
 		if width then control:SetWidth(width*scale) end
 		if height then control:SetHeight(height*scale) end
@@ -6577,7 +6606,7 @@ local function initLiveReport()
 		end
 	end
 
-	function liveReport.Resize(liveReport, scale)
+	function liveReport:Resize(scale)
 
 		resize(liveReport, scale)
 		liveReport:Refresh()

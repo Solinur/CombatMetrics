@@ -468,3 +468,10 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Fixed an issue where a lua error would appear during fight calculation.
 [*] Removed preliminary code to handle penetration given by the new Piercing Spray set (vAS Bow). As this is a conditional resistance modifier it is more complicated to implement and will be added in a future patch.
 [*] Added handling for a lua error that would show if libdebuglogger wasn't up to date. 
+
+1.0.5
+[*] Put back tracking of skill timings for Necro Siphon since it is back on GCD
+[*] Removed tracking of skill timing for Blood Frenzy and it's morphs, since they are off the GCD
+[*] Fixed an issue with russian fonts
+[*] put in checks to prevent unreasonably sized windows after resizing
+[*] fixed some issues that occured after resizing the live report window

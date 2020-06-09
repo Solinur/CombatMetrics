@@ -8,8 +8,8 @@ SafeAddString(SI_COMBAT_METRICS_LANG, "ru", 1)
 
 -- Fonts
 
-SafeAddString(SI_COMBAT_METRICS_STD_FONT, "RuESO/fonts/univers57.otf", 1) 
-SafeAddString(SI_COMBAT_METRICS_BOLD_FONT, "RuESO/fonts/univers67.otf", 1) 
+SafeAddString(SI_COMBAT_METRICS_STD_FONT, GetString(MEDIUM_FONT), 1) 
+SafeAddString(SI_COMBAT_METRICS_BOLD_FONT, GetString(BOLD_FONT), 1) 
 
 --SafeAddString(SI_COMBAT_METRICS_FONT_SIZE_SMALL, "14", 1) 
 --SafeAddString(SI_COMBAT_METRICS_FONT_SIZE, "15", 1) 
