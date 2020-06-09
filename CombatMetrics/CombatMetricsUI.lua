@@ -6617,7 +6617,7 @@ local function initLiveReport()
 
 	liveReport:Toggle(setLR.enabled)
 	liveReport:Resize(setLR.scale)
-	liveReport:SetMovable(not setLR.locked)
+	liveReport:GetNamedChild("ResizeFrame"):SetMouseEnabled(not setLR.locked)
 
 	bg:SetAlpha(setLR.bgalpha/100)
 

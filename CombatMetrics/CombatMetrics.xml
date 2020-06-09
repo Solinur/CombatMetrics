@@ -3585,7 +3585,7 @@
 			
 		</TopLevelControl>
 		
-		<TopLevelControl name="CombatMetrics_LiveReport" clampedToScreen="true" mouseEnabled="true" movable="true" resizeToFitDescendents="true" hidden="false">
+		<TopLevelControl name="CombatMetrics_LiveReport" clampedToScreen="true" movable="true" resizeToFitDescendents="true" hidden="false">
 			<Anchor point="BOTTOM" relativePoint="BOTTOM" offsetY="-150"/>
 			<Dimensions x="300" y="52"/>
 			

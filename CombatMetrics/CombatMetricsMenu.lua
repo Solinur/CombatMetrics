@@ -267,7 +267,7 @@ function CMX.MakeMenu(svdefaults)
 			default = def.liveReport.locked,
 			getFunc = function() return db.liveReport.locked end,
 			setFunc = function(value)
-				CombatMetrics_LiveReport:SetMovable(not value)
+				CombatMetrics_LiveReport:GetNamedChild("ResizeFrame"):SetMouseEnabled(not value)
 				db.liveReport.locked = value
 			end,
 		},
