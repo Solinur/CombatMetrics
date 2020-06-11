@@ -475,3 +475,6 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Fixed an issue with russian fonts
 [*] put in checks to prevent unreasonably sized windows after resizing
 [*] fixed some issues that occured after resizing the live report window
+
+1.0.6 2.808.185 (11.06.2020) 18:36
+[*] Fixed an issue with russian fonts for real this time

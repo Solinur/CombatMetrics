@@ -3,13 +3,13 @@
 
 -- Functionality
 
-SafeAddString(SI_COMBAT_METRICS_LANG, "ru", 1) 
+SafeAddString(SI_COMBAT_METRICS_LANG, "ru", 1)
 --SafeAddString(SI_COMBAT_METRICS_ENCHANTMENT_TRIM, " Enchantment", 1) -- this will be removed from the items enchantment string to show the rest in the info panel, e.g. "Spell Damage Enchantment" is reduced to "Spell Damage".
 
 -- Fonts
 
-SafeAddString(SI_COMBAT_METRICS_STD_FONT, GetString(MEDIUM_FONT), 1) 
-SafeAddString(SI_COMBAT_METRICS_BOLD_FONT, GetString(BOLD_FONT), 1) 
+SafeAddString(SI_COMBAT_METRICS_STD_FONT, "$(MEDIUM_FONT)", 1)
+SafeAddString(SI_COMBAT_METRICS_BOLD_FONT, "$(BOLD_FONT)", 1)
 
 --SafeAddString(SI_COMBAT_METRICS_FONT_SIZE_SMALL, "14", 1) 
 --SafeAddString(SI_COMBAT_METRICS_FONT_SIZE, "15", 1) 
