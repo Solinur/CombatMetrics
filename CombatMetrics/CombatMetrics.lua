@@ -28,7 +28,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.0.6"
+CMX.version = "1.0.7"
 
 -- Logger
 
@@ -186,7 +186,8 @@ local SpellResistDebuffs = {
 	[GetFormattedAbilityName(68588)] = 1320, --Minor Breach
 
 	[GetFormattedAbilityName(17906)] = 2108, -- Crusher, can get changed by settings !
-	[GetFormattedAbilityName(75753)] = 3010, -- Alkosh
+	
+	--[GetFormattedAbilityName(75753)] = 3010, -- Alkosh, now special tracking
 
 }
 
@@ -196,11 +197,10 @@ local PhysResistDebuffs = {
 	[GetFormattedAbilityName(64144)] = 1320, --Minor Fracture
 
 	[GetFormattedAbilityName(17906)] = 2108, -- Crusher, can get changed by settings !
-	[GetFormattedAbilityName(75753)] = 3010, -- Alkosh
 
-	--[GetFormattedAbilityName(100302)] = 6600, -- Piercing Spray
+	[GetFormattedAbilityName(80866)] = 2395, -- Tremorscale
 
-	--Corrosive Armor ignores all resistance
+	--[GetFormattedAbilityName(75753)] = 3010, -- Alkosh, now special tracking
 
 }
 
@@ -479,33 +479,32 @@ function UnitHandler:Initialize()
 
 end
 
-function UnitHandler:UpdateResistance(ismagic, debuffName)
+function UnitHandler:UpdateResistance(ismagic, effectdata, value)
 
+	local debuffName = effectdata.name
 	local debuffData = self.physResDebuffs
 	local valuekey = "currentPhysicalResistance"
-	local value = PhysResistDebuffs[debuffName]
 
 	if ismagic then
 
 		debuffData = self.spellResDebuffs
 		valuekey = "currentSpellResistance"
-		value = SpellResistDebuffs[debuffName]
 
 	end
 
 	local debuff = self.buffs[debuffName]
-
 	local isactive = NonContiguousCount(debuff.slots) > 0
 
-	if isactive == true and debuffData[debuffName] ~= true then
+	if isactive == true and (not debuffData[debuffName]) then
 
-		debuffData[debuffName] = true
+		debuffData[debuffName] = value
 
 		self[valuekey] = self[valuekey] + value
 
-	elseif isactive == false and debuffData[debuffName] == true then
+	elseif isactive == false and debuffData[debuffName] then
 
-		debuffData[debuffName] = false
+		value = debuffData[debuffName]
+		debuffData[debuffName] = nil
 
 		self[valuekey] = self[valuekey] - value
 
@@ -1272,7 +1271,7 @@ end
 
 local function ProcessLogEffects(fight, logline)
 
-	local callbacktype, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, slotId = unpackLogline(logline, 1, 9)
+	local callbacktype, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, slotId, hitValue = unpackLogline(logline, 1, 10)
 
 	stacks = stacks or 0
 
@@ -1368,15 +1367,23 @@ local function ProcessLogEffects(fight, logline)
 	local spellres = SpellResistDebuffs[buffname]
 	local physres = PhysResistDebuffs[buffname]
 
+	if abilityId == 75753 then
+
+		unit:UpdateResistance(true, effectdata, hitValue)
+		unit:UpdateResistance(false, effectdata, hitValue)
+
+
+	end
+
 	if spellres then
 
-		unit:UpdateResistance(true, buffname)
+		unit:UpdateResistance(true, effectdata, spellres)
 
 	end
 
 	if physres then
 
-		unit:UpdateResistance(false, buffname)
+		unit:UpdateResistance(false, effectdata, physres)
 
 	end
 end

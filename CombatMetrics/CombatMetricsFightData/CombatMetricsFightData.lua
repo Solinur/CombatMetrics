@@ -173,7 +173,7 @@ local logTypeToLayout = {
 local layouts = {
 
 	[LAYOUT_COMBAT] = {1, 4, 1, 2, 2, 3, 4, 1, 4}, 		-- (23) type, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType, overflow
-	[LAYOUT_EVENT] = {1, 4, 2, 3, 1, 1, 1, 1, 4},		-- (20) type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, slot
+	[LAYOUT_EVENT] = {1, 4, 2, 3, 1, 1, 1, 1, 4, 3},	-- (23) type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, slot, hitValue
 	[LAYOUT_STATS] = {1, 4, 4, 4, 1},		 			-- (15) type, timems, statchange, newvalue, statname
 	[LAYOUT_POWER] = {1, 4, 3, 3, 1, 3},		 		-- (16) type, timems, abilityId, powerValueChange, powerType, powerValue
 	[LAYOUT_MESSAGE] = {1, 4, 1, 1}, 					-- (8)  type, timems, messageId (e.g. "weapon swap"), bar

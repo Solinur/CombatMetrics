@@ -1,6 +1,6 @@
 ﻿## Title: CombatMetricsFightData
-## APIVersion: 100030 100031
-## Author: Solinur/decay
+## APIVersion: 100031 100032
+## Author: Solinur
 ## Version: 5
 ## IsLibrary: true
 ## DependsOn:

@@ -2954,7 +2954,7 @@
 										<Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_BUFF" horizontalAlignment="LEFT" verticalAlignment="CENTER">
 											
 											<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="4" offsetY="0"/>
-											<Dimensions x="180" y="20"/>
+											<Dimensions x="176" y="20"/>
 											
 										</Label>
 										

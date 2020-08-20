@@ -26,4 +26,4 @@ You can also assign keys to post the damage per second (DPS) or healing per seco
 * If you want to see Statistics in AvA areas, disable "Light Mode in Cyrodil"
 * Minor Savagery is ignored since it is too spammy.
 
-*Decay2 aka Solinur (Pact EU)*
+*Solinur (EU)*
