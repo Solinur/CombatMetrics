@@ -1886,6 +1886,8 @@ local function updateFightStatsPanelRight(panel)
 		local maxvalue = stats["max"..dataKey] or 0
 		local overpen = 0
 
+		local trimmedResistvalues = {[18] = 0}
+
 		for penetration, damage in pairs(resistvalues) do
 
 			sum = sum + penetration * damage
@@ -1894,15 +1896,27 @@ local function updateFightStatsPanelRight(panel)
 
 			if penetration - db.unitresistance > 0 then overpen = overpen + damage end
 
+			local trimmedkey = math.floor((penetration+800)/1000)
+			trimmedResistvalues[trimmedkey] = (trimmedResistvalues[trimmedkey] or 0) + damage
+
 		end
 
 		totaldamage = math.max(totaldamage, 1)
 
 		local tooltiplines = {GetString(SI_COMBAT_METRICS_PENETRATION_TT)}
 
-		for penetration, damage in CMX.spairs(resistvalues) do
+		local sumdamage = 0
 
-			local newline = string.format("%d: %.1f%%", penetration, 100 * damage/totaldamage)
+		for penetration, damage in CMX.spairs(trimmedResistvalues) do
+
+			sumdamage = sumdamage + damage
+
+			local sumdamageRatio = 100 * (sumdamage/totaldamage)
+			local damageRatio = 100 * damage/totaldamage
+
+			local color = penetration == 18 and "|cffbb88" or damageRatio > 5 and "|cffffff" or ""
+
+			local newline = string.format("<%s%2d.2k: %5.1f%%", color, penetration, sumdamageRatio)
 			table.insert(tooltiplines, newline)
 
 		end
@@ -5455,7 +5469,7 @@ local function updateInfoRowPanel(panel)
 
 	local datestring = type(date) == "number" and GetDateStringFromTimestamp(date) or date
 	local timestring = string.format("%s%s, %s", accountstring, datestring, data.time)
-	local versionstring = string.format("%s / CMX %s", data.ESOversion or "<= 3.2" , CMX.version)
+	local versionstring = string.format("%s / CMX %s / LC %s", data.ESOversion or "<= 3.2" , CMX.version, tostring(LC.version))
 
 	datetimecontrol:SetText(timestring)
 	versioncontrol:SetText(versionstring)

@@ -28,7 +28,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.0.7"
+CMX.version = "1.0.8"
 
 -- Logger
 
@@ -179,6 +179,10 @@ local IsMagickaAbility = {				-- nil for oblivion and other damage types that ar
 	[DAMAGE_TYPE_DISEASE] = false,
 
 }
+
+-- EC Flame: 142610
+-- EC Shock: 142653
+-- EC Frost: 142652
 
 local SpellResistDebuffs = {
 
@@ -496,6 +500,13 @@ function UnitHandler:UpdateResistance(ismagic, effectdata, value)
 	local isactive = NonContiguousCount(debuff.slots) > 0
 
 	if isactive == true and (not debuffData[debuffName]) then
+
+		if value == nil then
+
+			Print("calc", LOG_LEVEL_WARNING, "Resist debuff value missing: %s (%d)", debuffName or "nil", effectdata.iconId or 0)
+			return
+
+		end
 
 		debuffData[debuffName] = value
 

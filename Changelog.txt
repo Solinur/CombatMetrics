@@ -483,3 +483,9 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] API Bump to Stonethorn (100032)
 [*] Added tracking of the new Alkosh penetration debuff
 [*] Added tracking of Tremorscale penetration debuff
+
+1.0.8 3.032.349 (05.09.2020) 01:48
+[*] Prevented a lua error which appeared when Alkosh values were unkown. Instead a warning is shown via LibDebugLogger. (Thx to Citizen for reporting)
+[*] Added LibCombat version to version string
+[*] Made some adjustments to the tooltip of penetration values to improve readability
+[*] Requires LibCombat version 32 to ensure Alkosh tracking is working

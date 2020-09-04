@@ -1,9 +1,9 @@
 ﻿## Title: CombatMetrics
 ## APIVersion: 100031 100032
 ## Author: Solinur
-## Version: 1.0.7
-## AddOnVersion: 10007
-## DependsOn: CombatMetricsFightData LibCombat>=30 LibAddonMenu-2.0 LibCustomMenu LibFeedback
+## Version: 1.0.8
+## AddOnVersion: 10008
+## DependsOn: CombatMetricsFightData LibCombat>=32 LibAddonMenu-2.0 LibCustomMenu LibFeedback
 ## OptionalDependsOn: LibDebugLogger
 ## SavedVariables: CombatMetrics_Save
 ## Description: CombatMetrics is a tool to analyse your performance in fights.
