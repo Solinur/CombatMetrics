@@ -2022,12 +2022,12 @@
 													<Anchor point="TOPRIGHT" constrains="X"/>
 										
 													<Controls>
-														<Label name="$(parent)Label2" inherits="CombatMetrics_StatRowLabel" text="Mean" horizontalAlignment="RIGHT">
+														<Label name="$(parent)Label2" inherits="CombatMetrics_StatRowLabel" text="SI_COMBAT_METRICS_EFFECTIVE" horizontalAlignment="RIGHT">
 															<Anchor point="TOPLEFT" offsetX="120"/>
 															<Dimensions x="72"/>
 														</Label>
 														
-														<Label name="$(parent)Label3" inherits="CombatMetrics_StatRowLabel" text="Max" horizontalAlignment="RIGHT">
+														<Label name="$(parent)Label3" inherits="CombatMetrics_StatRowLabel" text="SI_COMBAT_METRICS_MAX" horizontalAlignment="RIGHT">
 															<Anchor point="TOPLEFT" offsetX="196"/>
 															<Dimensions x="72"/>
 														</Label>
