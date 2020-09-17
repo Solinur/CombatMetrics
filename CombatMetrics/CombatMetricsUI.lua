@@ -1886,17 +1886,18 @@ local function updateFightStatsPanelRight(panel)
 		local totaldamage = 0
 		local maxvalue = stats["max"..dataKey] or 0
 		local overpen = 0
+		local maxpen = db.unitresistance
 
 		local trimmedResistvalues = {[18] = 0}
 
 		for penetration, damage in pairs(resistvalues) do
 
 			sum = sum + penetration * damage
-			effectiveSum = effectiveSum + math.min(penetration, 18200) * damage
+			effectiveSum = effectiveSum + math.min(penetration, maxpen) * damage
 			maxvalue = math.max(maxvalue, penetration)
 			totaldamage = totaldamage + damage
 
-			if penetration - db.unitresistance > 0 then overpen = overpen + damage end
+			if penetration - maxpen > 0 then overpen = overpen + damage end
 
 			local trimmedkey = math.floor((penetration+800)/1000)
 			trimmedResistvalues[trimmedkey] = (trimmedResistvalues[trimmedkey] or 0) + damage

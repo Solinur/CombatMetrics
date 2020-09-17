@@ -489,3 +489,10 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Added LibCombat version to version string
 [*] Made some adjustments to the tooltip of penetration values to improve readability
 [*] Requires LibCombat version 32 to ensure Alkosh tracking is working
+
+1.0.9 3.089.214 (17.09.2020) 19:55
+[*] Renamed the left part of the the stat summary to "effective" instead of "mean" which is more accurate.
+[*] Changed the effective penetration value to mind the total unit resistance (can be changed in settings, default = 18200) and cap any values. 
+[*] The old "cap-ignorant" average is now shown in the tooltip
+[*] Requires LibCombat version 33
+[*] [LibCombat] Corrected the calculation for critical damage values to mind the new values from shadow mundus. It will now extract the value from the same tooltip which you can see in the character window, instead of using a hard coded base value and the extracted bonus from divine pieces.
