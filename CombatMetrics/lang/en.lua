@@ -294,21 +294,23 @@
 	SI_COMBAT_METRICS_BAR = "Bar ",
 	SI_COMBAT_METRICS_AVERAGEC = "Average: ",
 
-	SI_COMBAT_METRICS_SKILLTIME_LABEL2 = "< W / S", -- as in "Weapon / Skill"
-	SI_COMBAT_METRICS_SKILLTIME_LABEL3 = "W / S >",
+	SI_COMBAT_METRICS_SKILLTIME_LABEL2 = "weave", -- weaving time
+	SI_COMBAT_METRICS_SKILLTIME_LABEL3 = "E", -- errors
 
 	SI_COMBAT_METRICS_SKILLTIME_TT1 = "Number of casts of this skill",
-	SI_COMBAT_METRICS_SKILLTIME_TT2 = "Time since the last weapon/skill activation and the ability activation.",
-	SI_COMBAT_METRICS_SKILLTIME_TT3 = "Time between the ability activation and the next weapon/skill activation.",
+	SI_COMBAT_METRICS_SKILLTIME_TT2 = "Weaving Time\n\nThe average time wasted until the next skill was cast.",
+	SI_COMBAT_METRICS_SKILLTIME_TT3 = "Weaving Errors\n\nNumber of times the skill activation wasn't followed by a weapon attack or vice versa",
 	SI_COMBAT_METRICS_SKILLTIME_TT4 = "Average time between subsequent activations of this skill",
 
-	SI_COMBAT_METRICS_SKILLAVG_TT = "Average time lost between two skill casts",
-	SI_COMBAT_METRICS_SKILLTOTAL_TT = "Total time lost between two skill casts",
+	SI_COMBAT_METRICS_SKILLTIME_WEAVING = "Weaving Average: ",
+
+	SI_COMBAT_METRICS_SKILLAVG_TT = "Average time wasted between two skill casts",
+	SI_COMBAT_METRICS_SKILLTOTAL_TT = "Total time wasted between skill casts",
 
 	SI_COMBAT_METRICS_TOTALWA = "Weapon attacks: ",
-	SI_COMBAT_METRICS_TOTALWA_TT = "Total weapon attacks",
+	SI_COMBAT_METRICS_TOTALWA_TT = "Total light and heavy attacks",
 	SI_COMBAT_METRICS_TOTALSKILLS = "Skills: ",
-	SI_COMBAT_METRICS_TOTALSKILLS_TT = "Total skills fired",
+	SI_COMBAT_METRICS_TOTALSKILLS_TT = "Total skills cast",
 
 	SI_COMBAT_METRICS_SAVED_DATA = "Saved Data",
 

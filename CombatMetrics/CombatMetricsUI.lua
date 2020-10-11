@@ -5164,8 +5164,6 @@ local armorcolors = {
 	[ARMORTYPE_LIGHT] = {0.3, 0.3, 1, 1},
 }
 
-local skillkeys = { "count", "weaponAttackBeforeAvg", "skillBeforeAvg", "weaponAttackNextAvg", "skillNextAvg", "difftimesAvg"}
-
 local function updateLeftInfoPanel(panel)
 
 	if fightData == nil then return end
@@ -5202,8 +5200,6 @@ local function updateLeftInfoPanel(panel)
 		local bardata = skillBars and skillBars[barkey] or nil
 		local barStats = barStatData and barStatData[barkey] or nil
 
-		local skilltimingbefore = db.FightReport.skilltimingbefore
-
 		local dpsratio, timeratio
 
 		if barStats and type(barStats[category]) == "number" then
@@ -5224,8 +5220,6 @@ local function updateLeftInfoPanel(panel)
 		timeControl:SetText(string.format("%.1f%%", (dpsratio or 0) * 100))
 
 		for j = 5, row:GetNumChildren() - 2 do
-
-			local strings = {"-", "-", "-", "-", "-", "-"}
 
 			local control = row:GetChild(j)
 
@@ -5249,74 +5243,54 @@ local function updateLeftInfoPanel(panel)
 
 			local slotdata = skilldata and skilldata[reducedslot] or nil
 
-			if slotdata then
+			local strings = {"-", "-", "-", "-"}
 
-				strings[1] = string.format("%d", slotdata[skillkeys[1]])
+			if slotdata and slotdata.count and slotdata.count > 0 then
+
+				strings[1] = string.format("%d", slotdata.count) or "-"
+
+				local weave = slotdata.weavingTimeAvg or slotdata.skillNextAvg
+				strings[2] = weave and string.format("%.2f", weave/1000) or "-"
+
+				local errors = slotdata.weavingErrors
+				strings[3] = errors and string.format("%d", errors) or "-"
+
+				local diff = slotdata.diffTimeAvg or slotdata.difftimesAvg
+				strings[4] = diff and string.format("%.2f", diff/1000) or "-"
+
 				control.delay = slotdata.delayAvg
 
-				for k = 2, #skillkeys do
-
-					local value = slotdata[skillkeys[k]]
-
-					if type(value) == "number" then
-
-						strings[k] = string.format("%.2f", value / 1000)
-
-					end
-				end
 			end
 
-			local keymod = skilltimingbefore and 0 or 2
-
-			local valuestring = string.format("%s/%s", strings[2+keymod], strings[3+keymod])
-
-			control:GetNamedChild("Value1"):SetText(strings[1])
-			control:GetNamedChild("Value2"):SetText(valuestring)
-			control:GetNamedChild("Value3"):SetText(strings[6])
+			for k = 1, 4 do control:GetNamedChild("Value" .. k):SetText(strings[k]) end
 		end
-
-		local header3 = row:GetNamedChild("Header"):GetNamedChild("3")
-
-		local HeaderStringKey = skilltimingbefore and 2 or 3
-
-		header3:SetText(GetString("SI_COMBAT_METRICS_SKILLTIME_LABEL", HeaderStringKey))
-
-		header3.tooltip = GetString("SI_COMBAT_METRICS_SKILLTIME_TT", HeaderStringKey)
 	end
 
 	local statrow = panel:GetNamedChild("AbilityBlock1"):GetNamedChild("Stats2")
 	local statrow2 = panel:GetNamedChild("AbilityBlock2"):GetNamedChild("Stats2")
 
-	local totalSkills = data.totalSkills
-	local totalTime = data.totalSkillTime
+	local totalWeavingTimeCount = data.totalWeavingTimeCount or data.totalSkills
+	local totalWeavingTimeSum = data.totalWeavingTimeSum or data.totalSkillTime
 	local totalWeaponAttacks = data.totalWeaponAttacks
 	local totalSkillsFired = data.totalSkillsFired
 
 	local value1string = " -"
 	local value2string = " -"
 
-	if totalSkills and totalSkills > 0 and totalTime then
+	if totalWeavingTimeCount and totalWeavingTimeCount > 0 and totalWeavingTimeSum then
 
-		value1string = (totalTime and totalSkills) and string.format("%.3f s", totalTime / (1000 * totalSkills)) or "-"
-		value2string = totalTime and string.format("%.3f s", totalTime / 1000) or "-"
+		value1string = (totalWeavingTimeSum and totalWeavingTimeCount) and string.format("%.3f s", totalWeavingTimeSum / (1000 * totalWeavingTimeCount)) or " -"
+		value2string = totalWeavingTimeSum and string.format("%.3f s", totalWeavingTimeSum / 1000) or " -"
 
 	end
 
 	local value3string = totalWeaponAttacks or " -"
 	local value4string = totalSkillsFired or " -"
 
-	statrow:GetNamedChild("Label"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_AVERAGEC), value1string))
+	statrow:GetNamedChild("Label"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_SKILLTIME_WEAVING), value1string))
 	statrow:GetNamedChild("Label2"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALC), value2string))
 	statrow2:GetNamedChild("Label"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALWA), value3string))
 	statrow2:GetNamedChild("Label2"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALSKILLS), value4string))
-end
-
-function CMX.ToggleSkillTimingData(control)
-
-	db.FightReport.skilltimingbefore = not db.FightReport.skilltimingbefore
-
-	updateLeftInfoPanel(CombatMetrics_Report_InfoPanelLeft)
-
 end
 
 local passiveRequirements = {10, 30, 75, 120}

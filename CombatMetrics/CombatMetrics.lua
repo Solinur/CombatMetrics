@@ -11,6 +11,7 @@ local lastUsedSkill
 local lastUsedWeaponAttack
 
 local currentbar
+local abilityDurations = {}
 
 -- localize some module functions for performance
 
@@ -184,10 +185,12 @@ local IsMagickaAbility = {				-- nil for oblivion and other damage types that ar
 -- EC Shock: 142653
 -- EC Frost: 142652
 
+local newBuffValues = GetAPIVersion() >= 100033
+
 local SpellResistDebuffs = {
 
-	[GetFormattedAbilityName(62787)] = 5280, --Major Breach
-	[GetFormattedAbilityName(68588)] = 1320, --Minor Breach
+	[GetFormattedAbilityName(62787)] = newBuffValues and 5948 or 5280, --Major Breach
+	[GetFormattedAbilityName(68588)] = newBuffValues and 2974 or 1320, --Minor Breach
 
 	[GetFormattedAbilityName(17906)] = 2108, -- Crusher, can get changed by settings !
 	
@@ -197,8 +200,8 @@ local SpellResistDebuffs = {
 
 local PhysResistDebuffs = {
 
-	[GetFormattedAbilityName(62484)] = 5280, --Major Fracture
-	[GetFormattedAbilityName(64144)] = 1320, --Minor Fracture
+	[GetFormattedAbilityName(62484)] = newBuffValues and 5948 or 5280, --Major Fracture
+	[GetFormattedAbilityName(64144)] = newBuffValues and 2974 or 1320, --Minor Fracture
 
 	[GetFormattedAbilityName(17906)] = 2108, -- Crusher, can get changed by settings !
 
@@ -275,7 +278,7 @@ local AbilityHandler = NewSubclass()
 local ResourceTable = NewSubclass()
 local ResourceHandler = NewSubclass()
 local EffectHandler = NewSubclass()
-local SkillTimingHandler = NewSubclass()
+local SkillCastHandler = NewSubclass()
 local BarStatsHandler = NewSubclass()
 
 local function AcquireUnitData(self, unitId, timems)
@@ -353,13 +356,13 @@ local function AcquireResourceData(self, abilityId, powerValueChange, powerType)
 	return resourceData[abilityId]
 end
 
-local function AcquireSkillTimingData(self, reducedslot)
+local function AcquireSkillCastData(self, reducedslot)
 
 	local skilldata = self.calculated.skills
 
 	if skilldata[reducedslot] == nil then
 
-		skilldata[reducedslot] = SkillTimingHandler:New()
+		skilldata[reducedslot] = SkillCastHandler:New()
 
 	end
 
@@ -638,16 +641,17 @@ function ResourceHandler:Initialize()
 
 end
 
-function SkillTimingHandler:Initialize()
+function SkillCastHandler:Initialize()
 
-	self.times = {}  				-- holds times a skill gets used
-	self.skillBefore = {} 			-- holds times since last skill completed
-	self.weaponAttackBefore = {} 	-- holds times since last light or heavy attack completed
-	self.skillNext = {} 			-- holds times until a new skill is cast afterwards
-	self.weaponAttackNext = {} 		-- holds times until a new light or heavy attack is cast afterwards
-	self.sumdelays = 0
-	self.countdelays = 0
-	--self.delays = {} 				-- holds times between button press is registered and the ability activating
+	self.lastRegisteredIndex = nil
+	self.started = {}
+	self.times = {}
+	self.delaySum = 0
+	self.delayCount = 0
+	self.weavingTimeSum = 0
+	self.weavingTimeCount = 0
+	self.failedCount = 0
+	self.weavingErrors = 0
 
 end
 
@@ -675,10 +679,12 @@ local function GetEmtpyFightStats()
 	data.resources = ResourceTable:New()
 
 	data.skills = {}
+	data.casts = {}
+	abilityDurations = {}
 	data.barStats = {}
 
-	data.totalSkillTime = 0
-	data.totalSkills = 0
+	data.totalWeavingTimeSum = 0
+	data.totalWeavingTimeCount = 0
 	data.totalWeaponAttacks = 0
 	data.totalSkillsFired =  0
 
@@ -1446,105 +1452,127 @@ ProcessLog[LIBCOMBAT_EVENT_PLAYERSTATS] = ProcessLogStats
 
 local abilityExtraDelay = {[63044] = 100, [63029] = 100, [63046] = 100} -- Radiant Destruction and morphs have a 100ms delay after casting.
 
+local function GetAbilityDuration(abilityId)
+
+	local duration
+
+	if abilityDurations[abilityId] == nil then
+
+		local channeled, castTime, channelTime = GetAbilityCastInfo(abilityId)
+
+		if castTime == 0 then castTime = 1000 end
+
+		abilityDurations[abilityId] = channeled and channelTime or castTime
+
+	end
+
+	return abilityDurations[abilityId] + (abilityExtraDelay[abilityId] or 0)
+
+end
+
 ---[[
 local function ProcessLogSkillTimings(fight, logline)
 
 	local callbacktype, timems, reducedslot, abilityId, status, skillDelay = unpackLogline(logline, 1, 6)
 
-	if reducedslot == nil then return end
+	local skillData = fight:AcquireSkillCastData(reducedslot)
 
-	local isWeaponAttack = reducedslot%10 < 3
+	local castData = fight.calculated.casts
+	local lastRegisteredIndex = skillData.lastRegisteredIndex
+	local started = skillData.started
 
-	local slotdata = fight:AcquireSkillTimingData(reducedslot)
+	if status == LIBCOMBAT_SKILLSTATUS_REGISTERED then
 
-	if ignoredAbilityTiming[abilityId] then
+		local newCast = {reducedslot, timems}	-- reducedslot, registered, queued, start, end
 
-		table.insert(slotdata.times, timems)
-		return
+		local index = #castData + 1
 
-	end
+		castData[index] = newCast
+		skillData.lastRegisteredIndex = index   -- keep track of most recent registered instance, since an ability can fail to fire (for example due to poor weaving)
 
-	local lastSkillTime, lastSkillSlot, lastSkillSuccessTime
-	local lastWeaponAttackTime, lastWeaponAttackSlot, lastWeaponAttackSuccessTime
+	elseif status == LIBCOMBAT_SKILLSTATUS_QUEUE then
 
-	if lastUsedSkill then
+		if lastRegisteredIndex == nil then
 
-		lastSkillTime, lastSkillSlot, lastSkillSuccessTime = unpack(lastUsedSkill)
+			Print("calc", LOG_LEVEL_WARNING, "Missing registered ability on queue event: [%3.f s] %s (%d), Slot: %d", (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
+			return
 
-	end
+		end
 
-	if lastUsedWeaponAttack then
+		castData[lastRegisteredIndex][3] = timems
 
-		lastWeaponAttackTime, lastWeaponAttackSlot, lastWeaponAttackSuccessTime = unpack(lastUsedWeaponAttack)
+	elseif status == LIBCOMBAT_SKILLSTATUS_INSTANT then
 
-	end
+		if lastRegisteredIndex == nil then
 
-	local doubleWeaponAttack = isWeaponAttack and lastUsedWeaponAttack and lastUsedSkill and (lastWeaponAttackTime > lastSkillTime)
-	local doubleSkillUse = (not isWeaponAttack) and lastUsedWeaponAttack and lastUsedSkill and (lastSkillTime > lastWeaponAttackTime)
-
-	local key = isWeaponAttack and "weaponAttackNext" or "skillNext"
-
-	if lastSkillSuccessTime and not doubleWeaponAttack and status ~= LIBCOMBAT_SKILLSTATUS_SUCCESS then
-
-		local timeDifference = timems - lastSkillSuccessTime
-
-		table.insert(slotdata.skillBefore, timeDifference)
-		table.insert(fight:AcquireSkillTimingData(lastSkillSlot)[key], timeDifference)
-
-	end
-
-	if lastWeaponAttackSuccessTime and not doubleSkillUse and status ~= LIBCOMBAT_SKILLSTATUS_SUCCESS then
-
-		local timeDifference = timems - lastWeaponAttackSuccessTime
-
-		table.insert(slotdata.weaponAttackBefore, timeDifference)
-		table.insert(fight:AcquireSkillTimingData(lastWeaponAttackSlot)[key], timeDifference)
-
-	end
-
-	if status ~= LIBCOMBAT_SKILLSTATUS_SUCCESS then
-
-		table.insert(slotdata.times, timems)
-
-		if isWeaponAttack then
-
-			local successTime = status == LIBCOMBAT_SKILLSTATUS_INSTANT and timems or nil
-
-			lastUsedWeaponAttack = {timems, reducedslot, successTime}
+			Print("calc", LOG_LEVEL_WARNING, "Missing registered ability on start event: [%3.f s] %s (%d), Slot: %d", (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
+			return
 
 		else
 
-			local successTime = status == LIBCOMBAT_SKILLSTATUS_INSTANT and timems + 1000 or nil
+			local isWeaponAttack = reducedslot%10 == 1 or reducedslot%10 == 2
+			local duration = isWeaponAttack and 0 or 1000
 
-			lastUsedSkill = {timems, reducedslot, successTime}
-
-		end
-
-		if skillDelay then
-
-			slotdata.sumdelays = slotdata.sumdelays + skillDelay
-			slotdata.countdelays = slotdata.countdelays + 1
-			--table.insert(slotdata.delays, skillDelay)
+			castData[lastRegisteredIndex][4] = timems
+			table.insert(skillData.times, timems)
+			castData[lastRegisteredIndex][5] = timems + duration
+			skillData.lastRegisteredIndex = nli
 
 		end
 
-	else
+	elseif status == LIBCOMBAT_SKILLSTATUS_BEGIN_DURATION or status == LIBCOMBAT_SKILLSTATUS_BEGIN_CHANNEL then
 
-		local extraDelay = abilityExtraDelay[abilityId] or 0		-- some abilities require a extra delay due to animation
+		if lastRegisteredIndex == nil then
 
-		if isWeaponAttack and lastUsedWeaponAttack then
+			Print("calc", LOG_LEVEL_WARNING, "Missing registered ability on start event: [%3.f s] %s (%d), Slot: %d", (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
+			return
 
-			lastUsedWeaponAttack[3] = timems + extraDelay
+		else
 
-		elseif lastUsedSkill then
+			castData[lastRegisteredIndex][4] = timems
+			table.insert(skillData.times, timems)
+			table.insert(started, lastRegisteredIndex)
+			skillData.lastRegisteredIndex = nil
 
-			lastUsedSkill[3] = timems + extraDelay
+		end
+
+	elseif status == LIBCOMBAT_SKILLSTATUS_SUCCESS then
+
+		-- looking for suitable start event. Let's assume that every start event will have an end event. Search from earliest time event, until one is found that is within the expected time window
+
+		local indexFound = false
+
+		for k, castindex in ipairs(started) do
+
+			local starttime = castData[castindex][4]
+			local timeDiff = timems - starttime
+
+			if timeDiff < (GetAbilityDuration(abilityId) + 200) then
+
+				castData[castindex][5] = timems
+				indexFound = k
+
+				table.remove(started, k)
+
+				break
+
+			end
+		end
+
+		if not indexFound then
+
+			Print("calc", LOG_LEVEL_WARNING, "Missing started ability on success event: [%3.f s] %s (%d), Slot: %d", (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
+			return
+
+		elseif indexFound > 3 then
+
+			Print("calc", LOG_LEVEL_WARNING, "Large number of unfinished skills (%d): [%3.f s] %s (%d), Slot: %d", indexFound, (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
 
 		end
 	end
 end
 
-ProcessLog[LIBCOMBAT_EVENT_SKILL_TIMINGS] = ProcessLogSkillTimings
+ProcessLog[LIBCOMBAT_EVENT_SKILL_TIMINGS] = ProcessLogSkillTimings --ProcessLogSkillTimingsOld
 
 local function ProcessMessages(fight, logline)
 
@@ -1677,8 +1705,6 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 								stackData.groupUptime = stackData.groupUptime + duration
 								stackData.groupCount = stackData.groupCount + 1
 							end
-
-
 						end
 
 						if slotcount > 0 then
@@ -1894,10 +1920,62 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 		-- calculate skill timings
 
-		local skilldata = data.skills
+		local skillData = data.skills
+		local castData = data.casts
 
-		local totalSkillTime = 0
-		local totalSkills = 0
+		local lastValidSkill
+		local lastValidWeaponAttack
+
+		for i = #castData, 1, -1 do	-- go backwards to allow deleting without messing up indices
+
+			local reducedslot, registered, queued, startTime, endTime = unpackLogline(castData[i], 1, 5)
+			local skill = skillData[reducedslot]
+
+			if startTime then
+
+				local isWeaponAttack = reducedslot%10 == 1 or reducedslot%10 == 2
+
+				local delay = startTime - (queued or registered)
+
+				skill.delaySum = skill.delaySum + delay
+				skill.delayCount = skill.delayCount + 1
+
+				if lastValidSkill and endTime then
+
+					local weavingTime = endTime and castData[lastValidSkill][4] - endTime
+
+					skill.weavingTimeSum = skill.weavingTimeSum + weavingTime
+					skill.weavingTimeCount = skill.weavingTimeCount + 1
+
+				end
+
+				if isWeaponAttack then
+
+					if lastValidWeaponAttack and lastValidWeaponAttack - i == 1 then skill.weavingErrors = skill.weavingErrors + 1 end
+
+					lastValidWeaponAttack = i
+
+				else
+
+					if lastValidSkill and lastValidSkill - i == 1 then skill.weavingErrors = skill.weavingErrors + 1 end
+
+					lastValidSkill = i
+
+				end
+
+			else
+
+				table.remove(castData, i)
+				skill.failedCount = skill.failedCount + 1
+
+				if lastValidSkill then lastValidSkill = lastValidSkill - 1 end
+				if lastValidWeaponAttack then lastValidWeaponAttack = lastValidWeaponAttack - 1 end
+
+			end
+		end
+
+		local totalWeavingTimeSum = 0
+		local totalWeavingTimeCount = 0
 		local totalWeaponAttacks = 0
 		local totalSkillsFired = 0
 		local totalDelay = 0
@@ -1905,7 +1983,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 		local skillBars = fight.charData.skillBars
 
-		for reducedslot, skill in pairs(skilldata) do
+		for reducedslot, skill in pairs(skillData) do
 
 			local isWeaponAttack = reducedslot%10 == 1 or reducedslot%10 == 2
 			local timedata = skill.times
@@ -1914,65 +1992,46 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 			if bar <= 2 and skillId then
 
-				local difftimes = {}
+				local count = #timedata
 
-				skill.count = #timedata
+				skill.count = count
 
-				for i = 1, #timedata - 1 do
+				local delayCount = skill.delayCount
 
-					difftimes[i] = timedata[i+1] - timedata[i]
+				if delayCount and delayCount > 0 then skill.delayAvg = skill.delaySum / delayCount end
 
-				end
+				local weavingTimeCount = skill.weavingTimeCount
 
-				skill.difftimes = difftimes
-
-				local countdelays = skill.countdelays
-
-				if countdelays and countdelays > 0 then skill.delayAvg = skill.sumdelays / countdelays end
+				if weavingTimeCount and weavingTimeCount > 0 then skill.weavingTimeAvg = skill.weavingTimeSum / weavingTimeCount end
 
 				if isWeaponAttack then
 
-					totalWeaponAttacks = totalWeaponAttacks + skill.count
+					totalWeaponAttacks = totalWeaponAttacks + count
 
 				elseif not ignoredAbilityTiming[skillId] then
 
-					totalSkillsFired = totalSkillsFired + skill.count
-					totalDelay = totalDelay + skill.sumdelays
-					totalDelayCount = totalDelayCount + skill.countdelays
+					totalSkillsFired = totalSkillsFired + count
+					totalDelay = totalDelay + skill.delaySum
+					totalDelayCount = totalDelayCount + delayCount
 
 				end
 
-				for i, key in ipairs({"skillBefore", "weaponAttackBefore", "skillNext", "weaponAttackNext", "difftimes"}) do
+				if count > 1 then skill.diffTimeAvg = (timedata[#timedata] - timedata[1])/(count - 1) end
 
-					local times = skill[key]
+				if not (isWeaponAttack or ignoredAbilityTiming[skillId]) then
 
-					local avgkey = ZO_CachedStrFormat("<<1>>Avg", key)
+					totalWeavingTimeSum = totalWeavingTimeSum + skill.weavingTimeSum
+					totalWeavingTimeCount = totalWeavingTimeCount + skill.weavingTimeCount
 
-					local sum = 0
-					local count = 0
-
-					for _, v in pairs(times) do
-
-						if type(v) == 'number' then
-
-							sum = sum + v
-							count = count + 1
-
-						end
-
-					end
-
-					skill[avgkey] = count > 0 and (sum / count) or 0
-
-					if i == 3 and not (isWeaponAttack or ignoredAbilityTiming[skillId]) then
-
-						totalSkillTime = totalSkillTime + sum
-						totalSkills = totalSkills + count
-
-					end
 				end
 			end
 		end
+
+		data.totalWeavingTimeSum = totalWeavingTimeSum
+		data.totalWeavingTimeCount = totalWeavingTimeCount
+		data.totalWeaponAttacks = totalWeaponAttacks
+		data.totalSkillsFired = totalSkillsFired
+		data.delayAvg = (totalDelayCount > 0 and totalDelay / totalDelayCount) or 0
 
 		-- calculate bardata
 
@@ -2001,7 +2060,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 			else
 
-				Print("misc", LOG_LEVEL_WARNING, "Time Array lengthes doesn't match for bar %d", bar)
+				Print("misc", LOG_LEVEL_WARNING, "Time Array lengths don't match for bar %d", bar)
 
 			end
 		end
@@ -2024,12 +2083,6 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 		data.buffs = fight.playerid ~= nil and data.units[fight.playerid] and data.units[fight.playerid].buffs or {}
 		data.buffVersion = 2
-
-		data.totalSkillTime = totalSkillTime
-		data.totalSkills = totalSkills
-		data.totalWeaponAttacks = totalWeaponAttacks
-		data.totalSkillsFired = totalSkillsFired
-		data.delayAvg = (totalDelayCount > 0 and totalDelay / totalDelayCount) or 0
 
 		fight.calculating = false
 		fight.cindex = nil
@@ -2176,7 +2229,7 @@ local function AddFightCalculationFunctions(fight)
 	fight.AcquireUnitData = AcquireUnitData
 	fight.AcquireResourceData = AcquireResourceData
 	fight.AccumulateStats = AccumulateStats
-	fight.AcquireSkillTimingData = AcquireSkillTimingData
+	fight.AcquireSkillCastData = AcquireSkillCastData
 	fight.AcquireBarStats = AcquireBarStats
 
 end
@@ -2421,7 +2474,6 @@ local svdefaults = {
 		["mainpanel"] 			= "FightStats",
 		["rightpanel"] 			= "buffs",
 		["fightstatspanel"] 	= maxStat(),
-		["skilltimingbefore"] 	= true,
 
 		["useDisplayNames"] = false,
 		["showPets"] = true,
