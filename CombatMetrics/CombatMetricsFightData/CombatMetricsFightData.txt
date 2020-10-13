@@ -1,5 +1,5 @@
 ﻿## Title: CombatMetricsFightData
-## APIVersion: 100031 100032
+## APIVersion: 100032 100033
 ## Author: Solinur
 ## Version: 5
 ## IsLibrary: true

@@ -496,3 +496,9 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] The old "cap-ignorant" average is now shown in the tooltip
 [*] Requires LibCombat version 33
 [*] [LibCombat] Corrected the calculation for critical damage values to mind the new values from shadow mundus. It will now extract the value from the same tooltip which you can see in the character window, instead of using a hard coded base value and the extracted bonus from divine pieces.
+
+1.1.0 3.164.287 (14.10.2020) 00:19
+[*] Reworked skill timing and weaving stats. Now only one weaving time is shown, it shows the time wasted when weaving a skill, i.e. the gap between the global cooldowns or cast times of the skill and the following one. For light attacks it shows the time until the next skill was cast (it can sometimes show small negative values due to the way the API works). A new column "miss" will show the number of missed light/heavy attacks after a skill. In case of LA/HA it shows the number of times no skill has been casted between two subsequent LA/HA attacks.
+[*] In the log you can now see for casts when an input was registered, an early input automatically activated (from queue) and the cast actually fired. 
+[*] Added new buff values for Minor/Major Breach for penetration calculation in the new patch (Already works on PTS)
+[*] API Bump to Markath

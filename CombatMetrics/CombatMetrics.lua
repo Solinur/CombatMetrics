@@ -29,7 +29,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.0.9"
+CMX.version = "1.1.0"
 
 -- Logger
 
@@ -643,7 +643,6 @@ end
 
 function SkillCastHandler:Initialize()
 
-	self.lastRegisteredIndex = nil
 	self.started = {}
 	self.times = {}
 	self.delaySum = 0
@@ -680,6 +679,7 @@ local function GetEmtpyFightStats()
 
 	data.skills = {}
 	data.casts = {}
+	data.lastIndex = {}
 	abilityDurations = {}
 	data.barStats = {}
 
@@ -1478,7 +1478,8 @@ local function ProcessLogSkillTimings(fight, logline)
 	local skillData = fight:AcquireSkillCastData(reducedslot)
 
 	local castData = fight.calculated.casts
-	local lastRegisteredIndex = skillData.lastRegisteredIndex
+	local indexData = fight.calculated.lastIndex
+	local lastRegisteredIndex = indexData[abilityId]
 	local started = skillData.started
 
 	if status == LIBCOMBAT_SKILLSTATUS_REGISTERED then
@@ -1488,13 +1489,13 @@ local function ProcessLogSkillTimings(fight, logline)
 		local index = #castData + 1
 
 		castData[index] = newCast
-		skillData.lastRegisteredIndex = index   -- keep track of most recent registered instance, since an ability can fail to fire (for example due to poor weaving)
+		indexData[abilityId] = index   -- keep track of most recent registered instance, since an ability can fail to fire (for example due to poor weaving)
 
 	elseif status == LIBCOMBAT_SKILLSTATUS_QUEUE then
 
 		if lastRegisteredIndex == nil then
 
-			Print("calc", LOG_LEVEL_WARNING, "Missing registered ability on queue event: [%3.f s] %s (%d), Slot: %d", (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
+			Print("calc", LOG_LEVEL_WARNING, "Missing registered ability on queue event: [%.3f s] %s (%d), Slot: %d", (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
 			return
 
 		end
@@ -1505,7 +1506,7 @@ local function ProcessLogSkillTimings(fight, logline)
 
 		if lastRegisteredIndex == nil then
 
-			Print("calc", LOG_LEVEL_WARNING, "Missing registered ability on start event: [%3.f s] %s (%d), Slot: %d", (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
+			Print("calc", LOG_LEVEL_WARNING, "Missing registered ability on start event: [%.3f s] %s (%d), Slot: %d", (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
 			return
 
 		else
@@ -1516,7 +1517,7 @@ local function ProcessLogSkillTimings(fight, logline)
 			castData[lastRegisteredIndex][4] = timems
 			table.insert(skillData.times, timems)
 			castData[lastRegisteredIndex][5] = timems + duration
-			skillData.lastRegisteredIndex = nli
+			indexData[abilityId] = nli
 
 		end
 
@@ -1524,7 +1525,7 @@ local function ProcessLogSkillTimings(fight, logline)
 
 		if lastRegisteredIndex == nil then
 
-			Print("calc", LOG_LEVEL_WARNING, "Missing registered ability on start event: [%3.f s] %s (%d), Slot: %d", (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
+			Print("calc", LOG_LEVEL_WARNING, "Missing registered ability on start event: [%.3f s] %s (%d), Slot: %d", (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
 			return
 
 		else
@@ -1532,7 +1533,7 @@ local function ProcessLogSkillTimings(fight, logline)
 			castData[lastRegisteredIndex][4] = timems
 			table.insert(skillData.times, timems)
 			table.insert(started, lastRegisteredIndex)
-			skillData.lastRegisteredIndex = nil
+			indexData[abilityId] = nil
 
 		end
 
@@ -1561,12 +1562,12 @@ local function ProcessLogSkillTimings(fight, logline)
 
 		if not indexFound then
 
-			Print("calc", LOG_LEVEL_WARNING, "Missing started ability on success event: [%3.f s] %s (%d), Slot: %d", (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
+			Print("calc", LOG_LEVEL_WARNING, "Missing started ability on success event: [%.3f s] %s (%d), Slot: %d", (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
 			return
 
 		elseif indexFound > 3 then
 
-			Print("calc", LOG_LEVEL_WARNING, "Large number of unfinished skills (%d): [%3.f s] %s (%d), Slot: %d", indexFound, (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
+			Print("calc", LOG_LEVEL_WARNING, "Large number of unfinished skills (%d): [%.3f s] %s (%d), Slot: %d", indexFound, (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
 
 		end
 	end
