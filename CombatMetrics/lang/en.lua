@@ -295,7 +295,7 @@
 	SI_COMBAT_METRICS_AVERAGEC = "Average: ",
 
 	SI_COMBAT_METRICS_SKILLTIME_LABEL2 = "weave", -- weaving time
-	SI_COMBAT_METRICS_SKILLTIME_LABEL3 = "E", -- errors
+	SI_COMBAT_METRICS_SKILLTIME_LABEL3 = "miss", -- errors
 
 	SI_COMBAT_METRICS_SKILLTIME_TT1 = "Number of casts of this skill",
 	SI_COMBAT_METRICS_SKILLTIME_TT2 = "Weaving Time\n\nThe average time wasted until the next skill was cast.",

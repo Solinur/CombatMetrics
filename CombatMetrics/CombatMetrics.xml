@@ -255,7 +255,7 @@
 		
 		<Control name="CombatMetrics_InfoSkillRow" virtual="true">
 		
-			<Dimensions x="300" y="20"/>
+			<Dimensions x="310" y="20"/>
 		
 			<Controls>
 		
@@ -281,7 +281,7 @@
 				<Label name="$(parent)Value1" inherits="CombatMetrics_ValueFontControl" text="-" horizontalAlignment="CENTER">
 				
 					<Anchor point="LEFT" relativeTo="$(parent)Label" relativePoint="RIGHT" offsetX="4"/>
-					<Dimensions x="25" y="20"/>
+					<Dimensions x="28" y="20"/>
 					
 				</Label>
 				
@@ -295,7 +295,7 @@
 				<Label name="$(parent)Value3" inherits="CombatMetrics_ValueFontControl" text="-" horizontalAlignment="CENTER">
 				
 					<Anchor point="LEFT" relativeTo="$(parent)Value2" relativePoint="RIGHT" offsetX="4"/>
-					<Dimensions x="25" y="20"/>
+					<Dimensions x="28" y="20"/>
 					
 				</Label>
 				
@@ -384,7 +384,7 @@
 						<Label name="$(parent)2" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip" text="SI_COMBAT_METRICS_SHARP" horizontalAlignment="CENTER">
 						
 							<Anchor point="LEFT" relativeTo="$(parent)1" relativePoint="RIGHT" offsetX="4"/>
-							<Dimensions x="25" y="20"/>
+							<Dimensions x="28" y="20"/>
 							
 							<OnInitialized>self.tooltip = {SI_COMBAT_METRICS_SKILLTIME_TT1}</OnInitialized>
 							
@@ -402,7 +402,7 @@
 						<Label name="$(parent)4" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip" text="SI_COMBAT_METRICS_SKILLTIME_LABEL3" horizontalAlignment="CENTER">
 						
 							<Anchor point="LEFT" relativeTo="$(parent)3" relativePoint="RIGHT" offsetX="4"/>
-							<Dimensions x="25" y="20"/>
+							<Dimensions x="28" y="20"/>
 							
 							<OnInitialized>self.tooltip = {SI_COMBAT_METRICS_SKILLTIME_TT3}</OnInitialized>
 							
@@ -478,7 +478,7 @@
 				<Line name="$(parent)Sep2" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
 				
 					<Anchor point="TOPLEFT" relativeTo="$(parent)Ultimate" relativePoint="BOTTOMLEFT" offsetY="8"/>
-					<Anchor point="TOPRIGHT" relativeTo="$(parent)Ultimate" relativePoint="BOTTOMRIGHT" offsetY="8" offsetX="3"/>
+					<Anchor point="TOPRIGHT" relativeTo="$(parent)Ultimate" relativePoint="BOTTOMRIGHT" offsetY="8" offsetX="-4"/>
 				
 				</Line>		
 				
@@ -621,7 +621,7 @@
 			
 		<Control name="CombatMetrics_StarSign" virtual="true">
 		
-			<Dimensions x="350" y="66"/>
+			<Dimensions x="346" y="66"/>
 		
 			<Controls>
 			
@@ -3255,7 +3255,7 @@
 						<Control name="$(parent)Left">
 						
 							<Anchor point="TOPLEFT" offsetX="4" offsetY="4"/>
-							<Dimensions x="620" y="300"/>
+							<Dimensions x="626" y="300"/>
 							
 							<Controls>
 							
@@ -3288,7 +3288,7 @@
 						
 						<Control name="$(parent)Right">
 							
-							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Left" offsetX="6" offsetY="0"/>
+							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Left" offsetX="4" offsetY="0"/>
 							<Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4"/>
 							
 							<Controls>

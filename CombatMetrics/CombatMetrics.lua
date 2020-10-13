@@ -1932,6 +1932,8 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 			local skill = skillData[reducedslot]
 
 			if startTime then
+				
+				endTime = endTime or (startTime + 1000)
 
 				local isWeaponAttack = reducedslot%10 == 1 or reducedslot%10 == 2
 
@@ -1940,7 +1942,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 				skill.delaySum = skill.delaySum + delay
 				skill.delayCount = skill.delayCount + 1
 
-				if lastValidSkill and endTime then
+				if lastValidSkill then
 
 					local weavingTime = endTime and castData[lastValidSkill][4] - endTime
 
