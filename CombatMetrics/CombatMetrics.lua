@@ -219,6 +219,19 @@ local ignoredAbilityTiming = { -- Skills which ignore global cooldown
 
 }
 
+local ChangingAbilities = { -- Skills which can change on their own
+
+    [61902] = 61907,    -- Grim Focus --> Assasins Will
+    [61919] = 61930,    -- Merciless Resolve --> Assasins Will
+    [61927] = 61932,    -- Relentless Focus --> Assasins Scourge
+
+}
+
+for k,v in pairs(ChangingAbilities) do
+
+	ChangingAbilities[v] = k
+
+end
 
 function CMX.SetCrusher(value)
 
@@ -1493,6 +1506,8 @@ local function ProcessLogSkillTimings(fight, logline)
 
 	elseif status == LIBCOMBAT_SKILLSTATUS_QUEUE then
 
+		lastRegisteredIndex = lastRegisteredIndex or indexData[ChangingAbilities[abilityId]]
+
 		if lastRegisteredIndex == nil then
 
 			Print("calc", LOG_LEVEL_WARNING, "Missing registered ability on queue event: [%.3f s] %s (%d), Slot: %d", (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
@@ -1503,6 +1518,8 @@ local function ProcessLogSkillTimings(fight, logline)
 		castData[lastRegisteredIndex][3] = timems
 
 	elseif status == LIBCOMBAT_SKILLSTATUS_INSTANT then
+
+		lastRegisteredIndex = lastRegisteredIndex or indexData[ChangingAbilities[abilityId]]
 
 		if lastRegisteredIndex == nil then
 
