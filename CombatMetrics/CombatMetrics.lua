@@ -29,7 +29,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.1.0"
+CMX.version = "1.1.1"
 
 -- Logger
 
@@ -1488,12 +1488,12 @@ local function ProcessLogSkillTimings(fight, logline)
 
 	local callbacktype, timems, reducedslot, abilityId, status, skillDelay = unpackLogline(logline, 1, 6)
 
-	local skillData = fight:AcquireSkillCastData(reducedslot)
+	local skill = fight:AcquireSkillCastData(reducedslot)
 
 	local castData = fight.calculated.casts
 	local indexData = fight.calculated.lastIndex
 	local lastRegisteredIndex = indexData[abilityId]
-	local started = skillData.started
+	local started = skill.started
 
 	if status == LIBCOMBAT_SKILLSTATUS_REGISTERED then
 
@@ -1532,7 +1532,7 @@ local function ProcessLogSkillTimings(fight, logline)
 			local duration = isWeaponAttack and 0 or 1000
 
 			castData[lastRegisteredIndex][4] = timems
-			table.insert(skillData.times, timems)
+			table.insert(skill.times, timems)
 			castData[lastRegisteredIndex][5] = timems + duration
 			indexData[abilityId] = nli
 
@@ -1548,7 +1548,7 @@ local function ProcessLogSkillTimings(fight, logline)
 		else
 
 			castData[lastRegisteredIndex][4] = timems
-			table.insert(skillData.times, timems)
+			table.insert(skill.times, timems)
 			table.insert(started, lastRegisteredIndex)
 			indexData[abilityId] = nil
 
@@ -2045,6 +2045,8 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 				end
 			end
+
+			skill.started = nil
 		end
 
 		data.totalWeavingTimeSum = totalWeavingTimeSum
@@ -2052,6 +2054,9 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		data.totalWeaponAttacks = totalWeaponAttacks
 		data.totalSkillsFired = totalSkillsFired
 		data.delayAvg = (totalDelayCount > 0 and totalDelay / totalDelayCount) or 0
+
+		data.casts = nil
+		data.lastIndex = nil
 
 		-- calculate bardata
 
