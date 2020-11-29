@@ -6,7 +6,6 @@ This addon requires the following libraries:
 
 * [LibAddonMenu](https://www.esoui.com/downloads/info7-LibAddonMenu.html)
 * [LibCustomMenu](https://www.esoui.com/downloads/info1146-LibCustomMenu.html)
-* [LibFeedback](https://www.esoui.com/downloads/info2079-LibFeedback.html)
 * [LibCombat](https://www.esoui.com/downloads/info2528-LibCombat.html)
 
 They are not included in the release and have to be downloaded manually.

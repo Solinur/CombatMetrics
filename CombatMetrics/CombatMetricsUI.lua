@@ -1,7 +1,7 @@
 local em = GetEventManager()
 local wm = GetWindowManager()
-local dx = LIBCOMBAT_LINE_SIZE or math.ceil(GuiRoot:GetWidth()/tonumber(GetCVar("WindowedWidth"))*1000)/1000
-COMBAT_METRICS_LINE_SIZE = tostring(dx)
+local dx = math.ceil(GuiRoot:GetWidth()/tonumber(GetCVar("WindowedWidth"))*1000)/1000
+COMBAT_METRICS_LINE_SIZE = dx
 local fontsize = tonumber(GetString(SI_COMBAT_METRICS_FONT_SIZE_SMALL))
 local currentFight
 local abilitystats
@@ -11,7 +11,6 @@ local currentCLPage
 local selections, lastSelections
 local savedFights
 local SVHandler
-local ToggleFeedback
 local barKeyOffset = 1
 local enlargedGraph = false
 local maxXYPlots = 5
@@ -1252,8 +1251,6 @@ do
 
 		end
 
-		if LibFeedback then AddCustomMenuItem(GetString(SI_COMBAT_METRICS_FEEDBACK), ToggleFeedback) end
-
 		ShowMenu(settingsbutton)
 		AnchorMenu(settingsbutton)
 
@@ -1294,6 +1291,123 @@ do
 		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_NOTIFICATION_GUILD), ShowGuildInfo)
 		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_NOTIFICATION_ACCEPT), NotificationRead)
 		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_NOTIFICATION_DISCARD), DisableNotifications)
+
+		ShowMenu(settingsbutton)
+		AnchorMenu(settingsbutton)
+
+	end
+end
+
+do
+	local sendGold
+
+	local function PrefillMail()
+
+		local isDonation = sendGold and sendGold > 0
+		local headerString = GetString(isDonation and SI_COMBAT_METRICS_DONATE_GOLD_HEADER or SI_COMBAT_METRICS_FEEDBACK_MAIL_HEADER)
+
+		ZO_MailSendToField:SetText("@Solinur")
+		ZO_MailSendSubjectField:SetText(string.format(headerString, CMX.version))
+		ZO_MailSendBodyField:TakeFocus()
+
+		if sendGold and sendGold > 0 then
+
+			QueueMoneyAttachment(sendGold)
+			ZO_MailSendSendCurrency:OnBeginInput()
+
+		else
+
+			ZO_MailSendBodyField:TakeFocus()
+
+		end
+
+	end
+
+	local function SendIngameMail()
+
+		sendGold = 0
+		SCENE_MANAGER:Show('mailSend')
+		zo_callLater(PrefillMail, 250)
+
+	end
+
+	local function GotoESOUI()
+
+		RequestOpenUnsafeURL(GetString(SI_COMBAT_METRICS_FEEDBACK_ESOUIURL))
+
+	end
+
+	local function GotoGithub()
+
+		RequestOpenUnsafeURL(GetString(SI_COMBAT_METRICS_FEEDBACK_GITHUBURL))
+
+	end
+
+	local function GotoDiscord()
+
+		RequestOpenUnsafeURL(GetString(SI_COMBAT_METRICS_FEEDBACK_DISCORDURL))
+
+	end
+
+	local function DonateGold()
+
+		sendGold = 5000
+		SCENE_MANAGER:Show('mailSend')
+		zo_callLater(PrefillMail, 200)
+
+	end
+
+	local function CloseDialog()
+
+		CombatMetrics_Report_Dialog:SetHidden(true)
+
+	end
+
+	local function DonateCrowns()
+
+		local dialog = CombatMetrics_Report_Dialog
+		local button = dialog:GetNamedChild("Button")
+		local editbox = dialog:GetNamedChild("AccountInfo"):GetNamedChild("EditBox")
+
+		dialog:SetHidden(false)
+
+		button:SetHandler("OnClicked", CloseDialog, "CombatMetrics")
+		editbox:SetText("@Solinur")
+		editbox:TakeFocus()
+		editbox:SelectAll()
+
+	end
+
+	local function GotoESOUIDonation()
+
+		RequestOpenUnsafeURL(GetString(SI_COMBAT_METRICS_DONATE_ESOUIURL))
+
+	end
+
+	function CMX.FeedbackContextMenu( settingsbutton, upInside )
+
+		if not upInside then return end
+
+		ClearMenu()
+
+		local isEUServer = GetWorldName() == "EU Megaserver"
+		local stringFormatEU = isEUServer and "<<1>>" or SI_COMBAT_METRICS_FEEDBACK_EUONLY_FORMAT
+
+		local feedbackSubItems = {
+			{label = ZO_CachedStrFormat(stringFormatEU, GetString(SI_COMBAT_METRICS_FEEDBACK_MAIL)), callback = SendIngameMail, disabled = not isEUServer},
+			{label = GetString(SI_COMBAT_METRICS_FEEDBACK_ESOUI), callback = GotoESOUI},
+			{label = GetString(SI_COMBAT_METRICS_FEEDBACK_GITHUB), callback = GotoGithub},
+			{label = GetString(SI_COMBAT_METRICS_FEEDBACK_DISCORD), callback = GotoDiscord},
+		}
+		
+		local donationSubItems = {
+			{label = ZO_CachedStrFormat(stringFormatEU, GetString(SI_COMBAT_METRICS_DONATE_GOLD)), callback = DonateGold, disabled = not isEUServer},
+			{label = ZO_CachedStrFormat(stringFormatEU, GetString(SI_COMBAT_METRICS_DONATE_CROWNS)), callback = DonateCrowns, disabled = not isEUServer},
+			{label = GetString(SI_COMBAT_METRICS_DONATE_ESOUI), callback = GotoESOUIDonation},
+		}
+
+		AddCustomSubMenuItem(GetString(SI_COMBAT_METRICS_FEEDBACK_SEND), feedbackSubItems, nil, nil, nil, 2)
+		AddCustomSubMenuItem(GetString(SI_COMBAT_METRICS_DONATE), donationSubItems, nil, nil, nil, 2)
 
 		ShowMenu(settingsbutton)
 		AnchorMenu(settingsbutton)
@@ -5106,54 +5220,46 @@ end
 function CMX.ItemTooltip_OnMouseEnter(control)
 
 	local itemLink = control.itemLink
+	local enchantDescription = control.enchantDescription
 
-	if itemLink == "" or itemLink == nil then return end
+	if itemLink ~= "" and itemLink ~= nil then
 
-	InitializeTooltip(ItemTooltip, control:GetParent(), TOPLEFT, 5, 0, TOPRIGHT)
-	ItemTooltip:SetLink(itemLink)
+		InitializeTooltip(ItemTooltip, control:GetParent(), TOPLEFT, 5, 0, TOPRIGHT)
+		ItemTooltip:SetLink(itemLink)
+
+	elseif enchantDescription ~= "" and enchantDescription ~= nil then
+
+		InitializeTooltip(SkillTooltip, control:GetParent(), TOPLEFT, 5, 0, TOPRIGHT)
+		SkillTooltip:AddVerticalPadding(5)
+		SkillTooltip:AddLine(enchantDescription)
+
+	end
 
 end
 
 function CMX.ItemTooltip_OnMouseExit(control)
 
 	ClearTooltip(ItemTooltip)
+	ClearTooltip(SkillTooltip)
 
 end
 
 local equipslots = {
 
-	EQUIP_SLOT_MAIN_HAND,
-	EQUIP_SLOT_OFF_HAND,
-	EQUIP_SLOT_BACKUP_MAIN,
-	EQUIP_SLOT_BACKUP_OFF,
-	EQUIP_SLOT_HEAD,
-	EQUIP_SLOT_SHOULDERS,
-	EQUIP_SLOT_CHEST,
-	EQUIP_SLOT_HAND,
-	EQUIP_SLOT_WAIST,
-	EQUIP_SLOT_LEGS,
-	EQUIP_SLOT_FEET,
-	EQUIP_SLOT_NECK,
-	EQUIP_SLOT_RING1,
-	EQUIP_SLOT_RING2,
-}
-
-local equipicons = {
-
-	"EsoUI/Art/CharacterWindow/gearslot_mainhand.dds",
-	"EsoUI/Art/CharacterWindow/gearslot_offhand.dds",
-	"EsoUI/Art/CharacterWindow/gearslot_mainhand.dds",
-	"EsoUI/Art/CharacterWindow/gearslot_offhand.dds",
-	"EsoUI/Art/CharacterWindow/gearslot_head.dds",
-	"EsoUI/Art/CharacterWindow/gearslot_shoulders.dds",
-	"EsoUI/Art/CharacterWindow/gearslot_chest.dds",
-	"EsoUI/Art/CharacterWindow/gearslot_hands.dds",
-	"EsoUI/Art/CharacterWindow/gearslot_belt.dds",
-	"EsoUI/Art/CharacterWindow/gearslot_legs.dds",
-	"EsoUI/Art/CharacterWindow/gearslot_feet.dds",
-	"EsoUI/Art/CharacterWindow/gearslot_neck.dds",
-	"EsoUI/Art/CharacterWindow/gearslot_ring.dds",
-	"EsoUI/Art/CharacterWindow/gearslot_ring.dds",
+	{EQUIP_SLOT_MAIN_HAND, "EsoUI/Art/CharacterWindow/gearslot_mainhand.dds"},
+	{EQUIP_SLOT_OFF_HAND, "EsoUI/Art/CharacterWindow/gearslot_offhand.dds"},
+	{EQUIP_SLOT_BACKUP_MAIN, "EsoUI/Art/CharacterWindow/gearslot_mainhand.dds"},
+	{EQUIP_SLOT_BACKUP_OFF, "EsoUI/Art/CharacterWindow/gearslot_offhand.dds"},
+	{EQUIP_SLOT_HEAD, "EsoUI/Art/CharacterWindow/gearslot_head.dds"},
+	{EQUIP_SLOT_SHOULDERS, "EsoUI/Art/CharacterWindow/gearslot_shoulders.dds"},
+	{EQUIP_SLOT_CHEST, "EsoUI/Art/CharacterWindow/gearslot_chest.dds"},
+	{EQUIP_SLOT_HAND, "EsoUI/Art/CharacterWindow/gearslot_hands.dds"},
+	{EQUIP_SLOT_WAIST, "EsoUI/Art/CharacterWindow/gearslot_belt.dds"},
+	{EQUIP_SLOT_LEGS, "EsoUI/Art/CharacterWindow/gearslot_legs.dds"},
+	{EQUIP_SLOT_FEET, "EsoUI/Art/CharacterWindow/gearslot_feet.dds"},
+	{EQUIP_SLOT_NECK, "EsoUI/Art/CharacterWindow/gearslot_neck.dds"},
+	{EQUIP_SLOT_RING1, "EsoUI/Art/CharacterWindow/gearslot_ring.dds"},
+	{EQUIP_SLOT_RING2, "EsoUI/Art/CharacterWindow/gearslot_ring.dds"},
 }
 
 local armorcolors = {
@@ -5342,6 +5448,41 @@ local function updateRightInfoPanel(panel)
 	end
 end
 
+local subIdToQuality = {}
+
+local function GetEnchantQuality(itemLink)	-- From Enchanted Quality (Rhyono, votan)
+
+	local itemId, itemIdSub, enchantSub = itemLink:match("|H[^:]+:item:([^:]+):([^:]+):[^:]+:[^:]+:([^:]+):")
+	if not itemId then return 0 end
+
+	enchantSub = tonumber(enchantSub)
+
+	if enchantSub == 0 and not IsItemLinkCrafted(itemLink) then
+
+		local hasSet = GetItemLinkSetInfo(itemLink, false)		
+		if hasSet then enchantSub = tonumber(itemIdSub) end -- For non-crafted sets, the "built-in" enchantment has the same quality as the item itself
+
+	end
+
+	if enchantSub > 0 then
+
+		local quality = subIdToQuality[enchantSub]
+
+		if not quality then
+
+			-- Create a fake itemLink to get the quality from built-in function
+			local itemLink = string.format("|H1:item:%i:%i:50:0:0:0:0:0:0:0:0:0:0:0:0:1:1:0:0:10000:0|h|h", itemId, enchantSub)
+			quality = GetItemLinkQuality(itemLink)
+			subIdToQuality[enchantSub] = quality
+
+		end
+
+		return quality
+	end
+
+	return 0
+end
+
 local function updateBottomInfoPanel(panel)
 
 	if fightData == nil then return end
@@ -5355,7 +5496,10 @@ local function updateBottomInfoPanel(panel)
 	local poison1 = equipdata[EQUIP_SLOT_POISON]
 	local poison2 = equipdata[EQUIP_SLOT_BACKUP_POISON]
 
-	for i = 1, 14 do
+	for i, slotData in ipairs(equipslots) do
+
+		local slot = slotData[1]
+		local texture = slotData[2]
 
 		local equipline = panel:GetNamedChild("EquipLine" .. i)
 		local label = equipline:GetNamedChild("ItemLink")
@@ -5364,10 +5508,7 @@ local function updateBottomInfoPanel(panel)
 		local trait = equipline:GetNamedChild("Trait")
 		local enchant = equipline:GetNamedChild("Enchant")
 
-		local slot = equipslots[i]
-
 		local item = equipdata[slot] or ""
-		local texture = equipicons[i]
 
 		local armortype = GetItemLinkArmorType(item)
 		local color = item:len() > 0 and armorcolors[armortype] or {0, 0, 0, 1}
@@ -5390,27 +5531,36 @@ local function updateBottomInfoPanel(panel)
 
 		trait:SetText(traitName)
 
-		local enchantstring
+		local enchantString, enchantDescription
+		local enchantColor = {1, 1, 1, 1}
 
 		if (slot == EQUIP_SLOT_MAIN_HAND or slot == EQUIP_SLOT_OFF_HAND) and poison1:len() > 0 then
 
-			enchantstring = poison1
+			enchantString = poison1
 			enchant.itemLink = poison1
 
 		elseif (slot == EQUIP_SLOT_BACKUP_MAIN or slot == EQUIP_SLOT_BACKUP_OFF) and poison2:len() > 0 then
 
-			enchantstring = poison2
+			enchantString = poison2
 			enchant.itemLink = poison2
 
 		else
 
-			_, enchantstring = GetItemLinkEnchantInfo(item)
-			enchantstring = enchantstring:gsub(GetString(SI_COMBAT_METRICS_ENCHANTMENT_TRIM), "")
+			_, enchantString, enchantDescription = GetItemLinkEnchantInfo(item)
+			enchantString = enchantString:gsub(GetString(SI_COMBAT_METRICS_ENCHANTMENT_TRIM), "")
+			local enchantId = GetItemLinkAppliedEnchantId(item)
+			enchant.enchantDescription = enchantDescription
 			enchant.itemLink = ""
+			local quality = GetEnchantQuality(item)
+			enchantColor = {GetItemQualityColor(quality):UnpackRGBA()}
 
 		end
 
-		enchant:SetText(enchantstring)
+		enchant:SetText(enchantString)
+		enchant:SetColor(unpack(enchantColor))
+
+		-- GetEnchantProcAbilityId(GetItemLinkAppliedEnchantId())
+		-- GetItemLinkAppliedEnchantId
 
 	end
 end
@@ -6135,6 +6285,7 @@ local function toggleFightReport()
 
 	if not SCENE_MANAGER:IsShowing("CMX_REPORT_SCENE") then
 
+		CombatMetrics_Report_Dialog:SetHidden(true)
 		SCENE_MANAGER:Toggle("CMX_REPORT_SCENE")
 
 		CombatMetrics_Report:Update(#CMX.lastfights>0 and #CMX.lastfights or nil)
@@ -6647,20 +6798,4 @@ function CMX.InitializeUI()
 
 	initFightReport()
 	initLiveReport()
-
-	local settingsbutton = CombatMetrics_Report_SelectorRowSettingsButton
-
-	if LibFeedback then
-
-		local data = CMX.GetFeedBackData(settingsbutton)
-
-		local button, feedbackWindow = LibFeedback:initializeFeedbackWindow(unpack(data))
-		button:SetHidden(true)
-
-		function ToggleFeedback()
-
-			feedbackWindow:ToggleHidden()
-
-		end
-	end
 end

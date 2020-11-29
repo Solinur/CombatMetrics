@@ -29,7 +29,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.1.2"
+CMX.version = "1.1.3"
 
 -- Logger
 
@@ -88,47 +88,9 @@ if LC == nil then
 
 end
 
-function CMX.GetFeedBackData(parentcontrol)
-
-	local data = {
-
-		CMX,
-		CMX.name .. " " .. CMX.version,
-		parentcontrol,
-		"@Solinur",
-		{TOPLEFT, parentcontrol, TOPRIGHT, 10, 0},
-		{
-			{0, GetString(SI_COMBAT_METRICS_FEEDBACK_MAIL), false},
-			{5000, GetString(SI_COMBAT_METRICS_FEEDBACK_GOLD), true},
-			{25000, GetString(SI_COMBAT_METRICS_FEEDBACK_GOLD2), true},
-			{"https://www.esoui.com/downloads/info1360-CombatMetrics.html", GetString(SI_COMBAT_METRICS_FEEDBACK_ESOUI), false},
-			{"https://github.com/Solinur/CombatMetrics", GetString(SI_COMBAT_METRICS_FEEDBACK_GITHUB), false},
-		},
-		GetString(SI_COMBAT_METRICS_FEEDBACK_TEXT),
-		700,
-		245,
-		145
-	}
-
-	return data
-end
-
 local GetFormattedAbilityName = LC.GetFormattedAbilityName
 
 local GetFormattedAbilityIcon = LC.GetFormattedAbilityIcon
-
-local offstatlist= {
-	"maxmagicka",
-	"spellpower",
-	"spellcrit",
-	"spellcritbonus",
-	"spellpen",
-	"maxstamina",
-	"weaponpower",
-	"weaponcrit",
-	"weaponcritbonus",
-	"weaponpen",
-}
 
 local STATTYPE_NORMAL = 0
 local STATTYPE_CRITICAL = 1
@@ -229,7 +191,8 @@ local ChangingAbilities = { -- Skills which can change on their own
 
     [61902] = 61907,    -- Grim Focus --> Assasins Will
     [61919] = 61930,    -- Merciless Resolve --> Assasins Will
-    [61927] = 61932,    -- Relentless Focus --> Assasins Scourge
+	[61927] = 61932,    -- Relentless Focus --> Assasins Scourge
+	[117749] = 117773,   -- Stalking Blastbones (When greyed out)
 
 }
 
@@ -505,16 +468,20 @@ function UnitHandler:Initialize()
 
 end
 
-function UnitHandler:UpdateResistance(ismagic, effectdata, value)
+function UnitHandler:UpdateResistance(fight, ismagic, effectdata, value)
 
 	local debuffName = effectdata.name
 	local debuffData = self.physResDebuffs
 	local valuekey = "currentPhysicalResistance"
+	local resistDataKey = "physicalResistance"
+	local statkey = "currentweaponpen"
 
 	if ismagic then
 
 		debuffData = self.spellResDebuffs
 		valuekey = "currentSpellResistance"
+		resistDataKey = "spellResistance"
+		statkey = "currentspellpen"
 
 	end
 
@@ -533,6 +500,9 @@ function UnitHandler:UpdateResistance(ismagic, effectdata, value)
 		debuffData[debuffName] = value
 
 		self[valuekey] = self[valuekey] + value
+
+		local fullvalue = (fight.calculated.stats[statkey] or 0) + self[valuekey]
+		self[resistDataKey][fullvalue] = 0
 
 	elseif isactive == false and debuffData[debuffName] then
 
@@ -1209,6 +1179,7 @@ local healResultCategory={
 	[ACTION_RESULT_HOT_TICK] = "Normal",
 	[ACTION_RESULT_CRITICAL_HEAL] = "Critical",
 	[ACTION_RESULT_HOT_TICK_CRITICAL] = "Critical",
+	[ACTION_RESULT_DAMAGE_SHIELDED] = "Normal",
 }
 
 local function ProcessLogHeal(fight, logline)
@@ -1405,21 +1376,21 @@ local function ProcessLogEffects(fight, logline)
 
 	if abilityId == 75753 then
 
-		unit:UpdateResistance(true, effectdata, hitValue)
-		unit:UpdateResistance(false, effectdata, hitValue)
+		unit:UpdateResistance(fight, true, effectdata, hitValue)
+		unit:UpdateResistance(fight, false, effectdata, hitValue)
 
 
 	end
 
 	if spellres then
 
-		unit:UpdateResistance(true, effectdata, spellres)
+		unit:UpdateResistance(fight, true, effectdata, spellres)
 
 	end
 
 	if physres then
 
-		unit:UpdateResistance(false, effectdata, physres)
+		unit:UpdateResistance(fight, false, effectdata, physres)
 
 	end
 end
@@ -1516,7 +1487,7 @@ local function ProcessLogSkillTimings(fight, logline)
 
 		if lastRegisteredIndex == nil then
 
-			Print("calc", LOG_LEVEL_WARNING, "Missing registered ability on queue event: [%.3f s] %s (%d), Slot: %d", (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
+			-- Print("calc", LOG_LEVEL_WARNING, "Missing registered ability on queue event: [%.3f s] %s (%d), Slot: %d", (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
 			return
 
 		end

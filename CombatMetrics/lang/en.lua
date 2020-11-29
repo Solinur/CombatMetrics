@@ -15,6 +15,13 @@
 	SI_COMBAT_METRICS_STAMINA = GetString(SI_ATTRIBUTES3),  -- Stamina
 	SI_COMBAT_METRICS_ULTIMATE = GetString(SI_COMBATMECHANICTYPE10),  -- Ultimate
 
+-- URLs (Feedback Menu)
+
+	SI_COMBAT_METRICS_FEEDBACK_ESOUIURL = "https://www.esoui.com/downloads/info1360-CombatMetrics.html",
+	SI_COMBAT_METRICS_FEEDBACK_GITHUBURL = "https://github.com/Solinur/CombatMetrics",
+	SI_COMBAT_METRICS_FEEDBACK_DISCORDURL = "https://discord.gg/2eqYt2n5M5",
+	SI_COMBAT_METRICS_DONATE_ESOUIURL = "https://www.esoui.com/downloads/info1360-CombatMetrics.html#donate",
+
 -- Localization Start
 
 -- Functionality
@@ -114,7 +121,6 @@
 	SI_COMBAT_METRICS_POSTBUFF_FORMAT_GROUP = "<<1>> - Uptime: <<2>>/<<5>> (<<3>>/<<6>><<4[/ on $d/ on $d units]>>)", -- (<<1>> = buff name, <<2>> = relative uptime, <<3>> = uptime, <<4>> = units, <<5>> = relative group uptime, <<6>> = group uptime) e.g. Minor Sorcery - Uptime: 55.4%/100.6% (5:36/10:11 in 10:07)
 
 	SI_COMBAT_METRICS_SETTINGS = "Addon Settings",
-	SI_COMBAT_METRICS_FEEDBACK = "Send Feedback / Donate",
 
 	-- Graph
 
@@ -133,13 +139,28 @@
 
 	-- Feedback
 
-	SI_COMBAT_METRICS_FEEDBACK_MAIL = "Send Mail",
-	SI_COMBAT_METRICS_FEEDBACK_GOLD = "Donate 5000g",
-	SI_COMBAT_METRICS_FEEDBACK_GOLD2 = "Donate 25000g",
-	SI_COMBAT_METRICS_FEEDBACK_ESOUI = "Site (ESOUI)",
-	SI_COMBAT_METRICS_FEEDBACK_GITHUB = "GitHub",
-	SI_COMBAT_METRICS_FEEDBACK_TEXT = "\nIf you found a bug, have a request or a suggestion, send an ingame mail, create an issue on GitHub or post it in the comments on EsoUI. \n\nDonations are gladly accepted, but are not urgently needed. \nIf you want to buy me a coffee or a beer you can donate via Paypal on the ESOUI page.",
+	SI_COMBAT_METRICS_FEEDBACK = "Feedback",
 
+	SI_COMBAT_METRICS_FEEDBACK_SEND = "Send feedback",
+
+	SI_COMBAT_METRICS_FEEDBACK_EUONLY_FORMAT = "<<1>> (EU only)",
+	SI_COMBAT_METRICS_FEEDBACK_MAIL = "Ingame mail",
+	SI_COMBAT_METRICS_FEEDBACK_MAIL_HEADER = "Feedback: Combat Metrics %s",
+
+	SI_COMBAT_METRICS_FEEDBACK_ESOUI = "ESOUI page",
+	SI_COMBAT_METRICS_FEEDBACK_GITHUB = "GitHub repository",
+	SI_COMBAT_METRICS_FEEDBACK_DISCORD = "Discord",
+
+	SI_COMBAT_METRICS_DONATE = "Donate",
+	SI_COMBAT_METRICS_DONATE_GOLD = "Gold",
+	SI_COMBAT_METRICS_DONATE_GOLD_HEADER = "Donation: Combat Metrics %s",
+	SI_COMBAT_METRICS_DONATE_CROWNS = "Crowns",
+	SI_COMBAT_METRICS_DONATE_CROWNS_TEXT = "If you wish to gift something from the crown store, I'd be happy to receive some crown crates or consumable items. \nYou can also contact me if you wish to gift something else.",
+	SI_COMBAT_METRICS_DONATE_CROWNS_ACCOUNT = "My account:",
+	SI_COMBAT_METRICS_DONATE_ESOUI = "Donation Page",
+	
+	SI_COMBAT_METRICS_OK = "OK",
+	
 	SI_COMBAT_METRICS_STORAGE_FULL = "The storage file is full. The fight you want to save needs <<1>> MB. Delete a fight to free some space or increase the allowed space in the settings!",
 
 	-- Fight Control Button Tooltips
