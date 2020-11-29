@@ -7,9 +7,6 @@ local stepsize = 20 	-- stepsize for chunks of the log.
 local chatContainer
 local chatWindow
 
-local lastUsedSkill
-local lastUsedWeaponAttack
-
 local currentbar
 local abilityDurations = {}
 
@@ -29,7 +26,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.1.3"
+CMX.version = "1.2.0"
 
 -- Logger
 
@@ -686,9 +683,6 @@ local function GetEmtpyFightStats()
 		healingIn = {},
 	}
 
-	lastUsedSkill = nil
-	lastUsedWeaponAttack = nil
-
 	return data
 
 end
@@ -719,7 +713,6 @@ local function CalculateFight(fight) -- called by CMX.update or on user interact
 	fight.calculating = true
 
 	local titleBar = CombatMetrics_Report_TitleFightTitleBar
-	local titleBarBg = CombatMetrics_Report_TitleFightTitleBarBG
 
 	titleBar:SetValue(0)
 	titleBar:SetHidden(false)
@@ -1034,7 +1027,7 @@ local function IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitVa
 
 	local values
 
-	if isheal == true  and isDamageOut == true then
+	if isheal == true and isDamageOut == true then
 
 		values = stats.healavg
 		barStats.healingOut = barStats.healingOut + hitValue
@@ -1113,7 +1106,7 @@ end
 
 local function ProcessLogDamage(fight, logline)
 
-	local callbacktype, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType = unpackLogline(logline, 1, 9)
+	local callbacktype, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType, overflow = unpackLogline(logline, 1, 9)
 
 	if timems < (fight.combatstart-500) or fight.units[sourceUnitId] == nil or fight.units[targetUnitId] == nil then return end
 
@@ -1139,14 +1132,31 @@ local function ProcessLogDamage(fight, logline)
 		hitkey = ZO_CachedStrFormat("hitsOut<<1>>", resultkey)
 		graphkey = "damageOut"
 
+		hitValue = hitValue + overflow
+
+		if overflow > 0 then
+
+			local shieldkey = ZO_CachedStrFormat("damageOut<<1>>", damageResultCategory[ACTION_RESULT_DAMAGE_SHIELDED])
+			abilitydata[shieldkey] = abilitydata[shieldkey] + overflow
+		end
+
 	else																												-- incoming and self inflicted Damage are consolidated.
 
 		abilitydata = fight:AcquireUnitData(sourceUnitId, timems):AcquireAbilityData(abilityId, ispet, damageType, "damageIn")
 		isDamageOut = false
 
 		dmgkey = ZO_CachedStrFormat("damageIn<<1>>", resultkey)	-- determine categories. For normal incoming damage: dmgkey = "damageNormal", for critical outgoing damage: dmgkey = "damageCritical" ...
+
+		if overflow > hitValue then resultkey = damageResultCategory[ACTION_RESULT_DAMAGE_SHIELDED] end
+
 		hitkey = ZO_CachedStrFormat("hitsIn<<1>>", resultkey)
 		graphkey = "damageIn"
+
+		if overflow > 0 then
+
+			local shieldkey = ZO_CachedStrFormat("damageIn<<1>>", damageResultCategory[ACTION_RESULT_DAMAGE_SHIELDED])
+			abilitydata[shieldkey] = abilitydata[shieldkey] + overflow
+		end
 
 	end
 
