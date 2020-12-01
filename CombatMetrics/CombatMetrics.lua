@@ -1032,17 +1032,17 @@ local function IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitVa
 		values = stats.healavg
 		barStats.healingOut = barStats.healingOut + hitValue
 
-	elseif 	isheal == true and isDamageOut == false then
+	elseif isheal == true and isDamageOut == false then
 
 		barStats.healingIn = barStats.healingIn + hitValue
 		return
 
-	elseif 	isheal == false and isDamageOut == true then
+	elseif isheal == false and isDamageOut == true then
 
 		values = stats.dmgavg
 		barStats.damageOut = barStats.damageOut + hitValue
 
-	elseif 	isheal == false and isDamageOut == false then
+	elseif isheal == false and isDamageOut == false then
 
 		values = stats.dmginavg
 		barStats.damageIn = barStats.damageIn + hitValue
@@ -1192,9 +1192,11 @@ local healResultCategory={
 	[ACTION_RESULT_DAMAGE_SHIELDED] = "Normal",
 }
 
-local function ProcessLogHeal(fight, logline)
+local function ProcessLogHeal(fight, logline, overrideCallbackType)
 
 	local callbacktype, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, powerType, overflow = unpackLogline(logline, 1, 9)
+
+	callbacktype = overrideCallbackType or callbacktype
 
 	if timems < (fight.combatstart-500) or fight.units[sourceUnitId] == nil or fight.units[targetUnitId] == nil then return end
 
@@ -1259,11 +1261,8 @@ ProcessLog[LIBCOMBAT_EVENT_HEAL_IN] = ProcessLogHeal
 
 local function ProcessLogHealSelf (fight, logline)
 
-	logline[1] = LIBCOMBAT_EVENT_HEAL_OUT
-	ProcessLogHeal(fight, logline)
-
-	logline[1] = LIBCOMBAT_EVENT_HEAL_IN
-	ProcessLogHeal(fight, logline)
+	ProcessLogHeal(fight, logline, LIBCOMBAT_EVENT_HEAL_OUT)
+	ProcessLogHeal(fight, logline, LIBCOMBAT_EVENT_HEAL_IN)
 
 end
 

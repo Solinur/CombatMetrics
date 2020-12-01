@@ -291,8 +291,7 @@ local function decodeCombatLogLine(line, fight)
 	if layoutId == LAYOUT_COMBAT then						-- type, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType
 
 		logdata[3] = CombatResultTableLoad[logdata[3]]
-		logdata[6] = logdata[6] == 0 and -1 or logdata[6]
-		logdata[8]	= logdata[8] or 0
+		logdata[8] = logdata[8] or 0
 
 	elseif layoutId == LAYOUT_EVENT then					-- type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType
 
