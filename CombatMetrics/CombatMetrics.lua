@@ -190,6 +190,7 @@ local ChangingAbilities = { -- Skills which can change on their own
     [61919] = 61930,    -- Merciless Resolve --> Assasins Will
 	[61927] = 61932,    -- Relentless Focus --> Assasins Scourge
 	[117749] = 117773,   -- Stalking Blastbones (When greyed out)
+	[117690] = 117693,   -- Blighted Blastbones (When greyed out)
 
 }
 

@@ -510,9 +510,9 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Added Crystal Weapon and Breach/Fracture Poisons resistance debuffs to be recognized for penetration stat calculations
 [*] Fixed Minor/Major Breach not being considered as physical resistance debuff
 
-1.2.0 
+1.2.0 3.354.854 (03.12.2020) 00:19
 [*] Added colorization of enchant quality in the item overview panel. (Thx to Rhyono for the code)
 [*] Reworked the feedback menu. It's now accessed by a new button "S" that will also be implemented in my other addons sooner or later. As a consequence the dependency for LibFeedback (along with it's own dependency LibStub) has been dropped.
-[*] Fixed an issue that would prevent some preapplied buffs to be registered. (For example Minor Force when wearing Medusa or pots taken before combat start)
+[*] Fixed an issue that would prevent some preapplied buffs to be registered. (For example Minor Force when wearing Medusa or potions taken before combat start)
 [*] Added a workaround for Minor Magickasteal. Since the API currently reports the wrong source, it will always be shown as a buff added by a group member. 
 [*] Fixed an issue where some Blastbone casts were not registered.
