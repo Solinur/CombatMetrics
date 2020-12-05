@@ -3388,9 +3388,7 @@ local function DrawLine(plot, coords, id)
 
 	local line = lineControls[id]
 
-	local PlotColors = db.FightReport.PlotColors
-
-	line:SetThickness(dx * 2)
+	line:SetThickness(dx * 24)
 	line:SetColor(unpack(db.FightReport.PlotColors[plotid]))
 	line:ClearAnchors()
 
@@ -6332,11 +6330,13 @@ function CMX.Resizing(control, resizing)
 
 		control:SetEdgeColor(1,1,1,1)
 		control:SetCenterColor(1,1,1,.2)
+		control:SetDrawTier(2)
 
 	else
 
 		control:SetEdgeColor(1,1,1,0)
 		control:SetCenterColor(1,1,1,0)
+		control:SetDrawTier(0)
 
 		local scale, newpos = unpack(lastResize)
 		local parent = control:GetParent()

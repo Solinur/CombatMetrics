@@ -85,9 +85,26 @@
 	
 		</Label>
 		
-		<Backdrop name="CombatMetrics_BackgroundFramed" virtual="true" edgeColor="FFAAAAAA" centerColor="00000000">
+		<Line name="CombatMetrics_Line_Thin" thickness="16" textureFile="CombatMetrics/art/line1.dds" virtual="true" />
+		<Line name="CombatMetrics_Line" thickness="16" textureFile="CombatMetrics/art/line2.dds" virtual="true" />
+		<Line name="CombatMetrics_Line_Graph" thickness="32" textureFile="CombatMetrics/art/line2big.dds" pixelRoundingEnabled="false" virtual="true" />
+		<Line name="CombatMetrics_Line_Solid" thickness="16" textureFile="CombatMetrics/art/line4.dds" virtual="true" />
+		
+		<Backdrop name="CombatMetrics_BackgroundFramed_Solid" virtual="true" edgeColor="FFFFFFFF" centerColor="00000000">
 			
-			<Edge edgeSize="2"/>
+			<Edge file="CombatMetrics/art/simpleframe4.dds" edgeFileWidth="128" edgeFileHeight="16" edgeSize="8"/>
+			
+		</Backdrop>
+
+		<Backdrop name="CombatMetrics_BackgroundFramed" virtual="true" edgeColor="FFFFFFFF" centerColor="00000000">
+			
+			<Edge file="CombatMetrics/art/simpleframe2.dds" edgeFileWidth="128" edgeFileHeight="16" edgeSize="8"/>
+			
+		</Backdrop>
+
+		<Backdrop name="CombatMetrics_BackgroundFramed_Thin" virtual="true" edgeColor="FFAAAAAA" centerColor="00000000">
+			
+			<Edge file="CombatMetrics/art/simpleframe1.dds" edgeFileWidth="128" edgeFileHeight="16" edgeSize="8"/>
 			
 		</Backdrop>
 		
@@ -236,7 +253,7 @@
 					<Dimensions x="116"/>
 				</Label>
 					
-				<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+				<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
 					<Anchor point="BOTTOMLEFT"/>
 					<Anchor point="BOTTOMRIGHT"/>
 				</Line>
@@ -434,7 +451,7 @@
 					</Controls>
 				</Control>
 				
-				<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+				<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
 				
 					<Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="3"/>
 					<Anchor point="TOPRIGHT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetY="3"/>
@@ -489,7 +506,7 @@
 				
 				</Control>	
 				
-				<Line name="$(parent)Sep2" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+				<Line name="$(parent)Sep2" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
 				
 					<Anchor point="TOPLEFT" relativeTo="$(parent)Ultimate" relativePoint="BOTTOMLEFT" offsetY="8"/>
 					<Anchor point="TOPRIGHT" relativeTo="$(parent)Ultimate" relativePoint="BOTTOMRIGHT" offsetY="8" offsetX="-4"/>
@@ -722,7 +739,7 @@
 					
 				</Backdrop>
 					
-				<Line name="$(parent)Line" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+				<Line name="$(parent)Line" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
 					<Anchor point="BOTTOMLEFT" offsetX="4" />
 					<Anchor point="BOTTOMRIGHT" offsetX="-4" />
 				</Line>
@@ -803,7 +820,7 @@
 					
 				</Control>
 				
-				<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+				<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
 						
 					<Anchor point="BOTTOMLEFT" relativeTo="$(parent)Header" offsetY="2"/>
 					<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Header" offsetY="2"/>
@@ -866,7 +883,7 @@
 					
 				</Control>
 				
-				<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+				<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
 				
 					<Anchor point="BOTTOMLEFT" relativeTo="$(parent)Header" offsetY="2"/>
 					<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Header" offsetY="2"/>
@@ -1106,7 +1123,7 @@
 					<Dimensions x="50"/>					
 				</Label>
 				
-				<Line name="$(parent)Sep" color="FFFFFFFF" thickness="COMBAT_METRICS_LINE_SIZE">
+				<Line name="$(parent)Sep" color="FFFFFFFF" inherits="CombatMetrics_Line_Thin">
 					<Anchor point="BOTTOMLEFT"/>
 					<Anchor point="BOTTOMRIGHT" offsetX="-2"/>
 					<Dimensions y="1"/>
@@ -1281,7 +1298,7 @@
 			
 		</Control>
 		
-		<Line name="CombatMetrics_PlotLine" color="AAFFFF00" thickness="2" layer="1" level="2" virtual="true">
+		<Line name="CombatMetrics_PlotLine" color="AAFFFF00" inherits="CombatMetrics_Line_Graph" layer="1" level="2" virtual="true">
 		</Line>
 		
 		<Backdrop name="CombatMetrics_PlotBar" edgeColor="00000000" centerColor="66CCCCFF" layer="1" level="2" virtual="true">
@@ -1323,7 +1340,7 @@
 			</OnFocusLost>
 		</EditBox>
 		
-		<Line name="CombatMetrics_GraphTickY" color="FF444444" thickness="COMBAT_METRICS_LINE_SIZE" virtual="true">
+		<Line name="CombatMetrics_GraphTickY" color="FF444444" inherits="CombatMetrics_Line_Thin" virtual="true">
 		
 			<Controls>
 			
@@ -1341,7 +1358,7 @@
 	
 		</Line>
 		
-		<Line name="CombatMetrics_GraphTickX" color="FF333333" thickness="COMBAT_METRICS_LINE_SIZE" virtual="true">
+		<Line name="CombatMetrics_GraphTickX" color="FF333333" inherits="CombatMetrics_Line_Thin" virtual="true">
 		
 			<Controls>
 			
@@ -1432,11 +1449,11 @@
 			<Dimensions x="1000" y="770"/>
 			
 			<Controls>
-				<Backdrop name="$(parent)BG" inherits="CombatMetrics_BackgroundFramed" edgeColor="FF000000" centerColor="EE000000">
+				<Backdrop name="$(parent)BG" inherits="CombatMetrics_BackgroundFramed_Solid" edgeColor="FF000000" centerColor="EE000000">
 					<AnchorFill/>
 				</Backdrop>
 
-				<Backdrop name="$(parent)ResizeFrame" inherits="CombatMetrics_BackgroundFramed" edgeColor="00000000" centerColor="00000000" mouseEnabled="true" resizeHandleSize="10">
+				<Backdrop name="$(parent)ResizeFrame" inherits="CombatMetrics_BackgroundFramed_Solid" edgeColor="00000000" centerColor="00000000" mouseEnabled="true" resizeHandleSize="10">
 					<AnchorFill/>
 
 					<DimensionConstraints minX="500" maxX="3000" minY="385" maxY="2310"/>
@@ -1453,7 +1470,7 @@
 					
 					<Controls>
 					
-						<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="2">
+						<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line">
 							<Anchor point="BOTTOMLEFT"/>
 							<Anchor point="BOTTOMRIGHT"/>
 						</Line>
@@ -1682,7 +1699,7 @@
 							<AnchorFill/>
 							
 							<Controls>
-								<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+								<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
 									<Anchor point="TOP" offsetX="34" offsetY="6"/>
 									<Anchor point="BOTTOM" offsetX="34" offsetY="-6"/>
 								</Line>
@@ -1713,7 +1730,7 @@
 											<Dimensions x="76"/>
 										</Label>
 										
-										<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+										<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
 											<Anchor point="BOTTOMLEFT" relativeTo="$(parent)ActiveTimeLabel"  offsetY="4"/>
 											<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)CombatTimeValue"  offsetY="4"/>
 										</Line>
@@ -1733,7 +1750,7 @@
 											<Dimensions x="52"/>
 										</Label>
 										
-										<Line name="$(parent)StatHeaderSep" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+										<Line name="$(parent)StatHeaderSep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
 											<Anchor point="BOTTOMLEFT" relativeTo="$(parent)StatHeaderLabel1"  offsetY="2"/>
 											<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)StatHeaderLabel3"  offsetY="2"/>
 										</Line>
@@ -1907,7 +1924,7 @@
 											</OnInitialized>
 										</Control>
 
-										<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+										<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
 											<Anchor point="BOTTOMLEFT" relativeTo="$(parent)ResourceUltimate" offsetY="8"/>
 											<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)ResourceUltimate" offsetY="8"/>
 										</Line>
@@ -1932,7 +1949,7 @@
 															<Dimensions x="32" y="32"/>
 														</Texture>
 														
-														<Line name="$(parent)Line" thickness="COMBAT_METRICS_LINE_SIZE">
+														<Line name="$(parent)Line" inherits="CombatMetrics_Line_Thin">
 															<Anchor point="BOTTOMLEFT" offsetX="6"/>
 															<Anchor point="BOTTOMRIGHT" offsetX="-6"/>
 															
@@ -1955,7 +1972,7 @@
 												
 												</Control>
 												
-												<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+												<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
 													<Anchor point="TOPRIGHT" relativeTo="$(parent)Magicka" offsetY="6"/>
 													<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Magicka" offsetY="-6"/>
 												</Line>
@@ -1972,7 +1989,7 @@
 															<Dimensions x="32" y="32"/>
 														</Texture>
 														
-														<Line name="$(parent)Line" thickness="COMBAT_METRICS_LINE_SIZE">
+														<Line name="$(parent)Line" inherits="CombatMetrics_Line_Thin">
 															<Anchor point="BOTTOMLEFT" offsetX="6"/>
 															<Anchor point="BOTTOMRIGHT" offsetX="-6"/>
 															
@@ -1995,7 +2012,7 @@
 													
 												</Control>
 												
-												<Line name="$(parent)Sep2" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+												<Line name="$(parent)Sep2" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
 													<Anchor point="TOPRIGHT" relativeTo="$(parent)Stamina" offsetY="6"/>
 													<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Stamina" offsetY="-6"/>
 												</Line>
@@ -2011,7 +2028,7 @@
 															<Dimensions x="32" y="32"/>
 														</Texture>
 														
-														<Line name="$(parent)Line" thickness="COMBAT_METRICS_LINE_SIZE">
+														<Line name="$(parent)Line" inherits="CombatMetrics_Line_Thin">
 															<Anchor point="BOTTOMLEFT" offsetX="6"/>
 															<Anchor point="BOTTOMRIGHT" offsetX="-6"/>
 															
@@ -2365,7 +2382,7 @@
 									</Controls>
 								</Control>
 								
-								<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+								<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
 										
 									<Anchor point="BOTTOMLEFT" relativeTo="$(parent)Header" offsetY="2"/>
 									<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Header" offsetY="2"/>
@@ -2480,7 +2497,7 @@
 										
 											<Controls>
 											
-												<Backdrop name="$(parent)Bg" inherits="CombatMetrics_BackgroundFramed" centerColor="CC222222">
+												<Backdrop name="$(parent)Bg" inherits="CombatMetrics_BackgroundFramed_Solid" centerColor="CC222222">
 													
 													<Anchor point="TOPLEFT" offsetX="0"/>
 													<Anchor point="BOTTOMRIGHT" offsetX="0"/>
@@ -2604,7 +2621,7 @@
 									
 								</Control>
 								
-								<Line name="$(parent)Sep" color="FF888888" thickness="COMBAT_METRICS_LINE_SIZE">
+								<Line name="$(parent)Sep" color="FF888888" inherits="CombatMetrics_Line_Thin">
 									
 									<Anchor point="TOP" relativePoint="TOPRIGHT" relativeTo="$(parent)Toolbar" offsetX="4" offsetY="2"/>
 									<Anchor point="BOTTOM" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Toolbar" offsetX="4" offsetY="-2"/>
@@ -2629,7 +2646,7 @@
 											
 										</Backdrop>
 									
-										<Line name="$(parent)Cursor" color="66FFFFFF" level="0" thickness="COMBAT_METRICS_LINE_SIZE" hidden="true">
+										<Line name="$(parent)Cursor" color="66FFFFFF" level="0" inherits="CombatMetrics_Line_Thin" hidden="true">
 									
 											<Anchor point="TOPLEFT"/>
 											<Anchor point="BOTTOMLEFT"/>
@@ -2868,7 +2885,7 @@
 							
 						</Texture>
 					
-						<Backdrop name="$(parent)BG" inherits="CombatMetrics_BackgroundFramed" excludeFromResizeToFitExtents="true" edgeColor="FF000000" centerColor="EE000000">
+						<Backdrop name="$(parent)BG" inherits="CombatMetrics_BackgroundFramed_Solid" excludeFromResizeToFitExtents="true" edgeColor="FF000000" centerColor="EE000000">
 							<AnchorFill/>
 						</Backdrop>
 						
@@ -2902,7 +2919,7 @@
 									
 								</Control>
 								
-								<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+								<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
 									<Anchor point="TOPRIGHT" relativeTo="$(parent)BuffsIn" offsetY="6"/>
 									<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BuffsIn" offsetY="-6"/>
 								</Line>
@@ -2921,7 +2938,7 @@
 									
 								</Control>
 								
-								<Line name="$(parent)Sep2" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+								<Line name="$(parent)Sep2" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
 									<Anchor point="TOPRIGHT" relativeTo="$(parent)BuffsOut" offsetY="6"/>
 									<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BuffsOut" offsetY="-6"/>
 								</Line>
@@ -2941,7 +2958,7 @@
 									
 								</Control>
 								
-								<Line name="$(parent)Sep3" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+								<Line name="$(parent)Sep3" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
 									<Anchor point="TOPRIGHT" relativeTo="$(parent)MagickaStats" offsetY="6"/>
 									<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)MagickaStats" offsetY="-6"/>
 								</Line>
@@ -3017,7 +3034,7 @@
 									
 								</Control>
 								
-								<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+								<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
 								
 									<Anchor point="BOTTOMLEFT" relativeTo="$(parent)Header" offsetY="2"/>
 									<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Header" offsetY="2"/>
@@ -3126,7 +3143,7 @@
 							
 						</Control>
 						
-						<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+						<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
 								
 							<Anchor point="BOTTOMLEFT" relativeTo="$(parent)Header" offsetY="2"/>
 							<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Header" offsetY="2"/>
@@ -3245,7 +3262,7 @@
 							
 						</Control>
 						
-						<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+						<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
 								
 							<Anchor point="BOTTOMLEFT" relativeTo="$(parent)Header" offsetY="2"/>
 							<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Header" offsetY="2"/>
@@ -3291,7 +3308,7 @@
 									
 								</Control>
 								
-								<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+								<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
 								
 									<Anchor point="TOP" offsetY="2"/>
 									<Anchor point="BOTTOM" offsetY="-2"/>
@@ -3386,12 +3403,12 @@
 						
 						</Control>
 						
-						<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+						<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
 							<Anchor point="TOPLEFT" relativeTo="$(parent)Right" offsetX="0" offsetY="2"/>
 							<Anchor point="BOTTOMLEFT" relativeTo="$(parent)Right" offsetX="0" offsetY="-2"/>
 						</Line>
 						
-						<Line name="$(parent)Sep2" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+						<Line name="$(parent)Sep2" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
 							<Anchor point="BOTTOMLEFT" relativeTo="$(parent)Left" offsetX="2" offsetY="3"/>
 							<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Left" offsetX="-2" offsetY="3"/>
 						</Line>
@@ -3556,11 +3573,9 @@
 									
 								</Label>
 						
-								<Backdrop name="$(parent)BarBg" centerColor="00000000" edgeColor="FFCCCCCC" layer="1" level="1">
+								<Backdrop name="$(parent)BarBg" centerColor="00000000" edgeColor="FFCCCCCC" layer="1" level="1" inherits="CombatMetrics_BackgroundFramed">
 								
 									<AnchorFill/>
-									
-									<Edge edgeSize="1"/>
 								
 								</Backdrop>
 								
@@ -3593,7 +3608,7 @@
 							
 						</Control>
 						
-						<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" thickness="COMBAT_METRICS_LINE_SIZE">
+						<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
 						
 							<Anchor point="BOTTOMLEFT" relativeTo="$(parent)Recent" offsetX="4" offsetY="1"/>
 							<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Recent"  offsetX="-4" offsetY="1"/>
@@ -3622,7 +3637,7 @@
 				<Control name="$(parent)_Dialog" hidden="true" tier="2">
 					<Anchor point="CENTER" relativePoint="CENTER" offsetX="0" offsetY="0"/>
 
-					<Dimensions x="330" y="200" />
+					<Dimensions x="340" y="240" />
 					
 					<Controls>
 						<Backdrop name="$(parent)BG" inherits="CombatMetrics_BackgroundFramed" edgeColor="FFEEEECC" centerColor="F8050505">
@@ -3635,7 +3650,7 @@
 							<Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="10" offsetY="10"/>
 							<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="-10" offsetY="10"/>
 
-							<Dimensions y="100" />
+							<Dimensions y="140" />
 						</Label>
 
 						<Control name="$(parent)AccountInfo">
@@ -3647,13 +3662,13 @@
 								<Label name="$(parent)Label" text="SI_COMBAT_METRICS_DONATE_CROWNS_ACCOUNT" verticalAlignment="TOP" horizontalAlignment="RIGHT" inherits="CombatMetrics_LabelFontControl">
 									<Anchor point="TOPRIGHT" relativePoint="TOP" offsetX="-4"/>
 
-									<Dimensions x="70" y="20" />
+									<Dimensions x="100" y="20" />
 								</Label>
 
 								<EditBox name="$(parent)EditBox" font="ZoFontGame" color="FFFFFFFF" allowMarkupType="ALLOW_MARKUP_TYPE_NONE" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" editEnabled="false" mouseEnabled="true" newLineEnabled="false" multiLine="false">
 									<Anchor point="TOPLEFT" relativePoint="TOP" offsetX="4"/>
 
-									<Dimensions x="60" y="20" />
+									<Dimensions x="80" y="20" />
 								</EditBox>
 							</Controls>
 						</Control>
@@ -3684,11 +3699,11 @@
 			<Dimensions x="300" y="52"/>
 			
 			<Controls>
-				<Backdrop name="$(parent)BG" excludeFromResizeToFitExtents="true" inherits="CombatMetrics_BackgroundFramed" edgeColor="FF000000" centerColor="FF000000">
+				<Backdrop name="$(parent)BG" excludeFromResizeToFitExtents="true" inherits="CombatMetrics_BackgroundFramed_Solid" edgeColor="FF000000" centerColor="FF000000">
 					<AnchorFill />
 				</Backdrop>
 
-				<Backdrop name="$(parent)ResizeFrame" excludeFromResizeToFitExtents="true" inherits="CombatMetrics_BackgroundFramed" edgeColor="00000000" centerColor="00000000" mouseEnabled="true" resizeHandleSize="10">
+				<Backdrop name="$(parent)ResizeFrame" excludeFromResizeToFitExtents="true" inherits="CombatMetrics_BackgroundFramed_Solid" edgeColor="00000000" centerColor="00000000" mouseEnabled="true" resizeHandleSize="10">
 					<AnchorFill />
 
 					<DimensionConstraints minX="150" maxX="900" minY="26" maxY="156"/>
