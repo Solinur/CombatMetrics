@@ -87,7 +87,7 @@
 		
 		<Line name="CombatMetrics_Line_Thin" thickness="16" textureFile="CombatMetrics/art/line1.dds" virtual="true" />
 		<Line name="CombatMetrics_Line" thickness="16" textureFile="CombatMetrics/art/line2.dds" virtual="true" />
-		<Line name="CombatMetrics_Line_Graph" thickness="32" textureFile="CombatMetrics/art/line2big.dds" pixelRoundingEnabled="false" virtual="true" />
+		<Line name="CombatMetrics_Line_Graph" thickness="16" textureFile="CombatMetrics/art/line2.dds" pixelRoundingEnabled="false" virtual="true" />
 		<Line name="CombatMetrics_Line_Solid" thickness="16" textureFile="CombatMetrics/art/line4.dds" virtual="true" />
 		
 		<Backdrop name="CombatMetrics_BackgroundFramed_Solid" virtual="true" edgeColor="FFFFFFFF" centerColor="00000000">

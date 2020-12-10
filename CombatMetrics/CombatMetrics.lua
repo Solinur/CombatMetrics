@@ -26,7 +26,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.2.0"
+CMX.version = "1.2.1"
 
 -- Logger
 
@@ -783,14 +783,14 @@ local function AccumulateStats(fight)
 
 				if tablekey == "damageOut" then
 
-					ability.damageOutTotal = ability.damageOutNormal + ability.damageOutCritical + ability.damageOutShielded + ability.damageOutBlocked
-					ability.hitsOutTotal = ability.hitsOutNormal + ability.hitsOutCritical + ability.hitsOutShielded + ability.hitsOutBlocked
+					ability.damageOutTotal = ability.damageOutNormal + ability.damageOutCritical + ability.damageOutBlocked
+					ability.hitsOutTotal = ability.hitsOutNormal + ability.hitsOutCritical + ability.hitsOutBlocked
 					ability.DPSOut = ability.damageOutTotal / fight.dpstime
 
 				elseif tablekey == "damageIn" then
 
-					ability.damageInTotal = ability.damageInNormal + ability.damageInCritical + ability.damageInShielded + ability.damageInBlocked
-					ability.hitsInTotal = ability.hitsInNormal + ability.hitsInCritical + ability.hitsInShielded + ability.hitsInBlocked
+					ability.damageInTotal = ability.damageInNormal + ability.damageInCritical + ability.damageInBlocked
+					ability.hitsInTotal = ability.hitsInNormal + ability.hitsInCritical + ability.hitsInBlocked
 					ability.DPSIn = ability.damageInTotal / fight.dpstime
 
 				elseif tablekey == "healingOut" then
@@ -1123,6 +1123,8 @@ local function ProcessLogDamage(fight, logline)
 	local hitkey
 	local graphkey
 
+	hitValue = hitValue + overflow
+
 	if callbacktype == LIBCOMBAT_EVENT_DAMAGE_OUT then
 
 		unit = fight:AcquireUnitData(targetUnitId, timems)
@@ -1133,12 +1135,16 @@ local function ProcessLogDamage(fight, logline)
 		hitkey = ZO_CachedStrFormat("hitsOut<<1>>", resultkey)
 		graphkey = "damageOut"
 
-		hitValue = hitValue + overflow
+		if overflow > 0 then -- shielded damage
 
-		if overflow > 0 then
+			local shieldResult = damageResultCategory[ACTION_RESULT_DAMAGE_SHIELDED]
 
-			local shieldkey = ZO_CachedStrFormat("damageOut<<1>>", damageResultCategory[ACTION_RESULT_DAMAGE_SHIELDED])
+			local shieldkey = ZO_CachedStrFormat("damageOut<<1>>", shieldResult)
 			abilitydata[shieldkey] = abilitydata[shieldkey] + overflow
+
+			local shieldhitkey = ZO_CachedStrFormat("hitsOut<<1>>", shieldResult)
+			abilitydata[shieldhitkey] = abilitydata[shieldhitkey] + 1
+
 		end
 
 	else																												-- incoming and self inflicted Damage are consolidated.
@@ -1147,16 +1153,19 @@ local function ProcessLogDamage(fight, logline)
 		isDamageOut = false
 
 		dmgkey = ZO_CachedStrFormat("damageIn<<1>>", resultkey)	-- determine categories. For normal incoming damage: dmgkey = "damageNormal", for critical outgoing damage: dmgkey = "damageCritical" ...
-
-		if overflow > hitValue then resultkey = damageResultCategory[ACTION_RESULT_DAMAGE_SHIELDED] end
-
 		hitkey = ZO_CachedStrFormat("hitsIn<<1>>", resultkey)
 		graphkey = "damageIn"
 
-		if overflow > 0 then
+		if overflow > 0 then -- shielded damage
 
-			local shieldkey = ZO_CachedStrFormat("damageIn<<1>>", damageResultCategory[ACTION_RESULT_DAMAGE_SHIELDED])
+			local shieldResult = damageResultCategory[ACTION_RESULT_DAMAGE_SHIELDED]
+
+			local shieldkey = ZO_CachedStrFormat("damageIn<<1>>", shieldResult)
 			abilitydata[shieldkey] = abilitydata[shieldkey] + overflow
+
+			local shieldhitkey = ZO_CachedStrFormat("hitsIn<<1>>", shieldResult)
+			abilitydata[shieldhitkey] = abilitydata[shieldhitkey] + 1
+
 		end
 
 	end

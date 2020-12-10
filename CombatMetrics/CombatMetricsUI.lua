@@ -3388,7 +3388,7 @@ local function DrawLine(plot, coords, id)
 
 	local line = lineControls[id]
 
-	line:SetThickness(dx * 24)
+	line:SetThickness(dx * 16)
 	line:SetColor(unpack(db.FightReport.PlotColors[plotid]))
 	line:ClearAnchors()
 
