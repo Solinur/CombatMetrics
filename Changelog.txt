@@ -517,6 +517,6 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Added a workaround for Minor Magickasteal. Since the API currently reports the wrong source, it will always be shown as a buff added by a group member. 
 [*] Fixed an issue where some Blastbone casts were not registered.
 
-1.2.1
+1.2.1 3.408.218 (13.12.2020) 22:14
 [*] Reworked display of thin lines by using textures. This should result in more consistent display of line UI elements. 
-[*] Fixed an issue, where damage to shields was awarded twice for total DPS. 
+[*] Fixed an issue, where damage to shields was awarded twice for total DPS (You can recalculate fights recorded with version 1.2.0 to correct them). 
