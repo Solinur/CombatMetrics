@@ -194,6 +194,14 @@ local ChangingAbilities = { -- Skills which can change on their own
 
 }
 
+local abilityDelay = {	-- Radiant Destruction and morphs have a 100ms delay after casting. 50ms for Jabs
+    [63044] = 100,
+    [63029] = 100,
+    [63046] = 100,
+    [26797] = 50,
+    [38857] = 200
+}
+
 for k,v in pairs(ChangingAbilities) do
 
 	ChangingAbilities[v] = k
@@ -1544,6 +1552,7 @@ local function ProcessLogSkillTimings(fight, logline)
 		else
 
 			castData[lastRegisteredIndex][4] = timems
+			castData[lastRegisteredIndex][5] = timems + GetAbilityDuration(abilityId) + (abilityDelay[abilityId] or 0)
 			table.insert(skill.times, timems)
 			table.insert(started, lastRegisteredIndex)
 			indexData[abilityId] = nil
@@ -1561,7 +1570,7 @@ local function ProcessLogSkillTimings(fight, logline)
 			local starttime = castData[castindex][4]
 			local timeDiff = timems - starttime
 
-			if timeDiff < (GetAbilityDuration(abilityId) + 200) then
+			if timeDiff < (GetAbilityDuration(abilityId) + 250) then
 
 				castData[castindex][5] = timems
 				indexFound = k
