@@ -1190,8 +1190,8 @@ local function ProcessLogDamage(fight, logline)
 
 	end
 
-	abilitydata.max = mathmax(abilitydata.max, hitValue)
-	abilitydata.min = mathmin(abilitydata.min, hitValue)
+	abilitydata.max = mathmax(abilitydata.max)
+	abilitydata.min = mathmin(abilitydata.min)
 
 	IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitValue, false, unit)
 end

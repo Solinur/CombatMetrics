@@ -3501,7 +3501,8 @@ local function DrawBar(plot, x1, x2, id)
 
 	local xoffset = plot.xoffset
 
-	local maxX, _ = plot:GetDimensions() - xoffset
+	local maxX, _ = plot:GetDimensions()
+	maxX = maxX - xoffset
 
 	local outOfRange = ( x2 < minX ) or ( x1 > maxX )
 
@@ -5745,7 +5746,7 @@ local function updateFightListPanel(panel, data, issaved)
 			local durationstring = string.format("%d:%04.1f", activetime/60, activetime%60)
 
 			local DPSKey = DPSstrings[db.FightReport.category]
-			local dps = fight[DPSKey] or 0
+			local dps = zo_round(fight.calculated[DPSKey] or 0)
 
 			local rowName = scrollchild:GetName() .. "Row" .. id
 			local row = _G[rowName] or CreateControlFromVirtual(rowName, scrollchild, "CombatMetrics_FightlistRowTemplate")
