@@ -521,5 +521,5 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Reworked display of thin lines by using textures. This should result in more consistent display of line UI elements. 
 [*] Fixed an issue, where damage to shields was awarded twice for total DPS (You can recalculate fights recorded with version 1.2.0 to correct them). 
 
-1.2.2 
+1.2.2 3.459.569 (25.12.2020) 21:54
 [*] Fixed some inconsistencies in shown DPS numbers. 
