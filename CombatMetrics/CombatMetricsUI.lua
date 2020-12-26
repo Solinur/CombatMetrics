@@ -2937,7 +2937,7 @@ local function updateAbilityPanel(panel)
 	local averageLayoutId = settings.averageLayout[category]
 	local hitCritLayout = hitCritLayoutTable[hitCritLayoutId]
 	local averageLayout = averageLayoutTable[averageLayoutId]
-	local minmax = settings.maxValue
+	local minmax = settings.maxValue[category]
 
 	local isDamage = category == "damageIn" or category == "damageOut"
 	local showOverHeal = CMX.showOverHeal and category == "healingOut"

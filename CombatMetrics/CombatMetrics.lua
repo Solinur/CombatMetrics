@@ -26,7 +26,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.2.2"
+CMX.version = "1.2.3"
 
 -- Logger
 
@@ -1190,8 +1190,8 @@ local function ProcessLogDamage(fight, logline)
 
 	end
 
-	abilitydata.max = mathmax(abilitydata.max)
-	abilitydata.min = mathmin(abilitydata.min)
+	abilitydata.max = mathmax(abilitydata.max, hitValue)
+	abilitydata.min = mathmin(abilitydata.min, hitValue)
 
 	IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitValue, false, unit)
 end
