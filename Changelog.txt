@@ -529,3 +529,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 
 1.2.4 3.491.297 (27.12.2020) 16:33 
 [*] Fixed an issue, where a lua error appeared when loading the fight list. 
+
+1.2.5  (27.12.2020) 21:22 
+[*] Fixed an issue, where a lua error appeared during opening of the main report window, due to misformed saved variables introduced in an old version. 
+[*] Added an option to reset the settings to default in the addon settings menu.
