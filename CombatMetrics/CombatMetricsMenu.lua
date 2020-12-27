@@ -4,11 +4,127 @@ local _
 --
 -- Register with LibMenu and ESO
 
+local sendGold
+
+local function PrefillMail()
+
+	local isDonation = sendGold and sendGold > 0
+	local headerString = GetString(isDonation and SI_COMBAT_METRICS_DONATE_GOLD_HEADER or SI_COMBAT_METRICS_FEEDBACK_MAIL_HEADER)
+
+	ZO_MailSendToField:SetText("@Solinur")
+	ZO_MailSendSubjectField:SetText(string.format(headerString, CMX.version))
+	ZO_MailSendBodyField:TakeFocus()
+
+	if sendGold and sendGold > 0 then
+
+		QueueMoneyAttachment(sendGold)
+		ZO_MailSendSendCurrency:OnBeginInput()
+
+	else
+
+		ZO_MailSendBodyField:TakeFocus()
+
+	end
+
+end
+
+local function SendIngameMail()
+
+	sendGold = 0
+	SCENE_MANAGER:Show('mailSend')
+	zo_callLater(PrefillMail, 250)
+
+end
+
+local function GotoESOUI()
+
+	RequestOpenUnsafeURL(GetString(SI_COMBAT_METRICS_FEEDBACK_ESOUIURL))
+
+end
+
+local function GotoGithub()
+
+	RequestOpenUnsafeURL(GetString(SI_COMBAT_METRICS_FEEDBACK_GITHUBURL))
+
+end
+
+local function GotoDiscord()
+
+	RequestOpenUnsafeURL(GetString(SI_COMBAT_METRICS_FEEDBACK_DISCORDURL))
+
+end
+
+local function DonateGold()
+
+	sendGold = 5000
+	SCENE_MANAGER:Show('mailSend')
+	zo_callLater(PrefillMail, 200)
+
+end
+
+local function CloseDialog()
+
+	CombatMetrics_Report_Dialog:SetHidden(true)
+
+end
+
+local function DonateCrowns()
+
+	local dialog = CombatMetrics_Report_Dialog
+	local button = dialog:GetNamedChild("Button")
+	local editbox = dialog:GetNamedChild("AccountInfo"):GetNamedChild("EditBox")
+
+	dialog:SetHidden(false)
+
+	button:SetHandler("OnClicked", CloseDialog, "CombatMetrics")
+	editbox:SetText("@Solinur")
+	editbox:TakeFocus()
+	editbox:SelectAll()
+
+end
+
+local function GotoESOUIDonation()
+
+	RequestOpenUnsafeURL(GetString(SI_COMBAT_METRICS_DONATE_ESOUIURL))
+
+end
+
+local function FeedbackContextMenu()
+
+	ClearMenu()
+
+	local isEUServer = GetWorldName() == "EU Megaserver"
+
+	if isEUServer then AddCustomMenuItem(GetString(SI_COMBAT_METRICS_FEEDBACK_MAIL), SendIngameMail) end
+
+	AddCustomMenuItem(GetString(SI_COMBAT_METRICS_FEEDBACK_ESOUI), GotoESOUI)
+	AddCustomMenuItem(GetString(SI_COMBAT_METRICS_FEEDBACK_GITHUB), GotoGithub)
+	AddCustomMenuItem(GetString(SI_COMBAT_METRICS_FEEDBACK_DISCORD), GotoDiscord)
+
+
+	ShowMenu()
+
+end
+
+local function DonationContextMenu()
+
+	ClearMenu()
+
+	local isEUServer = GetWorldName() == "EU Megaserver"
+
+	if isEUServer then AddCustomMenuItem(GetString(SI_COMBAT_METRICS_DONATE_GOLD), DonateGold) end
+
+	AddCustomMenuItem(GetString(SI_COMBAT_METRICS_DONATE_ESOUI), GotoESOUIDonation)
+
+	ShowMenu()
+
+end
+
 function CMX.MakeMenu(svdefaults)
     -- load the settings->addons menu library
 	local menu = LibAddonMenu2
 	if not LibAddonMenu2 then return end
-	
+
 	local db = CMX.db
 	local def = svdefaults
 
@@ -20,6 +136,10 @@ function CMX.MakeMenu(svdefaults)
 		author = "Solinur",
         version = "" .. CMX.version,
 		registerForRefresh = true,
+		registerForDefaults = true,
+		website = "https://www.esoui.com/downloads/info1360-CombatMetrics.html",
+		feedback = FeedbackContextMenu,
+		donation = DonationContextMenu,
 	}
 
     --this adds entries in the addon menu

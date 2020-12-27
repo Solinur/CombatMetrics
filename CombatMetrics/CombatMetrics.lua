@@ -2628,31 +2628,27 @@ local function Initialize(event, addon)
 
 	-- convert legacy data into new format
 
-	if type(db.FightReport.hitCritLayout) == "number" then
-
-		local oldValue1 = db.FightReport.hitCritLayout
-		local oldValue2 = db.FightReport.averageLayout
-		local oldValue3 = db.FightReport.maxValue
+	if type(db.FightReport.hitCritLayout) == "number" or type(db.FightReport.maxValue) == "boolean" then
 
 		db.FightReport.hitCritLayout = {
-			["damageOut"] 	= oldValue1,
-			["damageIn"] 	= oldValue1,
-			["healingOut"] 	= oldValue1,
-			["healingIn"] 	= oldValue1,
+			["damageOut"] 	= 1,
+			["damageIn"] 	= 1,
+			["healingOut"] 	= 1,
+			["healingIn"] 	= 1,
 		}
 
 		db.FightReport.averageLayout = {
-			["damageOut"] 	= oldValue2,
-			["damageIn"] 	= oldValue2,
-			["healingOut"] 	= oldValue2,
-			["healingIn"] 	= oldValue2,
+			["damageOut"] 	= 2,
+			["damageIn"] 	= 2,
+			["healingOut"] 	= 2,
+			["healingIn"] 	= 2,
 		}
 
 		db.FightReport.maxValue = {
-			["damageOut"] 	= oldValue3,
-			["damageIn"] 	= oldValue3,
-			["healingOut"] 	= oldValue3,
-			["healingIn"] 	= oldValue3,
+			["damageOut"] 	= true,
+			["damageIn"] 	= true,
+			["healingOut"] 	= true,
+			["healingIn"] 	= true,
 		}
 
 	end
