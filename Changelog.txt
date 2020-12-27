@@ -524,5 +524,8 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 1.2.2 3.459.569 (25.12.2020) 21:54
 [*] Fixed some inconsistencies in shown DPS numbers. 
 
-1.2.3
+1.2.3 3.474.776 (26.12.2020) 18:43
 [*] Fixed an issue, where max/min hits weren't working. You can use recalculate fight via the option button (cogwheel icon) to fix it for saved fights. 
+
+1.2.4 3.491.297 (27.12.2020) 16:33 
+[*] Fixed an issue, where a lua error appeared when loading the fight list. 
