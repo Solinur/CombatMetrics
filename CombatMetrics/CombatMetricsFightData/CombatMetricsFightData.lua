@@ -6,7 +6,7 @@ local LOG_LEVEL_VERBOSE, LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG
 CombatMetricsFightData = {}
 
 local AddonName = "CombatMetricsFightData"
-local AddonVersion = 5
+local AddonVersion = 6
 
 local constants = 0
 
@@ -254,6 +254,7 @@ local function encodeCombatLogLine(line, fight)
 	elseif layoutId == LAYOUT_SKILL then -- type, timems, reducedslot, abilityId, status, skillDelay
 
 		line[6] = line[6] or 0
+		if line[3] > 64 then line[3] = line[3] - 40 end
 
 	elseif layoutId == LAYOUT_PERFORMANCE then -- type, timems, avg, min, max, ping
 
@@ -330,6 +331,8 @@ local function decodeCombatLogLine(line, fight)
 	elseif layoutId == LAYOUT_SKILL then
 
 		if logdata[6] == 0 then logdata[6] = nil end
+
+		if logdata[3] > 30 then logdata[3] = logdata[3] + 40 end
 
 	elseif layoutId ~= LAYOUT_PERFORMANCE and layoutId ~= LAYOUT_BOSSHP then					-- type, timems, message (e.g. "weapon swap")
 
@@ -528,9 +531,9 @@ local function getSavedVariableSize(sv)
 
 	collectgarbage("restart")
 
-	collectgarbage()
-
 	copy = nil
+	
+	collectgarbage()
 
 	return size
 

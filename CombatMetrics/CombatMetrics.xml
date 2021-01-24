@@ -109,8 +109,10 @@
 		</Backdrop>
 		
 		<Backdrop name="CombatMetrics_HighLight" edgeColor="00000000" centerColor="33FFFFFF" layer="3" excludeFromResizeToFitExtents="true" virtual="true">
-			<AnchorFill/>					
-			<Edge edgeSize="1" />
+			
+			<AnchorFill/>			
+			<Edge file="CombatMetrics/art/simpleframe2.dds" edgeFileWidth="128" edgeFileHeight="16" edgeSize="8"/>
+
 		</Backdrop>	
 		
 		<Control name="CombatMetrics_ControlFramed" virtual="true">
@@ -349,16 +351,43 @@
 			
 				<Label name="$(parent)Title" inherits="CombatMetrics_LabelFontControl" text="SI_COMBAT_METRICS_BAR" horizontalAlignment="CENTER">
 				
-					<Anchor point="TOPLEFT" offsetX="2" offsetY="4"/>
-					<Anchor point="TOPRIGHT" offsetX="-2" offsetY="4"/>
+					<Anchor point="TOPLEFT" offsetX="60" offsetY="4"/>
+					<Anchor point="TOPRIGHT" offsetX="-60" offsetY="4"/>
 					<Dimensions y="20"/>
 				
 				</Label>
 			
+				<Control name="$(parent)Werewolf" mouseEnabled="true" hidden="true">
+
+					<Anchor point="TOPRIGHT" offsetX="0" offsetY="2"/>
+					<Dimensions x="20" y="20"/>
+
+					<Controls>
+
+						<Backdrop name="$(parent)Bg" inherits="CombatMetrics_BackgroundFramed">
+
+							<AnchorFill />
+							
+						</Backdrop>
+
+						<Texture name="$(parent)Texture" textureFile="art/fx/texture/footprint_wolf_01.dds">
+						
+							<AnchorFill />
+
+						</Texture>
+
+					</Controls>					
+
+					<OnMouseEnter>CMX.SkillbarButtonMouseOver(self, true)</OnMouseEnter>
+					<OnMouseExit>CMX.SkillbarButtonMouseOver(self, false)</OnMouseExit>
+					<OnMouseUp>CMX.SkillbarToggleWerewolf(self)</OnMouseUp>
+
+				</Control>
+			
 				<Control name="$(parent)Stats" mouseEnabled="true">
 				
-					<Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetY="6"/>
-					<Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetY="6"/>
+					<Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetX="-58" offsetY="6"/>
+					<Anchor point="TOPRIGHT" relativeTo="$(parent)Title" relativePoint="BOTTOMRIGHT" offsetX="58" offsetY="6"/>
 					
 					<Dimensions y="20"/>
 					

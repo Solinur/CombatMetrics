@@ -117,7 +117,7 @@
 	SI_COMBAT_METRICS_POSTBUFF = "Post buff uptime",
 	SI_COMBAT_METRICS_POSTBUFF_BOSS = "Post buff uptime on bosses",
 	SI_COMBAT_METRICS_POSTBUFF_GROUP = "Post buff uptime on group members",
-	SI_COMBAT_METRICS_POSTBUFF_FORMAT = "<<1>> - HPS: <<2>> (<<3>><<4[/ on $d/ on $d units]>>)", -- (<<1>> = buff name, <<2>> = relative uptime, <<3>> = uptime, <<4>> = time) e.g. Major Intellect - Uptime: 93.2% (9:26 in 10:07)
+	SI_COMBAT_METRICS_POSTBUFF_FORMAT = "<<1>> - Uptime: <<2>> (<<3>><<4[/ on $d/ on $d units]>>)", -- (<<1>> = buff name, <<2>> = relative uptime, <<3>> = uptime, <<4>> = time) e.g. Major Intellect - Uptime: 93.2% (9:26 in 10:07)
 	SI_COMBAT_METRICS_POSTBUFF_FORMAT_GROUP = "<<1>> - Uptime: <<2>>/<<5>> (<<3>>/<<6>><<4[/ on $d/ on $d units]>>)", -- (<<1>> = buff name, <<2>> = relative uptime, <<3>> = uptime, <<4>> = units, <<5>> = relative group uptime, <<6>> = group uptime) e.g. Minor Sorcery - Uptime: 55.4%/100.6% (5:36/10:11 in 10:07)
 
 	SI_COMBAT_METRICS_SETTINGS = "Addon Settings",

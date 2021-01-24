@@ -11,11 +11,9 @@ local currentCLPage
 local selections, lastSelections
 local savedFights
 local SVHandler
-local barKeyOffset = 1
 local enlargedGraph = false
 local maxXYPlots = 5
 local maxBarPlots = 8
-local skillpage = 0
 local uncollapsedBuffs = {
 
 }
@@ -5269,6 +5267,12 @@ local armorcolors = {
 	[ARMORTYPE_LIGHT] = {0.3, 0.3, 1, 1},
 }
 
+local SkillBarItems = {"LightAttack", "HeavyAttack", "Ability1", "Ability2", "Ability3", "Ability4", "Ability5", "Ultimate"}
+
+local DisabledColor = ZO_ColorDef:New("FF999999")
+local WerewolfColor = ZO_ColorDef:New("FFf3c86e")
+local WhiteColor = ZO_ColorDef:New("FFFFFFFF")
+
 local function updateLeftInfoPanel(panel)
 
 	if fightData == nil then return end
@@ -5286,24 +5290,48 @@ local function updateLeftInfoPanel(panel)
 	local skilldata = data.skills
 	local barStatData = data.barStats
 
-	local barkeys = {}
-
-	for bar, data in CMX.spairs(skillBars or {}) do
-
-		table.insert(barkeys, bar)
-
-	end
-
 	local category = db.FightReport.category
 
-	for i = 0, 1 do
+	for subPanelIndex = 1, 2 do
 
-		local row = panel:GetNamedChild("AbilityBlock" .. i+1)
+		local subPanel = panel:GetNamedChild("AbilityBlock" .. subPanelIndex)
 
-		local barkey = barkeys and barkeys[i + barKeyOffset] or i
+		if subPanelIndex == 2 then	-- show extra option for werewolf bar
 
-		local bardata = skillBars and skillBars[barkey] or nil
-		local barStats = barStatData and barStatData[barkey] or nil
+			local hasWerewolfData = skillBars[HOTBAR_CATEGORY_WEREWOLF+1] ~= nil
+
+			local titleControl = subPanel:GetNamedChild("Title")
+			local werewolfButton = subPanel:GetNamedChild("Werewolf")
+
+			werewolfButton:SetHidden(not hasWerewolfData)
+
+			local titleString
+			local titleColor = WhiteColor
+
+			if hasWerewolfData then
+
+				local color = DisabledColor
+
+				if db.FightReport.showWereWolf then
+
+					color = WerewolfColor
+					subPanelIndex = HOTBAR_CATEGORY_WEREWOLF + 1
+					titleString = GetString(SI_HOTBARCATEGORY8)
+					titleColor = WerewolfColor
+
+				end
+
+				werewolfButton:GetNamedChild("Texture"):SetColor(color:UnpackRGB())
+				werewolfButton:GetNamedChild("Bg"):SetEdgeColor(color:UnpackRGB())
+
+			end
+
+			titleControl:SetText(titleString or zo_strformat("<<1>> 2", GetString(SI_COMBAT_METRICS_BAR)))
+			titleControl:SetColor(titleColor:UnpackRGB())
+		end
+
+		local bardata = skillBars and skillBars[subPanelIndex] or nil
+		local barStats = barStatData and barStatData[subPanelIndex] or nil
 
 		local dpsratio, timeratio
 
@@ -5317,22 +5345,22 @@ local function updateLeftInfoPanel(panel)
 
 		end
 
-		local statControl = row:GetNamedChild("Stats")
+		local statControl = subPanel:GetNamedChild("Stats")
 		local ratioControl = statControl:GetNamedChild("Value1")
 		local timeControl = statControl:GetNamedChild("Value2")
 
 		ratioControl:SetText(string.format("%.1f%%", (timeratio or 0) * 100))
 		timeControl:SetText(string.format("%.1f%%", (dpsratio or 0) * 100))
 
-		for j = 5, row:GetNumChildren() - 2 do
+		for line, controlName in ipairs(SkillBarItems) do
 
-			local control = row:GetChild(j)
+			local control = subPanel:GetNamedChild(controlName)
 
 			local icon = control:GetNamedChild("Icon"):GetNamedChild("Texture")
 
 			local name = control:GetNamedChild("Label")
 
-			local abilityId = bardata and bardata[j-4] or nil
+			local abilityId = bardata and bardata[line] or nil
 
 			control.id = abilityId
 
@@ -5344,7 +5372,7 @@ local function updateLeftInfoPanel(panel)
 
 			name:SetText(abilityName)
 
-			local reducedslot = (barkey - 1) * 10 + j - 4
+			local reducedslot = (subPanelIndex-1) * 10 + line
 
 			local slotdata = skilldata and skilldata[reducedslot] or nil
 
@@ -5396,6 +5424,24 @@ local function updateLeftInfoPanel(panel)
 	statrow:GetNamedChild("Label2"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALC), value2string))
 	statrow2:GetNamedChild("Label"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALWA), value3string))
 	statrow2:GetNamedChild("Label2"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALSKILLS), value4string))
+end
+
+function CMX.SkillbarButtonMouseOver(control, isOver)
+
+	local bg = control:GetNamedChild("Bg")
+
+	local alpha = isOver and 1 or 0
+
+	bg:SetCenterColor(0.2, 0.2, 0.2, alpha)
+
+end
+
+function CMX.SkillbarToggleWerewolf(control)
+
+	db.FightReport.showWereWolf = not db.FightReport.showWereWolf
+
+	updateLeftInfoPanel(control:GetParent():GetParent())
+
 end
 
 local passiveRequirements = {10, 30, 75, 120}
