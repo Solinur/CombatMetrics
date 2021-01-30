@@ -534,8 +534,8 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Fixed an issue, where a lua error appeared during opening of the main report window, due to misformed saved variables introduced in an old version. 
 [*] Added an option to reset the settings to default in the addon settings menu.
 
-1.3.0
+1.2.6 3.586.746 (30.01.2021) 14:04 
 [*] Added Skill Timings for the werewolf bar. You can toggle it on via a button on the top right of the skill analysis. The button will be hidden, when werewolf wasn't used.
 [*] Fixed an issue where Crystal Fragment Proc casts were not being tracked properly. 
-
+[*] Fixed a typo where the output string when posting buff uptimes would refer to HPS instead.
 
