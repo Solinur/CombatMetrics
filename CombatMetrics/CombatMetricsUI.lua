@@ -5188,9 +5188,11 @@ function CMX.SkillTooltip_OnMouseEnter(control)
 	local delay = rowControl.delay
 	local font = string.format("%s|%s|%s", GetString(SI_COMBAT_METRICS_STD_FONT), 16, "soft-shadow-thin")
 
+	local format = rowControl.ignored and "ID: %d (Off GCD)" or "ID: %d"
+
 	SkillTooltip:SetAbilityId(id)
 	SkillTooltip:AddVerticalPadding(15)
-	SkillTooltip:AddLine(string.format("ID: %d", id), font, .7, .7, .8 , TOP, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER)
+	SkillTooltip:AddLine(string.format(format, id), font, .7, .7, .8 , TOP, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER)
 	if delay then SkillTooltip:AddLine(string.format("Average delay: %d ms", delay), font, .7, .7, .8 , TOP, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER) end
 end
 
@@ -5201,6 +5203,8 @@ function CMX.SkillTooltip_OnMouseExit(control)
 end
 
 function CMX.CPTooltip_OnMouseEnter(control)
+
+	if GetAPIVersion() >= 100034 then return end
 
 	InitializeTooltip(SkillTooltip, control, TOPLEFT, 0, 5, BOTTOMLEFT)
 
@@ -5378,6 +5382,8 @@ local function updateLeftInfoPanel(panel)
 
 			local strings = {"-", "-", "-", "-"}
 
+			local color = WhiteColor
+
 			if slotdata and slotdata.count and slotdata.count > 0 then
 
 				strings[1] = string.format("%d", slotdata.count) or "-"
@@ -5386,16 +5392,29 @@ local function updateLeftInfoPanel(panel)
 				strings[2] = weave and string.format("%.2f", weave/1000) or "-"
 
 				local errors = slotdata.weavingErrors
-				strings[3] = errors and string.format("%d", errors) or "-"
+				strings[3] = weave and errors and string.format("%d", errors) or "-"
 
 				local diff = slotdata.diffTimeAvg or slotdata.difftimesAvg
 				strings[4] = diff and string.format("%.2f", diff/1000) or "-"
 
 				control.delay = slotdata.delayAvg
 
+				if slotdata.ignored then color = DisabledColor end
+
+				control.ignored = slotdata.ignored
+
 			end
 
-			for k = 1, 4 do control:GetNamedChild("Value" .. k):SetText(strings[k]) end
+			name:SetColor(color:UnpackRGB())
+
+			for k = 1, 4 do 
+
+				local label = control:GetNamedChild("Value" .. k)
+				
+				label:SetText(strings[k])
+				label:SetColor(color:UnpackRGB())
+			
+			end
 		end
 	end
 

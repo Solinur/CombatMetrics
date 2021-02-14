@@ -26,7 +26,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.2.6"
+CMX.version = "1.3.0"
 
 -- Logger
 
@@ -100,31 +100,31 @@ local StatListTable = {
 
 	["Spell"] = {
 
-		["maxmagicka"] = STATTYPE_NORMAL,
-		["spellpower"] = STATTYPE_NORMAL,
-		["spellcrit"] = STATTYPE_CRITICAL,
-		["spellcritbonus"] = STATTYPE_CRITICALBONUS,
-		["spellpen"] = STATTYPE_PENETRATION,
+		[LIBCOMBAT_STAT_MAXMAGICKA] = STATTYPE_NORMAL,
+		[LIBCOMBAT_STAT_SPELLPOWER] = STATTYPE_NORMAL,
+		[LIBCOMBAT_STAT_SPELLCRIT] = STATTYPE_CRITICAL,
+		[LIBCOMBAT_STAT_SPELLCRITBONUS] = STATTYPE_CRITICALBONUS,
+		[LIBCOMBAT_STAT_SPELLPENETRATION] = STATTYPE_PENETRATION,
 
 	},
 
 	["Weapon"] = {
 
-		["maxstamina"] = STATTYPE_NORMAL,
-		["weaponpower"] = STATTYPE_NORMAL,
-		["weaponcrit"] = STATTYPE_CRITICAL,
-		["weaponcritbonus"] = STATTYPE_CRITICALBONUS,
-		["weaponpen"] = STATTYPE_PENETRATION,
+		[LIBCOMBAT_STAT_MAXSTAMINA] = STATTYPE_NORMAL,
+		[LIBCOMBAT_STAT_WEAPONPOWER] = STATTYPE_NORMAL,
+		[LIBCOMBAT_STAT_WEAPONCRIT] = STATTYPE_CRITICAL,
+		[LIBCOMBAT_STAT_WEAPONCRITBONUS] = STATTYPE_CRITICALBONUS,
+		[LIBCOMBAT_STAT_WEAPONPENETRATION] = STATTYPE_PENETRATION,
 
 	},
 }
 
 local IncomingStatList = {
 
-	["maxhealth"] = STATTYPE_NORMAL,
-	["spellres"] = STATTYPE_INCSPELL,
-	["physres"] = STATTYPE_INCWEAPON,
-	["critres"] = STATTYPE_CRITICALBONUS,
+	[LIBCOMBAT_STAT_MAXHEALTH] = STATTYPE_NORMAL,
+	[LIBCOMBAT_STAT_PHYSICALRESISTANCE] = STATTYPE_INCWEAPON,
+	[LIBCOMBAT_STAT_SPELLRESISTANCE] = STATTYPE_INCSPELL,
+	[LIBCOMBAT_STAT_CRITICALRESISTANCE] = STATTYPE_CRITICALBONUS,
 
 }
 
@@ -666,6 +666,10 @@ local function GetEmtpyFightStats()
 
 	InitBasicValues(data)
 
+	data.temp =	{
+		["stats"] = {}
+	}
+
 	data.units = {}
 
 	data.stats = {dmgavg={}, healavg ={}, dmginavg = {}}	-- stat tracking
@@ -1032,13 +1036,15 @@ local function IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitVa
 
 	local barStats = fight:AcquireBarStats(currentbar)
 
-	local stats = fight.calculated.stats
+	local data = fight.calculated
+	local currentStats = data.temp.stats
+	local statData = data.stats
 
 	local values
 
 	if isheal == true and isDamageOut == true then
 
-		values = stats.healavg
+		values = statData.healavg
 		barStats.healingOut = barStats.healingOut + hitValue
 
 	elseif isheal == true and isDamageOut == false then
@@ -1048,12 +1054,12 @@ local function IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitVa
 
 	elseif isheal == false and isDamageOut == true then
 
-		values = stats.dmgavg
+		values = statData.dmgavg
 		barStats.damageOut = barStats.damageOut + hitValue
 
 	elseif isheal == false and isDamageOut == false then
 
-		values = stats.dmginavg
+		values = statData.dmginavg
 		barStats.damageIn = barStats.damageIn + hitValue
 
 	else return end
@@ -1061,9 +1067,8 @@ local function IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitVa
 	for statkey, stattype in pairs(statlist) do
 
 		local sumkey = ZO_CachedStrFormat("sum<<1>>", statkey)
-		local currentkey = ZO_CachedStrFormat("current<<1>>", statkey)
 
-		local currentValue = stats[currentkey]
+		local currentValue = currentStats[statkey]
 		local value = hitValue
 
 		if stattype == STATTYPE_CRITICAL and resultkey ~= "Blocked" and resultkey ~= "Shielded" then value = 1	-- they can't crit so they don't matter
@@ -1459,9 +1464,7 @@ local function ProcessLogStats(fight, logline)
 
 	local callbacktype, timems, statchange, newvalue, stat = unpackLogline(logline, 1, 5)
 
-	local key = LC.GetStatNameCurrent(stat)
-
-	fight.calculated.stats[key] = newvalue
+	fight.calculated.temp.stats[stat] = newvalue
 
 end
 
@@ -1953,12 +1956,17 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		local lastValidSkill
 		local lastValidWeaponAttack
 
+		local skillBars = fight.charData.skillBars
+
 		for i = #castData, 1, -1 do	-- go backwards to allow deleting without messing up indices
 
 			local reducedslot, registered, queued, startTime, endTime = unpackLogline(castData[i], 1, 5)
 			local skill = skillData[reducedslot]
 
-			if startTime then
+			local bar = mathfloor(reducedslot/10) + 1
+			local skillId = skillBars[bar][reducedslot%10]
+
+			if startTime and not ignoredAbilityTiming[skillId] then
 				
 				endTime = endTime or (startTime + 1000)
 
@@ -2010,8 +2018,6 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		local totalDelay = 0
 		local totalDelayCount = 0
 
-		local skillBars = fight.charData.skillBars
-
 		for reducedslot, skill in pairs(skillData) do
 
 			local isWeaponAttack = reducedslot%10 == 1 or reducedslot%10 == 2
@@ -2019,6 +2025,10 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 			local bar = mathfloor(reducedslot/10) + 1
 
 			local skillId = skillBars[bar][reducedslot%10]
+
+			local ignored = ignoredAbilityTiming[skillId]
+
+			if ignored then skill.ignored = true end
 
 			if skillId then
 
@@ -2038,7 +2048,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 					totalWeaponAttacks = totalWeaponAttacks + count
 
-				elseif not ignoredAbilityTiming[skillId] then
+				elseif not ignored then
 
 					totalSkillsFired = totalSkillsFired + count
 					totalDelay = totalDelay + skill.delaySum
@@ -2048,7 +2058,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 				if count > 1 then skill.diffTimeAvg = (timedata[#timedata] - timedata[1])/(count - 1) end
 
-				if not (isWeaponAttack or ignoredAbilityTiming[skillId]) then
+				if not (isWeaponAttack or ignored) then
 
 					totalWeavingTimeSum = totalWeavingTimeSum + skill.weavingTimeSum
 					totalWeavingTimeCount = totalWeavingTimeCount + skill.weavingTimeCount
@@ -2123,6 +2133,8 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		fight.cindex = nil
 
 		titleBar:SetHidden(true)
+
+		data.temp = nil
 
 		Print("calc", LOG_LEVEL_DEBUG, "Time for final calculations: %.2f ms", (GetGameTimeSeconds() - scalcms) * 1000)
 
