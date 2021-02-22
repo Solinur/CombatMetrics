@@ -154,7 +154,7 @@ local SpellResistDebuffs = {
 	[GetFormattedAbilityName(17906)] = 2108, -- Crusher, can get changed by settings !
 
 	[GetFormattedAbilityName(143808)] = 1000, -- Crystal Weapon
-	
+
 	--[GetFormattedAbilityName(75753)] = 3010, -- Alkosh, now special tracking
 
 }
@@ -268,6 +268,7 @@ local ResourceHandler = NewSubclass()
 local EffectHandler = NewSubclass()
 local SkillCastHandler = NewSubclass()
 local BarStatsHandler = NewSubclass()
+local StatDataHandler = NewSubclass()
 
 local function AcquireUnitData(self, unitId, timems)
 
@@ -368,6 +369,20 @@ local function AcquireBarStats(self, bar)
 	end
 
 	return bardata[bar]
+
+end
+
+local function AcquireStatData(self, statId)
+
+	local statData = self.calculated.stats
+
+	if statData[statId] == nil then
+
+		statData[statId] = StatDataHandler:New()
+
+	end
+
+	return statData[statId]
 
 end
 
@@ -480,14 +495,14 @@ function UnitHandler:UpdateResistance(fight, ismagic, effectdata, value)
 	local debuffData = self.physResDebuffs
 	local valuekey = "currentPhysicalResistance"
 	local resistDataKey = "physicalResistance"
-	local statkey = "currentweaponpen"
+	local statkey = LIBCOMBAT_STAT_WEAPONPENETRATION
 
 	if ismagic then
 
 		debuffData = self.spellResDebuffs
 		valuekey = "currentSpellResistance"
 		resistDataKey = "spellResistance"
-		statkey = "currentspellpen"
+		statkey = LIBCOMBAT_STAT_SPELLPENETRATION
 
 	end
 
@@ -507,7 +522,7 @@ function UnitHandler:UpdateResistance(fight, ismagic, effectdata, value)
 
 		self[valuekey] = self[valuekey] + value
 
-		local fullvalue = (fight.calculated.stats[statkey] or 0) + self[valuekey]
+		local fullvalue = (fight.calculated.temp.stats[statkey] or 0) + self[valuekey]
 		self[resistDataKey][fullvalue] = 0
 
 	elseif isactive == false and debuffData[debuffName] then
@@ -660,6 +675,15 @@ function BarStatsHandler:Initialize()
 
 end
 
+function StatDataHandler:Initialize()
+
+	self.min = 0
+	self.max = 0
+	self.dmgsum = 0
+	self.healsum = 0
+
+end
+
 local function GetEmtpyFightStats()
 
 	local data = {}
@@ -672,7 +696,7 @@ local function GetEmtpyFightStats()
 
 	data.units = {}
 
-	data.stats = {dmgavg={}, healavg ={}, dmginavg = {}}	-- stat tracking
+	data.stats = {}	-- stat tracking
 
 	data.resources = ResourceTable:New()
 
@@ -695,6 +719,9 @@ local function GetEmtpyFightStats()
 		healingOut = {},
 		healingIn = {},
 	}
+
+	data.buffVersion = 2
+	data.calcVersion = 2
 
 	return data
 
@@ -976,15 +1003,15 @@ function CMX.GenerateSelectionStats(fight, menuItem, selections) -- this is simi
 
 				selectedbuff.effectType = buff.effectType
 
-				if data.buffVersion == nil then 
-					
-					selectedbuff.icon = buff.icon 
-				
+				if data.buffVersion == nil then
+
+					selectedbuff.icon = buff.icon
+
 				elseif data.buffVersion >= 2 then
 
 					selectedbuff.iconId = data.buffVersion and (selectedbuff.iconId or buff.iconId) or buff.icon
-				
-				end				
+
+				end
 
 				selectiondata.buffs[name] = selectedbuff
 			end
@@ -1038,14 +1065,13 @@ local function IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitVa
 
 	local data = fight.calculated
 	local currentStats = data.temp.stats
-	local statData = data.stats
 
-	local values
+	local key
 
 	if isheal == true and isDamageOut == true then
 
-		values = statData.healavg
 		barStats.healingOut = barStats.healingOut + hitValue
+		key = "healsum"
 
 	elseif isheal == true and isDamageOut == false then
 
@@ -1054,34 +1080,22 @@ local function IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitVa
 
 	elseif isheal == false and isDamageOut == true then
 
-		values = statData.dmgavg
 		barStats.damageOut = barStats.damageOut + hitValue
+		key = "dmgsum"
 
 	elseif isheal == false and isDamageOut == false then
 
-		values = statData.dmginavg
 		barStats.damageIn = barStats.damageIn + hitValue
+		key = "dmgsum"
 
 	else return end
 
-	for statkey, stattype in pairs(statlist) do
+	for statId, stattype in pairs(statlist) do
 
-		local sumkey = ZO_CachedStrFormat("sum<<1>>", statkey)
-
-		local currentValue = currentStats[statkey]
+		local currentValue = currentStats[statId]
 		local value = hitValue
 
-		if stattype == STATTYPE_CRITICAL and resultkey ~= "Blocked" and resultkey ~= "Shielded" then value = 1	-- they can't crit so they don't matter
-
-		elseif stattype == STATTYPE_CRITICAL then value = 0
-
-		elseif stattype == STATTYPE_CRITICALBONUS and resultkey ~= "Critical" then value = 0
-
-		elseif stattype == STATTYPE_INCSPELL and ismagical ~= true then value = 0
-
-		elseif stattype == STATTYPE_INCWEAPON and ismagical ~= false then value = 0
-
-		elseif stattype == STATTYPE_PENETRATION then
+		if stattype == STATTYPE_PENETRATION then
 
 			if isheal == true then
 
@@ -1108,7 +1122,22 @@ local function IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitVa
 			end
 		end
 
-		values[sumkey] = (values[sumkey] or 0) + (value * (currentValue or 0)) -- sum up stats multplied by value, later this is divided by value to get a weighted average
+		if currentValue == 0 then return
+
+		elseif stattype == STATTYPE_CRITICAL then
+
+			value = resultkey == "Blocked" and 0 or 1	-- they can't crit so they don't matter
+
+		elseif stattype == STATTYPE_CRITICALBONUS and resultkey ~= "Critical" then return
+
+		elseif stattype == STATTYPE_INCSPELL and ismagical ~= true then return
+
+		elseif stattype == STATTYPE_INCWEAPON and ismagical ~= false then return
+
+		end
+
+		local statData = fight:AcquireStatData(statId)
+		statData[key] = statData[key] + (value * currentValue) -- sum up stats multplied by value, later this is divided by value to get a weighted average
 	end
 end
 
@@ -1462,9 +1491,16 @@ ProcessLog[LIBCOMBAT_EVENT_RESOURCES] = ProcessLogResources
 
 local function ProcessLogStats(fight, logline)
 
-	local callbacktype, timems, statchange, newvalue, stat = unpackLogline(logline, 1, 5)
+	local callbacktype, timems, statchange, newvalue, statId = unpackLogline(logline, 1, 5)
 
-	fight.calculated.temp.stats[stat] = newvalue
+	local data = fight.calculated
+
+	data.temp.stats[statId] = newvalue
+
+	local statData = fight:AcquireStatData(statId)
+
+	statData.max = math.max(newvalue, statData.max)
+	statData.min = math.min(newvalue, statData.min)
 
 end
 
@@ -1801,7 +1837,6 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 		fight:AccumulateStats()
 
-		local stats = data.stats
 		local resources = data.resources
 
 		-- calculate resource stats
@@ -1825,10 +1860,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 		-- calculate fight stats (like Spell Damage)
 
-		local fightstats = fight.stats
-		local dmgavg = stats.dmgavg
-		local dmginavg = stats.dmginavg
-		local healavg = stats.healavg
+		local stats = data.stats
 
 		local damageOut = data.damageOut
 
@@ -1863,15 +1895,14 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 		for key, list in pairs(StatListTable) do
 
-			for statname, stattype in pairs(list) do
+			for statId, stattype in pairs(list) do
 
 				local damagevalues = key == "Spell" and data.damageOutSpells or data.damageOutWeapon
 
-				local sumkey = "sum"..statname
-				local avgkey = "avg"..statname
+				local statdata = stats[statId]
 
-				local value = fightstats["max"..statname]
-				local value2 = fightstats["max"..statname]
+				local dmgValue = statdata.max
+				local healValue = statdata.max
 
 				local totaldmgvalue = mathmax(damagevalues.damageOutTotal, 1)
 				local totalhealvalue = mathmax(data.healingOutTotal, 1)
@@ -1889,13 +1920,13 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 				end
 
-				if dmgavg[sumkey] ~= nil then value = dmgavg[sumkey] / totaldmgvalue end
+				if statdata.dmgsum ~= nil then dmgValue = statdata.dmgsum / totaldmgvalue end
 
-				dmgavg[avgkey] = value
+				statdata.dmgavg = dmgValue
 
-				if healavg[sumkey] ~= nil and stattype ~= STATTYPE_PENETRATION then value2 = healavg[sumkey] / totalhealvalue end
+				if statdata.healsum ~= nil and stattype ~= STATTYPE_PENETRATION then healValue = statdata.healsum / totalhealvalue end
 
-				healavg[avgkey] = value2
+				statdata.dmgavg = healValue
 			end
 		end
 
@@ -1919,12 +1950,11 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 			end
 		end
 
-		for statname, stattype in pairs(IncomingStatList) do
+		for statId, stattype in pairs(IncomingStatList) do
+			
+			local statdata = stats[statId]
 
-			local sumkey = "sum"..statname
-			local avgkey = "avg"..statname
-
-			local value = fightstats["max"..statname]
+			local value = statdata.max
 
 			local totaldmgvalue = mathmax(data.damageInTotal, 1)
 
@@ -1942,9 +1972,9 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 			end
 
-			if dmginavg[sumkey] ~= nil then	value = dmginavg[sumkey] / totaldmgvalue end
+			if statdata.dmgsum ~= nil then value = statdata.dmgsum / totaldmgvalue end
 
-			dmginavg[avgkey] = value
+			statdata.dmgavg = value
 
 		end
 
@@ -1967,7 +1997,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 			local skillId = skillBars[bar][reducedslot%10]
 
 			if startTime and not ignoredAbilityTiming[skillId] then
-				
+
 				endTime = endTime or (startTime + 1000)
 
 				local isWeaponAttack = reducedslot%10 == 1 or reducedslot%10 == 2
@@ -2127,7 +2157,6 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		-- remaining stuff
 
 		data.buffs = fight.playerid ~= nil and data.units[fight.playerid] and data.units[fight.playerid].buffs or {}
-		data.buffVersion = 2
 
 		fight.calculating = false
 		fight.cindex = nil
@@ -2278,6 +2307,7 @@ local function AddFightCalculationFunctions(fight)
 	fight.AccumulateStats = AccumulateStats
 	fight.AcquireSkillCastData = AcquireSkillCastData
 	fight.AcquireBarStats = AcquireBarStats
+	fight.AcquireStatData = AcquireStatData
 
 end
 
@@ -2528,7 +2558,7 @@ local svdefaults = {
 		["SmoothWindow"] 		= 5,
 
 		["Cursor"]				= true,
-				
+
 		["showWereWolf"] 		= false,
 
 		["PlotColors"]				= {

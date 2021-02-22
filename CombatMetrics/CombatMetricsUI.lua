@@ -1871,29 +1871,48 @@ local powerTypeLabels = {
 	[POWERTYPE_HEALTH] = "_HEALTH",
 }
 
-local attackStatsKeys = { 			-- {label, format, convert}
+
+local statKeysLegacy = {
+
+[LIBCOMBAT_STAT_MAXMAGICKA] 		= "maxmagicka",
+[LIBCOMBAT_STAT_SPELLPOWER] 		= "spellpower",
+[LIBCOMBAT_STAT_SPELLCRIT] 			= "spellcrit",
+[LIBCOMBAT_STAT_SPELLCRITBONUS] 	= "spellcritbonus",
+[LIBCOMBAT_STAT_SPELLPENETRATION]	= "spellpen",
+[LIBCOMBAT_STAT_MAXSTAMINA] 		= "maxstamina",
+[LIBCOMBAT_STAT_WEAPONPOWER] 		= "weaponpower",
+[LIBCOMBAT_STAT_WEAPONCRIT] 		= "weaponcrit",
+[LIBCOMBAT_STAT_WEAPONCRITBONUS]	= "weaponcritbonus",
+[LIBCOMBAT_STAT_WEAPONPENETRATION] 	= "weaponpen",
+[LIBCOMBAT_STAT_MAXHEALTH] 			= "maxhealth",
+[LIBCOMBAT_STAT_PHYSICALRESISTANCE] = "physres",
+[LIBCOMBAT_STAT_SPELLRESISTANCE] 	= "spellres",
+[LIBCOMBAT_STAT_CRITICALRESISTANCE] = "critres",
+}
+
+local statFormat = { 			-- {label, format, convert}
 
 	[POWERTYPE_MAGICKA] = {
-		[1] = {"maxmagicka", "%d"},
-		[2] = {"spellpower", "%d"},
-		[3] = {"spellcrit", "%.1f%%", true},
-		[4] = {"spellcritbonus", "%.1f%%"},
-		[5] = {"spellpen", "%d"},
+		[1] = {LIBCOMBAT_STAT_MAXMAGICKA, "%d"},
+		[2] = {LIBCOMBAT_STAT_SPELLPOWER, "%d"},
+		[3] = {LIBCOMBAT_STAT_SPELLCRIT, "%.1f%%", true},
+		[4] = {LIBCOMBAT_STAT_SPELLCRITBONUS, "%.1f%%"},
+		[5] = {LIBCOMBAT_STAT_SPELLPENETRATION, "%d"},
 	},
 
 	[POWERTYPE_STAMINA] = {
-		[1] = {"maxstamina", "%d"},
-		[2] = {"weaponpower", "%d"},
-		[3] = {"weaponcrit", "%.1f%%", true},
-		[4] = {"weaponcritbonus", "%.1f%%"},
-		[5] = {"weaponpen", "%d"},
+		[1] = {LIBCOMBAT_STAT_MAXSTAMINA, "%d"},
+		[2] = {LIBCOMBAT_STAT_WEAPONPOWER, "%d"},
+		[3] = {LIBCOMBAT_STAT_WEAPONCRIT, "%.1f%%", true},
+		[4] = {LIBCOMBAT_STAT_WEAPONCRITBONUS, "%.1f%%"},
+		[5] = {LIBCOMBAT_STAT_WEAPONPENETRATION, "%d"},
 	},
 
 	[POWERTYPE_HEALTH] = {
-		[1] = {"maxhealth", "%d"},
-		[2] = {"physres", "%d"},
-		[3] = {"spellres", "%d"},
-		[4] = {"critres", "%d", "%.1f%%"},
+		[1] = {LIBCOMBAT_STAT_MAXHEALTH, "%d"},
+		[2] = {LIBCOMBAT_STAT_PHYSICALRESISTANCE, "%d"},
+		[3] = {LIBCOMBAT_STAT_SPELLRESISTANCE, "%d"},
+		[4] = {LIBCOMBAT_STAT_CRITICALRESISTANCE, "%d", "%.1f%%"},
 	},
 
 }
@@ -1908,13 +1927,14 @@ local function updateFightStatsPanelRight(panel)
 	local category = db.FightReport.category
 	category = category == "healingIn" and "healingOut" or category
 
-	local calculated  = data.calculated or {}
+	local calculated = data.calculated or {}
+	local calcVersion = calculated.calcVersion or 1
 
-	local calcstats = calculated.stats or {}
-	local stats = data.stats or {}
+	local stats = calculated.stats or {}
+	local fightStats = data.stats or {}
 
-	local isdamage = category == "damageOut" or category == "damageIn"
-	local avgvalues = (powerType == POWERTYPE_HEALTH and calcstats.dmginavg) or (isdamage and calcstats.dmgavg) or calcstats.healavg or {}
+	local avgkey = (category == "damageOut" or category == "damageIn") and "dmgavg" or "healavg"
+	local avgvalues = (powerType == POWERTYPE_HEALTH and stats.dmginavg) or stats[avgkey] or {}
 	local totalvalue = powerType == POWERTYPE_HEALTH and calculated.damageInTotal or calculated[category.."Total"]
 	local countvalue = calculated[CountStrings[category].."Total"]
 
@@ -1939,7 +1959,7 @@ local function updateFightStatsPanelRight(panel)
 	local stringKey = "SI_COMBAT_METRICS_STATS" .. powerTypeLabels[powerType]
 
 	local statWindowControl = panel:GetNamedChild("AttackStats")
-	local keys = attackStatsKeys[powerType]
+	local keys = statFormat[powerType]
 
 	for i = 1, 4 do
 
@@ -1947,15 +1967,19 @@ local function updateFightStatsPanelRight(panel)
 		local rowcontrol = statWindowControl:GetNamedChild("Row"..i)
 		local dataKey, displayformat, convert = unpack(keys[i] or {})
 
+		local statData = stats[dataKey]
+
+		if calcVersion < 2 then dataKey = statKeysLegacy[dataKey] end
+
 		if text ~= nil and text ~= "" and dataKey ~= nil then
 
-			local maxvalue = stats["max"..dataKey] or 0
+			local maxvalue = statData and statData.max or fightStats["max"..dataKey] or 0
 
 			if convert == true then maxvalue = GetCriticalStrikeChance(maxvalue) end
 			if dataKey == POWERTYPE_HEALTH and i == 4 then maxvalue = maxvalue / 68 end 	-- untested, but good agreement from multiple sources
 			if displayformat then maxvalue = string.format(displayformat, maxvalue) end
 
-			local avgvalue = avgvalues["avg"..dataKey] or calcstats["avg"..dataKey]
+			local avgvalue = statData and statData[avgkey] or avgvalues["avg"..dataKey] or stats["avg"..dataKey]
 
 			if avgvalue == nil then
 
@@ -1991,12 +2015,13 @@ local function updateFightStatsPanelRight(panel)
 	if category == "damageOut" and (powerType == POWERTYPE_MAGICKA or powerType == POWERTYPE_STAMINA) then
 
 		local resistvalues = powerType == POWERTYPE_MAGICKA and resdata.spellResistance or powerType == POWERTYPE_STAMINA and resdata.physicalResistance or {}
-		local dataKey = keys[5][1]
+		local statId = keys[5][1]
+		local statData = stats[statId]
 
 		local sum = 0
 		local effectiveSum = 0
 		local totaldamage = 0
-		local maxvalue = stats["max"..dataKey] or 0
+		local maxvalue = statData and statData.max or fightStats["max"..statId] or 0
 		local overpen = 0
 		local maxpen = db.unitresistance
 
@@ -2036,7 +2061,7 @@ local function updateFightStatsPanelRight(panel)
 
 		end
 
-		local averagePenetration = string.format("%d", math.max(zo_round(effectiveSum / totaldamage), avgvalues["avg"..dataKey] or 0))
+		local averagePenetration = string.format("%d", math.max(zo_round(effectiveSum / totaldamage), avgvalues["avg"..statId] or 0))
 		local overPenetrationRatio = string.format("%.1f%%", 100 * overpen / totaldamage)
 
 		local newline = string.format("%s: %d", GetString(SI_COMBAT_METRICS_AVERAGE), zo_round(sum / totaldamage))
