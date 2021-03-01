@@ -677,7 +677,7 @@ end
 
 function StatDataHandler:Initialize()
 
-	self.min = 0
+	self.min = infinity
 	self.max = 0
 	self.dmgsum = 0
 	self.healsum = 0
@@ -1862,6 +1862,8 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 		local stats = data.stats
 
+		-- calculate damage sums for the relevant categories
+
 		local damageOut = data.damageOut
 
 		data.damageOutSpells = {}
@@ -1891,7 +1893,27 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		end
 
 		if data.damageOutSpells.min == infinity then data.damageOutSpells.min = 0 end
-		if data.damageOutWeapon.min == infinity then data.damageOutWeapon.min = 0 end
+		if data.damageOutWeapon.min == infinity then data.damageOutWeapon.min = 0 end		
+
+		local damageIn = data.damageIn
+
+		data.damageInSpells = 0
+		data.damageInWeapon = 0
+
+		for id, ability in pairs(damageIn) do
+
+			local isMagic = IsMagickaAbility[ability.damageType]
+
+			if isMagic == true then
+
+				data.damageInSpells = data.damageInSpells + ability.damageInTotal
+
+			elseif isMagic == false then
+
+				data.damageInWeapon = data.damageInWeapon + ability.damageInTotal
+
+			end
+		end
 
 		for key, list in pairs(StatListTable) do
 
@@ -1926,27 +1948,9 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 				if statdata.healsum ~= nil and stattype ~= STATTYPE_PENETRATION then healValue = statdata.healsum / totalhealvalue end
 
-				statdata.dmgavg = healValue
-			end
-		end
+				statdata.healavg = healValue
 
-		local damageIn = data.damageIn
-
-		data.damageInSpells = 0
-		data.damageInWeapon = 0
-
-		for id, ability in pairs(damageIn) do
-
-			local isMagic = IsMagickaAbility[ability.damageType]
-
-			if isMagic == true then
-
-				data.damageInSpells = data.damageInSpells + ability.damageInTotal
-
-			elseif isMagic == false then
-
-				data.damageInWeapon = data.damageInWeapon + ability.damageInTotal
-
+				if statdata.min == infinity then statdata.min = 0 end
 			end
 		end
 
@@ -2767,6 +2771,25 @@ local function Initialize(event, addon)
 
 		Print("main", LOG_LEVEL_ERROR, "LibFeedback not found! Make sure the latest version is installed.")
 
+	end
+
+	if GetAPIVersion() >= 100034 then return end
+
+	local lang = GetCVar("language.2")
+	db.Legacy = db.Legacy or {}
+	db.Legacy[lang] = db.Legacy[lang] or {}
+
+	local langdata = db.Legacy[lang]
+
+	for i = 1,9 do
+
+		langdata[i] = {name = zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionDisciplineName(discipline))}
+
+		for j = 1, 8 do
+
+			langdata[i][j] = zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionSkillName(discipline, i))
+
+		end
 	end
 end
 

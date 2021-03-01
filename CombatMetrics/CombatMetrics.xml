@@ -643,10 +643,7 @@
 		
 		<Control name="CombatMetrics_StarRow" virtual="true" mouseEnabled="true">
 			
-			<Dimensions y="20"/>
-			
-			<OnMouseEnter> CMX.CPTooltip_OnMouseEnter(self) </OnMouseEnter>
-			<OnMouseExit> CMX.CPTooltip_OnMouseExit(self) </OnMouseExit>	
+			<Dimensions y="20"/>	
 		
 			<Controls>
 	
@@ -672,10 +669,7 @@
 		
 		<Control name="CombatMetrics_StarPassive" virtual="true" mouseEnabled="true">
 		
-			<Dimensions x="18" y="18"/>
-			
-			<OnMouseEnter> CMX.CPTooltip_OnMouseEnter(self) </OnMouseEnter>
-			<OnMouseExit> CMX.CPTooltip_OnMouseExit(self) </OnMouseExit>		
+			<Dimensions x="18" y="18"/>		
 		
 		</Control>
 			
@@ -746,6 +740,64 @@
 			
 			</Controls>
 		
+		</Control>
+
+		<Control name="CombatMetrics_StarItem" virtual="true" mouseEnabled="true">			
+			
+			<Dimensions x="169" y="20"/>
+			
+			<OnMouseEnter> CMX.CPTooltip_OnMouseEnter(self) </OnMouseEnter>
+			<OnMouseExit> CMX.CPTooltip_OnMouseExit(self) </OnMouseExit>	
+		
+			<Controls>
+
+				<Texture name="$(parent)Star" textureFile="/esoui/art/champion/champion_star_pulse.dds">
+		
+					<Anchor point="CENTER" relativeTo="$(parent)" relativePoint="LEFT" offsetX="10" offsetY="0"/>
+					<Dimensions x="30" y="30"/>
+
+				</Texture>
+
+				<Texture name="$(parent)Ring" textureFile="/esoui/art/champion/actionbar/champion_bar_slot_frame_disabled.dds">
+		
+					<Anchor point="LEFT"/>
+					<Dimensions x="20" y="20"/>
+					
+				</Texture>
+	
+				<Label name="$(parent)Value" text="0" inherits="CombatMetrics_ValueFontControl" horizontalAlignment="RIGHT">
+		
+					<Anchor point="RIGHT"/>
+					<Dimensions x="24" y="20"/>
+					
+				</Label>
+	
+				<Label name="$(parent)Name" text="Star" inherits="CombatMetrics_ValueFontControl">
+		
+					<Anchor point="LEFT" offsetX="24" offsetY="0"/>
+					<Anchor point="RIGHT" relativeTo="$(parent)Value" relativePoint="LEFT" offsetX="-8" offsetY="0"/>
+					
+					<Dimensions x="100" y="20"/>
+					
+				</Label>
+				
+			</Controls>
+			
+		</Control>
+
+		<Control name="CombatMetrics_Constellation" virtual="true">
+		
+			<Dimensions x="346" y="214"/>
+
+			<Controls>			
+				<Label name="$(parent)Title" text="CPNAME" inherits="CombatMetrics_LabelFontControl">
+					
+					<Anchor point="TOPLEFT"/>
+					<Dimensions x="200" y="20"/>
+					
+				</Label>
+			</Controls>
+
 		</Control>
 		
 		<Control name="CombatMetrics_BuffPanelBox" virtual="true">
@@ -3357,7 +3409,7 @@
 							
 						</Control>
 						
-						<Control name="$(parent)Right">
+						<Control name="$(parent)RightOld" hidden="true">
 							
 							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Left" offsetX="4" offsetY="0"/>
 							<Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4"/>
@@ -3423,6 +3475,39 @@
 								
 									<Anchor point="TOPLEFT" relativeTo="$(parent)StarSign8" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
 									<Anchor point="TOPRIGHT" relativeTo="$(parent)StarSign8" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
+									
+								</Control>
+						
+							</Controls>
+							
+							<OnInitialized> CMX.InitializeCPRowsLegacy(self) </OnInitialized>
+						
+						</Control>
+
+						<Control name="$(parent)Right">
+							
+							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Left" offsetX="4" offsetY="0"/>
+							<Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4"/>
+							
+							<Controls>
+									
+								<Control name="$(parent)Constellation1" inherits="CombatMetrics_Constellation">
+								
+									<Anchor point="TOPLEFT" offsetX="6" offsetY="4"/>
+									
+								</Control>
+								
+								<Control name="$(parent)Constellation2" inherits="CombatMetrics_Constellation">
+								
+									<Anchor point="TOPLEFT" relativeTo="$(parent)Constellation1" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="10"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)Constellation1" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="10"/>
+									
+								</Control>
+								
+								<Control name="$(parent)Constellation3" inherits="CombatMetrics_Constellation">
+								
+									<Anchor point="TOPLEFT" relativeTo="$(parent)Constellation2" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="10"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)Constellation2" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="10"/>
 									
 								</Control>
 						

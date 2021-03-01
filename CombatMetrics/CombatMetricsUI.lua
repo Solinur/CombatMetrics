@@ -429,7 +429,7 @@ local function initSelectorButtons(selectorButtons)
 	end
 end
 
-function CMX.InitializeCPRows(panel)
+function CMX.InitializeCPRowsLegacy(panel)
 
 	for i = 1, 9 do
 
@@ -479,6 +479,84 @@ function CMX.InitializeCPRows(panel)
 			passive.points = 0
 
 		end
+	end
+end
+
+local labelcolors = {
+
+	[CHAMPION_DISCIPLINE_TYPE_COMBAT] = GetString(SI_COMBAT_METRICS_MAGICKA_COLOR),
+	[CHAMPION_DISCIPLINE_TYPE_CONDITIONING] = GetString(SI_COMBAT_METRICS_HEALTH_COLOR),
+	[CHAMPION_DISCIPLINE_TYPE_WORLD] = GetString(SI_COMBAT_METRICS_STAMINA_COLOR),
+
+}
+local starcolors = {
+
+	[CHAMPION_DISCIPLINE_TYPE_COMBAT] = ZO_ColorDef:New(0.8, 0.8, 1),
+	[CHAMPION_DISCIPLINE_TYPE_CONDITIONING] = ZO_ColorDef:New(1, 0.80, 0.8),
+	[CHAMPION_DISCIPLINE_TYPE_WORLD] = ZO_ColorDef:New(0.8, 1, 0.7),
+
+}
+
+function CMX.InitializeCPRows(panel)
+
+	for disciplineId = 1,3 do
+
+		local constellationControl = panel:GetNamedChild("Constellation"..disciplineId)
+
+		local disciplineType = GetChampionDisciplineType(disciplineId)
+
+		local color = labelcolors[disciplineType]
+
+		local title = constellationControl:GetNamedChild("Title")
+		title:SetText(zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionDisciplineName(disciplineId)))
+
+		local nameBase = constellationControl:GetName() .. "StarItem"
+		local anchor = title
+
+		for i = 1, 16 do
+
+			local starItem = CreateControlFromVirtual(nameBase, constellationControl, "CombatMetrics_StarItem", i)
+
+			if i == 1 then
+
+				starItem:SetAnchor(TOPLEFT, anchor, BOTTOMLEFT, 0, 6)
+
+			elseif i == 9 then
+
+				starItem:SetAnchor(TOPRIGHT, constellationControl, TOPRIGHT, 0, 24)
+
+			else
+
+				starItem:SetAnchor(TOPLEFT, anchor, BOTTOMLEFT, 0, 4)
+
+			end
+
+			anchor = starItem
+
+			local coords = {0.75, 1, 0.5, 0.75}
+
+			if i > 4 then
+
+				coords = {0.25, 0.5, 0.25, 0.5}
+				starItem:GetNamedChild("Ring"):SetHidden(true)
+				starItem:SetHidden(true)
+
+			else
+
+				starItem:GetNamedChild("Star"):SetHidden(true)
+				starItem:GetNamedChild("Name"):SetHidden(true)
+				starItem:GetNamedChild("Value"):SetHidden(true)
+
+			end
+
+			local starIcon = starItem:GetNamedChild("Star")
+
+			starIcon:SetTextureCoords(unpack(coords))
+			starIcon:SetColor(starcolors[disciplineType]:UnpackRGB())
+
+		end
+
+		CMX.SetLabelColor(constellationControl, color)
 	end
 end
 
@@ -1397,7 +1475,7 @@ do
 			{label = GetString(SI_COMBAT_METRICS_FEEDBACK_GITHUB), callback = GotoGithub},
 			{label = GetString(SI_COMBAT_METRICS_FEEDBACK_DISCORD), callback = GotoDiscord},
 		}
-		
+
 		local donationSubItems = {
 			{label = ZO_CachedStrFormat(stringFormatEU, GetString(SI_COMBAT_METRICS_DONATE_GOLD)), callback = DonateGold, disabled = not isEUServer},
 			{label = ZO_CachedStrFormat(stringFormatEU, GetString(SI_COMBAT_METRICS_DONATE_CROWNS)), callback = DonateCrowns, disabled = not isEUServer},
@@ -3909,7 +3987,7 @@ local function PerformancePlot(dataType)
 		if lineData[1] == event and lineData[key] then
 
 			local deltatime = lineData[2]/1000 - combatstart
-		
+
 			local isSkill = dataType ~= 7 or (lineData[3]%10) > 2
 
 			if deltatime > x and isSkill then
@@ -5432,13 +5510,13 @@ local function updateLeftInfoPanel(panel)
 
 			name:SetColor(color:UnpackRGB())
 
-			for k = 1, 4 do 
+			for k = 1, 4 do
 
 				local label = control:GetNamedChild("Value" .. k)
-				
+
 				label:SetText(strings[k])
 				label:SetColor(color:UnpackRGB())
-			
+
 			end
 		end
 	end
@@ -5490,13 +5568,7 @@ end
 
 local passiveRequirements = {10, 30, 75, 120}
 
-local function updateRightInfoPanel(panel)
-
-	if fightData == nil then return end
-
-	local CPData = fightData.CP
-
-	if CPData == nil then return end
+local function updateRightInfoPanelLegacy(panel)
 
 	for i = 1, 9 do
 
@@ -5537,6 +5609,115 @@ local function updateRightInfoPanel(panel)
 	end
 end
 
+local function starOrder(t, a, b)
+
+	local ishigher = false
+
+	local typeA = t[a][2]
+	local typeB = t[b][2]
+
+	if typeA > typeB or (typeA == typeB and a < b) then ishigher = true end
+
+	return ishigher
+
+end
+
+local disciplineColors = {
+	[CHAMPION_DISCIPLINE_TYPE_COMBAT] = GetString(SI_COMBAT_METRICS_MAGICKA_COLOR),
+	[CHAMPION_DISCIPLINE_TYPE_CONDITIONING] = GetString(SI_COMBAT_METRICS_HEALTH_COLOR),
+	[CHAMPION_DISCIPLINE_TYPE_WORLD] = GetString(SI_COMBAT_METRICS_STAMINA_COLOR),
+}
+
+local function updateRightInfoPanel(panel)
+
+	if fightData == nil then return end
+
+	local CPData = fightData.CP
+
+	if CPData == nil then return end
+
+	local legacyPanel = panel:GetParent():GetNamedChild("RightOld")
+
+	if GetAPIVersion() < 100034 or (CPData.version or 0) < 2 then
+
+		panel:SetHidden(true)
+		legacyPanel:SetHidden(false)
+
+		updateRightInfoPanelLegacy(legacyPanel)
+
+		return
+	end
+
+	panel:SetHidden(false)
+	legacyPanel:SetHidden(true)
+
+	for disciplineId, discipline in pairs(CPData) do
+
+		if type(discipline) == "table" then
+
+			local constellationControl = panel:GetNamedChild("Constellation"..disciplineId)
+
+			local itemNo = 0
+			
+			local title = constellationControl:GetNamedChild("Title")
+			local disciplineName = zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionDisciplineName(disciplineId))
+
+			title:SetText(ZO_CachedStrFormat("<<1>> (<<2>>)", disciplineName, discipline.total))
+
+			for starId, starData in CMX.spairs(discipline.stars, starOrder) do
+
+				local starControl
+
+				itemNo = itemNo + 1
+
+				local points, state = unpack(starData)
+
+				starControl = constellationControl:GetNamedChild("StarItem" .. itemNo)
+
+				if itemNo > 16 then
+
+					break
+
+				elseif state == 2 then -- slotted
+
+					starControl:GetNamedChild("Star"):SetHidden(false)
+					starControl:GetNamedChild("Ring"):SetTexture("/esoui/art/champion/actionbar/champion_bar_slot_frame.dds")
+
+					local name = starControl:GetNamedChild("Name")
+					local value = starControl:GetNamedChild("Value")
+
+					name:SetHidden(false)
+					value:SetHidden(false)
+
+					name:SetText(zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionSkillName(starId)))
+					value:SetText(points)
+
+				elseif itemNo <= 4 then
+
+					starControl:GetNamedChild("Star"):SetHidden(true)
+					starControl:GetNamedChild("Name"):SetHidden(true)
+					starControl:GetNamedChild("Value"):SetHidden(true)
+					starControl:GetNamedChild("Ring"):SetTexture("/esoui/art/champion/actionbar/champion_bar_slot_frame_disabled.dds")
+
+				else
+
+					starControl:SetHidden(false)
+
+					starControl:GetNamedChild("Name"):SetText(zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionSkillName(starId)))
+					starControl:GetNamedChild("Value"):SetText(points)
+
+				end
+			end
+
+			for i = math.max(itemNo + 1, 5), 16 do
+
+				constellationControl:GetNamedChild("StarItem" .. i):SetHidden(true)
+
+			end
+		end
+	end
+end
+
 local subIdToQuality = {}
 
 local function GetEnchantQuality(itemLink)	-- From Enchanted Quality (Rhyono, votan)
@@ -5548,7 +5729,7 @@ local function GetEnchantQuality(itemLink)	-- From Enchanted Quality (Rhyono, vo
 
 	if enchantSub == 0 and not IsItemLinkCrafted(itemLink) then
 
-		local hasSet = GetItemLinkSetInfo(itemLink, false)		
+		local hasSet = GetItemLinkSetInfo(itemLink, false)
 		if hasSet then enchantSub = tonumber(itemIdSub) end -- For non-crafted sets, the "built-in" enchantment has the same quality as the item itself
 
 	end
