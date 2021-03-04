@@ -389,22 +389,18 @@ local function updateSelectorButtons(selectorButtons)
 
 	local show = db.ForceNotification or ((isGerman or isMe) and isEUServer and isNotificationAllowed and isVeteranRaid and isWithinAllowedTime)
 
-	if false then
-
-		df("Result: %s, De: %s, EU: %s, G: %s, R: %s, T: %s, Set: %s (%s, %d / %d)",
-			tostring(show),
-			tostring(isGerman),
-			tostring(isEUServer),
-			tostring(isNotInGuild),
-			tostring(isVeteranRaid),
-			tostring(isWithinAllowedTime),
-			tostring(isNotificationAllowed),
-			tostring(db.NotificationAllowed),
-			db.currentNotificationVersion,
-			db.NotificationRead
-		)
-
-	end
+	--[[ df("Result: %s, De: %s, EU: %s, G: %s, R: %s, T: %s, Set: %s (%s, %d / %d)",
+		tostring(show),
+		tostring(isGerman),
+		tostring(isEUServer),
+		tostring(isNotInGuild),
+		tostring(isVeteranRaid),
+		tostring(isWithinAllowedTime),
+		tostring(isNotificationAllowed),
+		tostring(db.NotificationAllowed),
+		db.currentNotificationVersion,
+		db.NotificationRead
+	)--]]
 
 	selectorButtons:GetNamedChild("NotificationButton"):SetHidden(not show)
 
