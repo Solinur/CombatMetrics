@@ -539,7 +539,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Fixed an issue where Crystal Fragment Proc casts were not being tracked properly. 
 [*] Fixed a typo where the output string when posting buff uptimes would refer to HPS instead.
 
-1.3.0 
+1.3.0 3.679.779 (05.03.2021) 00:55
 [*] Added support for CP 2.0. Parses done with CP 1.0 will be shown in the old style (but without tooltips). 
 [*] Updated the system to calculate effective Stat values. This is also done to allow future implementations of advanced stats, which are recorded already but not shown yet. 
 [*] Fixed some skill timing issues with vampire toggle.
