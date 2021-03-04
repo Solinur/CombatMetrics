@@ -19,6 +19,7 @@ lang/$(language).lua
 
 CombatMetrics.lua
 CombatMetricsMenu.lua
+CombatMetricsLegacy.lua
 CombatMetricsUI.lua
 Customisations.lua
 

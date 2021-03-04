@@ -29,7 +29,7 @@ local function GetChar(value, logstringdata, length)
 
 	local char = chars[value%64]
 
-	if char == nil then CMX.Print("save", LOG_LEVEL_WARNING, "Invalid value during log encoding: %s", tostring(value)) end
+	if char == nil then return true end
 
 	table.insert(logstringdata, char)
 
@@ -45,7 +45,13 @@ local function Encode(line, layout)
 
 	for i, size in ipairs(layout) do
 
-		if line[i] then GetChar(line[i], logstringdata, size) end
+		if line[i] then
+			
+			local error = GetChar(line[i], logstringdata, size)
+
+			if error then CMX.Print("save", LOG_LEVEL_WARNING, "Invalid value during log encoding: %s (type: %d, value %d) ", tostring(line[i]), line[1], i) end
+		
+		end
 
 	end
 
@@ -144,6 +150,7 @@ local LAYOUT_STATS = 14
 local LAYOUT_POWER = 15
 local LAYOUT_MESSAGE = 16
 local LAYOUT_DEATH = 17
+local LAYOUT_STATS_ADV = 18
 local LAYOUT_SKILL = 19
 local LAYOUT_BOSSHP = 20
 local LAYOUT_PERFORMANCE = 21
@@ -164,6 +171,7 @@ local logTypeToLayout = {
 	[15] = LAYOUT_POWER,
 	[16] = LAYOUT_MESSAGE,
 	[17] = LAYOUT_DEATH,
+	[18] = LAYOUT_STATS_ADV,
 	[19] = LAYOUT_SKILL,
 	[20] = LAYOUT_BOSSHP,
 	[21] = LAYOUT_PERFORMANCE,
@@ -174,7 +182,8 @@ local layouts = {
 
 	[LAYOUT_COMBAT] = {1, 4, 1, 2, 2, 3, 4, 1, 4}, 		-- (23) type, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType, overflow
 	[LAYOUT_EVENT] = {1, 4, 2, 3, 1, 1, 1, 1, 4, 3},	-- (23) type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, slot, hitValue
-	[LAYOUT_STATS] = {1, 4, 4, 4, 1},		 			-- (15) type, timems, statchange, newvalue, statname
+	[LAYOUT_STATS] = {1, 4, 4, 4, 1},		 			-- (15) type, timems, statchange, newvalue, statId
+	[LAYOUT_STATS_ADV] = {1, 4, 4, 4, 2},		 		-- (16) type, timems, statchange, newvalue, statId
 	[LAYOUT_POWER] = {1, 4, 3, 3, 1, 3},		 		-- (16) type, timems, abilityId, powerValueChange, powerType, powerValue
 	[LAYOUT_MESSAGE] = {1, 4, 1, 1}, 					-- (8)  type, timems, messageId (e.g. "weapon swap"), bar
 	[LAYOUT_DEATH] = {1, 4, 1, 2, 3}, 					-- (8)  type, timems, state, unitId, abilityId/unitId
@@ -225,6 +234,11 @@ local function encodeCombatLogLine(line, fight)
 	elseif layoutId == LAYOUT_STATS then			-- type, timems, statchange, newvalue, statname
 
 		line[3] = line[3] + 8388608					-- avoid negative numbers
+
+	elseif layoutId == LAYOUT_STATS_ADV then		-- type, timems, statchange, newvalue, statname
+
+		line[3] = zo_round(10 * (line[3] + 838860))	-- avoid negative/float numbers
+		line[4] = zo_round(line[4] * 10)
 
 	elseif layoutId == LAYOUT_POWER then			-- type, timems, abilityId, powerValueChange, powerType
 
@@ -298,12 +312,17 @@ local function decodeCombatLogLine(line, fight)
 
 		if logdata[3] == 0 then logdata[3] = nil end
 
-	elseif layoutId == LAYOUT_STATS then					-- type, timems, statchange, newvalue, statname
+	elseif layoutId == LAYOUT_STATS or layoutId == LAYOUT_STATS_ADV then			-- type, timems, statchange, newvalue, statname
 
 		if fight.svversion < 5 then logdata[5] = statTableConvert[logdata[5]] end
-		logdata[3] = logdata[3] - 8388608					-- recover negative numbers
+		logdata[3] = logdata[3] - 8388608											-- recover negative numbers
 
-	elseif layoutId == LAYOUT_POWER then					-- type, timems, abilityId, powerValueChange, powerType
+	elseif layoutId == LAYOUT_STATS_ADV then		-- type, timems, statchange, newvalue, statname
+
+		line[3] = (line[3] / 10) - 838860			-- avoid negative/float numbers
+		line[4] = (line[4] / 10)
+
+	elseif layoutId == LAYOUT_POWER then			-- type, timems, abilityId, powerValueChange, powerType
 
 		if logdata[3] == 262141 then
 

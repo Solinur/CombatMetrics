@@ -1710,6 +1710,8 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 		if ProcessLog[logType] then ProcessLog[logType](fight, logline) end
 
+		if logType == LIBCOMBAT_EVENT_PLAYERSTATS_ADVANCED then Print("calc", LOG_LEVEL_DEBUG, "Advanced Stat!") end
+
 	end
 
 	local titleBar = CombatMetrics_Report_TitleFightTitleBar
@@ -2771,25 +2773,6 @@ local function Initialize(event, addon)
 
 		Print("main", LOG_LEVEL_ERROR, "LibFeedback not found! Make sure the latest version is installed.")
 
-	end
-
-	if GetAPIVersion() >= 100034 then return end
-
-	local lang = GetCVar("language.2")
-	db.Legacy = db.Legacy or {}
-	db.Legacy[lang] = db.Legacy[lang] or {}
-
-	local langdata = db.Legacy[lang]
-
-	for i = 1,9 do
-
-		langdata[i] = {name = zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionDisciplineName(discipline))}
-
-		for j = 1, 8 do
-
-			langdata[i][j] = zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionSkillName(discipline, i))
-
-		end
 	end
 end
 

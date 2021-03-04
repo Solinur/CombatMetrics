@@ -669,7 +669,10 @@
 		
 		<Control name="CombatMetrics_StarPassive" virtual="true" mouseEnabled="true">
 		
-			<Dimensions x="18" y="18"/>		
+			<Dimensions x="18" y="18"/>
+			
+			<OnMouseEnter> CMX.CPTooltip_OnMouseEnterLegacy(self) </OnMouseEnter>
+			<OnMouseExit> CMX.CPTooltip_OnMouseExit(self) </OnMouseExit>
 		
 		</Control>
 			
@@ -3499,15 +3502,15 @@
 								
 								<Control name="$(parent)Constellation2" inherits="CombatMetrics_Constellation">
 								
-									<Anchor point="TOPLEFT" relativeTo="$(parent)Constellation1" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="10"/>
-									<Anchor point="TOPRIGHT" relativeTo="$(parent)Constellation1" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="10"/>
+									<Anchor point="TOPLEFT" relativeTo="$(parent)Constellation1" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)Constellation1" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
 									
 								</Control>
 								
 								<Control name="$(parent)Constellation3" inherits="CombatMetrics_Constellation">
 								
-									<Anchor point="TOPLEFT" relativeTo="$(parent)Constellation2" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="10"/>
-									<Anchor point="TOPRIGHT" relativeTo="$(parent)Constellation2" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="10"/>
+									<Anchor point="TOPLEFT" relativeTo="$(parent)Constellation2" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="8"/>
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)Constellation2" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="8"/>
 									
 								</Control>
 						
