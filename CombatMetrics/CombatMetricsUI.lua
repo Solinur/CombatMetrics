@@ -426,7 +426,7 @@ local function initSelectorButtons(selectorButtons)
 	end
 end
 
-local LegacyStrings = CMX.CPLegacyStrings[GetCVar("language.2")]
+local LegacyStrings = CMX.CPLegacyStrings[GetCVar("language.2")] or CMX.CPLegacyStrings["en"]
 
 function CMX.InitializeCPRowsLegacy(panel)
 
@@ -450,7 +450,9 @@ function CMX.InitializeCPRowsLegacy(panel)
 
 		local title = signcontrol:GetNamedChild("Title")
 
-		title:SetText(LegacyStrings[discipline].name)
+		local name = LegacyStrings and LegacyStrings[discipline] and LegacyStrings[discipline].name or "???"
+
+		title:SetText(name)
 
 		local width = title:GetTextWidth() + 4
 		local height = title:GetHeight()
@@ -465,7 +467,9 @@ function CMX.InitializeCPRowsLegacy(panel)
 
 			local label = row:GetNamedChild("Name")
 
-			label:SetText(LegacyStrings[discipline][i])
+			local name = LegacyStrings and LegacyStrings[discipline] and LegacyStrings[discipline][i] or "???"
+
+			label:SetText(name)
 
 			local passive = signcontrol:GetNamedChild("Passive"..i)
 
@@ -5322,6 +5326,12 @@ function CMX.CPTooltip_OnMouseEnter(starControl)
 	InitializeTooltip(ChampionSkillTooltip, starControl, TOPLEFT, 0, 5, BOTTOMLEFT)
 
 	ChampionSkillTooltip:SetChampionSkill(starControl.starId, starControl.points, nil, starControl.slotted)
+
+end
+
+function CMX.CPTooltip_OnMouseExitLegacy(control)
+
+	ClearTooltip(InformationTooltip)
 
 end
 

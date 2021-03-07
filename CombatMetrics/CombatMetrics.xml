@@ -672,7 +672,7 @@
 			<Dimensions x="18" y="18"/>
 			
 			<OnMouseEnter> CMX.CPTooltip_OnMouseEnterLegacy(self) </OnMouseEnter>
-			<OnMouseExit> CMX.CPTooltip_OnMouseExit(self) </OnMouseExit>
+			<OnMouseExit> CMX.CPTooltip_OnMouseExitLegacy(self) </OnMouseExit>
 		
 		</Control>
 			
