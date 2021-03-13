@@ -26,7 +26,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.3.1"
+CMX.version = "1.3.2"
 
 -- Logger
 
@@ -1615,7 +1615,7 @@ local function ProcessLogSkillTimings(fight, logline)
 
 			if timeDiff < (GetAbilityDuration(abilityId) + 250) then
 
-				castData[castindex][5] = timems
+				castData[castindex][5] = math.max(timems, starttime + 1000)
 				indexFound = k
 
 				table.remove(started, k)

@@ -3853,9 +3853,9 @@ end
 
 local powerTypeKeyTable = {
 
-	[POWERTYPE_HEALTH] = "maxmaxhealth",
-	[POWERTYPE_MAGICKA] = "maxmaxmagicka",
-	[POWERTYPE_STAMINA] = "maxmaxstamina",
+	[POWERTYPE_HEALTH] = LIBCOMBAT_STAT_MAXHEALTH,
+	[POWERTYPE_MAGICKA] = LIBCOMBAT_STAT_MAXMAGICKA,
+	[POWERTYPE_STAMINA] = LIBCOMBAT_STAT_MAXSTAMINA,
 
 }
 
@@ -3922,7 +3922,7 @@ local function ResourceAbsolute(powerType)
 
 	local key = powerTypeKeyTable[powerType]
 
-	local maxValue = powerType == POWERTYPE_ULTIMATE and 500 or fightData.stats[key]
+	local maxValue = powerType == POWERTYPE_ULTIMATE and 500 or fightData.calculated.stats[key].max
 
 	for i, xyData in ipairs(XYData) do
 
