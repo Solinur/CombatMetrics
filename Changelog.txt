@@ -554,3 +554,9 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 
 1.3.3 3.810.403 (13.03.2021) 01:22
 [*] Fixed an issue where too big weaving times were shown for channeled or casttime abilities which are faster than one second. (Thx to Liko for reporting this.)
+
+1.3.4 3.855.090 (16.03.2021) 00:56
+[*] Finally fixed an issue where effective Penetration values were too low. 
+[*] Added italian translation by Dusty82. Thanks!
+[*] Added an asterisk and tooltip to critical damage bonus display, to indicate that theAPI doesn allow to detect when one is flanking. 
+[*] Added protection to avoid a rare lua error. 

@@ -2075,6 +2075,28 @@ local function updateFightStatsPanelRight(panel)
 
 			end
 
+			if i == 4 and powerType == POWERTYPE_MAGICKA or powerType == POWERTYPE_STAMINA then	-- Add a hint for backstabber
+
+				local row4 = rowcontrol
+
+				row4.tooltip = nil
+
+				local CP = data.CP
+
+				if CP and CP.version ~= nil and CP.version >= 2 then
+
+					local backstabber = CP[1] and CP[1].stars and CP[1].stars[31] --
+
+					if backstabber and backstabber[1] >= 10 and backstabber[2] == LIBCOMBAT_CPTYPE_SLOTTED then 
+
+						text = ZO_CachedStrFormat("<<1>>*:", GetString(stringKey, i))
+
+						row4.tooltip = {GetString(SI_COMBAT_METRICS_BACKSTABBER_TT)}
+
+					end
+				end
+			end
+
 			rowcontrol:GetNamedChild("Label"):SetText(text)
 			rowcontrol:GetNamedChild("Value"):SetText(avgvalue)
 			rowcontrol:GetNamedChild("Value2"):SetText(maxvalue)
@@ -6234,8 +6256,8 @@ local function GetSelectionDamage(data, selection)	-- Gets highest Single Target
 
 			units = units + 1
 			damage = damage + totalUnitDamage
-			starttime = math.min(starttime or unit.dpsstart or 0, unit.dpsstart or 0)
-			endtime = math.max(endtime or unit.dpsend or 0, unit.dpsend or 0)
+			starttime = unit.dpsstart and math.min(starttime or unit.dpsstart, unit.dpsstart) or starttime
+			endtime = unit.dpsend and math.max(endtime or unit.dpsend, unit.dpsend) or endtime
 
 			if totalUnitDamage > bossDamage then
 
@@ -6247,7 +6269,7 @@ local function GetSelectionDamage(data, selection)	-- Gets highest Single Target
 		end
 	end
 
-	local damageTime = (endtime - starttime)/1000
+	local damageTime = starttime and endtime and (endtime - starttime)/1000 or 0
 	damageTime = damageTime > 0 and damageTime or data.dpstime
 
 	return units, damage, bossName, damageTime

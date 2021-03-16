@@ -254,6 +254,7 @@
 	SI_COMBAT_METRICS_PERFORMANCE_DESYNC = "Skill Desync",
 
 	SI_COMBAT_METRICS_PENETRATION_TT = "Penetration vs. Damage",
+	SI_COMBAT_METRICS_BACKSTABBER_TT = "Backstabber is included as if all targets were always flanked",
 
 	SI_COMBAT_METRICS_COMBAT_LOG = "Combat Log",
 

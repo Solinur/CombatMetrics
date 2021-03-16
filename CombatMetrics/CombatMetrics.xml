@@ -210,7 +210,7 @@
 			</Controls>
 		</Control>
 			
-		<Control name="CombatMetrics_StatRowLine2" virtual="true">
+		<Control name="CombatMetrics_StatRowLine2" inherits="CombatMetrics_ControlTooltip" virtual="true">
 			<Controls>
 			
 				<Label name="$(parent)Label" inherits="CombatMetrics_StatRowLabel" text="LABEL:" horizontalAlignment="RIGHT">
