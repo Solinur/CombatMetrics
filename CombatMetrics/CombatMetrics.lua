@@ -10,6 +10,8 @@ local chatWindow
 local currentbar
 local abilityDurations = {}
 
+local ProcessLog = {}
+
 -- localize some module functions for performance
 
 local stringformat = string.format
@@ -144,35 +146,27 @@ local IsMagickaAbility = {				-- nil for oblivion and other damage types that ar
 -- EC Shock: 142653
 -- EC Frost: 142652
 
-local SpellResistDebuffs = {
+local StatDebuffs = {
 
-	[GetFormattedAbilityName(62787)] = 5948, --Major Breach
-	[GetFormattedAbilityName(68588)] = 2974, --Minor Breach
+	[GetFormattedAbilityName(61743)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 5948, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 5948}, --Major Breach
+	[GetFormattedAbilityName(61742)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 2974, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 2974}, --Minor Breach
+	[GetFormattedAbilityName(17906)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 2108, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 2108}, -- Crusher, can get changed by settings !
+	[GetFormattedAbilityName(143808)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 1000, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 1000}, -- Crystal Weapon
+	[GetFormattedAbilityName(75753)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 3010, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 3010}, -- Alkosh
+	[GetFormattedAbilityName(120018)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 3010, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 3010}, -- Alkosh (Trial Dummy)
 
-	[GetFormattedAbilityName(79087)] = 1320, -- Spell Resistance Reduction by Poison
+	[GetFormattedAbilityName(79087)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 1320}, -- Spell Resistance Reduction by Poison
+	[GetFormattedAbilityName(79090)] = {[LIBCOMBAT_STAT_WEAPONPENETRATION] = 1320}, -- Physical Resistance Reduction by Poison
 
-	[GetFormattedAbilityName(17906)] = 2108, -- Crusher, can get changed by settings !
+	[GetFormattedAbilityName(80866)] = {[LIBCOMBAT_STAT_WEAPONPENETRATION] = 2395}, -- Tremorscale
 
-	[GetFormattedAbilityName(143808)] = 1000, -- Crystal Weapon
+	[GetFormattedAbilityName(142610)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 3, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 3}, -- Flame Weakness
+	[GetFormattedAbilityName(142653)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 3, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 3}, -- Shock Weakness
+	[GetFormattedAbilityName(142652)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 3, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 3}, -- Frost Weakness
 
-	--[GetFormattedAbilityName(75753)] = 3010, -- Alkosh, now special tracking
+	[GetFormattedAbilityName(145975)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 10, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 10}, -- Minor Brittle
 
-}
-
-local PhysResistDebuffs = {
-
-	[GetFormattedAbilityName(62787)] = 5948, --Major Breach
-	[GetFormattedAbilityName(68588)] = 2974, --Minor Breach
-
-	[GetFormattedAbilityName(79090)] = 1320, -- Physical Resistance Reduction by Poison
-
-	[GetFormattedAbilityName(17906)] = 2108, -- Crusher, can get changed by settings !
-
-	[GetFormattedAbilityName(143808)] = 1000, -- Crystal Weapon
-
-	[GetFormattedAbilityName(80866)] = 2395, -- Tremorscale
-
-	--[GetFormattedAbilityName(75753)] = 3010, -- Alkosh, now special tracking
+	[GetFormattedAbilityName(113382)] = {[LIBCOMBAT_STAT_SPELLPOWER] = 460}, -- Spell Strategist
 
 }
 
@@ -194,6 +188,12 @@ local ChangingAbilities = { -- Skills which can change un use
 	[46324] = 114716,  	-- Crystal Fragments Proc
 }
 
+for k,v in pairs(ChangingAbilities) do
+
+	ChangingAbilities[v] = k
+
+end
+
 local abilityDelay = {	-- Radiant Destruction and morphs have a 100ms delay after casting. 50ms for Jabs
     [63044] = 100,
     [63029] = 100,
@@ -202,11 +202,18 @@ local abilityDelay = {	-- Radiant Destruction and morphs have a 100ms delay afte
     [38857] = 200
 }
 
-for k,v in pairs(ChangingAbilities) do
+local TrialDummyBuffs = {
 
-	ChangingAbilities[v] = k
-
-end
+	[61743] = true, -- Major Breach
+	[61742] = true, -- Minor Breach
+	[79717] = true, -- Minor Vulnerability
+	[120007] = true, -- Crusher
+	[145975] = true, -- Minor Brittle
+	[106754] = true, -- Major Vulnerability
+	[120011] = true, -- Engulfing Flames
+	[120018] = true, -- Roar of Alkosh
+	[88401] = true, -- Minor Magickasteal
+}
 
 function CMX.SetCrusher(value)
 
@@ -214,8 +221,10 @@ function CMX.SetCrusher(value)
 
 	local crushername = GetFormattedAbilityName(17906)
 
-	SpellResistDebuffs[crushername] = value
-	PhysResistDebuffs[crushername] = value
+	local StatDebuffCrusher = StatDebuffs[crushername]
+
+	StatDebuffCrusher[LIBCOMBAT_STAT_SPELLPENETRATION] = value
+	StatDebuffCrusher[LIBCOMBAT_STAT_WEAPONPENETRATION] = value
 
 end
 
@@ -269,10 +278,11 @@ local EffectHandler = NewSubclass()
 local SkillCastHandler = NewSubclass()
 local BarStatsHandler = NewSubclass()
 local StatDataHandler = NewSubclass()
+local UnitStatHandler = NewSubclass()
 
-local function AcquireUnitData(self, unitId, timems)
+local function AcquireUnitData(fight, unitId, timems)
 
-	local units = self.calculated.units
+	local units = fight.calculated.units
 
 	local unit = units[unitId]
 
@@ -291,9 +301,9 @@ local function AcquireUnitData(self, unitId, timems)
 	return unit
 end
 
-local function AcquireAbilityData(self, abilityId, ispet, damageType, tableKey)
+local function AcquireAbilityData(unit, abilityId, ispet, damageType, tableKey)
 
-	local data = self[tableKey]
+	local data = unit[tableKey]
 
 	if data[abilityId] == nil then
 
@@ -304,11 +314,11 @@ local function AcquireAbilityData(self, abilityId, ispet, damageType, tableKey)
 	return data[abilityId]
 end
 
-local function AcquireEffectData(self, abilityId, effectType, stacks)
+local function AcquireEffectData(unit, abilityId, effectType, stacks)
 
 	local name = GetFormattedAbilityName(abilityId)
 
-	local buffs = self.buffs
+	local buffs = unit.buffs
 
 	if buffs[name] == nil then
 
@@ -326,10 +336,10 @@ local function AcquireEffectData(self, abilityId, effectType, stacks)
 
 end
 
-local function AcquireResourceData(self, abilityId, powerValueChange, powerType)
+local function AcquireResourceData(fight, abilityId, powerValueChange, powerType)
 
 	local tablekey = powerValueChange>=0 and "gains" or "drains"
-	local resource = self.calculated.resources[powerType]
+	local resource = fight.calculated.resources[powerType]
 
 	local resourceData = resource[tablekey]
 
@@ -346,9 +356,9 @@ local function AcquireResourceData(self, abilityId, powerValueChange, powerType)
 	return resourceData[abilityId]
 end
 
-local function AcquireSkillCastData(self, reducedslot)
+local function AcquireSkillCastData(fight, reducedslot)
 
-	local skilldata = self.calculated.skills
+	local skilldata = fight.calculated.skills
 
 	if skilldata[reducedslot] == nil then
 
@@ -359,9 +369,9 @@ local function AcquireSkillCastData(self, reducedslot)
 	return skilldata[reducedslot]
 end
 
-local function AcquireBarStats(self, bar)
+local function AcquireBarStats(fight, bar)
 
-	local bardata = self.calculated.barStats
+	local bardata = fight.calculated.barStats
 
 	if bardata[bar] == nil then
 
@@ -373,13 +383,27 @@ local function AcquireBarStats(self, bar)
 
 end
 
-local function AcquireStatData(self, statId)
+local function AcquireStatData(fight, statId)
 
-	local statData = self.calculated.stats
+	local statData = fight.calculated.stats
 
 	if statData[statId] == nil then
 
 		statData[statId] = StatDataHandler:New()
+
+	end
+
+	return statData[statId]
+
+end
+
+local function AcquireUnitStatData(unit, statId)
+
+	local statData = unit.statData
+
+	if statData[statId] == nil then
+
+		statData[statId] = UnitStatHandler:New()
 
 	end
 
@@ -482,54 +506,54 @@ function UnitHandler:Initialize()
 	InitBasicValues(self)
 	self.AcquireAbilityData = AcquireAbilityData
 	self.AcquireEffectData = AcquireEffectData
+	self.AcquireUnitStatData = AcquireUnitStatData
 	self.buffs = {}
 	self.currentPhysicalResistance = 0
 	self.currentSpellResistance = 0
-	self.spellResDebuffs = {}
-	self.physResDebuffs = {}
+	self.statData = {}
 
 end
 
-function UnitHandler:UpdateResistance(fight, ismagic, effectdata, value)
+function UnitHandler:UpdateStats(fight, effectdata, abilityId, hitValue)
 
 	local debuffName = effectdata.name
-	local debuffData = self.physResDebuffs
-	local valuekey = "currentPhysicalResistance"
-	local resistDataKey = "physicalResistance"
-	local statkey = LIBCOMBAT_STAT_WEAPONPENETRATION
 
-	if ismagic then
+	local debuffStatData = StatDebuffs[debuffName]
 
-		debuffData = self.spellResDebuffs
-		valuekey = "currentSpellResistance"
-		resistDataKey = "spellResistance"
-		statkey = LIBCOMBAT_STAT_SPELLPENETRATION
+	if debuffStatData == nil then return end
 
-	end
+	for stat, value in pairs(debuffStatData) do
 
-	local debuff = self.buffs[debuffName]
-	local isactive = NonContiguousCount(debuff.slots) > 0
+		if abilityId == 75753 then value = hitValue end
+		if abilityId == 120007 then value = 2740 end
 
-	if isactive == true and (not debuffData[debuffName]) then
+		local statData = self:AcquireUnitStatData(stat)
+		local debuffData = statData.debuffs
 
-		if value == nil then
+		local debuff = self.buffs[debuffName]
+		local isactive = NonContiguousCount(debuff.slots) > 0
 
-			Print("calc", LOG_LEVEL_WARNING, "Resist debuff value missing: %s (%d)", debuffName or "nil", effectdata.iconId or 0)
-			return
+		if isactive == true and (not debuffData[debuffName]) then
+
+			if value == nil then
+
+				Print("calc", LOG_LEVEL_WARNING, "Debuff stat value missing: %s (%d)", debuffName or "nil", effectdata.iconId or 0)
+				return
+
+			end
+
+			debuffData[debuffName] = value
+
+			statData.value = statData.value + value
+
+		elseif isactive == false and debuffData[debuffName] then
+
+			value = debuffData[debuffName]
+			debuffData[debuffName] = nil
+
+			statData.value = statData.value - value
 
 		end
-
-		debuffData[debuffName] = value
-
-		self[valuekey] = self[valuekey] + value
-
-	elseif isactive == false and debuffData[debuffName] then
-
-		value = debuffData[debuffName]
-		debuffData[debuffName] = nil
-
-		self[valuekey] = self[valuekey] - value
-
 	end
 end
 
@@ -682,6 +706,13 @@ function StatDataHandler:Initialize()
 
 end
 
+function UnitStatHandler:Initialize()
+
+	self.value = 0
+	self.debuffs = {}
+
+end
+
 local function GetEmtpyFightStats()
 
 	local data = {}
@@ -725,6 +756,25 @@ local function GetEmtpyFightStats()
 
 end
 
+local function InitTrialDummies(fight)
+
+	local units = fight.units
+
+	for unitId, unit in pairs(units) do
+		
+		if unit.isTrialDummy then
+
+			for abilityId, _ in pairs(TrialDummyBuffs) do
+
+				local fakeLogLine = {LIBCOMBAT_EVENT_GROUPEFFECTS_OUT, fight.combatstart, unitId, abilityId, EFFECT_RESULT_GAINED, BUFF_EFFECT_TYPE_DEBUFF, 0, COMBAT_UNIT_TYPE_TARGET_DUMMY, 0}
+
+				ProcessLog[LIBCOMBAT_EVENT_GROUPEFFECTS_OUT](fight, fakeLogLine)
+
+			end
+		end
+	end
+end
+
 local function CalculateFight(fight) -- called by CMX.update or on user interaction
 
 	fight.cindex = 0
@@ -754,6 +804,8 @@ local function CalculateFight(fight) -- called by CMX.update or on user interact
 
 	titleBar:SetValue(0)
 	titleBar:SetHidden(false)
+
+	fight:InitTrialDummies()
 
 	fight:CalculateChunk()
 
@@ -1028,8 +1080,6 @@ end
 
 -- Combat Log Processing functions, define for each callbacktype
 
-local ProcessLog = {}
-
 -- Damage
 
 local damageResultCategory={
@@ -1090,8 +1140,14 @@ local function IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitVa
 
 	for statId, stattype in pairs(statlist) do
 
-		local currentValue = currentStats[statId]
+		local unitData = unit and unit.statData[statId]
+		local unitValue = unitData and unitData.value or 0
+
+		local currentValue = (currentStats[statId] or 0) + unitValue
 		local value = hitValue
+
+		local statData = fight:AcquireStatData(statId)
+		statData.max = math.max(currentValue, statData.max)
 
 		if stattype == STATTYPE_PENETRATION then
 
@@ -1101,21 +1157,17 @@ local function IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitVa
 
 			elseif ismagical ~= nil then
 
-				local resistancekey = "currentPhysicalResistance"
 				local resistDataKey = "physicalResistance"
 
 				if ismagical == true then
 
-					resistancekey = "currentSpellResistance"
 					resistDataKey = "spellResistance"
 
 				end
 
-				local effectiveValue = (currentValue or 0) + unit[resistancekey]
-
 				local data = unit[resistDataKey]
 
-				data[effectiveValue] = (data[effectiveValue] or 0) + value
+				data[currentValue] = (data[currentValue] or 0) + value
 
 			end
 		end
@@ -1428,30 +1480,7 @@ local function ProcessLogEffects(fight, logline)
 		end
 	end
 
-	local buffname = effectdata.name
-
-	local spellres = SpellResistDebuffs[buffname]
-	local physres = PhysResistDebuffs[buffname]
-
-	if abilityId == 75753 then
-
-		unit:UpdateResistance(fight, true, effectdata, hitValue)
-		unit:UpdateResistance(fight, false, effectdata, hitValue)
-
-
-	end
-
-	if spellres then
-
-		unit:UpdateResistance(fight, true, effectdata, spellres)
-
-	end
-
-	if physres then
-
-		unit:UpdateResistance(fight, false, effectdata, physres)
-
-	end
+	unit:UpdateStats(fight, effectdata, abilityId, hitValue)
 end
 
 ProcessLog[LIBCOMBAT_EVENT_EFFECTS_IN] = ProcessLogEffects
@@ -1708,7 +1737,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 		if ProcessLog[logType] then ProcessLog[logType](fight, logline) end
 
-		if logType == LIBCOMBAT_EVENT_PLAYERSTATS_ADVANCED then Print("calc", LOG_LEVEL_DEBUG, "Advanced Stat!") end
+		--if logType == LIBCOMBAT_EVENT_PLAYERSTATS_ADVANCED then Print("debug", LOG_LEVEL_DEBUG, "Advanced Stat!") end
 
 	end
 
@@ -1893,7 +1922,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		end
 
 		if data.damageOutSpells.min == infinity then data.damageOutSpells.min = 0 end
-		if data.damageOutWeapon.min == infinity then data.damageOutWeapon.min = 0 end		
+		if data.damageOutWeapon.min == infinity then data.damageOutWeapon.min = 0 end
 
 		local damageIn = data.damageIn
 
@@ -1955,7 +1984,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		end
 
 		for statId, stattype in pairs(IncomingStatList) do
-			
+
 			local statdata = stats[statId]
 
 			local value = statdata.max
@@ -2312,6 +2341,7 @@ local function AddFightCalculationFunctions(fight)
 	fight.AcquireSkillCastData = AcquireSkillCastData
 	fight.AcquireBarStats = AcquireBarStats
 	fight.AcquireStatData = AcquireStatData
+	fight.InitTrialDummies = InitTrialDummies
 
 end
 
@@ -2724,10 +2754,7 @@ local function Initialize(event, addon)
 
 	--
 
-	local crushername = GetFormattedAbilityName(17906)
-
-	SpellResistDebuffs[crushername] = db.crusherValue
-	PhysResistDebuffs[crushername] = db.crusherValue
+	CMX.SetCrusher(db.crusherValue)
 
 	if db.chatLog.enabled then zo_callLater(CMX.InitializeChat, 500) end
 

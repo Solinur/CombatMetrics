@@ -2173,13 +2173,13 @@ local function updateFightStatsPanelRight(panel)
 		row5:SetHidden(false)
 		row6:SetHidden(false)
 
-		local text5 = GetString(stringKey, 5)
+		local text5 = ZO_CachedStrFormat("<<1>>:", GetString(stringKey, 5))
 
 		row5:GetNamedChild("Label"):SetText(text5)
 		row5:GetNamedChild("Value"):SetText(averagePenetration)
 		row5:GetNamedChild("Value2"):SetText(maxvalue)
 
-		local text6 = GetString(stringKey, 6)
+		local text6 = ZO_CachedStrFormat("<<1>>:", GetString(stringKey, 6))
 
 		row6:GetNamedChild("Label"):SetText(text6)
 		row6:GetNamedChild("Value"):SetText(overPenetrationRatio)
