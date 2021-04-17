@@ -152,8 +152,7 @@ local StatDebuffs = {
 	[GetFormattedAbilityName(61742)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 2974, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 2974}, --Minor Breach
 	[GetFormattedAbilityName(17906)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 2108, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 2108}, -- Crusher, can get changed by settings !
 	[GetFormattedAbilityName(143808)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 1000, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 1000}, -- Crystal Weapon
-	[GetFormattedAbilityName(75753)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 3010, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 3010}, -- Alkosh
-	[GetFormattedAbilityName(120018)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 3010, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 3010}, -- Alkosh (Trial Dummy)
+	[GetFormattedAbilityName(76667)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 3000, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 3000}, -- Alkosh
 
 	[GetFormattedAbilityName(79087)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 1320}, -- Spell Resistance Reduction by Poison
 	[GetFormattedAbilityName(79090)] = {[LIBCOMBAT_STAT_WEAPONPENETRATION] = 1320}, -- Physical Resistance Reduction by Poison
@@ -514,7 +513,14 @@ function UnitHandler:Initialize()
 
 end
 
-function UnitHandler:UpdateStats(fight, effectdata, abilityId, hitValue)
+local overridevalues = {
+
+	[120018] = 3010, -- Alkosh on Dummy
+	[120007] = 2740, -- Crusher on Dummy
+
+}
+
+function UnitHandler:UpdateStats(fight, effectdata, abilityId)
 
 	local debuffName = effectdata.name
 
@@ -524,8 +530,7 @@ function UnitHandler:UpdateStats(fight, effectdata, abilityId, hitValue)
 
 	for stat, value in pairs(debuffStatData) do
 
-		if abilityId == 75753 then value = hitValue end
-		if abilityId == 120007 then value = 2740 end
+		value = overridevalues[abilityId] or value
 
 		local statData = self:AcquireUnitStatData(stat)
 		local debuffData = statData.debuffs
@@ -1157,13 +1162,7 @@ local function IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitVa
 
 			elseif ismagical ~= nil then
 
-				local resistDataKey = "physicalResistance"
-
-				if ismagical == true then
-
-					resistDataKey = "spellResistance"
-
-				end
+				local resistDataKey = ismagical and "spellResistance" or "physicalResistance"
 
 				local data = unit[resistDataKey]
 
@@ -1172,17 +1171,21 @@ local function IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitVa
 			end
 		end
 
-		if currentValue == 0 then return
-
-		elseif stattype == STATTYPE_CRITICAL then
+		if stattype == STATTYPE_CRITICAL then
 
 			value = resultkey == "Blocked" and 0 or 1	-- they can't crit so they don't matter
 
-		elseif stattype == STATTYPE_CRITICALBONUS and resultkey ~= "Critical" then return
+		elseif stattype == STATTYPE_CRITICALBONUS and resultkey ~= "Critical" then
 
-		elseif stattype == STATTYPE_INCSPELL and ismagical ~= true then return
+			value = 0
 
-		elseif stattype == STATTYPE_INCWEAPON and ismagical ~= false then return
+		elseif stattype == STATTYPE_INCSPELL and ismagical ~= true then
+
+			value = 0
+
+		elseif stattype == STATTYPE_INCWEAPON and ismagical ~= false then
+
+			value = 0
 
 		end
 
