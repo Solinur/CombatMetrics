@@ -560,3 +560,12 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Added italian translation by Dusty82. Thanks!
 [*] Added an asterisk and tooltip to critical damage bonus display, to indicate that the API doesn allow to detect when one is flanking. 
 [*] Added protection to avoid a rare lua error. 
+
+1.4.0 3.966.548 (18.04.2021) 00:00
+[*] Added tracking of target based stat modifiers like Elemental Catalyst or Spell Strategist
+[*] Added support for target dummies. They are detected via a unique version of Minor Sorcery, which they apply to you every second. For target dummies a selection of debuffs is assumed with 100% uptime
+[*] Removed tracking of Alkosh penetration amount, as it now works in a way where it is no longer possible to detect the exact amount of penetration applied. Instead the maximum value is always assumed, which should be fine, since the value is reached quite often.
+[*] Fixed an issue where stats where shown as 0. This happened especially when wearing Band of Malacath, where the zero crit rate value silently broke some calculations. (Thx to shira for pointing this out)
+
+1.4.1 3.966.935 (18.04.2021) 00:08
+[*] Fixed inconsistent version numbers
