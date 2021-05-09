@@ -28,7 +28,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.4.1"
+CMX.version = "1.4.2"
 
 -- Logger
 
@@ -150,8 +150,10 @@ local StatDebuffs = {
 
 	[GetFormattedAbilityName(61743)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 5948, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 5948}, --Major Breach
 	[GetFormattedAbilityName(61742)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 2974, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 2974}, --Minor Breach
+	[GetFormattedAbilityName(120007)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 2740, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 2740}, -- Crusher, Target Dummy (the following line might overwrite this. If LUI extended is used, both declarations are necessary)
 	[GetFormattedAbilityName(17906)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 2108, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 2108}, -- Crusher, can get changed by settings !
 	[GetFormattedAbilityName(143808)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 1000, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 1000}, -- Crystal Weapon
+	[GetFormattedAbilityName(120018)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 3000, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 3010}, -- Alkosh, Target Dummy (the following line might overwrite this. If LUI extended is used, both declarations are necessary)
 	[GetFormattedAbilityName(76667)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 3000, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 3000}, -- Alkosh
 
 	[GetFormattedAbilityName(79087)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 1320}, -- Spell Resistance Reduction by Poison
