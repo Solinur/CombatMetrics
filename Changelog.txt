@@ -572,3 +572,8 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 
 1.4.2 4.049.481 (09.05.2021) 13:39
 [*] Fixed an issue where penetration values on Trial dummy where incorrect, when using LUI extended (Thx to xfroggerx for reporting this)
+
+1.4.3 4.158.626 (09.06.2021) 21:50
+[*] Fixed an issue where the uptime of stackable buffs was incorrectly calculated when you entered fights with more stacks than one already active.
+[*] Updated crit damage value for Elemental Catalyst
+[*] API bump to Blackwood (100035)

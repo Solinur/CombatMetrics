@@ -28,7 +28,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.4.2"
+CMX.version = "1.4.3"
 
 -- Logger
 
@@ -161,9 +161,9 @@ local StatDebuffs = {
 
 	[GetFormattedAbilityName(80866)] = {[LIBCOMBAT_STAT_WEAPONPENETRATION] = 2395}, -- Tremorscale
 
-	[GetFormattedAbilityName(142610)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 3, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 3}, -- Flame Weakness
-	[GetFormattedAbilityName(142653)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 3, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 3}, -- Shock Weakness
-	[GetFormattedAbilityName(142652)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 3, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 3}, -- Frost Weakness
+	[GetFormattedAbilityName(142610)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 5, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 5}, -- Flame Weakness
+	[GetFormattedAbilityName(142653)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 5, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 5}, -- Shock Weakness
+	[GetFormattedAbilityName(142652)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 5, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 5}, -- Frost Weakness
 
 	[GetFormattedAbilityName(145975)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 10, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 10}, -- Minor Brittle
 
@@ -768,7 +768,7 @@ local function InitTrialDummies(fight)
 	local units = fight.units
 
 	for unitId, unit in pairs(units) do
-		
+
 		if unit.isTrialDummy then
 
 			for abilityId, _ in pairs(TrialDummyBuffs) do
@@ -1839,7 +1839,19 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 						local count = 0
 						local groupCount = 0
 
+						local minStacks = math.huge
+						local minStackDuration
+						local minStackDurationGroup
+
 						for stacks, stackData in pairs(instance) do
+
+							if stacks < minStacks then
+
+								minStacks = stacks
+								minStackDuration = stackData.uptime
+								minStackDurationGroup = stackData.groupUptime
+
+							end
 
 							sumStackUptime = sumStackUptime + stackData.uptime
 							sumStackGroupUptime = sumStackGroupUptime + stackData.groupUptime
@@ -1850,8 +1862,8 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 						end
 
-						local uptime = sumStackUptime/maxStacks
-						local groupUptime = sumStackGroupUptime/maxStacks
+						local uptime = (sumStackUptime + (minStackDuration and ((minStacks - 1) * minStackDuration) or 0))/maxStacks
+						local groupUptime = (sumStackGroupUptime + (minStackDurationGroup and ((minStacks - 1) * minStackDurationGroup) or 0))/maxStacks
 
 						instance.uptime = uptime
 						instance.groupUptime = groupUptime

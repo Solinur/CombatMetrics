@@ -62,27 +62,6 @@ local function DonateGold()
 
 end
 
-local function CloseDialog()
-
-	CombatMetrics_Report_Dialog:SetHidden(true)
-
-end
-
-local function DonateCrowns()
-
-	local dialog = CombatMetrics_Report_Dialog
-	local button = dialog:GetNamedChild("Button")
-	local editbox = dialog:GetNamedChild("AccountInfo"):GetNamedChild("EditBox")
-
-	dialog:SetHidden(false)
-
-	button:SetHandler("OnClicked", CloseDialog, "CombatMetrics")
-	editbox:SetText("@Solinur")
-	editbox:TakeFocus()
-	editbox:SelectAll()
-
-end
-
 local function GotoESOUIDonation()
 
 	RequestOpenUnsafeURL(GetString(SI_COMBAT_METRICS_DONATE_ESOUIURL))
