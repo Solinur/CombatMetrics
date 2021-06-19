@@ -5334,7 +5334,7 @@ function CMX.CPTooltip_OnMouseEnterLegacy(control)
 	InitializeTooltip(InformationTooltip, control, TOPLEFT, 0, 5, BOTTOMLEFT)
 
 	local string = LegacyStrings[control.discipline][control.skillId]
-	
+
 	AddTooltipLine(control, InformationTooltip, string)
 
 end
@@ -5700,7 +5700,7 @@ local function updateRightInfoPanel(panel)
 			local constellationControl = panel:GetNamedChild("Constellation"..disciplineId)
 
 			local itemNo = 0
-			
+
 			local title = constellationControl:GetNamedChild("Title")
 			local disciplineName = zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionDisciplineName(disciplineId))
 
@@ -5742,13 +5742,13 @@ local function updateRightInfoPanel(panel)
 					if itemNo <= 4 then
 
 						for i = itemNo, 4 do
-							
+
 							starControl = constellationControl:GetNamedChild("StarItem" .. i)
 
 							starControl:GetNamedChild("Star"):SetHidden(true)
 							starControl:GetNamedChild("Name"):SetHidden(true)
 							starControl:GetNamedChild("Value"):SetHidden(true)
-							starControl:GetNamedChild("Ring"):SetTexture("/esoui/art/champion/actionbar/champion_bar_slot_frame_disabled.dds")					
+							starControl:GetNamedChild("Ring"):SetTexture("/esoui/art/champion/actionbar/champion_bar_slot_frame_disabled.dds")
 
 							starControl.slotted = nil
 							starControl.starId = nil
@@ -5764,7 +5764,7 @@ local function updateRightInfoPanel(panel)
 					starControl:SetHidden(false)
 
 					starControl:GetNamedChild("Name"):SetText(zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionSkillName(starId)))
-					starControl:GetNamedChild("Value"):SetText(points)					
+					starControl:GetNamedChild("Value"):SetText(points)
 
 					starControl.slotted = false
 					starControl.starId = starId
