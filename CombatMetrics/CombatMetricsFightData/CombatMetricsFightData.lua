@@ -6,7 +6,7 @@ local LOG_LEVEL_VERBOSE, LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG
 CombatMetricsFightData = {}
 
 local AddonName = "CombatMetricsFightData"
-local AddonVersion = 6
+local AddonVersion = 11
 
 local constants = 0
 
@@ -46,11 +46,11 @@ local function Encode(line, layout)
 	for i, size in ipairs(layout) do
 
 		if line[i] then
-			
+
 			local error = GetChar(line[i], logstringdata, size)
 
 			if error then CMX.Print("save", LOG_LEVEL_WARNING, "Invalid value during log encoding: %s (type: %d, value %d) ", tostring(line[i]), line[1], i) end
-		
+
 		end
 
 	end
@@ -346,7 +346,7 @@ local function decodeCombatLogLine(line, fight)
 	elseif layoutId == LAYOUT_DEATH then
 
 		if logdata[5] == 0 then logdata[5] = nil end
-	
+
 	elseif layoutId == LAYOUT_SKILL then
 
 		if logdata[6] == 0 then logdata[6] = nil end
@@ -518,7 +518,7 @@ local function reduceUnitIds(fight)
 
 	end
 
-	
+
 	if fight.bosses == nil then fight.bosses = {} end
 	local bosses = fight.bosses
 
@@ -551,7 +551,7 @@ local function getSavedVariableSize(sv)
 	collectgarbage("restart")
 
 	copy = nil
-	
+
 	collectgarbage()
 
 	return size

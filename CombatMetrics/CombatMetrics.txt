@@ -1,15 +1,15 @@
 ﻿## Title: CombatMetrics
 ## APIVersion: 100035
 ## Author: Solinur
-## Version: 1.4.3
-## AddOnVersion: 10403
-## DependsOn: CombatMetricsFightData LibCombat>=50 LibAddonMenu-2.0 LibCustomMenu
+## Version: 1.4.4
+## AddOnVersion: 10404
+## DependsOn: CombatMetricsFightData LibCombat>=50 LibAddonMenu-2.0>=32 LibCustomMenu>=700
 ## OptionalDependsOn: LibDebugLogger
 ## SavedVariables: CombatMetrics_Save
 ## Description: CombatMetrics is a tool to analyse your performance in fights.
 
-; This Add-on is not created by, affiliated with or sponsored by ZeniMax Media Inc. or its affiliates. 
-; The Elder Scrolls® and related logos are registered trademarks or trademarks of ZeniMax Media Inc. 
+; This Add-on is not created by, affiliated with or sponsored by ZeniMax Media Inc. or its affiliates.
+; The Elder Scrolls® and related logos are registered trademarks or trademarks of ZeniMax Media Inc.
 ; in the United States and/or other countries. All rights reserved.
 ;
 ; You can read the full terms at https://account.elderscrollsonline.com/add-on-terms
