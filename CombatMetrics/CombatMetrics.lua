@@ -139,12 +139,9 @@ local IsMagickaAbility = {				-- nil for oblivion and other damage types that ar
 	[DAMAGE_TYPE_PHYSICAL] = false,
 	[DAMAGE_TYPE_POISON] = false,
 	[DAMAGE_TYPE_DISEASE] = false,
+	[DAMAGE_TYPE_BLEED] = false,
 
 }
-
--- EC Flame: 142610
--- EC Shock: 142653
--- EC Frost: 142652
 
 local StatDebuffs = {
 
@@ -2797,7 +2794,7 @@ local function Initialize(event, addon)
 
 	function CMX.GetCombatLogString(fight, logline, fontsize)
 
-		local text, color = LC:GetCombatLogString(fight, logline, fontsize)
+		local text, color = LC:GetCombatLogString(fight, logline, fontsize, db.showDebugIds)
 		return text, color
 
 	end
