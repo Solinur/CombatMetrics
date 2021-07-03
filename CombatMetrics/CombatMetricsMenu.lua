@@ -302,8 +302,8 @@ function CMX.MakeMenu(svdefaults)
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_NOTIFICATIONS_TOOLTIP),
 			default = def.NotificationAllowed,
 			getFunc = function() return db.NotificationAllowed end,
-			setFunc = function(value) 
-				db.NotificationAllowed = value 
+			setFunc = function(value)
+				db.NotificationAllowed = value
 				if value == true then db.NotificationRead = 0 end
 			end,
 		},
@@ -586,7 +586,7 @@ function CMX.MakeMenu(svdefaults)
 		},
 	}
 
-	if GetDisplayName() == "@Solinur" then 
+	if GetDisplayName() == "@Solinur" then
 
 		options[#options+1] = {
 			type = "custom",
