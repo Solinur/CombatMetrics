@@ -577,3 +577,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Fixed an issue where the uptime of stackable buffs was incorrectly calculated when you entered fights with more stacks than one already active.
 [*] Updated crit damage value for Elemental Catalyst
 [*] API bump to Blackwood (100035)
+
+1.4.4 4.257.998 (06.07.2021) 00:06
+[*] Added chinese locale. Thanks to Juijote for providing the translation.
+[*] Added ability IDs to log when the "debug IDs" setting is enabled.
