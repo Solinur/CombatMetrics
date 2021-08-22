@@ -665,7 +665,7 @@ local function adjustSlider(self)
 	local slider = self:GetNamedChild("Slider")
 
 	local numHistoryLines = buffer:GetNumHistoryLines()
-	local numVisHistoryLines = math.floor((buffer:GetNumVisibleLines()+1)/dx) --it seems numVisHistoryLines is getting screwed by UI Scale
+	local numVisHistoryLines = buffer:GetNumVisibleLines() --it seems numVisHistoryLines is getting screwed by UI Scale
 	local bufferScrollPos = buffer:GetScrollPosition()
 
 	local sliderMin, sliderMax = slider:GetMinMax()
@@ -725,7 +725,7 @@ function CMX.InitCombatLog(control)
 
 		if shift then
 
-			offset = offset * math.floor((buffer:GetNumVisibleLines())/dx) -- correct for ui scale
+			offset = offset * math.floor((buffer:GetNumVisibleLines()))
 
 		elseif ctrl then
 
@@ -733,7 +733,7 @@ function CMX.InitCombatLog(control)
 
 		end
 
-		buffer:SetScrollPosition(math.min(buffer:GetScrollPosition() + offset, math.floor(buffer:GetNumHistoryLines()-(buffer:GetNumVisibleLines())/dx))) -- correct for ui scale
+		buffer:SetScrollPosition(math.min(buffer:GetScrollPosition() + offset, math.floor(buffer:GetNumHistoryLines()-buffer:GetNumVisibleLines())))
 
 		slider:SetValue(slider:GetValue() - offset)
 
@@ -742,7 +742,7 @@ function CMX.InitCombatLog(control)
 	slider:SetHandler("OnValueChanged", function(self, value, eventReason)
 
 		local numHistoryLines = buffer:GetNumHistoryLines()
-		local sliderValue = math.max(slider:GetValue(), math.floor((buffer:GetNumVisibleLines()+1)/dx)) -- correct for ui scale
+		local sliderValue = math.max(slider:GetValue(), math.floor((buffer:GetNumVisibleLines()+1)))
 
 		if eventReason == EVENT_REASON_HARDWARE then
 			buffer:SetScrollPosition(numHistoryLines-sliderValue)
@@ -756,7 +756,7 @@ function CMX.InitCombatLog(control)
 	local scrollEnd = slider:GetNamedChild("ScrollEnd")
 
 	scrollUp:SetHandler("OnMouseDown", function(...)
-		buffer:SetScrollPosition(math.min(buffer:GetScrollPosition()+1, math.floor(buffer:GetNumHistoryLines()-(buffer:GetNumVisibleLines())/dx))) -- correct for ui scale
+		buffer:SetScrollPosition(math.min(buffer:GetScrollPosition()+1, math.floor(buffer:GetNumHistoryLines()-buffer:GetNumVisibleLines())))
 		slider:SetValue(slider:GetValue()-1)
 	end)
 
@@ -3421,10 +3421,10 @@ local function updateCombatLog(panel)
 
 	buttonrow:Update(page, maxpage)
 
-	local offset = buffer:GetNumHistoryLines()
+	local totalLines = buffer:GetNumHistoryLines()
 
-	buffer:SetScrollPosition(math.min(buffer:GetScrollPosition() + offset, math.floor(buffer:GetNumHistoryLines()-(buffer:GetNumVisibleLines())/dx))) -- correct for ui scale
-	slider:SetValue(slider:GetValue() - offset)
+	buffer:SetScrollPosition(math.min(buffer:GetScrollPosition() + totalLines, math.floor(buffer:GetNumHistoryLines()-buffer:GetNumVisibleLines())))
+	slider:SetValue(slider:GetValue() - totalLines)
 end
 
 local CMX_PLOT_DIMENSION_X = 1
@@ -6197,9 +6197,10 @@ end
 
 local function GetBossTargetDamage(data) -- Gets Damage done to bosses and counts enemy boss units.
 
-	if not data.bossfight then return 0, 0, nil, 0 end
+	if not data.bossfight then return 0, 0, 0, nil, 0 end
 
 	local totalBossDamage, bossDamage, bossUnits = 0, 0, 0
+	local totalBossGroupDamage = 0
 	local bossName
 	local starttime
 	local endtime
@@ -6207,10 +6208,12 @@ local function GetBossTargetDamage(data) -- Gets Damage done to bosses and count
 	for unitId, unit in pairs(data.units) do
 
 		local totalUnitDamage = unit.damageOutTotal
+		local totalUnitGroupDamage = unit.groupDamageOut
 
 		if (unit.bossId ~= nil and totalUnitDamage>0) then
 
 			totalBossDamage = totalBossDamage + totalUnitDamage
+			totalBossGroupDamage = totalBossGroupDamage + totalUnitGroupDamage
 			bossUnits = bossUnits + 1
 
 			starttime = math.min(starttime or unit.dpsstart or 0, unit.dpsstart or 0)
@@ -6225,12 +6228,12 @@ local function GetBossTargetDamage(data) -- Gets Damage done to bosses and count
 		end
 	end
 
-	if bossUnits == 0 then return 0, 0, nil, 0 end
+	if bossUnits == 0 then return 0, 0, 0, nil, 0 end
 
 	local bossTime = (endtime - starttime)/1000
 	bossTime = bossTime > 0 and bossTime or data.dpstime
 
-	return bossUnits, totalBossDamage, bossName, bossTime
+	return bossUnits, totalBossDamage, totalBossGroupDamage, bossName, bossTime
 end
 
 local function GetSelectionDamage(data, selection)	-- Gets highest Single Target Damage and counts enemy units.
@@ -6409,7 +6412,7 @@ function CMX.PosttoChat(mode, fight, UnitContextMenuUnitId)
 		or mode == CMX_POSTTOCHAT_MODE_SELECTED_UNITNAME and GetUnitsByName(data, UnitContextMenuUnitId)
 
 	local units, damage, name, dpstime = GetSelectionDamage(data, unitSelection)
-	local bossUnits, bossDamage, bossName, bossTime = GetBossTargetDamage(data)
+	local bossUnits, bossDamage, _, bossName, bossTime = GetBossTargetDamage(data)
 	local singleDamage, _, _, singleTime = GetSingleTargetDamage(data)
 
 	dpstime = zo_roundToNearest(dpstime, 0.1)
@@ -6565,10 +6568,31 @@ local function updateLiveReport(self, data)
 
 	if db.liveReport.damageOutSingle then
 
-		local singleTargetDamage, singleTargetDamageGroup, _, damageTime = GetSingleTargetDamage(data)
+		local singleTargetDamage, singleTargetDamageGroup, damageTime = 0, 0, 1
 
-		SDPS = zo_round(singleTargetDamage / damageTime)
-		groupSDPS = zo_round(singleTargetDamageGroup / damageTime)
+		local iconControl = self:GetNamedChild("DamageOutSingle"):GetNamedChild("Icon")
+		local tooltipControl = self:GetNamedChild("DamageOutSingle"):GetNamedChild("Tooltip")
+
+		if data.bossfight then
+
+			_, singleTargetDamage, singleTargetDamageGroup, _, damageTime = GetBossTargetDamage(data)
+			iconControl:SetTexture("esoui/art/tutorial/poi_groupboss_complete.dds")
+			tooltipControl.tooltip[1] = SI_COMBAT_METRICS_LIVEREPORT_DPSBOSS_TOOLTIP
+
+		end
+
+		if (singleTargetDamage == 0 or singleTargetDamage == nil) and (singleTargetDamageGroup == 0 or singleTargetDamageGroup == nil) then
+
+			singleTargetDamage, singleTargetDamageGroup, _, damageTime = GetSingleTargetDamage(data)
+			iconControl:SetTexture("/esoui/art/icons/mapkey/mapkey_fightersguild.dds")
+			tooltipControl.tooltip[1] = SI_COMBAT_METRICS_LIVEREPORT_DPSSINGLE_TOOLTIP
+
+		end
+
+		damageTime = math.max(damageTime or 1, 1)
+
+		SDPS = zo_round((singleTargetDamage or 0) / damageTime)
+		groupSDPS = zo_round((singleTargetDamageGroup or 0) / damageTime)
 
 	end
 
@@ -6580,6 +6604,7 @@ local function updateLiveReport(self, data)
 	local timeString = string.format("%d:%04.1f", maxtime/60, maxtime%60)
 
 	-- maybe add data from group
+
 	if db.recordgrp == true and (groupDPSOut > 0 or groupDPSIn > 0 or groupHPSOut > 0) then
 
 		local dpsratio, hpsratio, idpsratio, sdpsratio = 0, 0, 0, 0
@@ -6904,7 +6929,11 @@ end
 
 local function initLiveReport()
 
+	local setLR = db.liveReport
 	local liveReport = CombatMetrics_LiveReport
+
+	local bg = liveReport:GetNamedChild("BG")
+	local resizeFrame = liveReport:GetNamedChild("ResizeFrame")
 
 	storeOrigLayout(liveReport)
 
@@ -6937,20 +6966,23 @@ local function initLiveReport()
 
 	end
 
-	local setLR = db.liveReport
-	local bg = liveReport:GetNamedChild("BG")
+	local function refreshBG()
 
-	function liveReport.RefreshBG()
+		local newwidth, newheight = liveReport:GetDimensions()
 
-		local resizeFrame = liveReport:GetNamedChild("ResizeFrame")
+		bg:SetDimensions(newwidth, newheight)
+		resizeFrame:SetDimensions(newwidth, newheight)
+		resizeFrame:SetAnchorFill()
 
-		bg:SetDimensions(liveReport:GetWidth(), liveReport:GetHeight())
-		resizeFrame:SetDimensions(liveReport:GetWidth(), liveReport:GetHeight())
-		resizeFrame:SetAnchorFill(liveReport)
+		liveReport.sizes = {newwidth/setLR.scale, newheight/setLR.scale}
+		bg.sizes = {newwidth/setLR.scale, newheight/setLR.scale}
+		resizeFrame.sizes = {newwidth/setLR.scale, newheight/setLR.scale}
+
+		resizeFrame:SetDimensionConstraints(newwidth/setLR.scale*0.5, newheight/setLR.scale*0.5, newwidth/setLR.scale*3, newheight/setLR.scale*3)
 
 	end
 
-	function liveReport:Refresh()
+	function liveReport.Refresh(self)
 
 		local anchors = (setLR.layout == "Horizontal" and {
 
@@ -7046,10 +7078,14 @@ local function initLiveReport()
 
 				label:SetHorizontalAlignment(alignment)
 
+				local showGroupTooltip = db.recordgrp == true
+
+				child:GetNamedChild("Tooltip").tooltip[2] = showGroupTooltip and SI_COMBAT_METRICS_LIVEREPORT_GROUP_TOOLTIP or nil
+
 			end
 		end
 
-		zo_callLater(liveReport.RefreshBG, 1)
+		zo_callLater(refreshBG, 1)
 
 	end
 

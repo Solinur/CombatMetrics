@@ -3828,7 +3828,7 @@
 					<OnRectChanged>CMX.NewSize(self, newLeft, newTop, newRight, newBottom, oldLeft, oldTop, oldRight, oldBottom)</OnRectChanged>
 					<OnResizeStart>CMX.Resizing(self, true)</OnResizeStart>
 					<OnResizeStop>CMX.Resizing(self, false)</OnResizeStop>
-							
+
 					<OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
 
 				</Backdrop>
@@ -3848,9 +3848,19 @@
 							<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" />
 							<Dimensions x="120" y="24"/>
 						</Label>
+
+						<Control name="$(parent)Tooltip" inherits="CombatMetrics_ControlTooltip">
+
+							<Anchor point="TOPLEFT" offsetX="3" offsetY="3"/>
+							<Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3"/>
+							
+							<OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
+							<OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_DPSSINGLE_TOOLTIP}</OnInitialized>	
+		
+						</Control>
 					</Controls>
 					
-					<OnInitialized> self.blocksize = 1 </OnInitialized>
+					<OnInitialized>self.blocksize = 1</OnInitialized>					
 					
 				</Control>
 				
@@ -3869,9 +3879,19 @@
 							<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" />
 							<Dimensions x="120" y="24"/>
 						</Label>
+
+						<Control name="$(parent)Tooltip" inherits="CombatMetrics_ControlTooltip">
+
+							<Anchor point="TOPLEFT" offsetX="3" offsetY="3"/>
+							<Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3"/>
+							
+							<OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
+							<OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_DPSMULTI_TOOLTIP}</OnInitialized>	
+		
+						</Control>
 					</Controls>
 					
-					<OnInitialized> self.blocksize = 1 </OnInitialized>
+					<OnInitialized>self.blocksize = 1</OnInitialized>
 					
 				</Control>
 				
@@ -3890,15 +3910,25 @@
 							<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="2"/>
 							<Dimensions x="120" y="24"/>
 						</Label>
+
+						<Control name="$(parent)Tooltip" inherits="CombatMetrics_ControlTooltip">
+
+							<Anchor point="TOPLEFT" offsetX="3" offsetY="3"/>
+							<Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3"/>
+							
+							<OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
+							<OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_HPSOUT_TOOLTIP}</OnInitialized>	
+		
+						</Control>
 					</Controls>
 					
-					<OnInitialized> self.blocksize = 1 </OnInitialized>
+					<OnInitialized>self.blocksize = 1</OnInitialized>
 					
 				</Control>
 				
 				<Control name="$(parent)HealOutAbsolute">
 					<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DamageOut"/>
-					<Dimensions x="150" y="26"/>
+					<Dimensions x="85" y="26"/>
 					
 					<Controls>
 						<Texture name="$(parent)Icon" textureFile="/esoui/art/buttons/gamepad/pointsplus_up.dds" color="FF888888">
@@ -3911,9 +3941,19 @@
 							<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="2"/>
 							<Dimensions x="55" y="24"/>
 						</Label>
+
+						<Control name="$(parent)Tooltip" inherits="CombatMetrics_ControlTooltip">
+
+							<Anchor point="TOPLEFT" offsetX="3" offsetY="3"/>
+							<Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3"/>
+							
+							<OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
+							<OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_HPSRAW_TOOLTIP}</OnInitialized>	
+		
+						</Control>
 					</Controls> 
 					
-					<OnInitialized> self.blocksize = 0.6 </OnInitialized>
+					<OnInitialized>self.blocksize = 0.57</OnInitialized>
 					
 				</Control>
 				
@@ -3932,9 +3972,19 @@
 							<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon"/>
 							<Dimensions x="120" y="24"/>
 						</Label>
+
+						<Control name="$(parent)Tooltip" inherits="CombatMetrics_ControlTooltip">
+
+							<Anchor point="TOPLEFT" offsetX="3" offsetY="3"/>
+							<Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3"/>
+							
+							<OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
+							<OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_DPSINC_TOOLTIP}</OnInitialized>	
+		
+						</Control>
 					</Controls>
 					
-					<OnInitialized> self.blocksize = 1 </OnInitialized>
+					<OnInitialized>self.blocksize = 1</OnInitialized>
 					
 				</Control>
 				
@@ -3953,9 +4003,19 @@
 							<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="2"/>
 							<Dimensions x="55" y="24"/>
 						</Label>
+
+						<Control name="$(parent)Tooltip" inherits="CombatMetrics_ControlTooltip">
+
+							<Anchor point="TOPLEFT" offsetX="3" offsetY="3"/>
+							<Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3"/>
+							
+							<OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
+							<OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_HPSINC_TOOLTIP}</OnInitialized>	
+		
+						</Control>
 					</Controls> 
 					
-					<OnInitialized> self.blocksize = 0.6 </OnInitialized>
+					<OnInitialized>self.blocksize = 0.57</OnInitialized>
 					
 				</Control>
 				
@@ -3974,9 +4034,19 @@
 							<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon"/>
 							<Dimensions x="38" y="24"/>
 						</Label>
+
+						<Control name="$(parent)Tooltip" inherits="CombatMetrics_ControlTooltip">
+
+							<Anchor point="TOPLEFT" offsetX="3" offsetY="3"/>
+							<Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3"/>
+							
+							<OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
+							<OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_TIME_TOOLTIP}</OnInitialized>	
+		
+						</Control>
 					</Controls>
 					
-					<OnInitialized> self.blocksize = 0.4 </OnInitialized>
+					<OnInitialized>self.blocksize = 0.43</OnInitialized>
 					
 				</Control>
 

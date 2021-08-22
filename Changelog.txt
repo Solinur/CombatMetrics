@@ -581,3 +581,9 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 1.4.4 4.257.998 (06.07.2021) 00:06
 [*] Added chinese locale. Thanks to Juijote for providing the translation.
 [*] Added ability IDs to log when the "debug IDs" setting is enabled.
+
+1.4.5 
+[*] Added tooltips to Live Report Window to indicate, what each of the panels means.
+[*] Changed the single target DPS panel to show boss DPS instead of single target DPS during boss fights.
+[*] Fixed rescaling of live report window.
+[*] Fixed an issue in logs where one could not scroll to bring the top into view.
