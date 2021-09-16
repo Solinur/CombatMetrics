@@ -3800,17 +3800,21 @@ local function Total(category)
 	local t0
 	local tmax
 
-	local combatstart = fightData.combatstart
-
+	local combatstart = fightData.combatstart or fightData.dpsstart or fightData.hpsstart or 0
+	local dpsstart = fightData.dpsstart or combatstart
+	local dpsend = fightData.dpsend or (combatstart + 1)
+	local hpsstart = fightData.hpsstart or combatstart
+	local hpsend = fightData.hpsend or (combatstart + 1)
+ 
 	if category == "healingOut" or category == "healingIn" then
 
-		t0 = ((fightData.hpsstart - combatstart) / 1000) or 0
-		tmax = ((fightData.hpsend - combatstart) / 1000) or 1
+		t0 = (hpsstart - combatstart) / 1000
+		tmax = (hpsend - combatstart) / 1000
 
 	else
 
-		t0 = ((fightData.dpsstart - combatstart) / 1000) or 0
-		tmax = ((fightData.dpsend - combatstart) / 1000) or 1
+		t0 = (dpsstart - combatstart) / 1000
+		tmax = (dpsend - combatstart) / 1000
 
 	end
 

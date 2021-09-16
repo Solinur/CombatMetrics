@@ -28,7 +28,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.4.5"
+CMX.version = "1.4.6"
 
 -- Logger
 
@@ -150,8 +150,9 @@ local StatDebuffs = {
 	[GetFormattedAbilityName(120007)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 2740, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 2740}, -- Crusher, Target Dummy (the following line might overwrite this. If LUI extended is used, both declarations are necessary)
 	[GetFormattedAbilityName(17906)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 2108, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 2108}, -- Crusher, can get changed by settings !
 	[GetFormattedAbilityName(143808)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 1000, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 1000}, -- Crystal Weapon
-	[GetFormattedAbilityName(120018)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 3000, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 3010}, -- Alkosh, Target Dummy (the following line might overwrite this. If LUI extended is used, both declarations are necessary)
-	[GetFormattedAbilityName(76667)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 3000, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 3000}, -- Alkosh
+	[GetFormattedAbilityName(120018)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 3010, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 3010}, -- Alkosh, Target Dummy (the following line might overwrite this. If LUI extended is used, both declarations are necessary)
+	[GetFormattedAbilityName(76667)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 6000, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 6000}, -- Alkosh
+	[GetFormattedAbilityName(159288)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 3541, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 3541}, -- Crimson Oath
 
 	[GetFormattedAbilityName(79087)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 1320}, -- Spell Resistance Reduction by Poison
 	[GetFormattedAbilityName(79090)] = {[LIBCOMBAT_STAT_WEAPONPENETRATION] = 1320}, -- Physical Resistance Reduction by Poison
@@ -1393,12 +1394,12 @@ local function ProcessLogEffects(fight, logline)
 
 	local callbacktype, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, slotId, hitValue = unpackLogline(logline, 1, 10)
 
-	stacks = stacks or 0
+	local currentstacks = stacks or 0
 
 	if timems < (fight.combatstart - 500) or fight.units[unitId] == nil then return end
 
 	local unit = fight:AcquireUnitData(unitId, timems)
-	local effectdata = unit:AcquireEffectData(abilityId, effectType, stacks)
+	local effectdata = unit:AcquireEffectData(abilityId, effectType, currentstacks)
 
 	local isPlayerSource = sourceType == COMBAT_UNIT_TYPE_PLAYER or sourceType == COMBAT_UNIT_TYPE_PLAYER_PET
 
@@ -1406,10 +1407,11 @@ local function ProcessLogEffects(fight, logline)
 	local slotcount, groupSlotCount = CountSlots(slots)
 
 	local slotdata = slots[slotId]
+	local instance = effectdata.instances[abilityId]
 
 	if (changeType == EFFECT_RESULT_GAINED or changeType == EFFECT_RESULT_UPDATED) and timems < fight.endtime then
 
-		local starttime = mathmax(effectdata.lastGain or timems, fight.starttime)
+		local starttime = mathmax(timems, fight.starttime)
 
 		if slotcount == 0 and isPlayerSource then effectdata.firstStartTime = starttime end
 		if groupSlotCount == 0 then effectdata.firstGroupStartTime = starttime end
@@ -1425,13 +1427,43 @@ local function ProcessLogEffects(fight, logline)
 
 		end
 
-		slotdata[stacks] = slotdata[stacks] or starttime
+		for stacks = 1, currentstacks do
+
+			if slotdata[stacks] == nil then
+
+				slotdata[stacks] = starttime
+				effectdata:CheckInstance(abilityId, stacks)
+
+			end
+		end
+
+		for stacks, starttime in pairs(slotdata) do
+
+			if type(stacks) == "number" and stacks > currentstacks then
+
+				local stackData = instance[stacks]
+				local duration = mathmin(timems, fight.endtime) - starttime
+
+				if isPlayerSource then
+
+					stackData.uptime = stackData.uptime + duration
+					stackData.count = stackData.count + 1
+					effectdata.count = effectdata.count + 1
+
+				end
+
+				stackData.groupUptime = stackData.groupUptime + duration
+				stackData.groupCount = stackData.groupCount + 1
+				effectdata.groupCount = effectdata.groupCount + 1
+
+				slotdata[stacks] = nil
+
+			end
+		end
 
 	elseif changeType == EFFECT_RESULT_FADED then
 
 		slots[slotId] = nil
-
-		local instance = effectdata.instances[abilityId]
 
 		if slotdata and timems > fight.starttime then
 

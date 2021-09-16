@@ -587,3 +587,8 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Changed the single target DPS panel to show boss DPS instead during boss fights.
 [*] Fixed rescaling of live report window.
 [*] Fixed an issue in logs where one could not scroll to bring the top into view.
+
+1.4.6 4.458.923 (17.09.2021) 00:59
+[*] Fix an issue that appeared when using the graph resulting in a lua error
+[*] Added Crimson Oath to penetration ability tracking.
+[*] Fixed an issue, where incorrect durations were calculated for stackable abilities when only a few stacks got removed (Harpooner's Wading Kilt).
