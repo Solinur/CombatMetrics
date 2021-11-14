@@ -2041,6 +2041,8 @@ local function updateFightStatsPanelRight(panel)
 	local statWindowControl = panel:GetNamedChild("AttackStats")
 	local keys = statFormat[powerType]
 
+	local resdata = selections.unit[category] and selectionData or calculated or {}
+
 	for i = 1, 4 do
 
 		local text = ZO_CachedStrFormat("<<1>>:", GetString(stringKey, i))
@@ -2061,27 +2063,29 @@ local function updateFightStatsPanelRight(panel)
 
 			local avgvalue = statData and statData[avgkey] or avgvalues["avg"..dataKey] or stats["avg"..dataKey]
 
-			if avgvalue == nil then
+			if avgvalue == nil then -- legacy
 
 				local legacyvalue = avgvalues["sum"..dataKey]
 				avgvalue = (legacyvalue and legacyvalue / math.max(convert and countvalue or totalvalue or 1, 1)) or maxvalue
 
 			end
 
-			if type(avgvalue) == "number" then -- legacy
+			if type(avgvalue) == "number" then
 
 				if convert then avgvalue = GetCriticalStrikeChance(avgvalue) end
 				if displayformat then avgvalue = string.format(displayformat, avgvalue) end
 
 			end
 
-			if i == 4 then	-- Add a hint for backstabber
+			if i == 4 and powerType ~= POWERTYPE_HEALTH then	-- Add a hint for backstabber
 
-				rowcontrol.tooltip = nil
+				rowcontrol.tooltip = {}
+				local tooltiplines = {}
+				local backstabberTT
 
 				local CP = data.CP
 
-				if powerType ~= POWERTYPE_HEALTH and CP and CP.version ~= nil and CP.version >= 2 then
+				if CP and CP.version ~= nil and CP.version >= 2 then
 
 					local backstabber = CP[1] and CP[1].stars and CP[1].stars[31] -- Backstabber CP
 
@@ -2089,10 +2093,69 @@ local function updateFightStatsPanelRight(panel)
 
 						text = ZO_CachedStrFormat("<<1>>*:", GetString(stringKey, i))
 
-						rowcontrol.tooltip = {GetString(SI_COMBAT_METRICS_BACKSTABBER_TT)}
+						backstabberTT = GetString(SI_COMBAT_METRICS_BACKSTABBER_TT)
 
 					end
 				end
+
+				local critvalues = powerType == POWERTYPE_MAGICKA and resdata.spellCrit or powerType == POWERTYPE_STAMINA and resdata.weaponCrit
+
+				if critvalues then
+
+					local sum = 0
+					local effectiveSum = 0
+					local totalDamage = 0
+					local maxCritBonus = 125
+					local trimmedCritValues = {[125] = 0}
+					local stepsize = 10
+
+					for crit, damage in pairs(critvalues) do
+
+						sum = sum + crit * damage
+						effectiveSum = effectiveSum + math.min(crit, maxCritBonus) * damage
+						totalDamage = totalDamage + damage
+
+						if crit < 130 and crit >= 120 then stepsize = 5 end
+
+						local trimmedkey = math.ceil(crit/stepsize)*stepsize
+						trimmedCritValues[trimmedkey] = (trimmedCritValues[trimmedkey] or 0) + damage
+
+					end
+
+					totalDamage = math.max(totalDamage, 1)
+
+					table.insert(tooltiplines, GetString(SI_COMBAT_METRICS_CRITBONUS_TT))
+
+					local sumdamage = 0
+
+					for crit, damage in CMX.spairs(trimmedCritValues) do
+
+						sumdamage = sumdamage + damage
+
+						local sumdamageRatio = 100 * (sumdamage/totalDamage)
+						local damageRatio = 100 * damage/totalDamage
+
+						local color = crit == 125 and "|cffbb88" or damageRatio > 5 and "|cffffff" or ""
+
+						local newline = string.format("<%s%2d%%: %5.1f%%", color, crit, sumdamageRatio)
+						table.insert(tooltiplines, newline)
+
+					end
+
+					avgvalue = string.format(displayformat, math.max(effectiveSum / totalDamage, avgvalues["avg"..dataKey] or 0))
+
+					rowcontrol.tooltip = #tooltiplines>2 and tooltiplines or nil
+					if backstabberTT then table.insert(tooltiplines, 1, backstabberTT) end
+
+					local newline = string.format("%s: %.1f%%", GetString(SI_COMBAT_METRICS_AVERAGE), sum / totalDamage)
+					table.insert(tooltiplines, " ")
+					table.insert(tooltiplines, newline)
+
+				end
+			else
+
+				rowcontrol.tooltip = nil
+
 			end
 
 			rowcontrol:GetNamedChild("Label"):SetText(text)
@@ -2110,7 +2173,6 @@ local function updateFightStatsPanelRight(panel)
 
 	local row5 = statWindowControl:GetNamedChild("Row5")
 	local row6 = statWindowControl:GetNamedChild("Row6")
-	local resdata = selections.unit[category] and selectionData or calculated or {}
 
 	if category == "damageOut" and (powerType == POWERTYPE_MAGICKA or powerType == POWERTYPE_STAMINA) then
 
@@ -2120,7 +2182,7 @@ local function updateFightStatsPanelRight(panel)
 
 		local sum = 0
 		local effectiveSum = 0
-		local totaldamage = 0
+		local totalDamage = 0
 		local maxvalue = statData and statData.max or fightStats["max"..statId] or 0
 		local overpen = 0
 		local maxpen = db.unitresistance
@@ -2132,7 +2194,7 @@ local function updateFightStatsPanelRight(panel)
 			sum = sum + penetration * damage
 			effectiveSum = effectiveSum + math.min(penetration, maxpen) * damage
 			maxvalue = math.max(maxvalue, penetration)
-			totaldamage = totaldamage + damage
+			totalDamage = totalDamage + damage
 
 			if penetration - maxpen > 0 then overpen = overpen + damage end
 
@@ -2141,7 +2203,7 @@ local function updateFightStatsPanelRight(panel)
 
 		end
 
-		totaldamage = math.max(totaldamage, 1)
+		totalDamage = math.max(totalDamage, 1)
 
 		local tooltiplines = {GetString(SI_COMBAT_METRICS_PENETRATION_TT)}
 
@@ -2151,8 +2213,8 @@ local function updateFightStatsPanelRight(panel)
 
 			sumdamage = sumdamage + damage
 
-			local sumdamageRatio = 100 * (sumdamage/totaldamage)
-			local damageRatio = 100 * damage/totaldamage
+			local sumdamageRatio = 100 * (sumdamage/totalDamage)
+			local damageRatio = 100 * damage/totalDamage
 
 			local color = penetration == 18 and "|cffbb88" or damageRatio > 5 and "|cffffff" or ""
 
@@ -2161,10 +2223,10 @@ local function updateFightStatsPanelRight(panel)
 
 		end
 
-		local averagePenetration = string.format("%d", math.max(zo_round(effectiveSum / totaldamage), avgvalues["avg"..statId] or 0))
-		local overPenetrationRatio = string.format("%.1f%%", 100 * overpen / totaldamage)
+		local averagePenetration = string.format("%d", math.max(zo_round(effectiveSum / totalDamage), avgvalues["avg"..statId] or 0))
+		local overPenetrationRatio = string.format("%.1f%%", 100 * overpen / totalDamage)
 
-		local newline = string.format("%s: %d", GetString(SI_COMBAT_METRICS_AVERAGE), zo_round(sum / totaldamage))
+		local newline = string.format("%s: %d", GetString(SI_COMBAT_METRICS_AVERAGE), zo_round(sum / totalDamage))
 		table.insert(tooltiplines, " ")
 		table.insert(tooltiplines, newline)
 
@@ -2181,7 +2243,7 @@ local function updateFightStatsPanelRight(panel)
 
 		row6:GetNamedChild("Label"):SetText(text6)
 		row6:GetNamedChild("Value"):SetText(overPenetrationRatio)
-		row6.tooltip = #tooltiplines>1 and tooltiplines or nil
+		row6.tooltip = #tooltiplines>4 and tooltiplines or nil
 
 	else
 
@@ -5629,8 +5691,6 @@ local function updateRightInfoPanelLegacy(panel)
 			local cpvalue = CPData[discipline][id]
 
 			local row = signcontrol:GetNamedChild("Row" .. id)
-
-			row.points = cpvalue - GetNumPointsSpentOnChampionSkill(discipline, id)
 
 			local value = row:GetNamedChild("Value")
 

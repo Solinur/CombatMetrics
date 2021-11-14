@@ -28,7 +28,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.4.6"
+CMX.version = "1.5.0"
 
 -- Logger
 
@@ -162,6 +162,8 @@ local StatDebuffs = {
 	[GetFormattedAbilityName(142610)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 5, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 5}, -- Flame Weakness
 	[GetFormattedAbilityName(142653)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 5, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 5}, -- Shock Weakness
 	[GetFormattedAbilityName(142652)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 5, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 5}, -- Frost Weakness
+
+	[GetFormattedAbilityName(95136)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 10, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 10}, -- Chilled (in combination with the "Glacial Presence" passive of Warden)
 
 	[GetFormattedAbilityName(145975)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 10, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 10}, -- Minor Brittle
 
@@ -495,6 +497,8 @@ local function InitBasicValues(self)
 
 	self.spellResistance = {}
 	self.physicalResistance = {}
+	self.spellCrit = {}
+	self.weaponCrit = {}
 end
 
 local basicTable = {}
@@ -507,8 +511,6 @@ function UnitHandler:Initialize()
 	self.AcquireEffectData = AcquireEffectData
 	self.AcquireUnitStatData = AcquireUnitStatData
 	self.buffs = {}
-	self.currentPhysicalResistance = 0
-	self.currentSpellResistance = 0
 	self.statData = {}
 
 end
@@ -529,6 +531,14 @@ function UnitHandler:UpdateStats(fight, effectdata, abilityId)
 	if debuffStatData == nil then return end
 
 	for stat, value in pairs(debuffStatData) do
+
+		if abilityId == 95136 then
+
+			local bonus = fight.special and fight.special.glacial or 0
+			
+			value = bonus * value
+
+		end
 
 		value = overridevalues[abilityId] or value
 
@@ -838,7 +848,7 @@ local function sumUnitTables(target, source, reference) -- adds values from sour
 					end
 				end
 
-			elseif key == "spellResistance" or key == "physicalResistance" then
+			elseif key == "spellResistance" or key == "physicalResistance" or key == "spellCrit" or key == "weaponCrit" then
 
 				sumUnitTables(target[key], source[key], source[key])
 
@@ -1175,9 +1185,19 @@ local function IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitVa
 
 			value = resultkey == "Blocked" and 0 or 1	-- they can't crit so they don't matter
 
-		elseif stattype == STATTYPE_CRITICALBONUS and resultkey ~= "Critical" then
+		elseif stattype == STATTYPE_CRITICALBONUS then
 
-			value = 0
+			if resultkey ~= "Critical" then value = 0 end
+
+			if ismagical ~= nil and isheal == false and isDamageOut == true then
+
+				local critDataKey = ismagical and "spellCrit" or "weaponCrit"
+
+				local data = unit[critDataKey]
+
+				data[currentValue] = (data[currentValue] or 0) + value
+
+			end
 
 		elseif stattype == STATTYPE_INCSPELL and ismagical ~= true then
 
@@ -2268,8 +2288,6 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 	fightlabel:SetText(stringformat("%s (%.1f%%)", GetString(SI_COMBAT_METRICS_CALC), 100 * progress))
 
 	titleBar:SetValue(progress)
-
-	return
 end
 
 local function InitCurrentData()
@@ -2822,7 +2840,11 @@ local function Initialize(event, addon)
 	-- make addon options menu
 	CMX.MakeMenu(svdefaults)
 
-	if CMX.LoadCustomizations then CMX.LoadCustomizations() end
+	if CMX.LoadCustomizations then
+
+		LC.AddCustomAbilityData(CMX.LoadCustomizations())
+	
+	end
 
 	function CMX.GetCombatLogString(fight, logline, fontsize)
 

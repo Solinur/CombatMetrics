@@ -592,3 +592,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Fix an issue that appeared when using the graph resulting in a lua error
 [*] Added Crimson Oath to penetration ability tracking.
 [*] Fixed an issue, where incorrect durations were calculated for stackable abilities when only a few stacks got removed (Harpooner's Wading Kilt).
+
+1.5.0 4.573.933 (14.11.2021) 14:09
+[*] Added tracking for Critical Damage Bonus of Warden's "Glacial Presence"
+[*] Changed the way the effective Critical Damage Bonus is calculated (It is now similar to the way Penetration values are calculated and shown). It will now consider the cap of 125% when calculating the effective value. The actual average and a breakdown of the portion of damage done at different values are shown in the tooltip.
