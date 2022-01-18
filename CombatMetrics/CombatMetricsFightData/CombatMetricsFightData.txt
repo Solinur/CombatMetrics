@@ -1,5 +1,5 @@
 ﻿## Title: CombatMetricsFightData
-## APIVersion: 100033 100034
+## APIVersion: 101032
 ## Author: Solinur
 ## AddOnVersion: 11
 ## Version: 11

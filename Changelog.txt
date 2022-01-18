@@ -596,3 +596,6 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 1.5.0 4.573.933 (14.11.2021) 14:09
 [*] Added tracking for Critical Damage Bonus of Warden's "Glacial Presence"
 [*] Changed the way the effective Critical Damage Bonus is calculated (It is now similar to the way Penetration values are calculated and shown). It will now consider the cap of 125% when calculating the effective value. The actual average and a breakdown of the portion of damage done at different values are shown in the tooltip.
+
+1.5.1 4.700.421 (19.01.2022) 00:37
+[*] Fixed an issue where the live report could pop up randomly. (Thx to chaozzblade for reporting the issue)

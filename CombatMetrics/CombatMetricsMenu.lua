@@ -355,8 +355,8 @@ function CMX.MakeMenu(svdefaults)
 			default = def.liveReport.enabled,
 			getFunc = function() return db.liveReport.enabled end,
 			setFunc = function(value)
-				CombatMetrics_LiveReport:Toggle(value)
 				db.liveReport.enabled = value
+				CombatMetrics_LiveReport:Toggle(value)
 			end,
 		},
 		{

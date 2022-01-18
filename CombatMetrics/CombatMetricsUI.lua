@@ -7012,19 +7012,24 @@ local function initLiveReport()
 
 		if value == nil then value = liveReport:IsHidden() end
 
-		liveReport:SetHidden(not value)
-
 		if value == true then
 
 			SCENE_MANAGER:GetScene("hud"):AddFragment( fragment )
 			SCENE_MANAGER:GetScene("hudui"):AddFragment( fragment )
 			SCENE_MANAGER:GetScene("siegeBar"):AddFragment( fragment )
 
+			local currentScene = SCENE_MANAGER.currentScene.name
+			local isShownForCurrentScene = currentScene == "hud" or currentScene == "hudui" or currentScene == "siegeBar"
+
+			liveReport:SetHidden(not isShownForCurrentScene)
+
 		else
 
 			SCENE_MANAGER:GetScene("hud"):RemoveFragment( fragment )
 			SCENE_MANAGER:GetScene("hudui"):RemoveFragment( fragment )
 			SCENE_MANAGER:GetScene("siegeBar"):RemoveFragment( fragment )
+
+			liveReport:SetHidden(true)
 
 		end
 
