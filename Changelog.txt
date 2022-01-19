@@ -599,3 +599,6 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 
 1.5.1 4.700.421 (19.01.2022) 00:37
 [*] Fixed an issue where the live report could pop up randomly. (Thx to chaozzblade for reporting the issue)
+
+1.5.2 4.710.022 (19.01.2022) 13:36
+[*] Fixed an issue with a lua error introduced in last patch.
