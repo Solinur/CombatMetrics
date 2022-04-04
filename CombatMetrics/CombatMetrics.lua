@@ -28,7 +28,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.5.2"
+CMX.version = "1.5.3"
 
 -- Logger
 
@@ -166,6 +166,7 @@ local StatDebuffs = {
 	[GetFormattedAbilityName(95136)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 10, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 10}, -- Chilled (in combination with the "Glacial Presence" passive of Warden)
 
 	[GetFormattedAbilityName(145975)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 10, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 10}, -- Minor Brittle
+	[GetFormattedAbilityName(145977)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 20, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 20}, -- Major Brittle
 
 	[GetFormattedAbilityName(113382)] = {[LIBCOMBAT_STAT_SPELLPOWER] = 460}, -- Spell Strategist
 
