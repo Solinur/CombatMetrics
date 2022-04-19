@@ -603,5 +603,8 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 1.5.2 4.710.022 (19.01.2022) 13:36
 [*] Fixed an issue with a lua error introduced in last patch.
 
-1.5.3 4.832.505 (05.04.2022) 00:38
+1.5.3 4.832.505 (05.04.2022) 00:41
 [*] Added tracking of Major Brittle for Critical Damage Bonus.
+
+1.5.4 4,896,237 (19.04.2022) 18:14
+[*] Fixed an issue where category buttons were unresponsive, due to some faulty code that mysteriously worked for years. (Thx to LordKruxis for the bug report)

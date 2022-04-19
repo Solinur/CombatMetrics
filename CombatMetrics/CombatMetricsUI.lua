@@ -265,17 +265,19 @@ end
 
 local function selectCategory(button)
 
-	local control = button:GetParent()
+	local parent = button:GetParent()
 
-	for i=1, 4 do
+	for i = 1, parent:GetNumChildren() do
 
-		local child = control:GetChild(i)
+		local child = parent:GetChild(i)
 
-		local r, g, b, _ = child:GetColor()
-		local a = child == button and 1 or .2
+		if child and child.isMainCategory then 
 
-		child:SetColor(r, g, b, a)
+			local r, g, b, _ = child:GetColor()
+			local a = child == button and 1 or .2
 
+			child:SetColor(r, g, b, a)
+		end
 	end
 
 	db.FightReport.category = button.category
@@ -406,23 +408,29 @@ local function updateSelectorButtons(selectorButtons)
 
 end
 
+local mainSelectorCategories = {
+
+
+}
+
 local function initSelectorButtons(selectorButtons)
 
-	for i = 1, 8 do
+	for i = 1, selectorButtons:GetNumChildren() do
 
 		local child = selectorButtons:GetChild(i)
 
-		if child and i <= 4 then
+		if child and child.isMainCategory then
 
 			child:SetHandler( "OnMouseUp", selectCategory)
 			if child.category == db.FightReport.category then selectCategory(child) end
 
-		elseif child and i>4 then
+		elseif child and child.isSecondaryCategory then
 
 			child:SetHandler( "OnMouseUp", selectMainPanel)
-			selectMainPanel(selectorButtons:GetNamedChild("FightStatsButton"))
 
 		end
+
+		selectMainPanel(selectorButtons:GetNamedChild("FightStatsButton"))
 	end
 end
 

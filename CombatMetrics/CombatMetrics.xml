@@ -108,7 +108,7 @@
 			
 		</Backdrop>
 		
-		<Backdrop name="CombatMetrics_HighLight" edgeColor="00000000" centerColor="33FFFFFF" layer="3" excludeFromResizeToFitExtents="true" virtual="true">
+		<Backdrop name="CombatMetrics_HighLight" edgeColor="00000000" centerColor="33FFFFFF" layer="OVERLAY" excludeFromResizeToFitExtents="true" virtual="true">
 			
 			<AnchorFill/>			
 			<Edge file="CombatMetrics/art/simpleframe2.dds" edgeFileWidth="128" edgeFileHeight="16" edgeSize="8"/>
@@ -168,7 +168,7 @@
 			<ButtonState state="DISABLED"/>
 		</Button>
 		
-		<Texture name="CombatMetrics_SelectorButton" virtual="true">
+		<Texture name="CombatMetrics_SelectorButton" virtual="true" layer="CONTROLS">
 			<Dimensions x="32" y="32"/>
 		</Texture>
 		
@@ -814,7 +814,7 @@
 					
 				</Backdrop>
 				
-				<Backdrop name="$(parent)Overlay" edgeColor="BB000000" centerColor="BB000000" hidden="true" layer="3" excludeFromResizeToFitExtents="true">
+				<Backdrop name="$(parent)Overlay" edgeColor="BB000000" centerColor="BB000000" hidden="true" layer="OVERLAY" excludeFromResizeToFitExtents="true">
 
 					<Edge edgeSize="1"/>
 					
@@ -1002,7 +1002,7 @@
 					<AnchorFill/>
 				</Texture>
 				
-				<Backdrop name="$(parent)Overlay" edgeColor="66FFFFFF" centerColor="CC000000" layer="3">
+				<Backdrop name="$(parent)Overlay" edgeColor="66FFFFFF" centerColor="CC000000" layer="OVERLAY">
 					<AnchorFill/>
 					<Edge edgeSize="1" />
 				</Backdrop>
@@ -1020,7 +1020,7 @@
 					<AnchorFill/>
 				</Label>
 				
-				<Backdrop name="$(parent)Overlay" edgeColor="66FFFFFF" centerColor="CC000000" layer="3">
+				<Backdrop name="$(parent)Overlay" edgeColor="66FFFFFF" centerColor="CC000000" layer="OVERLAY">
 					<AnchorFill/>
 					<Edge edgeSize="1" />
 				</Backdrop>
@@ -1320,7 +1320,7 @@
 					<Dimensions x="50" y="20"/>
 				</Label>
 			
-				<Backdrop name="$(parent)HighLight" edgeColor="00000000" centerColor="22FFFFFF" layer="3" hidden="true">
+				<Backdrop name="$(parent)HighLight" edgeColor="00000000" centerColor="22FFFFFF" layer="OVERLAY" hidden="true">
 					<Anchor point="TOPLEFT"/>
 					<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)DPS" offsetX="2"/>
 					<Edge  edgeSize="1" />
@@ -1382,10 +1382,10 @@
 			
 		</Control>
 		
-		<Line name="CombatMetrics_PlotLine" color="AAFFFF00" inherits="CombatMetrics_Line_Graph" layer="1" level="2" virtual="true">
+		<Line name="CombatMetrics_PlotLine" color="AAFFFF00" inherits="CombatMetrics_Line_Graph" layer="CONTROLS" level="2" virtual="true">
 		</Line>
 		
-		<Backdrop name="CombatMetrics_PlotBar" edgeColor="00000000" centerColor="66CCCCFF" layer="1" level="2" virtual="true">
+		<Backdrop name="CombatMetrics_PlotBar" edgeColor="00000000" centerColor="66CCCCFF" layer="CONTROLS" level="2" virtual="true">
 		</Backdrop>
 		
 		<Control name="CombatMetrics_PlotControlXY" virtual="true">
@@ -1742,7 +1742,7 @@
 									
 									<Controls>
 								
-										<Backdrop name="$(parent)BarBg" centerColor="00000000" edgeColor="FFCCCCCC" layer="1" level="1">
+										<Backdrop name="$(parent)BarBg" centerColor="00000000" edgeColor="FFCCCCCC" layer="CONTROLS" level="1">
 										
 											<AnchorFill/>
 											
@@ -2721,7 +2721,7 @@
 									
 									<Controls>
 									
-										<Backdrop name="$(parent)Zoom" centerColor="33FFFFFF" edgeColor="55FFFFFF" layer="1" level="1" hidden="true">
+										<Backdrop name="$(parent)Zoom" centerColor="33FFFFFF" edgeColor="55FFFFFF" layer="CONTROLS" level="1" hidden="true">
 										
 											<Anchor point="TOPLEFT" relativeTo="GuiRoot"/>
 											<Dimensions x="0" y="0"/>
@@ -2865,7 +2865,7 @@
 					</Controls>
 				</Control>				
 				
-				<Control name="$(parent)_SelectorRow" resizeToFitDescendents="true" mouseEnabled="true">
+				<Control name="$(parent)_SelectorRow" resizeToFitDescendents="true" layer="BACKGROUND">
 					<Anchor point="RIGHT" relativePoint="LEFT" constrains="X"/>
 					<Anchor point="TOP" relativePoint="TOP" relativeTo="$(parent)_MainPanel" constrains="Y"/>
 					<ResizeToFitPadding width="8" height="8"/>
@@ -2877,6 +2877,7 @@
 							<OnInitialized>
 								self.tooltip = {SI_COMBAT_METRICS_DAMAGE_CAUSED}
 								self.category = "damageOut"
+								self.isMainCategory = true
 							</OnInitialized>
 						</Texture>
 						
@@ -2885,6 +2886,7 @@
 							<OnInitialized>
 								self.tooltip = {SI_COMBAT_METRICS_HEALING_DONE}
 								self.category = "healingOut"
+								self.isMainCategory = true
 							</OnInitialized>
 						</Texture>
 						
@@ -2893,6 +2895,7 @@
 							<OnInitialized>
 								self.tooltip = {SI_COMBAT_METRICS_DAMAGE_RECEIVED}
 								self.category = "damageIn"
+								self.isMainCategory = true
 							</OnInitialized>
 						</Texture>
 						
@@ -2901,6 +2904,7 @@
 							<OnInitialized>
 								self.tooltip = {SI_COMBAT_METRICS_HEALING_RECEIVED}
 								self.category = "healingIn"
+								self.isMainCategory = true
 							</OnInitialized>
 						</Texture>
 						
@@ -2909,6 +2913,7 @@
 							<OnInitialized>
 								self.tooltip = {SI_COMBAT_METRICS_TOGGLE_FIGHTSTATS}
 								self.category = "FightStats"
+								self.isSecondaryCategory = true
 							</OnInitialized>
 						</Texture>
 						
@@ -2917,6 +2922,7 @@
 							<OnInitialized>
 								self.tooltip = {SI_COMBAT_METRICS_TOGGLE_COMBAT_LOG}
 								self.category = "CombatLog"
+								self.isSecondaryCategory = true
 							</OnInitialized>
 						</Texture>
 						
@@ -2925,6 +2931,7 @@
 							<OnInitialized>
 								self.tooltip = {SI_COMBAT_METRICS_TOGGLE_GRAPH}
 								self.category = "Graph"
+								self.isSecondaryCategory = true
 							</OnInitialized>
 						</Texture>
 						
@@ -2933,6 +2940,7 @@
 							<OnInitialized>
 								self.tooltip = {SI_COMBAT_METRICS_TOGGLE_INFO}
 								self.category = "Info"
+								self.isSecondaryCategory = true
 							</OnInitialized>
 						</Texture>
 						
@@ -3690,7 +3698,7 @@
 									
 								</Label>
 						
-								<Backdrop name="$(parent)BarBg" centerColor="00000000" edgeColor="FFCCCCCC" layer="1" level="1" inherits="CombatMetrics_BackgroundFramed">
+								<Backdrop name="$(parent)BarBg" centerColor="00000000" edgeColor="FFCCCCCC" layer="CONTROLS" level="1" inherits="CombatMetrics_BackgroundFramed">
 								
 									<AnchorFill/>
 								

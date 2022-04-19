@@ -336,7 +336,7 @@ local function decodeCombatLogLine(line, fight)
 
 		logdata[4] = logdata[4] - 131072
 
-		if logdata[5] > POWERTYPE_ITERATION_END then logdata[5] = logdata[5] - 64 end -- POWERTYPE_HEALTH is -2
+		if logdata[5] > (POWERTYPE_ITERATION_END or 64) then logdata[5] = logdata[5] - 64 end -- POWERTYPE_HEALTH is -2
 		if logdata[6] == 0 then logdata[6] = nil end
 
 	elseif layoutId == LAYOUT_MESSAGE then
