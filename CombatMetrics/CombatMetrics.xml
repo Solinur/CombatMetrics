@@ -1461,7 +1461,7 @@
 			
 			<Controls>
 			
-				<Backdrop name="$(parent)ColorBox" centerColor="FF333333" edgeColor="FF333333" mouseEnabled="true">
+				<Backdrop name="$(parent)ColorBox" centerColor="FF333333" edgeColor="FF333333" mouseEnabled="true" layer="CONTROLS">
 				
 					<Anchor point="LEFT" offsetX="0" offsetY="0" />
 					
@@ -1471,7 +1471,7 @@
 				
 				</Backdrop>
 				
-				<Backdrop name="$(parent)Dropdown" centerColor="FF000000" edgeColor="FF333333" mouseEnabled="true">
+				<Backdrop name="$(parent)Dropdown" centerColor="FF000000" edgeColor="FF333333" mouseEnabled="true" layer="CONTROLS">
 
 					<Anchor point="LEFT" relativeTo="$(parent)ColorBox" relativePoint="RIGHT" offsetX="4" offsetY="0" />
 					<Anchor point="RIGHT" offsetX="0" offsetY="0" />
@@ -2564,7 +2564,7 @@
 						
 							<Controls>
 							
-								<Control name="$(parent)Toolbar" mouseEnabled="true">
+								<Control name="$(parent)Toolbar" mouseEnabled="true" layer="BACKGROUND">
 								
 									<Anchor point="TOPLEFT" offsetX="4" offsetY="4"/>
 									<Anchor point="BOTTOMLEFT" offsetX="4" offsetY="-4"/>

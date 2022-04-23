@@ -265,11 +265,11 @@ end
 
 local function selectCategory(button)
 
-	local parent = button:GetParent()
+	local selectControl = button:GetParent()
 
-	for i = 1, parent:GetNumChildren() do
+	for i = 1, selectControl:GetNumChildren() do
 
-		local child = parent:GetChild(i)
+		local child = selectControl:GetChild(i)
 
 		if child and child.isMainCategory then 
 
@@ -291,14 +291,16 @@ local function selectMainPanel(button)
 	local selectControl = button:GetParent()
 	local category = button.category
 
-	for i = 5, 8 do
+	for i = 1, selectControl:GetNumChildren() do
 
 		local child = selectControl:GetChild(i)
 
-		local a = child == button and 1 or .2
+		if child and child.isSecondaryCategory then
 
-		child:SetColor(1, 1, 1, a)
+			local a = child == button and 1 or .2
 
+			child:SetColor(1, 1, 1, a)
+		end
 	end
 
 	local mainPanel = CombatMetrics_Report_MainPanel
@@ -340,30 +342,6 @@ local function selectMainPanel(button)
 		infoPanel:Update()
 
 	end
-end
-
-local function toggleInfoPanel(button)
-
-	local selectControl = button:GetParent()
-
-	for i=5, 8 do
-
-		local child = selectControl:GetChild(i)
-
-		local a = child == button and 1 or .2
-
-		child:SetColor(1, 1, 1, a)
-
-	end
-
-	local mainpanel = CombatMetrics_Report_MainPanel
-	local rightpanel = CombatMetrics_Report_RightPanel
-	local infopanel = CombatMetrics_Report_InfoPanel
-
-	mainpanel:SetHidden(true)
-	rightpanel:SetHidden(true)
-	infopanel:SetHidden(false)
-
 end
 
 local ValidRaids = {

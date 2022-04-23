@@ -6,7 +6,7 @@ local LOG_LEVEL_VERBOSE, LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG
 CombatMetricsFightData = {}
 
 local AddonName = "CombatMetricsFightData"
-local AddonVersion = 11
+local AddonVersion = 12
 
 local constants = 0
 
@@ -126,6 +126,56 @@ for key, value in pairs(CombatResultTableLoad) do
 
 end
 
+local CombatMechnicFlagTableLoad
+
+if GetAPIVersion() >= 101034 then
+
+	CombatMechnicFlagTableLoad = {
+
+		[1] = COMBAT_MECHANIC_FLAGS_HEALTH,
+		[2] = COMBAT_MECHANIC_FLAGS_MAGICKA,
+		[3] = COMBAT_MECHANIC_FLAGS_STAMINA,
+		[4] = COMBAT_MECHANIC_FLAGS_ULTIMATE,
+		[5] = COMBAT_MECHANIC_FLAGS_WEREWOLF,
+		[6] = COMBAT_MECHANIC_FLAGS_DAEDRIC,
+		[7] = COMBAT_MECHANIC_FLAGS_MOUNT_STAMINA,
+	}
+
+else
+
+	CombatMechnicFlagTableLoad = {
+
+		[1] = POWERTYPE_HEALTH,
+		[2] = POWERTYPE_MAGICKA,
+		[3] = POWERTYPE_STAMINA,
+		[4] = POWERTYPE_ULTIMATE,
+		[5] = POWERTYPE_WEREWOLF,
+		[6] = POWERTYPE_DAEDRIC,
+		[7] = POWERTYPE_MOUNT_STAMINA,
+	}
+
+end
+
+local CombatMechnicFlagTableSave = {}
+
+for key, value in pairs(CombatMechnicFlagTableLoad) do
+
+	CombatMechnicFlagTableSave[value] = key
+
+end
+
+CombatMechnicFlagTableLoadLegacy = {
+
+	[-2] = COMBAT_MECHANIC_FLAGS_HEALTH        or POWERTYPE_HEALTH,
+	[0]  = COMBAT_MECHANIC_FLAGS_MAGICKA       or POWERTYPE_MAGICKA,
+	[6]  = COMBAT_MECHANIC_FLAGS_STAMINA       or POWERTYPE_STAMINA,
+	[10] = COMBAT_MECHANIC_FLAGS_ULTIMATE      or POWERTYPE_ULTIMATE,
+	[1]  = COMBAT_MECHANIC_FLAGS_WEREWOLF      or POWERTYPE_WEREWOLF,
+	[13] = COMBAT_MECHANIC_FLAGS_DAEDRIC       or POWERTYPE_DAEDRIC,
+	[11] = COMBAT_MECHANIC_FLAGS_MOUNT_STAMINA or POWERTYPE_MOUNT_STAMINA,
+
+}
+
 local statTableConvert = {
 
 	[1] = LIBCOMBAT_STAT_SPELLPOWER,
@@ -157,24 +207,24 @@ local LAYOUT_PERFORMANCE = 21
 
 local logTypeToLayout = {
 
-	[4] = LAYOUT_COMBAT,
-	[5] = LAYOUT_COMBAT,
-	[6] = LAYOUT_COMBAT,
-	[7] = LAYOUT_COMBAT,
-	[8] = LAYOUT_COMBAT,
-	[9] = LAYOUT_COMBAT,
-	[10] = LAYOUT_EVENT,
-	[11] = LAYOUT_EVENT,
-	[12] = LAYOUT_EVENT,
-	[13] = LAYOUT_EVENT,
-	[14] = LAYOUT_STATS,
-	[15] = LAYOUT_POWER,
-	[16] = LAYOUT_MESSAGE,
-	[17] = LAYOUT_DEATH,
-	[18] = LAYOUT_STATS_ADV,
-	[19] = LAYOUT_SKILL,
-	[20] = LAYOUT_BOSSHP,
-	[21] = LAYOUT_PERFORMANCE,
+	[LIBCOMBAT_EVENT_DAMAGE_OUT] = LAYOUT_COMBAT,
+	[LIBCOMBAT_EVENT_DAMAGE_IN] = LAYOUT_COMBAT,
+	[LIBCOMBAT_EVENT_DAMAGE_SELF] = LAYOUT_COMBAT,
+	[LIBCOMBAT_EVENT_HEAL_OUT] = LAYOUT_COMBAT,
+	[LIBCOMBAT_EVENT_HEAL_IN] = LAYOUT_COMBAT,
+	[LIBCOMBAT_EVENT_HEAL_SELF] = LAYOUT_COMBAT,
+	[LIBCOMBAT_EVENT_EFFECTS_IN] = LAYOUT_EVENT,
+	[LIBCOMBAT_EVENT_EFFECTS_OUT] = LAYOUT_EVENT,
+	[LIBCOMBAT_EVENT_GROUPEFFECTS_IN] = LAYOUT_EVENT,
+	[LIBCOMBAT_EVENT_GROUPEFFECTS_OUT] = LAYOUT_EVENT,
+	[LIBCOMBAT_EVENT_PLAYERSTATS] = LAYOUT_STATS,
+	[LIBCOMBAT_EVENT_RESOURCES] = LAYOUT_POWER,
+	[LIBCOMBAT_EVENT_MESSAGES] = LAYOUT_MESSAGE,
+	[LIBCOMBAT_EVENT_DEATH] = LAYOUT_DEATH,
+	[LIBCOMBAT_EVENT_PLAYERSTATS_ADVANCED] = LAYOUT_STATS_ADV,
+	[LIBCOMBAT_EVENT_SKILL_TIMINGS] = LAYOUT_SKILL,
+	[LIBCOMBAT_EVENT_BOSSHP] = LAYOUT_BOSSHP,
+	[LIBCOMBAT_EVENT_PERFORMANCE] = LAYOUT_PERFORMANCE,
 
 }
 
@@ -244,6 +294,7 @@ local function encodeCombatLogLine(line, fight)
 
 		line[3] = line[3] or -3
 		line[4] = line[4] + 131072					-- avoid negative numbers
+		line[5] = CombatMechnicFlagTableSave[line[5]]
 		line[6] = line[6] or 0
 
 	elseif layoutId == LAYOUT_MESSAGE and type(line[3]) ~= "number" then					-- type, timems, messageId
@@ -336,7 +387,25 @@ local function decodeCombatLogLine(line, fight)
 
 		logdata[4] = logdata[4] - 131072
 
-		if logdata[5] > (POWERTYPE_ITERATION_END or 64) then logdata[5] = logdata[5] - 64 end -- POWERTYPE_HEALTH is -2
+		if fight.svversion >= 12 then
+
+			logdata[5] = CombatMechnicFlagTableLoad[logdata[5]]
+
+		else
+
+			if logdata[5] > (POWERTYPE_ITERATION_END or 64) then
+
+				logdata[5] = logdata[5] - 64  			-- POWERTYPE_HEALTH is -2
+
+			end
+
+			if (GetAPIVersion() or 0) >= 101034 and (fight.APIversion or 0) < 101034 then
+
+				logdata[5] = CombatMechnicFlagTableLoadLegacy[logdata[5]]
+
+			end
+		end
+
 		if logdata[6] == 0 then logdata[6] = nil end
 
 	elseif layoutId == LAYOUT_MESSAGE then
@@ -575,6 +644,7 @@ local function saveFight(fight, filters)
 	ZO_DeepTableCopy(fight, newSavedFight)
 
 	newSavedFight.svversion = AddonVersion
+	newSavedFight.APIversion = GetAPIVersion()
 
 	reduceUnitIds(newSavedFight)
 

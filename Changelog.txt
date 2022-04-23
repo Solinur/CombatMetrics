@@ -608,3 +608,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 
 1.5.4 4,896,237 (19.04.2022) 18:14
 [*] Fixed an issue where category buttons were unresponsive, due to some faulty code that mysteriously worked for years. (Thx to LordKruxis for the bug report)
+
+1.5.4 4,896,237 (19.04.2022) 18:14
+[*] Fixed an issue where fights could not be loaded under the new API (currently on PTS)
+[*] Removed an error message, complaining about LibFeedback missing, although it is no longer a dependency.

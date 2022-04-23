@@ -2862,12 +2862,6 @@ local function Initialize(event, addon)
 	if GetDisplayName() == "@Solinur" then db.NotificationRead = 0 end -- for dev purposes
 
 	CMX.init = true
-
-	if LibFeedback == nil then
-
-		Print("main", LOG_LEVEL_ERROR, "LibFeedback not found! Make sure the latest version is installed.")
-
-	end
 end
 
 -- register event handler function to initialize when addon is loaded
