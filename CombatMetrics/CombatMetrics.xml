@@ -3661,21 +3661,21 @@
 						
 							<Anchor point="LEFT" offsetX="4"/>
 							
-							<Dimensions x="200" y="20"/>
+							<Dimensions x="276" y="20"/>
 							
 						</Label>
 						
 						<Label name="$(parent)ESOVersion" inherits="CombatMetrics_StatRowLabel" text="" horizontalAlignment="RIGHT">
 						
 							<Anchor point="RIGHT" offsetX="-4"/>
-							<Dimensions x="250" y="20"/>
+							<Dimensions x="276" y="20"/>
 							
 						</Label>
 						
 						<Label name="$(parent)Performance" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="CENTER" hidden="true">
 						
-							<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DateTime" offsetX="80"/>
-							<Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)ESOVersion" offsetX="-30"/>
+							<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DateTime" offsetX="4"/>
+							<Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)ESOVersion" offsetX="-4"/>
 
 							<Dimensions y="20"/>
 							
@@ -3683,8 +3683,8 @@
 						
 						<StatusBar name="$(parent)Bar" orientation="HORIZONTAL" color="CCBBBB77">
 						
-							<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DateTime" offsetX="120"/>
-							<Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)ESOVersion" offsetX="-70"/>
+							<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DateTime" offsetX="44"/>
+							<Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)ESOVersion" offsetX="-44"/>
 							
 							<Dimensions y="20"/>
 							
