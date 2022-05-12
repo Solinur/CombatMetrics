@@ -69,7 +69,7 @@
 	SI_COMBAT_METRICS_DAMAGE_CAUSED = "Damage Caused",
 	SI_COMBAT_METRICS_DAMAGE_RECEIVED = "Damage Received",
 	SI_COMBAT_METRICS_HEALING_DONE = "Healing Done",
-	SI_COMBAT_METRICS_HEALING_RECEIVED = "Healing Recieved",
+	SI_COMBAT_METRICS_HEALING_RECEIVED = "Healing Received",
 
 	SI_COMBAT_METRICS_TOGGLE_FIGHTSTATS = "Fight Stats",
 	SI_COMBAT_METRICS_TOGGLE_COMBAT_LOG = "Combat Log",
@@ -376,7 +376,7 @@
 	SI_COMBAT_METRICS_MENU_NOPVP_TOOLTIP = "Turns all fight logging off in Cyrodil and Battlegrounds",
 
 	SI_COMBAT_METRICS_MENU_LMPVP_NAME = "Light Mode in PvP",
-	SI_COMBAT_METRICS_MENU_LMPVP_TOOLTIP = "Swiches to light mode in Cyrodil and Battlegrounds. When in light mode, Combat Metrics will only calculate the DPS/HPS in the live report window. No statistics will be calculated and the fight report window will be disabled",
+	SI_COMBAT_METRICS_MENU_LMPVP_TOOLTIP = "Switches to light mode in Cyrodil and Battlegrounds. When in light mode, Combat Metrics will only calculate the DPS/HPS in the live report window. No statistics will be calculated and the fight report window will be disabled",
 
 	SI_COMBAT_METRICS_MENU_ASCC_NAME = "Auto Select Channel",
 	SI_COMBAT_METRICS_MENU_ASCC_TOOLTIP = "Automatically select the channel when posting DPS/HPS to chat. When in group the /group chat is used otherwise the /say chat.",
