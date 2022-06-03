@@ -606,9 +606,11 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 1.5.3 4.832.505 (05.04.2022) 00:41
 [*] Added tracking of Major Brittle for Critical Damage Bonus.
 
-1.5.4 4,896,237 (19.04.2022) 18:14
+1.5.4 4.896.237 (19.04.2022) 18:14
 [*] Fixed an issue where category buttons were unresponsive, due to some faulty code that mysteriously worked for years. (Thx to LordKruxis for the bug report)
 
-1.5.4 4,896,237 (19.04.2022) 18:14
-[*] Fixed an issue where fights could not be loaded under the new API (currently on PTS)
+1.5.5 4.986.189 (03.06.2022) 23:12
+[*] Added compatibility with High Isle (API 101034).
+[*] Added settings to adjust the values used for Alkosh and Tremorscale as their strength cannot be determined if they are not cast by the player.
 [*] Removed an error message, complaining about LibFeedback missing, although it is no longer a dependency.
+[*] Fixed an issue where the account name and date could be cut off in the status bar at the bottom. 

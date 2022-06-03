@@ -6,7 +6,7 @@ local LOG_LEVEL_VERBOSE, LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG
 CombatMetricsFightData = {}
 
 local AddonName = "CombatMetricsFightData"
-local AddonVersion = 12
+local AddonVersion = 13
 
 local constants = 0
 
@@ -166,13 +166,13 @@ end
 
 CombatMechnicFlagTableLoadLegacy = {
 
-	[-2] = COMBAT_MECHANIC_FLAGS_HEALTH        or POWERTYPE_HEALTH,
-	[0]  = COMBAT_MECHANIC_FLAGS_MAGICKA       or POWERTYPE_MAGICKA,
-	[6]  = COMBAT_MECHANIC_FLAGS_STAMINA       or POWERTYPE_STAMINA,
-	[10] = COMBAT_MECHANIC_FLAGS_ULTIMATE      or POWERTYPE_ULTIMATE,
-	[1]  = COMBAT_MECHANIC_FLAGS_WEREWOLF      or POWERTYPE_WEREWOLF,
-	[13] = COMBAT_MECHANIC_FLAGS_DAEDRIC       or POWERTYPE_DAEDRIC,
-	[11] = COMBAT_MECHANIC_FLAGS_MOUNT_STAMINA or POWERTYPE_MOUNT_STAMINA,
+	[-2] = COMBAT_MECHANIC_FLAGS_HEALTH,
+	[0]  = COMBAT_MECHANIC_FLAGS_MAGICKA,
+	[6]  = COMBAT_MECHANIC_FLAGS_STAMINA,
+	[10] = COMBAT_MECHANIC_FLAGS_ULTIMATE,
+	[1]  = COMBAT_MECHANIC_FLAGS_WEREWOLF,
+	[13] = COMBAT_MECHANIC_FLAGS_DAEDRIC,
+	[11] = COMBAT_MECHANIC_FLAGS_MOUNT_STAMINA,
 
 }
 
@@ -393,7 +393,7 @@ local function decodeCombatLogLine(line, fight)
 
 		else
 
-			if logdata[5] > (POWERTYPE_ITERATION_END or 64) then
+			if logdata[5] > (POWERTYPE_ITERATION_END or 60) then
 
 				logdata[5] = logdata[5] - 64  			-- POWERTYPE_HEALTH is -2
 
@@ -530,6 +530,27 @@ local function recoverCombatLog(loadedFight)
 
 	local timeOffset = 0
 	if loadedFight.svversion >= 3 then timeOffset = 1000 end
+	if loadedFight.svversion < 12 and loadedFight.APIversion == nil then
+
+		local _, _, ESOMainVersion = string.find(loadedFight.ESOversion, "eso%.%w+%.(%d+)")
+		loadedFight.APIversion = (tonumber(ESOMainVersion) or 0) + 101026
+
+	end
+
+	if GetAPIVersion() >= 101034 and loadedFight.APIversion < 101034 then
+
+		local resources = {}
+
+		for oldkey, data in pairs(loadedFight.calculated.resources) do
+
+			local newkey = CombatMechnicFlagTableLoadLegacy[oldkey]
+
+			resources[newkey] = data
+
+		end
+
+		loadedFight.calculated.resources = resources
+	end
 
 	if strings == nil or #strings == 0 then return end
 
@@ -644,7 +665,6 @@ local function saveFight(fight, filters)
 	ZO_DeepTableCopy(fight, newSavedFight)
 
 	newSavedFight.svversion = AddonVersion
-	newSavedFight.APIversion = GetAPIVersion()
 
 	reduceUnitIds(newSavedFight)
 

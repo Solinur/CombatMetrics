@@ -8,13 +8,6 @@
 	SI_COMBAT_METRICS_STAMINA_COLOR = "FFA6D852",
 	SI_COMBAT_METRICS_ULTIMATE_COLOR = "FFffe785",
 
--- Ingame (Use ZOS Tranlations, change only for languages which are not supported)
-
-	SI_COMBAT_METRICS_HEALTH = GetString(SI_ATTRIBUTES1),  -- Health
-	SI_COMBAT_METRICS_MAGICKA = GetString(SI_ATTRIBUTES2),  -- Magicka
-	SI_COMBAT_METRICS_STAMINA = GetString(SI_ATTRIBUTES3),  -- Stamina
-	SI_COMBAT_METRICS_ULTIMATE = GetString(SI_COMBATMECHANICTYPE10),  -- Ultimate
-
 -- URLs (Feedback Menu)
 
 	SI_COMBAT_METRICS_FEEDBACK_ESOUIURL = "https://www.esoui.com/downloads/info1360-CombatMetrics.html",
@@ -399,7 +392,11 @@
 
 	SI_COMBAT_METRICS_MENU_RESPEN_NAME = "Resistance and Penetration",
 	SI_COMBAT_METRICS_MENU_CRUSHER = "Crusher",
-	SI_COMBAT_METRICS_MENU_CRUSHER_TOOLTIP = "Resistance reduction due to debuff from Crusher glyph. For maxlevel gold glyph: standard: 1622, infused: 2108, infused + Torug's: 2740",
+	SI_COMBAT_METRICS_MENU_CRUSHER_TOOLTIP = "Resistance reduction from the Crusher glyph debuff. \nFor CP160 gold glyph: \nstandard: 1622 \ninfused: 2108 \ninfused + Torug's: 2740",
+	SI_COMBAT_METRICS_MENU_ALKOSH = "Alkosh",
+	SI_COMBAT_METRICS_MENU_ALKOSH_TOOLTIP = "Resistance reduction from the Roar of Alkosh debuff. \nIt is given by the higher of weapon or spell damage of the caster, up to a maximum of 6000.",
+	SI_COMBAT_METRICS_MENU_TREMORSCALE = "Tremorscale",
+	SI_COMBAT_METRICS_MENU_TREMORSCALE_TOOLTIP = "Resistance reduction from the Tremorscale debuff. \nIt is given by the higher of physical or spell resistance of the caster, multiplied by 0.08.",
 	SI_COMBAT_METRICS_MENU_MOBRESISTANCE = "Target resistance",
 	SI_COMBAT_METRICS_MENU_MOBRESISTANCE_TOOLTIP = "Target resistance that is assumed for overpenetration calculation",
 
@@ -474,9 +471,27 @@
 	SI_BINDING_NAME_CMX_POST_HPS = "Post Heal to Chat",
 	SI_BINDING_NAME_CMX_RESET_FIGHT = "Manually Reset the Fight",
 
--- Localization End
-
 }
+
+-- Ingame (Use ZOS Tranlations, change only for languages which are not supported)
+
+if GetAPIVersion() < 101034 then
+
+	strings["SI_COMBAT_METRICS_HEALTH"] = GetString(SI_ATTRIBUTES1)  -- Health
+	strings["SI_COMBAT_METRICS_MAGICKA"] = GetString(SI_ATTRIBUTES2)  -- Magicka
+	strings["SI_COMBAT_METRICS_STAMINA"] = GetString(SI_ATTRIBUTES3)  -- Stamina
+	strings["SI_COMBAT_METRICS_ULTIMATE"] = GetString(SI_COMBATMECHANICTYPE10)  -- Ultimate
+
+else
+
+	strings["SI_COMBAT_METRICS_HEALTH"] = GetString(SI_COMBATMECHANICFLAGS32)  -- Health
+	strings["SI_COMBAT_METRICS_MAGICKA"] = GetString(SI_COMBATMECHANICFLAGS1)  -- Magicka
+	strings["SI_COMBAT_METRICS_STAMINA"] = GetString(SI_COMBATMECHANICFLAGS4)  -- Stamina
+	strings["SI_COMBAT_METRICS_ULTIMATE"] = GetString(SI_COMBATMECHANICFLAGS8)  -- Ultimate
+
+end
+
+-- Localization End
 
 for stringId, stringValue in pairs(strings) do
 	ZO_CreateStringId(stringId, stringValue)

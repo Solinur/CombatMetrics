@@ -324,7 +324,37 @@ function CMX.MakeMenu(svdefaults)
 					if value then
 
 						local number = zo_round(tonumber(value) or def.crusherValue)
-						CMX.SetCrusher(number)
+						CMX.SetPenetrationDebuffValue("crusherValue", number)
+
+					end
+				end
+		},
+		{
+			type = "editbox",
+			name = GetString(SI_COMBAT_METRICS_MENU_ALKOSH),
+			tooltip = GetString(SI_COMBAT_METRICS_MENU_ALKOSH_TOOLTIP),
+			default = def.alkoshValue,
+			getFunc = function() return db.alkoshValue end,
+			setFunc = function(value)
+					if value then
+
+						local number = zo_round(tonumber(value) or def.alkoshValue)
+						CMX.SetPenetrationDebuffValue("alkoshValue", number)
+
+					end
+				end
+		},
+		{
+			type = "editbox",
+			name = GetString(SI_COMBAT_METRICS_MENU_TREMORSCALE),
+			tooltip = GetString(SI_COMBAT_METRICS_MENU_TREMORSCALE_TOOLTIP),
+			default = def.tremorscaleValue,
+			getFunc = function() return db.tremorscaleValue end,
+			setFunc = function(value)
+					if value then
+
+						local number = zo_round(tonumber(value) or def.tremorscaleValue)
+						CMX.SetPenetrationDebuffValue("tremorscaleValue", number)
 
 					end
 				end

@@ -28,7 +28,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.5.4"
+CMX.version = "1.5.5"
 
 -- Logger
 
@@ -157,7 +157,7 @@ local StatDebuffs = {
 	[GetFormattedAbilityName(79087)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 1320}, -- Spell Resistance Reduction by Poison
 	[GetFormattedAbilityName(79090)] = {[LIBCOMBAT_STAT_WEAPONPENETRATION] = 1320}, -- Physical Resistance Reduction by Poison
 
-	[GetFormattedAbilityName(80866)] = {[LIBCOMBAT_STAT_WEAPONPENETRATION] = 2395}, -- Tremorscale
+	[GetFormattedAbilityName(80866)] = GetAPIVersion() >= 101034 and {[LIBCOMBAT_STAT_SPELLPENETRATION] = 2640, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 2640} or {[LIBCOMBAT_STAT_WEAPONPENETRATION] = 2395}, -- Tremorscale
 
 	[GetFormattedAbilityName(142610)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 5, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 5}, -- Flame Weakness
 	[GetFormattedAbilityName(142653)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 5, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 5}, -- Shock Weakness
@@ -217,16 +217,28 @@ local TrialDummyBuffs = {
 	[88401] = true, -- Minor Magickasteal
 }
 
-function CMX.SetCrusher(value)
 
-	db.crusherValue = value
 
-	local crushername = GetFormattedAbilityName(17906)
+local variablePenetrationDebuffAbilityIds = {
 
-	local StatDebuffCrusher = StatDebuffs[crushername]
+	["crusherValue"] = 17906,
+	["alkoshValue"] = 76667,
+	["tremorscaleValue"] = 80866,
 
-	StatDebuffCrusher[LIBCOMBAT_STAT_SPELLPENETRATION] = value
-	StatDebuffCrusher[LIBCOMBAT_STAT_WEAPONPENETRATION] = value
+}
+
+function CMX.SetPenetrationDebuffValue(debuffKey, value)
+
+	local abilityId = variablePenetrationDebuffAbilityIds[debuffKey]
+
+	if value == nil then value = db[debuffKey] else db[debuffKey] = value end	-- load values from SV when no value is given, otherwise store new value
+
+	local abilityName = GetFormattedAbilityName(abilityId)
+
+	local StatDebuff = StatDebuffs[abilityName]
+
+	StatDebuff[LIBCOMBAT_STAT_SPELLPENETRATION] = value
+	StatDebuff[LIBCOMBAT_STAT_WEAPONPENETRATION] = value
 
 end
 
@@ -2622,6 +2634,8 @@ local svdefaults = {
 
 	["showstacks"] = true,
 	["crusherValue"] = 2108,
+	["alkoshValue"] = 6000,
+	["tremorscaleValue"] = 2640,
 	["unitresistance"] = 18200,
 
 	["lightmode"] = false,
@@ -2819,7 +2833,11 @@ local function Initialize(event, addon)
 
 	--
 
-	CMX.SetCrusher(db.crusherValue)
+	for debuffKey, _ in pairs(variablePenetrationDebuffAbilityIds) do
+
+		CMX.SetPenetrationDebuffValue(debuffKey, nil)	-- Load values from SV
+
+	end
 
 	if db.chatLog.enabled then zo_callLater(CMX.InitializeChat, 500) end
 
