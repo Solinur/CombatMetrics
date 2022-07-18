@@ -3790,7 +3790,7 @@
 									<Dimensions x="100" y="20" />
 								</Label>
 
-								<EditBox name="$(parent)EditBox" font="ZoFontGame" color="FFFFFFFF" allowMarkupType="ALLOW_MARKUP_TYPE_NONE" inherits="ZO_DefaultEditForBackdrop ZO_EditDefaultText" editEnabled="false" mouseEnabled="true" newLineEnabled="false" multiLine="false">
+								<EditBox name="$(parent)EditBox" font="ZoFontGame" color="FFFFFFFF" allowMarkupType="ALLOW_MARKUP_TYPE_NONE" inherits="ZO_DefaultEditForBackdrop ZO_DefaultEdit" editEnabled="false" mouseEnabled="true" newLineEnabled="false" multiLine="false">
 									<Anchor point="TOPLEFT" relativePoint="TOP" offsetX="4"/>
 
 									<Dimensions x="80" y="20" />

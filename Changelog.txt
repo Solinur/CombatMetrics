@@ -614,3 +614,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Added settings to adjust the values used for Alkosh and Tremorscale as their strength cannot be determined if they are not cast by the player.
 [*] Removed an error message, complaining about LibFeedback missing, although it is no longer a dependency.
 [*] Fixed an issue where the account name and date could be cut off in the status bar at the bottom. 
+
+1.5.6 5.104.339 (19.07.2022) 00:03
+[*] Fixed a Lua error appearing on PTS
+[*] Fixed an issue where short cast time abilities showed wrong weaving statistics (Thanks SkinnyCheeks for the hint)

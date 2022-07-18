@@ -28,7 +28,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.5.5"
+CMX.version = "1.5.6"
 
 -- Logger
 
@@ -1700,7 +1700,7 @@ local function ProcessLogSkillTimings(fight, logline)
 
 		-- looking for suitable start event. Let's assume that every start event will have an end event. Search from earliest time event, until one is found that is within the expected time window
 
-		local indexFound = false
+		local indexFound
 
 		for k, castindex in ipairs(started) do
 
@@ -2110,9 +2110,9 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 			if startTime and not ignoredAbilityTiming[skillId] then
 
-				endTime = endTime or (startTime + 1000)
-
 				local isWeaponAttack = reducedslot%10 == 1 or reducedslot%10 == 2
+
+				endTime = isWeaponAttack == false and math.max(startTime+1000, endTime or 0) or (endTime or startTime+1000)
 
 				local delay = startTime - (queued or registered)
 
@@ -2252,7 +2252,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 			end
 		end
 
-		-- calculate avh performance values
+		-- calculate avg performance values
 
 		local performance = data.performance
 		local count = performance.count
