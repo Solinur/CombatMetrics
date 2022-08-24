@@ -28,7 +28,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.5.6"
+CMX.version = "1.5.7"
 
 -- Logger
 
@@ -150,18 +150,19 @@ local StatDebuffs = {
 	[GetFormattedAbilityName(120007)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 2740, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 2740}, -- Crusher, Target Dummy (the following line might overwrite this. If LUI extended is used, both declarations are necessary)
 	[GetFormattedAbilityName(17906)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 2108, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 2108}, -- Crusher, can get changed by settings !
 	[GetFormattedAbilityName(143808)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 1000, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 1000}, -- Crystal Weapon
-	[GetFormattedAbilityName(120018)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 3010, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 3010}, -- Alkosh, Target Dummy (the following line might overwrite this. If LUI extended is used, both declarations are necessary)
+	[GetFormattedAbilityName(120018)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 6000, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 6000}, -- Alkosh, Target Dummy (the following line might overwrite this. If LUI extended is used, both declarations are necessary)
 	[GetFormattedAbilityName(76667)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 6000, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 6000}, -- Alkosh
 	[GetFormattedAbilityName(159288)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 3541, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 3541}, -- Crimson Oath
 
 	[GetFormattedAbilityName(79087)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 1320}, -- Spell Resistance Reduction by Poison
 	[GetFormattedAbilityName(79090)] = {[LIBCOMBAT_STAT_WEAPONPENETRATION] = 1320}, -- Physical Resistance Reduction by Poison
 
-	[GetFormattedAbilityName(80866)] = GetAPIVersion() >= 101034 and {[LIBCOMBAT_STAT_SPELLPENETRATION] = 2640, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 2640} or {[LIBCOMBAT_STAT_WEAPONPENETRATION] = 2395}, -- Tremorscale
+	[GetFormattedAbilityName(80866)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 2640, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 2640}, -- Tremorscale
 
 	[GetFormattedAbilityName(142610)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 5, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 5}, -- Flame Weakness
 	[GetFormattedAbilityName(142653)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 5, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 5}, -- Shock Weakness
 	[GetFormattedAbilityName(142652)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 5, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 5}, -- Frost Weakness
+	[GetFormattedAbilityName(181606)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 15, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 15}, -- Elemental Catalyst
 
 	[GetFormattedAbilityName(95136)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 10, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 10}, -- Chilled (in combination with the "Glacial Presence" passive of Warden)
 
@@ -214,6 +215,7 @@ local TrialDummyBuffs = {
 	[106754] = true, -- Major Vulnerability
 	[120011] = true, -- Engulfing Flames
 	[120018] = true, -- Roar of Alkosh
+	[181606] = true, -- Elemental Catalyst
 	[88401] = true, -- Minor Magickasteal
 }
 
@@ -530,7 +532,7 @@ end
 
 local overridevalues = {
 
-	[120018] = 3010, -- Alkosh on Dummy
+	[120018] = 6000, -- Alkosh on Dummy
 	[120007] = 2740, -- Crusher on Dummy
 
 }
