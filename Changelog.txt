@@ -624,4 +624,9 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Updated Alkosh and Elemental Catalyst for the Trial Dummy (Thx @ToxicKitty135 for the hint)
 
 1.5.8 5.260.987 (15.09.2022) 23:08
-[*] Adjusted crusher value on target dummy to reflect the change in Update 35 (@thx zvavi for the hint)
+[*] Adjusted crusher value on target dummy to reflect the change in Update 35 (Thanks to zvavi for the hint)
+
+1.5.9 5.358.887 (10.11.2022) 00:04
+[*] Updated critical damage calculation to reflect warden changes with Update 36 (Thanks to SkinnyCheeks and Baumlaus for the reminders)
+[*] Updated fonts to fix an issue when using chinese locale
+[*] Added compatibility with Lost Depths (API 101036).

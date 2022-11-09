@@ -164,8 +164,6 @@ local StatDebuffs = {
 	[GetFormattedAbilityName(142652)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 5, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 5}, -- Frost Weakness
 	[GetFormattedAbilityName(181606)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 15, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 15}, -- Elemental Catalyst
 
-	[GetFormattedAbilityName(95136)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 10, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 10}, -- Chilled (in combination with the "Glacial Presence" passive of Warden)
-
 	[GetFormattedAbilityName(145975)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 10, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 10}, -- Minor Brittle
 	[GetFormattedAbilityName(145977)] = {[LIBCOMBAT_STAT_SPELLCRITBONUS] = 20, [LIBCOMBAT_STAT_WEAPONCRITBONUS] = 20}, -- Major Brittle
 
@@ -546,14 +544,6 @@ function UnitHandler:UpdateStats(fight, effectdata, abilityId)
 	if debuffStatData == nil then return end
 
 	for stat, value in pairs(debuffStatData) do
-
-		if abilityId == 95136 then
-
-			local bonus = fight.special and fight.special.glacial or 0
-			
-			value = bonus * value
-
-		end
 
 		value = overridevalues[abilityId] or value
 

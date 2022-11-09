@@ -6,8 +6,8 @@ SafeAddString(SI_COMBAT_METRICS_ENCHANTMENT_TRIM, " 附魔", 1) -- this will be 
 
 -- Fonts
 
-SafeAddString(SI_COMBAT_METRICS_STD_FONT, "EsoZH/fonts/Univers57.otf", 1) 
-SafeAddString(SI_COMBAT_METRICS_BOLD_FONT, "EsoZH/fonts/Univers67.otf", 1) 
+SafeAddString(SI_COMBAT_METRICS_STD_FONT, "$(MEDIUM_FONT)", 1) 
+SafeAddString(SI_COMBAT_METRICS_BOLD_FONT, "$(BOLD_FONT)", 1) 
 
 SafeAddString(SI_COMBAT_METRICS_FONT_SIZE_SMALL, "14", 1) 
 SafeAddString(SI_COMBAT_METRICS_FONT_SIZE, "13", 1) 
