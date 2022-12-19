@@ -630,3 +630,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Updated critical damage calculation to reflect warden changes with Update 36 (Thanks to SkinnyCheeks and Baumlaus for the reminders)
 [*] Updated fonts to fix an issue when using chinese locale
 [*] Added compatibility with Lost Depths (API 101036).
+
+1.5.10 5.441.378 (19.12.2022) 22:10
+[*] Added special tracking for Z'en, to show achieved stacks in the buff panel. It uses the same tracking method as ExoYs ExoYs ProcSet Timer and TouchOfZen. Let me know if any source for Z'en is missing.
+[*] Added special tracking for the Spell/Weapon Damage modifying portion of Seething Fury. It is shown with a square version of the icon and named Seething Fury (Buff).

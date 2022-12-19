@@ -28,7 +28,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.5.8"
+CMX.version = "1.5.10"
 
 -- Logger
 
@@ -1452,7 +1452,9 @@ local function ProcessLogEffects(fight, logline)
 
 		end
 
-		for stacks = 1, currentstacks do
+		local minStacks = abilityId == 126597 and 0 or 1
+
+		for stacks = minStacks, currentstacks do
 
 			if slotdata[stacks] == nil then
 
@@ -1473,13 +1475,11 @@ local function ProcessLogEffects(fight, logline)
 
 					stackData.uptime = stackData.uptime + duration
 					stackData.count = stackData.count + 1
-					effectdata.count = effectdata.count + 1
 
 				end
 
 				stackData.groupUptime = stackData.groupUptime + duration
 				stackData.groupCount = stackData.groupCount + 1
-				effectdata.groupCount = effectdata.groupCount + 1
 
 				slotdata[stacks] = nil
 
@@ -1507,13 +1507,11 @@ local function ProcessLogEffects(fight, logline)
 
 					stackData.uptime = stackData.uptime + duration
 					stackData.count = stackData.count + 1
-					effectdata.count = effectdata.count + 1
 
 				end
 
 				stackData.groupUptime = stackData.groupUptime + duration
 				stackData.groupCount = stackData.groupCount + 1
-				effectdata.groupCount = effectdata.groupCount + 1
 			end
 
 			if slotcount == 0 and effectdata.firstStartTime then
@@ -1521,6 +1519,7 @@ local function ProcessLogEffects(fight, logline)
 				local duration = mathmin(timems, fight.endtime) - effectdata.firstStartTime
 
 				effectdata.uptime = effectdata.uptime + duration
+				effectdata.count = effectdata.count + 1
 
 				effectdata.firstStartTime = nil
 
@@ -1531,6 +1530,7 @@ local function ProcessLogEffects(fight, logline)
 				local duration = mathmin(timems,fight.endtime) - effectdata.firstGroupStartTime
 
 				effectdata.groupUptime = effectdata.groupUptime + duration
+				effectdata.groupCount = effectdata.groupCount + 1
 
 				effectdata.firstGroupStartTime = nil
 
@@ -1926,7 +1926,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 						if uptime > maxDuration or groupUptime > maxDuration then
 
-							maxDuration = mathmax(maxDuration, uptime, maxDuration)
+							maxDuration = mathmax(maxDuration, uptime, groupUptime)
 							effectdata.iconId = abilityId
 
 						end

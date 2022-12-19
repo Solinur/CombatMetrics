@@ -2639,7 +2639,7 @@ local function updateBuffPanel(panel)
 			local shownGroupUptime = buff.groupUptime
 
 			local hasInstances = buff.instances and NonContiguousCount(buff.instances) > 1
-			local hasStacks = buff.instances and buff.maxStacks > 1
+			local hasStacks = buff.instances and (buff.iconId == 126597 or buff.maxStacks > 1)
 
 			local showName = buffName
 
@@ -2696,20 +2696,29 @@ local function updateBuffPanel(panel)
 				rowdata.highlight = false
 				rowdata.hasDetails = false
 
-				for stacks, stackData in pairs(buff.instances[buff.iconId]) do
 
-					if type(stacks) == "number" then
+				local keys = {}
+				local instanceData = buff.instances[buff.iconId]
+				
+				for stacks, stackData in pairs(instanceData) do
+					if type(stacks) == "number" then keys[#keys+1] = stacks end
+				end
 
-						rowdata.label = ZO_CachedStrFormat("<<1>>x <<2>>", stacks, buffName)
+				table.sort(keys)
 
-						rowdata.uptimeRatio = stackData.uptime / totalUnitTime
-						rowdata.groupUptimeRatio = stackData.groupUptime / totalUnitTime
-						rowdata.count = stackData.count
-						rowdata.groupCount = stackData.groupCount
+				for i = 1, #keys do
 
-						currentanchor = addBuffPanelRow(panel, scrollchild, currentanchor, rowdata, parentrow)
+					local stacks = keys[i]
+					local stackData = instanceData[stacks]
 
-					end
+					rowdata.label = ZO_CachedStrFormat("<<1>>x <<2>>", stacks, buffName)
+
+					rowdata.uptimeRatio = stackData.uptime / totalUnitTime
+					rowdata.groupUptimeRatio = stackData.groupUptime / totalUnitTime
+					rowdata.count = stackData.count
+					rowdata.groupCount = stackData.groupCount
+
+					currentanchor = addBuffPanelRow(panel, scrollchild, currentanchor, rowdata, parentrow)
 				end
 			end
 		end
