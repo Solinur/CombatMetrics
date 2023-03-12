@@ -6118,8 +6118,8 @@ local function updateFightListPanel(panel, data, issaved)
 
 			local zonestring = subzone ~= "" and string.format("%s, %s", subzone, zone) or nil
 
-			local datestring = type(fight.date) == "number" and GetDateStringFromTimestamp(fight.date) or fight.date
-			local timestring = string.format("%s, %s", datestring, fight.time)
+			local datestring = type(fight.date) == "number" and GetDateStringFromTimestamp(fight.date) or fight.date or ""
+			local timestring = string.format("%s, %s", datestring, fight.time or "")
 
 			local fightlog = issaved and fight.stringlog or fight.log
 			local logState = fightlog and #fightlog>0
@@ -7073,8 +7073,6 @@ local function initLiveReport()
 
 		local last = liveReport
 
-		liveReport:SetDimensions(1, 1)
-
 		local totalBlocks = 0
 
 		for i = 3, liveReport:GetNumChildren() do
@@ -7115,8 +7113,6 @@ local function initLiveReport()
 				local isnotfull = ( math.ceil(blocks) - math.ceil(blocks + addspace)) == 0
 
 				blocks = blocks + addspace
-
-				local is
 
 				if firstBlock == nil then firstBlock = child end
 
@@ -7190,7 +7186,12 @@ local function initLiveReport()
 
 	function liveReport:Resize(scale)
 
-		resize(liveReport, scale)
+		for i = 1, liveReport:GetNumChildren() do	-- dont resize liveReport!
+
+			local child = liveReport:GetChild(i)
+			if child then resize(child, scale) end
+
+		end
 		liveReport:Refresh()
 
 	end

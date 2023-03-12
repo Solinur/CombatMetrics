@@ -343,9 +343,7 @@
 			
 		</Control>		
 		
-		<Control name="CombatMetrics_InfoAbilityBlock" resizeToFitDescendents="true" virtual="true">
-			
-			<Dimensions y="200"/>
+		<Control name="CombatMetrics_InfoAbilityBlock" virtual="true">
 		
 			<Controls>
 			
@@ -1286,7 +1284,6 @@
 		</Control>
 		
 		<Control name="CombatMetrics_FightlistRowTemplate" resizeToFitDescendents="true" mouseEnabled="true" virtual="true">
-			<Dimensions x="500" y="20"/> 
 		
 			<Controls>	
 				
@@ -1537,7 +1534,7 @@
 					<AnchorFill/>
 				</Backdrop>
 
-				<Backdrop name="$(parent)ResizeFrame" inherits="CombatMetrics_BackgroundFramed_Solid" edgeColor="00000000" centerColor="00000000" mouseEnabled="true" resizeHandleSize="10">
+				<Backdrop name="$(parent)ResizeFrame" inherits="CombatMetrics_BackgroundFramed_Solid" edgeColor="00000000" centerColor="00000000" mouseEnabled="true" resizeHandleSize="10" layer="OVERLAY" >
 					<AnchorFill/>
 
 					<DimensionConstraints minX="500" maxX="3000" minY="385" maxY="2310"/>
@@ -1703,7 +1700,7 @@
 						
 						</Control>
 						
-						<Control name="$(parent)FightTitle" resizeToFitDescendents="true" mouseEnabled="true" inherits="CombatMetrics_ControlTooltip">
+						<Control name="$(parent)FightTitle" mouseEnabled="true" inherits="CombatMetrics_ControlTooltip">
 						
 							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)CharacterInfo" offsetX="8"/>
 							<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)NavigationRow" offsetX="-8"/>
@@ -2246,7 +2243,7 @@
 											
 										</Label>
 										
-										<Control name="$(parent)PageButtonRow" resizeToFitDescendents="true">
+										<Control name="$(parent)PageButtonRow" resizeToFitConstrains="Y">
 											<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Name" offsetX="0" offsetY="2"/>
 											<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Name" offsetX="0" offsetY="2"/>
 											<Dimensions x="120"/>
@@ -2324,7 +2321,7 @@
 											</OnInitialized>
 										</Control>
 										
-										<Control name="$(parent)FilterButtonRow" resizeToFitDescendents="true">
+										<Control name="$(parent)FilterButtonRow" resizeToFitConstrains="Y">
 											<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="-4" offsetY="4"/>
 											<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" offsetX="-4" offsetY="0"/>
 											<Dimensions x="120"/>
@@ -2984,7 +2981,7 @@
 					</Controls>
 				</Control>
 				
-				<Control name="$(parent)_RightPanel" inherits="CombatMetrics_ControlFramed" resizeToFitDescendents="true">
+				<Control name="$(parent)_RightPanel" inherits="CombatMetrics_ControlFramed">
 					<Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)_Title" offsetX="0" offsetY="4"/>
 					<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)_MainPanel" offsetX="4" offsetY="0"/>
 					
@@ -3821,14 +3818,15 @@
 		
 		<TopLevelControl name="CombatMetrics_LiveReport" clampedToScreen="true" movable="true" resizeToFitDescendents="true" hidden="false">
 			<Anchor point="BOTTOM" relativePoint="BOTTOM" offsetY="-150"/>
-			<Dimensions x="300" y="52"/>
+
+			<DimensionConstraints minX="150" maxX="900" minY="26" maxY="156"/>
 			
 			<Controls>
 				<Backdrop name="$(parent)BG" excludeFromResizeToFitExtents="true" inherits="CombatMetrics_BackgroundFramed_Solid" edgeColor="FF000000" centerColor="FF000000">
 					<AnchorFill />
 				</Backdrop>
 
-				<Backdrop name="$(parent)ResizeFrame" excludeFromResizeToFitExtents="true" inherits="CombatMetrics_BackgroundFramed_Solid" edgeColor="00000000" centerColor="00000000" mouseEnabled="true" resizeHandleSize="10">
+				<Backdrop name="$(parent)ResizeFrame" excludeFromResizeToFitExtents="true" inherits="CombatMetrics_BackgroundFramed_Solid" edgeColor="00000000" centerColor="00000000" mouseEnabled="true" resizeHandleSize="8">
 					<AnchorFill />
 
 					<DimensionConstraints minX="150" maxX="900" minY="26" maxY="156"/>
