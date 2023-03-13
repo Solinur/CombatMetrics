@@ -1534,7 +1534,7 @@
 					<AnchorFill/>
 				</Backdrop>
 
-				<Backdrop name="$(parent)ResizeFrame" inherits="CombatMetrics_BackgroundFramed_Solid" edgeColor="00000000" centerColor="00000000" mouseEnabled="true" resizeHandleSize="10" layer="OVERLAY" >
+				<Backdrop name="$(parent)ResizeFrame" inherits="CombatMetrics_BackgroundFramed_Solid" edgeColor="00000000" centerColor="00000000" mouseEnabled="true" resizeHandleSize="10" layer="CONTROLS">
 					<AnchorFill/>
 
 					<DimensionConstraints minX="500" maxX="3000" minY="385" maxY="2310"/>

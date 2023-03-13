@@ -637,3 +637,6 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 
 1.5.11 5.568.953 (13.03.2023) 00:49
 [*] Update for Scribes of Fate (API 101037)
+
+1.5.12 5.581.992 (13.03.2023) 15:48
+[*] Fixed an issue were the top row buttons were unclickable (Thx to Sizzyy for the report)
