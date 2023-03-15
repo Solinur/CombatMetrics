@@ -2243,10 +2243,9 @@
 											
 										</Label>
 										
-										<Control name="$(parent)PageButtonRow" resizeToFitConstrains="Y">
+										<Control name="$(parent)PageButtonRow" resizeToFitDescendents="true">
 											<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Name" offsetX="0" offsetY="2"/>
 											<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Name" offsetX="0" offsetY="2"/>
-											<Dimensions x="120"/>
 											
 											<Controls>
 												<Control name="$(parent)PageLeft" inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
@@ -2321,10 +2320,9 @@
 											</OnInitialized>
 										</Control>
 										
-										<Control name="$(parent)FilterButtonRow" resizeToFitConstrains="Y">
+										<Control name="$(parent)FilterButtonRow" resizeToFitDescendents="true">
 											<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="-4" offsetY="4"/>
 											<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" offsetX="-4" offsetY="0"/>
-											<Dimensions x="120"/>
 											
 											<Controls>
 												<Control name="$(parent)Performance" inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
@@ -2963,7 +2961,7 @@
 							
 						</Texture>
 						
-						<Texture name="$(parent)NotificationButton" mouseEnabled="true" textureFile="esoui/art/mainmenu/menubar_notifications_down.dds" color="FFFFFFFF" inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton" hidden="false">
+						<Texture name="$(parent)NotificationButton" mouseEnabled="true" textureFile="esoui/art/mainmenu/menubar_notifications_down.dds" color="FFFFFFFF" inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton" hidden="true">
 							<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)FeedbackButton" offsetY="8"/>
 							<OnInitialized>
 								self.tooltip = {SI_COMBAT_METRICS_NOTIFICATION}

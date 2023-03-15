@@ -639,4 +639,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Update for Scribes of Fate (API 101037)
 
 1.5.12 5.581.992 (13.03.2023) 15:48
-[*] Fixed an issue were the top row buttons were unclickable (Thx to Sizzyy for the report)
+[*] Fixed an issue where the top row buttons were unclickable (Thx to Sizzyy for the report)
+
+1.5.13 5.620.315 (15.03.2023) 13:58
+[*] Fixed an issue where filter buttons in the combat log were inaccessible (Thx to virtus753 for the report)
