@@ -643,3 +643,6 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 
 1.5.13 5.620.315 (15.03.2023) 13:58
 [*] Fixed an issue where filter buttons in the combat log were inaccessible (Thx to virtus753 for the report)
+
+1.5.14 5.738.783 (16.05.2023) 00:19
+[*] Added support for Force of Nature (by popular request). This includes adding tracking for all status effects. A dummy debuff with stacks will be shown, to show the combined uptime.

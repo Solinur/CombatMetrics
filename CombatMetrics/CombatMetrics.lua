@@ -28,7 +28,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.5.13"
+CMX.version = "1.5.14"
 
 -- Logger
 
@@ -143,6 +143,8 @@ local IsMagickaAbility = {				-- nil for oblivion and other damage types that ar
 
 }
 
+local WrathOfNaturePen = 660
+
 local StatDebuffs = {
 
 	[GetFormattedAbilityName(61743)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 5948, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 5948}, --Major Breach
@@ -153,6 +155,14 @@ local StatDebuffs = {
 	[GetFormattedAbilityName(120018)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 6000, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 6000}, -- Alkosh, Target Dummy (the following line might overwrite this. If LUI extended is used, both declarations are necessary)
 	[GetFormattedAbilityName(76667)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 6000, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 6000}, -- Alkosh
 	[GetFormattedAbilityName(159288)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 3541, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 3541}, -- Crimson Oath
+	[GetFormattedAbilityName(178118)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 660, [LIBCOMBAT_STAT_WEAPONPENETRATION] = WrathOfNaturePen}, -- Overcharged
+	[GetFormattedAbilityName(18084)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 660, [LIBCOMBAT_STAT_WEAPONPENETRATION] = WrathOfNaturePen}, -- Burning
+	[GetFormattedAbilityName(95136)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 660, [LIBCOMBAT_STAT_WEAPONPENETRATION] = WrathOfNaturePen}, -- Chill
+	[GetFormattedAbilityName(95134)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 660, [LIBCOMBAT_STAT_WEAPONPENETRATION] = WrathOfNaturePen}, -- Concussion
+	[GetFormattedAbilityName(178123)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 660, [LIBCOMBAT_STAT_WEAPONPENETRATION] = WrathOfNaturePen}, -- Sundered
+	[GetFormattedAbilityName(21929)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 660, [LIBCOMBAT_STAT_WEAPONPENETRATION] = WrathOfNaturePen}, -- Burning
+	[GetFormattedAbilityName(178127)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 660, [LIBCOMBAT_STAT_WEAPONPENETRATION] = WrathOfNaturePen}, -- Diseased
+	[GetFormattedAbilityName(148801)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 660, [LIBCOMBAT_STAT_WEAPONPENETRATION] = WrathOfNaturePen}, -- Hemorrhaging
 
 	[GetFormattedAbilityName(79087)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 1320}, -- Spell Resistance Reduction by Poison
 	[GetFormattedAbilityName(79090)] = {[LIBCOMBAT_STAT_WEAPONPENETRATION] = 1320}, -- Physical Resistance Reduction by Poison
@@ -217,13 +227,24 @@ local TrialDummyBuffs = {
 	[88401] = true, -- Minor Magickasteal
 }
 
-
-
 local variablePenetrationDebuffAbilityIds = {
 
 	["crusherValue"] = 17906,
 	["alkoshValue"] = 76667,
 	["tremorscaleValue"] = 80866,
+
+}
+
+local StatusEffectIds = {
+
+	[178118] = true, -- Magic (Overcharged)
+	[18084]  = true, -- Fire (Burning)
+	[95136]  = true, -- Frost (Chill)
+	[95134]  = true, -- Lightning (Concussion)
+	[178123] = true, -- Physical (Sundered)
+	[21929]  = true, -- Poison (Burning)
+	[178127] = true, -- Foulness (Diseased)
+	[148801] = true, -- Bleeding (Hemorrhaging)
 
 }
 
@@ -547,6 +568,8 @@ function UnitHandler:UpdateStats(fight, effectdata, abilityId)
 
 		value = overridevalues[abilityId] or value
 
+		if StatusEffectIds[abilityId] and fight.special["wrathCP"] ~= true then return end
+
 		local statData = self:AcquireUnitStatData(stat)
 		local debuffData = statData.debuffs
 
@@ -819,6 +842,8 @@ local function CalculateFight(fight) -- called by CMX.update or on user interact
 	data.groupDPSIn 	= fight.groupDPSIn
 
 	fight.calculating = true
+
+	fight.special["wrathCP"] = fight.CP[1] and fight.CP[1]["slotted"] and fight.CP[1]["slotted"][276]
 
 	local titleBar = CombatMetrics_Report_TitleFightTitleBar
 
