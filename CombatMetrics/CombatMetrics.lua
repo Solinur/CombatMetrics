@@ -28,7 +28,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.5.14"
+CMX.version = "1.5.15"
 
 -- Logger
 
@@ -155,14 +155,17 @@ local StatDebuffs = {
 	[GetFormattedAbilityName(120018)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 6000, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 6000}, -- Alkosh, Target Dummy (the following line might overwrite this. If LUI extended is used, both declarations are necessary)
 	[GetFormattedAbilityName(76667)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 6000, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 6000}, -- Alkosh
 	[GetFormattedAbilityName(159288)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 3541, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 3541}, -- Crimson Oath
-	[GetFormattedAbilityName(178118)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 660, [LIBCOMBAT_STAT_WEAPONPENETRATION] = WrathOfNaturePen}, -- Overcharged
-	[GetFormattedAbilityName(18084)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 660, [LIBCOMBAT_STAT_WEAPONPENETRATION] = WrathOfNaturePen}, -- Burning
-	[GetFormattedAbilityName(95136)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 660, [LIBCOMBAT_STAT_WEAPONPENETRATION] = WrathOfNaturePen}, -- Chill
-	[GetFormattedAbilityName(95134)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 660, [LIBCOMBAT_STAT_WEAPONPENETRATION] = WrathOfNaturePen}, -- Concussion
-	[GetFormattedAbilityName(178123)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 660, [LIBCOMBAT_STAT_WEAPONPENETRATION] = WrathOfNaturePen}, -- Sundered
-	[GetFormattedAbilityName(21929)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 660, [LIBCOMBAT_STAT_WEAPONPENETRATION] = WrathOfNaturePen}, -- Burning
-	[GetFormattedAbilityName(178127)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 660, [LIBCOMBAT_STAT_WEAPONPENETRATION] = WrathOfNaturePen}, -- Diseased
-	[GetFormattedAbilityName(148801)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 660, [LIBCOMBAT_STAT_WEAPONPENETRATION] = WrathOfNaturePen}, -- Hemorrhaging
+	[GetFormattedAbilityName(187742)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 2200, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 2200}, -- Runic Sunder
+
+
+	[GetFormattedAbilityName(178118)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = WrathOfNaturePen, [LIBCOMBAT_STAT_WEAPONPENETRATION] = WrathOfNaturePen}, -- Overcharged
+	[GetFormattedAbilityName(18084)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = WrathOfNaturePen, [LIBCOMBAT_STAT_WEAPONPENETRATION] = WrathOfNaturePen}, -- Burning
+	[GetFormattedAbilityName(95136)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = WrathOfNaturePen, [LIBCOMBAT_STAT_WEAPONPENETRATION] = WrathOfNaturePen}, -- Chill
+	[GetFormattedAbilityName(95134)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = WrathOfNaturePen, [LIBCOMBAT_STAT_WEAPONPENETRATION] = WrathOfNaturePen}, -- Concussion
+	[GetFormattedAbilityName(178123)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = WrathOfNaturePen, [LIBCOMBAT_STAT_WEAPONPENETRATION] = WrathOfNaturePen}, -- Sundered
+	[GetFormattedAbilityName(21929)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = WrathOfNaturePen, [LIBCOMBAT_STAT_WEAPONPENETRATION] = WrathOfNaturePen}, -- Burning
+	[GetFormattedAbilityName(178127)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = WrathOfNaturePen, [LIBCOMBAT_STAT_WEAPONPENETRATION] = WrathOfNaturePen}, -- Diseased
+	[GetFormattedAbilityName(148801)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = WrathOfNaturePen, [LIBCOMBAT_STAT_WEAPONPENETRATION] = WrathOfNaturePen}, -- Hemorrhaging
 
 	[GetFormattedAbilityName(79087)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 1320}, -- Spell Resistance Reduction by Poison
 	[GetFormattedAbilityName(79090)] = {[LIBCOMBAT_STAT_WEAPONPENETRATION] = 1320}, -- Physical Resistance Reduction by Poison

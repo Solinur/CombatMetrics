@@ -1,8 +1,8 @@
 ﻿## Title: CombatMetrics
 ## APIVersion: 101036 101037
 ## Author: Solinur
-## Version: 1.5.14
-## AddOnVersion: 10514
+## Version: 1.5.15
+## AddOnVersion: 10515
 ## DependsOn: CombatMetricsFightData LibCombat>=67 LibAddonMenu-2.0>=34 LibCustomMenu>=713
 ## OptionalDependsOn: LibDebugLogger
 ## SavedVariables: CombatMetrics_Save
