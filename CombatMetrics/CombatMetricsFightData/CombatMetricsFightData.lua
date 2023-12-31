@@ -393,7 +393,7 @@ local function decodeCombatLogLine(line, fight)
 
 		else
 
-			if logdata[5] > (POWERTYPE_ITERATION_END or 60) then
+			if logdata[5] > (COMBAT_MECHANIC_FLAGS_ITERATION_END or 64) then
 
 				logdata[5] = logdata[5] - 64  			-- POWERTYPE_HEALTH is -2
 
