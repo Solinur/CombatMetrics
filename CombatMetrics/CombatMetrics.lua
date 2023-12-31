@@ -1693,7 +1693,7 @@ local function ProcessLogSkillTimings(fight, logline)
 			castData[lastRegisteredIndex][4] = timems
 			table.insert(skill.times, timems)
 			castData[lastRegisteredIndex][5] = timems + duration
-			indexData[abilityId] = nli
+			indexData[abilityId] = nil
 
 		end
 
