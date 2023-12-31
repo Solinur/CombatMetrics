@@ -1835,7 +1835,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 		Print("calc", LOG_LEVEL_DEBUG, "Start end routine")
 
-		fightlabel:SetText(GetString(SI_COMBAT_METRICS_FINALIZING))
+		fightlabel:SetText(GetString(SI_COMBAT_METRICS_FINALISING))
 
 		local data = fight.calculated
 
