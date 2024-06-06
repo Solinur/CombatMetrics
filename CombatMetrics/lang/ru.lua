@@ -18,7 +18,7 @@ SafeAddString(SI_COMBAT_METRICS_BOLD_FONT, "$(BOLD_FONT)", 1)
 -- Main UI
 
 SafeAddString(SI_COMBAT_METRICS_CALC, "Подсчёт...", 1) 
---SafeAddString(SI_COMBAT_METRICS_FINALISING, "Finalising...", 1) 
+--SafeAddString(SI_COMBAT_METRICS_FINALIZING, "Finalizing...", 1) 
 SafeAddString(SI_COMBAT_METRICS_GROUP, "Группа", 1) 
 SafeAddString(SI_COMBAT_METRICS_SELECTION, "Выбор", 1) 
 

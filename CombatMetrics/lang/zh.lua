@@ -16,7 +16,7 @@ SafeAddString(SI_COMBAT_METRICS_FONT_SIZE_TITLE, "20", 1)
 -- Main UI
 
 SafeAddString(SI_COMBAT_METRICS_CALC, "计算中...", 1) 
-SafeAddString(SI_COMBAT_METRICS_FINALISING, "结束中...", 1) 
+SafeAddString(SI_COMBAT_METRICS_FINALIZING, "结束中...", 1) 
 SafeAddString(SI_COMBAT_METRICS_GROUP, "队伍", 1) 
 SafeAddString(SI_COMBAT_METRICS_SELECTION, "选定", 1) 
 

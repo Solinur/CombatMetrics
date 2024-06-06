@@ -16,7 +16,7 @@
 -- Main UI
 
 --SafeAddString(SI_COMBAT_METRICS_CALC, "Calculating...", 1) 
---SafeAddString(SI_COMBAT_METRICS_FINALISING, "Finalising...", 1) 
+--SafeAddString(SI_COMBAT_METRICS_FINALIZING, "Finalizing...", 1) 
 --SafeAddString(SI_COMBAT_METRICS_GROUP, "Group", 1) 
 --SafeAddString(SI_COMBAT_METRICS_SELECTION, "Selection", 1) 
 

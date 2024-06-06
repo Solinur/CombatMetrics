@@ -8,7 +8,7 @@ SafeAddString(SI_COMBAT_METRICS_ENCHANTMENT_TRIM, " Incantamento", 1) -- this wi
 -- Main UI
 
 SafeAddString(SI_COMBAT_METRICS_CALC, "Calcolo...", 1)
-SafeAddString(SI_COMBAT_METRICS_FINALISING, "Completamento...", 1)
+SafeAddString(SI_COMBAT_METRICS_FINALIZING, "Completamento...", 1)
 SafeAddString(SI_COMBAT_METRICS_GROUP, "Gruppo", 1)
 SafeAddString(SI_COMBAT_METRICS_SELECTION, "Selezione", 1)
 

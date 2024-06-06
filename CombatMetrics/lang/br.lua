@@ -16,7 +16,7 @@ SafeAddString(SI_COMBAT_METRICS_ENCHANTMENT_TRIM, "Spell Damage", 1) -- this wil
 -- Main UI
 
 SafeAddString(SI_COMBAT_METRICS_CALC, "Calculando...", 1) 
-SafeAddString(SI_COMBAT_METRICS_FINALISING, "Finalizando...", 1) 
+SafeAddString(SI_COMBAT_METRICS_FINALIZING, "Finalizando...", 1) 
 SafeAddString(SI_COMBAT_METRICS_GROUP, "Grupo", 1) 
 SafeAddString(SI_COMBAT_METRICS_SELECTION, "Seleção", 1) 
 

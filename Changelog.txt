@@ -649,3 +649,8 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 
 1.5.15 5.868.987 (31.07.2023) 01:02
 [*] Added Runic Sunder to penetration ability tracking. That one somehow slipped through so far.
+
+1.5.16 6,136,604 (06.06.2024) 22:41
+[*] Added some bugfixes provided by DakJaniels
+[*] removed some legacy code
+[*] Fixed a lua issue

@@ -18,7 +18,7 @@ SafeAddString(SI_COMBAT_METRICS_ENCHANTMENT_TRIM, " Enchantement", 1) -- this wi
 -- Main UI
 
 SafeAddString(SI_COMBAT_METRICS_CALC, "Calcul en Cours...", 1)
-SafeAddString(SI_COMBAT_METRICS_FINALISING, "Finalisation...", 1)
+SafeAddString(SI_COMBAT_METRICS_FINALIZING, "Finalisation...", 1)
 SafeAddString(SI_COMBAT_METRICS_GROUP, "Groupe", 1)
 SafeAddString(SI_COMBAT_METRICS_SELECTION, "Sélection", 1)
 

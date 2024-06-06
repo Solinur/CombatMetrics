@@ -393,7 +393,7 @@ local function decodeCombatLogLine(line, fight)
 
 		else
 
-			if logdata[5] > (POWERTYPE_ITERATION_END or 60) then
+			if logdata[5] > (COMBAT_MECHANIC_FLAGS_ITERATION_END or 64) then
 
 				logdata[5] = logdata[5] - 64  			-- POWERTYPE_HEALTH is -2
 
@@ -563,11 +563,11 @@ local function recoverCombatLog(loadedFight)
 
 			local logline = decodeCombatLogLine(line, loadedFight)
 
-			if logline[2] < 16600000 then
+			if logline and logline[2] < 16600000 then
 
 				logline[2] = logline[2] + starttime
 
-			else
+			elseif logline then
 
 				logline[2] = logline[2] + starttime - 16777216
 

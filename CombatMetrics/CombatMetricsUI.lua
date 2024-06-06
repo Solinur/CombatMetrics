@@ -3198,7 +3198,9 @@ local function updateAbilityPanel(panel)
 
 			local icon = GetFormattedAbilityIcon(abilityId)
 
-			local dot = (GetAbilityDuration(abilityId)>0 or (IsAbilityPassive(abilityId) and isDamage)) and "*" or ""
+			local duration = GetAbilityDuration(abilityId)
+
+			local dot = ((duration and duration > 0) or (IsAbilityPassive(abilityId) and isDamage)) and "*" or ""
 			local pet = ability.pet and " (pet)" or ""
 			local dbug = showids and string.format("(%d) ", abilityId) or ""
 			local color = ability.damageType and CMX.GetDamageColor(ability.damageType) or ""
@@ -6840,8 +6842,8 @@ local function initFightReport()
 
 		db.FightReport.scale = scale
 
-		if width then control:SetWidth(width*scale) end
-		if height then control:SetHeight(height*scale) end
+		if width and control:GetResizeToFitDescendents() == false then control:SetWidth(width*scale) end
+		if height and control:GetResizeToFitDescendents() == false then control:SetHeight(height*scale) end
 
 		local anchors = {}
 		local oldanchors = control.anchors

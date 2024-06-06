@@ -28,7 +28,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.5.15"
+CMX.version = "1.5.16"
 
 -- Logger
 
@@ -1622,17 +1622,15 @@ ProcessLog[LIBCOMBAT_EVENT_PLAYERSTATS] = ProcessLogStats
 
 local abilityExtraDelay = {[63044] = 100, [63029] = 100, [63046] = 100} -- Radiant Destruction and morphs have a 100ms delay after casting.
 
-local function GetAbilityDuration(abilityId)
-
-	local duration
+local function CMX_GetAbilityDuration(abilityId)
 
 	if abilityDurations[abilityId] == nil then
 
-		local channeled, castTime, channelTime = GetAbilityCastInfo(abilityId)
+		local channeled, castTime = GetAbilityCastInfo(abilityId)
 
-		if castTime == 0 then castTime = 1000 end
+		if castTime == nil or castTime == 0 then castTime = 1000 end
 
-		abilityDurations[abilityId] = channeled and channelTime or castTime
+		abilityDurations[abilityId] = castTime
 
 	end
 
@@ -1693,7 +1691,7 @@ local function ProcessLogSkillTimings(fight, logline)
 			castData[lastRegisteredIndex][4] = timems
 			table.insert(skill.times, timems)
 			castData[lastRegisteredIndex][5] = timems + duration
-			indexData[abilityId] = nli
+			indexData[abilityId] = nil
 
 		end
 
@@ -1709,7 +1707,7 @@ local function ProcessLogSkillTimings(fight, logline)
 		else
 
 			castData[lastRegisteredIndex][4] = timems
-			castData[lastRegisteredIndex][5] = timems + GetAbilityDuration(abilityId) + (abilityDelay[abilityId] or 0)
+			castData[lastRegisteredIndex][5] = timems + CMX_GetAbilityDuration(abilityId) + (abilityDelay[abilityId] or 0)
 			table.insert(skill.times, timems)
 			table.insert(started, lastRegisteredIndex)
 			indexData[abilityId] = nil
@@ -1727,7 +1725,7 @@ local function ProcessLogSkillTimings(fight, logline)
 			local starttime = castData[castindex][4]
 			local timeDiff = timems - starttime
 
-			if timeDiff < (GetAbilityDuration(abilityId) + 250) then
+			if timeDiff < (CMX_GetAbilityDuration(abilityId) + 250) then
 
 				castData[castindex][5] = math.max(timems, starttime + 1000)
 				indexFound = k
@@ -2004,15 +2002,14 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 			local isMagic = IsMagickaAbility[ability.damageType]
 
-			local datatable = isMagic == true and data.damageOutSpells or isMagic == false and data.damageOutWeapon
+			local datatable = (isMagic == true and data.damageOutSpells) or (isMagic == false and data.damageOutWeapon) or {}
 
-			for key, value in pairs(datatable or {}) do
-
+			for key, value in pairs(datatable) do
 				if key == "min" or key == "max" then
 
 					datatable[key] = math[key](ability[key], datatable[key])
 
-				else
+				elseif datatable[key] ~= nil then
 
 					datatable[key] = ability[key] + datatable[key]
 
@@ -2342,7 +2339,7 @@ local function AddtoChatLog(logType, ...)
 
 		local text, color = CMX.GetCombatLogString(nil, logLine, 12)
 
-		if chatContainer then chatContainer:AddMessageToWindow(chatWindow, text, unpack(color)) end -- in case the container got removed by the user or an addon
+		if chatContainer and text and color then chatContainer:AddMessageToWindow(chatWindow, text, unpack(color)) end -- in case the container got removed by the user or an addon
 
 	end
 end

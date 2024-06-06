@@ -34,7 +34,7 @@
 -- Main UI
 
 	SI_COMBAT_METRICS_CALC = "Calculating...",
-	SI_COMBAT_METRICS_FINALISING = "Finalising...",
+	SI_COMBAT_METRICS_FINALIZING = "Finalizing...",
 	SI_COMBAT_METRICS_GROUP = "Group",
 	SI_COMBAT_METRICS_SELECTION = "Selection",
 
@@ -475,21 +475,10 @@
 
 -- Ingame (Use ZOS Tranlations, change only for languages which are not supported)
 
-if GetAPIVersion() < 101034 then
-
-	strings["SI_COMBAT_METRICS_HEALTH"] = GetString(SI_ATTRIBUTES1)  -- Health
-	strings["SI_COMBAT_METRICS_MAGICKA"] = GetString(SI_ATTRIBUTES2)  -- Magicka
-	strings["SI_COMBAT_METRICS_STAMINA"] = GetString(SI_ATTRIBUTES3)  -- Stamina
-	strings["SI_COMBAT_METRICS_ULTIMATE"] = GetString(SI_COMBATMECHANICTYPE10)  -- Ultimate
-
-else
-
-	strings["SI_COMBAT_METRICS_HEALTH"] = GetString(SI_COMBATMECHANICFLAGS32)  -- Health
-	strings["SI_COMBAT_METRICS_MAGICKA"] = GetString(SI_COMBATMECHANICFLAGS1)  -- Magicka
-	strings["SI_COMBAT_METRICS_STAMINA"] = GetString(SI_COMBATMECHANICFLAGS4)  -- Stamina
-	strings["SI_COMBAT_METRICS_ULTIMATE"] = GetString(SI_COMBATMECHANICFLAGS8)  -- Ultimate
-
-end
+strings["SI_COMBAT_METRICS_HEALTH"] = GetString(SI_COMBATMECHANICFLAGS32)  -- Health
+strings["SI_COMBAT_METRICS_MAGICKA"] = GetString(SI_COMBATMECHANICFLAGS1)  -- Magicka
+strings["SI_COMBAT_METRICS_STAMINA"] = GetString(SI_COMBATMECHANICFLAGS4)  -- Stamina
+strings["SI_COMBAT_METRICS_ULTIMATE"] = GetString(SI_COMBATMECHANICFLAGS8)  -- Ultimate
 
 -- Localization End
 

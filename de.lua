@@ -17,7 +17,7 @@ SafeAddString(SI_COMBAT_METRICS_ENCHANTMENT_TRIM, "Verzauberung:Â ", 1) -- ZOS
 -- Main UI
 
 SafeAddString(SI_COMBAT_METRICS_CALC, "Berechnung...", 1)
-SafeAddString(SI_COMBAT_METRICS_FINALISING, "Berechnung...", 1)
+SafeAddString(SI_COMBAT_METRICS_FINALIZING, "Berechnung...", 1)
 SafeAddString(SI_COMBAT_METRICS_GROUP, "Gruppe", 1)
 SafeAddString(SI_COMBAT_METRICS_SELECTION, "Auswahl", 1)
 
