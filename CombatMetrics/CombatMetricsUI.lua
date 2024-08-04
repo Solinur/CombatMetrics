@@ -6410,6 +6410,7 @@ function CMX.PostBuffUptime(fight, buffname, unitType)
 
 	local buffDataTable, units = GetBuffDataAndUnits(unitType) -- TODO provide the single unit if units is 1
 	local buffData = buffDataTable.buffs[buffname]
+	if buffData == nil then return end
 	local totalUnitTime = buffDataTable.totalUnitTime
 
 	if totalUnitTime then totalUnitTime = totalUnitTime / 1000 end

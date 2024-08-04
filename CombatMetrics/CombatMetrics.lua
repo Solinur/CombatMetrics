@@ -211,9 +211,7 @@ end
 local abilityDelay = {	-- Radiant Destruction and morphs have a 100ms delay after casting. 50ms for Jabs
     [63044] = 100,
     [63029] = 100,
-    [63046] = 100,
-    [26797] = 50,
-    [38857] = 200
+    [63046] = 100
 }
 
 local TrialDummyBuffs = {
@@ -1620,8 +1618,6 @@ end
 
 ProcessLog[LIBCOMBAT_EVENT_PLAYERSTATS] = ProcessLogStats
 
-local abilityExtraDelay = {[63044] = 100, [63029] = 100, [63046] = 100} -- Radiant Destruction and morphs have a 100ms delay after casting.
-
 local function CMX_GetAbilityDuration(abilityId)
 
 	if abilityDurations[abilityId] == nil then
@@ -1634,7 +1630,7 @@ local function CMX_GetAbilityDuration(abilityId)
 
 	end
 
-	return abilityDurations[abilityId] + (abilityExtraDelay[abilityId] or 0)
+	return abilityDurations[abilityId] + (abilityDelay[abilityId] or 0)
 
 end
 
