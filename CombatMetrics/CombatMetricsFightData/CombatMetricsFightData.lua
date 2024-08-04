@@ -6,7 +6,7 @@ local LOG_LEVEL_VERBOSE, LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG
 CombatMetricsFightData = {}
 
 local AddonName = "CombatMetricsFightData"
-local AddonVersion = 13
+local AddonVersion = 14
 
 local constants = 0
 
@@ -674,38 +674,54 @@ local function saveFight(fight, filters)
 end
 
 local function loadFight(id)
-
 	local loadedFight = {}
-
-	ZO_DeepTableCopy(sv[id], loadedFight)
+	local savedFight = sv[id]
+	if savedFight.encodedStrings ~= nil and savedFight.svversion >= 14 then
+		loadedFight = LibDataEncode.Decode(savedFight.encodedStrings)
+		loadedFight.stringlog = savedFight.stringlog
+	else
+		ZO_DeepTableCopy(sv[id], loadedFight)
+	end
 
 	recoverCombatLog(loadedFight)
-
 	return loadedFight
 end
 
 local function GetFights()
-
-	LOG_LEVEL_VERBOSE, LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR = CMX.GetDebugLevels()
-
 	return sv
-
 end
 
 local function ConvertSV(version)
+	CMX.Print(LOG_LEVEL_INFO, "Converting saved fight from version %d to %d ...", version, AddonVersion)
 
 	if version < 2 then -- convert format if coming from CombatMetrics < 0.8
-
 		for i = 1, #sv do
-
 			saveFight(sv[1])
 			table.remove(sv, 1)
-
 		end
-
 	end
 
-	sv.version = AddonVersion
+	-- if version < 14 then
+	-- 	CMX.Print(LOG_LEVEL_INFO, "")
+	-- 	for i = 1, #sv do
+	-- 		local loaded = loadFight(sv[i], true)
+	-- 		saveFight(loaded)
+	-- 		table.remove(sv, 1)
+
+	-- 	end
+	-- end
+
+	CMX.Print(LOG_LEVEL_INFO, "Conversion Finished!")
+	-- sv.version = AddonVersion
+end
+
+local function TestEncoding(fightIndex)
+	local fight = CMX.lastfights[fightIndex]
+	fight.log = nil
+
+	local start = GetGameTimeMilliseconds()
+	LibDataEncode.PerformTest(fight, true, "Fightdata" .. fightIndex)
+	df("Test run time: %d ms", GetGameTimeMilliseconds() - start)
 
 end
 
@@ -714,26 +730,22 @@ CombatMetricsFightData.Save = saveFight
 CombatMetricsFightData.Load = loadFight
 CombatMetricsFightData.Convert = ConvertSV
 CombatMetricsFightData.GetFights = GetFights
+CombatMetricsFightData.TestEncoding = TestEncoding
 
 local function Initialize(event, addon)
-
 	if addon ~= AddonName then return end
-
 	em:UnregisterForEvent(AddonName, EVENT_ADD_ON_LOADED)
 
 	sv = _G["CombatMetricsFightDataSV"]
-
 	if sv == nil or sv.version == nil then
-
 		sv = {["version"] = AddonVersion}
 		_G["CombatMetricsFightDataSV"] = sv
-
 	end
 
 	local svversion = sv.version
-
 	if svversion ~= AddonVersion then ConvertSV(svversion) end
 
+	LOG_LEVEL_VERBOSE, LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR = CMX.GetDebugLevels()
 end
 
 em:RegisterForEvent(AddonName, EVENT_ADD_ON_LOADED, function(...) Initialize(...) end)
