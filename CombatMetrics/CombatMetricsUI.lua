@@ -6756,6 +6756,7 @@ function CMX.Resizing(control, resizing)
 		control:SetDrawTier(2)
 
 	else
+		if lastResize == nil then return end
 
 		control:SetEdgeColor(1,1,1,0)
 		control:SetCenterColor(1,1,1,0)
