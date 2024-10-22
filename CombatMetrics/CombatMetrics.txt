@@ -1,5 +1,5 @@
 ﻿## Title: CombatMetrics
-## APIVersion: 101042
+## APIVersion: 101043
 ## Author: Solinur
 ## Version: 1.6.0
 ## AddOnVersion: 10516

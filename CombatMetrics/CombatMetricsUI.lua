@@ -6756,6 +6756,7 @@ function CMX.Resizing(control, resizing)
 		control:SetDrawTier(2)
 
 	else
+		if lastResize == nil then return end
 
 		control:SetEdgeColor(1,1,1,0)
 		control:SetCenterColor(1,1,1,0)
@@ -7071,11 +7072,8 @@ local function initLiveReport()
 		}
 
 		local liveReport = liveReport
-
 		local scale = setLR.scale
-
 		local last = liveReport
-
 		local totalBlocks = 0
 
 		for i = 3, liveReport:GetNumChildren() do
@@ -7204,6 +7202,7 @@ local function initLiveReport()
 	liveReport:Toggle(setLR.enabled)
 	liveReport:Resize(setLR.scale)
 	liveReport:GetNamedChild("ResizeFrame"):SetMouseEnabled(not setLR.locked)
+	liveReport:SetMovable(not setLR.locked)
 
 	bg:SetAlpha(setLR.bgalpha/100)
 

@@ -654,3 +654,9 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Added some bugfixes provided by DakJaniels
 [*] removed some legacy code
 [*] Fixed a lua issue
+
+1.5.17 6,239,963 (20.08.2024) 23:01
+[*] Fixed an issue where the live report window was movable when the lock options was enabled (Thx to Foozeyy for the report).
+
+1.5.18
+[*] Small fix to prevent a lua-error on resizing (Thx to zelenin for the report)
