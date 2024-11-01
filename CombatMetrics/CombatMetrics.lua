@@ -1953,6 +1953,9 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 						end
 					end
+
+					effectdata.firstStartTime = nil
+					effectdata.firstGroupStartTime = nil
 				end
 			end
 		end
@@ -2263,6 +2266,9 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 				Print("misc", LOG_LEVEL_WARNING, "Time Array lengths don't match for bar %d", bar)
 
 			end
+
+			barStats.onTimes = nil
+			barStats.offTimes = nil
 		end
 
 		-- calculate avg performance values
