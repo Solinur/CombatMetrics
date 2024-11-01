@@ -15,6 +15,119 @@ local charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-
 local chars = {}
 local values = {}
 
+--[[ 
+/zgoo LibDataEncode
+--]]
+
+local globalDict = {
+	"name",
+	"max",
+	"min",
+	"count",
+	"uptime",
+	"groupCount",
+	"groupUptime",
+	"effectType",
+	"maxStacks",
+	"iconId",
+	"instances",
+	"unitId",
+	"pet",
+	"isheal",
+	"starttime",
+	"endtime",
+	"debuffs",
+	"value",
+	"damageType",
+	"DPSOut",
+	"damageOutNormal",
+	"damageOutCritical",
+	"damageOutBlocked",
+	"damageOutShielded",
+	"damageOutTotal",
+	"hitsOutNormal",
+	"hitsOutCritical",
+	"hitsOutBlocked",
+	"hitsOutShielded",
+	"hitsOutTotal",
+	"HPSIn",
+	"healingInNormal",
+	"healingInOverflow",
+	"healingInCritical",
+	"healingInAbsolute",
+	"healingInTotal",
+	"healsInNormal",
+	"healsInOverflow",
+	"healsInCritical",
+	"healsInAbsolute",
+	"healsInTotal",
+	"HPSOut",
+	"HPSAOut",
+	"healingOutNormal",
+	"healingOutOverflow",
+	"healingOutCritical",
+	"healingOutAbsolute",
+	"healingOutTotal",
+	"healsOutNormal",
+	"healsOutOverflow",
+	"healsOutCritical",
+	"healsOutAbsolute",
+	"healsOutTotal",
+	"DPSIn",
+	"damageInNormal",
+	"damageInCritical",
+	"damageInBlocked",
+	"damageInShielded",
+	"damageInTotal",
+	"hitsInNormal",
+	"hitsInCritical",
+	"hitsInBlocked",
+	"hitsInShielded",
+	"hitsInTotal",
+	"damageOut",
+	"groupDamageOut",
+	"damageIn",
+	"healingIn",
+	"healingOut",
+	"dpsstart",
+	"dpsend",
+	"unitType",
+	"isFriendly",
+	"buffs",
+	"spellCrit",
+	"spellResistance",
+	"weaponCrit",
+	"physicalResistance",
+	"statData",
+	"ticks",
+	"rate",
+	"times",
+	"delayAvg",
+	"delayCount",
+	"delaySum",
+	"diffTimeAvg",
+	"failedCount",
+	"weavingErrors",
+	"weavingTimeCount",
+	"weavingTimeSum",
+	"weavingTimeAvg",
+	"unitTag",
+	"isDead",
+	"displayname",
+	"dmgavg",
+	"dmgsum",
+	"healavg",
+	"healsum",
+	"gains",
+	"gainRate",
+	"totalgains",
+	"drainRate",
+	"totaldrains",
+	"stars",
+	"slotted",
+	"total",
+}
+
 assert(LibDataEncode ~= nil, "LibDataEncode wasn't found")
 local LDE = LibDataEncode
 
@@ -313,7 +426,6 @@ end
 
 local function convertCombatLog(savedFight, filters)
 	local combatlog = savedFight.log
-	savedFight.log = nil
 
 	if filters == false or combatlog == nil or #combatlog == 0 then
 		return
@@ -370,7 +482,8 @@ local function convertCombatLog(savedFight, filters)
 		local longstring = table.concat(tempLog, ",")
 		table.insert(stringlog, longstring)
 	end
-
+	
+	savedFight.log = nil
 	return stringlog	-- pin converted log on saved fight
 end
 
@@ -426,6 +539,11 @@ local function reduceUnitIds(fight)
 	local newId = 1
 
 	for id, unit in pairs(fight.units) do
+		unit.zenEffectSlot = nil
+		unit.stacksOfZen = nil
+		unit.forceOfNature = nil
+		unit.forceOfNatureStacks = nil
+		
 		newUnits[newId] = unit
 		newCalcUnits[newId] = calcUnits[id]
 		unitConversion[id] = newId
@@ -465,13 +583,39 @@ local function checkSavedVariable(data)
 	return size
 end
 
+local function copyFightMetaData(sourceFight, destFight)
+	if destFight == nil then destFight = {} end
+
+	destFight.fightlabel = sourceFight.fightlabel
+	destFight.charData = sourceFight.charData
+	destFight.zone = sourceFight.zone
+	destFight.subzone = sourceFight.subzone
+	destFight.date = sourceFight.date
+	destFight.calculated = {
+		DPSOut = sourceFight.calculated.DPSOut,
+		DPSIn = sourceFight.calculated.DPSIn,
+		HPSOut = sourceFight.calculated.HPSOut,
+		HPSIn = sourceFight.calculated.HPSIn,
+
+	}
+	destFight.hpstime = sourceFight.hpstime
+	destFight.dpstime = sourceFight.dpstime
+
+	return destFight
+end
+
+
 local function saveFight(fight, filters)
-	local newSavedFight = ZO_DeepTableCopy(fight)
-	reduceUnitIds(newSavedFight)
-	local stringlog = convertCombatLog(newSavedFight, filters)
-	LDE.Encode(newSavedFight, true, globalDict)
-	table.insert(sv, newSavedFight)
-	newSavedFight.svversion = AddonVersion
+	local fightCopy = ZO_DeepTableCopy(fight)
+	reduceUnitIds(fightCopy)
+	local stringlog = convertCombatLog(fightCopy, filters)
+	local savedData = {}
+	savedData.encodedStrings = LDE.Encode(fightCopy, true, globalDict)
+	savedData.stringlog = stringlog
+	savedData.svversion = AddonVersion
+	savedData.log = (stringlog ~= nil)
+	copyFightMetaData(fightCopy, savedData)	
+	table.insert(sv, savedData)
 end
 
 local function loadFight(id)
@@ -483,13 +627,35 @@ local function loadFight(id)
 	else
 		ZO_DeepTableCopy(sv[id], loadedFight)
 	end
-
 	recoverCombatLog(loadedFight)
 	return loadedFight
 end
 
 local function GetFights()
 	return sv
+end
+
+local function CleanupFight(fight)
+	local calculated = fight.calculated
+
+	local barStats = calculated.barStats
+	barStats[1].onTimes = nil
+	barStats[1].offTimes = nil
+	barStats[2].onTimes = nil
+	barStats[2].offTimes = nil
+
+	for _, buff in pairs(calculated.buffs) do
+		buff.firstStartTime = nil
+		buff.firstGroupStartTime = nil
+	end
+
+	for _, unit in pairs(calculated.units) do
+		for _, buff in pairs(unit.buffs) do
+			buff.firstStartTime = nil
+			buff.firstGroupStartTime = nil
+		end
+	end
+
 end
 
 local function ConvertSV(version)
@@ -501,21 +667,33 @@ local function ConvertSV(version)
 			table.remove(sv, 1)
 		end
 		converted = true
+		sv.version = 13
 	end
 
 	if version < 14 then
 		CMX.Print(LOG_LEVEL_INFO, "Converting saved fight from version %d to %d ...", version, AddonVersion)
-		for i = 1, #sv do
-			local loaded = loadFight(sv[i])
-			LDE.PerformTest("Testfight" .. i, testTable, testDictLocal, testDictGlobal)
-			-- saveFight(loaded)
-			-- table.remove(sv, 1)
+		local numFights = #sv
+		for id = 1, numFights do
+			local loaded = loadFight(id)
+			CleanupFight(loaded)
+			local log = loaded.log
+			loaded.log = nil
+			local testresult = LDE.PerformTest("Testfight" .. id, loaded, true, globalDict)
+			loaded.log = log
+			if testresult and testresult.result then
+				saveFight(loaded)
+			else
+				assert(false, "Test encoding failed! Aborting ...")
+			end
+		end
+		for id = 1, numFights do
+			table.remove(sv, 1)
 		end
 		converted = true
+		sv.version = AddonVersion
 	end
 
 	if converted then CMX.Print(LOG_LEVEL_INFO, "Conversion Finished!") end
-	-- sv.version = AddonVersion
 end
 
 CombatMetricsFightData.Check = checkSavedVariable

@@ -660,3 +660,6 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 
 1.5.18
 [*] Small fix to prevent a lua-error on resizing (Thx to zelenin for the report)
+
+1.6.0
+[*] Reworked how fight data is stored. The data is now encoded, resulting in a smaller SV on disc, significantly lower lua memory consumption and UI load times.

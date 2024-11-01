@@ -176,17 +176,13 @@ function NavButtonFunctions.load(control)
 end
 
 local function checkSaveLimit(fight)
-
 	local size = SVHandler.Check(fight)									-- if no table is passed it will check size of the SV
 
 	if fight == nil then
-
 		CMX.Print("save", LOG_LEVEL_DEBUG, "SV Size: %.3f MB, %.1f%%", size, size*100/db.maxSVsize)
-
 	end
 
 	local isvalid = (size < db.maxSVsize)
-
 	return isvalid, size
 end
 
@@ -6008,6 +6004,11 @@ local function updateInfoRowPanel(panel)
 
 		performancecontrol:SetHidden(true)
 
+		if db.SVsize == nil then 
+			local _, size = checkSaveLimit()
+			db.SVsize = size
+		end
+
 		local usedSpace = db.SVsize/db.maxSVsize
 		barcontrol:SetValue(usedSpace)
 
@@ -6124,7 +6125,7 @@ local function updateFightListPanel(panel, data, issaved)
 			local timestring = string.format("%s, %s", datestring, fight.time or "")
 
 			local fightlog = issaved and fight.stringlog or fight.log
-			local logState = fightlog and #fightlog>0
+			local logState = fightlog and (fightlog == true or #fightlog>0)
 
 			local activetime = 1
 			local category = db.FightReport.category
@@ -7214,9 +7215,6 @@ function CMX.InitializeUI()
 
 	SVHandler = CombatMetricsFightData
 	savedFights = SVHandler.GetFights()
-
-	local _, size = checkSaveLimit()
-	db.SVsize = size
 
 	selections = {
 		["ability"]		= {},
