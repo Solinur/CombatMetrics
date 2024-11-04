@@ -6106,12 +6106,27 @@ local function updateFightReport(control, fightId)
 end
 
 local function updateFightListPanel(panel, data, issaved)
+	em:UnregisterForUpdate("updateFightListPanel")
 
 	local scrollchild = GetControl(panel, "PanelScrollChild")
 	local currentanchor = {TOPLEFT, scrollchild, TOPLEFT, 0, 1}
 
-	if #data>0 then
+	local rowBaseName = scrollchild:GetName() .. "Row"
 
+	if #data > panel.numItems then
+		panel:GetNamedChild("LoadingLabel"):SetHidden(false)
+		for i = panel.numItems+1, #data do
+			CreateControlFromVirtual(rowBaseName, scrollchild, "CombatMetrics_FightlistRowTemplate", i)
+			panel.numItems = i
+			if GetFrameTimeMilliseconds() > 20 then
+				em:RegisterForUpdate("updateFightListPanel", 1, function() updateFightListPanel(panel, data, issaved) end)
+				return
+			end
+		end
+	end
+	panel:GetNamedChild("LoadingLabel"):SetHidden(true)
+
+	if #data > 0 then
 		for id, fight in ipairs(data) do
 
 			local label = string.gsub(fight.fightlabel or "", ".+%:%d%d %- ([A-Z])", "%1")
