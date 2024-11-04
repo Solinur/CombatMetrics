@@ -591,6 +591,7 @@ local function copyFightMetaData(sourceFight, destFight)
 	destFight.zone = sourceFight.zone
 	destFight.subzone = sourceFight.subzone
 	destFight.date = sourceFight.date
+	destFight.time = sourceFight.time
 	destFight.calculated = {
 		DPSOut = sourceFight.calculated.DPSOut,
 		DPSIn = sourceFight.calculated.DPSIn,
@@ -744,6 +745,7 @@ end
 local function Initialize(event, addon)
 	if addon ~= AddonName then return end
 	em:UnregisterForEvent(AddonName, EVENT_ADD_ON_LOADED)
+	LOG_LEVEL_VERBOSE, LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR = CMX.GetDebugLevels()
 
 	sv = _G["CombatMetricsFightDataSV"]
 	if sv == nil or sv.version == nil then
@@ -754,7 +756,6 @@ local function Initialize(event, addon)
 	local svversion = sv.version
 	if svversion ~= AddonVersion then ConvertSV(svversion) end
 
-	LOG_LEVEL_VERBOSE, LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR = CMX.GetDebugLevels()
 end
 
 em:RegisterForEvent(AddonName, EVENT_ADD_ON_LOADED, function(...) Initialize(...) end)

@@ -916,7 +916,7 @@
 				
 				</Control>
 				
-				<Label name="$(parent)LoadingLabel" text="SI_COMBAT_METRICS_LOADING" verticalAlignment="CENTER" horizontalAlignment="CENTER" inherits="CombatMetrics_TitleFontControl">
+				<Label name="$(parent)LoadingLabel" text="SI_COMBAT_METRICS_LOADING" verticalAlignment="CENTER" horizontalAlignment="CENTER" inherits="CombatMetrics_TitleFontControl" hidden="true">
 					<Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Panel"/>
 					<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Panel"/>
 				</Label>

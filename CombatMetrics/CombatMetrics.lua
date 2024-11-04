@@ -2643,8 +2643,7 @@ local svdefaults = {
 	["accountwide"] = false,
 
 	["fighthistory"] = 25,
-	["maxSVsize"] = 10,
-	["SVsize"] = 0,
+	["maxSavedFights"] = 50,
 	["keepbossfights"] = false,
 	["chunksize"] = 1000,
 
@@ -2809,47 +2808,7 @@ local function Initialize(event, addon)
 
 	-- convert legacy data into new format
 
-	if type(db.FightReport.hitCritLayout) == "number" or type(db.FightReport.maxValue) == "boolean" then
-
-		db.FightReport.hitCritLayout = {
-			["damageOut"] 	= 1,
-			["damageIn"] 	= 1,
-			["healingOut"] 	= 1,
-			["healingIn"] 	= 1,
-		}
-
-		db.FightReport.averageLayout = {
-			["damageOut"] 	= 2,
-			["damageIn"] 	= 2,
-			["healingOut"] 	= 2,
-			["healingIn"] 	= 2,
-		}
-
-		db.FightReport.maxValue = {
-			["damageOut"] 	= true,
-			["damageIn"] 	= true,
-			["healingOut"] 	= true,
-			["healingIn"] 	= true,
-		}
-
-	end
-
-	local oldsv = CombatMetrics_Save["Default"][GetDisplayName()]["$AccountWide"]
-
-	local olddata = oldsv["Fights"]
-
-	if olddata ~= nil and olddata.fights ~= nil then
-
-		for id, fight in ipairs(olddata.fights) do
-
-			fightdata.Save(fight)
-
-		end
-
-		oldsv["Fights"] = nil
-
-	end
-
+	if db.maxSVsize > 1 then db.maxSVsize = math.max(db.maxSVsize / 50, 1) end
 	--
 
 	for debuffKey, _ in pairs(variablePenetrationDebuffAbilityIds) do
