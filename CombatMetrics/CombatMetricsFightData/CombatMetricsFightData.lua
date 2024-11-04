@@ -587,7 +587,7 @@ local function copyFightMetaData(sourceFight, destFight)
 	if destFight == nil then destFight = {} end
 
 	destFight.fightlabel = sourceFight.fightlabel
-	destFight.charData = sourceFight.charData
+	destFight.charData = {name = sourceFight.charData.name}
 	destFight.zone = sourceFight.zone
 	destFight.subzone = sourceFight.subzone
 	destFight.date = sourceFight.date
@@ -624,11 +624,31 @@ local function loadFight(id)
 	if savedFight.encodedStrings ~= nil and savedFight.svversion >= 14 then
 		loadedFight = LDE.Decode(savedFight.encodedStrings, globalDict)
 		loadedFight.stringlog = savedFight.stringlog
+		loadedFight.svversion = savedFight.svversion
 	else
 		ZO_DeepTableCopy(sv[id], loadedFight)
 	end
 	recoverCombatLog(loadedFight)
 	return loadedFight
+end
+
+local function deleteFight(id)
+	table.remove(sv, id)
+end
+
+local function deleteLog(id)
+	sv[id]["stringlog"]={}
+end
+
+local function getNumFights()
+	return #sv
+end
+
+local function GetFight(id)
+	if id == -1 then
+		return sv[#sv]
+	end
+	return sv[id]
 end
 
 local function GetFights()
@@ -658,6 +678,34 @@ local function CleanupFight(fight)
 
 end
 
+local function EncodeSavedFights()
+	local numFights = #sv
+	for id = 1, numFights do
+		local loaded = loadFight(id)
+		CleanupFight(loaded)
+		local log = loaded.log
+		loaded.log = nil
+		local testresult = LDE.PerformTest("Testfight" .. id, loaded, true, globalDict)
+		loaded.log = log
+		if testresult and testresult.result then
+			saveFight(loaded)
+		else
+			assert(false, "Test encoding failed! Aborting ...")
+		end
+	end
+	for id = 1, numFights do
+		table.remove(sv, 1)
+	end
+	sv.version = AddonVersion
+	CMX.Print(LOG_LEVEL_INFO, "Conversion Finished!")
+end
+
+local function PromptSavedFightsEncoding()
+	local dialog = false
+	-- TODO: Add user dialog
+	if dialog then EncodeSavedFights() end
+end
+
 local function ConvertSV(version)
 	local converted = false
 	if version < 2 then -- convert format if coming from CombatMetrics < 0.8
@@ -672,25 +720,7 @@ local function ConvertSV(version)
 
 	if version < 14 then
 		CMX.Print(LOG_LEVEL_INFO, "Converting saved fight from version %d to %d ...", version, AddonVersion)
-		local numFights = #sv
-		for id = 1, numFights do
-			local loaded = loadFight(id)
-			CleanupFight(loaded)
-			local log = loaded.log
-			loaded.log = nil
-			local testresult = LDE.PerformTest("Testfight" .. id, loaded, true, globalDict)
-			loaded.log = log
-			if testresult and testresult.result then
-				saveFight(loaded)
-			else
-				assert(false, "Test encoding failed! Aborting ...")
-			end
-		end
-		for id = 1, numFights do
-			table.remove(sv, 1)
-		end
-		converted = true
-		sv.version = AddonVersion
+		PromptSavedFightsEncoding()
 	end
 
 	if converted then CMX.Print(LOG_LEVEL_INFO, "Conversion Finished!") end
@@ -699,8 +729,17 @@ end
 CombatMetricsFightData.Check = checkSavedVariable
 CombatMetricsFightData.Save = saveFight
 CombatMetricsFightData.Load = loadFight
-CombatMetricsFightData.Convert = ConvertSV
 CombatMetricsFightData.GetFights = GetFights
+CombatMetricsFightData.GetFight = GetFight
+CombatMetricsFightData.Delete = deleteFight
+CombatMetricsFightData.DeleteLog = deleteLog
+CombatMetricsFightData.GetNumFights = getNumFights
+
+function CMX_CopyFight(n)
+	for i = 1,n do
+		table.insert(sv, sv[#sv])
+	end
+end
 
 local function Initialize(event, addon)
 	if addon ~= AddonName then return end
