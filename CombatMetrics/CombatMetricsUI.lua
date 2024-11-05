@@ -1370,13 +1370,13 @@ do
 
 	local function CloseDialog()
 
-		CombatMetrics_Report_Dialog:SetHidden(true)
+		CombatMetrics_Report_DonateDialog:SetHidden(true)
 
 	end
 
 	local function DonateCrowns()
 
-		local dialog = CombatMetrics_Report_Dialog
+		local dialog = CombatMetrics_Report_DonateDialog
 		local button = dialog:GetNamedChild("Button")
 		local editbox = dialog:GetNamedChild("AccountInfo"):GetNamedChild("EditBox")
 
@@ -6669,7 +6669,7 @@ local function toggleFightReport()
 
 	if not SCENE_MANAGER:IsShowing("CMX_REPORT_SCENE") then
 
-		CombatMetrics_Report_Dialog:SetHidden(true)
+		CombatMetrics_Report_DonateDialog:SetHidden(true)
 		SCENE_MANAGER:Toggle("CMX_REPORT_SCENE")
 
 		CombatMetrics_Report:Update(#CMX.lastfights>0 and #CMX.lastfights or nil)

@@ -3758,7 +3758,7 @@
 					</Controls>
 				</Control>
 
-				<Control name="$(parent)_Dialog" hidden="true" tier="2">
+				<Control name="$(parent)_DonateDialog" hidden="true" tier="2">
 					<Anchor point="CENTER" relativePoint="CENTER" offsetX="0" offsetY="0"/>
 
 					<Dimensions x="340" y="240" />
