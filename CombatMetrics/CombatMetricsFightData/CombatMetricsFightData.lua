@@ -742,6 +742,25 @@ function CMX_CopyFight(n)
 	end
 end
 
+local function InitConversionDialog()	-- /script ZO_Dialogs_ShowDialog("CMX_ConvertSV_Dialog")
+	ESO_Dialogs["CMX_ConvertSV_Dialog"] = {
+		canQueue = true,
+		uniqueIdentifier = "CMX_ConvertSV_Dialog",
+		title = {text = SI_COMBAT_METRICS_CONVERT_DB_TITLE},
+		mainText = {text = SI_COMBAT_METRICS_CONVERT_DB_TEXT},
+		buttons = {
+			[1] = {
+				text = SI_COMBAT_METRICS_CONVERT_DB_BUTTON1_TEXT,
+				callback = function() end
+			},
+			[2] = {
+				text = SI_COMBAT_METRICS_CONVERT_DB_BUTTON2_TEXT,
+				callback = function() end
+			},
+		},
+	  }
+end
+
 local function Initialize(event, addon)
 	if addon ~= AddonName then return end
 	em:UnregisterForEvent(AddonName, EVENT_ADD_ON_LOADED)
@@ -753,9 +772,9 @@ local function Initialize(event, addon)
 		_G["CombatMetricsFightDataSV"] = sv
 	end
 
+	InitConversionDialog()
 	local svversion = sv.version
 	if svversion ~= AddonVersion then ConvertSV(svversion) end
-
 end
 
 em:RegisterForEvent(AddonName, EVENT_ADD_ON_LOADED, function(...) Initialize(...) end)

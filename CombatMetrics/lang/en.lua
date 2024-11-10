@@ -156,6 +156,10 @@
 	SI_COMBAT_METRICS_OK = "OK",
 	
 	SI_COMBAT_METRICS_SAVEDFIGHTS_FULL = "You're exceeding the maximum number of saved fights. Delete <<1[a fight/a fight/$d fights]>> or increase the allowed number in the settings!",
+	SI_COMBAT_METRICS_CONVERT_DB_TITLE = "COMBAT METRICS",
+	SI_COMBAT_METRICS_CONVERT_DB_TEXT = "This version features a new way to store fights. It takes up less space and reduces UI loading times, even with much more fights saved. \n\nTo benefit from this and allow new fights to be saved, all stored fights need to be converted. \n\nThis process may take a up to a few minutes.",
+	SI_COMBAT_METRICS_CONVERT_DB_BUTTON1_TEXT = "Convert",
+	SI_COMBAT_METRICS_CONVERT_DB_BUTTON2_TEXT = "Abort",
 
 	-- Fight Control Button Tooltips
 
