@@ -160,6 +160,8 @@
 	SI_COMBAT_METRICS_CONVERT_DB_TEXT = "This version features a new way to store fights. It takes up less space and reduces UI loading times, even with much more fights saved. \n\nTo benefit from this and allow new fights to be saved, all stored fights need to be converted. \n\nThis process may take a up to a few minutes.",
 	SI_COMBAT_METRICS_CONVERT_DB_BUTTON1_TEXT = "Convert",
 	SI_COMBAT_METRICS_CONVERT_DB_BUTTON2_TEXT = "Abort",
+	SI_COMBAT_METRICS_CONVERSION_TITLE_TEXT = "Converting Fight <<1>>/<<2>> ...",
+	SI_COMBAT_METRICS_CONVERSION_FINISHED_TEXT = "Conversion Finished!",
 
 	-- Fight Control Button Tooltips
 

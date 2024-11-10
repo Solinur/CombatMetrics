@@ -14,6 +14,7 @@ local charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-
 
 local chars = {}
 local values = {}
+local sv_default = {["version"] = AddonVersion}
 
 --[[ 
 /zgoo LibDataEncode
@@ -679,38 +680,92 @@ local function CleanupFight(fight)
 
 end
 
-local function EncodeSavedFights()
-	local numFights = #sv
-	for id = 1, numFights do
-		local loaded = loadFight(id)
+local nextEncodeId = 1
+local oldSV
+
+local function FinishEncoding()
+	for _ = 1, #oldSV do
+		table.remove(sv, 1)
+	end
+	-- sv.version = AddonVersion
+	CMX.Print(LOG_LEVEL_INFO, "Conversion Finished!")
+	
+	local titleBar = CombatMetrics_Report_TitleFightTitleBar
+	titleBar:SetValue(0)
+	titleBar:SetHidden(true)
+
+	local fightlabel = CombatMetrics_Report_TitleFightTitleName
+	fightlabel:SetText(zo_strformat(SI_COMBAT_METRICS_CONVERSION_FINISHED_TEXT))
+	oldSV = nil
+end
+
+local function EncodeNextFight()
+	local titleBar = CombatMetrics_Report_TitleFightTitleBar
+	local fightlabel = CombatMetrics_Report_TitleFightTitleName
+
+	if nextEncodeId <= #oldSV then
+		fightlabel:SetText(zo_strformat(SI_COMBAT_METRICS_CONVERSION_TITLE_TEXT, nextEncodeId, #oldSV))
+		local loaded = loadFight(nextEncodeId)
 		CleanupFight(loaded)
 		local log = loaded.log
 		loaded.log = nil
-		local testresult = LDE.PerformTest("Testfight" .. id, loaded, true, globalDict)
+		local testresult = LDE.PerformTest("Testfight" .. nextEncodeId, loaded, true, globalDict)
 		loaded.log = log
 		if testresult and testresult.result then
 			saveFight(loaded)
+			titleBar:SetValue(nextEncodeId/#oldSV)
+			nextEncodeId = nextEncodeId + 1
+			zo_callLater(EncodeNextFight, 100)
 		else
-			assert(false, "Test encoding failed! Aborting ...")
+			sv = oldSV
+			_G["CombatMetricsFightDataSV"] = sv
+			assert(false, string.format("Test encoding on fight %d failed! Aborting ...", nextEncodeId))
+			return
 		end
+	else
+		FinishEncoding()
 	end
-	for id = 1, numFights do
-		table.remove(sv, 1)
-	end
-	sv.version = AddonVersion
-	CMX.Print(LOG_LEVEL_INFO, "Conversion Finished!")
 end
 
-local function PromptSavedFightsEncoding()
-	local dialog = false
-	-- TODO: Add user dialog
-	if dialog then EncodeSavedFights() end
+local function StartEncodingSavedFights()
+	CMX.Print(LOG_LEVEL_INFO, "Converting saved fight from version %d to %d ...", sv.version, AddonVersion)
+	oldSV = ZO_ShallowTableCopy(sv)
+
+	local titleBar = CombatMetrics_Report_TitleFightTitleBar
+	titleBar:SetValue(0)
+	titleBar:SetHidden(false)
+	
+	local fightlabel = CombatMetrics_Report_TitleFightTitleName
+	fightlabel:SetText(zo_strformat(SI_COMBAT_METRICS_CONVERSION_TITLE_TEXT, 1, #oldSV))
+	
+	if SCENE_MANAGER:IsShowing("CMX_REPORT_SCENE") == false then CombatMetrics_Report.Toggle() end
+	zo_callLater(EncodeNextFight, 100)
 end
 
-local function ConvertSV(version)
+local function InitConversionDialog()	-- /script ZO_Dialogs_ShowDialog("CMX_ConvertSV_Dialog")
+	ESO_Dialogs["CMX_ConvertSV_Dialog"] = {
+		canQueue = true,
+		uniqueIdentifier = "CMX_ConvertSV_Dialog",
+		title = {text = SI_COMBAT_METRICS_CONVERT_DB_TITLE},
+		mainText = {text = SI_COMBAT_METRICS_CONVERT_DB_TEXT},
+		buttons = {
+			[1] = {
+				text = SI_COMBAT_METRICS_CONVERT_DB_BUTTON1_TEXT,
+				callback = StartEncodingSavedFights
+			},
+			[2] = {
+				text = SI_COMBAT_METRICS_CONVERT_DB_BUTTON2_TEXT,
+				callback = function() end
+			},
+		},
+	  }
+end
+
+local function ConvertSV()
+	local version = sv.version
 	local converted = false
 	if version < 2 then -- convert format if coming from CombatMetrics < 0.8
-		CMX.Print(LOG_LEVEL_INFO, "Converting saved fight from version %d to %d ...", version, AddonVersion)
+		CMX.Print(LOG_LEVEL_INFO, "Converting saved fight from version %d to %d ...", version, 13)
 		for i = 1, #sv do
 			saveFight(sv[1])
 			table.remove(sv, 1)
@@ -720,8 +775,7 @@ local function ConvertSV(version)
 	end
 
 	if version < 14 then
-		CMX.Print(LOG_LEVEL_INFO, "Converting saved fight from version %d to %d ...", version, AddonVersion)
-		PromptSavedFightsEncoding()
+		ZO_Dialogs_ShowDialog("CMX_ConvertSV_Dialog")
 	end
 
 	if converted then CMX.Print(LOG_LEVEL_INFO, "Conversion Finished!") end
@@ -742,25 +796,6 @@ function CMX_CopyFight(n)
 	end
 end
 
-local function InitConversionDialog()	-- /script ZO_Dialogs_ShowDialog("CMX_ConvertSV_Dialog")
-	ESO_Dialogs["CMX_ConvertSV_Dialog"] = {
-		canQueue = true,
-		uniqueIdentifier = "CMX_ConvertSV_Dialog",
-		title = {text = SI_COMBAT_METRICS_CONVERT_DB_TITLE},
-		mainText = {text = SI_COMBAT_METRICS_CONVERT_DB_TEXT},
-		buttons = {
-			[1] = {
-				text = SI_COMBAT_METRICS_CONVERT_DB_BUTTON1_TEXT,
-				callback = function() end
-			},
-			[2] = {
-				text = SI_COMBAT_METRICS_CONVERT_DB_BUTTON2_TEXT,
-				callback = function() end
-			},
-		},
-	  }
-end
-
 local function Initialize(event, addon)
 	if addon ~= AddonName then return end
 	em:UnregisterForEvent(AddonName, EVENT_ADD_ON_LOADED)
@@ -768,13 +803,15 @@ local function Initialize(event, addon)
 
 	sv = _G["CombatMetricsFightDataSV"]
 	if sv == nil or sv.version == nil then
-		sv = {["version"] = AddonVersion}
+		sv = sv_default
 		_G["CombatMetricsFightDataSV"] = sv
 	end
 
-	InitConversionDialog()
-	local svversion = sv.version
-	if svversion ~= AddonVersion then ConvertSV(svversion) end
+	if sv.version ~= AddonVersion then
+		InitConversionDialog()
+		ConvertSV()
+	end
+
 end
 
 em:RegisterForEvent(AddonName, EVENT_ADD_ON_LOADED, function(...) Initialize(...) end)
