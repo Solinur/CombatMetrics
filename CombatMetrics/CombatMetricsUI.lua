@@ -6707,17 +6707,12 @@ function CMX.GetCMXData(dataType)	-- for external access to fightData
 end
 
 local lastResize
-
 function CMX.Resizing(control, resizing)
-
 	if control:IsHidden() then return end
-
 	if resizing then
-
 		control:SetEdgeColor(1,1,1,1)
 		control:SetCenterColor(1,1,1,.2)
 		control:SetDrawTier(2)
-
 	else
 		if lastResize == nil then return end
 
@@ -6733,7 +6728,6 @@ function CMX.Resizing(control, resizing)
 		parent:ClearAnchors()
 		parent:SetAnchor(CENTER, nil , TOPLEFT, newpos.x, newpos.y)
 		parent:Resize(scale)
-
 	end
 end
 
@@ -6783,7 +6777,6 @@ local scene = ZO_Scene:New("CMX_REPORT_SCENE", SCENE_MANAGER)
 local function initFightReport()
 
 	local fightReport = CombatMetrics_Report
-
 	storeOrigLayout(fightReport)
 
 	local pos = db[fightReport:GetName()]
