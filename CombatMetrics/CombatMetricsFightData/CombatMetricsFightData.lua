@@ -16,10 +16,6 @@ local chars = {}
 local values = {}
 local sv_default = {["version"] = AddonVersion}
 
---[[ 
-/zgoo LibDataEncode
---]]
-
 local globalDict = {
 	"name",
 	"max",
@@ -485,7 +481,7 @@ local function convertCombatLog(savedFight, filters)
 	end
 	
 	savedFight.log = nil
-	return stringlog	-- pin converted log on saved fight
+	return stringlog
 end
 
 local function recoverCombatLog(loadedFight)
@@ -687,7 +683,7 @@ local function FinishEncoding()
 	for _ = 1, #oldSV do
 		table.remove(sv, 1)
 	end
-	-- sv.version = AddonVersion
+	sv.version = AddonVersion
 	CMX.Print(LOG_LEVEL_INFO, "Conversion Finished!")
 	
 	local titleBar = CombatMetrics_Report_TitleFightTitleBar
@@ -742,7 +738,7 @@ local function StartEncodingSavedFights()
 	zo_callLater(EncodeNextFight, 100)
 end
 
-local function InitConversionDialog()	-- /script ZO_Dialogs_ShowDialog("CMX_ConvertSV_Dialog")
+local function InitConversionDialog()
 	ESO_Dialogs["CMX_ConvertSV_Dialog"] = {
 		canQueue = true,
 		uniqueIdentifier = "CMX_ConvertSV_Dialog",
