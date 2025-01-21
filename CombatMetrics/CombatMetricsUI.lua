@@ -168,12 +168,6 @@ function NavButtonFunctions.load(control)
 
 end
 
-local function checkSaveLimit()
-	local size = SVHandler.Check()
-	CMX.Print("save", LOG_LEVEL_DEBUG, "SV Size: %.3f MB, %.1f%%", size, size*100/db.maxSVsize)
-	return size
-end
-
 function NavButtonFunctions.save(control, _, _, _, _, shiftkey )
 	if control:GetState() == BSTATE_DISABLED then
 		return
