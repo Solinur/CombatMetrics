@@ -2808,7 +2808,7 @@ local function Initialize(event, addon)
 
 	-- convert legacy data into new format
 
-	if db.maxSVsize > 1 then db.maxSVsize = math.max(db.maxSVsize / 50, 1) end
+	if db.maxSVsize then db.maxSVsize = nil end
 	--
 
 	for debuffKey, _ in pairs(variablePenetrationDebuffAbilityIds) do
