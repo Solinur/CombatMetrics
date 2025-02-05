@@ -5666,11 +5666,16 @@ local function starOrder(t, a, b)
 
 end
 
-local disciplineColors = {
-	[CHAMPION_DISCIPLINE_TYPE_COMBAT] = GetString(SI_COMBAT_METRICS_MAGICKA_COLOR),
-	[CHAMPION_DISCIPLINE_TYPE_CONDITIONING] = GetString(SI_COMBAT_METRICS_HEALTH_COLOR),
-	[CHAMPION_DISCIPLINE_TYPE_WORLD] = GetString(SI_COMBAT_METRICS_STAMINA_COLOR),
-}
+local function SetStarControlEmpty(starControl)
+	starControl:GetNamedChild("Star"):SetHidden(true)
+	starControl:GetNamedChild("Name"):SetHidden(true)
+	starControl:GetNamedChild("Value"):SetHidden(true)
+	starControl:GetNamedChild("Ring"):SetTexture("/esoui/art/champion/actionbar/champion_bar_slot_frame_disabled.dds")
+
+	starControl.slotted = nil
+	starControl.starId = nil
+	starControl.points = nil
+end
 
 local function updateRightInfoPanel(panel)
 	if fightData == nil then return end
@@ -5699,45 +5704,34 @@ local function updateRightInfoPanel(panel)
 			title:SetText(ZO_CachedStrFormat("<<1>> (<<2>>)", disciplineName, discipline.total))
 
 			for starId, starData in CMX.spairs(discipline.stars, starOrder) do
-				local starControl
 				itemNo = itemNo + 1
+				if itemNo > 18 then break end
+
+				local starControl = constellationControl:GetNamedChild("StarItem" .. itemNo)
 				local points, state = unpack(starData)
-				starControl = constellationControl:GetNamedChild("StarItem" .. itemNo)
 
-				if itemNo > 18 then
-
-					break
-
-				elseif state == 2 then -- slotted
+				if state == LIBCOMBAT_CPTYPE_SLOTTED then -- slotted
 					starControl:GetNamedChild("Star"):SetHidden(false)
 					starControl:GetNamedChild("Ring"):SetTexture("/esoui/art/champion/actionbar/champion_bar_slot_frame.dds")
 
-					local name = starControl:GetNamedChild("Name")
-					local value = starControl:GetNamedChild("Value")
+					local nameControl = starControl:GetNamedChild("Name")
+					local valueControl = starControl:GetNamedChild("Value")
 
-					name:SetHidden(false)
-					value:SetHidden(false)
+					nameControl:SetHidden(false)
+					nameControl:SetText(zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionSkillName(starId)))
 
-					name:SetText(zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionSkillName(starId)))
-					value:SetText(points)
+					valueControl:SetHidden(false)
+					valueControl:SetText(points)
 
 					starControl.slotted = true
 					starControl.starId = starId
 					starControl.points = points
-
-				else
+				
+				elseif state == LIBCOMBAT_CPTYPE_PASSIVE then
 					if itemNo <= 4 then
 						for i = itemNo, 4 do
 							starControl = constellationControl:GetNamedChild("StarItem" .. i)
-
-							starControl:GetNamedChild("Star"):SetHidden(true)
-							starControl:GetNamedChild("Name"):SetHidden(true)
-							starControl:GetNamedChild("Value"):SetHidden(true)
-							starControl:GetNamedChild("Ring"):SetTexture("/esoui/art/champion/actionbar/champion_bar_slot_frame_disabled.dds")
-
-							starControl.slotted = nil
-							starControl.starId = nil
-							starControl.points = nil
+							SetStarControlEmpty(starControl)
 						end
 
 						itemNo = 5
@@ -5751,14 +5745,11 @@ local function updateRightInfoPanel(panel)
 					starControl.slotted = false
 					starControl.starId = starId
 					starControl.points = points
-
 				end
 			end
 
 			for i = math.max(itemNo + 1, 5), 18 do
-
 				constellationControl:GetNamedChild("StarItem" .. i):SetHidden(true)
-
 			end
 		end
 	end
