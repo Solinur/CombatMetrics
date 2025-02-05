@@ -5673,22 +5673,16 @@ local disciplineColors = {
 }
 
 local function updateRightInfoPanel(panel)
-
 	if fightData == nil then return end
-
 	local CPData = fightData.CP
-
 	if CPData == nil then return end
 
 	local legacyPanel = panel:GetParent():GetNamedChild("RightOld")
-
 	if GetAPIVersion() < 100034 or (CPData.version or 0) < 2 then
-
 		panel:SetHidden(true)
 		legacyPanel:SetHidden(false)
 
 		updateRightInfoPanelLegacy(legacyPanel)
-
 		return
 	end
 
@@ -5696,26 +5690,18 @@ local function updateRightInfoPanel(panel)
 	legacyPanel:SetHidden(true)
 
 	for disciplineId, discipline in pairs(CPData) do
-
 		if type(discipline) == "table" then
-
 			local constellationControl = panel:GetNamedChild("Constellation"..disciplineId)
-
 			local itemNo = 0
-
 			local title = constellationControl:GetNamedChild("Title")
 			local disciplineName = zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionDisciplineName(disciplineId))
 
 			title:SetText(ZO_CachedStrFormat("<<1>> (<<2>>)", disciplineName, discipline.total))
 
 			for starId, starData in CMX.spairs(discipline.stars, starOrder) do
-
 				local starControl
-
 				itemNo = itemNo + 1
-
 				local points, state = unpack(starData)
-
 				starControl = constellationControl:GetNamedChild("StarItem" .. itemNo)
 
 				if itemNo > 18 then
@@ -5723,7 +5709,6 @@ local function updateRightInfoPanel(panel)
 					break
 
 				elseif state == 2 then -- slotted
-
 					starControl:GetNamedChild("Star"):SetHidden(false)
 					starControl:GetNamedChild("Ring"):SetTexture("/esoui/art/champion/actionbar/champion_bar_slot_frame.dds")
 
@@ -5742,9 +5727,7 @@ local function updateRightInfoPanel(panel)
 
 				else
 					if itemNo <= 4 then
-
 						for i = itemNo, 4 do
-
 							starControl = constellationControl:GetNamedChild("StarItem" .. i)
 
 							starControl:GetNamedChild("Star"):SetHidden(true)
@@ -5758,13 +5741,10 @@ local function updateRightInfoPanel(panel)
 						end
 
 						itemNo = 5
-
 						starControl = constellationControl:GetNamedChild("StarItem" .. itemNo)
-
 					end
 
 					starControl:SetHidden(false)
-
 					starControl:GetNamedChild("Name"):SetText(zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionSkillName(starId)))
 					starControl:GetNamedChild("Value"):SetText(points)
 
