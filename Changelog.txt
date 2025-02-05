@@ -664,5 +664,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 1.5.19 6,340,650 (10.11.2024) 14:07
 [*] Fix to prevent the live report window from getting stuck in resize mode (Thx to @Keekalakookoo for the report)
 
-1.6.0
+1.6.0 6,434,885 (05.02.2025) 21:51
+[*] New required Library: LibDataEncode
 [*] Reworked how fight data is stored. The data is now encoded, resulting in a smaller SV on disc, significantly lower lua memory consumption and UI load times.
+[*] As a side effect, loading the fight list might take a bit of time, especially if a lot of fights are stored. I will have to rework how the list is implemented under the hood to improve that. This will happen in the next update.
