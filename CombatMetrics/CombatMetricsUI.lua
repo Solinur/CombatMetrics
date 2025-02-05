@@ -38,7 +38,6 @@ local LC = LibCombat
 if LC == nil then return end
 
 local GetFormattedAbilityName = LC.GetFormattedAbilityName
-
 local GetFormattedAbilityIcon = LC.GetFormattedAbilityIcon
 
 local function searchtable(t, field, value)
@@ -86,20 +85,14 @@ local function storeOrigLayout(self)
 end
 
 local function toggleFightList(panel, show)
-
 	panel = panel or CombatMetrics_Report_FightList
-
 	show = show or panel:IsHidden()
-
 	panel:SetHidden(not show)
-
 	if show then
-
 		panel:Update()
-		panel:GetParent():GetNamedChild("_InfoRow"):Update()
-
 	end
 
+	panel:GetParent():GetNamedChild("_InfoRow"):Update()
 end
 
 function CMX.EditTitleStart(control)
@@ -175,53 +168,19 @@ function NavButtonFunctions.load(control)
 
 end
 
-local function checkSaveLimit(fight)
-
-	local size = SVHandler.Check(fight)									-- if no table is passed it will check size of the SV
-
-	if fight == nil then
-
-		CMX.Print("save", LOG_LEVEL_DEBUG, "SV Size: %.3f MB, %.1f%%", size, size*100/db.maxSVsize)
-
-	end
-
-	local isvalid = (size < db.maxSVsize)
-
-	return isvalid, size
-end
-
 function NavButtonFunctions.save(control, _, _, _, _, shiftkey )
-
 	if control:GetState() == BSTATE_DISABLED then
-
 		return
-
 	else
+		local numFights = SVHandler.GetNumFights()
+		local lastsaved = SVHandler.GetFight(numFights)
+		if lastsaved ~= nil and lastsaved.date == fightData.date then return end -- bail out if fight is already saved
 
-		local lastsaved = savedFights[#savedFights]
-
-		if lastsaved ~= nil and lastsaved.date == fightData.date then return end --bail out if fight is already saved
-
+		local spaceLeft = db.maxSavedFights - numFights
+		assert(spaceLeft > 0, zo_strformat(SI_COMBAT_METRICS_SAVEDFIGHTS_FULL, 1-spaceLeft))
+		
 		SVHandler.Save(fightData, shiftkey)
-
-		local isvalid, size = checkSaveLimit()
-
-		if isvalid then
-
-			db.SVsize = size
-			CombatMetrics_Report:Update()
-
-		else
-
-			local removed = table.remove(savedFights)
-			local _, removedSize = checkSaveLimit(removed)
-
-			local errorstring = zo_strformat(SI_COMBAT_METRICS_STORAGE_FULL, removedSize)
-			assert(false, errorstring)
-
-			CombatMetrics_Report:Update()
-
-		end
+		CombatMetrics_Report:Update()
 	end
 end
 
@@ -904,75 +863,57 @@ function CMX.LoadItem(listitem)
 	local lastfights = CMX.lastfights
 
 	local isLoaded, loadId
+	local savedFight = SVHandler.GetFight(id)
 
-	if issaved and savedFights[id] then
-
-		isLoaded, loadId = searchtable(lastfights, "date", savedFights[id]["date"])					-- returns false if nothing is found else it returns the id
-		if isLoaded then isLoaded = lastfights[loadId]["time"] == savedFights[id]["time"] end		-- ensures old fights load correctly
-
+	if issaved and savedFight then
+		-- returns false if nothing is found else it returns the id
+		isLoaded, loadId = searchtable(lastfights, "date", savedFight["date"])
+		if isLoaded then isLoaded = lastfights[loadId]["time"] == savedFight["time"] end		-- ensures old fights load correctly
 	end
 
 	toggleFightList()
 
 	if issaved and isLoaded == false then
-
 		local loadedfight = SVHandler.Load(id)
-
 		if loadedfight.log then CMX.AddFightCalculationFunctions(loadedfight) end
-
 		table.insert(lastfights, loadedfight)
+
 		CombatMetrics_Report:Update(#CMX.lastfights)
-
 	else
-
 		CombatMetrics_Report:Update((issaved and loadId or id))
-
 	end
 
 	ClearSelections()
-
 end
 
 function CMX.DeleteItem(control)
-
 	local row = control:GetParent():GetParent()
 	local issaved = row.issaved
 	local id = row.id
 
 	if issaved then
-
-		table.remove(savedFights, id)
-
-		local _, size = checkSaveLimit()
-		db.SVsize = size
-
+		SVHandler.Delete(id)
 		CombatMetrics_Report:Update()
-
 	else
-
 		table.remove(CMX.lastfights, id)
 		if #CMX.lastfights == 0 then CombatMetrics_Report:Update() else CombatMetrics_Report:Update(math.min(currentFight, #CMX.lastfights)) end
-
 	end
 
 	toggleFightList(nil, true)
-
 end
 
 function CMX.DeleteItemLog(control)
-
 	local row = control:GetParent():GetParent()
 	local issaved = row.issaved
 	local id = row.id
 
 	if issaved then
-		savedFights[id]["stringlog"]={}
+		SVHandler.DeleteLog(id)
 	else
 		CMX.lastfights[id]["log"]={}
 	end
 
 	toggleFightList(nil, true)
-
 end
 
 --Slash Commands
@@ -1423,13 +1364,13 @@ do
 
 	local function CloseDialog()
 
-		CombatMetrics_Report_Dialog:SetHidden(true)
+		CombatMetrics_Report_DonateDialog:SetHidden(true)
 
 	end
 
 	local function DonateCrowns()
 
-		local dialog = CombatMetrics_Report_Dialog
+		local dialog = CombatMetrics_Report_DonateDialog
 		local button = dialog:GetNamedChild("Button")
 		local editbox = dialog:GetNamedChild("AccountInfo"):GetNamedChild("EditBox")
 
@@ -1713,8 +1654,8 @@ local function updateTitlePanel(panel)
 		["previous"] 	= CMX.lastfights[fightId - 1] ~= nil,
 		["next"] 		= CMX.lastfights[fightId + 1] ~= nil,
 		["last"] 		= CMX.lastfights[fightId + 1] ~= nil,
-		["load"] 		= savedFights ~= nil and #savedFights > 0,
-		["save"] 		= CMX.lastfights[fightId] ~= nil and not searchtable(savedFights, "date", fightData.date),
+		["load"] 		= SVHandler ~= nil and SVHandler.GetNumFights() > 0,
+		["save"] 		= CMX.lastfights[fightId] ~= nil and not searchtable(CombatMetricsFightData.GetFights(), "date", fightData.date),
 		["delete"] 		= CMX.lastfights[fightId] ~= nil and #CMX.lastfights>0 ~= nil
 	}
 
@@ -6005,14 +5946,14 @@ local function updateInfoRowPanel(panel)
 	barcontrol:SetHidden(hideBar)
 
 	if not hideBar then
-
 		performancecontrol:SetHidden(true)
 
-		local usedSpace = db.SVsize/db.maxSVsize
+		local numSaved = SVHandler.GetNumFights()
+		local usedSpace = numSaved/db.maxSavedFights
 		barcontrol:SetValue(usedSpace)
 
 		local barlabelcontrol = barcontrol:GetNamedChild("Label")
-		barlabelcontrol:SetText(string.format("%s: %.1f MB / %d MB (%.1f%%)", GetString(SI_COMBAT_METRICS_SAVED_DATA), db.SVsize, db.maxSVsize, usedSpace * 100))
+		barlabelcontrol:SetText(string.format("%s: %d / %d", GetString(SI_COMBAT_METRICS_SAVED_FIGHTS), SVHandler.GetNumFights(), db.maxSavedFights))
 
 	else	-- show performance stats
 
@@ -6105,12 +6046,28 @@ local function updateFightReport(control, fightId)
 end
 
 local function updateFightListPanel(panel, data, issaved)
+	local stringId = issaved and "updateFightListPanelSaved" or "updateFightListPanelRecent"
+	em:UnregisterForUpdate(stringId)
 
 	local scrollchild = GetControl(panel, "PanelScrollChild")
 	local currentanchor = {TOPLEFT, scrollchild, TOPLEFT, 0, 1}
 
-	if #data>0 then
+	local rowBaseName = scrollchild:GetName() .. "Row"
 
+	if #data > panel.numItems then
+		for i = panel.numItems+1, #data do
+			CreateControlFromVirtual(rowBaseName, scrollchild, "CombatMetrics_FightlistRowTemplate", i)
+			panel.numItems = i
+			if GetGameTimeSeconds() - GetFrameTimeSeconds() > 0.015 then
+				em:RegisterForUpdate(stringId, 50, function() updateFightListPanel(panel, data, issaved) end)
+				panel:GetNamedChild("LoadingLabel"):SetHidden(false)
+				return
+			end
+		end
+	end
+	panel:GetNamedChild("LoadingLabel"):SetHidden(true)
+
+	if #data > 0 then
 		for id, fight in ipairs(data) do
 
 			local label = string.gsub(fight.fightlabel or "", ".+%:%d%d %- ([A-Z])", "%1")
@@ -6124,7 +6081,7 @@ local function updateFightListPanel(panel, data, issaved)
 			local timestring = string.format("%s, %s", datestring, fight.time or "")
 
 			local fightlog = issaved and fight.stringlog or fight.log
-			local logState = fightlog and #fightlog>0
+			local logState = fightlog and (fightlog == true or #fightlog>0)
 
 			local activetime = 1
 			local category = db.FightReport.category
@@ -6144,8 +6101,8 @@ local function updateFightListPanel(panel, data, issaved)
 			local DPSKey = DPSstrings[db.FightReport.category]
 			local dps = zo_round(fight.calculated and fight.calculated[DPSKey] or fight[DPSKey] or 0)
 
-			local rowName = scrollchild:GetName() .. "Row" .. id
-			local row = _G[rowName] or CreateControlFromVirtual(rowName, scrollchild, "CombatMetrics_FightlistRowTemplate")
+			-- CMX.Print(LOG_LEVEL_INFO, "Getting row: %s%d", rowBaseName, id)
+			local row = GetControl(rowBaseName, id)
 			row:SetAnchor(unpack(currentanchor))
 			row:SetHidden(false)
 
@@ -6213,7 +6170,7 @@ local function updateFightList(panel)
 	GetControl(savedPanel, "HeaderDPS"):SetText(label)
 
 	updateFightListPanel(recentPanel, CMX.lastfights, false)
-	updateFightListPanel(savedPanel, savedFights, true)
+	updateFightListPanel(savedPanel, SVHandler.GetFights(), true)
 end
 
 local function GetCurrentData()
@@ -6706,7 +6663,7 @@ local function toggleFightReport()
 
 	if not SCENE_MANAGER:IsShowing("CMX_REPORT_SCENE") then
 
-		CombatMetrics_Report_Dialog:SetHidden(true)
+		CombatMetrics_Report_DonateDialog:SetHidden(true)
 		SCENE_MANAGER:Toggle("CMX_REPORT_SCENE")
 
 		CombatMetrics_Report:Update(#CMX.lastfights>0 and #CMX.lastfights or nil)
@@ -7206,10 +7163,6 @@ function CMX.InitializeUI()
 	db = CMX.db
 
 	SVHandler = CombatMetricsFightData
-	savedFights = SVHandler.GetFights()
-
-	local _, size = checkSaveLimit()
-	db.SVsize = size
 
 	selections = {
 		["ability"]		= {},

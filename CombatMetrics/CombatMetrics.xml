@@ -914,7 +914,12 @@
 					<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Sep" offsetX="-2" offsetY="2"/>
 					<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" offsetX="-4" offsetY="-4"/>
 				
-				</Control>								
+				</Control>
+				
+				<Label name="$(parent)LoadingLabel" text="SI_COMBAT_METRICS_LOADING" verticalAlignment="CENTER" horizontalAlignment="CENTER" inherits="CombatMetrics_TitleFontControl" hidden="true">
+					<Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Panel"/>
+					<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Panel"/>
+				</Label>
 			</Controls>
 			
 			<OnInitialized>
@@ -3723,6 +3728,7 @@
 							
 								local scrolllist = GetControl(self, "PanelScrollChild")
 								scrolllist:SetResizeToFitPadding(0, 20)
+								self.numItems = 0
 								
 							</OnInitialized>
 							
@@ -3740,21 +3746,19 @@
 							<Anchor point="BOTTOMRIGHT"/>
 							
 							<OnInitialized>
-							
 								local scrolllist = GetControl(self, "PanelScrollChild")
 								scrolllist:SetResizeToFitPadding(0, 20)
 								
 								local label = GetControl(self, "HeaderName")
 								label:SetText(GetString(SI_COMBAT_METRICS_SAVED_FIGHTS))
-								
+
+								self.numItems = 0
 							</OnInitialized>
-							
 						</Control>
-						
-					</Controls>	
+					</Controls>
 				</Control>
 
-				<Control name="$(parent)_Dialog" hidden="true" tier="2">
+				<Control name="$(parent)_DonateDialog" hidden="true" tier="2">
 					<Anchor point="CENTER" relativePoint="CENTER" offsetX="0" offsetY="0"/>
 
 					<Dimensions x="340" y="240" />

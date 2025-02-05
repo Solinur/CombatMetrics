@@ -34,6 +34,7 @@
 -- Main UI
 
 	SI_COMBAT_METRICS_CALC = "Calculating...",
+	SI_COMBAT_METRICS_LOADING = "Loading...",
 	SI_COMBAT_METRICS_FINALIZING = "Finalizing...",
 	SI_COMBAT_METRICS_GROUP = "Group",
 	SI_COMBAT_METRICS_SELECTION = "Selection",
@@ -154,7 +155,13 @@
 	
 	SI_COMBAT_METRICS_OK = "OK",
 	
-	SI_COMBAT_METRICS_STORAGE_FULL = "The storage file is full. The fight you want to save needs <<1>> MB. Delete a fight to free some space or increase the allowed space in the settings!",
+	SI_COMBAT_METRICS_SAVEDFIGHTS_FULL = "You're exceeding the maximum number of saved fights. Delete <<1[a fight/a fight/$d fights]>> or increase the allowed number in the settings!",
+	SI_COMBAT_METRICS_CONVERT_DB_TITLE = "COMBAT METRICS",
+	SI_COMBAT_METRICS_CONVERT_DB_TEXT = "This version features a new way to store fights. It takes up less space and reduces UI loading times, even with much more fights saved. \n\nTo benefit from this and allow new fights to be saved, all stored fights need to be converted. \n\nThis process may take a up to a few minutes.",
+	SI_COMBAT_METRICS_CONVERT_DB_BUTTON1_TEXT = "Convert",
+	SI_COMBAT_METRICS_CONVERT_DB_BUTTON2_TEXT = "Abort",
+	SI_COMBAT_METRICS_CONVERSION_TITLE_TEXT = "Converting Fight <<1>>/<<2>> ...",
+	SI_COMBAT_METRICS_CONVERSION_FINISHED_TEXT = "Conversion Finished!",
 
 	-- Fight Control Button Tooltips
 
@@ -346,9 +353,9 @@
 	SI_COMBAT_METRICS_MENU_FH_NAME = "Fight History",
 	SI_COMBAT_METRICS_MENU_FH_TOOLTIP = "Number of recent fights to save",
 
-	SI_COMBAT_METRICS_MENU_SVSIZE_NAME = "Saved Fight Memory",
-	SI_COMBAT_METRICS_MENU_SVSIZE_TOOLTIP = "Maximum memory size for saved fights in MB",
-	SI_COMBAT_METRICS_MENU_SVSIZE_WARNING = "Use with caution! Lots of saved data significantly increase loading times. If the file gets too large, the client might crash when attempting to load it.",
+	SI_COMBAT_METRICS_MENU_MAXSAVEDFIGHTS_NAME = "Saved Fights",
+	SI_COMBAT_METRICS_MENU_MAXSAVEDFIGHTS_TOOLTIP = "Maximum number of fights that can be saved",
+	SI_COMBAT_METRICS_MENU_MAXSAVEDFIGHTS_WARNING = "Saving too many fights may increase loading times.",
 
 	SI_COMBAT_METRICS_MENU_BOSSFIGHTS_NAME = "Keep Boss Fights",
 	SI_COMBAT_METRICS_MENU_BOSSFIGHTS_TOOLTIP = "Delete trash fights first before deleting boss fights when limit of fights is reached",
