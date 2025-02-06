@@ -28,7 +28,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.6.0beta"
+CMX.version = "1.6.0"
 
 -- Logger
 
