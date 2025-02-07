@@ -668,3 +668,13 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] New required Library: LibDataEncode
 [*] Reworked how fight data is stored. The data is now encoded, resulting in a smaller SV on disc, significantly lower lua memory consumption and UI load times.
 [*] As a side effect, loading the fight list might take a bit of time, especially if a lot of fights are stored. I will have to rework how the list is implemented under the hood to improve that. This will happen in the next update.
+
+1.6.1 6,448,040 (06.02.2025) 21:03
+[*] Fixed an issue when converting very old fights. The old fights might not be loadable for now, but at least the conversion finishes. (Thx to Sycophantic-Witty for the report and fix proposal)
+[*] Fixed incorrect version numbers
+
+1.6.2 6,450,025 (06.02.2025) 21:50
+[*] Fixed incorrect version numbers (again)
+
+1.6.3 6,459,368 (07.02.2025) 13:08
+[*] Fixed reference to CMX before it was loaded, resulting in a lua error
