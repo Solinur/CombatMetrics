@@ -28,7 +28,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.6.0"
+CMX.version = "1.6.3"
 
 -- Logger
 
@@ -70,12 +70,6 @@ local function Print(category, level, ...)
 end
 
 CMX.Print = Print
-
-function CMX.GetDebugLevels()
-
-	return 	LOG_LEVEL_VERBOSE, LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR
-
-end
 
 -- init and check for libs
 

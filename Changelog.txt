@@ -672,3 +672,9 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 1.6.1 6,448,040 (06.02.2025) 21:03
 [*] Fixed an issue when converting very old fights. The old fights might not be loadable for now, but at least the conversion finishes. (Thx to Sycophantic-Witty for the report and fix proposal)
 [*] Fixed incorrect version numbers
+
+1.6.2 6,450,025 (06.02.2025) 21:50
+[*] Fixed incorrect version numbers (again)
+
+1.6.3  (07.02.2025) 21:50
+[*] Fixed reference to CMX before it was loaded, resulting in a lua error
