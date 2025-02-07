@@ -4,7 +4,7 @@
 ## Version: 16
 ## AddOnVersion: 16
 ## IsLibrary: true
-## DependsOn: LibCombat>=65 LibDataEncode
+## DependsOn: LibCombat>=75 LibDataEncode
 ## SavedVariables: CombatMetricsFightDataSV
 ## OptionalDependsOn: LibDebugLogger
 ## This Add-on is not created by, affiliated with or sponsored by ZeniMax Media Inc. or its affiliates.
