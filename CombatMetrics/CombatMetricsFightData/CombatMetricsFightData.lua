@@ -1,7 +1,29 @@
 local _
 local em = GetEventManager()
 local sv
-local LOG_LEVEL_VERBOSE, LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR
+
+local LOG_LEVEL_VERBOSE = "V"
+local LOG_LEVEL_DEBUG = "D"
+local LOG_LEVEL_INFO = "I"
+local LOG_LEVEL_WARNING ="W"
+local LOG_LEVEL_ERROR = "E"
+
+if LibDebugLogger then
+	LOG_LEVEL_VERBOSE = LibDebugLogger.LOG_LEVEL_VERBOSE
+	LOG_LEVEL_DEBUG = LibDebugLogger.LOG_LEVEL_DEBUG
+	LOG_LEVEL_INFO = LibDebugLogger.LOG_LEVEL_INFO
+	LOG_LEVEL_WARNING = LibDebugLogger.LOG_LEVEL_WARNING
+	LOG_LEVEL_ERROR = LibDebugLogger.LOG_LEVEL_ERROR
+end
+
+local function Print(...)
+	if not CMX then 
+		print("[CombatMetricsFightData]: CMX not found!")
+		return
+	end
+	return CMX.Print(...)
+end
+
 
 CombatMetricsFightData = {}
 
@@ -150,7 +172,7 @@ local function Encode(line, layout)
 	for i, size in ipairs(layout) do
 		if line[i] then
 			local error = GetChar(line[i], logstringdata, size)
-			if error then CMX.Print("save", LOG_LEVEL_WARNING,
+			if error then Print("save", LOG_LEVEL_WARNING,
 					"Invalid value during log encoding: %s (type: %d, value %d) ", tostring(line[i]), line[1], i) end
 		end
 	end
@@ -671,7 +693,7 @@ local function FinishEncoding()
 		table.remove(sv, 1)
 	end
 	sv.version = AddonVersion
-	CMX.Print(LOG_LEVEL_INFO, "Conversion Finished!")
+	Print(LOG_LEVEL_INFO, "Conversion Finished!")
 
 	local titleBar = CombatMetrics_Report_TitleFightTitleBar
 	titleBar:SetValue(0)
@@ -711,7 +733,7 @@ local function EncodeNextFight()
 end
 
 local function StartEncodingSavedFights()
-	CMX.Print(LOG_LEVEL_INFO, "Converting saved fight from version %d to %d ...", sv.version, AddonVersion)
+	Print(LOG_LEVEL_INFO, "Converting saved fight from version %d to %d ...", sv.version, AddonVersion)
 	oldSV = ZO_ShallowTableCopy(sv)
 
 	local titleBar = CombatMetrics_Report_TitleFightTitleBar
@@ -748,7 +770,7 @@ local function ConvertSV()
 	local version = sv.version
 	local converted = false
 	if version < 2 then -- convert format if coming from CombatMetrics < 0.8
-		CMX.Print(LOG_LEVEL_INFO, "Converting saved fight from version %d to %d ...", version, 13)
+		Print(LOG_LEVEL_INFO, "Converting saved fight from version %d to %d ...", version, 13)
 		for i = 1, #sv do
 			saveFight(sv[1])
 			table.remove(sv, 1)
@@ -761,7 +783,7 @@ local function ConvertSV()
 		ZO_Dialogs_ShowDialog("CMX_ConvertSV_Dialog")
 	end
 
-	if converted then CMX.Print(LOG_LEVEL_INFO, "Conversion Finished!") end
+	if converted then Print(LOG_LEVEL_INFO, "Conversion Finished!") end
 end
 
 CombatMetricsFightData.Check = checkSavedVariable
@@ -782,7 +804,6 @@ end
 local function Initialize(event, addon)
 	if addon ~= AddonName then return end
 	em:UnregisterForEvent(AddonName, EVENT_ADD_ON_LOADED)
-	LOG_LEVEL_VERBOSE, LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR = CMX.GetDebugLevels()
 
 	sv = _G["CombatMetricsFightDataSV"]
 	if sv == nil or sv.version == nil then
