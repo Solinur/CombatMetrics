@@ -1,8 +1,8 @@
 ﻿## Title: CombatMetricsFightData
 ## APIVersion: 101044 101045
 ## Author: Solinur
-## Version: 16
-## AddOnVersion: 16
+## Version: 17
+## AddOnVersion: 17
 ## IsLibrary: true
 ## DependsOn: LibCombat>=75 LibDataEncode
 ## SavedVariables: CombatMetricsFightDataSV
