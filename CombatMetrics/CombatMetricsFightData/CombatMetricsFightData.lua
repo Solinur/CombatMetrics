@@ -28,7 +28,7 @@ end
 CombatMetricsFightData = {}
 
 local AddonName = "CombatMetricsFightData"
-local AddonVersion = 14
+local AddonVersion = 17
 
 local constants = 0
 
@@ -666,10 +666,14 @@ local function CleanupFight(fight)
 
 	local barStats = calculated.barStats
 	if barStats ~= nil then
-		barStats[1].onTimes = nil
-		barStats[1].offTimes = nil
-		barStats[2].onTimes = nil
-		barStats[2].offTimes = nil
+		if barStats[1] then
+			barStats[1].onTimes = nil
+			barStats[1].offTimes = nil
+		end
+		if barStats[2] then
+			barStats[2].onTimes = nil
+			barStats[2].offTimes = nil
+		end
 	end
 
 	for _, buff in pairs(calculated.buffs) do
