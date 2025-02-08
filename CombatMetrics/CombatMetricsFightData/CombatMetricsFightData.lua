@@ -28,7 +28,7 @@ end
 CombatMetricsFightData = {}
 
 local AddonName = "CombatMetricsFightData"
-local AddonVersion = 17
+local AddonVersion = 18
 
 local constants = 0
 
@@ -504,6 +504,10 @@ local function recoverCombatLog(loadedFight)
 		local resources = {}
 		for oldkey, data in pairs(loadedFight.calculated.resources) do
 			local newkey = CombatMechnicFlagTableLoadLegacy[oldkey]
+			if newkey == nil then
+				resources = loadedFight.calculated.resources
+				break
+			end
 			resources[newkey] = data
 		end
 
