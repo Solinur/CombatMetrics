@@ -678,3 +678,6 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 
 1.6.3  (07.02.2025) 21:50
 [*] Fixed reference to CMX before it was loaded, resulting in a lua error
+
+1.6.4 6,472,856 (08.02.2025) 10:17
+[*] Fixed another issue that could occur during fight conversions (Thanks to Bonstrigmo for the report)
