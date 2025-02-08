@@ -28,7 +28,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.6.6"
+CMX.version = "1.6.7"
 
 -- Logger
 
@@ -1106,7 +1106,13 @@ function CMX.GenerateSelectionStats(fight, menuItem, selections) -- this is simi
 				selectiondata.buffs[name] = selectedbuff
 			end
 
-			selectiondata.totalUnitTime = (selectiondata.totalUnitTime or 0) + (mathmin(fight.endtime, unit.endtime or unitData.dpsend) - mathmax(fight.starttime, unit.starttime or unitData.dpsstart))
+			local fightEndTime = fight.endtime or fight.dpsend or 0
+			local unitEndTime = unit.endtime or unitData.dpsend or 0
+			local fightStartTime = fight.starttime or fight.dpsstart or 0
+			local unitStartTime = unit.starttime or unitData.dpsstart or 0
+			local startTime = mathmax(fightStartTime, unitStartTime)
+			local endTime = mathmin(fightEndTime, unitEndTime)
+			selectiondata.totalUnitTime = (selectiondata.totalUnitTime or 0) + (endTime - startTime)
 
 		end
 	end
