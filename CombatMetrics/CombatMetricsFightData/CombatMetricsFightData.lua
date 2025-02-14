@@ -159,7 +159,7 @@ end
 local lastid = 0
 
 local function GetChar(value, logstringdata, length)
-	local char = chars[value % 64]
+	local char = chars[math.floor(value) % 64]
 	if char == nil then return true end
 	table.insert(logstringdata, char)
 
@@ -333,7 +333,12 @@ local function encodeCombatLogLine(line, fight)
 		line[3] = unitConversion[line[3]] or 0
 		line[8] = line[8] or 0
 	elseif layoutId == LAYOUT_STATS then      -- type, timems, statchange, newvalue, statname
-		line[3] = line[3] + 8388608           -- avoid negative numbers
+		if line[5] == LIBCOMBAT_STAT_STATUS_EFFECT_CHANCE then 
+			line[3] = line[3] * 100
+			line[4] = line[4] * 100
+		end
+		line[3] = zo_round(line[3]) + 8388608           -- avoid negative numbers
+		line[4] = zo_round(line[4]) + 8388608           -- avoid negative numbers
 	elseif layoutId == LAYOUT_STATS_ADV then  -- type, timems, statchange, newvalue, statname
 		line[3] = zo_round(10 * (line[3] + 838860)) -- avoid negative/float numbers
 		line[4] = zo_round(line[4] * 10)
@@ -386,7 +391,11 @@ local function decodeCombatLogLine(line, fight)
 		if logdata[3] == 0 then logdata[3] = nil end
 	elseif layoutId == LAYOUT_STATS or layoutId == LAYOUT_STATS_ADV then -- type, timems, statchange, newvalue, statname
 		if fight.svversion < 5 then logdata[5] = statTableConvert[logdata[5]] end
-		logdata[3] = logdata[3] - 8388608                             -- recover negative numbers
+		if logdata[5] == LIBCOMBAT_STAT_STATUS_EFFECT_CHANCE then 
+			logdata[3] = logdata[3] / 100
+			logdata[4] = logdata[4] / 100
+		end
+		logdata[3] = logdata[3] - 8388608                             -- recover negative numbers		
 	elseif layoutId == LAYOUT_STATS_ADV then                          -- type, timems, statchange, newvalue, statname
 		line[3] = (line[3] / 10) - 838860                             -- avoid negative/float numbers
 		line[4] = (line[4] / 10)
