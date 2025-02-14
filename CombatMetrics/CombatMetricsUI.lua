@@ -5709,14 +5709,13 @@ local function updateRightInfoPanel(panel)
 	for disciplineId, discipline in pairs(CPData) do
 		if type(discipline) == "table" then
 			local constellationControl = panel:GetNamedChild("Constellation"..disciplineId)
-			local itemNo = 0
+			local itemNo = 1
 			local title = constellationControl:GetNamedChild("Title")
 			local disciplineName = zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionDisciplineName(disciplineId))
 
 			title:SetText(ZO_CachedStrFormat("<<1>> (<<2>>)", disciplineName, discipline.total))
 
 			for starId, starData in CMX.spairs(discipline.stars, starOrder) do
-				itemNo = itemNo + 1
 				if itemNo > 18 then break end
 
 				local starControl = constellationControl:GetNamedChild("StarItem" .. itemNo)
@@ -5738,6 +5737,7 @@ local function updateRightInfoPanel(panel)
 					starControl.slotted = true
 					starControl.starId = starId
 					starControl.points = points
+					itemNo = itemNo + 1
 				
 				elseif state == LIBCOMBAT_CPTYPE_PASSIVE then
 					if itemNo <= 4 then
@@ -5757,6 +5757,7 @@ local function updateRightInfoPanel(panel)
 					starControl.slotted = false
 					starControl.starId = starId
 					starControl.points = points
+					itemNo = itemNo + 1
 				end
 			end
 
