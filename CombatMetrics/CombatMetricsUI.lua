@@ -1,3 +1,4 @@
+---@diagnostic disable: assign-type-mismatch
 local em = GetEventManager()
 local wm = GetWindowManager()
 local dx = math.ceil(GuiRoot:GetWidth()/tonumber(GetCVar("WindowedWidth"))*1000)/1000
@@ -53,19 +54,13 @@ local GetFormattedAbilityName = LC.GetFormattedAbilityName
 local GetFormattedAbilityIcon = LC.GetFormattedAbilityIcon
 
 local function searchtable(t, field, value)
-
 	if value == nil then return false end
 
 	for k, v in pairs(t) do
-
 		if type(v) == "table" and field and v[field] == value then
-
 			return true, k
-
 		elseif v == value then
-
 			return true, k
-
 		end
 	end
 
@@ -190,7 +185,7 @@ function NavButtonFunctions.save(control, _, _, _, _, shiftkey )
 
 		local spaceLeft = db.maxSavedFights - numFights
 		assert(spaceLeft > 0, zo_strformat(SI_COMBAT_METRICS_SAVEDFIGHTS_FULL, 1-spaceLeft))
-		
+
 		SVHandler.Save(fightData, shiftkey)
 		CombatMetrics_Report:Update()
 	end
@@ -242,7 +237,7 @@ local function selectCategory(button)
 
 		local child = selectControl:GetChild(i)
 
-		if child and child.isMainCategory then 
+		if child and child.isMainCategory then
 
 			local r, g, b, _ = child:GetColor()
 			local a = child == button and 1 or .2
@@ -357,26 +352,15 @@ local function updateSelectorButtons(selectorButtons)
 
 end
 
-local mainSelectorCategories = {
-
-
-}
-
 local function initSelectorButtons(selectorButtons)
-
 	for i = 1, selectorButtons:GetNumChildren() do
-
 		local child = selectorButtons:GetChild(i)
 
 		if child and child.isMainCategory then
-
 			child:SetHandler( "OnMouseUp", selectCategory)
 			if child.category == db.FightReport.category then selectCategory(child) end
-
 		elseif child and child.isSecondaryCategory then
-
 			child:SetHandler( "OnMouseUp", selectMainPanel)
-
 		end
 
 		selectMainPanel(selectorButtons:GetNamedChild("FightStatsButton"))
@@ -386,54 +370,37 @@ end
 local LegacyStrings = CMX.CPLegacyStrings[GetCVar("language.2")] or CMX.CPLegacyStrings["en"]
 
 function CMX.InitializeCPRowsLegacy(panel)
-
 	for i = 1, 9 do
-
 		local discipline = (7-i)%9+1	-- start with apprentice and then clockwise (seriously, how did they come up with those ids?)
-
 		local color = GetString(SI_COMBAT_METRICS_MAGICKA_COLOR)
 
 		if i > 6 then
-
 			color = GetString(SI_COMBAT_METRICS_STAMINA_COLOR)
-
 		elseif i > 3 then
-
 			color = GetString(SI_COMBAT_METRICS_HEALTH_COLOR)
-
 		end
 
 		local signcontrol = panel:GetNamedChild("StarSign"..i)
-
 		local title = signcontrol:GetNamedChild("Title")
-
 		local name = LegacyStrings and LegacyStrings[discipline] and LegacyStrings[discipline].name or "???"
-
 		title:SetText(name)
 
 		local width = title:GetTextWidth() + 4
 		local height = title:GetHeight()
-
 		title:SetDimensions(width, height)
 
 		CMX.SetLabelColor(signcontrol, color)
 
 		for i = 1, 4 do
-
 			local row = signcontrol:GetNamedChild("Row"..i)
-
 			local label = row:GetNamedChild("Name")
-
 			local name = LegacyStrings and LegacyStrings[discipline] and LegacyStrings[discipline][i] or "???"
-
 			label:SetText(name)
 
 			local passive = signcontrol:GetNamedChild("Passive"..i)
-
 			passive.discipline = discipline
 			passive.skillId = i + 4
 			passive.points = 0
-
 		end
 	end
 end
@@ -455,69 +422,81 @@ local starcolors = {
 }
 
 function CMX.InitializeCPRows(panel)
-
-	if GetAPIVersion() < 100034 then return end
+	local scrollchild = GetControl(panel, "PanelScrollChild")
+	scrollchild:SetAnchor(TOPRIGHT, nil, TOPRIGHT, 0, 0)
+	local currentanchor = {TOPLEFT, scrollchild, TOPLEFT, 0, dx}
+	local currentanchor2 = {TOPRIGHT, scrollchild, TOPRIGHT, 0, dx}
 
 	for disciplineId = 1,3 do
-
-		local constellationControl = panel:GetNamedChild("Constellation"..disciplineId)
-
 		local disciplineType = GetChampionDisciplineType(disciplineId)
-
 		local color = labelcolors[disciplineType]
 
+		local panelName = scrollchild:GetName() .. "Panel" .. disciplineId
+		local constellationControl = _G[panelName] or CreateControlFromVirtual(panelName, scrollchild, "CombatMetrics_Constellation")
+		constellationControl:SetAnchor(unpack(currentanchor))
+		constellationControl:SetAnchor(unpack(currentanchor2))
+		constellationControl:SetHidden(false)
+
+		currentanchor = {TOPLEFT, constellationControl, BOTTOMLEFT, 0, 4}
+		currentanchor2 = {TOPRIGHT, constellationControl, BOTTOMRIGHT, 0, 4}
+
+		---@type LabelControl
 		local title = constellationControl:GetNamedChild("Title")
 		title:SetText(zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionDisciplineName(disciplineId)))
 
-		local nameBase = constellationControl:GetName() .. "StarItem"
-		local anchor = title
+		local nameBase = constellationControl:GetName() .. "StarControl"
+		local anchor
 
-		for i = 1, 18 do
-
-			local starItem = CreateControlFromVirtual(nameBase, constellationControl, "CombatMetrics_StarItem", i)
+		for i = 1, 20 do
+			local starControl = CreateControlFromVirtual(nameBase, constellationControl, "CombatMetrics_StarControl", i)
 
 			if i == 1 then
-
-				starItem:SetAnchor(TOPLEFT, anchor, BOTTOMLEFT, 0, 4)
-
-			elseif i == 10 then
-
-				starItem:SetAnchor(TOPRIGHT, constellationControl, TOPRIGHT, 0, 24)
-
-			else
-
-				starItem:SetAnchor(TOPLEFT, anchor, BOTTOMLEFT, 0, 2)
-
+				starControl:SetAnchor(TOPLEFT, title, BOTTOMLEFT, 0, 4)
+			elseif i%2 == 0 then
+				starControl:SetAnchor(TOPLEFT, anchor, TOPRIGHT, 6, 0)
+			elseif i%2 == 1 then
+				starControl:SetAnchor(TOPRIGHT, anchor, BOTTOMLEFT, -6, 2)
 			end
 
-			anchor = starItem
-
+			anchor = starControl
 			local coords = {0.75, 1, 0.5, 0.75}
 
 			if i > 4 then
-
 				coords = {0.25, 0.5, 0.25, 0.5}
-				starItem:GetNamedChild("Ring"):SetHidden(true)
-				starItem:SetHidden(true)
-
+				starControl:GetNamedChild("Ring"):SetHidden(true)
+				starControl:SetHidden(true)
 			else
-
-				starItem:GetNamedChild("Star"):SetHidden(true)
-				starItem:GetNamedChild("Name"):SetHidden(true)
-				starItem:GetNamedChild("Value"):SetHidden(true)
-
+				starControl:GetNamedChild("Icon"):SetHidden(true)
+				starControl:GetNamedChild("Name"):SetHidden(true)
+				starControl:GetNamedChild("Value"):SetHidden(true)
 			end
 
-			local starIcon = starItem:GetNamedChild("Star")
-
+			local starIcon = starControl:GetNamedChild("Icon")
 			starIcon:SetTextureCoords(unpack(coords))
 			starIcon:SetColor(starcolors[disciplineType]:UnpackRGB())
-
 		end
 
 		CMX.SetLabelColor(constellationControl, color)
 	end
 end
+
+function CMX.InitializeScribedPanel(panel)
+	local nameBase = panel:GetName() .. "ScribedSkill"
+	local anchor
+	for i = 1, 10 do
+		local scribedSkillControl = CreateControlFromVirtual(nameBase, panel, "CombatMetrics_ScribedSkillControl", i)
+		-- scribedSkillControl:SetHidden(false)
+
+		if i == 1 then
+			scribedSkillControl:SetAnchor(TOPLEFT, panel, TOPLEFT, 0, 4)
+		else			
+			scribedSkillControl:SetAnchor(TOPLEFT, anchor, BOTTOMLEFT, 0, 4)
+		end
+
+		anchor = scribedSkillControl
+	end
+end
+
 
 function CMX.InitializeSkillStats(panel)
 
@@ -2652,7 +2631,7 @@ local function updateBuffPanel(panel)
 
 				local keys = {}
 				local instanceData = buff.instances[buff.iconId]
-				
+
 				for stacks, stackData in pairs(instanceData) do
 					if type(stacks) == "number" then keys[#keys+1] = stacks end
 				end
@@ -3817,7 +3796,7 @@ local function Total(category)
 	local dpsend = fightData.dpsend or (combatstart + 1)
 	local hpsstart = fightData.hpsstart or combatstart
 	local hpsend = fightData.hpsend or (combatstart + 1)
- 
+
 	if category == "healingOut" or category == "healingIn" then
 
 		t0 = (hpsstart - combatstart) / 1000
@@ -5343,6 +5322,30 @@ function CMX.SkillTooltip_OnMouseExit(control)
 
 end
 
+function CMX.ScribedSkillTooltip_OnMouseEnter(control)
+
+	InitializeTooltip(SkillTooltip, control, TOPLEFT, 0, 5, BOTTOMLEFT)
+
+	local rowControl = control:GetParent()
+
+	local id = rowControl.id
+	local delay = rowControl.delay
+	local font = string.format("%s|%s|%s", GetString(SI_COMBAT_METRICS_STD_FONT), 16, "soft-shadow-thin")
+
+	local format = rowControl.ignored and "ID: %d (Off GCD)" or "ID: %d"
+
+	SkillTooltip:SetAbilityId(id)
+	SkillTooltip:AddVerticalPadding(15)
+	SkillTooltip:AddLine(string.format(format, id), font, .7, .7, .8 , TOP, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER)
+	if delay then SkillTooltip:AddLine(string.format("Average delay: %d ms", delay), font, .7, .7, .8 , TOP, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER) end
+end
+
+function CMX.ScribedSkillTooltip_OnMouseExit(control)
+
+	ClearTooltip(SkillTooltip)
+
+end
+
 function CMX.CPTooltip_OnMouseEnterLegacy(control)
 
 	if control.skillId == nil then return end
@@ -5679,7 +5682,7 @@ local function starOrder(t, a, b)
 end
 
 local function SetStarControlEmpty(starControl)
-	starControl:GetNamedChild("Star"):SetHidden(true)
+	starControl:GetNamedChild("Icon"):SetHidden(true)
 	starControl:GetNamedChild("Name"):SetHidden(true)
 	starControl:GetNamedChild("Value"):SetHidden(true)
 	starControl:GetNamedChild("Ring"):SetTexture("/esoui/art/champion/actionbar/champion_bar_slot_frame_disabled.dds")
@@ -5705,10 +5708,12 @@ local function updateRightInfoPanel(panel)
 
 	panel:SetHidden(false)
 	legacyPanel:SetHidden(true)
+	local scrollchild = GetControl(panel, "PanelScrollChild")
+
 
 	for disciplineId, discipline in pairs(CPData) do
 		if type(discipline) == "table" then
-			local constellationControl = panel:GetNamedChild("Constellation"..disciplineId)
+			local constellationControl = scrollchild:GetNamedChild("Panel"..disciplineId)
 			local itemNo = 1
 			local title = constellationControl:GetNamedChild("Title")
 			local disciplineName = zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionDisciplineName(disciplineId))
@@ -5716,13 +5721,11 @@ local function updateRightInfoPanel(panel)
 			title:SetText(ZO_CachedStrFormat("<<1>> (<<2>>)", disciplineName, discipline.total))
 
 			for starId, starData in CMX.spairs(discipline.stars, starOrder) do
-				if itemNo > 18 then break end
-
-				local starControl = constellationControl:GetNamedChild("StarItem" .. itemNo)
 				local points, state = unpack(starData)
 
 				if state == LIBCOMBAT_CPTYPE_SLOTTED then -- slotted
-					starControl:GetNamedChild("Star"):SetHidden(false)
+					local starControl = constellationControl:GetNamedChild("StarControl" .. itemNo)
+					starControl:GetNamedChild("Icon"):SetHidden(false)
 					starControl:GetNamedChild("Ring"):SetTexture("/esoui/art/champion/actionbar/champion_bar_slot_frame.dds")
 
 					local nameControl = starControl:GetNamedChild("Name")
@@ -5738,22 +5741,33 @@ local function updateRightInfoPanel(panel)
 					starControl.starId = starId
 					starControl.points = points
 					itemNo = itemNo + 1
-				
+
 				elseif state == LIBCOMBAT_CPTYPE_PASSIVE then
 					if itemNo <= 4 then
 						for i = itemNo, 4 do
-							starControl = constellationControl:GetNamedChild("StarItem" .. i)
+							local starControl = constellationControl:GetNamedChild("StarControl" .. i)
 							SetStarControlEmpty(starControl)
 						end
 
 						itemNo = 5
-						starControl = constellationControl:GetNamedChild("StarItem" .. itemNo)
 					end
 
+					local starControl = constellationControl:GetNamedChild("StarControl" .. itemNo)
 					starControl:SetHidden(false)
-					starControl:GetNamedChild("Name"):SetText(zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionSkillName(starId)))
-					starControl:GetNamedChild("Value"):SetText(points)
+					starControl:GetNamedChild("Ring"):SetHidden(true)
 
+					local starLabel = starControl:GetNamedChild("Name")
+					starLabel:SetText(zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionSkillName(starId)))
+					starLabel:SetHidden(false)
+					
+					local starIcon = starControl:GetNamedChild("Icon")
+					starIcon:SetTextureCoords(0.25, 0.5, 0.25, 0.5)
+					starIcon:SetHidden(false)
+					
+					local starValue = starControl:GetNamedChild("Value")
+					starValue:SetText(points)
+					starValue:SetHidden(false)
+					
 					starControl.slotted = false
 					starControl.starId = starId
 					starControl.points = points
@@ -5761,8 +5775,12 @@ local function updateRightInfoPanel(panel)
 				end
 			end
 
-			for i = math.max(itemNo + 1, 5), 18 do
-				constellationControl:GetNamedChild("StarItem" .. i):SetHidden(true)
+			local starControl = constellationControl:GetNamedChild("StarControl" .. itemNo)
+			while starControl do
+				starControl:SetHidden(true)
+				SetStarControlEmpty(starControl)
+				itemNo = itemNo + 1
+				starControl = constellationControl:GetNamedChild("StarControl" .. itemNo)
 			end
 		end
 	end
@@ -6695,7 +6713,7 @@ function CMX.Resizing(control, resizing)
 		control:SetEdgeColor(1,1,1,0)
 		control:SetCenterColor(1,1,1,0)
 		control:SetDrawTier(0)
-		
+
 		if lastResize == nil then return end
 
 		local scale, newpos = unpack(lastResize)

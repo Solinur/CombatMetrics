@@ -266,26 +266,17 @@
 		</Control>
 
 		<Control name="CombatMetrics_InfoSkillIcon" virtual="true">
-
 			<Dimensions x="20" y="20" />
-
 			<Controls>
-
 				<Texture name="$(parent)BG" textureFile="EsoUI/Art/ActionBar/abilityframe64_up.dds" level="0">
-
 					<AnchorFill />
-
 				</Texture>
 
 				<Texture name="$(parent)Texture" textureFile="EsoUI/Art/crafting/gamepad/crafting_alchemy_trait_unknown.dds" level="1">
-
 					<Anchor point="TOPLEFT" offsetX="2" offsetY="2" />
 					<Anchor point="BOTTOMRIGHT" offsetX="-2" offsetY="-2" />
-
 				</Texture>
-
 			</Controls>
-
 		</Control>
 
 		<Control name="CombatMetrics_InfoSkillRow" virtual="true">
@@ -760,56 +751,88 @@
 
 		</Control>
 
-		<Control name="CombatMetrics_StarItem" virtual="true" mouseEnabled="true">
-
-			<Dimensions x="169" y="20" />
+		<Control name="CombatMetrics_StarControl" virtual="true" mouseEnabled="true">
+			<Dimensions x="162" y="20" />
 
 			<OnMouseEnter> CMX.CPTooltip_OnMouseEnter(self) </OnMouseEnter>
 			<OnMouseExit> CMX.CPTooltip_OnMouseExit(self) </OnMouseExit>
 
 			<Controls>
-
-				<Texture name="$(parent)Star" textureFile="/esoui/art/champion/champion_star_pulse.dds">
-
+				<Texture name="$(parent)Icon" textureFile="/esoui/art/champion/champion_star_pulse.dds">
 					<Anchor point="CENTER" relativeTo="$(parent)" relativePoint="LEFT" offsetX="10" offsetY="0" />
 					<Dimensions x="30" y="30" />
-
 				</Texture>
 
 				<Texture name="$(parent)Ring" textureFile="/esoui/art/champion/actionbar/champion_bar_slot_frame_disabled.dds">
-
 					<Anchor point="LEFT" />
 					<Dimensions x="20" y="20" />
-
 				</Texture>
 
 				<Label name="$(parent)Value" text="0" inherits="CombatMetrics_ValueFontControl" horizontalAlignment="RIGHT">
-
 					<Anchor point="RIGHT" />
 					<Dimensions x="24" y="20" />
-
 				</Label>
 
 				<Label name="$(parent)Name" text="Star" inherits="CombatMetrics_ValueFontControl">
-
 					<Anchor point="LEFT" offsetX="24" offsetY="0" />
 					<Anchor point="RIGHT" relativeTo="$(parent)Value" relativePoint="LEFT" offsetX="-8" offsetY="0" />
-
-					<Dimensions x="100" y="20" />
-
+					<Dimensions x="93" y="20" />
 				</Label>
-
 			</Controls>
-
 		</Control>
 
-		<Control name="CombatMetrics_Constellation" virtual="true">
-			<Dimensions x="346" y="214" />
+		<Control name="CombatMetrics_Constellation" virtual="true" resizeToFitDescendents="true">
 			<Controls>
 				<Label name="$(parent)Title" text="CPNAME" inherits="CombatMetrics_LabelFontControl">
 					<Anchor point="TOPLEFT" />
-					<Dimensions x="200" y="20" />
+					<Anchor point="TOPRIGHT" />
+					<Dimensions x="330" y="20" />
 				</Label>
+			</Controls>
+		</Control>
+
+		<Control name="CombatMetrics_ScribedSkillScriptControl"  virtual="true">
+			<Dimensions x="98" y="16" /> 
+			<OnMouseEnter> CMX.ScribedSkillTooltip_OnMouseEnter(self) </OnMouseEnter>
+			<OnMouseExit> CMX.ScribedSkillTooltip_OnMouseExit(self) </OnMouseExit>
+			<Controls>
+				<Texture name="$(parent)Icon" textureFile="EsoUI/Art/crafting/gamepad/crafting_alchemy_trait_unknown.dds">
+					<Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="0" />
+					<Dimensions x="16" y="16"/>
+				</Texture>
+				
+				<Label name="$(parent)Name" text="Script" inherits="CombatMetrics_ValueFontSmallControl">
+					<Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="2" offsetY="0" />
+					<Anchor point="TOPRIGHT"/>
+				</Label>
+			</Controls>
+		</Control>
+
+		<Control name="CombatMetrics_ScribedSkillControl" virtual="true">
+			<Dimensions x="330" y="35" /> 
+			<Controls>
+				<Control name="$(parent)Icon" inherits="CombatMetrics_InfoSkillIcon">
+					<Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="4" offsetY="0" />
+					<Dimensions x="18" y="18" />
+				</Control>
+				
+				<Label name="$(parent)Name" text="ScribingSkill" inherits="CombatMetrics_LabelFontControl">
+					<Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="4" offsetY="0" />
+					<Anchor point="TOPRIGHT" offsetX="-4" offsetY="0"/>
+					<Dimensions y="18" />
+				</Label>
+
+				<Control name="$(parent)Script1" inherits="CombatMetrics_ScribedSkillScriptControl">
+					<Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="1" />
+				</Control>
+
+				<Control name="$(parent)Script2" inherits="CombatMetrics_ScribedSkillScriptControl">
+					<Anchor point="TOPLEFT" relativeTo="$(parent)Script1" relativePoint="TOPRIGHT" offsetX="4" offsetY="0" />
+				</Control>
+
+				<Control name="$(parent)Script3" inherits="CombatMetrics_ScribedSkillScriptControl">
+					<Anchor point="TOPLEFT" relativeTo="$(parent)Script2" relativePoint="TOPRIGHT" offsetX="4" offsetY="0" />
+				</Control>
 			</Controls>
 		</Control>
 
@@ -946,8 +969,8 @@
 
 			<OnInitialized>
 			
-				local scrolllist = GetControl(self, "PanelScrollChild")
-				scrolllist:SetResizeToFitPadding(0, 20)
+				local scrollList = GetControl(self, "PanelScrollChild")
+				scrollList:SetResizeToFitPadding(0, 20)
 				
 			</OnInitialized>
 
@@ -1013,8 +1036,8 @@
 
 			<OnInitialized>
 			
-				local scrolllist = GetControl(self, "PanelScrollChild")
-				scrolllist:SetResizeToFitPadding(0, 20)
+				local scrollList = GetControl(self, "PanelScrollChild")
+				scrollList:SetResizeToFitPadding(0, 20)
 				
 			</OnInitialized>
 
@@ -3385,8 +3408,8 @@
 
 							<OnInitialized>
 							
-								local scrolllist = GetControl(self, "PanelScrollChild")
-								scrolllist:SetResizeToFitPadding(0, 20)
+								local scrollList = GetControl(self, "PanelScrollChild")
+								scrollList:SetResizeToFitPadding(0, 20)
 								
 							</OnInitialized>
 
@@ -3499,8 +3522,8 @@
 
 					<OnInitialized>
 					
-						local scrolllist = GetControl(self, "PanelScrollChild")
-						scrolllist:SetResizeToFitPadding(0, 20)
+						local scrollList = GetControl(self, "PanelScrollChild")
+						scrollList:SetResizeToFitPadding(0, 20)
 						
 					</OnInitialized>
 
@@ -3627,8 +3650,8 @@
 
 					<OnInitialized>
 					
-						local scrolllist = GetControl(self, "PanelScrollChild")
-						scrolllist:SetResizeToFitPadding(0, 20)
+						local scrollList = GetControl(self, "PanelScrollChild")
+						scrollList:SetResizeToFitPadding(0, 20)
 						
 					</OnInitialized>
 
@@ -3767,49 +3790,39 @@
 						</Control>
 
 						<Control name="$(parent)Right">
-
 							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Left" offsetX="4" offsetY="0" />
-							<Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4" />
+							<Anchor point="BOTTOMRIGHT" offsetX="0" offsetY="-2" />
 
 							<Controls>
+								<Control name="$(parent)ScribedSkills" resizeToFitDescendents="true">
+									<Anchor point="TOPLEFT" offsetX="0" offsetY="0" />
+									<Anchor point="TOPRIGHT" offsetX="0" offsetY="0" />
+									<DimensionConstraints minY="0"/>
 
-								<Control name="$(parent)ScribedSkills">
+									<Controls>
+									</Controls>
 
-									<Anchor point="TOPLEFT" offsetX="6" offsetY="4" />
-
+									<OnInitialized> 
+										CMX.InitializeScribedPanel(self) 
+									</OnInitialized>
 								</Control>
 
-								<Control name="$(parent)Constellation1" inherits="CombatMetrics_Constellation">
+								<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
+									<Anchor point="TOPLEFT" relativeTo="$(parent)ScribedSkills" relativePoint="BOTTOMLEFT" offsetX="2" offsetY="6" />
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)ScribedSkills" relativePoint="BOTTOMRIGHT" offsetX="-2" offsetY="6" />
+								</Line>
 
-									<Anchor point="TOPLEFT" relativeTo="$(parent)ScribedSkills" relativePoint="BOTTOMLEFT" offsetX="0"
-										offsetY="8" />
-									<Anchor point="TOPRIGHT" relativeTo="$(parent)ScribedSkills" relativePoint="BOTTOMRIGHT" offsetX="0"
-										offsetY="8" />
-
+								<Control name="$(parent)Panel" inherits="ZO_ScrollContainer">
+									<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Sep" offsetX="2" offsetY="4" />
+									<Anchor point="BOTTOMRIGHT" offsetX="0" offsetY="0" />
 								</Control>
-
-								<Control name="$(parent)Constellation2" inherits="CombatMetrics_Constellation">
-
-									<Anchor point="TOPLEFT" relativeTo="$(parent)Constellation1" relativePoint="BOTTOMLEFT" offsetX="0"
-										offsetY="8" />
-									<Anchor point="TOPRIGHT" relativeTo="$(parent)Constellation1" relativePoint="BOTTOMRIGHT" offsetX="0"
-										offsetY="8" />
-
-								</Control>
-
-								<Control name="$(parent)Constellation3" inherits="CombatMetrics_Constellation">
-
-									<Anchor point="TOPLEFT" relativeTo="$(parent)Constellation2" relativePoint="BOTTOMLEFT" offsetX="0"
-										offsetY="8" />
-									<Anchor point="TOPRIGHT" relativeTo="$(parent)Constellation2" relativePoint="BOTTOMRIGHT" offsetX="0"
-										offsetY="8" />
-
-								</Control>
-
 							</Controls>
 
-							<OnInitialized> CMX.InitializeCPRows(self) </OnInitialized>
-
+							<OnInitialized> 
+								local scrollList = GetControl(self, "PanelScrollChild")
+								scrollList:SetResizeToFitPadding(0, 20)
+								CMX.InitializeCPRows(self) 
+							</OnInitialized>
 						</Control>
 
 						<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
@@ -4036,12 +4049,10 @@
 							<Anchor point="TOPLEFT" />
 							<Anchor point="BOTTOMRIGHT" relativePoint="RIGHT" offsetY="-1" />
 
-							<OnInitialized>
-							
-								local scrolllist = GetControl(self, "PanelScrollChild")
-								scrolllist:SetResizeToFitPadding(0, 20)
-								self.numItems = 0
-								
+							<OnInitialized>							
+								local scrollList = GetControl(self, "PanelScrollChild")
+								scrollList:SetResizeToFitPadding(0, 20)
+								self.numItems = 0								
 							</OnInitialized>
 
 						</Control>
@@ -4058,8 +4069,8 @@
 							<Anchor point="BOTTOMRIGHT" />
 
 							<OnInitialized>
-								local scrolllist = GetControl(self, "PanelScrollChild")
-								scrolllist:SetResizeToFitPadding(0, 20)
+								local scrollList = GetControl(self, "PanelScrollChild")
+								scrollList:SetResizeToFitPadding(0, 20)
 								
 								local label = GetControl(self, "HeaderName")
 								label:SetText(GetString(SI_COMBAT_METRICS_SAVED_FIGHTS))
