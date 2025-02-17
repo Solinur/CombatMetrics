@@ -5,7 +5,8 @@
 
 			<Controls>
 				<Control name="$(parent)Font">
-					<AnchorFill />
+					<Anchor point="TOPLEFT" />
+					<Dimensions x="0" y="0"/>
 					<OnInitialized>
 						self.font = {GetString(SI_COMBAT_METRICS_BOLD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE), "soft-shadow-thin"}
 						self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
@@ -19,7 +20,8 @@
 
 			<Controls>
 				<Control name="$(parent)Font">
-					<AnchorFill />
+					<Anchor point="TOPLEFT" />
+					<Dimensions x="0" y="0"/>
 					<OnInitialized>
 						self.font = {GetString(SI_COMBAT_METRICS_BOLD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE), "soft-shadow-thin"}
 						self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
@@ -33,7 +35,8 @@
 
 			<Controls>
 				<Control name="$(parent)Font">
-					<AnchorFill />
+					<Anchor point="TOPLEFT" />
+					<Dimensions x="0" y="0"/>
 					<OnInitialized>
 						self.font = {GetString(SI_COMBAT_METRICS_STD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE), "soft-shadow-thin"}
 						self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
@@ -47,7 +50,8 @@
 
 			<Controls>
 				<Control name="$(parent)Font">
-					<AnchorFill />
+					<Anchor point="TOPLEFT" />
+					<Dimensions x="0" y="0"/>
 					<OnInitialized>
 						self.font = {GetString(SI_COMBAT_METRICS_STD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE_SMALL), "soft-shadow-thin"}
 						self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
@@ -61,7 +65,8 @@
 
 			<Controls>
 				<Control name="$(parent)Font">
-					<AnchorFill />
+					<Anchor point="TOPLEFT" />
+					<Dimensions x="0" y="0"/>
 					<OnInitialized>
 						self.font = {GetString(SI_COMBAT_METRICS_STD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE_TITLE), "soft-shadow-thin"}
 						self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
@@ -75,7 +80,8 @@
 
 			<Controls>
 				<Control name="$(parent)Font">
-					<AnchorFill />
+					<Anchor point="TOPLEFT" />
+					<Dimensions x="0" y="0"/>
 					<OnInitialized>
 						self.font = {GetString(SI_COMBAT_METRICS_BOLD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE_TITLE), "soft-shadow-thin"}
 						self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
@@ -751,8 +757,8 @@
 
 		</Control>
 
-		<Control name="CombatMetrics_StarControl" virtual="true" mouseEnabled="true">
-			<Dimensions x="162" y="20" />
+		<Control name="CombatMetrics_StarControl" virtual="true" mouseEnabled="true" excludeFromResizeToFitExtents="true">
+			<Dimensions x="165" y="20" />
 
 			<OnMouseEnter> CMX.CPTooltip_OnMouseEnter(self) </OnMouseEnter>
 			<OnMouseExit> CMX.CPTooltip_OnMouseExit(self) </OnMouseExit>
@@ -776,17 +782,16 @@
 				<Label name="$(parent)Name" text="Star" inherits="CombatMetrics_ValueFontControl">
 					<Anchor point="LEFT" offsetX="24" offsetY="0" />
 					<Anchor point="RIGHT" relativeTo="$(parent)Value" relativePoint="LEFT" offsetX="-8" offsetY="0" />
-					<Dimensions x="93" y="20" />
+					<Dimensions x="97" y="20" />
 				</Label>
 			</Controls>
 		</Control>
 
-		<Control name="CombatMetrics_Constellation" virtual="true" resizeToFitDescendents="true">
+		<Control name="CombatMetrics_Constellation" virtual="true">
 			<Controls>
-				<Label name="$(parent)Title" text="CPNAME" inherits="CombatMetrics_LabelFontControl">
+				<Label name="$(parent)Title" text="CPNAME" inherits="CombatMetrics_LabelFontControl" excludeFromResizeToFitExtents="true">
 					<Anchor point="TOPLEFT" />
 					<Anchor point="TOPRIGHT" />
-					<Dimensions x="330" y="20" />
 				</Label>
 			</Controls>
 		</Control>
@@ -816,7 +821,7 @@
 					<Dimensions x="18" y="18" />
 				</Control>
 				
-				<Label name="$(parent)Name" text="ScribingSkill" inherits="CombatMetrics_LabelFontControl">
+				<Label name="$(parent)Name" text="Scribed Skill" inherits="CombatMetrics_LabelFontControl">
 					<Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="4" offsetY="0" />
 					<Anchor point="TOPRIGHT" offsetX="-4" offsetY="0"/>
 					<Dimensions y="18" />
@@ -2383,6 +2388,17 @@
 														self:GetNamedChild("Label"):SetText(GetString("SI_COMBAT_METRICS_STATS_MAGICKA",6))
 													</OnInitialized>
 												</Control>
+
+												<Control name="$(parent)Row7" inherits="CombatMetrics_StatRowLine2"
+													resizeToFitDescendents="true">
+													<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Row6"
+														offsetY="4" />
+													<Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Row6"
+														offsetY="4" constrains="X" />
+													<OnInitialized>
+														self:GetNamedChild("Label"):SetText(GetString("SI_COMBAT_METRICS_STATS_MAGICKA",7))
+													</OnInitialized>
+												</Control>
 											</Controls>
 
 											<OnInitialized>
@@ -3658,135 +3674,101 @@
 				</Control>
 
 				<Control name="$(parent)_InfoPanel" inherits="CombatMetrics_ControlFramed" hidden="true" mouseEnabled="true">
-
 					<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)_Title" offsetX="0" offsetY="4" />
 					<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)_AbilityPanel" offsetX="0" offsetY="0" />
 
 					<Controls>
-
 						<Control name="$(parent)Left">
-
-							<Anchor point="TOPLEFT" offsetX="4" offsetY="4" />
+							<Anchor point="TOPLEFT" offsetX="4" offsetY="0" />
 							<Dimensions x="626" y="300" />
 
 							<Controls>
-
 								<Control name="$(parent)AbilityBlock1" inherits="CombatMetrics_InfoAbilityBlock">
-
 									<Anchor point="TOPLEFT" offsetX="0" offsetY="0" />
 									<Anchor point="TOPRIGHT" relativePoint="TOP" constrains="X" offsetX="-3" offsetY="0" />
-
 								</Control>
 
 								<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
-
 									<Anchor point="TOP" offsetY="2" />
 									<Anchor point="BOTTOM" offsetY="-2" />
-
 								</Line>
 
 								<Control name="$(parent)AbilityBlock2" inherits="CombatMetrics_InfoAbilityBlock">
-
 									<Anchor point="TOPRIGHT" offsetX="0" offsetY="0" />
 									<Anchor point="TOPLEFT" relativePoint="TOP" constrains="X" offsetX="3" offsetY="0" />
-
 								</Control>
-
 							</Controls>
 
 							<OnInitialized> CMX.InitializeSkillStats(self) </OnInitialized>
-
 						</Control>
 
 						<Control name="$(parent)RightOld" hidden="true">
-
 							<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Left" offsetX="4" offsetY="0" />
 							<Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4" />
 
 							<Controls>
-
 								<Control name="$(parent)StarSign1" inherits="CombatMetrics_StarSign">
-
 									<Anchor point="TOPLEFT" offsetX="6" offsetY="4" />
-
 								</Control>
 
 								<Control name="$(parent)StarSign2" inherits="CombatMetrics_StarSign">
-
 									<Anchor point="TOPLEFT" relativeTo="$(parent)StarSign1" relativePoint="BOTTOMLEFT" offsetX="0"
 										offsetY="8" />
 									<Anchor point="TOPRIGHT" relativeTo="$(parent)StarSign1" relativePoint="BOTTOMRIGHT" offsetX="0"
 										offsetY="8" />
-
 								</Control>
 
 								<Control name="$(parent)StarSign3" inherits="CombatMetrics_StarSign">
-
 									<Anchor point="TOPLEFT" relativeTo="$(parent)StarSign2" relativePoint="BOTTOMLEFT" offsetX="0"
 										offsetY="8" />
 									<Anchor point="TOPRIGHT" relativeTo="$(parent)StarSign2" relativePoint="BOTTOMRIGHT" offsetX="0"
 										offsetY="8" />
-
 								</Control>
 
 								<Control name="$(parent)StarSign4" inherits="CombatMetrics_StarSign">
-
 									<Anchor point="TOPLEFT" relativeTo="$(parent)StarSign3" relativePoint="BOTTOMLEFT" offsetX="0"
 										offsetY="14" />
 									<Anchor point="TOPRIGHT" relativeTo="$(parent)StarSign3" relativePoint="BOTTOMRIGHT" offsetX="0"
 										offsetY="14" />
-
 								</Control>
 
 								<Control name="$(parent)StarSign5" inherits="CombatMetrics_StarSign">
-
 									<Anchor point="TOPLEFT" relativeTo="$(parent)StarSign4" relativePoint="BOTTOMLEFT" offsetX="0"
 										offsetY="8" />
 									<Anchor point="TOPRIGHT" relativeTo="$(parent)StarSign4" relativePoint="BOTTOMRIGHT" offsetX="0"
 										offsetY="8" />
-
 								</Control>
 
 								<Control name="$(parent)StarSign6" inherits="CombatMetrics_StarSign">
-
 									<Anchor point="TOPLEFT" relativeTo="$(parent)StarSign5" relativePoint="BOTTOMLEFT" offsetX="0"
 										offsetY="8" />
 									<Anchor point="TOPRIGHT" relativeTo="$(parent)StarSign5" relativePoint="BOTTOMRIGHT" offsetX="0"
 										offsetY="8" />
-
 								</Control>
 
 								<Control name="$(parent)StarSign7" inherits="CombatMetrics_StarSign">
-
 									<Anchor point="TOPLEFT" relativeTo="$(parent)StarSign6" relativePoint="BOTTOMLEFT" offsetX="0"
 										offsetY="14" />
 									<Anchor point="TOPRIGHT" relativeTo="$(parent)StarSign6" relativePoint="BOTTOMRIGHT" offsetX="0"
 										offsetY="14" />
-
 								</Control>
 
 								<Control name="$(parent)StarSign8" inherits="CombatMetrics_StarSign">
-
 									<Anchor point="TOPLEFT" relativeTo="$(parent)StarSign7" relativePoint="BOTTOMLEFT" offsetX="0"
 										offsetY="8" />
 									<Anchor point="TOPRIGHT" relativeTo="$(parent)StarSign7" relativePoint="BOTTOMRIGHT" offsetX="0"
 										offsetY="8" />
-
 								</Control>
 
 								<Control name="$(parent)StarSign9" inherits="CombatMetrics_StarSign">
-
 									<Anchor point="TOPLEFT" relativeTo="$(parent)StarSign8" relativePoint="BOTTOMLEFT" offsetX="0"
 										offsetY="8" />
 									<Anchor point="TOPRIGHT" relativeTo="$(parent)StarSign8" relativePoint="BOTTOMRIGHT" offsetX="0"
 										offsetY="8" />
-
 								</Control>
-
 							</Controls>
 
 							<OnInitialized> CMX.InitializeCPRowsLegacy(self) </OnInitialized>
-
 						</Control>
 
 						<Control name="$(parent)Right">
@@ -3798,13 +3780,6 @@
 									<Anchor point="TOPLEFT" offsetX="0" offsetY="0" />
 									<Anchor point="TOPRIGHT" offsetX="0" offsetY="0" />
 									<DimensionConstraints minY="0"/>
-
-									<Controls>
-									</Controls>
-
-									<OnInitialized> 
-										CMX.InitializeScribedPanel(self) 
-									</OnInitialized>
 								</Control>
 
 								<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
@@ -3821,7 +3796,7 @@
 							<OnInitialized> 
 								local scrollList = GetControl(self, "PanelScrollChild")
 								scrollList:SetResizeToFitPadding(0, 20)
-								CMX.InitializeCPRows(self) 
+								CMX.InitializeRightInfoPanel(self) 
 							</OnInitialized>
 						</Control>
 

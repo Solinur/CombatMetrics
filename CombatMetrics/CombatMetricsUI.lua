@@ -421,7 +421,28 @@ local starcolors = {
 
 }
 
-function CMX.InitializeCPRows(panel)
+
+local function InitializeScribedSkillsPanel(panel)
+	local nameBase = panel:GetName()
+	local anchor
+	for i = 1, 10 do
+		local scribedSkillControl = CreateControlFromVirtual(nameBase, panel, "CombatMetrics_ScribedSkillControl", i)
+		-- scribedSkillControl:SetHidden(false)
+
+		if i == 1 then
+			scribedSkillControl:SetAnchor(TOPLEFT, panel, TOPLEFT, 0, 4)
+		else
+			scribedSkillControl:SetAnchor(TOPLEFT, anchor, BOTTOMLEFT, 0, 4)
+			scribedSkillControl:SetHidden(true)
+		end
+
+		anchor = scribedSkillControl
+	end
+end
+
+function CMX.InitializeRightInfoPanel(panel)
+	InitializeScribedSkillsPanel(panel:GetNamedChild("ScribedSkills"))
+
 	local scrollchild = GetControl(panel, "PanelScrollChild")
 	scrollchild:SetAnchor(TOPRIGHT, nil, TOPRIGHT, 0, 0)
 	local currentanchor = {TOPLEFT, scrollchild, TOPLEFT, 0, dx}
@@ -442,6 +463,7 @@ function CMX.InitializeCPRows(panel)
 
 		---@type LabelControl
 		local title = constellationControl:GetNamedChild("Title")
+		local top = title:GetTop()
 		title:SetText(zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionDisciplineName(disciplineId)))
 
 		local nameBase = constellationControl:GetName() .. "StarControl"
@@ -453,9 +475,9 @@ function CMX.InitializeCPRows(panel)
 			if i == 1 then
 				starControl:SetAnchor(TOPLEFT, title, BOTTOMLEFT, 0, 4)
 			elseif i%2 == 0 then
-				starControl:SetAnchor(TOPLEFT, anchor, TOPRIGHT, 6, 0)
+				starControl:SetAnchor(TOPLEFT, anchor, TOPRIGHT, 7, 0)
 			elseif i%2 == 1 then
-				starControl:SetAnchor(TOPRIGHT, anchor, BOTTOMLEFT, -6, 2)
+				starControl:SetAnchor(TOPRIGHT, anchor, BOTTOMLEFT, -7, 2)
 			end
 
 			anchor = starControl
@@ -475,25 +497,10 @@ function CMX.InitializeCPRows(panel)
 			starIcon:SetTextureCoords(unpack(coords))
 			starIcon:SetColor(starcolors[disciplineType]:UnpackRGB())
 		end
+		local bottom = constellationControl:GetNamedChild("StarControl4"):GetBottom()
+		constellationControl:SetHeight(bottom-top)
 
 		CMX.SetLabelColor(constellationControl, color)
-	end
-end
-
-function CMX.InitializeScribedPanel(panel)
-	local nameBase = panel:GetName() .. "ScribedSkill"
-	local anchor
-	for i = 1, 10 do
-		local scribedSkillControl = CreateControlFromVirtual(nameBase, panel, "CombatMetrics_ScribedSkillControl", i)
-		-- scribedSkillControl:SetHidden(false)
-
-		if i == 1 then
-			scribedSkillControl:SetAnchor(TOPLEFT, panel, TOPLEFT, 0, 4)
-		else			
-			scribedSkillControl:SetAnchor(TOPLEFT, anchor, BOTTOMLEFT, 0, 4)
-		end
-
-		anchor = scribedSkillControl
 	end
 end
 
@@ -1896,6 +1903,7 @@ local statFormat = { 			-- {label, format, convert}
 		[3] = {LIBCOMBAT_STAT_SPELLCRIT, "%.1f%%", true},
 		[4] = {LIBCOMBAT_STAT_SPELLCRITBONUS, "%.1f%%"},
 		[5] = {LIBCOMBAT_STAT_SPELLPENETRATION, "%d"},
+		[6] = {LIBCOMBAT_STAT_STATUS_EFFECT_CHANCE, "%.1f%%"},
 	},
 
 	[POWERTYPE_STAMINA] = {
@@ -1904,6 +1912,7 @@ local statFormat = { 			-- {label, format, convert}
 		[3] = {LIBCOMBAT_STAT_WEAPONCRIT, "%.1f%%", true},
 		[4] = {LIBCOMBAT_STAT_WEAPONCRITBONUS, "%.1f%%"},
 		[5] = {LIBCOMBAT_STAT_WEAPONPENETRATION, "%d"},
+		[6] = {LIBCOMBAT_STAT_STATUS_EFFECT_CHANCE, "%.1f%%"},
 	},
 
 	[POWERTYPE_HEALTH] = {
@@ -1917,7 +1926,6 @@ local statFormat = { 			-- {label, format, convert}
 
 
 local function updateFightStatsPanelRight(panel)
-
 	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating FightStatsPanelRight")
 
 	local data = fightData or {}
@@ -1962,17 +1970,13 @@ local function updateFightStatsPanelRight(panel)
 	local resdata = selections.unit[category] and selectionData or calculated or {}
 
 	for i = 1, 4 do
-
 		local text = ZO_CachedStrFormat("<<1>>:", GetString(stringKey, i))
 		local rowcontrol = statWindowControl:GetNamedChild("Row"..i)
 		local dataKey, displayformat, convert = unpack(keys[i] or {})
-
 		local statData = stats[dataKey]
-
 		if calcVersion < 2 then dataKey = statKeysLegacy[dataKey] end
 
 		if text ~= nil and text ~= "" and dataKey ~= nil then
-
 			local maxvalue = statData and statData.max or fightStats["max"..dataKey] or 0
 
 			if convert == true then maxvalue = GetCriticalStrikeChance(maxvalue) end
@@ -1982,44 +1986,33 @@ local function updateFightStatsPanelRight(panel)
 			local avgvalue = statData and statData[avgkey] or avgvalues["avg"..dataKey] or stats["avg"..dataKey]
 
 			if avgvalue == nil then -- legacy
-
 				local legacyvalue = avgvalues["sum"..dataKey]
 				avgvalue = (legacyvalue and legacyvalue / math.max(convert and countvalue or totalvalue or 1, 1)) or maxvalue
-
 			end
 
 			if type(avgvalue) == "number" then
-
 				if convert then avgvalue = GetCriticalStrikeChance(avgvalue) end
 				if displayformat then avgvalue = string.format(displayformat, avgvalue) end
-
 			end
 
 			if i == 4 and powerType ~= POWERTYPE_HEALTH then	-- Add a hint for backstabber
-
 				rowcontrol.tooltip = {}
 				local tooltiplines = {}
 				local backstabberTT
-
 				local CP = data.CP
 
 				if CP and CP.version ~= nil and CP.version >= 2 then
-
 					local backstabber = CP[1] and CP[1].stars and CP[1].stars[31] -- Backstabber CP
 
 					if backstabber and backstabber[1] >= 10 and backstabber[2] == LIBCOMBAT_CPTYPE_SLOTTED then
-
 						text = ZO_CachedStrFormat("<<1>>*:", GetString(stringKey, i))
-
 						backstabberTT = GetString(SI_COMBAT_METRICS_BACKSTABBER_TT)
-
 					end
 				end
 
 				local critvalues = powerType == POWERTYPE_MAGICKA and resdata.spellCrit or powerType == POWERTYPE_STAMINA and resdata.weaponCrit
 
 				if critvalues then
-
 					local sum = 0
 					local effectiveSum = 0
 					local totalDamage = 0
@@ -2028,7 +2021,6 @@ local function updateFightStatsPanelRight(panel)
 					local stepsize = 10
 
 					for crit, damage in pairs(critvalues) do
-
 						sum = sum + crit * damage
 						effectiveSum = effectiveSum + math.min(crit, maxCritBonus) * damage
 						totalDamage = totalDamage + damage
@@ -2037,27 +2029,20 @@ local function updateFightStatsPanelRight(panel)
 
 						local trimmedkey = math.ceil(crit/stepsize)*stepsize
 						trimmedCritValues[trimmedkey] = (trimmedCritValues[trimmedkey] or 0) + damage
-
 					end
 
 					totalDamage = math.max(totalDamage, 1)
-
 					table.insert(tooltiplines, GetString(SI_COMBAT_METRICS_CRITBONUS_TT))
 
 					local sumdamage = 0
-
 					for crit, damage in CMX.spairs(trimmedCritValues) do
-
 						sumdamage = sumdamage + damage
 
 						local sumdamageRatio = 100 * (sumdamage/totalDamage)
 						local damageRatio = 100 * damage/totalDamage
-
 						local color = crit == 125 and "|cffbb88" or damageRatio > 5 and "|cffffff" or ""
-
 						local newline = string.format("<%s%2d%%: %5.1f%%", color, crit, sumdamageRatio)
 						table.insert(tooltiplines, newline)
-
 					end
 
 					avgvalue = string.format(displayformat, math.max(effectiveSum / totalDamage, avgvalues["avg"..dataKey] or 0))
@@ -2071,15 +2056,12 @@ local function updateFightStatsPanelRight(panel)
 
 				end
 			else
-
 				rowcontrol.tooltip = nil
-
 			end
 
 			rowcontrol:GetNamedChild("Label"):SetText(text)
 			rowcontrol:GetNamedChild("Value"):SetText(avgvalue)
 			rowcontrol:GetNamedChild("Value2"):SetText(maxvalue)
-
 			rowcontrol:SetHidden(false)
 
 		else
@@ -2091,6 +2073,7 @@ local function updateFightStatsPanelRight(panel)
 
 	local row5 = statWindowControl:GetNamedChild("Row5")
 	local row6 = statWindowControl:GetNamedChild("Row6")
+	local row7 = statWindowControl:GetNamedChild("Row7")
 
 	if category == "damageOut" and (powerType == POWERTYPE_MAGICKA or powerType == POWERTYPE_STAMINA) then
 
@@ -2150,6 +2133,7 @@ local function updateFightStatsPanelRight(panel)
 
 		row5:SetHidden(false)
 		row6:SetHidden(false)
+		row7:SetHidden(false)
 
 		local text5 = ZO_CachedStrFormat("<<1>>:", GetString(stringKey, 5))
 
@@ -2163,10 +2147,30 @@ local function updateFightStatsPanelRight(panel)
 		row6:GetNamedChild("Value"):SetText(overPenetrationRatio)
 		row6.tooltip = #tooltiplines>4 and tooltiplines or nil
 
+		local text7 = ZO_CachedStrFormat("<<1>>:", GetString(stringKey, 7))
+		local dataKey, displayformat, convert = unpack(keys[6] or {})
+		local statData = stats[dataKey]
+		CMX.Print("debug", LOG_LEVEL_INFO, "status effect display:", dataKey, displayformat, statData ~= nil, text7)
+
+		if text7 ~= nil and text7 ~= "" and dataKey ~= nil then
+			local maxvalue = statData and statData.max or fightStats["max"..dataKey] or 0
+			local avgvalue = statData and statData[avgkey] or avgvalues["avg"..dataKey] or stats["avg"..dataKey] or 0
+
+			if displayformat then maxvalue = string.format(displayformat, maxvalue) end
+			if displayformat then avgvalue = string.format(displayformat, avgvalue) end
+
+			row7:GetNamedChild("Label"):SetText(text7)
+			row7:GetNamedChild("Value"):SetText(avgvalue)
+			row7:GetNamedChild("Value2"):SetText(maxvalue)
+			row7:SetHidden(false)
+		else
+			row7:SetHidden(true)
+		end
 	else
 
 		row5:SetHidden(true)
 		row6:SetHidden(true)
+		row7:SetHidden(true)
 		row6.tooltip = nil
 
 	end
@@ -5522,7 +5526,7 @@ local function updateLeftInfoPanel(panel)
 
 			local control = subPanel:GetNamedChild(controlName)
 
-			local icon = control:GetNamedChild("Icon"):GetNamedChild("Texture")
+			local icon = GetControl(control, "IconTexture")
 
 			local name = control:GetNamedChild("Label")
 
@@ -5668,17 +5672,59 @@ local function updateRightInfoPanelLegacy(panel)
 	end
 end
 
+
+---@param panel Control
+---@param setHidden boolean
+local function setScribedSkillsPanelHidden(panel, setHidden)
+	panel:SetHidden(setHidden)
+	panel:GetParent():GetNamedChild("Sep"):SetHidden(setHidden)
+end
+
+local function updateScribedSkillsPanel(panel)
+	if fightData == nil then return setScribedSkillsPanelHidden(panel, true) end
+	local scribedSkills = fightData.charData.scribedSkills or {}
+
+	local index = 0
+	for abilityId, data in CMX.spairs(scribedSkills) do
+		index = index + 1
+		local skillControl = panel:GetNamedChild(tostring(index))
+		skillControl:SetHidden(false)
+		local abilityName = GetFormattedAbilityName(abilityId)
+		local iconTexture = GetFormattedAbilityIcon(abilityId)
+
+		skillControl:GetNamedChild("Name"):SetText(abilityName)
+		GetControl(skillControl, "IconTexture"):SetTexture(iconTexture)
+
+		for i = 1, 3 do
+			local scriptId = data[i]
+			local scriptControl = skillControl:GetNamedChild("Script" .. i)
+			local scriptName = GetFormattedAbilityName(scriptId, true)
+			local iconTexture = GetFormattedAbilityIcon(scriptId, true)
+
+			scriptControl:GetNamedChild("Name"):SetText(scriptName)
+			scriptControl:GetNamedChild("Icon"):SetTexture(iconTexture)
+		end
+		if index == 10 then break end
+	end
+
+	for i = index + 1, panel:GetNumChildren() do
+		panel:GetNamedChild(tostring(i)):SetHidden(true)
+	end
+
+	setScribedSkillsPanelHidden(panel, index == 0)
+end
+
+
+---@param t table
+---@param a any key1
+---@param b any key2
+---@return boolean isHigher
 local function starOrder(t, a, b)
-
-	local ishigher = false
-
 	local typeA = t[a][2]
 	local typeB = t[b][2]
 
-	if typeA > typeB or (typeA == typeB and a < b) then ishigher = true end
-
-	return ishigher
-
+	if typeA > typeB or (typeA == typeB and a < b) then return true end
+	return false
 end
 
 local function SetStarControlEmpty(starControl)
@@ -5694,6 +5740,8 @@ end
 
 local function updateRightInfoPanel(panel)
 	if fightData == nil then return end
+	
+	updateScribedSkillsPanel(panel:GetNamedChild("ScribedSkills"))
 	local CPData = fightData.CP
 	if CPData == nil then return end
 
@@ -5716,6 +5764,7 @@ local function updateRightInfoPanel(panel)
 			local constellationControl = scrollchild:GetNamedChild("Panel"..disciplineId)
 			local itemNo = 1
 			local title = constellationControl:GetNamedChild("Title")
+			local top = title:GetTop()
 			local disciplineName = zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionDisciplineName(disciplineId))
 
 			title:SetText(ZO_CachedStrFormat("<<1>> (<<2>>)", disciplineName, discipline.total))
@@ -5774,6 +5823,8 @@ local function updateRightInfoPanel(panel)
 					itemNo = itemNo + 1
 				end
 			end
+			local bottom = constellationControl:GetNamedChild("StarControl" .. (itemNo-1)):GetBottom()
+			constellationControl:SetHeight(bottom-top)
 
 			local starControl = constellationControl:GetNamedChild("StarControl" .. itemNo)
 			while starControl do
