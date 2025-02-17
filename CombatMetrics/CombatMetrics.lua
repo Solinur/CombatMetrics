@@ -28,7 +28,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.6.7"
+CMX.version = "1.7.0beta"
 
 -- Logger
 
@@ -82,8 +82,6 @@ if LC == nil then
 end
 
 local GetFormattedAbilityName = LC.GetFormattedAbilityName
-
-local GetFormattedAbilityIcon = LC.GetFormattedAbilityIcon
 
 local STATTYPE_NORMAL = 0
 local STATTYPE_CRITICAL = 1
@@ -178,7 +176,7 @@ local StatDebuffs = {
 
 	[GetFormattedAbilityName(113382)] = {[LIBCOMBAT_STAT_SPELLPOWER] = 460}, -- Spell Strategist
 
-	[GetFormattedAbilityName(217353)] = {[LIBCOMBAT_STAT_STATUS_EFFECT_CHANCE] = 100}, -- Shattering KNife: Assassin's Misery
+	[GetFormattedAbilityName(217353)] = {[LIBCOMBAT_STAT_STATUS_EFFECT_CHANCE] = 100}, -- Misery Knife (Travelling Knife -> Assassin's Misery)
 
 }
 
@@ -2070,9 +2068,11 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 				end
 
+				if statId == LIBCOMBAT_STAT_STATUS_EFFECT_CHANCE then totaldmgvalue = mathmax(data.damageOutTotal, 1) end
 				if statdata.dmgsum ~= nil then dmgValue = statdata.dmgsum / totaldmgvalue end
-
 				statdata.dmgavg = dmgValue
+
+				if statId == 25 then Print("debug", LOG_LEVEL_INFO, "calc stat avg:", statdata.dmgsum, totaldmgvalue, dmgValue) end
 
 				if statdata.healsum ~= nil and stattype ~= STATTYPE_PENETRATION then healValue = statdata.healsum / totalhealvalue end
 
