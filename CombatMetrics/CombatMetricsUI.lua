@@ -33,6 +33,23 @@ if LibDebugLogger then
 	LOG_LEVEL_ERROR = LibDebugLogger.LOG_LEVEL_ERROR
 end
 
+local MundusStones = {
+	[13975] = true,
+	[13980] = true,
+	[13943] = true,
+	[13978] = true,
+	[13976] = true,
+	[13981] = true,
+	[13982] = true,
+	[13979] = true,
+	[13940] = true,
+	[13985] = true,
+	[13977] = true,
+	[13984] = true,
+	[13974] = true,
+}
+
+
 if GetAPIVersion() < 100034 then CHAMPION_DISCIPLINE_TYPE_COMBAT, CHAMPION_DISCIPLINE_TYPE_CONDITIONING, CHAMPION_DISCIPLINE_TYPE_WORLD = 0, 1, 2 end
 
 local CMX = CMX
@@ -5515,43 +5532,32 @@ local function updateLeftInfoPanel(panel)
 
 		end
 
-		local statControl = subPanel:GetNamedChild("Stats")
-		local ratioControl = statControl:GetNamedChild("Value1")
-		local timeControl = statControl:GetNamedChild("Value2")
+		local ratioControl = subPanel:GetNamedChild("Value1")
+		local timeControl = subPanel:GetNamedChild("Value2")
 
 		ratioControl:SetText(string.format("%.1f%%", (timeratio or 0) * 100))
 		timeControl:SetText(string.format("%.1f%%", (dpsratio or 0) * 100))
 
 		for line, controlName in ipairs(SkillBarItems) do
-
 			local control = subPanel:GetNamedChild(controlName)
-
-			local icon = GetControl(control, "IconTexture")
-
-			local name = control:GetNamedChild("Label")
-
 			local abilityId = bardata and bardata[line] or nil
-
+			
 			control.id = abilityId
-
+			
+			local icon = GetControl(control, "IconTexture")
 			local texture = abilityId and abilityId > 0 and GetFormattedAbilityIcon(abilityId) or "EsoUI/Art/crafting/gamepad/crafting_alchemy_trait_unknown.dds"
-
 			icon:SetTexture(texture)
-
+			
+			local name = control:GetNamedChild("Label")
 			local abilityName = abilityId and abilityId > 0 and GetFormattedAbilityName(abilityId) or ""
-
 			name:SetText(abilityName)
 
 			local reducedslot = (subPanelIndex-1) * 10 + line
-
 			local slotdata = skilldata and skilldata[reducedslot] or nil
-
 			local strings = {"-", "-", "-", "-"}
-
 			local color = WhiteColor
 
 			if slotdata and slotdata.count and slotdata.count > 0 then
-
 				strings[1] = string.format("%d", slotdata.count) or "-"
 
 				local weave = slotdata.weavingTimeAvg or slotdata.skillNextAvg
@@ -5564,22 +5570,17 @@ local function updateLeftInfoPanel(panel)
 				strings[4] = diff and string.format("%.2f", diff/1000) or "-"
 
 				control.delay = slotdata.delayAvg
-
 				if slotdata.ignored then color = DisabledColor end
-
 				control.ignored = slotdata.ignored
-
 			end
 
 			name:SetColor(color:UnpackRGB())
 
 			for k = 1, 4 do
-
 				local label = control:GetNamedChild("Value" .. k)
 
 				label:SetText(strings[k])
 				label:SetColor(color:UnpackRGB())
-
 			end
 		end
 	end
