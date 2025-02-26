@@ -601,6 +601,33 @@
 			</Controls>
 		</Control>
 
+		<Control name="Misc_Setup_Item" virtual="true" mouseEnabled="true">		
+			<Dimensions x="202"/>
+			<Controls>
+				<Texture name="$(parent)Icon" textureFile="EsoUI/Art/CharacterWindow/gearSlot_head.dds">
+					<Anchor point="TOPLEFT" />
+					<Dimensions x="22" y="22" />
+				</Texture>
+
+				<Label name="$(parent)Name" text="Name" inherits="CombatMetrics_ValueFontControl" verticalAlignment="CENTER">
+					<Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="8" offsetY="0"/>
+					<Anchor point="TOPRIGHT"/>
+				</Label>
+
+				<Texture name="$(parent)Icon2" textureFile="EsoUI/Art/CharacterWindow/gearSlot_head.dds">
+					<Anchor point="BOTTOMLEFT" />
+					<Dimensions x="22" y="22" />
+				</Texture>
+
+				<Label name="$(parent)Name2" text="Name" inherits="CombatMetrics_ValueFontControl" verticalAlignment="CENTER">
+					<Anchor point="TOPLEFT" relativeTo="$(parent)Icon2" relativePoint="TOPRIGHT" offsetX="8" offsetY="0"/>
+					<Anchor point="BOTTOMRIGHT"/>
+				</Label>
+			</Controls>
+		</Control>
+
+		
+
 		<Control name="CombatMetrics_StarRow" virtual="true" mouseEnabled="true">
 
 			<Dimensions y="20" />
@@ -3758,11 +3785,11 @@
 
 						<Control name="$(parent)Bottom">
 							<Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Left" offsetX="0" offsetY="6" />
-							<Anchor point="BOTTOMLEFT" offsetX="4" offsetY="-38" />
+							<Anchor point="BOTTOMLEFT" offsetX="4" offsetY="-50" />
 
 							<Controls>
 								<Control name="$(parent)EquipLine1" inherits="CombatMetrics_EquipLine">
-									<Anchor point="TOPLEFT" offsetX="5" offsetY="8" />
+									<Anchor point="TOPLEFT" offsetX="5" offsetY="4" />
 									<Anchor point="TOPRIGHT" relativeTo="$(parent)" offsetX="0" constrains="X" />
 								</Control>
 
@@ -3775,9 +3802,9 @@
 
 								<Control name="$(parent)EquipLine3" inherits="CombatMetrics_EquipLine">
 									<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine2" relativePoint="BOTTOMLEFT" offsetX="0"
-										offsetY="12" />
+										offsetY="8" />
 									<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine2" relativePoint="BOTTOMRIGHT" offsetX="0"
-										offsetY="12" />
+										offsetY="8" />
 								</Control>
 
 								<Control name="$(parent)EquipLine4" inherits="CombatMetrics_EquipLine">
@@ -3789,9 +3816,9 @@
 
 								<Control name="$(parent)EquipLine5" inherits="CombatMetrics_EquipLine">
 									<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine4" relativePoint="BOTTOMLEFT" offsetX="0"
-										offsetY="12" />
+										offsetY="10" />
 									<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine4" relativePoint="BOTTOMRIGHT" offsetX="0"
-										offsetY="12" />
+										offsetY="10" />
 								</Control>
 
 								<Control name="$(parent)EquipLine6" inherits="CombatMetrics_EquipLine">
@@ -3838,9 +3865,9 @@
 
 								<Control name="$(parent)EquipLine12" inherits="CombatMetrics_EquipLine">
 									<Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine11" relativePoint="BOTTOMLEFT" offsetX="0"
-										offsetY="12" />
+										offsetY="10" />
 									<Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine11" relativePoint="BOTTOMRIGHT" offsetX="0"
-										offsetY="12" />
+										offsetY="10" />
 								</Control>
 
 								<Control name="$(parent)EquipLine13" inherits="CombatMetrics_EquipLine">
@@ -3863,6 +3890,39 @@
 							<Anchor point="BOTTOMLEFT" relativeTo="$(parent)Bottom" offsetY="0" />
 							<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Bottom" offsetY="0" />
 						</Line>
+
+						<Control name="$(parent)Misc">
+							<Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Bottom" offsetX="0" offsetY="3" />
+							<Anchor point="BOTTOMLEFT" offsetX="8" offsetY="-3" />
+
+							<Controls>
+								<Control name="$(parent)Mundus" inherits="Misc_Setup_Item">
+									<Anchor point="TOPLEFT"/>
+									<Anchor point="BOTTOMLEFT"/>
+								</Control>
+
+								<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
+									<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Mundus" offsetX="2"/>
+									<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Mundus" offsetX="2"/>
+								</Line>
+
+								<Control name="$(parent)DrinkFood" inherits="Misc_Setup_Item">
+									<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Mundus" offsetX="5"/>
+									<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Mundus" offsetX="5"/>
+								</Control>
+
+								<Line name="$(parent)Sep2" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
+									<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)DrinkFood" offsetX="2"/>
+									<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)DrinkFood" offsetX="2"/>
+								</Line>
+
+								<Control name="$(parent)Potions" inherits="Misc_Setup_Item">
+									<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)DrinkFood" offsetX="5"/>
+									<Anchor point="BOTTOMRIGHT"/>
+								</Control>
+
+							</Controls>
+						</Control>
 
 					</Controls>
 
