@@ -33,23 +33,6 @@ if LibDebugLogger then
 	LOG_LEVEL_ERROR = LibDebugLogger.LOG_LEVEL_ERROR
 end
 
-local MundusStones = {
-	[13975] = true,
-	[13980] = true,
-	[13943] = true,
-	[13978] = true,
-	[13976] = true,
-	[13981] = true,
-	[13982] = true,
-	[13979] = true,
-	[13940] = true,
-	[13985] = true,
-	[13977] = true,
-	[13984] = true,
-	[13974] = true,
-}
-
-
 if GetAPIVersion() < 100034 then CHAMPION_DISCIPLINE_TYPE_COMBAT, CHAMPION_DISCIPLINE_TYPE_CONDITIONING, CHAMPION_DISCIPLINE_TYPE_WORLD = 0, 1, 2 end
 
 local CMX = CMX
