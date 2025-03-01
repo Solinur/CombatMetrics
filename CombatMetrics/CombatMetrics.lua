@@ -754,21 +754,14 @@ function UnitStatHandler:Initialize()
 end
 
 local function GetEmtpyFightStats()
-
 	local data = {}
-
 	InitBasicValues(data)
 
-	data.temp =	{
-		["stats"] = {}
-	}
-
+	data.temp =	{["stats"] = {}}
 	data.units = {}
-
 	data.stats = {}	-- stat tracking
 
 	data.resources = ResourceTable:New()
-
 	data.skills = {}
 	data.casts = {}
 	data.lastIndex = {}
@@ -781,6 +774,7 @@ local function GetEmtpyFightStats()
 	data.totalSkillsFired =  0
 
 	data.performance = {count = 0}
+	data.buildInfo = {mundus = {}, drinkFood = {}, potions = {}}
 
 	data.graph = {
 		damageOut = {},
@@ -793,37 +787,27 @@ local function GetEmtpyFightStats()
 	data.calcVersion = 2
 
 	return data
-
 end
 
 local function InitTrialDummies(fight)
-
 	local units = fight.units
 
 	for unitId, unit in pairs(units) do
-
 		if unit.isTrialDummy then
-
 			for abilityId, _ in pairs(TrialDummyBuffs) do
-
 				local fakeLogLine = {LIBCOMBAT_EVENT_GROUPEFFECTS_OUT, fight.combatstart, unitId, abilityId, EFFECT_RESULT_GAINED, BUFF_EFFECT_TYPE_DEBUFF, 0, COMBAT_UNIT_TYPE_TARGET_DUMMY, 0}
-
 				ProcessLog[LIBCOMBAT_EVENT_GROUPEFFECTS_OUT](fight, fakeLogLine)
-
 			end
 		end
 	end
 end
 
 local function CalculateFight(fight) -- called by CMX.update or on user interaction
-
 	fight.cindex = 0
 	fight.calculated = GetEmtpyFightStats()
 
 	local data = fight.calculated
-
 	currentbar = fight.startBar
-
 	local barStats = fight:AcquireBarStats(currentbar)
 	barStats.onTimes = {fight.dpsstart}
 
@@ -838,25 +822,15 @@ local function CalculateFight(fight) -- called by CMX.update or on user interact
 	data.groupHPSIn 	= fight.groupHPSIn
 	data.groupDPSIn 	= fight.groupDPSIn
 
-	data.buildInfo = {
-		mundus = {},
-		drinkFood = {},
-		potions = {},
-	}
-
 	fight.calculating = true
-
 	fight.special["wrathCP"] = fight.CP[1] and fight.CP[1]["slotted"] and fight.CP[1]["slotted"][276]
 
 	local titleBar = CombatMetrics_Report_TitleFightTitleBar
-
 	titleBar:SetValue(0)
 	titleBar:SetHidden(false)
 
 	fight:InitTrialDummies()
-
 	fight:CalculateChunk()
-
 end
 
 local function sumUnitTables(target, source, reference) -- adds values from source to those in target using reference to determine the objects to sum
@@ -1733,13 +1707,10 @@ ProcessLog[LIBCOMBAT_EVENT_MESSAGES] = ProcessMessages
 ProcessLog[LIBCOMBAT_EVENT_BOSSHP] = function() end
 
 local function ProcessPerformanceStats(fight, logline)
-
 	local callbacktype, timems, avg, min, max, ping = unpackLogline(logline, 1, 6)
-
 	if not (avg and min and max and ping) then return end
 
 	local performance = fight.calculated.performance
-
 	performance.count = performance.count + 1
 
 	performance.minMin = mathmin(performance.minMin or min, min)
@@ -1758,8 +1729,22 @@ local function ProcessPerformanceStats(fight, logline)
 	performance.maxPing = mathmax(performance.maxPing or ping, ping)
 	performance.sumPing = ping + (performance.sumPing or 0)
 end
-
 ProcessLog[LIBCOMBAT_EVENT_PERFORMANCE] = ProcessPerformanceStats
+
+local function ProcessQuickslotEvents(fight, logline)
+	local itemLink = logline[3]
+	Print("debug", LOG_LEVEL_INFO, unpack(logline))
+	-- Print("debug", LOG_LEVEL_INFO, "%s, %d, %d, %s", itemLink, GetItemLinkItemType(itemLink), tostring(GetItemLinkItemType(itemLink) ~= ITEMTYPE_POTION))
+	if GetItemLinkItemType(itemLink) ~= ITEMTYPE_POTION then return end
+
+	local potions = fight.calculated.buildInfo.potions
+	if potions[itemLink] == nil then
+		potions[itemLink] = 1
+	else
+		potions[itemLink] = potions[itemLink] + 1
+	end
+end
+ProcessLog[LIBCOMBAT_EVENT_QUICKSLOT] = ProcessQuickslotEvents
 
 local function FinalizeUnitBuffs(fight)
 	local calc = fight.calculated
@@ -1857,7 +1842,7 @@ local function FinalizeUnitBuffs(fight)
 					end
 
 					if unitId == fight.playerid then
-						if LC.foodBuffIdToItemLinks[abilityId] then
+						if LC.GetFoodDrinkItemLinkFromAbilityId(abilityId) then
 							calc.buildInfo.drinkFood[abilityId] = uptime
 						end
 						if LC.MundusStones[abilityId] then
@@ -2121,8 +2106,9 @@ local function FinalizePerformanceData(fight)
 	end
 end
 
-local function FinalizeFight(fight)
+local function Finalize(fight)
 	Print("calc", LOG_LEVEL_DEBUG, "Start end routine")
+	local scalcms = GetGameTimeSeconds()
 	CombatMetrics_Report_TitleFightTitleName:SetText(GetString(SI_COMBAT_METRICS_FINALIZING))
 
 	local data = fight.calculated
@@ -2166,7 +2152,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 	local fightlabel = CombatMetrics_Report_TitleFightTitleName
 
 	if iend >= #logdata then
-		return fight:FinalizeFight()
+		return fight:Finalize()
 	else
 		fight.cindex = iend
 		em:RegisterForUpdate("CMX_chunk", 20, function() fight:CalculateChunk() end )
@@ -2273,7 +2259,7 @@ local function AddFightCalculationFunctions(fight)
 	fight.AcquireStatData = AcquireStatData
 	fight.InitTrialDummies = InitTrialDummies
 
-	fight.Finalize = FinalizeFight
+	fight.Finalize = Finalize
 	fight.FinalizeUnitBuffs = FinalizeUnitBuffs
 	fight.FinalizeResourceStats = FinalizeResourceStats
 	fight.FinalizeStats = FinalizeStats
@@ -2320,34 +2306,30 @@ local function UpdateEvents(event)
 	if registrationStatus ~= newstatus then
 
 		if newstatus == CMX_STATUS_DISABLED then
-
 			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_PERFORMANCE do
 				LC:UnregisterCallbackType(i, AddToLog, CMX.name)
 			end
 
+			LC:UnregisterCallbackType(LIBCOMBAT_EVENT_QUICKSLOT, AddToLog, CMX.name)
 			LC:UnregisterCallbackType(LIBCOMBAT_EVENT_UNITS, UnitsCallback, CMX.name)
 			LC:UnregisterCallbackType(LIBCOMBAT_EVENT_FIGHTRECAP, FightRecapCallback, CMX.name)
 			LC:UnregisterCallbackType(LIBCOMBAT_EVENT_FIGHTSUMMARY, FightSummaryCallback, CMX.name)
 
 		elseif newstatus == CMX_STATUS_LIGHTMODE then
-
 			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_PERFORMANCE do
 				LC:UnregisterCallbackType(i, AddToLog, CMX.name)
 			end
 
-			LC:UnregisterCallbackType(LIBCOMBAT_EVENT_FIGHTSUMMARY, FightSummaryCallback, CMX.name)
-
+			LC:UnregisterCallbackType(LIBCOMBAT_EVENT_QUICKSLOT, AddToLog, CMX.name)
 			LC:RegisterCallbackType(LIBCOMBAT_EVENT_UNITS, UnitsCallback, CMX.name)
 			LC:RegisterCallbackType(LIBCOMBAT_EVENT_FIGHTRECAP, FightRecapCallback, CMX.name)
+			LC:UnregisterCallbackType(LIBCOMBAT_EVENT_FIGHTSUMMARY, FightSummaryCallback, CMX.name)
 
 		elseif newstatus == CMX_STATUS_ENABLED then
-
 			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_PERFORMANCE do
-
 				LC:RegisterCallbackType(i, AddToLog ,CMX.name)
-
 			end
-
+			LC:RegisterCallbackType(LIBCOMBAT_EVENT_QUICKSLOT, AddToLog, CMX.name)
 			LC:RegisterCallbackType(LIBCOMBAT_EVENT_UNITS, UnitsCallback, CMX.name)
 			LC:RegisterCallbackType(LIBCOMBAT_EVENT_FIGHTRECAP, FightRecapCallback, CMX.name)
 			LC:RegisterCallbackType(LIBCOMBAT_EVENT_FIGHTSUMMARY, FightSummaryCallback, CMX.name)

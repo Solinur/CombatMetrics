@@ -601,27 +601,27 @@
 			</Controls>
 		</Control>
 
-		<Control name="Misc_Setup_Item" virtual="true" mouseEnabled="true">		
+		<Control name="Misc_Setup_Item" virtual="true" mouseEnabled="true">
 			<Dimensions x="202"/>
 			<Controls>
-				<Texture name="$(parent)Icon" textureFile="EsoUI/Art/CharacterWindow/gearSlot_head.dds">
-					<Anchor point="TOPLEFT" />
-					<Dimensions x="22" y="22" />
+				<Texture name="$(parent)Icon1" textureFile="EsoUI/Art/CharacterWindow/gearSlot_head.dds">
+					<Anchor point="TOPLEFT" offsetX="2"/>
+					<Dimensions x="20" y="20" />
 				</Texture>
 
-				<Label name="$(parent)Name" text="Name" inherits="CombatMetrics_ValueFontControl" verticalAlignment="CENTER">
-					<Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="8" offsetY="0"/>
-					<Anchor point="TOPRIGHT"/>
+				<Label name="$(parent)Name1" text="Name" inherits="CombatMetrics_LabelFontControl" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
+					<Anchor point="LEFT" relativeTo="$(parent)Icon1" relativePoint="RIGHT" offsetX="4" offsetY="0"/>
+					<Dimensions x="170" y="20" />
 				</Label>
 
 				<Texture name="$(parent)Icon2" textureFile="EsoUI/Art/CharacterWindow/gearSlot_head.dds">
-					<Anchor point="BOTTOMLEFT" />
+					<Anchor point="BOTTOMLEFT" offsetX="2"/>
 					<Dimensions x="22" y="22" />
 				</Texture>
 
-				<Label name="$(parent)Name2" text="Name" inherits="CombatMetrics_ValueFontControl" verticalAlignment="CENTER">
-					<Anchor point="TOPLEFT" relativeTo="$(parent)Icon2" relativePoint="TOPRIGHT" offsetX="8" offsetY="0"/>
-					<Anchor point="BOTTOMRIGHT"/>
+				<Label name="$(parent)Name2" text="Name" inherits="CombatMetrics_LabelFontControl" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
+					<Anchor point="LEFT" relativeTo="$(parent)Icon2" relativePoint="RIGHT" offsetX="4" offsetY="0"/>
+					<Dimensions x="170" y="20" />
 				</Label>
 			</Controls>
 		</Control>
@@ -3893,7 +3893,7 @@
 
 						<Control name="$(parent)Misc">
 							<Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Bottom" offsetX="0" offsetY="3" />
-							<Anchor point="BOTTOMLEFT" offsetX="8" offsetY="-3" />
+							<Anchor point="BOTTOMLEFT" offsetX="4" offsetY="-3" />
 
 							<Controls>
 								<Control name="$(parent)Mundus" inherits="Misc_Setup_Item">

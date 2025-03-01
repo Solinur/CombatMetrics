@@ -2150,7 +2150,6 @@ local function updateFightStatsPanelRight(panel)
 		local text7 = ZO_CachedStrFormat("<<1>>:", GetString(stringKey, 7))
 		local dataKey, displayformat, convert = unpack(keys[6] or {})
 		local statData = stats[dataKey]
-		CMX.Print("debug", LOG_LEVEL_INFO, "status effect display:", dataKey, displayformat, statData ~= nil, text7)
 
 		if text7 ~= nil and text7 ~= "" and dataKey ~= nil then
 			local maxvalue = statData and statData.max or fightStats["max"..dataKey] or 0
@@ -5857,11 +5856,9 @@ local function GetEnchantQuality(itemLink)	-- From Enchanted Quality (Rhyono, vo
 end
 
 local function updateBottomInfoPanel(panel)
-
 	if fightData == nil then return end
 
 	local charData = fightData.charData
-
 	if charData == nil then return end
 
 	local equipdata = charData and charData.equip or {}
@@ -5938,14 +5935,78 @@ local function updateBottomInfoPanel(panel)
 	end
 end
 
-local function updateInfoPanel(panel)
+local function valueOrder(t,a,b)
+	return t[a] < t[b]
+end
 
+local function updateMiscPanelItem(control, data, childName)
+	local numItems = NonContiguousCount(data)
+
+	if numItems == 0 then
+		control:SetHidden(true)
+	else
+		local num = 0
+		for key, _ in CMX.spairs(data, valueOrder) do
+			num = num + 1
+			local label, texture
+			if childName == "Mundus" then
+				label = GetFormattedAbilityName(key)
+				texture = GetFormattedAbilityIcon(key)
+			elseif childName == "DrinkFood" then
+				label = LC.GetFoodDrinkItemLinkFromAbilityId(key)
+				texture = GetItemLinkIcon(label)
+			else
+				label = key
+				texture = GetItemLinkIcon(key)
+			end
+			control:GetNamedChild("Name"..num):SetText(label)
+			control:GetNamedChild("Icon"..num):SetTexture(texture)
+			if num >= 2 then break end
+		end
+
+		local icon1 = control:GetNamedChild("Icon1")
+		local iconSize = control:GetNamedChild("Icon2"):GetWidth()
+		icon1:ClearAnchors()
+		if numItems == 1 then
+			icon1:SetDimensions(1.3*iconSize, 1.3*iconSize)
+			icon1:SetAnchor(LEFT)
+			control:GetNamedChild("Name2"):SetHidden(true)
+			control:GetNamedChild("Icon2"):SetHidden(true)
+		else
+			icon1:SetDimensions(iconSize, iconSize)
+			icon1:SetAnchor(TOPLEFT)
+			control:GetNamedChild("Name2"):SetHidden(true)
+			control:GetNamedChild("Icon2"):SetHidden(true)
+		end
+		control:SetHidden(false)
+	end
+end
+
+local function updateMiscInfoPanel(panel)
+	local mundusControl = panel:GetNamedChild("Mundus")
+	local drinksFoodsControl = panel:GetNamedChild("DrinkFood")
+	local potionsControl = panel:GetNamedChild("Potions")
+
+	if fightData == nil or fightData.calculated == nil or fightData.calculated.buildInfo == nil then
+		mundusControl:SetHidden(true)
+		drinksFoodsControl:SetHidden(true)
+		potionsControl:SetHidden(true)
+		return
+	end
+
+	local buildInfo = fightData.calculated.buildInfo
+	updateMiscPanelItem(mundusControl, buildInfo.mundus, "Mundus")
+	updateMiscPanelItem(drinksFoodsControl, buildInfo.drinkFood, "DrinkFood")
+	updateMiscPanelItem(potionsControl, buildInfo.potions, "Potions")
+end
+
+local function updateInfoPanel(panel)
 	if panel:IsHidden() then return end
 
-	updateLeftInfoPanel(panel:GetNamedChild("Left"))
-	updateRightInfoPanel(panel:GetNamedChild("Right"))
-	updateBottomInfoPanel(panel:GetNamedChild("Bottom"))
-
+	updateLeftInfoPanel(panel:GetNamedChild("Left")) -- TODO: Rename
+	updateRightInfoPanel(panel:GetNamedChild("Right")) -- TODO: Rename
+	updateBottomInfoPanel(panel:GetNamedChild("Bottom")) -- TODO: Rename
+	updateMiscInfoPanel(panel:GetNamedChild("Misc"))
 end
 
 local function updateInfoRowPanel(panel)
