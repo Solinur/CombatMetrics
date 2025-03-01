@@ -2208,36 +2208,24 @@ local function AddtoChatLog(logType, ...)
 end
 
 local function AddToLog(logType, ...)
-
 	if LC.data.inCombat ~= true and logType == LIBCOMBAT_EVENT_PERFORMANCE then return end
-
 	table.insert(CMX.currentdata.log,{logType, ...})
-
 	if db.chatLog.enabled then AddtoChatLog(logType, ...) end
 end
 
 local function UnitsCallback(_, units)
-
 	CMX.currentdata.units = units
-
 end
 
 local function FightRecapCallback(_, newdata)
-
 	local data = CMX.currentdata
-
 	ZO_DeepTableCopy(newdata, data)
-
 	CombatMetrics_LiveReport:Update(data)
-
 end
 
 local function GroupFightRecapCallback(_, newdata)
-
 	local data = CMX.currentdata
-
 	ZO_DeepTableCopy(newdata, data)
-
 end
 
 local function CheckNumberOfFights()
