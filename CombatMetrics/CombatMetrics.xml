@@ -612,6 +612,9 @@
 				<Label name="$(parent)Name1" text="Name" inherits="CombatMetrics_LabelFontControl" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
 					<Anchor point="LEFT" relativeTo="$(parent)Icon1" relativePoint="RIGHT" offsetX="4" offsetY="0"/>
 					<Dimensions x="170" y="20" />
+
+					<OnMouseEnter> CMX.BuildInfo_OnMouseEnter(self) </OnMouseEnter>
+					<OnMouseExit> CMX.BuildInfo_OnMouseExit(self) </OnMouseExit>
 				</Label>
 
 				<Texture name="$(parent)Icon2" textureFile="EsoUI/Art/CharacterWindow/gearSlot_head.dds">
@@ -622,6 +625,9 @@
 				<Label name="$(parent)Name2" text="Name" inherits="CombatMetrics_LabelFontControl" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
 					<Anchor point="LEFT" relativeTo="$(parent)Icon2" relativePoint="RIGHT" offsetX="4" offsetY="0"/>
 					<Dimensions x="170" y="20" />
+
+					<OnMouseEnter> CMX.BuildInfo_OnMouseEnter(self) </OnMouseEnter>
+					<OnMouseExit> CMX.BuildInfo_OnMouseExit(self) </OnMouseExit>
 				</Label>
 			</Controls>
 		</Control>
@@ -776,9 +782,7 @@
 		</Control>
 
 		<Control name="CombatMetrics_ScribedSkillScriptControl"  virtual="true">
-			<Dimensions x="98" y="16" /> 
-			<OnMouseEnter> CMX.ScribedSkillTooltip_OnMouseEnter(self) </OnMouseEnter>
-			<OnMouseExit> CMX.ScribedSkillTooltip_OnMouseExit(self) </OnMouseExit>
+			<Dimensions x="154" y="16" /> 
 			<Controls>
 				<Texture name="$(parent)Icon" textureFile="EsoUI/Art/crafting/gamepad/crafting_alchemy_trait_unknown.dds">
 					<Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="0" />
@@ -792,30 +796,31 @@
 			</Controls>
 		</Control>
 
-		<Control name="CombatMetrics_ScribedSkillControl" virtual="true">
+		<Control name="CombatMetrics_ScribedSkillControl" virtual="true" mouseEnabled="true">
 			<Dimensions x="330" y="35" /> 
+			<OnMouseEnter> CMX.ScribedSkillTooltip_OnMouseEnter(self) </OnMouseEnter>
+			<OnMouseExit> CMX.ScribedSkillTooltip_OnMouseExit(self) </OnMouseExit>
 			<Controls>
 				<Control name="$(parent)Icon" inherits="CombatMetrics_InfoSkillIcon">
 					<Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="4" offsetY="0" />
 					<Dimensions x="18" y="18" />
 				</Control>
 
-				<Label name="$(parent)Name" text="Scribed Skill" inherits="CombatMetrics_LabelFontControl">
+				<Label name="$(parent)Name" text="Scribed Skill" inherits="CombatMetrics_LabelFontControl" horizontalAlignment="LEFT">
 					<Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="4" offsetY="0" />
-					<Anchor point="TOPRIGHT" offsetX="-4" offsetY="0"/>
-					<Dimensions y="18" />
+					<Dimensions x="154" y="18" />
 				</Label>
 
 				<Control name="$(parent)Script1" inherits="CombatMetrics_ScribedSkillScriptControl">
-					<Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="1" />
+					<Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="TOPRIGHT" offsetX="4" offsetY="0" />
 				</Control>
 
 				<Control name="$(parent)Script2" inherits="CombatMetrics_ScribedSkillScriptControl">
-					<Anchor point="TOPLEFT" relativeTo="$(parent)Script1" relativePoint="TOPRIGHT" offsetX="4" offsetY="0" />
+					<Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="1" />
 				</Control>
 
 				<Control name="$(parent)Script3" inherits="CombatMetrics_ScribedSkillScriptControl">
-					<Anchor point="TOPLEFT" relativeTo="$(parent)Script2" relativePoint="TOPRIGHT" offsetX="4" offsetY="0" />
+					<Anchor point="TOPLEFT" relativeTo="$(parent)Script1" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="3" />
 				</Control>
 			</Controls>
 		</Control>

@@ -5326,27 +5326,16 @@ function CMX.SkillTooltip_OnMouseExit(control)
 end
 
 function CMX.ScribedSkillTooltip_OnMouseEnter(control)
+	local abilityId = control.abilityId
+	local scriptIds = control.scriptIds
 
 	InitializeTooltip(SkillTooltip, control, TOPLEFT, 0, 5, BOTTOMLEFT)
-
-	local rowControl = control:GetParent()
-
-	local id = rowControl.id
-	local delay = rowControl.delay
-	local font = string.format("%s|%s|%s", GetString(SI_COMBAT_METRICS_STD_FONT), 16, "soft-shadow-thin")
-
-	local format = rowControl.ignored and "ID: %d (Off GCD)" or "ID: %d"
-
-	SkillTooltip:SetAbilityId(id)
-	SkillTooltip:AddVerticalPadding(15)
-	SkillTooltip:AddLine(string.format(format, id), font, .7, .7, .8 , TOP, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER)
-	if delay then SkillTooltip:AddLine(string.format("Average delay: %d ms", delay), font, .7, .7, .8 , TOP, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER) end
+	SetCraftedAbilityScriptSelectionOverride(GetAbilityCraftedAbilityId(abilityId), scriptIds[1], scriptIds[2], scriptIds[3])
+	SkillTooltip:SetAbilityId(abilityId)
 end
 
 function CMX.ScribedSkillTooltip_OnMouseExit(control)
-
 	ClearTooltip(SkillTooltip)
-
 end
 
 function CMX.CPTooltip_OnMouseEnterLegacy(control)
@@ -5676,6 +5665,8 @@ local function updateScribedSkillsPanel(panel)
 		local iconTexture = GetFormattedAbilityIcon(abilityId)
 
 		skillControl:GetNamedChild("Name"):SetText(abilityName)
+		skillControl.abilityId = abilityId
+		skillControl.scriptIds = data
 		GetControl(skillControl, "IconTexture"):SetTexture(iconTexture)
 
 		for i = 1, 3 do
@@ -5975,8 +5966,8 @@ local function updateMiscPanelItem(control, data, childName)
 		else
 			icon1:SetDimensions(iconSize, iconSize)
 			icon1:SetAnchor(TOPLEFT)
-			control:GetNamedChild("Name2"):SetHidden(true)
-			control:GetNamedChild("Icon2"):SetHidden(true)
+			control:GetNamedChild("Name2"):SetHidden(false)
+			control:GetNamedChild("Icon2"):SetHidden(false)
 		end
 		control:SetHidden(false)
 	end
