@@ -1946,7 +1946,6 @@ local function FinalizeStats(fight)
 			if statdata.dmgsum ~= nil then dmgValue = statdata.dmgsum / totaldmgvalue end
 			statdata.dmgavg = dmgValue
 
-			if statId == 25 then Print("debug", LOG_LEVEL_INFO, "calc stat avg:", statdata.dmgsum, totaldmgvalue, dmgValue) end
 			if statdata.healsum ~= nil and stattype ~= STATTYPE_PENETRATION then healValue = statdata.healsum / totalhealvalue end
 			if statdata.min == infinity then statdata.min = 0 end
 			statdata.healavg = healValue
