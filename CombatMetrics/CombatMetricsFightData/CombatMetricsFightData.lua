@@ -28,7 +28,7 @@ end
 CombatMetricsFightData = {}
 
 local AddonName = "CombatMetricsFightData"
-local AddonVersion = 18
+local AddonVersion = 19
 
 local constants = 0
 
@@ -159,7 +159,7 @@ end
 local lastid = 0
 
 local function GetChar(value, logstringdata, length)
-	local char = chars[value % 64]
+	local char = chars[math.floor(value) % 64]
 	if char == nil then return true end
 	table.insert(logstringdata, char)
 
@@ -274,6 +274,7 @@ local LAYOUT_STATS_ADV = 18
 local LAYOUT_SKILL = 19
 local LAYOUT_BOSSHP = 20
 local LAYOUT_PERFORMANCE = 21
+local LAYOUT_QUICKSLOT = 23
 
 local logTypeToLayout = {
 	[LIBCOMBAT_EVENT_DAMAGE_OUT] = LAYOUT_COMBAT,
@@ -294,19 +295,21 @@ local logTypeToLayout = {
 	[LIBCOMBAT_EVENT_SKILL_TIMINGS] = LAYOUT_SKILL,
 	[LIBCOMBAT_EVENT_BOSSHP] = LAYOUT_BOSSHP,
 	[LIBCOMBAT_EVENT_PERFORMANCE] = LAYOUT_PERFORMANCE,
+	[LIBCOMBAT_EVENT_QUICKSLOT] = LAYOUT_QUICKSLOT,
 }
 
 local layouts = {
-	[LAYOUT_COMBAT] = { 1, 4, 1, 2, 2, 3, 4, 1, 4 }, -- (23) type, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType, overflow
-	[LAYOUT_EVENT] = { 1, 4, 2, 3, 1, 1, 1, 1, 4, 3 }, -- (23) type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, slot, hitValue
-	[LAYOUT_STATS] = { 1, 4, 4, 4, 1 },           -- (15) type, timems, statchange, newvalue, statId
-	[LAYOUT_STATS_ADV] = { 1, 4, 4, 4, 2 },       -- (16) type, timems, statchange, newvalue, statId
-	[LAYOUT_POWER] = { 1, 4, 3, 3, 1, 3 },        -- (16) type, timems, abilityId, powerValueChange, powerType, powerValue
-	[LAYOUT_MESSAGE] = { 1, 4, 1, 1 },            -- (8)  type, timems, messageId (e.g. "weapon swap"), bar
-	[LAYOUT_DEATH] = { 1, 4, 1, 2, 3 },           -- (8)  type, timems, state, unitId, abilityId/unitId
-	[LAYOUT_SKILL] = { 1, 4, 1, 3, 1, 2 },        -- (13) type, timems, reducedslot, abilityId, status, skillDelay
-	[LAYOUT_BOSSHP] = { 1, 4, 1, 5, 5 },          -- (17) type, timems, bossId, currenthp, maxhp
-	[LAYOUT_PERFORMANCE] = { 1, 4, 2, 2, 2, 2 },  -- (14) type, timems, avg, min, max, ping
+	[LAYOUT_COMBAT] = { 1, 4, 1, 2, 2, 3, 4, 1, 4 }, 				-- (23) type, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType, overflow
+	[LAYOUT_EVENT] = { 1, 4, 2, 3, 1, 1, 1, 1, 4, 3 }, 	-- (23) type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, slot, hitValue
+	[LAYOUT_STATS] = { 1, 4, 4, 4, 1 },											-- (15) type, timems, statchange, newvalue, statId
+	[LAYOUT_STATS_ADV] = { 1, 4, 4, 4, 2 },										-- (16) type, timems, statchange, newvalue, statId
+	[LAYOUT_POWER] = { 1, 4, 3, 3, 1, 3 },									-- (16) type, timems, abilityId, powerValueChange, powerType, powerValue
+	[LAYOUT_MESSAGE] = { 1, 4, 1, 1 },												--  (8) type, timems, messageId (e.g. "weapon swap"), bar
+	[LAYOUT_DEATH] = { 1, 4, 1, 2, 3 },											--  (8) type, timems, state, unitId, abilityId/unitId
+	[LAYOUT_SKILL] = { 1, 4, 1, 3, 1, 2 },									-- (13) type, timems, reducedslot, abilityId, status, skillDelay
+	[LAYOUT_BOSSHP] = { 1, 4, 1, 5, 5 },											-- (17) type, timems, bossId, currenthp, maxhp
+	[LAYOUT_PERFORMANCE] = { 1, 4, 2, 2, 2, 2 },  							-- (14) type, timems, avg, min, max, ping
+	[LAYOUT_QUICKSLOT] = { 1, 4, 3 },  															--  (9) type, timems, abilityId
 }
 
 local layoutsize = {} -- get total sizes of layouts
@@ -332,14 +335,18 @@ local function encodeCombatLogLine(line, fight)
 	elseif layoutId == LAYOUT_EVENT then -- type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, slot
 		line[3] = unitConversion[line[3]] or 0
 		line[8] = line[8] or 0
-	elseif layoutId == LAYOUT_STATS then      -- type, timems, statchange, newvalue, statname
-		line[3] = line[3] + 8388608           -- avoid negative numbers
+	elseif layoutId == LAYOUT_STATS then  -- type, timems, statchange, newvalue, statname
+		if line[5] == LIBCOMBAT_STAT_STATUS_EFFECT_CHANCE then 
+			line[3] = line[3] * 100
+			line[4] = line[4] * 100
+		end
+		line[3] = zo_round(line[3]) + 8388608  -- avoid negative numbers
 	elseif layoutId == LAYOUT_STATS_ADV then  -- type, timems, statchange, newvalue, statname
 		line[3] = zo_round(10 * (line[3] + 838860)) -- avoid negative/float numbers
 		line[4] = zo_round(line[4] * 10)
 	elseif layoutId == LAYOUT_POWER then -- type, timems, abilityId, powerValueChange, powerType
 		line[3] = line[3] or -3
-		line[4] = line[4] + 131072    -- avoid negative numbers
+		line[4] = line[4] + 131072  -- avoid negative numbers
 		line[5] = CombatMechnicFlagTableSave[line[5]]
 		line[6] = line[6] or 0
 	elseif layoutId == LAYOUT_MESSAGE and type(line[3]) ~= "number" then -- type, timems, messageId
@@ -386,9 +393,13 @@ local function decodeCombatLogLine(line, fight)
 		if logdata[3] == 0 then logdata[3] = nil end
 	elseif layoutId == LAYOUT_STATS or layoutId == LAYOUT_STATS_ADV then -- type, timems, statchange, newvalue, statname
 		if fight.svversion < 5 then logdata[5] = statTableConvert[logdata[5]] end
-		logdata[3] = logdata[3] - 8388608                             -- recover negative numbers
-	elseif layoutId == LAYOUT_STATS_ADV then                          -- type, timems, statchange, newvalue, statname
-		line[3] = (line[3] / 10) - 838860                             -- avoid negative/float numbers
+		logdata[3] = logdata[3] - 8388608  -- recover negative numbers		
+		if logdata[5] == LIBCOMBAT_STAT_STATUS_EFFECT_CHANCE then 
+			logdata[3] = logdata[3] / 100
+			logdata[4] = logdata[4] / 100
+		end
+	elseif layoutId == LAYOUT_STATS_ADV then  -- type, timems, statchange, newvalue, statname
+		line[3] = (line[3] / 10) - 838860  -- avoid negative/float numbers
 		line[4] = (line[4] / 10)
 	elseif layoutId == LAYOUT_POWER then -- type, timems, abilityId, powerValueChange, powerType
 		if logdata[3] == 262141 then

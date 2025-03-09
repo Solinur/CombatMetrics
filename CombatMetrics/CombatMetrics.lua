@@ -15,12 +15,7 @@ local ProcessLog = {}
 -- localize some module functions for performance
 
 local stringformat = string.format
-local mathfloor = math.floor
-local mathmax = math.max
-local mathmin = math.min
-local mathabs = math.abs
-local mathceil = math.ceil
-local infinity = math.huge
+local inf = math.huge
 
 -- namespace for thg addon
 if CMX == nil then CMX = {} end
@@ -28,7 +23,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.6.7"
+CMX.version = "1.7.0"
 
 -- Logger
 
@@ -60,13 +55,9 @@ if LibDebugLogger then
 end
 
 local function Print(category, level, ...)
-
 	if mainlogger == nil then return end
-
 	local logger = category and subloggers[category] or mainlogger
-
 	if type(logger.Log)=="function" then logger:Log(level, ...) end
-
 end
 
 CMX.Print = Print
@@ -75,15 +66,11 @@ CMX.Print = Print
 
 local LC = LibCombat
 if LC == nil then
-
 	Print("main", LOG_LEVEL_ERROR, "LibCombat not found!")
 	return
-
 end
 
 local GetFormattedAbilityName = LC.GetFormattedAbilityName
-
-local GetFormattedAbilityIcon = LC.GetFormattedAbilityIcon
 
 local STATTYPE_NORMAL = 0
 local STATTYPE_CRITICAL = 1
@@ -93,39 +80,32 @@ local STATTYPE_INCSPELL = 4
 local STATTYPE_INCWEAPON = 5
 
 local StatListTable = {
-
 	["Spell"] = {
-
 		[LIBCOMBAT_STAT_MAXMAGICKA] = STATTYPE_NORMAL,
 		[LIBCOMBAT_STAT_SPELLPOWER] = STATTYPE_NORMAL,
 		[LIBCOMBAT_STAT_SPELLCRIT] = STATTYPE_CRITICAL,
 		[LIBCOMBAT_STAT_SPELLCRITBONUS] = STATTYPE_CRITICALBONUS,
 		[LIBCOMBAT_STAT_SPELLPENETRATION] = STATTYPE_PENETRATION,
-
+		[LIBCOMBAT_STAT_STATUS_EFFECT_CHANCE] = STATTYPE_NORMAL,
 	},
-
 	["Weapon"] = {
-
 		[LIBCOMBAT_STAT_MAXSTAMINA] = STATTYPE_NORMAL,
 		[LIBCOMBAT_STAT_WEAPONPOWER] = STATTYPE_NORMAL,
 		[LIBCOMBAT_STAT_WEAPONCRIT] = STATTYPE_CRITICAL,
 		[LIBCOMBAT_STAT_WEAPONCRITBONUS] = STATTYPE_CRITICALBONUS,
 		[LIBCOMBAT_STAT_WEAPONPENETRATION] = STATTYPE_PENETRATION,
-
+		[LIBCOMBAT_STAT_STATUS_EFFECT_CHANCE] = STATTYPE_NORMAL,
 	},
 }
 
 local IncomingStatList = {
-
 	[LIBCOMBAT_STAT_MAXHEALTH] = STATTYPE_NORMAL,
 	[LIBCOMBAT_STAT_PHYSICALRESISTANCE] = STATTYPE_INCWEAPON,
 	[LIBCOMBAT_STAT_SPELLRESISTANCE] = STATTYPE_INCSPELL,
 	[LIBCOMBAT_STAT_CRITICALRESISTANCE] = STATTYPE_CRITICALBONUS,
-
 }
 
 local IsMagickaAbility = {				-- nil for oblivion and other damage types that are not covered by spell damage
-
 	[DAMAGE_TYPE_MAGIC] = true,
 	[DAMAGE_TYPE_FIRE] = true,
 	[DAMAGE_TYPE_COLD] = true,
@@ -134,13 +114,11 @@ local IsMagickaAbility = {				-- nil for oblivion and other damage types that ar
 	[DAMAGE_TYPE_POISON] = false,
 	[DAMAGE_TYPE_DISEASE] = false,
 	[DAMAGE_TYPE_BLEED] = false,
-
 }
 
 local WrathOfNaturePen = 660
 
 local StatDebuffs = {
-
 	[GetFormattedAbilityName(61743)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 5948, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 5948}, --Major Breach
 	[GetFormattedAbilityName(61742)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 2974, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 2974}, --Minor Breach
 	[GetFormattedAbilityName(120007)] = {[LIBCOMBAT_STAT_SPELLPENETRATION] = 2108, [LIBCOMBAT_STAT_WEAPONPENETRATION] = 2108}, -- Crusher, Target Dummy (the following line might overwrite this. If LUI extended is used, both declarations are necessary)
@@ -176,18 +154,16 @@ local StatDebuffs = {
 
 	[GetFormattedAbilityName(113382)] = {[LIBCOMBAT_STAT_SPELLPOWER] = 460}, -- Spell Strategist
 
+	[GetFormattedAbilityName(217353)] = {[LIBCOMBAT_STAT_STATUS_EFFECT_CHANCE] = 100}, -- Misery Knife (Travelling Knife -> Assassin's Misery)
 }
 
 local ignoredAbilityTiming = { -- Skills which ignore global cooldown
-
     [132141] = true,    -- Blood Frenzy (Vampire Toggle)
     [134160] = true,    -- Simmering Frenzy (Vampire Toggle)
     [135841] = true,    -- Sated Fury (Vampire Toggle)
-
 }
 
 local ChangingAbilities = { -- Skills which can change un use
-
     [61902] = 61907,    -- Grim Focus --> Assasins Will
     [61919] = 61930,    -- Merciless Resolve --> Assasins Will
 	[61927] = 61932,    -- Relentless Focus --> Assasins Scourge
@@ -360,7 +336,7 @@ local function AcquireEffectData(unit, abilityId, effectType, stacks)
 
 	buffdata:CheckInstance(abilityId, stacks)
 
-	buffdata.maxStacks = mathmax(stacks, buffdata.maxStacks)
+	buffdata.maxStacks = zo_max(stacks, buffdata.maxStacks)
 
 	return buffs[name]
 
@@ -600,7 +576,7 @@ local function initBaseAbility(self, tablekey)
 	local list = CategoryList[tablekey]
 
 	self.max = 0 -- max hit
-	self.min = infinity -- min hit
+	self.min = inf -- min hit
 
 	for _,key in pairs(list) do
 
@@ -737,7 +713,7 @@ end
 
 function StatDataHandler:Initialize()
 
-	self.min = infinity
+	self.min = inf
 	self.max = 0
 	self.dmgsum = 0
 	self.healsum = 0
@@ -752,21 +728,14 @@ function UnitStatHandler:Initialize()
 end
 
 local function GetEmtpyFightStats()
-
 	local data = {}
-
 	InitBasicValues(data)
 
-	data.temp =	{
-		["stats"] = {}
-	}
-
+	data.temp =	{["stats"] = {}}
 	data.units = {}
-
 	data.stats = {}	-- stat tracking
 
 	data.resources = ResourceTable:New()
-
 	data.skills = {}
 	data.casts = {}
 	data.lastIndex = {}
@@ -779,6 +748,7 @@ local function GetEmtpyFightStats()
 	data.totalSkillsFired =  0
 
 	data.performance = {count = 0}
+	data.buildInfo = {mundus = {}, drinkFood = {}, potions = {}}
 
 	data.graph = {
 		damageOut = {},
@@ -791,37 +761,27 @@ local function GetEmtpyFightStats()
 	data.calcVersion = 2
 
 	return data
-
 end
 
 local function InitTrialDummies(fight)
-
 	local units = fight.units
 
 	for unitId, unit in pairs(units) do
-
 		if unit.isTrialDummy then
-
 			for abilityId, _ in pairs(TrialDummyBuffs) do
-
 				local fakeLogLine = {LIBCOMBAT_EVENT_GROUPEFFECTS_OUT, fight.combatstart, unitId, abilityId, EFFECT_RESULT_GAINED, BUFF_EFFECT_TYPE_DEBUFF, 0, COMBAT_UNIT_TYPE_TARGET_DUMMY, 0}
-
 				ProcessLog[LIBCOMBAT_EVENT_GROUPEFFECTS_OUT](fight, fakeLogLine)
-
 			end
 		end
 	end
 end
 
 local function CalculateFight(fight) -- called by CMX.update or on user interaction
-
 	fight.cindex = 0
 	fight.calculated = GetEmtpyFightStats()
 
 	local data = fight.calculated
-
 	currentbar = fight.startBar
-
 	local barStats = fight:AcquireBarStats(currentbar)
 	barStats.onTimes = {fight.dpsstart}
 
@@ -837,18 +797,14 @@ local function CalculateFight(fight) -- called by CMX.update or on user interact
 	data.groupDPSIn 	= fight.groupDPSIn
 
 	fight.calculating = true
-
 	fight.special["wrathCP"] = fight.CP[1] and fight.CP[1]["slotted"] and fight.CP[1]["slotted"][276]
 
 	local titleBar = CombatMetrics_Report_TitleFightTitleBar
-
 	titleBar:SetValue(0)
 	titleBar:SetHidden(false)
 
 	fight:InitTrialDummies()
-
 	fight:CalculateChunk()
-
 end
 
 local function sumUnitTables(target, source, reference) -- adds values from source to those in target using reference to determine the objects to sum
@@ -883,11 +839,11 @@ local function sumUnitTables(target, source, reference) -- adds values from sour
 
 			if key == "max" then
 
-				target[key] = mathmax((target[key] or 0), (source[key] or 0))
+				target[key] = zo_max((target[key] or 0), (source[key] or 0))
 
 			elseif key == "min" then
 
-				target[key] = mathmin((target[key] or infinity), (source[key] or infinity))
+				target[key] = zo_min((target[key] or inf), (source[key] or inf))
 
 			else
 
@@ -1039,7 +995,7 @@ function CMX.GenerateSelectionStats(fight, menuItem, selections) -- this is simi
 				selectedbuff.groupUptime = selectedbuff.groupUptime + buff.groupUptime
 				selectedbuff.groupCount = selectedbuff.groupCount + buff.groupCount
 
-				selectedbuff.maxStacks = mathmax(selectedbuff.maxStacks, buff.maxStacks or 0)
+				selectedbuff.maxStacks = zo_max(selectedbuff.maxStacks, buff.maxStacks or 0)
 
 				if buff.instances then
 
@@ -1110,8 +1066,8 @@ function CMX.GenerateSelectionStats(fight, menuItem, selections) -- this is simi
 			local unitEndTime = unit.endtime or unitData.dpsend or 0
 			local fightStartTime = fight.starttime or fight.dpsstart or 0
 			local unitStartTime = unit.starttime or unitData.dpsstart or 0
-			local startTime = mathmax(fightStartTime, unitStartTime)
-			local endTime = mathmin(fightEndTime, unitEndTime)
+			local startTime = zo_max(fightStartTime, unitStartTime)
+			local endTime = zo_min(fightEndTime, unitEndTime)
 			selectiondata.totalUnitTime = (selectiondata.totalUnitTime or 0) + (endTime - startTime)
 
 		end
@@ -1138,106 +1094,70 @@ local damageResultCategory={
 }
 
 local function IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitValue, isheal, unit)
-
 	local ismagical = IsMagickaAbility[damageType]				-- is nil for uncategorized damage, e.g. Oblivion Damage
-
 	local statlist = IncomingStatList
 
 	if isDamageOut then
-
 		local useMagickaList = (isheal and damageType == POWERTYPE_MAGICKA) or ((isheal == false) and ismagical) -- for heals damageType is replaced with powerType.
-
 		if useMagickaList == nil then return end
 
 		local key = useMagickaList and "Spell" or "Weapon"
-
 		statlist = StatListTable[key]
-
 	end
 
 	local barStats = fight:AcquireBarStats(currentbar)
-
 	local data = fight.calculated
 	local currentStats = data.temp.stats
-
 	local key
 
 	if isheal == true and isDamageOut == true then
-
 		barStats.healingOut = barStats.healingOut + hitValue
 		key = "healsum"
-
 	elseif isheal == true and isDamageOut == false then
-
 		barStats.healingIn = barStats.healingIn + hitValue
 		return
-
 	elseif isheal == false and isDamageOut == true then
-
 		barStats.damageOut = barStats.damageOut + hitValue
 		key = "dmgsum"
-
 	elseif isheal == false and isDamageOut == false then
-
 		barStats.damageIn = barStats.damageIn + hitValue
 		key = "dmgsum"
-
-	else return end
+	else
+		return
+	end
 
 	for statId, stattype in pairs(statlist) do
-
 		local unitData = unit and unit.statData[statId]
 		local unitValue = unitData and unitData.value or 0
-
 		local currentValue = (currentStats[statId] or 0) + unitValue
 		local value = hitValue
 
 		local statData = fight:AcquireStatData(statId)
-		statData.max = math.max(currentValue, statData.max)
+		statData.max = zo_max(currentValue, statData.max)
 
 		if stattype == STATTYPE_PENETRATION then
-
 			if isheal == true then
-
 				value = 0
-
 			elseif ismagical ~= nil then
-
 				local resistDataKey = ismagical and "spellResistance" or "physicalResistance"
-
 				local data = unit[resistDataKey]
-
 				data[currentValue] = (data[currentValue] or 0) + value
-
 			end
 		end
 
 		if stattype == STATTYPE_CRITICAL then
-
 			value = resultkey == "Blocked" and 0 or 1	-- they can't crit so they don't matter
-
 		elseif stattype == STATTYPE_CRITICALBONUS then
-
 			if resultkey ~= "Critical" then value = 0 end
-
 			if ismagical ~= nil and isheal == false and isDamageOut == true then
-
 				local critDataKey = ismagical and "spellCrit" or "weaponCrit"
-
 				local data = unit[critDataKey]
-
 				data[currentValue] = (data[currentValue] or 0) + value
-
 			end
-
 		elseif stattype == STATTYPE_INCSPELL and ismagical ~= true then
-
 			value = 0
-
 		elseif stattype == STATTYPE_INCWEAPON and ismagical ~= false then
-
 			value = 0
-
 		end
 
 		local statData = fight:AcquireStatData(statId)
@@ -1282,15 +1202,12 @@ local function ProcessLogDamage(fight, logline)
 		graphkey = "damageOut"
 
 		if overflow > 0 then -- shielded damage
-
 			local shieldResult = damageResultCategory[ACTION_RESULT_DAMAGE_SHIELDED]
-
 			local shieldkey = ZO_CachedStrFormat("damageOut<<1>>", shieldResult)
-			abilitydata[shieldkey] = abilitydata[shieldkey] + overflow
-
 			local shieldhitkey = ZO_CachedStrFormat("hitsOut<<1>>", shieldResult)
-			abilitydata[shieldhitkey] = abilitydata[shieldhitkey] + 1
 
+			abilitydata[shieldkey] = abilitydata[shieldkey] + overflow
+			abilitydata[shieldhitkey] = abilitydata[shieldhitkey] + 1
 		end
 
 	else																												-- incoming and self inflicted Damage are consolidated.
@@ -1303,34 +1220,27 @@ local function ProcessLogDamage(fight, logline)
 		graphkey = "damageIn"
 
 		if overflow > 0 then -- shielded damage
-
 			local shieldResult = damageResultCategory[ACTION_RESULT_DAMAGE_SHIELDED]
-
 			local shieldkey = ZO_CachedStrFormat("damageIn<<1>>", shieldResult)
-			abilitydata[shieldkey] = abilitydata[shieldkey] + overflow
-
 			local shieldhitkey = ZO_CachedStrFormat("hitsIn<<1>>", shieldResult)
+
+			abilitydata[shieldkey] = abilitydata[shieldkey] + overflow
 			abilitydata[shieldhitkey] = abilitydata[shieldhitkey] + 1
-
 		end
-
 	end
 
 	abilitydata[dmgkey] = abilitydata[dmgkey] + hitValue
 	abilitydata[hitkey] = abilitydata[hitkey] + 1
 
-	local inttime = mathfloor((timems - fight.combatstart)/1000)
+	local inttime = zo_floor((timems - fight.combatstart)/1000)
 
 	if inttime >= 0 then
-
 		local data = fight.calculated.graph[graphkey]
 		data[inttime] = (data[inttime] or 0) + hitValue
-
 	end
 
-	abilitydata.max = mathmax(abilitydata.max, hitValue)
-	abilitydata.min = mathmin(abilitydata.min, hitValue)
-
+	abilitydata.max = zo_max(abilitydata.max, hitValue)
+	abilitydata.min = zo_min(abilitydata.min, hitValue)
 	IncrementStatSum(fight, damageType, resultkey, isDamageOut, hitValue, false, unit)
 end
 
@@ -1397,7 +1307,7 @@ local function ProcessLogHeal(fight, logline, overrideCallbackType)
 
 	if hitValue == 0 and overflow > 0 then abilitydata[overflowHealskey] = abilitydata[overflowHealskey] + 1 end
 
-	local inttime = mathfloor((timems - fight.combatstart)/1000)
+	local inttime = zo_floor((timems - fight.combatstart)/1000)
 
 	if inttime >= 0 then
 
@@ -1406,8 +1316,8 @@ local function ProcessLogHeal(fight, logline, overrideCallbackType)
 
 	end
 
-	abilitydata.max = mathmax(abilitydata.max, hitValue)
-	abilitydata.min = mathmin(abilitydata.min, hitValue)
+	abilitydata.max = zo_max(abilitydata.max, hitValue)
+	abilitydata.min = zo_min(abilitydata.min, hitValue)
 
 	IncrementStatSum(fight, powerType, resultkey, isHealingOut, hitValue, true)
 end
@@ -1462,7 +1372,7 @@ local function ProcessLogEffects(fight, logline)
 
 	if (changeType == EFFECT_RESULT_GAINED or changeType == EFFECT_RESULT_UPDATED) and timems < fight.endtime then
 
-		local starttime = mathmax(timems, fight.starttime)
+		local starttime = zo_max(timems, fight.starttime)
 
 		if slotcount == 0 and isPlayerSource then effectdata.firstStartTime = starttime end
 		if groupSlotCount == 0 then effectdata.firstGroupStartTime = starttime end
@@ -1495,7 +1405,7 @@ local function ProcessLogEffects(fight, logline)
 			if type(stacks) == "number" and stacks > currentstacks then
 
 				local stackData = instance[stacks]
-				local duration = mathmin(timems, fight.endtime) - starttime
+				local duration = zo_min(timems, fight.endtime) - starttime
 
 				if isPlayerSource then
 
@@ -1527,7 +1437,7 @@ local function ProcessLogEffects(fight, logline)
 			for stacks, starttime in pairs(slotdata) do
 
 				local stackData = instance[stacks]
-				local duration = mathmin(timems, fight.endtime) - starttime
+				local duration = zo_min(timems, fight.endtime) - starttime
 
 				if isPlayerSource then
 
@@ -1542,7 +1452,7 @@ local function ProcessLogEffects(fight, logline)
 
 			if slotcount == 0 and effectdata.firstStartTime then
 
-				local duration = mathmin(timems, fight.endtime) - effectdata.firstStartTime
+				local duration = zo_min(timems, fight.endtime) - effectdata.firstStartTime
 
 				effectdata.uptime = effectdata.uptime + duration
 				effectdata.count = effectdata.count + 1
@@ -1553,7 +1463,7 @@ local function ProcessLogEffects(fight, logline)
 
 			if groupSlotCount == 0 and effectdata.firstGroupStartTime then
 
-				local duration = mathmin(timems,fight.endtime) - effectdata.firstGroupStartTime
+				local duration = zo_min(timems,fight.endtime) - effectdata.firstGroupStartTime
 
 				effectdata.groupUptime = effectdata.groupUptime + duration
 				effectdata.groupCount = effectdata.groupCount + 1
@@ -1584,7 +1494,7 @@ local function ProcessLogResources(fight, logline)
 
 	local resourceData = fight:AcquireResourceData(abilityId, powerValueChange, powerType)
 
-	local change = mathabs(powerValueChange)
+	local change = zo_abs(powerValueChange)
 
 	if powerType == POWERTYPE_ULTIMATE then
 
@@ -1611,8 +1521,8 @@ local function ProcessLogStats(fight, logline)
 
 	local statData = fight:AcquireStatData(statId)
 
-	statData.max = math.max(newvalue, statData.max)
-	statData.min = math.min(newvalue, statData.min)
+	statData.max = zo_max(newvalue, statData.max)
+	statData.min = zo_min(newvalue, statData.min)
 
 end
 
@@ -1723,7 +1633,7 @@ local function ProcessLogSkillTimings(fight, logline)
 
 			if timeDiff < (CMX_GetAbilityDuration(abilityId) + 250) then
 
-				castData[castindex][5] = math.max(timems, starttime + 1000)
+				castData[castindex][5] = zo_max(timems, starttime + 1000)
 				indexFound = k
 
 				table.remove(started, k)
@@ -1771,552 +1681,464 @@ ProcessLog[LIBCOMBAT_EVENT_MESSAGES] = ProcessMessages
 ProcessLog[LIBCOMBAT_EVENT_BOSSHP] = function() end
 
 local function ProcessPerformanceStats(fight, logline)
-
 	local callbacktype, timems, avg, min, max, ping = unpackLogline(logline, 1, 6)
-
 	if not (avg and min and max and ping) then return end
 
 	local performance = fight.calculated.performance
-
 	performance.count = performance.count + 1
 
-	performance.minMin = mathmin(performance.minMin or min, min)
-	performance.maxMin = mathmax(performance.maxMin or min, min)
+	performance.minMin = zo_min(performance.minMin or min, min)
+	performance.maxMin = zo_max(performance.maxMin or min, min)
 	performance.sumMin = min + (performance.sumMin or 0)
 
-	performance.minMax = mathmin(performance.minMax or max, max)
-	performance.maxMax = mathmax(performance.maxMax or max, max)
+	performance.minMax = zo_min(performance.minMax or max, max)
+	performance.maxMax = zo_max(performance.maxMax or max, max)
 	performance.sumMax = max + (performance.sumMax or 0)
 
-	performance.minAvg = mathmin(performance.minAvg or avg, avg)
-	performance.maxAvg = mathmax(performance.maxAvg or avg, avg)
+	performance.minAvg = zo_min(performance.minAvg or avg, avg)
+	performance.maxAvg = zo_max(performance.maxAvg or avg, avg)
 	performance.sumAvg = avg + (performance.sumAvg or 0)
 
-	performance.minPing = mathmin(performance.minPing or ping, ping)
-	performance.maxPing = mathmax(performance.maxPing or ping, ping)
+	performance.minPing = zo_min(performance.minPing or ping, ping)
+	performance.maxPing = zo_max(performance.maxPing or ping, ping)
 	performance.sumPing = ping + (performance.sumPing or 0)
 end
-
 ProcessLog[LIBCOMBAT_EVENT_PERFORMANCE] = ProcessPerformanceStats
 
---]]
+local function ProcessQuickslotEvents(fight, logline)
+	local itemLink = logline[3]
+	Print("debug", LOG_LEVEL_INFO, unpack(logline))
+	-- Print("debug", LOG_LEVEL_INFO, "%s, %d, %d, %s", itemLink, GetItemLinkItemType(itemLink), tostring(GetItemLinkItemType(itemLink) ~= ITEMTYPE_POTION))
+	if GetItemLinkItemType(itemLink) ~= ITEMTYPE_POTION then return end
+
+	local potions = fight.calculated.buildInfo.potions
+	if potions[itemLink] == nil then
+		potions[itemLink] = 1
+	else
+		potions[itemLink] = potions[itemLink] + 1
+	end
+end
+ProcessLog[LIBCOMBAT_EVENT_QUICKSLOT] = ProcessQuickslotEvents
+
+local function FinalizeUnitBuffs(fight)
+	local calc = fight.calculated
+	for unitId, unitData in pairs(fight.units) do
+		local unitCalc = calc.units[unitId] -- calculated info is not stored in fight.units but in fight.calculated.units
+
+		if unitData.name == "Offline" then -- delete unknown units. Should only happen to units that did not participate in the fight
+			unitData[unitId] = nil
+			calc.units[unitId] = nil
+
+		elseif unitCalc ~= nil then
+			local endtime = zo_min(unitCalc.endtime, fight.endtime)
+
+			for _, effectdata in pairs(unitCalc.buffs) do	-- finish buffs that didn't end before end of combat
+				local instances = effectdata.instances
+				local slots = effectdata.slots
+				local slotcount, groupSlotCount = CountSlots(effectdata.slots)
+
+				if groupSlotCount > 0 and fight.starttime ~= 0 then
+					for slotId, slotdata in pairs(slots) do
+						local abilityId = slotdata.abilityId
+						local isPlayerSource = slotdata.isPlayerSource
+						local instance = instances[abilityId]
+
+						slotdata.abilityId = nil
+						slotdata.isPlayerSource = nil
+
+						for stacks, starttime in pairs(slotdata) do
+							local stackData = instance[stacks]
+							local duration = endtime - starttime
+
+							if isPlayerSource then
+								stackData.uptime = stackData.uptime + duration
+								stackData.count = stackData.count + 1
+							end
+
+							stackData.groupUptime = stackData.groupUptime + duration
+							stackData.groupCount = stackData.groupCount + 1
+						end
+					end
+
+					if slotcount > 0 then
+						local duration = endtime - effectdata.firstStartTime
+						effectdata.uptime = effectdata.uptime + duration
+						effectdata.count = effectdata.count + slotcount
+					end
+
+					local duration = endtime - effectdata.firstGroupStartTime
+					effectdata.groupUptime = effectdata.groupUptime + duration
+					effectdata.groupCount = effectdata.groupCount + groupSlotCount
+				end
+
+				effectdata.slots = nil
+
+				-- calculate efective instance and stack uptime
+				local maxDuration = 0
+
+				for abilityId, instance in pairs(instances) do
+					local count = 0
+					local groupCount = 0
+					local sumStackUptime = 0
+					local sumStackGroupUptime = 0
+
+					local maxStacks = 1
+					local minStacks = inf
+					local minStackDuration
+					local minStackDurationGroup
+
+					for stacks, stackData in pairs(instance) do
+						if stacks < minStacks then
+							minStacks = stacks
+							minStackDuration = stackData.uptime
+							minStackDurationGroup = stackData.groupUptime
+						end
+
+						sumStackUptime = sumStackUptime + stackData.uptime
+						sumStackGroupUptime = sumStackGroupUptime + stackData.groupUptime
+
+						maxStacks = zo_max(maxStacks, stacks)
+						count = zo_max(stackData.count, count)
+						groupCount = zo_max(stackData.groupCount, groupCount)
+					end
+
+					local uptime = (sumStackUptime + (minStackDuration and ((minStacks - 1) * minStackDuration) or 0))/maxStacks
+					local groupUptime = (sumStackGroupUptime + (minStackDurationGroup and ((minStacks - 1) * minStackDurationGroup) or 0))/maxStacks
+
+					instance.uptime = uptime
+					instance.groupUptime = groupUptime
+					instance.count = count
+					instance.groupCount = groupCount
+
+					if uptime > maxDuration or groupUptime > maxDuration then
+						maxDuration = zo_max(maxDuration, uptime, groupUptime)
+						effectdata.iconId = abilityId
+					end
+
+					if unitId == fight.playerid then
+						if LC.GetFoodDrinkItemLinkFromAbilityId(abilityId) then
+							calc.buildInfo.drinkFood[abilityId] = uptime
+						end
+						if LC.MundusStones[abilityId] then
+							calc.buildInfo.mundus[abilityId] = uptime
+						end
+					end
+				end
+
+				effectdata.firstStartTime = nil
+				effectdata.firstGroupStartTime = nil
+			end
+		end
+	end
+end
+
+local function FinalizeResourceStats(fight)
+	local resources = fight.calculated.resources
+	for k, resource in pairs(resources) do
+
+		for id, ability in pairs(resource.gains or {}) do
+			resource.totalgains = ability.value + resource.totalgains
+			ability.rate = ability.value / fight.combattime
+		end
+
+		for id, ability in pairs(resource.drains or {}) do
+			resource.totaldrains = ability.value + resource.totaldrains
+			ability.rate = ability.value / fight.combattime
+		end
+
+		resource.gainRate = (resource.totalgains or 0) / fight.combattime
+		resource.drainRate = (resource.totaldrains or 0) / fight.combattime
+
+	end
+end
+
+local function FinalizeStats(fight)
+	local calcData = fight.calculated
+	local stats = calcData.stats
+
+	-- calculate damage sums for the relevant categories
+
+	local damageOut = calcData.damageOut
+
+	calcData.damageOutSpells = {}
+	initBaseAbility(calcData.damageOutSpells, "damageOut")
+
+	calcData.damageOutWeapon = {}
+	initBaseAbility(calcData.damageOutWeapon, "damageOut")
+
+	for id, ability in pairs(damageOut) do
+		local isMagic = IsMagickaAbility[ability.damageType]
+		local datatable = (isMagic == true and calcData.damageOutSpells) or (isMagic == false and calcData.damageOutWeapon) or {}
+
+		for key, value in pairs(datatable) do
+			if key == "min" or key == "max" then
+				datatable[key] = math[key](ability[key], datatable[key])
+			elseif datatable[key] ~= nil then
+				datatable[key] = ability[key] + datatable[key]
+			end
+		end
+	end
+
+	if calcData.damageOutSpells.min == inf then calcData.damageOutSpells.min = 0 end
+	if calcData.damageOutWeapon.min == inf then calcData.damageOutWeapon.min = 0 end
+
+	local damageIn = calcData.damageIn
+
+	calcData.damageInSpells = 0
+	calcData.damageInWeapon = 0
+
+	for id, ability in pairs(damageIn) do
+		local isMagic = IsMagickaAbility[ability.damageType]
+
+		if isMagic == true then
+			calcData.damageInSpells = calcData.damageInSpells + ability.damageInTotal
+		elseif isMagic == false then
+			calcData.damageInWeapon = calcData.damageInWeapon + ability.damageInTotal
+		end
+	end
+
+	for key, list in pairs(StatListTable) do
+		for statId, stattype in pairs(list) do
+			local damagevalues = key == "Spell" and calcData.damageOutSpells or calcData.damageOutWeapon
+			local statdata = stats[statId]
+			
+			if statdata ~= nil then 
+				local dmgValue = statdata.max
+				local healValue = statdata.max
+				local totaldmgvalue = zo_max(damagevalues.damageOutTotal, 1)
+				local totalhealvalue = zo_max(calcData.healingOutTotal, 1)
+
+				if stattype == STATTYPE_CRITICAL then
+					local critablehits = damagevalues.hitsOutNormal + damagevalues.hitsOutCritical
+					totaldmgvalue = zo_max(critablehits, 1)
+					totalhealvalue = zo_max(calcData.healsOutTotal, 1)
+				elseif stattype == STATTYPE_CRITICALBONUS then
+					totaldmgvalue = zo_max(damagevalues.damageOutCritical, 1)
+					totalhealvalue = zo_max(calcData.healingOutCritical, 1)
+				end
+
+				if statId == LIBCOMBAT_STAT_STATUS_EFFECT_CHANCE then totaldmgvalue = zo_max(calcData.damageOutTotal, 1) end
+				if statdata.dmgsum ~= nil then dmgValue = statdata.dmgsum / totaldmgvalue end
+				statdata.dmgavg = dmgValue
+
+				if statdata.healsum ~= nil and stattype ~= STATTYPE_PENETRATION then healValue = statdata.healsum / totalhealvalue end
+				if statdata.min == inf then statdata.min = 0 end
+				statdata.healavg = healValue
+			end
+		end
+	end
+
+	for statId, stattype in pairs(IncomingStatList) do
+		local statdata = stats[statId]
+		local value = statdata.max
+		local totaldmgvalue = zo_max(calcData.damageInTotal, 1)
+
+		if stattype == STATTYPE_CRITICALBONUS then
+			totaldmgvalue = zo_max(calcData.damageInCritical, 1)
+		elseif stattype == STATTYPE_INCSPELL then
+			totaldmgvalue = zo_max(calcData.damageInSpells, 1)
+		elseif stattype == STATTYPE_INCWEAPON then
+			totaldmgvalue = zo_max(calcData.damageInWeapon, 1)
+		end
+
+		if statdata.dmgsum ~= nil then value = statdata.dmgsum / totaldmgvalue end
+		statdata.dmgavg = value
+	end
+end
+
+local function FinalizeSkillTimings(fight)
+	local calcData = fight.calculated
+	local skillData = calcData.skills
+	local castData = calcData.casts
+
+	local lastValidSkill
+	local lastValidWeaponAttack
+
+	local skillBars = fight.charData.skillBars
+
+	for i = #castData, 1, -1 do	-- go backwards to allow deleting without messing up indices
+		local reducedslot, registered, queued, startTime, endTime = unpackLogline(castData[i], 1, 5)
+		local skill = skillData[reducedslot]
+		local bar = zo_floor(reducedslot/10) + 1
+		local skillId = skillBars[bar][reducedslot%10]
+
+		if startTime and not ignoredAbilityTiming[skillId] then
+			local isWeaponAttack = reducedslot%10 == 1 or reducedslot%10 == 2
+			local delay = startTime - (queued or registered)
+			endTime = isWeaponAttack == false and zo_max(startTime+1000, endTime or 0) or (endTime or startTime+1000)
+
+			skill.delaySum = skill.delaySum + delay
+			skill.delayCount = skill.delayCount + 1
+
+			if lastValidSkill then
+				local weavingTime = endTime and castData[lastValidSkill][4] - endTime
+				skill.weavingTimeSum = skill.weavingTimeSum + weavingTime
+				skill.weavingTimeCount = skill.weavingTimeCount + 1
+			end
+
+			if isWeaponAttack then
+				if lastValidWeaponAttack and lastValidWeaponAttack - i == 1 then skill.weavingErrors = skill.weavingErrors + 1 end
+				lastValidWeaponAttack = i
+			else
+				if lastValidSkill and lastValidSkill - i == 1 then skill.weavingErrors = skill.weavingErrors + 1 end
+				lastValidSkill = i
+			end
+		else
+			table.remove(castData, i)
+			skill.failedCount = skill.failedCount + 1
+			if lastValidSkill then lastValidSkill = lastValidSkill - 1 end
+			if lastValidWeaponAttack then lastValidWeaponAttack = lastValidWeaponAttack - 1 end
+		end
+	end
+
+	local totalWeavingTimeSum = 0
+	local totalWeavingTimeCount = 0
+	local totalWeaponAttacks = 0
+	local totalSkillsFired = 0
+	local totalDelay = 0
+	local totalDelayCount = 0
+
+	for reducedslot, skill in pairs(skillData) do
+		local isWeaponAttack = reducedslot%10 == 1 or reducedslot%10 == 2
+		local timedata = skill.times
+		local bar = zo_floor(reducedslot/10) + 1
+		local skillId = skillBars[bar][reducedslot%10]
+		local ignored = ignoredAbilityTiming[skillId]
+
+		if ignored then skill.ignored = true end
+		if skillId then
+			local count = #timedata
+			skill.count = count
+			local delayCount = skill.delayCount
+			local weavingTimeCount = skill.weavingTimeCount
+
+			if delayCount and delayCount > 0 then skill.delayAvg = skill.delaySum / delayCount end
+			if weavingTimeCount and weavingTimeCount > 0 then skill.weavingTimeAvg = skill.weavingTimeSum / weavingTimeCount end
+
+			if isWeaponAttack then
+				totalWeaponAttacks = totalWeaponAttacks + count
+			elseif not ignored then
+				totalSkillsFired = totalSkillsFired + count
+				totalDelay = totalDelay + skill.delaySum
+				totalDelayCount = totalDelayCount + delayCount
+			end
+
+			if count > 1 then skill.diffTimeAvg = (timedata[#timedata] - timedata[1])/(count - 1) end
+
+			if not (isWeaponAttack or ignored) then
+				totalWeavingTimeSum = totalWeavingTimeSum + skill.weavingTimeSum
+				totalWeavingTimeCount = totalWeavingTimeCount + skill.weavingTimeCount
+			end
+		end
+
+		skill.started = nil
+	end
+
+	calcData.totalWeavingTimeSum = totalWeavingTimeSum
+	calcData.totalWeavingTimeCount = totalWeavingTimeCount
+	calcData.totalWeaponAttacks = totalWeaponAttacks
+	calcData.totalSkillsFired = totalSkillsFired
+	calcData.delayAvg = (totalDelayCount > 0 and totalDelay / totalDelayCount) or 0
+
+	calcData.casts = nil
+	calcData.lastIndex = nil
+end
+
+local function FinalizeBarData(fight)
+	local barData = fight.calculated.barStats
+	local barStats = barData[currentbar]
+
+	table.insert(barStats.offTimes, fight.dpsend) -- add endtime for last used bar
+
+	for bar, barStats in pairs(barData) do
+		local totalTime =  0
+		local onTimes  = barStats.onTimes
+		local offTimes = barStats.offTimes
+
+		if #onTimes == #offTimes then
+			for i, onTime in ipairs(onTimes) do
+				totalTime = totalTime + offTimes[i] - onTime
+			end
+			barStats.totalTime = totalTime / 1000
+		else
+			Print("misc", LOG_LEVEL_WARNING, "Time Array lengths don't match for bar %d", bar)
+		end
+
+		barStats.onTimes = nil
+		barStats.offTimes = nil
+	end
+end
+
+local function FinalizePerformanceData(fight)
+	local performance = fight.calculated.performance
+	local count = performance.count
+
+	if count > 0 then
+		performance.avgMin   = performance.sumMin/count
+		performance.avgMax   = performance.sumMax/count
+		performance.avgAvg   = performance.sumAvg/count
+		performance.avgPing  = performance.sumPing/count
+	end
+end
+
+local function Finalize(fight)
+	Print("calc", LOG_LEVEL_DEBUG, "Start end routine")
+	local scalcms = GetGameTimeSeconds()
+	CombatMetrics_Report_TitleFightTitleName:SetText(GetString(SI_COMBAT_METRICS_FINALIZING))
+
+	local data = fight.calculated
+	
+	fight:FinalizeUnitBuffs()
+	fight:AccumulateStats()
+	fight:FinalizeResourceStats()
+	fight:FinalizeStats()
+	fight:FinalizeSkillTimings()
+	fight:FinalizeBarData()
+	fight:FinalizePerformanceData()
+
+	-- set player buffs shortcut
+	data.buffs = fight.playerid ~= nil and data.units[fight.playerid] and data.units[fight.playerid].buffs or {}
+
+	-- cleanup		
+	fight.calculating = false
+	fight.cindex = nil
+	data.temp = nil
+
+	CombatMetrics_Report_TitleFightTitleBar:SetHidden(true)
+	Print("calc", LOG_LEVEL_DEBUG, "Time for final calculations: %.2f ms", (GetGameTimeSeconds() - scalcms) * 1000)
+end
 
 local function CalculateChunk(fight)  -- called by CalculateFight or itself
 	em:UnregisterForUpdate("CMX_chunk")
 
 	local scalcms = GetGameTimeSeconds()
-
 	local logdata = fight.log
-
 	local istart = fight.cindex
-	local iend = mathmin(istart+db.chunksize, #logdata)
+	local iend = zo_min(istart+db.chunksize, #logdata)
 
 	for i=istart+1,iend do
-
 		local logline = logdata[i]
 		local logType = logline[1] -- logline[1] is the callbacktype e.g. LIBCOMBAT_EVENT_DAMAGEOUT
 
 		if ProcessLog[logType] then ProcessLog[logType](fight, logline) end
-
-		--if logType == LIBCOMBAT_EVENT_PLAYERSTATS_ADVANCED then Print("debug", LOG_LEVEL_DEBUG, "Advanced Stat!") end
-
 	end
 
 	local titleBar = CombatMetrics_Report_TitleFightTitleBar
 	local fightlabel = CombatMetrics_Report_TitleFightTitleName
 
 	if iend >= #logdata then
-
-		Print("calc", LOG_LEVEL_DEBUG, "Start end routine")
-
-		fightlabel:SetText(GetString(SI_COMBAT_METRICS_FINALIZING))
-
-		local data = fight.calculated
-
-		for k,unitData in pairs(fight.units) do
-
-			local unitCalc = data.units[k] -- calculated info is not stored in fight.units but in fight.calculated.units
-
-			if unitData.name == "Offline" then -- delete unknown units. Should only happen to units that did not participate in the fight
-
-				unitData[k] = nil
-				data.units[k] = nil
-
-			elseif unitCalc ~= nil then
-
-				local endtime = mathmin(unitCalc.endtime, fight.endtime)
-
-				for _, effectdata in pairs(unitCalc.buffs) do	-- finish buffs that didn't end before end of combat
-
-					local instances = effectdata.instances
-
-					local slots = effectdata.slots
-
-					local slotcount, groupSlotCount = CountSlots(effectdata.slots)
-
-					if groupSlotCount > 0 and fight.starttime ~= 0 then
-
-						for slotId, slotdata in pairs(slots) do
-
-							local abilityId = slotdata.abilityId
-							local isPlayerSource = slotdata.isPlayerSource
-
-							local instance = instances[abilityId]
-
-							slotdata.abilityId = nil
-							slotdata.isPlayerSource = nil
-
-							for stacks, starttime in pairs(slotdata) do
-
-								local stackData = instance[stacks]
-								local duration = endtime - starttime
-
-								if isPlayerSource then
-
-									stackData.uptime = stackData.uptime + duration
-									stackData.count = stackData.count + 1
-
-								end
-
-								stackData.groupUptime = stackData.groupUptime + duration
-								stackData.groupCount = stackData.groupCount + 1
-							end
-						end
-
-						if slotcount > 0 then
-
-							local duration = endtime - effectdata.firstStartTime
-
-							effectdata.uptime = effectdata.uptime + duration
-							effectdata.count = effectdata.count + slotcount
-
-						end
-
-						local duration = endtime - effectdata.firstGroupStartTime
-
-						effectdata.groupUptime = effectdata.groupUptime + duration
-						effectdata.groupCount = effectdata.groupCount + groupSlotCount
-
-					end
-
-					effectdata.slots = nil
-
-					-- calculate efective instance and stack uptime
-
-					local maxDuration = 0
-
-					for abilityId, instance in pairs(instances) do
-
-						local sumStackUptime = 0
-						local sumStackGroupUptime = 0
-
-						local maxStacks = 1
-
-						local count = 0
-						local groupCount = 0
-
-						local minStacks = math.huge
-						local minStackDuration
-						local minStackDurationGroup
-
-						for stacks, stackData in pairs(instance) do
-
-							if stacks < minStacks then
-
-								minStacks = stacks
-								minStackDuration = stackData.uptime
-								minStackDurationGroup = stackData.groupUptime
-
-							end
-
-							sumStackUptime = sumStackUptime + stackData.uptime
-							sumStackGroupUptime = sumStackGroupUptime + stackData.groupUptime
-
-							maxStacks = mathmax(maxStacks, stacks)
-							count = mathmax(stackData.count, count)
-							groupCount = mathmax(stackData.groupCount, groupCount)
-
-						end
-
-						local uptime = (sumStackUptime + (minStackDuration and ((minStacks - 1) * minStackDuration) or 0))/maxStacks
-						local groupUptime = (sumStackGroupUptime + (minStackDurationGroup and ((minStacks - 1) * minStackDurationGroup) or 0))/maxStacks
-
-						instance.uptime = uptime
-						instance.groupUptime = groupUptime
-						instance.count = count
-						instance.groupCount = groupCount
-
-						if uptime > maxDuration or groupUptime > maxDuration then
-
-							maxDuration = mathmax(maxDuration, uptime, groupUptime)
-							effectdata.iconId = abilityId
-
-						end
-					end
-
-					effectdata.firstStartTime = nil
-					effectdata.firstGroupStartTime = nil
-				end
-			end
-		end
-
-		fight:AccumulateStats()
-
-		local resources = data.resources
-
-		-- calculate resource stats
-
-		for k, resource in pairs(resources) do
-
-			for id, ability in pairs(resource.gains or {}) do
-				resource.totalgains = ability.value + resource.totalgains
-				ability.rate = ability.value / fight.combattime
-			end
-
-			for id, ability in pairs(resource.drains or {}) do
-				resource.totaldrains = ability.value + resource.totaldrains
-				ability.rate = ability.value / fight.combattime
-			end
-
-			resource.gainRate = (resource.totalgains or 0) / fight.combattime
-			resource.drainRate = (resource.totaldrains or 0) / fight.combattime
-
-		end
-
-		-- calculate fight stats (like Spell Damage)
-
-		local stats = data.stats
-
-		-- calculate damage sums for the relevant categories
-
-		local damageOut = data.damageOut
-
-		data.damageOutSpells = {}
-		initBaseAbility(data.damageOutSpells, "damageOut")
-
-		data.damageOutWeapon = {}
-		initBaseAbility(data.damageOutWeapon, "damageOut")
-
-		for id, ability in pairs(damageOut) do
-
-			local isMagic = IsMagickaAbility[ability.damageType]
-
-			local datatable = (isMagic == true and data.damageOutSpells) or (isMagic == false and data.damageOutWeapon) or {}
-
-			for key, value in pairs(datatable) do
-				if key == "min" or key == "max" then
-
-					datatable[key] = math[key](ability[key], datatable[key])
-
-				elseif datatable[key] ~= nil then
-
-					datatable[key] = ability[key] + datatable[key]
-
-				end
-			end
-		end
-
-		if data.damageOutSpells.min == infinity then data.damageOutSpells.min = 0 end
-		if data.damageOutWeapon.min == infinity then data.damageOutWeapon.min = 0 end
-
-		local damageIn = data.damageIn
-
-		data.damageInSpells = 0
-		data.damageInWeapon = 0
-
-		for id, ability in pairs(damageIn) do
-
-			local isMagic = IsMagickaAbility[ability.damageType]
-
-			if isMagic == true then
-
-				data.damageInSpells = data.damageInSpells + ability.damageInTotal
-
-			elseif isMagic == false then
-
-				data.damageInWeapon = data.damageInWeapon + ability.damageInTotal
-
-			end
-		end
-
-		for key, list in pairs(StatListTable) do
-
-			for statId, stattype in pairs(list) do
-
-				local damagevalues = key == "Spell" and data.damageOutSpells or data.damageOutWeapon
-
-				local statdata = stats[statId]
-
-				local dmgValue = statdata.max
-				local healValue = statdata.max
-
-				local totaldmgvalue = mathmax(damagevalues.damageOutTotal, 1)
-				local totalhealvalue = mathmax(data.healingOutTotal, 1)
-
-				if stattype == STATTYPE_CRITICAL then
-
-					local critablehits = damagevalues.hitsOutNormal + damagevalues.hitsOutCritical
-					totaldmgvalue = mathmax(critablehits, 1)
-					totalhealvalue = mathmax(data.healsOutTotal, 1)
-
-				elseif stattype == STATTYPE_CRITICALBONUS then
-
-					totaldmgvalue = mathmax(damagevalues.damageOutCritical, 1)
-					totalhealvalue = mathmax(data.healingOutCritical, 1)
-
-				end
-
-				if statdata.dmgsum ~= nil then dmgValue = statdata.dmgsum / totaldmgvalue end
-
-				statdata.dmgavg = dmgValue
-
-				if statdata.healsum ~= nil and stattype ~= STATTYPE_PENETRATION then healValue = statdata.healsum / totalhealvalue end
-
-				statdata.healavg = healValue
-
-				if statdata.min == infinity then statdata.min = 0 end
-			end
-		end
-
-		for statId, stattype in pairs(IncomingStatList) do
-
-			local statdata = stats[statId]
-
-			local value = statdata.max
-
-			local totaldmgvalue = mathmax(data.damageInTotal, 1)
-
-			if stattype == STATTYPE_CRITICALBONUS then
-
-				totaldmgvalue = mathmax(data.damageInCritical, 1)
-
-			elseif stattype == STATTYPE_INCSPELL then
-
-				totaldmgvalue = mathmax(data.damageInSpells, 1)
-
-			elseif stattype == STATTYPE_INCWEAPON then
-
-				totaldmgvalue = mathmax(data.damageInWeapon, 1)
-
-			end
-
-			if statdata.dmgsum ~= nil then value = statdata.dmgsum / totaldmgvalue end
-
-			statdata.dmgavg = value
-
-		end
-
-		-- calculate skill timings
-
-		local skillData = data.skills
-		local castData = data.casts
-
-		local lastValidSkill
-		local lastValidWeaponAttack
-
-		local skillBars = fight.charData.skillBars
-
-		for i = #castData, 1, -1 do	-- go backwards to allow deleting without messing up indices
-
-			local reducedslot, registered, queued, startTime, endTime = unpackLogline(castData[i], 1, 5)
-			local skill = skillData[reducedslot]
-
-			local bar = mathfloor(reducedslot/10) + 1
-			local skillId = skillBars[bar][reducedslot%10]
-
-			if startTime and not ignoredAbilityTiming[skillId] then
-
-				local isWeaponAttack = reducedslot%10 == 1 or reducedslot%10 == 2
-
-				endTime = isWeaponAttack == false and math.max(startTime+1000, endTime or 0) or (endTime or startTime+1000)
-
-				local delay = startTime - (queued or registered)
-
-				skill.delaySum = skill.delaySum + delay
-				skill.delayCount = skill.delayCount + 1
-
-				if lastValidSkill then
-
-					local weavingTime = endTime and castData[lastValidSkill][4] - endTime
-
-					skill.weavingTimeSum = skill.weavingTimeSum + weavingTime
-					skill.weavingTimeCount = skill.weavingTimeCount + 1
-
-				end
-
-				if isWeaponAttack then
-
-					if lastValidWeaponAttack and lastValidWeaponAttack - i == 1 then skill.weavingErrors = skill.weavingErrors + 1 end
-
-					lastValidWeaponAttack = i
-
-				else
-
-					if lastValidSkill and lastValidSkill - i == 1 then skill.weavingErrors = skill.weavingErrors + 1 end
-
-					lastValidSkill = i
-
-				end
-
-			else
-
-				table.remove(castData, i)
-				skill.failedCount = skill.failedCount + 1
-
-				if lastValidSkill then lastValidSkill = lastValidSkill - 1 end
-				if lastValidWeaponAttack then lastValidWeaponAttack = lastValidWeaponAttack - 1 end
-
-			end
-		end
-
-		local totalWeavingTimeSum = 0
-		local totalWeavingTimeCount = 0
-		local totalWeaponAttacks = 0
-		local totalSkillsFired = 0
-		local totalDelay = 0
-		local totalDelayCount = 0
-
-		for reducedslot, skill in pairs(skillData) do
-
-			local isWeaponAttack = reducedslot%10 == 1 or reducedslot%10 == 2
-			local timedata = skill.times
-			local bar = mathfloor(reducedslot/10) + 1
-
-			local skillId = skillBars[bar][reducedslot%10]
-
-			local ignored = ignoredAbilityTiming[skillId]
-
-			if ignored then skill.ignored = true end
-
-			if skillId then
-
-				local count = #timedata
-
-				skill.count = count
-
-				local delayCount = skill.delayCount
-
-				if delayCount and delayCount > 0 then skill.delayAvg = skill.delaySum / delayCount end
-
-				local weavingTimeCount = skill.weavingTimeCount
-
-				if weavingTimeCount and weavingTimeCount > 0 then skill.weavingTimeAvg = skill.weavingTimeSum / weavingTimeCount end
-
-				if isWeaponAttack then
-
-					totalWeaponAttacks = totalWeaponAttacks + count
-
-				elseif not ignored then
-
-					totalSkillsFired = totalSkillsFired + count
-					totalDelay = totalDelay + skill.delaySum
-					totalDelayCount = totalDelayCount + delayCount
-
-				end
-
-				if count > 1 then skill.diffTimeAvg = (timedata[#timedata] - timedata[1])/(count - 1) end
-
-				if not (isWeaponAttack or ignored) then
-
-					totalWeavingTimeSum = totalWeavingTimeSum + skill.weavingTimeSum
-					totalWeavingTimeCount = totalWeavingTimeCount + skill.weavingTimeCount
-
-				end
-			end
-
-			skill.started = nil
-		end
-
-		data.totalWeavingTimeSum = totalWeavingTimeSum
-		data.totalWeavingTimeCount = totalWeavingTimeCount
-		data.totalWeaponAttacks = totalWeaponAttacks
-		data.totalSkillsFired = totalSkillsFired
-		data.delayAvg = (totalDelayCount > 0 and totalDelay / totalDelayCount) or 0
-
-		data.casts = nil
-		data.lastIndex = nil
-
-		-- calculate bardata
-
-		local barData = data.barStats
-
-		local barStats = barData[currentbar]
-
-		table.insert(barStats.offTimes, fight.dpsend) -- add endtime for last used bar
-
-		for bar, barStats in pairs(barData) do
-
-			local totalTime =  0
-
-			local onTimes  = barStats.onTimes
-			local offTimes = barStats.offTimes
-
-			if #onTimes == #offTimes then
-
-				for i, onTime in ipairs(onTimes) do
-
-					totalTime = totalTime + offTimes[i] - onTime
-
-				end
-
-				barStats.totalTime = totalTime / 1000
-
-			else
-
-				Print("misc", LOG_LEVEL_WARNING, "Time Array lengths don't match for bar %d", bar)
-
-			end
-
-			barStats.onTimes = nil
-			barStats.offTimes = nil
-		end
-
-		-- calculate avg performance values
-
-		local performance = data.performance
-		local count = performance.count
-
-		if count > 0 then
-
-			performance.avgMin   = performance.sumMin/count
-			performance.avgMax   = performance.sumMax/count
-			performance.avgAvg   = performance.sumAvg/count
-			performance.avgPing  = performance.sumPing/count
-
-		end
-
-		-- remaining stuff
-
-		data.buffs = fight.playerid ~= nil and data.units[fight.playerid] and data.units[fight.playerid].buffs or {}
-
-		fight.calculating = false
-		fight.cindex = nil
-
-		titleBar:SetHidden(true)
-
-		data.temp = nil
-
-		Print("calc", LOG_LEVEL_DEBUG, "Time for final calculations: %.2f ms", (GetGameTimeSeconds() - scalcms) * 1000)
-
-		return
-
+		return fight:Finalize()
 	else
-
 		fight.cindex = iend
 		em:RegisterForUpdate("CMX_chunk", 20, function() fight:CalculateChunk() end )
-
 	end
 
 	local chunktime = GetGameTimeSeconds() - scalcms
-
-	local newchunksize = mathmin(mathceil(desiredtime / mathmax(chunktime, 0.001) * db.chunksize / stepsize) * stepsize, 20000)
-
+	local newchunksize = zo_min(zo_ceil(desiredtime / zo_max(chunktime, 0.001) * db.chunksize / stepsize) * stepsize, 20000)
 	Print("calc", LOG_LEVEL_DEBUG, "Chunk calculation time: %.2f ms, new chunk size: %d", chunktime * 1000, newchunksize)
 
 	db.chunksize = newchunksize
-
 	local progress = iend/#logdata
-
 	fightlabel:SetText(stringformat("%s (%.1f%%)", GetString(SI_COMBAT_METRICS_CALC), 100 * progress))
 
 	titleBar:SetValue(progress)
@@ -2347,80 +2169,53 @@ local function AddtoChatLog(logType, ...)
 end
 
 local function AddToLog(logType, ...)
-
 	if LC.data.inCombat ~= true and logType == LIBCOMBAT_EVENT_PERFORMANCE then return end
-
 	table.insert(CMX.currentdata.log,{logType, ...})
-
 	if db.chatLog.enabled then AddtoChatLog(logType, ...) end
 end
 
 local function UnitsCallback(_, units)
-
 	CMX.currentdata.units = units
-
 end
 
 local function FightRecapCallback(_, newdata)
-
 	local data = CMX.currentdata
-
 	ZO_DeepTableCopy(newdata, data)
-
 	CombatMetrics_LiveReport:Update(data)
-
 end
 
 local function GroupFightRecapCallback(_, newdata)
-
 	local data = CMX.currentdata
-
 	ZO_DeepTableCopy(newdata, data)
-
 end
 
 local function CheckNumberOfFights()
-
 	local lastfights = CMX.lastfights
-
 	if #lastfights > db.fighthistory then
-
 		local fighttodelete = 1
 
 		if db.keepbossfights then
-
 			for i = 1, #lastfights - 1 do
-
 				if not lastfights[i].bossfight then fighttodelete = i break end
-
 			end
 		end
 
 		table.remove(lastfights, fighttodelete)
-
 	end
 end
 
 local function GetFightName(fight)
-
 	local bigunitname = "Unkown"
 	local dmgmax = 0
 
 	for k,unitData in pairs(fight.units) do
-
 		if fight.bossfight == true and unitData.bossId ~= nil and unitData.damageOutTotal > dmgmax then -- find the "biggest" enemy
-
 			bigunitname = unitData.name
-
 			if unitData.bossId == 1 then break end		-- this should be the name of the main boss
-
 			dmgmax = unitData.damageOutTotal
-
 		elseif unitData.unitType == COMBAT_UNIT_TYPE_NONE and unitData.damageOutTotal > dmgmax then
-
 			bigunitname = unitData.name
 			dmgmax = unitData.damageOutTotal
-
 		end
 	end
 
@@ -2428,7 +2223,7 @@ local function GetFightName(fight)
 end
 
 local function AddFightCalculationFunctions(fight)
-
+	fight.GetFightName = GetFightName
 	fight.CalculateFight = CalculateFight
 	fight.CalculateChunk = CalculateChunk
 	fight.AcquireUnitData = AcquireUnitData
@@ -2439,24 +2234,26 @@ local function AddFightCalculationFunctions(fight)
 	fight.AcquireStatData = AcquireStatData
 	fight.InitTrialDummies = InitTrialDummies
 
+	fight.Finalize = Finalize
+	fight.FinalizeUnitBuffs = FinalizeUnitBuffs
+	fight.FinalizeResourceStats = FinalizeResourceStats
+	fight.FinalizeStats = FinalizeStats
+	fight.FinalizeSkillTimings = FinalizeSkillTimings
+	fight.FinalizeBarData = FinalizeBarData
+	fight.FinalizePerformanceData = FinalizePerformanceData
 end
 
 CMX.AddFightCalculationFunctions = AddFightCalculationFunctions
 
 local function FightSummaryCallback(_, fight)
-
-	AddFightCalculationFunctions(fight)
-
+	AddFightCalculationFunctions(fight)	
+	fight:GetFightName()
+	
 	fight.grouplog = nil
-
-	GetFightName(fight)
-
 	fight.log = CMX.currentdata.log -- copy combatlog
-
 	InitCurrentData() 	-- reset currentdata, the previous log is now only linked to the fight.
 
 	if fight.dpsstart ~= nil or fight.hpsstart ~= nil then table.insert(CMX.lastfights, fight) end
-
 	CheckNumberOfFights()
 
 	if SCENE_MANAGER.currentScene.name == "CMX_REPORT_SCENE" then CombatMetrics_Report:Update() end
@@ -2484,34 +2281,30 @@ local function UpdateEvents(event)
 	if registrationStatus ~= newstatus then
 
 		if newstatus == CMX_STATUS_DISABLED then
-
 			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_PERFORMANCE do
 				LC:UnregisterCallbackType(i, AddToLog, CMX.name)
 			end
 
+			LC:UnregisterCallbackType(LIBCOMBAT_EVENT_QUICKSLOT, AddToLog, CMX.name)
 			LC:UnregisterCallbackType(LIBCOMBAT_EVENT_UNITS, UnitsCallback, CMX.name)
 			LC:UnregisterCallbackType(LIBCOMBAT_EVENT_FIGHTRECAP, FightRecapCallback, CMX.name)
 			LC:UnregisterCallbackType(LIBCOMBAT_EVENT_FIGHTSUMMARY, FightSummaryCallback, CMX.name)
 
 		elseif newstatus == CMX_STATUS_LIGHTMODE then
-
 			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_PERFORMANCE do
 				LC:UnregisterCallbackType(i, AddToLog, CMX.name)
 			end
 
-			LC:UnregisterCallbackType(LIBCOMBAT_EVENT_FIGHTSUMMARY, FightSummaryCallback, CMX.name)
-
+			LC:UnregisterCallbackType(LIBCOMBAT_EVENT_QUICKSLOT, AddToLog, CMX.name)
 			LC:RegisterCallbackType(LIBCOMBAT_EVENT_UNITS, UnitsCallback, CMX.name)
 			LC:RegisterCallbackType(LIBCOMBAT_EVENT_FIGHTRECAP, FightRecapCallback, CMX.name)
+			LC:UnregisterCallbackType(LIBCOMBAT_EVENT_FIGHTSUMMARY, FightSummaryCallback, CMX.name)
 
 		elseif newstatus == CMX_STATUS_ENABLED then
-
 			for i = LIBCOMBAT_EVENT_DAMAGE_OUT, LIBCOMBAT_EVENT_PERFORMANCE do
-
 				LC:RegisterCallbackType(i, AddToLog ,CMX.name)
-
 			end
-
+			LC:RegisterCallbackType(LIBCOMBAT_EVENT_QUICKSLOT, AddToLog, CMX.name)
 			LC:RegisterCallbackType(LIBCOMBAT_EVENT_UNITS, UnitsCallback, CMX.name)
 			LC:RegisterCallbackType(LIBCOMBAT_EVENT_FIGHTRECAP, FightRecapCallback, CMX.name)
 			LC:RegisterCallbackType(LIBCOMBAT_EVENT_FIGHTSUMMARY, FightSummaryCallback, CMX.name)
@@ -2840,7 +2633,7 @@ local function Initialize(event, addon)
 	if CMX.LoadCustomizations then
 
 		LC.AddCustomAbilityData(CMX.LoadCustomizations())
-	
+
 	end
 
 	function CMX.GetCombatLogString(fight, logline, fontsize)

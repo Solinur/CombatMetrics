@@ -1,6 +1,7 @@
+---@diagnostic disable: assign-type-mismatch
 local em = GetEventManager()
 local wm = GetWindowManager()
-local dx = math.ceil(GuiRoot:GetWidth()/tonumber(GetCVar("WindowedWidth"))*1000)/1000
+local dx = zo_ceil(GuiRoot:GetWidth()/tonumber(GetCVar("WindowedWidth"))*1000)/1000
 COMBAT_METRICS_LINE_SIZE = dx
 local fontsize = tonumber(GetString(SI_COMBAT_METRICS_FONT_SIZE_SMALL))
 local currentFight
@@ -53,19 +54,13 @@ local GetFormattedAbilityName = LC.GetFormattedAbilityName
 local GetFormattedAbilityIcon = LC.GetFormattedAbilityIcon
 
 local function searchtable(t, field, value)
-
 	if value == nil then return false end
 
 	for k, v in pairs(t) do
-
 		if type(v) == "table" and field and v[field] == value then
-
 			return true, k
-
 		elseif v == value then
-
 			return true, k
-
 		end
 	end
 
@@ -190,7 +185,7 @@ function NavButtonFunctions.save(control, _, _, _, _, shiftkey )
 
 		local spaceLeft = db.maxSavedFights - numFights
 		assert(spaceLeft > 0, zo_strformat(SI_COMBAT_METRICS_SAVEDFIGHTS_FULL, 1-spaceLeft))
-		
+
 		SVHandler.Save(fightData, shiftkey)
 		CombatMetrics_Report:Update()
 	end
@@ -218,7 +213,7 @@ function NavButtonFunctions.delete(control)
 		table.remove(CMX.lastfights, currentFight)
 		ClearSelections()
 
-		if #CMX.lastfights == 0 then CombatMetrics_Report:Update() else CombatMetrics_Report:Update(math.min(currentFight, #CMX.lastfights)) end
+		if #CMX.lastfights == 0 then CombatMetrics_Report:Update() else CombatMetrics_Report:Update(zo_min(currentFight, #CMX.lastfights)) end
 
 	end
 end
@@ -242,7 +237,7 @@ local function selectCategory(button)
 
 		local child = selectControl:GetChild(i)
 
-		if child and child.isMainCategory then 
+		if child and child.isMainCategory then
 
 			local r, g, b, _ = child:GetColor()
 			local a = child == button and 1 or .2
@@ -357,26 +352,15 @@ local function updateSelectorButtons(selectorButtons)
 
 end
 
-local mainSelectorCategories = {
-
-
-}
-
 local function initSelectorButtons(selectorButtons)
-
 	for i = 1, selectorButtons:GetNumChildren() do
-
 		local child = selectorButtons:GetChild(i)
 
 		if child and child.isMainCategory then
-
 			child:SetHandler( "OnMouseUp", selectCategory)
 			if child.category == db.FightReport.category then selectCategory(child) end
-
 		elseif child and child.isSecondaryCategory then
-
 			child:SetHandler( "OnMouseUp", selectMainPanel)
-
 		end
 
 		selectMainPanel(selectorButtons:GetNamedChild("FightStatsButton"))
@@ -386,54 +370,37 @@ end
 local LegacyStrings = CMX.CPLegacyStrings[GetCVar("language.2")] or CMX.CPLegacyStrings["en"]
 
 function CMX.InitializeCPRowsLegacy(panel)
-
 	for i = 1, 9 do
-
 		local discipline = (7-i)%9+1	-- start with apprentice and then clockwise (seriously, how did they come up with those ids?)
-
 		local color = GetString(SI_COMBAT_METRICS_MAGICKA_COLOR)
 
 		if i > 6 then
-
 			color = GetString(SI_COMBAT_METRICS_STAMINA_COLOR)
-
 		elseif i > 3 then
-
 			color = GetString(SI_COMBAT_METRICS_HEALTH_COLOR)
-
 		end
 
 		local signcontrol = panel:GetNamedChild("StarSign"..i)
-
 		local title = signcontrol:GetNamedChild("Title")
-
 		local name = LegacyStrings and LegacyStrings[discipline] and LegacyStrings[discipline].name or "???"
-
 		title:SetText(name)
 
 		local width = title:GetTextWidth() + 4
 		local height = title:GetHeight()
-
 		title:SetDimensions(width, height)
 
 		CMX.SetLabelColor(signcontrol, color)
 
 		for i = 1, 4 do
-
 			local row = signcontrol:GetNamedChild("Row"..i)
-
 			local label = row:GetNamedChild("Name")
-
 			local name = LegacyStrings and LegacyStrings[discipline] and LegacyStrings[discipline][i] or "???"
-
 			label:SetText(name)
 
 			local passive = signcontrol:GetNamedChild("Passive"..i)
-
 			passive.discipline = discipline
 			passive.skillId = i + 4
 			passive.points = 0
-
 		end
 	end
 end
@@ -454,70 +421,89 @@ local starcolors = {
 
 }
 
-function CMX.InitializeCPRows(panel)
 
-	if GetAPIVersion() < 100034 then return end
+local function InitializeScribedSkillsPanel(panel)
+	local nameBase = panel:GetName()
+	local anchor
+	for i = 1, 10 do
+		local scribedSkillControl = CreateControlFromVirtual(nameBase, panel, "CombatMetrics_ScribedSkillControl", i)
+		-- scribedSkillControl:SetHidden(false)
+
+		if i == 1 then
+			scribedSkillControl:SetAnchor(TOPLEFT, panel, TOPLEFT, 0, 4)
+		else
+			scribedSkillControl:SetAnchor(TOPLEFT, anchor, BOTTOMLEFT, 0, 4)
+			scribedSkillControl:SetHidden(true)
+		end
+
+		anchor = scribedSkillControl
+	end
+end
+
+function CMX.InitializeRightInfoPanel(panel)
+	InitializeScribedSkillsPanel(panel:GetNamedChild("ScribedSkills"))
+
+	local scrollchild = GetControl(panel, "PanelScrollChild")
+	scrollchild:SetAnchor(TOPRIGHT, nil, TOPRIGHT, 0, 0)
+	local currentanchor = {TOPLEFT, scrollchild, TOPLEFT, 0, dx}
+	local currentanchor2 = {TOPRIGHT, scrollchild, TOPRIGHT, 0, dx}
 
 	for disciplineId = 1,3 do
-
-		local constellationControl = panel:GetNamedChild("Constellation"..disciplineId)
-
 		local disciplineType = GetChampionDisciplineType(disciplineId)
-
 		local color = labelcolors[disciplineType]
 
+		local panelName = scrollchild:GetName() .. "Panel" .. disciplineId
+		local constellationControl = _G[panelName] or CreateControlFromVirtual(panelName, scrollchild, "CombatMetrics_Constellation")
+		constellationControl:SetAnchor(unpack(currentanchor))
+		constellationControl:SetAnchor(unpack(currentanchor2))
+		constellationControl:SetHidden(false)
+
+		currentanchor = {TOPLEFT, constellationControl, BOTTOMLEFT, 0, 4}
+		currentanchor2 = {TOPRIGHT, constellationControl, BOTTOMRIGHT, 0, 4}
+
+		---@type LabelControl
 		local title = constellationControl:GetNamedChild("Title")
+		local top = title:GetTop()
 		title:SetText(zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionDisciplineName(disciplineId)))
 
-		local nameBase = constellationControl:GetName() .. "StarItem"
-		local anchor = title
+		local nameBase = constellationControl:GetName() .. "StarControl"
+		local anchor
 
-		for i = 1, 18 do
-
-			local starItem = CreateControlFromVirtual(nameBase, constellationControl, "CombatMetrics_StarItem", i)
+		for i = 1, 20 do
+			local starControl = CreateControlFromVirtual(nameBase, constellationControl, "CombatMetrics_StarControl", i)
 
 			if i == 1 then
-
-				starItem:SetAnchor(TOPLEFT, anchor, BOTTOMLEFT, 0, 4)
-
-			elseif i == 10 then
-
-				starItem:SetAnchor(TOPRIGHT, constellationControl, TOPRIGHT, 0, 24)
-
-			else
-
-				starItem:SetAnchor(TOPLEFT, anchor, BOTTOMLEFT, 0, 2)
-
+				starControl:SetAnchor(TOPLEFT, title, BOTTOMLEFT, 0, 4)
+			elseif i%2 == 0 then
+				starControl:SetAnchor(TOPLEFT, anchor, TOPRIGHT, 7, 0)
+			elseif i%2 == 1 then
+				starControl:SetAnchor(TOPRIGHT, anchor, BOTTOMLEFT, -7, 2)
 			end
 
-			anchor = starItem
-
+			anchor = starControl
 			local coords = {0.75, 1, 0.5, 0.75}
 
 			if i > 4 then
-
 				coords = {0.25, 0.5, 0.25, 0.5}
-				starItem:GetNamedChild("Ring"):SetHidden(true)
-				starItem:SetHidden(true)
-
+				starControl:GetNamedChild("Ring"):SetHidden(true)
+				starControl:SetHidden(true)
 			else
-
-				starItem:GetNamedChild("Star"):SetHidden(true)
-				starItem:GetNamedChild("Name"):SetHidden(true)
-				starItem:GetNamedChild("Value"):SetHidden(true)
-
+				starControl:GetNamedChild("Icon"):SetHidden(true)
+				starControl:GetNamedChild("Name"):SetHidden(true)
+				starControl:GetNamedChild("Value"):SetHidden(true)
 			end
 
-			local starIcon = starItem:GetNamedChild("Star")
-
+			local starIcon = starControl:GetNamedChild("Icon")
 			starIcon:SetTextureCoords(unpack(coords))
 			starIcon:SetColor(starcolors[disciplineType]:UnpackRGB())
-
 		end
+		local bottom = constellationControl:GetNamedChild("StarControl4"):GetBottom()
+		constellationControl:SetHeight(bottom-top)
 
 		CMX.SetLabelColor(constellationControl, color)
 	end
 end
+
 
 function CMX.InitializeSkillStats(panel)
 
@@ -645,7 +631,7 @@ local function adjustSlider(self)
 	if numHistoryLines > numVisHistoryLines then -- If there are more history lines than visible lines show the slider
 
 		slider:SetHidden(false)
-		slider:SetThumbTextureHeight(math.max(20, math.floor(numVisHistoryLines/numHistoryLines*self:GetNamedChild("Slider"):GetHeight())))
+		slider:SetThumbTextureHeight(zo_max(20, zo_floor(numVisHistoryLines/numHistoryLines*self:GetNamedChild("Slider"):GetHeight())))
 
 	else -- else hide the slider
 
@@ -682,7 +668,7 @@ function CMX.InitCombatLog(control)
 
 		if shift then
 
-			offset = offset * math.floor((buffer:GetNumVisibleLines()))
+			offset = offset * zo_floor((buffer:GetNumVisibleLines()))
 
 		elseif ctrl then
 
@@ -690,7 +676,7 @@ function CMX.InitCombatLog(control)
 
 		end
 
-		buffer:SetScrollPosition(math.min(buffer:GetScrollPosition() + offset, math.floor(buffer:GetNumHistoryLines()-buffer:GetNumVisibleLines())))
+		buffer:SetScrollPosition(zo_min(buffer:GetScrollPosition() + offset, zo_floor(buffer:GetNumHistoryLines()-buffer:GetNumVisibleLines())))
 
 		slider:SetValue(slider:GetValue() - offset)
 
@@ -699,7 +685,7 @@ function CMX.InitCombatLog(control)
 	slider:SetHandler("OnValueChanged", function(self, value, eventReason)
 
 		local numHistoryLines = buffer:GetNumHistoryLines()
-		local sliderValue = math.max(slider:GetValue(), math.floor((buffer:GetNumVisibleLines()+1)))
+		local sliderValue = zo_max(slider:GetValue(), zo_floor((buffer:GetNumVisibleLines()+1)))
 
 		if eventReason == EVENT_REASON_HARDWARE then
 			buffer:SetScrollPosition(numHistoryLines-sliderValue)
@@ -713,7 +699,7 @@ function CMX.InitCombatLog(control)
 	local scrollEnd = slider:GetNamedChild("ScrollEnd")
 
 	scrollUp:SetHandler("OnMouseDown", function(...)
-		buffer:SetScrollPosition(math.min(buffer:GetScrollPosition()+1, math.floor(buffer:GetNumHistoryLines()-buffer:GetNumVisibleLines())))
+		buffer:SetScrollPosition(zo_min(buffer:GetScrollPosition()+1, zo_floor(buffer:GetNumHistoryLines()-buffer:GetNumVisibleLines())))
 		slider:SetValue(slider:GetValue()-1)
 	end)
 
@@ -908,7 +894,7 @@ function CMX.DeleteItem(control)
 		CombatMetrics_Report:Update()
 	else
 		table.remove(CMX.lastfights, id)
-		if #CMX.lastfights == 0 then CombatMetrics_Report:Update() else CombatMetrics_Report:Update(math.min(currentFight, #CMX.lastfights)) end
+		if #CMX.lastfights == 0 then CombatMetrics_Report:Update() else CombatMetrics_Report:Update(zo_min(currentFight, #CMX.lastfights)) end
 	end
 
 	toggleFightList(nil, true)
@@ -1465,8 +1451,8 @@ function CMX.AddSelection( self, button, upInside, ctrlkey, alt, shiftkey )
 
 	elseif shiftkey and not ctrlkey and lastsel ~= nil then 	-- select everything between this and the previous sel if shiftkey is pressed
 
-		local istart = math.min(lastsel, id)
-		local iend = math.max(lastsel, id)
+		local istart = zo_min(lastsel, id)
+		local iend = zo_max(lastsel, id)
 
 		sel = {} 	-- forget/disregard other selections
 
@@ -1493,8 +1479,8 @@ function CMX.AddSelection( self, button, upInside, ctrlkey, alt, shiftkey )
 
 	elseif shiftkey and ctrlkey and lastsel ~= nil then  -- additionally select everything between this and the previous sel if ctrlkey + shift key is pressed
 
-		local istart = math.min(lastsel, id)
-		local iend = math.max(lastsel, id)
+		local istart = zo_min(lastsel, id)
+		local iend = zo_max(lastsel, id)
 
 		for i=istart, iend do
 
@@ -1558,13 +1544,13 @@ local function updateTitlePanel(panel)
 		charData.CPtotal = 0
 
 		fightData.charData = charData
-		fightlabel = string.gsub(fightData.fightlabel, ".+%:%d%d %- ([A-Z])", "%1") or ""
+		fightlabel = zo_strgsub(fightData.fightlabel, ".+%:%d%d %- ([A-Z])", "%1") or ""
 
 	else
 
 		charData = fightData.charData or {}
 		charData.name = charData.name or fightData.char
-		fightlabel = string.gsub(fightData.fightlabel, ".+%:%d%d %- ([A-Z])", "%1") or ""
+		fightlabel = zo_strgsub(fightData.fightlabel, ".+%:%d%d %- ([A-Z])", "%1") or ""
 
 	end
 
@@ -1917,6 +1903,7 @@ local statFormat = { 			-- {label, format, convert}
 		[3] = {LIBCOMBAT_STAT_SPELLCRIT, "%.1f%%", true},
 		[4] = {LIBCOMBAT_STAT_SPELLCRITBONUS, "%.1f%%"},
 		[5] = {LIBCOMBAT_STAT_SPELLPENETRATION, "%d"},
+		[6] = {LIBCOMBAT_STAT_STATUS_EFFECT_CHANCE, "+%.1f%%"},
 	},
 
 	[POWERTYPE_STAMINA] = {
@@ -1925,6 +1912,7 @@ local statFormat = { 			-- {label, format, convert}
 		[3] = {LIBCOMBAT_STAT_WEAPONCRIT, "%.1f%%", true},
 		[4] = {LIBCOMBAT_STAT_WEAPONCRITBONUS, "%.1f%%"},
 		[5] = {LIBCOMBAT_STAT_WEAPONPENETRATION, "%d"},
+		[6] = {LIBCOMBAT_STAT_STATUS_EFFECT_CHANCE, "+%.1f%%"},
 	},
 
 	[POWERTYPE_HEALTH] = {
@@ -1938,7 +1926,6 @@ local statFormat = { 			-- {label, format, convert}
 
 
 local function updateFightStatsPanelRight(panel)
-
 	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating FightStatsPanelRight")
 
 	local data = fightData or {}
@@ -1983,17 +1970,13 @@ local function updateFightStatsPanelRight(panel)
 	local resdata = selections.unit[category] and selectionData or calculated or {}
 
 	for i = 1, 4 do
-
 		local text = ZO_CachedStrFormat("<<1>>:", GetString(stringKey, i))
 		local rowcontrol = statWindowControl:GetNamedChild("Row"..i)
 		local dataKey, displayformat, convert = unpack(keys[i] or {})
-
 		local statData = stats[dataKey]
-
 		if calcVersion < 2 then dataKey = statKeysLegacy[dataKey] end
 
 		if text ~= nil and text ~= "" and dataKey ~= nil then
-
 			local maxvalue = statData and statData.max or fightStats["max"..dataKey] or 0
 
 			if convert == true then maxvalue = GetCriticalStrikeChance(maxvalue) end
@@ -2003,44 +1986,33 @@ local function updateFightStatsPanelRight(panel)
 			local avgvalue = statData and statData[avgkey] or avgvalues["avg"..dataKey] or stats["avg"..dataKey]
 
 			if avgvalue == nil then -- legacy
-
 				local legacyvalue = avgvalues["sum"..dataKey]
-				avgvalue = (legacyvalue and legacyvalue / math.max(convert and countvalue or totalvalue or 1, 1)) or maxvalue
-
+				avgvalue = (legacyvalue and legacyvalue / zo_max(convert and countvalue or totalvalue or 1, 1)) or maxvalue
 			end
 
 			if type(avgvalue) == "number" then
-
 				if convert then avgvalue = GetCriticalStrikeChance(avgvalue) end
 				if displayformat then avgvalue = string.format(displayformat, avgvalue) end
-
 			end
 
 			if i == 4 and powerType ~= POWERTYPE_HEALTH then	-- Add a hint for backstabber
-
 				rowcontrol.tooltip = {}
 				local tooltiplines = {}
 				local backstabberTT
-
 				local CP = data.CP
 
 				if CP and CP.version ~= nil and CP.version >= 2 then
-
 					local backstabber = CP[1] and CP[1].stars and CP[1].stars[31] -- Backstabber CP
 
 					if backstabber and backstabber[1] >= 10 and backstabber[2] == LIBCOMBAT_CPTYPE_SLOTTED then
-
 						text = ZO_CachedStrFormat("<<1>>*:", GetString(stringKey, i))
-
 						backstabberTT = GetString(SI_COMBAT_METRICS_BACKSTABBER_TT)
-
 					end
 				end
 
 				local critvalues = powerType == POWERTYPE_MAGICKA and resdata.spellCrit or powerType == POWERTYPE_STAMINA and resdata.weaponCrit
 
 				if critvalues then
-
 					local sum = 0
 					local effectiveSum = 0
 					local totalDamage = 0
@@ -2049,39 +2021,31 @@ local function updateFightStatsPanelRight(panel)
 					local stepsize = 10
 
 					for crit, damage in pairs(critvalues) do
-
 						sum = sum + crit * damage
-						effectiveSum = effectiveSum + math.min(crit, maxCritBonus) * damage
+						effectiveSum = effectiveSum + zo_min(crit, maxCritBonus) * damage
 						totalDamage = totalDamage + damage
 
 						if crit < 130 and crit >= 120 then stepsize = 5 end
 
-						local trimmedkey = math.ceil(crit/stepsize)*stepsize
+						local trimmedkey = zo_ceil(crit/stepsize)*stepsize
 						trimmedCritValues[trimmedkey] = (trimmedCritValues[trimmedkey] or 0) + damage
-
 					end
 
-					totalDamage = math.max(totalDamage, 1)
-
+					totalDamage = zo_max(totalDamage, 1)
 					table.insert(tooltiplines, GetString(SI_COMBAT_METRICS_CRITBONUS_TT))
 
 					local sumdamage = 0
-
 					for crit, damage in CMX.spairs(trimmedCritValues) do
-
 						sumdamage = sumdamage + damage
 
 						local sumdamageRatio = 100 * (sumdamage/totalDamage)
 						local damageRatio = 100 * damage/totalDamage
-
 						local color = crit == 125 and "|cffbb88" or damageRatio > 5 and "|cffffff" or ""
-
 						local newline = string.format("<%s%2d%%: %5.1f%%", color, crit, sumdamageRatio)
 						table.insert(tooltiplines, newline)
-
 					end
 
-					avgvalue = string.format(displayformat, math.max(effectiveSum / totalDamage, avgvalues["avg"..dataKey] or 0))
+					avgvalue = string.format(displayformat, zo_max(effectiveSum / totalDamage, avgvalues["avg"..dataKey] or 0))
 
 					rowcontrol.tooltip = #tooltiplines>2 and tooltiplines or nil
 					if backstabberTT then table.insert(tooltiplines, 1, backstabberTT) end
@@ -2092,15 +2056,12 @@ local function updateFightStatsPanelRight(panel)
 
 				end
 			else
-
 				rowcontrol.tooltip = nil
-
 			end
 
 			rowcontrol:GetNamedChild("Label"):SetText(text)
 			rowcontrol:GetNamedChild("Value"):SetText(avgvalue)
 			rowcontrol:GetNamedChild("Value2"):SetText(maxvalue)
-
 			rowcontrol:SetHidden(false)
 
 		else
@@ -2112,6 +2073,7 @@ local function updateFightStatsPanelRight(panel)
 
 	local row5 = statWindowControl:GetNamedChild("Row5")
 	local row6 = statWindowControl:GetNamedChild("Row6")
+	local row7 = statWindowControl:GetNamedChild("Row7")
 
 	if category == "damageOut" and (powerType == POWERTYPE_MAGICKA or powerType == POWERTYPE_STAMINA) then
 
@@ -2131,18 +2093,18 @@ local function updateFightStatsPanelRight(panel)
 		for penetration, damage in pairs(resistvalues) do
 
 			sum = sum + penetration * damage
-			effectiveSum = effectiveSum + math.min(penetration, maxpen) * damage
-			maxvalue = math.max(maxvalue, penetration)
+			effectiveSum = effectiveSum + zo_min(penetration, maxpen) * damage
+			maxvalue = zo_max(maxvalue, penetration)
 			totalDamage = totalDamage + damage
 
 			if penetration - maxpen > 0 then overpen = overpen + damage end
 
-			local trimmedkey = math.floor((penetration+800)/1000)
+			local trimmedkey = zo_floor((penetration+800)/1000)
 			trimmedResistvalues[trimmedkey] = (trimmedResistvalues[trimmedkey] or 0) + damage
 
 		end
 
-		totalDamage = math.max(totalDamage, 1)
+		totalDamage = zo_max(totalDamage, 1)
 
 		local tooltiplines = {GetString(SI_COMBAT_METRICS_PENETRATION_TT)}
 
@@ -2162,7 +2124,7 @@ local function updateFightStatsPanelRight(panel)
 
 		end
 
-		local averagePenetration = string.format("%d", math.max(zo_round(effectiveSum / totalDamage), avgvalues["avg"..statId] or 0))
+		local averagePenetration = string.format("%d", zo_max(zo_round(effectiveSum / totalDamage), avgvalues["avg"..statId] or 0))
 		local overPenetrationRatio = string.format("%.1f%%", 100 * overpen / totalDamage)
 
 		local newline = string.format("%s: %d", GetString(SI_COMBAT_METRICS_AVERAGE), zo_round(sum / totalDamage))
@@ -2171,6 +2133,7 @@ local function updateFightStatsPanelRight(panel)
 
 		row5:SetHidden(false)
 		row6:SetHidden(false)
+		row7:SetHidden(false)
 
 		local text5 = ZO_CachedStrFormat("<<1>>:", GetString(stringKey, 5))
 
@@ -2184,10 +2147,29 @@ local function updateFightStatsPanelRight(panel)
 		row6:GetNamedChild("Value"):SetText(overPenetrationRatio)
 		row6.tooltip = #tooltiplines>4 and tooltiplines or nil
 
+		local text7 = ZO_CachedStrFormat("<<1>>:", GetString(stringKey, 7))
+		local dataKey, displayformat, convert = unpack(keys[6] or {})
+		local statData = stats[dataKey]
+
+		if text7 ~= nil and text7 ~= "" and dataKey ~= nil then
+			local maxvalue = statData and statData.max or fightStats["max"..dataKey] or 0
+			local avgvalue = statData and statData[avgkey] or avgvalues["avg"..dataKey] or stats["avg"..dataKey] or 0
+
+			if displayformat then maxvalue = string.format(displayformat, maxvalue) end
+			if displayformat then avgvalue = string.format(displayformat, avgvalue) end
+
+			row7:GetNamedChild("Label"):SetText(text7)
+			row7:GetNamedChild("Value"):SetText(avgvalue)
+			row7:GetNamedChild("Value2"):SetText(maxvalue)
+			row7:SetHidden(false)
+		else
+			row7:SetHidden(true)
+		end
 	else
 
 		row5:SetHidden(true)
 		row6:SetHidden(true)
+		row7:SetHidden(true)
 		row6.tooltip = nil
 
 	end
@@ -2221,7 +2203,7 @@ local function adjustRowSize(row, header) 	-- this function resizes the row elem
 
 		local child = header:GetChild(i)
 
-		local childname = string.gsub(child:GetName(), header:GetName(), "")
+		local childname = zo_strgsub(child:GetName(), header:GetName(), "")
 
 		local template = header:GetNamedChild(childname)
 		local rowchild = row:GetNamedChild(childname)
@@ -2389,7 +2371,7 @@ local function updateBuffPanelLegacy(panel)
 	local selectedbuffs = selections["buff"]["buff"]
 	local currentanchor = {TOPLEFT, scrollchild, TOPLEFT, 0, 1}
 
-	local maxtime = math.max(fightData.activetime or 0, fightData.dpstime or 0, fightData.hpstime or 0)
+	local maxtime = zo_max(fightData.activetime or 0, fightData.dpstime or 0, fightData.hpstime or 0)
 
 	local totalUnitTime = buffData.totalUnitTime or maxtime * 1000
 	local showids = db.showDebugIds
@@ -2573,7 +2555,7 @@ local function updateBuffPanel(panel)
 	local selectedbuffs = selections["buff"]["buff"]
 	local currentanchor = {TOPLEFT, scrollchild, TOPLEFT, 0, 1}
 
-	local maxtime = math.max(fightData.activetime or 0, fightData.dpstime or 0, fightData.hpstime or 0)
+	local maxtime = zo_max(fightData.activetime or 0, fightData.dpstime or 0, fightData.hpstime or 0)
 
 	local totalUnitTime = buffData.totalUnitTime or maxtime * 1000
 	local showids = db.showDebugIds
@@ -2652,7 +2634,7 @@ local function updateBuffPanel(panel)
 
 				local keys = {}
 				local instanceData = buff.instances[buff.iconId]
-				
+
 				for stacks, stackData in pairs(instanceData) do
 					if type(stacks) == "number" then keys[#keys+1] = stacks end
 				end
@@ -2798,8 +2780,8 @@ end
 
 local function GetShortFormattedNumber(number)
 
-	local exponent = math.floor(math.log(number)/math.log(10))
-	local loweredNumber = zo_roundToNearest(number, math.pow(10, exponent-2))
+	local exponent = zo_floor(math.log(number)/math.log(10))
+	local loweredNumber = zo_roundToNearest(number, zo_pow(10, exponent-2))
 
 	local shortNumber = ZO_AbbreviateNumber(loweredNumber, 2, exponent>=6)
 
@@ -2859,7 +2841,7 @@ local function updateUnitPanel(panel)
 
 			local highlight = false
 			if selectedunits ~= nil then highlight = selectedunits[unitId] ~= nil end
-
+			
 			local dbug = showids and string.format("(%d) ", unitId) or ""
 
 			local name = dbug .. (FRsettings.useDisplayNames and unitData.displayname or unitData.name)
@@ -2867,7 +2849,7 @@ local function updateUnitPanel(panel)
 			local isboss = unitData.bossId
 			local namecolor = (isboss and {1, .8, .3, 1}) or {1, 1, 1, 1}
 
-			local unitTime = unitData.dpsend and unitData.dpsstart and math.max((unitData.dpsend - unitData.dpsstart) / 1000, 1) or 1
+			local unitTime = unitData.dpsend and unitData.dpsstart and zo_max((unitData.dpsend - unitData.dpsstart) / 1000, 1) or 1
 			local dps  = unitTime and totalUnitAmount / unitTime or unit[APSKey]
 			local damage = totalUnitAmount
 			local ratio = damage / totalAmount
@@ -3254,7 +3236,7 @@ local logtypeCategories = {
 
 local function updateCLPageButtons(buttonrow, page, maxpage)
 
-	local first = math.max(page-2, 1)
+	local first = zo_max(page-2, 1)
 	local last = first + 4
 
 	buttonrow:GetNamedChild("PageLeft"):SetHidden(page == 1)
@@ -3299,10 +3281,10 @@ local function updateCombatLog(panel)
 	buffer:Clear()
 	if loglength == 0 then return end
 
-	buffer:SetMaxHistoryLines(math.min(loglength, 1000))
+	buffer:SetMaxHistoryLines(zo_min(loglength, 1000))
 	buffer:SetFont(string.format("%s|%s|%s", GetString(SI_COMBAT_METRICS_STD_FONT), tonumber(GetString(SI_COMBAT_METRICS_FONT_SIZE)) * db.FightReport.scale, ""))
 
-	local maxpage = math.ceil(loglength/1000)
+	local maxpage = zo_ceil(loglength/1000)
 	local page = (currentCLPage or 1) <= maxpage and currentCLPage or 1
 
 	local writtenlines = 0
@@ -3427,7 +3409,7 @@ local function updateCombatLog(panel)
 		end
 	end
 
-	maxpage = math.max(math.ceil(writtenlines/1000), 1)
+	maxpage = zo_max(zo_ceil(writtenlines/1000), 1)
 
 	local buttonrow = GetControl(panel, "HeaderPageButtonRow")
 
@@ -3435,7 +3417,7 @@ local function updateCombatLog(panel)
 
 	local totalLines = buffer:GetNumHistoryLines()
 
-	buffer:SetScrollPosition(math.min(buffer:GetScrollPosition() + totalLines, math.floor(buffer:GetNumHistoryLines()-buffer:GetNumVisibleLines())))
+	buffer:SetScrollPosition(zo_min(buffer:GetScrollPosition() + totalLines, zo_floor(buffer:GetNumHistoryLines()-buffer:GetNumVisibleLines())))
 	slider:SetValue(slider:GetValue() - totalLines)
 end
 
@@ -3648,8 +3630,8 @@ local function DrawBar(plot, x1, x2, id)
 
 	end
 
-	local left = math.max(x1, minX) + xoffset
-	local right = math.min(x2, maxX) + xoffset
+	local left = zo_max(x1, minX) + xoffset
+	local right = zo_min(x2, maxX) + xoffset
 
 	local PlotColors = db.FightReport.PlotColors
 
@@ -3763,7 +3745,7 @@ local function Smooth(category)
 
 	local XYData = {}
 
-	local t2 = math.ceil(totaltime) - smoothWindow
+	local t2 = zo_ceil(totaltime) - smoothWindow
 
 	for t = 0, t2 do
 
@@ -3805,7 +3787,7 @@ local function Total(category)
 
 	local XYData = {}
 
-	local t2 = math.ceil(totaltime)
+	local t2 = zo_ceil(totaltime)
 
 	local sum = 0
 
@@ -3817,7 +3799,7 @@ local function Total(category)
 	local dpsend = fightData.dpsend or (combatstart + 1)
 	local hpsstart = fightData.hpsstart or combatstart
 	local hpsend = fightData.hpsend or (combatstart + 1)
- 
+
 	if category == "healingOut" or category == "healingIn" then
 
 		t0 = (hpsstart - combatstart) / 1000
@@ -3830,17 +3812,17 @@ local function Total(category)
 
 	end
 
-	local startpoint = math.max(db.FightReport.SmoothWindow / 2, t0)
+	local startpoint = zo_max(db.FightReport.SmoothWindow / 2, t0)
 
 	for t = 0, t2 do
 
 		sum = sum + (data[t] or 0)
 
-		if t >= startpoint and t <= math.ceil(tmax) then
+		if t >= startpoint and t <= zo_ceil(tmax) then
 
 			local x = t
 
-			local y = sum / (math.min(tmax, t) - t0)
+			local y = sum / (zo_min(tmax, t) - t0)
 
 			table.insert(XYData, {x, y})
 
@@ -3866,7 +3848,7 @@ local function Absolute(category)
 
 	local XYData = {}
 
-	local t2 = math.ceil(totaltime)
+	local t2 = zo_ceil(totaltime)
 
 	local sum = 0
 
@@ -3945,7 +3927,7 @@ local function ResourceAbsolute(powerType)
 
 		if lineData[1] == LIBCOMBAT_EVENT_RESOURCES and lineData[5] == powerType and lineData[6] then
 
-			local deltatime = math.floor(lineData[2]/1000 - combatstart)
+			local deltatime = zo_floor(lineData[2]/1000 - combatstart)
 
 			value = lineData[6] or 0
 
@@ -3988,7 +3970,7 @@ local function BossHPAbsolute()
 
 		if lineData[1] == LIBCOMBAT_EVENT_BOSSHP then
 
-			local deltatime = math.floor(lineData[2]/1000 - combatstart)
+			local deltatime = zo_floor(lineData[2]/1000 - combatstart)
 
 			if deltatime > x then
 
@@ -4063,9 +4045,9 @@ local function StatAbsolute(statId)
 
 			value = lineData[4]
 
-			maxvalue = math.max(value, maxvalue)
+			maxvalue = zo_max(value, maxvalue)
 
-			local deltatime = math.floor(lineData[2]/1000 - combatstart)
+			local deltatime = zo_floor(lineData[2]/1000 - combatstart)
 
 			updateXYData(XYData, deltatime, value)
 
@@ -4140,7 +4122,7 @@ local function AcquireBuffData(buffName)
 					local prevend = previoustimes and previoustimes[2] or nil
 					local prevunit = previoustimes and previoustimes[3] or nil
 
-					if prevend and (math.abs(starttime - prevend)) < 0.02 and prevunit == unitId then 		-- to avoid drawing too many controls: if a buff is renewed within 20 ms, consider it continious
+					if prevend and (zo_abs(starttime - prevend)) < 0.02 and prevunit == unitId then 		-- to avoid drawing too many controls: if a buff is renewed within 20 ms, consider it continious
 
 						previoustimes[2] = deltatime
 
@@ -4172,16 +4154,16 @@ end
 
 local function GetScale(x1, x2)	-- e.g. 34596 and 42693
 
-	local distance = math.max(x2 - x1, 1)	-- 8097
+	local distance = zo_max(x2 - x1, 1)	-- 8097
 
-	local power = math.pow(10, math.floor(math.log10(distance/2)))	-- math.pow(10, math.floor(3.61) = math.pow(10, 3) = 1000
+	local power = zo_pow(10, zo_floor(math.log10(distance/2)))	-- zo_pow(10, zo_floor(3.61) = zo_pow(10, 3) = 1000
 
-	local high = math.ceil(x2 / power) * power	-- 43000
-	local low = math.floor(x1 / power) * power	-- 34000
+	local high = zo_ceil(x2 / power) * power	-- 43000
+	local low = zo_floor(x1 / power) * power	-- 34000
 
 	local size = (high - low) / power 	-- 9000 / 1000 = 9
 
-	local cleansize = math.floor(size)
+	local cleansize = zo_floor(size)
 	--[[
 	local rangesizes = {1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 20}
 
@@ -4200,8 +4182,8 @@ local function GetScale(x1, x2)	-- e.g. 34596 and 42693
 
 	local delta = cleansize - size -- 1
 
-	local cleanLow = low - math.floor(delta / 2) * power 	-- 34000 - math.floor(0.5) * 1000 = 34000
-	local cleanHigh = high + math.ceil(delta / 2) * power 	-- 34000 - math.ceil(0.5) * 1000 = 44000
+	local cleanLow = low - zo_floor(delta / 2) * power 	-- 34000 - zo_floor(0.5) * 1000 = 34000
+	local cleanHigh = high + zo_ceil(delta / 2) * power 	-- 34000 - zo_ceil(0.5) * 1000 = 44000
 
 	if cleanLow < 0 then
 
@@ -4222,7 +4204,7 @@ local function GetTickValues(low, high)
 
 	for i = 2,4 do
 
-		tickValues[i] = math.floor(low + (high - low) * (i - 1) / 4)
+		tickValues[i] = zo_floor(low + (high - low) * (i - 1) / 4)
 
 	end
 
@@ -4269,10 +4251,10 @@ local function AcquireRange(XYData)
 
 		local x, y = unpack(coords)
 
-		minX = math.min(minX, x)
-		maxX = math.max(maxX, x)
-		minY = math.max(minY, y)
-		maxY = math.max(maxY, y)
+		minX = zo_min(minX, x)
+		maxX = zo_max(maxX, x)
+		minY = zo_max(minY, y)
+		maxY = zo_max(maxY, y)
 
 	end
 
@@ -4294,10 +4276,10 @@ local function GetRequiredRange(plotWindow, newRange, startZero)
 
 	local minX, maxX, minY, maxY = unpack(newRange)
 
-	local minXNew = startZero and 0 or math.min(minXOld, minX)
-	local maxXNew = math.max(maxXOld, maxX)
-	local minYNew = startZero and 0 or math.min(minYOld, minY)
-	local maxYNew = math.max(maxYOld, maxY)
+	local minXNew = startZero and 0 or zo_min(minXOld, minX)
+	local maxXNew = zo_max(maxXOld, maxX)
+	local minYNew = startZero and 0 or zo_min(minYOld, minY)
+	local maxYNew = zo_max(maxYOld, maxY)
 
 	local isChanged = minXOld ~= minXNew or maxXOld ~= maxXNew or minYOld ~= minYNew or maxYOld ~= maxYNew
 
@@ -4495,7 +4477,7 @@ end
 
 local function limit(value, minValue, maxValue)
 
-	local coercedValue = math.min(math.max(value, minValue), maxValue)
+	local coercedValue = zo_min(zo_max(value, minValue), maxValue)
 
 	return coercedValue
 
@@ -4516,10 +4498,10 @@ do
 		limit(x2, minX, maxX)
 		limit(y2, minY, maxY)
 
-		local width = math.abs(x2 - startX)
-		local height = math.abs(y2 - startY)
+		local width = zo_abs(x2 - startX)
+		local height = zo_abs(y2 - startY)
 
-		zoomcontrol:SetAnchor(TOPLEFT, GuiRoot , TOPLEFT, math.min(startX, x2), math.min(startY, y2))
+		zoomcontrol:SetAnchor(TOPLEFT, GuiRoot , TOPLEFT, zo_min(startX, x2), zo_min(startY, y2))
 		zoomcontrol:SetDimensions(width, height)
 
 	end
@@ -4573,7 +4555,7 @@ do
 
 		InitializeTooltip(InformationTooltip, GuiRoot, TOPLEFT, x + 30, y + 30, TOPLEFT)
 
-		local tooltipText = string.format("|cddddddTime: %d:%02d", cursorTime/60, math.floor(cursorTime%60))
+		local tooltipText = string.format("|cddddddTime: %d:%02d", cursorTime/60, zo_floor(cursorTime%60))
 
 		AddTooltipLine(plotWindow, InformationTooltip, tooltipText)
 
@@ -4585,7 +4567,7 @@ do
 
 			local label = plotWindow.plots[plotId].label
 
-			tooltipText = string.format(formatter, math.floor(r * 255), math.floor(g * 255), math.floor(b * 255), label, unpack(data))
+			tooltipText = string.format(formatter, zo_floor(r * 255), zo_floor(g * 255), zo_floor(b * 255), label, unpack(data))
 
 			AddTooltipLine(plotWindow, InformationTooltip, tooltipText)
 
@@ -4648,10 +4630,10 @@ do
 			t2 = limit(t2, minT, maxT)
 			v2 = limit(v2, minV, maxV)
 
-			local tMin = math.min(t1, t2)
-			local tMax = math.max(t1, t2)
-			local vMin = math.min(v1, v2)
-			local vMax = math.max(v1, v2)
+			local tMin = zo_min(t1, t2)
+			local tMax = zo_max(t1, t2)
+			local vMin = zo_min(v1, v2)
+			local vMax = zo_max(v1, v2)
 
 			plotWindow:UpdateScales({tMin, tMax, vMin, vMax})
 
@@ -4747,10 +4729,10 @@ do
 		local v1 = tonumber(plotWindow:GetNamedChild("YTick1"):GetNamedChild("Label"):GetText())
 		local v2 = tonumber(plotWindow:GetNamedChild("YTick5"):GetNamedChild("Label"):GetText())
 
-		local tMin = math.min(t1, t2)
-		local tMax = math.max(t1, t2)
-		local vMin = math.min(v1, v2)
-		local vMax = math.max(v1, v2)
+		local tMin = zo_min(t1, t2)
+		local tMax = zo_max(t1, t2)
+		local vMin = zo_min(v1, v2)
+		local vMax = zo_max(v1, v2)
 
 		plotWindow:UpdateScales({tMin, tMax, vMin, vMax}, true)
 
@@ -5343,6 +5325,19 @@ function CMX.SkillTooltip_OnMouseExit(control)
 
 end
 
+function CMX.ScribedSkillTooltip_OnMouseEnter(control)
+	local abilityId = control.abilityId
+	local scriptIds = control.scriptIds
+
+	InitializeTooltip(SkillTooltip, control, TOPLEFT, 0, 5, BOTTOMLEFT)
+	SetCraftedAbilityScriptSelectionOverride(GetAbilityCraftedAbilityId(abilityId), scriptIds[1], scriptIds[2], scriptIds[3])
+	SkillTooltip:SetAbilityId(abilityId)
+end
+
+function CMX.ScribedSkillTooltip_OnMouseExit(control)
+	ClearTooltip(SkillTooltip)
+end
+
 function CMX.CPTooltip_OnMouseEnterLegacy(control)
 
 	if control.skillId == nil then return end
@@ -5508,43 +5503,32 @@ local function updateLeftInfoPanel(panel)
 
 		end
 
-		local statControl = subPanel:GetNamedChild("Stats")
-		local ratioControl = statControl:GetNamedChild("Value1")
-		local timeControl = statControl:GetNamedChild("Value2")
+		local ratioControl = subPanel:GetNamedChild("Value1")
+		local timeControl = subPanel:GetNamedChild("Value2")
 
 		ratioControl:SetText(string.format("%.1f%%", (timeratio or 0) * 100))
 		timeControl:SetText(string.format("%.1f%%", (dpsratio or 0) * 100))
 
 		for line, controlName in ipairs(SkillBarItems) do
-
 			local control = subPanel:GetNamedChild(controlName)
-
-			local icon = control:GetNamedChild("Icon"):GetNamedChild("Texture")
-
-			local name = control:GetNamedChild("Label")
-
 			local abilityId = bardata and bardata[line] or nil
-
+			
 			control.id = abilityId
-
+			
+			local icon = GetControl(control, "IconTexture")
 			local texture = abilityId and abilityId > 0 and GetFormattedAbilityIcon(abilityId) or "EsoUI/Art/crafting/gamepad/crafting_alchemy_trait_unknown.dds"
-
 			icon:SetTexture(texture)
-
+			
+			local name = control:GetNamedChild("Label")
 			local abilityName = abilityId and abilityId > 0 and GetFormattedAbilityName(abilityId) or ""
-
 			name:SetText(abilityName)
 
 			local reducedslot = (subPanelIndex-1) * 10 + line
-
 			local slotdata = skilldata and skilldata[reducedslot] or nil
-
 			local strings = {"-", "-", "-", "-"}
-
 			local color = WhiteColor
 
 			if slotdata and slotdata.count and slotdata.count > 0 then
-
 				strings[1] = string.format("%d", slotdata.count) or "-"
 
 				local weave = slotdata.weavingTimeAvg or slotdata.skillNextAvg
@@ -5557,22 +5541,17 @@ local function updateLeftInfoPanel(panel)
 				strings[4] = diff and string.format("%.2f", diff/1000) or "-"
 
 				control.delay = slotdata.delayAvg
-
 				if slotdata.ignored then color = DisabledColor end
-
 				control.ignored = slotdata.ignored
-
 			end
 
 			name:SetColor(color:UnpackRGB())
 
 			for k = 1, 4 do
-
 				local label = control:GetNamedChild("Value" .. k)
 
 				label:SetText(strings[k])
 				label:SetColor(color:UnpackRGB())
-
 			end
 		end
 	end
@@ -5665,132 +5644,168 @@ local function updateRightInfoPanelLegacy(panel)
 	end
 end
 
+
+---@param panel Control
+---@param setHidden boolean
+local function setScribedSkillsPanelHidden(panel, setHidden)
+	panel:SetHidden(setHidden)
+	panel:GetParent():GetNamedChild("Sep"):SetHidden(setHidden)
+end
+
+local function updateScribedSkillsPanel(panel)
+	if fightData == nil then return setScribedSkillsPanelHidden(panel, true) end
+	local scribedSkills = fightData.charData.scribedSkills or {}
+
+	local index = 0
+	for abilityId, data in CMX.spairs(scribedSkills) do
+		index = index + 1
+		local skillControl = panel:GetNamedChild(tostring(index))
+		skillControl:SetHidden(false)
+		local abilityName = GetFormattedAbilityName(abilityId)
+		local iconTexture = GetFormattedAbilityIcon(abilityId)
+
+		skillControl:GetNamedChild("Name"):SetText(abilityName)
+		skillControl.abilityId = abilityId
+		skillControl.scriptIds = data
+		GetControl(skillControl, "IconTexture"):SetTexture(iconTexture)
+
+		for i = 1, 3 do
+			local scriptId = data[i]
+			local scriptControl = skillControl:GetNamedChild("Script" .. i)
+			local scriptName = GetFormattedAbilityName(scriptId, true)
+			local iconTexture = GetFormattedAbilityIcon(scriptId, true)
+
+			scriptControl:GetNamedChild("Name"):SetText(scriptName)
+			scriptControl:GetNamedChild("Icon"):SetTexture(iconTexture)
+		end
+		if index == 10 then break end
+	end
+
+	for i = index + 1, panel:GetNumChildren() do
+		panel:GetNamedChild(tostring(i)):SetHidden(true)
+	end
+
+	setScribedSkillsPanelHidden(panel, index == 0)
+end
+
+
+---@param t table
+---@param a any key1
+---@param b any key2
+---@return boolean isHigher
 local function starOrder(t, a, b)
-
-	local ishigher = false
-
 	local typeA = t[a][2]
 	local typeB = t[b][2]
 
-	if typeA > typeB or (typeA == typeB and a < b) then ishigher = true end
-
-	return ishigher
-
+	if typeA > typeB or (typeA == typeB and a < b) then return true end
+	return false
 end
 
-local disciplineColors = {
-	[CHAMPION_DISCIPLINE_TYPE_COMBAT] = GetString(SI_COMBAT_METRICS_MAGICKA_COLOR),
-	[CHAMPION_DISCIPLINE_TYPE_CONDITIONING] = GetString(SI_COMBAT_METRICS_HEALTH_COLOR),
-	[CHAMPION_DISCIPLINE_TYPE_WORLD] = GetString(SI_COMBAT_METRICS_STAMINA_COLOR),
-}
+local function SetStarControlEmpty(starControl)
+	starControl:GetNamedChild("Icon"):SetHidden(true)
+	starControl:GetNamedChild("Name"):SetHidden(true)
+	starControl:GetNamedChild("Value"):SetHidden(true)
+	starControl:GetNamedChild("Ring"):SetTexture("/esoui/art/champion/actionbar/champion_bar_slot_frame_disabled.dds")
+
+	starControl.slotted = nil
+	starControl.starId = nil
+	starControl.points = nil
+end
 
 local function updateRightInfoPanel(panel)
-
 	if fightData == nil then return end
-
+	
+	updateScribedSkillsPanel(panel:GetNamedChild("ScribedSkills"))
 	local CPData = fightData.CP
-
 	if CPData == nil then return end
 
 	local legacyPanel = panel:GetParent():GetNamedChild("RightOld")
-
 	if GetAPIVersion() < 100034 or (CPData.version or 0) < 2 then
-
 		panel:SetHidden(true)
 		legacyPanel:SetHidden(false)
 
 		updateRightInfoPanelLegacy(legacyPanel)
-
 		return
 	end
 
 	panel:SetHidden(false)
 	legacyPanel:SetHidden(true)
+	local scrollchild = GetControl(panel, "PanelScrollChild")
+
 
 	for disciplineId, discipline in pairs(CPData) do
-
 		if type(discipline) == "table" then
-
-			local constellationControl = panel:GetNamedChild("Constellation"..disciplineId)
-
-			local itemNo = 0
-
+			local constellationControl = scrollchild:GetNamedChild("Panel"..disciplineId)
+			local itemNo = 1
 			local title = constellationControl:GetNamedChild("Title")
+			local top = title:GetTop()
 			local disciplineName = zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionDisciplineName(disciplineId))
 
 			title:SetText(ZO_CachedStrFormat("<<1>> (<<2>>)", disciplineName, discipline.total))
 
 			for starId, starData in CMX.spairs(discipline.stars, starOrder) do
-
-				local starControl
-
-				itemNo = itemNo + 1
-
 				local points, state = unpack(starData)
 
-				starControl = constellationControl:GetNamedChild("StarItem" .. itemNo)
-
-				if itemNo > 18 then
-
-					break
-
-				elseif state == 2 then -- slotted
-
-					starControl:GetNamedChild("Star"):SetHidden(false)
+				if state == LIBCOMBAT_CPTYPE_SLOTTED then -- slotted
+					local starControl = constellationControl:GetNamedChild("StarControl" .. itemNo)
+					starControl:GetNamedChild("Icon"):SetHidden(false)
 					starControl:GetNamedChild("Ring"):SetTexture("/esoui/art/champion/actionbar/champion_bar_slot_frame.dds")
 
-					local name = starControl:GetNamedChild("Name")
-					local value = starControl:GetNamedChild("Value")
+					local nameControl = starControl:GetNamedChild("Name")
+					local valueControl = starControl:GetNamedChild("Value")
 
-					name:SetHidden(false)
-					value:SetHidden(false)
+					nameControl:SetHidden(false)
+					nameControl:SetText(zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionSkillName(starId)))
 
-					name:SetText(zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionSkillName(starId)))
-					value:SetText(points)
+					valueControl:SetHidden(false)
+					valueControl:SetText(points)
 
 					starControl.slotted = true
 					starControl.starId = starId
 					starControl.points = points
+					itemNo = itemNo + 1
 
-				else
+				elseif state == LIBCOMBAT_CPTYPE_PASSIVE then
 					if itemNo <= 4 then
-
 						for i = itemNo, 4 do
-
-							starControl = constellationControl:GetNamedChild("StarItem" .. i)
-
-							starControl:GetNamedChild("Star"):SetHidden(true)
-							starControl:GetNamedChild("Name"):SetHidden(true)
-							starControl:GetNamedChild("Value"):SetHidden(true)
-							starControl:GetNamedChild("Ring"):SetTexture("/esoui/art/champion/actionbar/champion_bar_slot_frame_disabled.dds")
-
-							starControl.slotted = nil
-							starControl.starId = nil
-							starControl.points = nil
+							local starControl = constellationControl:GetNamedChild("StarControl" .. i)
+							SetStarControlEmpty(starControl)
 						end
 
 						itemNo = 5
-
-						starControl = constellationControl:GetNamedChild("StarItem" .. itemNo)
-
 					end
 
+					local starControl = constellationControl:GetNamedChild("StarControl" .. itemNo)
 					starControl:SetHidden(false)
+					starControl:GetNamedChild("Ring"):SetHidden(true)
 
-					starControl:GetNamedChild("Name"):SetText(zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionSkillName(starId)))
-					starControl:GetNamedChild("Value"):SetText(points)
-
+					local starLabel = starControl:GetNamedChild("Name")
+					starLabel:SetText(zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionSkillName(starId)))
+					starLabel:SetHidden(false)
+					
+					local starIcon = starControl:GetNamedChild("Icon")
+					starIcon:SetTextureCoords(0.25, 0.5, 0.25, 0.5)
+					starIcon:SetHidden(false)
+					
+					local starValue = starControl:GetNamedChild("Value")
+					starValue:SetText(points)
+					starValue:SetHidden(false)
+					
 					starControl.slotted = false
 					starControl.starId = starId
 					starControl.points = points
-
+					itemNo = itemNo + 1
 				end
 			end
+			local bottom = constellationControl:GetNamedChild("StarControl" .. (itemNo-1)):GetBottom()
+			constellationControl:SetHeight(bottom-top)
 
-			for i = math.max(itemNo + 1, 5), 18 do
-
-				constellationControl:GetNamedChild("StarItem" .. i):SetHidden(true)
-
+			local starControl = constellationControl:GetNamedChild("StarControl" .. itemNo)
+			while starControl do
+				starControl:SetHidden(true)
+				SetStarControlEmpty(starControl)
+				itemNo = itemNo + 1
+				starControl = constellationControl:GetNamedChild("StarControl" .. itemNo)
 			end
 		end
 	end
@@ -5832,11 +5847,9 @@ local function GetEnchantQuality(itemLink)	-- From Enchanted Quality (Rhyono, vo
 end
 
 local function updateBottomInfoPanel(panel)
-
 	if fightData == nil then return end
 
 	local charData = fightData.charData
-
 	if charData == nil then return end
 
 	local equipdata = charData and charData.equip or {}
@@ -5913,14 +5926,78 @@ local function updateBottomInfoPanel(panel)
 	end
 end
 
-local function updateInfoPanel(panel)
+local function valueOrder(t,a,b)
+	return t[a] < t[b]
+end
 
+local function updateMiscPanelItem(control, data, childName)
+	local numItems = NonContiguousCount(data)
+
+	if numItems == 0 then
+		control:SetHidden(true)
+	else
+		local num = 0
+		for key, _ in CMX.spairs(data, valueOrder) do
+			num = num + 1
+			local label, texture
+			if childName == "Mundus" then
+				label = GetFormattedAbilityName(key)
+				texture = GetFormattedAbilityIcon(key)
+			elseif childName == "DrinkFood" then
+				label = LC.GetFoodDrinkItemLinkFromAbilityId(key)
+				texture = GetItemLinkIcon(label)
+			else
+				label = key
+				texture = GetItemLinkIcon(key)
+			end
+			control:GetNamedChild("Name"..num):SetText(label)
+			control:GetNamedChild("Icon"..num):SetTexture(texture)
+			if num >= 2 then break end
+		end
+
+		local icon1 = control:GetNamedChild("Icon1")
+		local iconSize = control:GetNamedChild("Icon2"):GetWidth()
+		icon1:ClearAnchors()
+		if numItems == 1 then
+			icon1:SetDimensions(1.3*iconSize, 1.3*iconSize)
+			icon1:SetAnchor(LEFT)
+			control:GetNamedChild("Name2"):SetHidden(true)
+			control:GetNamedChild("Icon2"):SetHidden(true)
+		else
+			icon1:SetDimensions(iconSize, iconSize)
+			icon1:SetAnchor(TOPLEFT)
+			control:GetNamedChild("Name2"):SetHidden(false)
+			control:GetNamedChild("Icon2"):SetHidden(false)
+		end
+		control:SetHidden(false)
+	end
+end
+
+local function updateMiscInfoPanel(panel)
+	local mundusControl = panel:GetNamedChild("Mundus")
+	local drinksFoodsControl = panel:GetNamedChild("DrinkFood")
+	local potionsControl = panel:GetNamedChild("Potions")
+
+	if fightData == nil or fightData.calculated == nil or fightData.calculated.buildInfo == nil then
+		mundusControl:SetHidden(true)
+		drinksFoodsControl:SetHidden(true)
+		potionsControl:SetHidden(true)
+		return
+	end
+
+	local buildInfo = fightData.calculated.buildInfo
+	updateMiscPanelItem(mundusControl, buildInfo.mundus, "Mundus")
+	updateMiscPanelItem(drinksFoodsControl, buildInfo.drinkFood, "DrinkFood")
+	updateMiscPanelItem(potionsControl, buildInfo.potions, "Potions")
+end
+
+local function updateInfoPanel(panel)
 	if panel:IsHidden() then return end
 
-	updateLeftInfoPanel(panel:GetNamedChild("Left"))
-	updateRightInfoPanel(panel:GetNamedChild("Right"))
-	updateBottomInfoPanel(panel:GetNamedChild("Bottom"))
-
+	updateLeftInfoPanel(panel:GetNamedChild("Left")) -- TODO: Rename
+	updateRightInfoPanel(panel:GetNamedChild("Right")) -- TODO: Rename
+	updateBottomInfoPanel(panel:GetNamedChild("Bottom")) -- TODO: Rename
+	updateMiscInfoPanel(panel:GetNamedChild("Misc"))
 end
 
 local function updateInfoRowPanel(panel)
@@ -6082,7 +6159,7 @@ local function updateFightListPanel(panel, data, issaved)
 	if #data > 0 then
 		for id, fight in ipairs(data) do
 
-			local label = string.gsub(fight.fightlabel or "", ".+%:%d%d %- ([A-Z])", "%1")
+			local label = zo_strgsub(fight.fightlabel or "", ".+%:%d%d %- ([A-Z])", "%1")
 			local charname = fight.charData and fight.charData.name or fight.char or ""
 			local zone = fight.zone or ""
 			local subzone = fight.subzone or ""
@@ -6201,7 +6278,7 @@ end
 
 local function GetSingleTargetDamage(data)	-- Gets highest Single Target Damage and counts enemy units.
 
-	local damage, groupDamage, units, unittime, name = 0, 0, 0, 0, ""
+	local damage, groupDamage, unittime, name = 0, 0, 0, ""
 
 	for unitId, unit in pairs(data.units) do
 
@@ -6221,6 +6298,7 @@ local function GetSingleTargetDamage(data)	-- Gets highest Single Target Damage 
 	end
 
 	unittime = unittime > 0 and unittime/1000 or data.dpstime
+	groupDamage = zo_max(damage, groupDamage)
 
 	return damage, groupDamage, name, unittime
 end
@@ -6246,8 +6324,8 @@ local function GetBossTargetDamage(data) -- Gets Damage done to bosses and count
 			totalBossGroupDamage = totalBossGroupDamage + totalUnitGroupDamage
 			bossUnits = bossUnits + 1
 
-			starttime = math.min(starttime or unit.dpsstart or 0, unit.dpsstart or 0)
-			endtime = math.max(endtime or unit.dpsend or 0, unit.dpsend or 0)
+			starttime = zo_min(starttime or unit.dpsstart or 0, unit.dpsstart or 0)
+			endtime = zo_max(endtime or unit.dpsend or 0, unit.dpsend or 0)
 
 			if totalUnitDamage > bossDamage then
 
@@ -6287,8 +6365,8 @@ local function GetSelectionDamage(data, selection)	-- Gets highest Single Target
 
 			units = units + 1
 			damage = damage + totalUnitDamage
-			starttime = unit.dpsstart and math.min(starttime or unit.dpsstart, unit.dpsstart) or starttime
-			endtime = unit.dpsend and math.max(endtime or unit.dpsend, unit.dpsend) or endtime
+			starttime = unit.dpsstart and zo_min(starttime or unit.dpsstart, unit.dpsstart) or starttime
+			endtime = unit.dpsend and zo_max(endtime or unit.dpsend, unit.dpsend) or endtime
 
 			if totalUnitDamage > bossDamage then
 
@@ -6328,8 +6406,8 @@ local function GetSelectionHeal(data, selection)	-- Gets highest Single Target D
 
 			units = units + 1
 			healing = healing + totalUnitHeal
-			starttime = math.min(starttime or unit.hpsstart or 0, unit.hpsstart or 0)
-			endtime = math.max(endtime or unit.hpsend or 0, unit.hpsend or 0)
+			starttime = zo_min(starttime or unit.hpsstart or 0, unit.hpsstart or 0)
+			endtime = zo_max(endtime or unit.hpsend or 0, unit.hpsend or 0)
 
 		end
 	end
@@ -6454,7 +6532,7 @@ function CMX.PosttoChat(mode, fight, UnitContextMenuUnitId)
 	local bossDamage = data.bossfight and bossDamage or singleDamage
 	local bossTime = zo_roundToNearest(data.bossfight and bossTime or singleTime, 0.1)
 
-	local totalDPSString = ZO_CommaDelimitNumber(math.floor(data.DPSOut))
+	local totalDPSString = ZO_CommaDelimitNumber(zo_floor(data.DPSOut))
 	local totalDamageString = ZO_CommaDelimitNumber(damage)
 
 	if mode == CMX_POSTTOCHAT_MODE_HEALING then
@@ -6476,7 +6554,7 @@ function CMX.PosttoChat(mode, fight, UnitContextMenuUnitId)
 		local timeString = string.format("%d:%04.1f", healTime/60, healTime%60)
 
 		local totalHealingString = ZO_CommaDelimitNumber(healing)
-		local totalHPSString = ZO_CommaDelimitNumber(math.floor(healing / healTime))
+		local totalHPSString = ZO_CommaDelimitNumber(zo_floor(healing / healTime))
 
 		output = zo_strformat(GetString(SI_COMBAT_METRICS_POSTSELECTIONHPS_FORMAT), name, units, totalHPSString, totalHealingString, timeString)
 
@@ -6485,7 +6563,7 @@ function CMX.PosttoChat(mode, fight, UnitContextMenuUnitId)
 		local damage = mode == CMX_POSTTOCHAT_MODE_SELECTED_UNIT and damage or singleDamage
 		local damageTime = mode == CMX_POSTTOCHAT_MODE_SELECTED_UNIT and dpstime or singleTime
 
-		local singleDPSString = ZO_CommaDelimitNumber(math.floor(damage / damageTime))
+		local singleDPSString = ZO_CommaDelimitNumber(zo_floor(damage / damageTime))
 		local singleDamageString = ZO_CommaDelimitNumber(damage)
 		local timeString = string.format("%d:%04.1f", damageTime/60, damageTime%60)
 
@@ -6496,7 +6574,7 @@ function CMX.PosttoChat(mode, fight, UnitContextMenuUnitId)
 		local bosses = bossUnits > 1 and string.format(" (+%d)", (bossUnits-1) )  or ""
 		local bossTimeString = string.format("%d:%04.1f", bossTime/60, bossTime%60)
 
-		local bossDPSString = ZO_CommaDelimitNumber(math.floor(bossDamage / bossTime))
+		local bossDPSString = ZO_CommaDelimitNumber(zo_floor(bossDamage / bossTime))
 		local bossDamageString = ZO_CommaDelimitNumber(bossDamage)
 
 		output = zo_strformat(GetString(SI_COMBAT_METRICS_POSTSMARTDPS_FORMAT), name, bosses, bossDPSString, bossDamageString, bossTimeString)
@@ -6505,7 +6583,7 @@ function CMX.PosttoChat(mode, fight, UnitContextMenuUnitId)
 
 		local timeString = string.format("%d:%04.1f", dpstime/60, dpstime%60)
 
-		local totalDPSString = ZO_CommaDelimitNumber(math.floor(data.DPSOut))
+		local totalDPSString = ZO_CommaDelimitNumber(zo_floor(data.DPSOut))
 		local totalDamageString = ZO_CommaDelimitNumber(damage)
 
 		output = zo_strformat(GetString(SI_COMBAT_METRICS_POSTMULTIDPS_FORMAT), name, units-1, totalDPSString, totalDamageString, timeString)
@@ -6516,10 +6594,10 @@ function CMX.PosttoChat(mode, fight, UnitContextMenuUnitId)
 		local timeString = string.format("%d:%04.1f", dpstime/60, dpstime%60)
 		local bossTimeString = string.format("%d:%04.1f", bossTime/60, bossTime%60)
 
-		local bossDPSString = ZO_CommaDelimitNumber(math.floor(bossDamage / bossTime))
+		local bossDPSString = ZO_CommaDelimitNumber(zo_floor(bossDamage / bossTime))
 		local bossDamageString = ZO_CommaDelimitNumber(bossDamage)
 
-		local totalDPSString = ZO_CommaDelimitNumber(math.floor(data.DPSOut))
+		local totalDPSString = ZO_CommaDelimitNumber(zo_floor(data.DPSOut))
 		local totalDamageString = ZO_CommaDelimitNumber(damage)
 
 		local stringA = zo_strformat(GetString(SI_COMBAT_METRICS_POSTALLDPS_FORMAT_A), name, units-1, totalDPSString, totalDamageString, timeString)
@@ -6535,7 +6613,7 @@ function CMX.PosttoChat(mode, fight, UnitContextMenuUnitId)
 			or units > 1 and string.format(" (+%d)", (units-1) )
 			or ""
 
-		local DPSString = ZO_CommaDelimitNumber(math.floor(damage / dpstime))
+		local DPSString = ZO_CommaDelimitNumber(zo_floor(damage / dpstime))
 		local DamageString = ZO_CommaDelimitNumber(damage)
 		local timeString = string.format("%d:%04.1f", dpstime/60, dpstime%60)
 
@@ -6575,15 +6653,13 @@ end
 -- Update the mini DPS meter
 
 local function updateLiveReport(self, data)
-
 	if data == nil then return end
 
 	local livereport = self
-
 	local DPSOut = data.DPSOut
 	local DPSIn = data.DPSIn
 	local HPSOut = data.HPSOut
-	local HPSAOut = data.HPSAOut
+	local HPSAOut = data.OHPSOut
 	local HPSIn = data.HPSIn
 	local dpstime = data.dpstime
 	local hpstime = data.hpstime
@@ -6598,69 +6674,49 @@ local function updateLiveReport(self, data)
 	local groupSDPS = 0
 
 	if db.liveReport.damageOutSingle then
-
-		local singleTargetDamage, singleTargetDamageGroup, damageTime = 0, 0, 1
-
-		local iconControl = self:GetNamedChild("DamageOutSingle"):GetNamedChild("Icon")
-		local tooltipControl = self:GetNamedChild("DamageOutSingle"):GetNamedChild("Tooltip")
-
+		local iconControl = livereport:GetNamedChild("DamageOutSingle"):GetNamedChild("Icon")
+		local tooltipControl = livereport:GetNamedChild("DamageOutSingle"):GetNamedChild("Tooltip")
+		local texture = "/esoui/art/icons/mapkey/mapkey_fightersguild.dds"
+		local tooltip = SI_COMBAT_METRICS_LIVEREPORT_DPSSINGLE_TOOLTIP
+		
 		if data.bossfight then
-
-			_, singleTargetDamage, singleTargetDamageGroup, _, damageTime = GetBossTargetDamage(data)
 			iconControl:SetTexture("esoui/art/tutorial/poi_groupboss_complete.dds")
-			tooltipControl.tooltip[1] = SI_COMBAT_METRICS_LIVEREPORT_DPSBOSS_TOOLTIP
-
+			tooltip = SI_COMBAT_METRICS_LIVEREPORT_DPSBOSS_TOOLTIP
 		end
-
-		if (singleTargetDamage == 0 or singleTargetDamage == nil) and (singleTargetDamageGroup == 0 or singleTargetDamageGroup == nil) then
-
-			singleTargetDamage, singleTargetDamageGroup, _, damageTime = GetSingleTargetDamage(data)
-			iconControl:SetTexture("/esoui/art/icons/mapkey/mapkey_fightersguild.dds")
-			tooltipControl.tooltip[1] = SI_COMBAT_METRICS_LIVEREPORT_DPSSINGLE_TOOLTIP
-
-		end
-
-		damageTime = math.max(damageTime or 1, 1)
-
-		SDPS = zo_round((singleTargetDamage or 0) / damageTime)
-		groupSDPS = zo_round((singleTargetDamageGroup or 0) / damageTime)
-
+		
+		iconControl:SetTexture(texture)
+		tooltipControl.tooltip[1] = tooltip
+		SDPS = data.bossDPSOut
+		groupSDPS = data.bossDPSOutGroup
 	end
 
 	local DPSString
 	local HPSString
 	local DPSInString
 	local SDPSString
-	local maxtime = zo_roundToNearest(math.max(dpstime, hpstime), 0.1)
+	local maxtime = zo_roundToNearest(zo_max(dpstime, hpstime), 0.1)
 	local timeString = string.format("%d:%04.1f", maxtime/60, maxtime%60)
 
 	-- maybe add data from group
-
 	if db.recordgrp == true and (groupDPSOut > 0 or groupDPSIn > 0 or groupHPSOut > 0) then
-
 		local dpsratio, hpsratio, idpsratio, sdpsratio = 0, 0, 0, 0
-
-		if groupDPSOut > 0  then dpsratio  = (math.floor(DPSOut / groupDPSOut * 1000) / 10) end
-		if groupDPSIn > 0 then idpsratio = (math.floor(DPSIn / groupDPSIn * 1000) / 10) end
-		if groupSDPS > 0  then sdpsratio  = (math.floor(SDPS / groupSDPS * 1000) / 10) end
-		if groupHPSOut > 0 then hpsratio  = (math.floor(HPSOut / groupHPSOut * 1000) / 10) end
+		if groupDPSOut > 0  then dpsratio  = (zo_floor(DPSOut / groupDPSOut * 1000) / 10) end
+		if groupDPSIn > 0 then idpsratio = (zo_floor(DPSIn / groupDPSIn * 1000) / 10) end
+		if groupSDPS > 0  then sdpsratio  = (zo_floor(SDPS / groupSDPS * 1000) / 10) end
+		if groupHPSOut > 0 then hpsratio  = (zo_floor(HPSOut / groupHPSOut * 1000) / 10) end
 
 		DPSString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), DPSOut, groupDPSOut, dpsratio)
 		DPSInString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), DPSIn, groupDPSIn, idpsratio)
 		HPSString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), HPSOut, groupHPSOut, hpsratio)
 		SDPSString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), SDPS, groupSDPS, sdpsratio)
-
 	else
-
 		DPSString  = DPSOut
 		DPSInString = DPSIn
 		HPSString  = HPSOut
 		SDPSString = SDPS
-
 	end
 
 	-- Update the values
-
 	livereport:GetNamedChild("DamageOutSingle"):GetNamedChild("Label"):SetText( SDPSString )
 	livereport:GetNamedChild("DamageOut"):GetNamedChild("Label"):SetText( DPSString )
 	livereport:GetNamedChild("HealOut"):GetNamedChild("Label"):SetText( HPSString )
@@ -6668,7 +6724,6 @@ local function updateLiveReport(self, data)
 	livereport:GetNamedChild("DamageIn"):GetNamedChild("Label"):SetText( DPSInString )
 	livereport:GetNamedChild("HealIn"):GetNamedChild("Label"):SetText( HPSIn )
 	livereport:GetNamedChild("Time"):GetNamedChild("Label"):SetText( timeString )
-
 end
 
 local function toggleFightReport()
@@ -6723,7 +6778,7 @@ function CMX.Resizing(control, resizing)
 		control:SetEdgeColor(1,1,1,0)
 		control:SetCenterColor(1,1,1,0)
 		control:SetDrawTier(0)
-		
+
 		if lastResize == nil then return end
 
 		local scale, newpos = unpack(lastResize)
@@ -6754,7 +6809,7 @@ function CMX.NewSize(control, newLeft, newTop, newRight, newBottom, oldLeft, old
 
 	local newscale
 
-	if math.abs(heightChange) > math.abs(widthChange) then
+	if zo_abs(heightChange) > zo_abs(widthChange) then
 
 		newscale = newHeight / baseHeight
 		newWidth = baseWidth * newscale
@@ -6802,7 +6857,7 @@ local function initFightReport()
 
 		local maxwidth, maxheight = GuiRoot:GetDimensions()
 
-		scale = math.min(math.max(scale or 1, 0.5), 3, maxwidth/width, maxheight/height)
+		scale = zo_min(zo_max(scale or 1, 0.5), 3, maxwidth/width, maxheight/height)
 
 		db.FightReport.scale = scale
 
@@ -7041,7 +7096,7 @@ local function initLiveReport()
 		for i = 3, liveReport:GetNumChildren() do
 
 			local child = liveReport:GetChild(i)
-			local name = string.gsub(string.gsub(child:GetName(), liveReport:GetName(), ""), "^%u", string.lower) -- difference in names is the child name e.g. "DamageOut". Outer gsub changes first letter to lowercase to match the settings, e.g. "damageOut".
+			local name = zo_strgsub(zo_strgsub(child:GetName(), liveReport:GetName(), ""), "^%u", zo_strlower) -- difference in names is the child name e.g. "DamageOut". Outer gsub changes first letter to lowercase to match the settings, e.g. "damageOut".
 
 			local shown = setLR[name]
 
@@ -7055,7 +7110,7 @@ local function initLiveReport()
 
 		end
 
-		local halfway = (setLR.layout == "Compact" and (math.ceil(totalBlocks / 2) + 1)) or nil
+		local halfway = (setLR.layout == "Compact" and (zo_ceil(totalBlocks / 2) + 1)) or nil
 
 		local blocks = 0
 
@@ -7064,7 +7119,7 @@ local function initLiveReport()
 		for i = 3, liveReport:GetNumChildren() do
 
 			local child = liveReport:GetChild(i)
-			local name = string.gsub(string.gsub(child:GetName(), liveReport:GetName(), ""), "^%u", string.lower) -- difference in names is the child name e.g. "DamageOut". Outer gsub changes first letter to lowercase to match the settings, e.g. "damageOut".
+			local name = zo_strgsub(zo_strgsub(child:GetName(), liveReport:GetName(), ""), "^%u", zo_strlower) -- difference in names is the child name e.g. "DamageOut". Outer gsub changes first letter to lowercase to match the settings, e.g. "damageOut".
 
 			local shown = setLR[name]
 			child:SetHidden(not shown)
@@ -7073,7 +7128,7 @@ local function initLiveReport()
 
 				local addspace = child.blocksize
 
-				local isnotfull = ( math.ceil(blocks) - math.ceil(blocks + addspace)) == 0
+				local isnotfull = ( zo_ceil(blocks) - zo_ceil(blocks + addspace)) == 0
 
 				blocks = blocks + addspace
 
@@ -7120,7 +7175,7 @@ local function initLiveReport()
 
 		local maxwidth, maxheight = GuiRoot:GetDimensions()
 
-		scale = math.min(math.max(scale or 1, 0.5), 3, maxwidth/width, maxheight/height)
+		scale = zo_min(zo_max(scale or 1, 0.5), 3, maxwidth/width, maxheight/height)
 
 		db.liveReport.scale = scale
 
