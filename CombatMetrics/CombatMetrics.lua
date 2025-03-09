@@ -1901,28 +1901,30 @@ local function FinalizeStats(fight)
 		for statId, stattype in pairs(list) do
 			local damagevalues = key == "Spell" and calcData.damageOutSpells or calcData.damageOutWeapon
 			local statdata = stats[statId]
+			
+			if statdata ~= nil then 
+				local dmgValue = statdata.max
+				local healValue = statdata.max
+				local totaldmgvalue = zo_max(damagevalues.damageOutTotal, 1)
+				local totalhealvalue = zo_max(calcData.healingOutTotal, 1)
 
-			local dmgValue = statdata.max
-			local healValue = statdata.max
-			local totaldmgvalue = zo_max(damagevalues.damageOutTotal, 1)
-			local totalhealvalue = zo_max(calcData.healingOutTotal, 1)
+				if stattype == STATTYPE_CRITICAL then
+					local critablehits = damagevalues.hitsOutNormal + damagevalues.hitsOutCritical
+					totaldmgvalue = zo_max(critablehits, 1)
+					totalhealvalue = zo_max(calcData.healsOutTotal, 1)
+				elseif stattype == STATTYPE_CRITICALBONUS then
+					totaldmgvalue = zo_max(damagevalues.damageOutCritical, 1)
+					totalhealvalue = zo_max(calcData.healingOutCritical, 1)
+				end
 
-			if stattype == STATTYPE_CRITICAL then
-				local critablehits = damagevalues.hitsOutNormal + damagevalues.hitsOutCritical
-				totaldmgvalue = zo_max(critablehits, 1)
-				totalhealvalue = zo_max(calcData.healsOutTotal, 1)
-			elseif stattype == STATTYPE_CRITICALBONUS then
-				totaldmgvalue = zo_max(damagevalues.damageOutCritical, 1)
-				totalhealvalue = zo_max(calcData.healingOutCritical, 1)
+				if statId == LIBCOMBAT_STAT_STATUS_EFFECT_CHANCE then totaldmgvalue = zo_max(calcData.damageOutTotal, 1) end
+				if statdata.dmgsum ~= nil then dmgValue = statdata.dmgsum / totaldmgvalue end
+				statdata.dmgavg = dmgValue
+
+				if statdata.healsum ~= nil and stattype ~= STATTYPE_PENETRATION then healValue = statdata.healsum / totalhealvalue end
+				if statdata.min == inf then statdata.min = 0 end
+				statdata.healavg = healValue
 			end
-
-			if statId == LIBCOMBAT_STAT_STATUS_EFFECT_CHANCE then totaldmgvalue = zo_max(calcData.damageOutTotal, 1) end
-			if statdata.dmgsum ~= nil then dmgValue = statdata.dmgsum / totaldmgvalue end
-			statdata.dmgavg = dmgValue
-
-			if statdata.healsum ~= nil and stattype ~= STATTYPE_PENETRATION then healValue = statdata.healsum / totalhealvalue end
-			if statdata.min == inf then statdata.min = 0 end
-			statdata.healavg = healValue
 		end
 	end
 
