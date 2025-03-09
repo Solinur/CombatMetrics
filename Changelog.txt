@@ -688,7 +688,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 1.6.6 6,482,867 (08.02.2025) 10:17
 [*] Attempting to fix another issue that could occur during fight conversions (Thanks to black_gfa for the report).
 
-1.7.0
+1.7.0 6,538,181 (09.03.2025) 22:05
 [*] Added spanish translation by cisneros (Big Thanks!)
 [*] Added increase of status effect proc chance to stats panel. Note that it shows the increase of the base value, not the total chance.
 [*] Added scribing skills to info panel
