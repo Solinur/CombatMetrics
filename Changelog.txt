@@ -695,5 +695,5 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Added spanish translation by cisneros (Big Thanks!)
 [*] Added increase of status effect proc chance to stats panel.
 [*] Added scribing skills to info panel
-[*] Added additional build details to info panel, showing used mundus, buff food and potions.
+[*] Added additional build details to info panel, showing used mundus, buff food and potions. Mundus & Buff food are derived form buffs, so they can be shown for older fights if the recalculate option is used. Potions will only be available for new fights.
 [*] Minor refactoring and formatting
