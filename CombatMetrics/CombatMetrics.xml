@@ -618,8 +618,8 @@
 				</Label>
 
 				<Texture name="$(parent)Icon2" textureFile="EsoUI/Art/CharacterWindow/gearSlot_head.dds">
-					<Anchor point="BOTTOMLEFT" offsetX="2"/>
-					<Dimensions x="22" y="22" />
+					<Anchor point="BOTTOMLEFT" offsetX="0"/>
+					<Dimensions x="20" y="20" />
 				</Texture>
 
 				<Label name="$(parent)Name2" text="Name" inherits="CombatMetrics_LabelFontControl" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
