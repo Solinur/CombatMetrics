@@ -1903,7 +1903,7 @@ local statFormat = { 			-- {label, format, convert}
 		[3] = {LIBCOMBAT_STAT_SPELLCRIT, "%.1f%%", true},
 		[4] = {LIBCOMBAT_STAT_SPELLCRITBONUS, "%.1f%%"},
 		[5] = {LIBCOMBAT_STAT_SPELLPENETRATION, "%d"},
-		[6] = {LIBCOMBAT_STAT_STATUS_EFFECT_CHANCE, "%.1f%%"},
+		[6] = {LIBCOMBAT_STAT_STATUS_EFFECT_CHANCE, "+%.1f%%"},
 	},
 
 	[POWERTYPE_STAMINA] = {
@@ -1912,7 +1912,7 @@ local statFormat = { 			-- {label, format, convert}
 		[3] = {LIBCOMBAT_STAT_WEAPONCRIT, "%.1f%%", true},
 		[4] = {LIBCOMBAT_STAT_WEAPONCRITBONUS, "%.1f%%"},
 		[5] = {LIBCOMBAT_STAT_WEAPONPENETRATION, "%d"},
-		[6] = {LIBCOMBAT_STAT_STATUS_EFFECT_CHANCE, "%.1f%%"},
+		[6] = {LIBCOMBAT_STAT_STATUS_EFFECT_CHANCE, "+%.1f%%"},
 	},
 
 	[POWERTYPE_HEALTH] = {
