@@ -6231,19 +6231,19 @@ local function updateFightListPanel(panel, data, issaved)
 	end
 end
 
-local function updateFightList(panel)
-
+local function updateFightList(panel)	
 	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating FightListPanel")
-
+	
 	if panel:IsHidden() then return end
-
+	
 	local recentPanel = panel:GetNamedChild("Recent")
 	local savedPanel = panel:GetNamedChild("Saved")
-
+	
 	ResetBars(recentPanel)
 	ResetBars(savedPanel)
-
+	
 	local label
+	local category = db.FightReport.category
 
 	if category == "healingOut" or category == "healingIn" then
 
