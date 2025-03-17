@@ -5797,6 +5797,13 @@ local function updateRightInfoPanel(panel)
 					itemNo = itemNo + 1
 				end
 			end
+			if itemNo <= 4 then
+				for i = itemNo, 4 do
+					local starControl = constellationControl:GetNamedChild("StarControl" .. i)
+					SetStarControlEmpty(starControl)
+				end
+				itemNo = 5
+			end
 			local bottom = constellationControl:GetNamedChild("StarControl" .. (itemNo-1)):GetBottom()
 			constellationControl:SetHeight(bottom-top)
 

@@ -695,3 +695,6 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Added additional build details to info panel, showing used mundus, buff food and potions. Mundus & Buff food are derived form buffs, so they can be shown for older fights if the recalculate option is used. Potions will only be available for new fights.
 [*] Fixed an issue when loading an old fight (Thx to Sycophantic-Witty for the report and cooperation).
 [*] Minor refactoring and formatting
+
+1.7.1 6,583,563 (17.03.2025) 19:10
+[*] Fix for info panel when no CP are set on a character in at least one tree (Thx to Kyzeragon & SkullElf for the bug reports)
