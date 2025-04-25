@@ -566,8 +566,9 @@ function CMX.InitCLNavButtonRow(rowControl)
 
 end
 
-local function CLFilterButtonFunction(self)
+local toggleCopyPaste
 
+local function CLFilterButtonFunction(self)
 	local overlay = self:GetNamedChild("Overlay")
 	local func = self.func
 
@@ -576,30 +577,51 @@ local function CLFilterButtonFunction(self)
 	overlay:SetCenterColor( 0 , 0 , 0 , db.FightReport.CLSelection[func] and 0 or 0.8 ) -- Switch Button overlay (active = button darkened)
 	overlay:SetEdgeColor( 1 , 1 , 1 , db.FightReport.CLSelection[func] and 1 or .4 )
 
-	self:GetParent():GetParent():GetParent():Update()
+	if func ~= "CopyPaste" and db.FightReport.CLSelection["CopyPaste"] then
+		toggleCopyPaste(self:GetParent():GetNamedChild("CopyPaste"))
+	end
 
+	self:GetParent():GetParent():GetParent():Update()
+end
+
+function toggleCopyPaste(self)
+	local combatLog = self:GetParent():GetParent():GetParent()
+
+	---@type TextBufferControl
+	local textWindow = combatLog:GetNamedChild("Window")
+	---@type EditControl
+	local copyPasteBox = combatLog:GetNamedChild("CopyPasteBox")
+	copyPasteBox:SetFont(string.format("%s|%s|%s", GetString(SI_COMBAT_METRICS_STD_FONT), tonumber(GetString(SI_COMBAT_METRICS_FONT_SIZE)) * db.FightReport.scale, ""))
+
+	if textWindow:IsHidden() then
+		textWindow:SetHidden(false)
+		copyPasteBox:SetHidden(true)
+	else
+		textWindow:SetHidden(true)
+		copyPasteBox:SetHidden(false)
+	end
+
+	CLFilterButtonFunction(self)
 end
 
 local function initCLButtonRow(rowControl)
-
 	for i=1, rowControl:GetNumChildren() do
 
 		local button = rowControl:GetChild(i)
 
 		if button.texture then button:GetNamedChild("Icon"):SetTexture(button.texture) end
-
 		if button.label then button:GetNamedChild("Label"):SetText(button.label) end
 
-		button:SetHandler( "OnMouseUp", CLFilterButtonFunction )
+		local func = (button.func == "CopyPaste") and toggleCopyPaste or CLFilterButtonFunction
+		button:SetHandler( "OnMouseUp", func )
 
+		db.FightReport.CLSelection["CopyPaste"] = false
 		local selected = db.FightReport.CLSelection[button.func]
 		local overlay = button:GetNamedChild("Overlay")
 
 		overlay:SetCenterColor( 0 , 0 , 0 , selected and 0 or 0.8 )
 		overlay:SetEdgeColor( 1 , 1 , 1 , selected and 1 or .5 )
-
 	end
-
 end
 
 local function adjustSlider(self)
@@ -3264,7 +3286,6 @@ local function updateCLPageButtons(buttonrow, page, maxpage)
 end
 
 local function updateCombatLog(panel)
-
 	if fightData == nil or panel:IsHidden() then return end
 
 	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating CombatLog")
@@ -3272,11 +3293,17 @@ local function updateCombatLog(panel)
 	local CLSelection = db.FightReport.CLSelection
 
 	local window = panel:GetNamedChild("Window")
+	local copyPasteBox = panel:GetNamedChild("CopyPasteBox")
 	local buffer = window:GetNamedChild("Buffer")
 	local slider = window:GetNamedChild("Slider")
 
 	local logdata = fightData.log or {}
 	local loglength = #logdata
+
+	local isCopyPasteMode = buffer:IsHidden()
+	local lastLine = buffer:GetNumHistoryLines() - buffer:GetScrollPosition()
+	local firstLine = lastLine - buffer:GetNumVisibleLines()
+	local copyPasteText = {}
 
 	buffer:Clear()
 	if loglength == 0 then return end
@@ -3299,25 +3326,18 @@ local function updateCombatLog(panel)
 	local unitsSelected = false
 
 	for _, category in pairs({"healingIn", "healingOut", "damageIn", "damageOut"}) do
-
 		local subcategory = unitSelection[category]
 
 		if subcategory ~= nil then
-
 			for unitId, bool in pairs(subcategory) do
-
 				unitSelectionAll[unitId] = bool
 				unitsSelected = true
-
 			end
-
 		end
 	end
 
 	for k, logline in ipairs(logdata) do
-
-		local condition1, condition2 = false, false
-
+		local condition2 = false
 		local logtype = logline[1]
 
 		local condition1 =
@@ -3340,7 +3360,7 @@ local function updateCombatLog(panel)
 
 				condition2 = (
 
-						unitSelCat == nil
+					unitSelCat == nil
 						or (unitSelCat[targetUnitId]~= nil and (logtype == LIBCOMBAT_EVENT_HEAL_OUT or logtype == LIBCOMBAT_EVENT_DAMAGE_OUT))
 						or (unitSelCat[sourceUnitId]~= nil and (logtype == LIBCOMBAT_EVENT_HEAL_IN or logtype == LIBCOMBAT_EVENT_DAMAGE_IN))
 					) and (
@@ -3395,30 +3415,37 @@ local function updateCombatLog(panel)
 			end
 
 			if condition2 == true then
-
 				writtenlines = writtenlines + 1
-
-				if writtenlines >= (page-1)*1000 and writtenlines < page*1000 then
-
-					local text, color = CMX.GetCombatLogString(fightData, logline, fontsize)
-
-					window:AddColoredText(text, color)
-
+				if isCopyPasteMode then
+					if writtenlines >= (page-1)*1000+firstLine and writtenlines <= (page-1)*1000+lastLine then
+						local text, color = CMX.GetCombatLogString(fightData, logline, fontsize)
+						copyPasteText[#copyPasteText+1] = text:gsub("|c......", ""):gsub("|r", ""):gsub("|t.-|t ", "")
+					end
+				else
+					if writtenlines > (page-1)*1000 and writtenlines <= page*1000 then
+						local text, color = CMX.GetCombatLogString(fightData, logline, fontsize)
+						window:AddColoredText(text, color)
+					end
 				end
 			end
 		end
 	end
 
 	maxpage = zo_max(zo_ceil(writtenlines/1000), 1)
-
 	local buttonrow = GetControl(panel, "HeaderPageButtonRow")
 
 	buttonrow:Update(page, maxpage)
-
 	local totalLines = buffer:GetNumHistoryLines()
 
 	buffer:SetScrollPosition(zo_min(buffer:GetScrollPosition() + totalLines, zo_floor(buffer:GetNumHistoryLines()-buffer:GetNumVisibleLines())))
 	slider:SetValue(slider:GetValue() - totalLines)
+
+	if isCopyPasteMode then
+		local text = table.concat(copyPasteText, "\n")
+		copyPasteBox:SetText(text)
+		copyPasteBox:SelectAll(text)
+		copyPasteBox:TakeFocus()
+	end
 end
 
 local CMX_PLOT_DIMENSION_X = 1

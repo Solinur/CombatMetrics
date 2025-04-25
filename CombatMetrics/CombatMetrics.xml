@@ -2502,8 +2502,8 @@
 										</Control>
 
 										<Control name="$(parent)FilterButtonRow" resizeToFitDescendents="true">
-											<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="-4" offsetY="4" />
-											<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" offsetX="-4" offsetY="0" />
+											<Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="0" offsetY="4" />
+											<Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="0" />
 
 											<Controls>
 												<Control name="$(parent)Performance"
@@ -2567,7 +2567,7 @@
 
 												<Control name="$(parent)BuffsIn"
 													inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
-													<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Resources" offsetX="13"
+													<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Resources" offsetX="7"
 														offsetY="0" />
 
 													<OnInitialized>
@@ -2616,7 +2616,7 @@
 												<Control name="$(parent)DamageOut"
 													inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
 													<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)GroupBuffsOut"
-														offsetX="13" offsetY="0" />
+														offsetX="7" offsetY="0" />
 
 													<OnInitialized>
 														self.tooltip = {SI_COMBAT_METRICS_TOGGLE_YOUR_DAMAGE}
@@ -2662,6 +2662,20 @@
 													</OnInitialized>
 
 												</Control>
+
+												<Control name="$(parent)CopyPaste"
+													inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
+
+													<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)HealingIn" offsetX="7"
+														offsetY="0" />
+
+													<OnInitialized>
+														self.tooltip = {SI_COMBAT_METRICS_COPY_PASTE}
+														self.func = "CopyPaste"
+														self.texture = "/esoui/art/guild/gamepad/gp_guild_menuicon_changemessage.dds"
+													</OnInitialized>
+
+												</Control>
 											</Controls>
 										</Control>
 									</Controls>
@@ -2675,14 +2689,11 @@
 								</Line>
 
 								<Control name="$(parent)Window">
-
 									<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Sep" offsetX="0" offsetY="2" />
 									<Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4" />
 
 									<Controls>
-
 										<TextBuffer name="$(parent)Buffer" linkEnabled="false" maxHistoryLines="1000" mouseEnabled="true">
-
 											<Anchor point="TOPLEFT" />
 											<Anchor point="BOTTOMRIGHT" offsetX="-12" offsetY="0" />
 
@@ -2713,9 +2724,7 @@
 											<BackgroundMiddle textureFile="EsoUI/Art/ChatWindow/chat_scrollbar_track.dds" />
 
 											<Controls>
-
 												<Button name="$(parent)ScrollUp" inherits="ZO_ScrollUpButton">
-
 													<Anchor point="BOTTOM" relativePoint="TOP" offsetX="-1" />
 													<Dimensions x="12" y="12" />
 
@@ -2725,7 +2734,6 @@
 														mouseOver="EsoUI/Art/ChatWindow/chat_scrollbar_upArrow_over.dds"
 														disabled="EsoUI/Art/ChatWindow/chat_scrollbar_upArrow_disabled.dds"
 													/>
-
 												</Button>
 
 												<Button name="$(parent)ScrollDown" inherits="ZO_ScrollDownButton">
@@ -2738,29 +2746,33 @@
 														mouseOver="EsoUI/Art/ChatWindow/chat_scrollbar_downArrow_over.dds"
 														disabled="EsoUI/Art/ChatWindow/chat_scrollbar_downArrow_disabled.dds"
 													/>
-
 												</Button>
 
 												<Button name="$(parent)ScrollEnd" inherits="ZO_ScrollEndButton">
 													<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)ScrollDown" />
 													<Dimensions x="12" y="12" />
-
 												</Button>
 											</Controls>
 										</Slider>
 									</Controls>
 
-									<OnInitialized>
-
-										CMX.InitCombatLog(self)
-
-									</OnInitialized>
-
+									<OnInitialized>CMX.InitCombatLog(self)</OnInitialized>
 								</Control>
-							</Controls>
+
+								<EditBox name="$(parent)CopyPasteBox" layer="TEXT" editEnabled="false" hidden="true" maxInputCharacters="29903" newLineEnabled="true" inherits="ZO_DefaultEditMultiLine">
+									<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Sep" offsetX="0" offsetY="2" />
+									<Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4" />
+
+									<OnInitialized>
+										self.font = {GetString(SI_COMBAT_METRICS_STD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE), "soft-shadow-thin"}
+										self:SetFont(string.format("%s|%s|%s", unpack(self.font)))
+										self:SetText("Test 123 CopyPasteBox CopyPasteBox CopyPasteBox CopyPasteBox \n CopyPasteBox CopyPasteBox 123")
+									</OnInitialized>
+								</EditBox>
+							</Controls>	
 						</Control>
 
-						<Control name="$(parent)Graph" inherits="CombatMetrics_ControlFramed" hidden="true" mouseEnabled="true">
+						<Control name="$(parent)Graph" inherits="CombatMetrics_ControlFramed" hidden="true" mouseEnabled="true" >
 
 							<Anchor point="TOPLEFT" relativeTo="$(parent)_MainPanel" />
 							<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)_MainPanel" />

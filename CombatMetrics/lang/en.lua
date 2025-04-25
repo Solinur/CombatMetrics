@@ -265,9 +265,10 @@
 	SI_COMBAT_METRICS_PAGE = "Go to page <<1>>", -- <<1>> = page number
 	SI_COMBAT_METRICS_GOTO_NEXT = "Go to next page",
 
+	SI_COMBAT_METRICS_COPY_PASTE = "Toggle copy paste mode of the combat log.",
+
 	SI_COMBAT_METRICS_TOGGLE_HEAL = "Toggle received healing events",
 	SI_COMBAT_METRICS_TOGGLE_DAMAGE = "Toggle received damage events",
-
 	SI_COMBAT_METRICS_TOGGLE_YOUR_HEAL = "Toggle your healing events",
 	SI_COMBAT_METRICS_TOGGLE_YOUR_DAMAGE = "Toggle your damage events",
 
