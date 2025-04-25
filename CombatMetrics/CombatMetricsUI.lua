@@ -5326,6 +5326,7 @@ function CMX.SkillTooltip_OnMouseExit(control)
 end
 
 function CMX.ScribedSkillTooltip_OnMouseEnter(control)
+	if control.scriptIds == nil then return end
 	local abilityId = control.abilityId
 	local scriptIds = control.scriptIds
 
@@ -5776,6 +5777,7 @@ local function updateRightInfoPanel(panel)
 					end
 
 					local starControl = constellationControl:GetNamedChild("StarControl" .. itemNo)
+					if starControl == nil then break end
 					starControl:SetHidden(false)
 					starControl:GetNamedChild("Ring"):SetHidden(true)
 
