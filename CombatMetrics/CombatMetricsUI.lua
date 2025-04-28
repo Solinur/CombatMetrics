@@ -469,7 +469,7 @@ function CMX.InitializeRightInfoPanel(panel)
 		local nameBase = constellationControl:GetName() .. "StarControl"
 		local anchor
 
-		for i = 1, 20 do
+		for i = 1, 24 do
 			local starControl = CreateControlFromVirtual(nameBase, constellationControl, "CombatMetrics_StarControl", i)
 
 			if i == 1 then
