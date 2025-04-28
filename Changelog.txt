@@ -698,3 +698,8 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 
 1.7.1 6,583,563 (17.03.2025) 19:10
 [*] Fix for info panel when no CP are set on a character in at least one tree (Thx to Kyzeragon & SkullElf for the bug reports)
+
+1.7.2 6,662,645 (28.04.2025) 21:52
+[*] Added an option to allow copy&paste of the current combat log display.
+[*] Fix for LUA error when a lot of passive CPs are active in a tree (Thx @Spuddl  and jrmsk for reporting).
+[*] Fix for LUA error when hovering over empty scribing skill before a fight gets loaded (Thx @Kyzeragon for reporting).
