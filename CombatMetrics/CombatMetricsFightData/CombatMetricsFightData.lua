@@ -18,10 +18,10 @@ end
 
 local function Print(...)
 	if not CMX then 
-		print("[CombatMetricsFightData]: CMX not found!")
+		d("[CombatMetricsFightData]: CMX not found!")
 		return
 	end
-	return CMX.Print(...)
+	return CMX.Print("save", ...)
 end
 
 
@@ -662,6 +662,7 @@ local function deleteLog(id)
 end
 
 local function getNumFights()
+	if sv == nil then return 0 end
 	return #sv
 end
 
@@ -820,9 +821,15 @@ function CMX_CopyFight(n)
 	end
 end
 
-local function Initialize(event, addon)
-	if addon ~= AddonName then return end
-	em:UnregisterForEvent(AddonName, EVENT_ADD_ON_LOADED)
+local initTime
+local function InitSV()
+	Print(LOG_LEVEL_INFO, "Try Init SV ...")
+	if GetGameTimeMilliseconds() - 10000 > initTime then
+		em:UnregisterForUpdate("CombatMetricsFightData_InitSV")
+		assert(false, "Combat Metrics Fight Data Initialization failed!")
+		return
+	end
+	if CMX == nil or CombatMetrics_Report_TitleFightTitleBar == nil or CombatMetrics_Report_TitleFightTitleName == nil then return end
 
 	sv = _G["CombatMetricsFightDataSV"]
 	if sv == nil or sv.version == nil then
@@ -834,6 +841,16 @@ local function Initialize(event, addon)
 		InitConversionDialog()
 		ConvertSV()
 	end
+	Print(LOG_LEVEL_INFO, "Init SV complete")
+	em:UnregisterForUpdate("CombatMetricsFightData_InitSV")
+end
+
+local function Initialize(event, addon)
+	if addon ~= AddonName then return end
+	em:UnregisterForEvent(AddonName, EVENT_ADD_ON_LOADED)
+
+	initTime = GetGameTimeMilliseconds()
+	em:RegisterForUpdate("CombatMetricsFightData_InitSV", 100, InitSV)
 end
 
 em:RegisterForEvent(AddonName, EVENT_ADD_ON_LOADED, function(...) Initialize(...) end)
