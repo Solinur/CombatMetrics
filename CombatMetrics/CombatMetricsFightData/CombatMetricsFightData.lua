@@ -28,9 +28,7 @@ end
 CombatMetricsFightData = {}
 
 local AddonName = "CombatMetricsFightData"
-local AddonVersion = 20
-
-local constants = 0
+local AddonVersion = 21
 
 local charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_"
 
@@ -823,13 +821,23 @@ end
 
 local initTime
 local function InitSV()
-	Print(LOG_LEVEL_INFO, "Try Init SV ...")
-	if GetGameTimeMilliseconds() - 10000 > initTime then
-		em:UnregisterForUpdate("CombatMetricsFightData_InitSV")
-		assert(false, "Combat Metrics Fight Data Initialization failed!")
+	em:UnregisterForUpdate("CombatMetricsFightData_InitSV")
+	Print(LOG_LEVEL_DEBUG, "Try Init SV ...")
+
+	if GetGameTimeMilliseconds() - 30000 > initTime then
+		local message = "Combat Metrics Fight Data Initialization failed!"
+		local message2 = string.format("CMX found: %s", tostring(CMX ~= nil))
+		local message3 = string.format("TitleBar found: %s", tostring(CombatMetrics_Report_TitleFightTitleBar ~= nil))
+		local message4 = string.format("TitleName found: %s", tostring(CombatMetrics_Report_TitleFightTitleName ~= nil))
+		local error_message = table.concat({message, message2, message3, message4}, "\n")
+		assert(false, error_message)
 		return
 	end
-	if CMX == nil or CombatMetrics_Report_TitleFightTitleBar == nil or CombatMetrics_Report_TitleFightTitleName == nil then return end
+
+	if CMX == nil or CombatMetrics_Report_TitleFightTitleBar == nil or CombatMetrics_Report_TitleFightTitleName == nil then
+		em:RegisterForUpdate("CombatMetricsFightData_InitSV", 100, InitSV)
+		return
+	end
 
 	sv = _G["CombatMetricsFightDataSV"]
 	if sv == nil or sv.version == nil then
@@ -841,8 +849,7 @@ local function InitSV()
 		InitConversionDialog()
 		ConvertSV()
 	end
-	Print(LOG_LEVEL_INFO, "Init SV complete")
-	em:UnregisterForUpdate("CombatMetricsFightData_InitSV")
+	Print(LOG_LEVEL_DEBUG, "Init SV complete")
 end
 
 local function Initialize(event, addon)
@@ -850,7 +857,7 @@ local function Initialize(event, addon)
 	em:UnregisterForEvent(AddonName, EVENT_ADD_ON_LOADED)
 
 	initTime = GetGameTimeMilliseconds()
-	em:RegisterForUpdate("CombatMetricsFightData_InitSV", 100, InitSV)
+	InitSV()
 end
 
 em:RegisterForEvent(AddonName, EVENT_ADD_ON_LOADED, function(...) Initialize(...) end)
