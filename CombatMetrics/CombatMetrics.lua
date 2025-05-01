@@ -37,7 +37,7 @@ local LOG_LEVEL_ERROR = "E"
 
 if LibDebugLogger then
 
-	mainlogger = LibDebugLogger.Create(CMX.name)
+	mainlogger = LibDebugLogger.Create("CMX")
 
 	LOG_LEVEL_VERBOSE = LibDebugLogger.LOG_LEVEL_VERBOSE
 	LOG_LEVEL_DEBUG = LibDebugLogger.LOG_LEVEL_DEBUG
