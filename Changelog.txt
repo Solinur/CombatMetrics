@@ -706,3 +706,6 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 
 1.7.3 6,683,751 (01.05.2025) 11:24
 [*] Fix for LUA error on initialization of the addon (Thx PBnJ66 for reporting)
+
+1.7.4 6,692,802 (01.05.2025) 22:16
+[*] Attempt to fix a new LUA error sometimes appearing on initialization of the addon (Thx to everyone reporting)
