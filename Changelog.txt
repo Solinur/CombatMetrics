@@ -703,3 +703,6 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Added an option to allow copy&paste of the current combat log display.
 [*] Fix for LUA error when a lot of passive CPs are active in a tree (Thx @Spuddl  and jrmsk for reporting).
 [*] Fix for LUA error when hovering over empty scribing skill before a fight gets loaded (Thx @Kyzeragon for reporting).
+
+1.7.3 6,683,751 (01.05.2025) 11:24
+[*] Fix for LUA error on initialization of the addon (Thx PBnJ66 for reporting)

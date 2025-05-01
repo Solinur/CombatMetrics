@@ -28,7 +28,7 @@ end
 CombatMetricsFightData = {}
 
 local AddonName = "CombatMetricsFightData"
-local AddonVersion = 19
+local AddonVersion = 20
 
 local constants = 0
 
