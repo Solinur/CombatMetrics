@@ -3364,6 +3364,15 @@
 											<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Indicator" offsetX="2"
 												offsetY="0" />
 											<Dimensions x="20" y="20" />
+
+											<Controls>
+												<Texture name="$(parent)Texture" textureFile="esoui/art/miscellaneous/eso_icon_warning.dds" layer="CONTROLS" inherits="CombatMetrics_TextureTooltip" color="FFFF8800">
+													<AnchorFill/>
+													<OnInitialized>
+														self.tooltip = {SI_COMBAT_METRICS_SIGIL_WARNING}
+													</OnInitialized>
+												</Texture>
+											</Controls>
 										</Control>
 
 										<Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_BUFF"

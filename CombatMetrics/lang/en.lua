@@ -71,6 +71,8 @@
 	SI_COMBAT_METRICS_TOGGLE_INFO = "Info",
 	SI_COMBAT_METRICS_TOGGLE_SETTINGS = "Options",
 
+	SI_COMBAT_METRICS_SIGIL_WARNING = "This Icon indicates that a sigil has been used.",
+
 	SI_COMBAT_METRICS_NOTIFICATION = "Mein Raid |cffff00Beyond Infinity|r sucht einen MagDK/Necro für vCR+3 (Greifenherz).",
 	SI_COMBAT_METRICS_NOTIFICATION_GUILD = "Info: |cffff00Beyond Infinity|r",
 	SI_COMBAT_METRICS_NOTIFICATION_ACCEPT = "Message Read",

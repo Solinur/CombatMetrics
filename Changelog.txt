@@ -709,3 +709,7 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 
 1.7.4 6,692,802 (01.05.2025) 22:16
 [*] Attempt to fix a new LUA error sometimes appearing on initialization of the addon (Thx to everyone reporting)
+
+1.7.5 6,741,291 (15.05.2025) 21:26
+[*] Reworked fight data initialization once more. This should fix the error that occured when only the subaddon was activated.
+[*] Added a warning symbol to the buff panel when certain sigils are used.

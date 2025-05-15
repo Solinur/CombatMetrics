@@ -16,19 +16,19 @@ if LibDebugLogger then
 	LOG_LEVEL_ERROR = LibDebugLogger.LOG_LEVEL_ERROR
 end
 
-local function Print(...)
+local function Log(...)
 	if not CMX then 
 		d("[CombatMetricsFightData]: CMX not found!")
 		return
 	end
-	return CMX.Print("save", ...)
+	return CMX.Log("save", ...)
 end
 
 
 CombatMetricsFightData = {}
 
 local AddonName = "CombatMetricsFightData"
-local AddonVersion = 21
+local AddonVersion = 22
 
 local charset = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_"
 
@@ -170,7 +170,7 @@ local function Encode(line, layout)
 	for i, size in ipairs(layout) do
 		if line[i] then
 			local error = GetChar(line[i], logstringdata, size)
-			if error then Print("save", LOG_LEVEL_WARNING,
+			if error then Log("save", LOG_LEVEL_WARNING,
 					"Invalid value during log encoding: %s (type: %d, value %d) ", tostring(line[i]), line[1], i) end
 		end
 	end
@@ -711,7 +711,7 @@ local function FinishEncoding()
 		table.remove(sv, 1)
 	end
 	sv.version = AddonVersion
-	Print(LOG_LEVEL_INFO, "Conversion Finished!")
+	Log(LOG_LEVEL_INFO, "Conversion Finished!")
 
 	local titleBar = CombatMetrics_Report_TitleFightTitleBar
 	titleBar:SetValue(0)
@@ -751,7 +751,7 @@ local function EncodeNextFight()
 end
 
 local function StartEncodingSavedFights()
-	Print(LOG_LEVEL_INFO, "Converting saved fight from version %d to %d ...", sv.version, AddonVersion)
+	Log(LOG_LEVEL_INFO, "Converting saved fight from version %d to %d ...", sv.version, AddonVersion)
 	oldSV = ZO_ShallowTableCopy(sv)
 
 	local titleBar = CombatMetrics_Report_TitleFightTitleBar
@@ -788,7 +788,7 @@ local function ConvertSV()
 	local version = sv.version
 	local converted = false
 	if version < 2 then -- convert format if coming from CombatMetrics < 0.8
-		Print(LOG_LEVEL_INFO, "Converting saved fight from version %d to %d ...", version, 13)
+		Log(LOG_LEVEL_INFO, "Converting saved fight from version %d to %d ...", version, 13)
 		for i = 1, #sv do
 			saveFight(sv[1])
 			table.remove(sv, 1)
@@ -801,7 +801,7 @@ local function ConvertSV()
 		ZO_Dialogs_ShowDialog("CMX_ConvertSV_Dialog")
 	end
 
-	if converted then Print(LOG_LEVEL_INFO, "Conversion Finished!") end
+	if converted then Log(LOG_LEVEL_INFO, "Conversion Finished!") end
 end
 
 CombatMetricsFightData.Check = checkSavedVariable
@@ -819,25 +819,8 @@ function CMX_CopyFight(n)
 	end
 end
 
-local initTime
-local function InitSV()
-	em:UnregisterForUpdate("CombatMetricsFightData_InitSV")
-	Print(LOG_LEVEL_DEBUG, "Try Init SV ...")
-
-	if GetGameTimeMilliseconds() - 30000 > initTime then
-		local message = "Combat Metrics Fight Data Initialization failed!"
-		local message2 = string.format("CMX found: %s", tostring(CMX ~= nil))
-		local message3 = string.format("TitleBar found: %s", tostring(CombatMetrics_Report_TitleFightTitleBar ~= nil))
-		local message4 = string.format("TitleName found: %s", tostring(CombatMetrics_Report_TitleFightTitleName ~= nil))
-		local error_message = table.concat({message, message2, message3, message4}, "\n")
-		assert(false, error_message)
-		return
-	end
-
-	if CMX == nil or CombatMetrics_Report_TitleFightTitleBar == nil or CombatMetrics_Report_TitleFightTitleName == nil then
-		em:RegisterForUpdate("CombatMetricsFightData_InitSV", 100, InitSV)
-		return
-	end
+function InitializeCMXFightData()
+	Log(LOG_LEVEL_INFO, "Starting init of fight data ...")
 
 	sv = _G["CombatMetricsFightDataSV"]
 	if sv == nil or sv.version == nil then
@@ -849,15 +832,8 @@ local function InitSV()
 		InitConversionDialog()
 		ConvertSV()
 	end
-	Print(LOG_LEVEL_DEBUG, "Init SV complete")
+
+	Log(LOG_LEVEL_INFO, "Init of fight data complete.")
+	_G["InitializeCMXFightData"] = nil
 end
 
-local function Initialize(event, addon)
-	if addon ~= AddonName then return end
-	em:UnregisterForEvent(AddonName, EVENT_ADD_ON_LOADED)
-
-	initTime = GetGameTimeMilliseconds()
-	InitSV()
-end
-
-em:RegisterForEvent(AddonName, EVENT_ADD_ON_LOADED, function(...) Initialize(...) end)

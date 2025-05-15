@@ -53,6 +53,23 @@ if LC == nil then return end
 local GetFormattedAbilityName = LC.GetFormattedAbilityName
 local GetFormattedAbilityIcon = LC.GetFormattedAbilityIcon
 
+local SigilAbilities = { -- Ailities to display a warning icon in the buff list to indicate it cannot be considered a "clean" parse
+	[236960] = true, -- Sigil of Power
+	[236968] = true, -- Sigil of Defense
+	[236994] = true, -- Sigil of Ultimate
+	[237014] = true, -- Sigil of Speed
+} 
+
+local function isSigilAbility(buffAbilityIds)
+	if type(buffAbilityIds) ~= "table" then return false end
+
+	for abilityId, _ in pairs(buffAbilityIds) do
+		if SigilAbilities[abilityId] then return true end
+	end
+
+	return false
+end
+
 local function searchtable(t, field, value)
 	if value == nil then return false end
 
@@ -1537,7 +1554,7 @@ end
 
 local function updateTitlePanel(panel)
 
-	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating TitlePanel")
+	CMX.Log("UI", LOG_LEVEL_DEBUG, "Updating TitlePanel")
 
 	-- update character info
 
@@ -1706,7 +1723,7 @@ local CountStrings = {
 
 local function updateFightStatsPanelLeft(panel)
 
-	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating FightStatsPanelLeft")
+	CMX.Log("UI", LOG_LEVEL_DEBUG, "Updating FightStatsPanelLeft")
 
 	local data = fightData and fightData.calculated or {}
 	local category = db.FightReport.category
@@ -1948,7 +1965,7 @@ local statFormat = { 			-- {label, format, convert}
 
 
 local function updateFightStatsPanelRight(panel)
-	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating FightStatsPanelRight")
+	CMX.Log("UI", LOG_LEVEL_DEBUG, "Updating FightStatsPanelRight")
 
 	local data = fightData or {}
 	local powerType = db.FightReport.fightstatspanel
@@ -2199,7 +2216,7 @@ end
 
 local function updateFightStatsPanel(panel)
 
-	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating FightStatsPanel")
+	CMX.Log("UI", LOG_LEVEL_DEBUG, "Updating FightStatsPanel")
 
 	panel:GetNamedChild("Left"):Update(fightData, selectionData)
 	panel:GetNamedChild("Right"):Update(fightData)
@@ -2208,7 +2225,7 @@ end
 
 local function updateMainPanel(mainpanel)
 
-	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating MainPanel")
+	CMX.Log("UI", LOG_LEVEL_DEBUG, "Updating MainPanel")
 
 	mainpanel.active:Update()
 
@@ -2378,7 +2395,7 @@ end
 
 local function updateBuffPanelLegacy(panel)
 
-	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating BuffPanel")
+	CMX.Log("UI", LOG_LEVEL_DEBUG, "Updating BuffPanel")
 
 	ResetBars(panel)
 
@@ -2558,9 +2575,10 @@ end
 
 local function updateBuffPanel(panel)
 
-	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating BuffPanel")
-
+	CMX.Log("UI", LOG_LEVEL_DEBUG, "Updating BuffPanel")
 	ResetBars(panel)
+	local sigilIcon = GetControl(panel, "HeaderIconTexture")
+	sigilIcon:SetHidden(true)
 
 	if fightData == nil then return end
 
@@ -2588,6 +2606,7 @@ local function updateBuffPanel(panel)
 	for buffName, buff in CMX.spairs(buffData["buffs"], buffSortFunction) do
 
 		if buff.groupUptime > 0 then
+			if isSigilAbility(buff.instances) then sigilIcon:SetHidden(false) end
 
 			local labelFormat = showids and "(<<1>>) <<2>>" or "<<2>>"
 			local rowdata = {}
@@ -2748,7 +2767,7 @@ end
 
 local function updateResourcePanel(panel)
 
-	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating ResourcePanel")
+	CMX.Log("UI", LOG_LEVEL_DEBUG, "Updating ResourcePanel")
 
 	local subpanel1 = panel:GetNamedChild("Gains")
 	local subpanel2 = panel:GetNamedChild("Drains")
@@ -2794,7 +2813,7 @@ end
 
 local function updateRightPanel(rightPanel)
 
-	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating RightPanel")
+	CMX.Log("UI", LOG_LEVEL_DEBUG, "Updating RightPanel")
 
 	rightPanel.active:Update()
 
@@ -2813,7 +2832,7 @@ end
 
 local function updateUnitPanel(panel)
 
-	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating UnitPanel")
+	CMX.Log("UI", LOG_LEVEL_DEBUG, "Updating UnitPanel")
 
 	ResetBars(panel)
 
@@ -3063,7 +3082,7 @@ end
 
 local function updateAbilityPanel(panel)
 
-	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating AbilityPanel")
+	CMX.Log("UI", LOG_LEVEL_DEBUG, "Updating AbilityPanel")
 
 	ResetBars(panel)
 
@@ -3288,7 +3307,7 @@ end
 local function updateCombatLog(panel)
 	if fightData == nil or panel:IsHidden() then return end
 
-	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating CombatLog")
+	CMX.Log("UI", LOG_LEVEL_DEBUG, "Updating CombatLog")
 
 	local CLSelection = db.FightReport.CLSelection
 
@@ -6038,7 +6057,7 @@ end
 
 local function updateInfoRowPanel(panel)
 
-	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating InfoRow")
+	CMX.Log("UI", LOG_LEVEL_DEBUG, "Updating InfoRow")
 
 	local datetimecontrol = panel:GetNamedChild("DateTime")
 	local versioncontrol = panel:GetNamedChild("ESOVersion")
@@ -6105,7 +6124,7 @@ end
 
 local function updateFightReport(control, fightId)
 
-	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating FightReport")
+	CMX.Log("UI", LOG_LEVEL_DEBUG, "Updating FightReport")
 
 	em:UnregisterForUpdate("CMX_Report_Update_Delay")
 
@@ -6226,7 +6245,7 @@ local function updateFightListPanel(panel, data, issaved)
 			local DPSKey = DPSstrings[db.FightReport.category]
 			local dps = zo_round(fight.calculated and fight.calculated[DPSKey] or fight[DPSKey] or 0)
 
-			-- CMX.Print(LOG_LEVEL_INFO, "Getting row: %s%d", rowBaseName, id)
+			-- CMX.Log(LOG_LEVEL_INFO, "Getting row: %s%d", rowBaseName, id)
 			local row = GetControl(rowBaseName, id)
 			row:SetAnchor(unpack(currentanchor))
 			row:SetHidden(false)
@@ -6268,7 +6287,7 @@ local function updateFightListPanel(panel, data, issaved)
 end
 
 local function updateFightList(panel)	
-	CMX.Print("UI", LOG_LEVEL_DEBUG, "Updating FightListPanel")
+	CMX.Log("UI", LOG_LEVEL_DEBUG, "Updating FightListPanel")
 	
 	if panel:IsHidden() then return end
 	
@@ -6527,7 +6546,7 @@ function CMX.PostBuffUptime(fight, buffname, unitType)
 
 	local channel = db.autoselectchatchannel == true and (IsUnitGrouped('player') and CHAT_CHANNEL_PARTY or CHAT_CHANNEL_SAY) or nil
 
-	-- Print output to chat
+	-- Log output to chat
 
 	local outputtext = string.format("%s%s", timedata, output)
 	StartChatInput(outputtext, channel)
@@ -6661,7 +6680,7 @@ function CMX.PosttoChat(mode, fight, UnitContextMenuUnitId)
 
 	local channel = db.autoselectchatchannel == false and "" or IsUnitGrouped('player') and "/p " or "/say "
 
-	-- Print output to chat
+	-- Log output to chat
 
 	local outputtext = string.format("%s%s", timedata, output)
 

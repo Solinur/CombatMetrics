@@ -23,7 +23,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.7.4"
+CMX.version = "1.7.5"
 
 -- Logger
 
@@ -54,19 +54,19 @@ if LibDebugLogger then
 
 end
 
-local function Print(category, level, ...)
+local function Log(category, level, ...)
 	if mainlogger == nil then return end
 	local logger = category and subloggers[category] or mainlogger
 	if type(logger.Log)=="function" then logger:Log(level, ...) end
 end
 
-CMX.Print = Print
+CMX.Log = Log
 
 -- init and check for libs
 
 local LC = LibCombat
 if LC == nil then
-	Print("main", LOG_LEVEL_ERROR, "LibCombat not found!")
+	Log("main", LOG_LEVEL_ERROR, "LibCombat not found!")
 	return
 end
 
@@ -551,7 +551,7 @@ function UnitHandler:UpdateStats(fight, effectdata, abilityId)
 
 			if value == nil then
 
-				Print("calc", LOG_LEVEL_WARNING, "Debuff stat value missing: %s (%d)", debuffName or "nil", effectdata.iconId or 0)
+				Log("calc", LOG_LEVEL_WARNING, "Debuff stat value missing: %s (%d)", debuffName or "nil", effectdata.iconId or 0)
 				return
 
 			end
@@ -1556,7 +1556,7 @@ local function ProcessLogSkillTimings(fight, logline)
 	local lastRegisteredIndex = indexData[abilityId]
 	local started = skill.started
 
-	-- Print("calc", LOG_LEVEL_INFO, "[%.3f s] Skill Event: %s (%d), Status: %d, Slot: %d", (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, status, reducedslot)
+	-- Log("calc", LOG_LEVEL_INFO, "[%.3f s] Skill Event: %s (%d), Status: %d, Slot: %d", (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, status, reducedslot)
 
 	if status == LIBCOMBAT_SKILLSTATUS_REGISTERED then
 
@@ -1573,7 +1573,7 @@ local function ProcessLogSkillTimings(fight, logline)
 
 		if lastRegisteredIndex == nil then
 
-			-- Print("calc", LOG_LEVEL_WARNING, "Missing registered ability on queue event: [%.3f s] %s (%d), Slot: %d", (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
+			-- Log("calc", LOG_LEVEL_WARNING, "Missing registered ability on queue event: [%.3f s] %s (%d), Slot: %d", (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
 			return
 
 		end
@@ -1586,7 +1586,7 @@ local function ProcessLogSkillTimings(fight, logline)
 
 		if lastRegisteredIndex == nil then
 
-			Print("calc", LOG_LEVEL_WARNING, "[%.3f s] Missing registered ability on instant event: %s (%d), Slot: %d", (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
+			Log("calc", LOG_LEVEL_WARNING, "[%.3f s] Missing registered ability on instant event: %s (%d), Slot: %d", (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
 			return
 
 		else
@@ -1607,7 +1607,7 @@ local function ProcessLogSkillTimings(fight, logline)
 
 		if lastRegisteredIndex == nil then
 
-			Print("calc", LOG_LEVEL_WARNING, "[%.3f s] Missing registered ability on start event: %s (%d), Slot: %d", (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
+			Log("calc", LOG_LEVEL_WARNING, "[%.3f s] Missing registered ability on start event: %s (%d), Slot: %d", (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
 			return
 
 		else
@@ -1645,12 +1645,12 @@ local function ProcessLogSkillTimings(fight, logline)
 
 		if not indexFound then
 
-			Print("calc", LOG_LEVEL_WARNING, "[%.3f s] Missing started ability on success event: %s (%d), Slot: %d", (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
+			Log("calc", LOG_LEVEL_WARNING, "[%.3f s] Missing started ability on success event: %s (%d), Slot: %d", (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
 			return
 
 		elseif indexFound > 3 then
 
-			Print("calc", LOG_LEVEL_WARNING, "[%.3f s] Large number of unfinished skills (%d): %s (%d), Slot: %d", indexFound, (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
+			Log("calc", LOG_LEVEL_WARNING, "[%.3f s] Large number of unfinished skills (%d): %s (%d), Slot: %d", indexFound, (timems - fight.combatstart)/1000, GetFormattedAbilityName(abilityId), abilityId, reducedslot)
 
 		end
 	end
@@ -1707,8 +1707,8 @@ ProcessLog[LIBCOMBAT_EVENT_PERFORMANCE] = ProcessPerformanceStats
 
 local function ProcessQuickslotEvents(fight, logline)
 	local itemLink = logline[3]
-	Print("debug", LOG_LEVEL_INFO, unpack(logline))
-	-- Print("debug", LOG_LEVEL_INFO, "%s, %d, %d, %s", itemLink, GetItemLinkItemType(itemLink), tostring(GetItemLinkItemType(itemLink) ~= ITEMTYPE_POTION))
+	Log("debug", LOG_LEVEL_INFO, unpack(logline))
+	-- Log("debug", LOG_LEVEL_INFO, "%s, %d, %d, %s", itemLink, GetItemLinkItemType(itemLink), tostring(GetItemLinkItemType(itemLink) ~= ITEMTYPE_POTION))
 	if GetItemLinkItemType(itemLink) ~= ITEMTYPE_POTION then return end
 
 	local potions = fight.calculated.buildInfo.potions
@@ -2061,7 +2061,7 @@ local function FinalizeBarData(fight)
 			end
 			barStats.totalTime = totalTime / 1000
 		else
-			Print("misc", LOG_LEVEL_WARNING, "Time Array lengths don't match for bar %d", bar)
+			Log("misc", LOG_LEVEL_WARNING, "Time Array lengths don't match for bar %d", bar)
 		end
 
 		barStats.onTimes = nil
@@ -2082,7 +2082,7 @@ local function FinalizePerformanceData(fight)
 end
 
 local function Finalize(fight)
-	Print("calc", LOG_LEVEL_DEBUG, "Start end routine")
+	Log("calc", LOG_LEVEL_DEBUG, "Start end routine")
 	local scalcms = GetGameTimeSeconds()
 	CombatMetrics_Report_TitleFightTitleName:SetText(GetString(SI_COMBAT_METRICS_FINALIZING))
 
@@ -2105,7 +2105,7 @@ local function Finalize(fight)
 	data.temp = nil
 
 	CombatMetrics_Report_TitleFightTitleBar:SetHidden(true)
-	Print("calc", LOG_LEVEL_DEBUG, "Time for final calculations: %.2f ms", (GetGameTimeSeconds() - scalcms) * 1000)
+	Log("calc", LOG_LEVEL_DEBUG, "Time for final calculations: %.2f ms", (GetGameTimeSeconds() - scalcms) * 1000)
 end
 
 local function CalculateChunk(fight)  -- called by CalculateFight or itself
@@ -2135,7 +2135,7 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 
 	local chunktime = GetGameTimeSeconds() - scalcms
 	local newchunksize = zo_min(zo_ceil(desiredtime / zo_max(chunktime, 0.001) * db.chunksize / stepsize) * stepsize, 20000)
-	Print("calc", LOG_LEVEL_DEBUG, "Chunk calculation time: %.2f ms, new chunk size: %d", chunktime * 1000, newchunksize)
+	Log("calc", LOG_LEVEL_DEBUG, "Chunk calculation time: %.2f ms, new chunk size: %d", chunktime * 1000, newchunksize)
 
 	db.chunksize = newchunksize
 	local progress = iend/#logdata
@@ -2327,7 +2327,7 @@ local function UpdateEvents(event)
 		registeredGroup = false
 	end
 
-	Print("group", LOG_LEVEL_DEBUG, "State: %d, Group: %s", registrationStatus or 0, tostring(registeredGroup or false))
+	Log("group", LOG_LEVEL_DEBUG, "State: %d, Group: %s", registrationStatus or 0, tostring(registeredGroup or false))
 end
 
 do
@@ -2631,9 +2631,7 @@ local function Initialize(event, addon)
 	CMX.MakeMenu(svdefaults)
 
 	if CMX.LoadCustomizations then
-
 		LC.AddCustomAbilityData(CMX.LoadCustomizations())
-
 	end
 
 	function CMX.GetCombatLogString(fight, logline, fontsize)
@@ -2651,6 +2649,7 @@ local function Initialize(event, addon)
 	if GetDisplayName() == "@Solinur" then db.NotificationRead = 0 end -- for dev purposes
 
 	CMX.init = true
+	InitializeCMXFightData()
 end
 
 -- register event handler function to initialize when addon is loaded

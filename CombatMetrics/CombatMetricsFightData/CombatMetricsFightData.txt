@@ -1,10 +1,10 @@
 ﻿## Title: CombatMetricsFightData
 ## APIVersion: 101045 101046
 ## Author: Solinur
-## Version: 21
-## AddOnVersion: 21
+## Version: 22
+## AddOnVersion: 22
 ## IsLibrary: true
-## DependsOn: LibCombat>=81 LibDataEncode>=2
+## DependsOn: LibCombat>=82 LibDataEncode>=2
 ## SavedVariables: CombatMetricsFightDataSV
 ## OptionalDependsOn: LibDebugLogger
 ## This Add-on is not created by, affiliated with or sponsored by ZeniMax Media Inc. or its affiliates.
