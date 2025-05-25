@@ -157,11 +157,11 @@ end
 local lastid = 0
 
 local function GetChar(value, logstringdata, length)
-	local char = chars[math.floor(value) % 64]
+	local char = chars[zo_floor(value) % 64]
 	if char == nil then return true end
 	table.insert(logstringdata, char)
 
-	local newvalue = math.floor(value / 64)
+	local newvalue = zo_floor(value / 64)
 	if length > 1 then GetChar(newvalue, logstringdata, length - 1) end
 end
 
@@ -362,10 +362,10 @@ local function encodeCombatLogLine(line, fight)
 		line[6] = line[6] or 0
 		if line[3] > 64 then line[3] = line[3] - 40 end
 	elseif layoutId == LAYOUT_PERFORMANCE then -- type, timems, avg, min, max, ping
-		line[3] = math.floor(line[3])
-		line[4] = math.floor(line[4])
-		line[5] = math.floor(line[5])
-		line[6] = math.floor(line[6])
+		line[3] = zo_floor(line[3])
+		line[4] = zo_floor(line[4])
+		line[5] = zo_floor(line[5])
+		line[6] = zo_floor(line[6])
 	elseif layoutId ~= LAYOUT_SKILL and layoutId ~= LAYOUT_BOSSHP then
 		return
 	end
