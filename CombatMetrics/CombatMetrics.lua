@@ -1215,7 +1215,7 @@ local function ProcessLogDamage(fight, logline)
 		abilitydata = fight:AcquireUnitData(sourceUnitId, timems):AcquireAbilityData(abilityId, ispet, damageType, "damageIn")
 		isDamageOut = false
 
-		dmgkey = ZO_CachedStrFormat("damageIn<<1>>", resultkey)	-- determine categories. For normal incoming damage: dmgkey = "damageNormal", for critical outgoing damage: dmgkey = "damageCritical" ...
+		dmgkey = ZO_CachedStrFormat("damageIn<<1>>", resultkey)
 		hitkey = ZO_CachedStrFormat("hitsIn<<1>>", resultkey)
 		graphkey = "damageIn"
 
