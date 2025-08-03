@@ -1,0 +1,667 @@
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
+    <Controls>
+        <Label name="CombatMetrics_LabelFontControl" font="ZoFontGameSmall" virtual="true">
+            <Controls>
+                <Control name="$(parent)Font">
+                    <Anchor point="TOPLEFT" />
+                    <Dimensions x="0" y="0" />
+                    <OnInitialized>
+                        self.font = {GetString(SI_COMBAT_METRICS_BOLD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE), "soft-shadow-thin"}
+                        self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
+                    </OnInitialized>
+                </Control>
+            </Controls>
+        </Label>
+
+        <Button name="CombatMetrics_ButtonFontControl" font="ZoFontGameSmall" virtual="true">
+            <Controls>
+                <Control name="$(parent)Font">
+                    <Anchor point="TOPLEFT" />
+                    <Dimensions x="0" y="0" />
+                    <OnInitialized>
+                        self.font = {GetString(SI_COMBAT_METRICS_BOLD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE), "soft-shadow-thin"}
+                        self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
+                    </OnInitialized>
+                </Control>
+            </Controls>
+        </Button>
+
+        <Label name="CombatMetrics_ValueFontControl" font="ZoFontGameSmall" virtual="true">
+            <Controls>
+                <Control name="$(parent)Font">
+                    <Anchor point="TOPLEFT" />
+                    <Dimensions x="0" y="0" />
+                    <OnInitialized>
+                        self.font = {GetString(SI_COMBAT_METRICS_STD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE), "soft-shadow-thin"}
+                        self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
+                    </OnInitialized>
+                </Control>
+            </Controls>
+        </Label>
+
+        <Label name="CombatMetrics_ValueFontSmallControl" font="ZoFontGameSmall" virtual="true">
+            <Controls>
+                <Control name="$(parent)Font">
+                    <Anchor point="TOPLEFT" />
+                    <Dimensions x="0" y="0" />
+                    <OnInitialized>
+                        self.font = {GetString(SI_COMBAT_METRICS_STD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE_SMALL), "soft-shadow-thin"}
+                        self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
+                    </OnInitialized>
+                </Control>
+            </Controls>
+        </Label>
+
+        <Label name="CombatMetrics_InfoFontControl" font="ZoFontGameSmall" virtual="true">
+            <Controls>
+                <Control name="$(parent)Font">
+                    <Anchor point="TOPLEFT" />
+                    <Dimensions x="0" y="0" />
+                    <OnInitialized>
+                        self.font = {GetString(SI_COMBAT_METRICS_STD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE_TITLE), "soft-shadow-thin"}
+                        self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
+                    </OnInitialized>
+                </Control>
+            </Controls>
+        </Label>
+
+        <Label name="CombatMetrics_TitleFontControl" font="ZoFontGameSmall" virtual="true">
+            <Controls>
+                <Control name="$(parent)Font">
+                    <Anchor point="TOPLEFT" />
+                    <Dimensions x="0" y="0" />
+                    <OnInitialized>
+                        self.font = {GetString(SI_COMBAT_METRICS_BOLD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE_TITLE), "soft-shadow-thin"}
+                        self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
+                    </OnInitialized>
+                </Control>
+            </Controls>
+        </Label>
+
+        <Line name="CombatMetrics_Line_Thin" thickness="16" textureFile="CombatMetrics/art/line1.dds" virtual="true" />
+        <Line name="CombatMetrics_Line" thickness="16" textureFile="CombatMetrics/art/line2.dds" virtual="true" />
+        <Line name="CombatMetrics_Line_Graph" thickness="16" textureFile="CombatMetrics/art/line2.dds" pixelRoundingEnabled="false"
+            virtual="true" />
+        <Line name="CombatMetrics_Line_Solid" thickness="16" textureFile="CombatMetrics/art/line4.dds" virtual="true" />
+
+        <Backdrop name="CombatMetrics_BackgroundFramed_Solid" virtual="true" edgeColor="FFFFFFFF" centerColor="00000000">
+            <Edge file="CombatMetrics/art/simpleframe4.dds" edgeFileWidth="128" edgeFileHeight="16" edgeSize="8" />
+        </Backdrop>
+
+        <Backdrop name="CombatMetrics_BackgroundFramed" virtual="true" edgeColor="FFFFFFFF" centerColor="00000000">
+            <Edge file="CombatMetrics/art/simpleframe2.dds" edgeFileWidth="128" edgeFileHeight="16" edgeSize="8" />
+        </Backdrop>
+
+        <Backdrop name="CombatMetrics_BackgroundFramed_Thin" virtual="true" edgeColor="FFAAAAAA" centerColor="00000000">
+            <Edge file="CombatMetrics/art/simpleframe1.dds" edgeFileWidth="128" edgeFileHeight="16" edgeSize="8" />
+        </Backdrop>
+
+        <Backdrop name="CombatMetrics_Highlight" edgeColor="00000000" centerColor="33FFFFFF" layer="OVERLAY"
+            excludeFromResizeToFitExtents="true" virtual="true">
+            <AnchorFill />
+            <Edge file="CombatMetrics/art/simpleframe2.dds" edgeFileWidth="128" edgeFileHeight="16" edgeSize="8" />
+        </Backdrop>
+
+        <Control name="CombatMetrics_ControlFramed" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="CombatMetrics_BackgroundFramed">
+                    <AnchorFill />
+                </Backdrop>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_ControlTooltip" mouseEnabled="true" virtual="true">
+            <OnMouseEnter>
+                CMX.OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_Options_OnMouseExit(self)
+            </OnMouseExit>
+        </Control>
+
+        <Button name="CombatMetrics_ButtonTooltip" mouseEnabled="true" virtual="true">
+            <OnMouseEnter>
+                CMX.OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_Options_OnMouseExit(self)
+            </OnMouseExit>
+        </Button>
+
+        <Label name="CombatMetrics_LabelTooltip" mouseEnabled="true" virtual="true">
+            <OnMouseEnter>
+                CMX.OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_Options_OnMouseExit(self)
+            </OnMouseExit>
+        </Label>
+
+        <Texture name="CombatMetrics_TextureTooltip" mouseEnabled="true" virtual="true">
+            <OnMouseEnter>
+                CMX.OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                ZO_Options_OnMouseExit(self)
+            </OnMouseExit>
+        </Texture>
+
+        <Label name="CombatMetrics_StatRowLabel" virtual="true" inherits="CombatMetrics_LabelFontControl">
+            <Dimensions y="20" />
+        </Label>
+
+        <Label name="CombatMetrics_StatRowValue" virtual="true" inherits="CombatMetrics_ValueFontControl">
+            <Dimensions y="20" />
+        </Label>
+
+        <Control name="CombatMetrics_StatRowLine" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" inherits="CombatMetrics_StatRowLabel" text="LABEL:" horizontalAlignment="RIGHT">
+                    <Anchor point="LEFT" />
+                    <Dimensions x="116" />
+                </Label>
+
+                <Label name="$(parent)Value" inherits="CombatMetrics_StatRowValue" text="0" horizontalAlignment="RIGHT">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Label" offsetX="4" />
+                    <Dimensions x="74" />
+                </Label>
+
+                <Label name="$(parent)Value2" inherits="CombatMetrics_StatRowValue" text="0" horizontalAlignment="RIGHT">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Value" offsetX="8" />
+                    <Dimensions x="74" />
+                </Label>
+
+                <Label name="$(parent)Value3" inherits="CombatMetrics_StatRowValue" text="0 %" horizontalAlignment="RIGHT">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Value2" offsetX="8" />
+                    <Dimensions x="48" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_StatRowLine2" inherits="CombatMetrics_ControlTooltip" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" inherits="CombatMetrics_StatRowLabel" text="LABEL:" horizontalAlignment="RIGHT">
+                    <Anchor point="LEFT" />
+                    <Dimensions x="116" />
+                </Label>
+
+                <Label name="$(parent)Value" inherits="CombatMetrics_StatRowValue" text="0" horizontalAlignment="RIGHT">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Label" offsetX="4" />
+                    <Dimensions x="72" />
+                </Label>
+
+                <Label name="$(parent)Value2" inherits="CombatMetrics_StatRowValue" text="0" horizontalAlignment="RIGHT">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Value" offsetX="4" />
+                    <Dimensions x="72" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_StatRowLine3" inherits="CombatMetrics_ControlTooltip" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" inherits="CombatMetrics_StatRowLabel" text="LABEL:" horizontalAlignment="RIGHT">
+                    <Anchor point="LEFT" />
+                    <Dimensions x="116" />
+                </Label>
+
+                <Label name="$(parent)Value" inherits="CombatMetrics_StatRowValue" text="0" horizontalAlignment="RIGHT">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Label" offsetX="4" />
+                    <Dimensions x="72" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_StatRowTitleLine" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" inherits="CombatMetrics_StatRowLabel" text="Damage" horizontalAlignment="LEFT">
+                    <Anchor point="TOPLEFT" />
+                    <Dimensions x="116" />
+                </Label>
+
+                <Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
+                    <Anchor point="BOTTOMLEFT" />
+                    <Anchor point="BOTTOMRIGHT" />
+                </Line>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_StarTemplate" virtual="true" mouseEnabled="true" excludeFromResizeToFitExtents="true">
+            <Dimensions x="165" y="20" />
+            <OnMouseEnter> CMX.CPTooltip_OnMouseEnter(self) </OnMouseEnter>
+            <OnMouseExit> CMX.CPTooltip_OnMouseExit(self) </OnMouseExit>
+            <Controls>
+                <Texture name="$(parent)Icon" textureFile="/esoui/art/champion/champion_star_pulse.dds">
+                    <Anchor point="CENTER" relativeTo="$(parent)" relativePoint="LEFT" offsetX="10" offsetY="0" />
+                    <Dimensions x="30" y="30" />
+                </Texture>
+
+                <Texture name="$(parent)Ring" textureFile="/esoui/art/champion/actionbar/champion_bar_slot_frame_disabled.dds">
+                    <Anchor point="LEFT" />
+                    <Dimensions x="20" y="20" />
+                </Texture>
+
+                <Label name="$(parent)Value" text="0" inherits="CombatMetrics_ValueFontControl" horizontalAlignment="RIGHT">
+                    <Anchor point="RIGHT" />
+                    <Dimensions x="24" y="20" />
+                </Label>
+
+                <Label name="$(parent)Name" text="Star" inherits="CombatMetrics_ValueFontControl">
+                    <Anchor point="LEFT" offsetX="24" offsetY="0" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)Value" relativePoint="LEFT" offsetX="-8" offsetY="0" />
+                    <Dimensions x="97" y="20" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_ConstellationTemplate" virtual="true">
+            <Controls>
+                <Label name="$(parent)Title" text="CPNAME" inherits="CombatMetrics_LabelFontControl" excludeFromResizeToFitExtents="true">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_ScribedSkillScriptTemplate" virtual="true">
+            <Dimensions x="154" y="16" />
+            <Controls>
+                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/crafting/gamepad/crafting_alchemy_trait_unknown.dds">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="0" />
+                    <Dimensions x="16" y="16" />
+                </Texture>
+
+                <Label name="$(parent)Name" text="Script" inherits="CombatMetrics_ValueFontSmallControl">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="2" offsetY="0" />
+                    <Anchor point="TOPRIGHT" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_ScribedSkillTemplate" virtual="true" mouseEnabled="true">
+            <Dimensions x="330" y="35" />
+            <OnMouseEnter> CMX.ScribedSkillTooltip_OnMouseEnter(self) </OnMouseEnter>
+            <OnMouseExit> CMX.ScribedSkillTooltip_OnMouseExit(self) </OnMouseExit>
+            <Controls>
+                <Control name="$(parent)Icon" inherits="CombatMetrics_InfoSkillIcon">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="4" offsetY="0" />
+                    <Dimensions x="18" y="18" />
+                </Control>
+
+                <Label name="$(parent)Name" text="Scribed Skill" inherits="CombatMetrics_LabelFontControl" horizontalAlignment="LEFT">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="4" offsetY="0" />
+                    <Dimensions x="154" y="18" />
+                </Label>
+
+                <Control name="$(parent)Script1" inherits="CombatMetrics_ScribedSkillScriptTemplate">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="TOPRIGHT" offsetX="4" offsetY="0" />
+                </Control>
+
+                <Control name="$(parent)Script2" inherits="CombatMetrics_ScribedSkillScriptTemplate">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="1" />
+                </Control>
+
+                <Control name="$(parent)Script3" inherits="CombatMetrics_ScribedSkillScriptTemplate">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Script1" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="3" />
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_RowTemplate" resizeToFitDescendents="true" mouseEnabled="true" virtual="true">
+            <OnMouseUp> CMX.AddSelection( self, button, upInside, ctrl, alt, shift ) </OnMouseUp>
+        </Control>
+
+        <Control name="CombatMetrics_UnitRowTemplate" resizeToFitDescendents="true" mouseEnabled="true" virtual="true">
+            <OnMouseUp> 
+                if button == MOUSE_BUTTON_INDEX_RIGHT then 
+                    CMX.UnitContextMenu( self, upInside ) 
+                else
+                    CMX.AddSelection( self, button, upInside, ctrl, alt, shift )
+                end
+            </OnMouseUp>
+
+            <Controls>
+                <Backdrop name="$(parent)HighLight" inherits="CombatMetrics_Highlight" />
+                <Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="LEFT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="LEFT" offsetX="2" />
+                    <Dimensions x="50" y="20" />
+                </Label>
+
+                <Backdrop name="$(parent)Bar" edgeColor="00000000" centerColor="99CC0000">
+                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Name" offsetX="-2" />
+                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Name" />
+                    <Dimensions x="50" />
+
+                    <Edge edgeSize="1" />
+                </Backdrop>
+
+                <Label name="$(parent)PerSecond" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="2" />
+                    <Dimensions x="50" y="20" />
+                </Label>
+
+                <Label name="$(parent)Total" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)PerSecond" offsetX="2" />
+                    <Dimensions x="50" y="20" />
+                </Label>
+
+                <Label name="$(parent)Fraction" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Total" offsetX="2" />
+                    <Dimensions x="50" y="20" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_BuffRowTemplate" resizeToFitDescendents="true" mouseEnabled="true" virtual="true">
+            <OnMouseUp> 
+                if button == MOUSE_BUTTON_INDEX_RIGHT then 
+                    CMX.BuffContextMenu( self, upInside ) 
+                else
+                    CMX.AddSelection( self, button, upInside, ctrl, alt, shift )
+                end
+            </OnMouseUp>
+
+            <Controls>
+                <Backdrop name="$(parent)HighLight" inherits="CombatMetrics_Highlight" />
+                <Control name="$(parent)Indicator">
+                    <Anchor point="LEFT" offsetX="0" offsetY="0" />
+                    <Dimensions x="10" y="10" />
+                </Control>
+
+                <Button name="$(parent)IndicatorSwitch" hidden="true">
+                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Indicator" offsetX="-2" offsetY="0" />
+                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Indicator" offsetX="0" offsetY="0" />
+					<OnClicked> CMX.CollapseButton( self, upInside ) </OnClicked>
+                    <Textures
+                        normal="esoui/art/buttons/dropbox_arrow_normal.dds"
+                        mouseOver="esoui/art/buttons/dropbox_arrow_mouseover.dds"
+                        pressed="esoui/art/buttons/dropbox_arrow_mousedown.dds"
+                        disabled="esoui/art/buttons/dropbox_arrow_disabled.dds"
+                    />
+                </Button>
+
+                <Texture name="$(parent)Icon">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Indicator" offsetX="2" />
+                    <Dimensions x="20" y="20" />
+                </Texture>
+
+                <Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="LEFT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="4" />
+                    <Dimensions x="50" y="20" />
+                </Label>
+
+                <Backdrop name="$(parent)GroupBar" edgeColor="00000000" centerColor="CC000099">
+                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Name" offsetX="-2" />
+                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Name" constrains="Y" />
+                    <Dimensions x="50" />
+                    <Edge edgeSize="1" />
+                </Backdrop>
+
+                <Backdrop name="$(parent)PlayerBar" edgeColor="00000000" centerColor="CC000099">
+                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Name" offsetX="-2" />
+                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Name" constrains="Y" />
+                    <Dimensions x="50" />
+                    <Edge edgeSize="1" />
+                </Backdrop>
+
+                <Label name="$(parent)Count" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="2" />
+                    <Dimensions x="50" y="20" />
+                </Label>
+
+                <Label name="$(parent)Uptime" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Count" offsetX="2" />
+                    <Dimensions x="50" y="20" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_ResourceRowTemplate" inherits="CombatMetrics_RowTemplate" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)HighLight" inherits="CombatMetrics_Highlight" />
+                <Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="LEFT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="LEFT" offsetX="2" />
+                    <Dimensions x="50" y="20" />
+                </Label>
+
+                <Backdrop name="$(parent)Bar" edgeColor="00000000" centerColor="CC000099">
+                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Name" offsetX="-2" />
+                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Name" />
+
+                    <Edge edgeSize="1" />
+                </Backdrop>
+
+                <Label name="$(parent)Count" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="2" />
+                    <Dimensions x="50" y="20" />
+                </Label>
+
+                <Label name="$(parent)Rate" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Count" offsetX="2" />
+                    <Dimensions x="50" y="20" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_ResourceRowSeperatorTemplate" virtual="true"> <!-- TODO: Check if obsolete? -->
+            <Controls>
+                <Label name="$(parent)Label" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_DRAIN"
+                    horizontalAlignment="LEFT" verticalAlignment="CENTER">
+                    <Anchor point="TOPLEFT" offsetX="4" />
+                    <Anchor point="BOTTOMLEFT" />
+                    <Dimensions x="50" />
+                </Label>
+
+                <Line name="$(parent)Sep" color="FFFFFFFF" inherits="CombatMetrics_Line_Thin">
+                    <Anchor point="BOTTOMLEFT" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-2" />
+                    <Dimensions y="1" />
+                </Line>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_AbilityRowTemplate" inherits="CombatMetrics_RowTemplate" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)HighLight" inherits="CombatMetrics_Highlight" />
+                <Texture name="$(parent)Icon">
+                    <Anchor point="LEFT" relativePoint="LEFT" offsetX="2" />
+                    <Dimensions x="18" y="18" />
+                </Texture>
+
+                <Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="Left"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="4" />
+                    <Dimensions x="50" y="20" />
+                </Label>
+
+                <Backdrop name="$(parent)Bar" edgeColor="00000000" centerColor="FF806600">
+                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Name" offsetX="-2" />
+                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Name" />
+                    <Dimensions x="50" />
+                    <Edge edgeSize="1" />
+                </Backdrop>
+
+                <Label name="$(parent)Fraction" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="2" />
+                    <Dimensions x="50" y="20" />
+                </Label>
+
+                <Label name="$(parent)PerSecond" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Fraction" offsetX="2" />
+                    <Dimensions x="50" y="20" />
+                </Label>
+
+                <Label name="$(parent)Total" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)PerSecond" offsetX="2" />
+                    <Dimensions x="50" y="20" />
+                </Label>
+
+                <Label name="$(parent)Crits" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Total" offsetX="2" />
+                    <Dimensions x="50" y="20" />
+                </Label>
+
+                <Label name="$(parent)Hits" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="LEFT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Crits" offsetX="0" />
+                    <Dimensions x="50" y="20" />
+                </Label>
+
+                <Label name="$(parent)CritRatio" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Hits" offsetX="2" />
+                    <Dimensions x="50" y="20" />
+                </Label>
+
+                <Label name="$(parent)Average" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)CritRatio" offsetX="2" />
+                    <Dimensions x="50" y="20" />
+                </Label>
+
+                <Label name="$(parent)MinMax" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Average" offsetX="2" />
+                    <Dimensions x="50" y="20" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_FightlistRowTemplate" resizeToFitDescendents="true" mouseEnabled="true" virtual="true">
+            <OnMouseEnter> self:GetNamedChild("HighLight"):SetHidden(false) </OnMouseEnter>
+            <OnMouseExit> self:GetNamedChild("HighLight"):SetHidden(true) </OnMouseExit>
+            <OnMouseUp>CMX.LoadItem(self)</OnMouseUp>
+            <Controls>
+                <Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="LEFT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="LEFT" offsetX="2" />
+                    <Dimensions x="50" y="20" />
+                </Label>
+
+                <Label name="$(parent)Char" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="LEFT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="4" />
+                    <Dimensions x="50" y="20" />
+                </Label>
+
+                <Label name="$(parent)Zone" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="LEFT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Char" offsetX="4" />
+                    <Dimensions x="50" y="20" />
+                </Label>
+
+                <Label name="$(parent)Time" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="LEFT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Zone" offsetX="4" />
+                    <Dimensions x="50" y="20" />
+                </Label>
+
+                <Label name="$(parent)Duration" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Time" offsetX="4" />
+                    <Dimensions x="50" y="20" />
+                </Label>
+
+                <Label name="$(parent)DPS" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Duration" offsetX="4" />
+                    <Dimensions x="50" y="20" />
+                </Label>
+
+                <Backdrop name="$(parent)HighLight" edgeColor="00000000" centerColor="22FFFFFF" layer="OVERLAY" hidden="true">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)DPS" offsetX="2" />
+                    <Edge edgeSize="1" />
+
+                </Backdrop>
+
+                <Control name="$(parent)Buttons">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DPS" offsetX="2" />
+                    <Dimensions x="50" y="20" />
+                    <Controls>
+                        <Button name="$(parent)DeleteLog" mouseEnabled="true" inherits="CombatMetrics_ButtonTooltip">
+                            <Anchor point="TOPRIGHT" relativePoint="TOP" offsetX="-4" />
+                            <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM" offsetX="-4" />
+                            <Dimensions x="20" />
+							<ButtonState state="NORMAL" />
+							<OnInitialized>self.tooltip = {SI_COMBAT_METRICS_DELETE_COMBAT_LOG}</OnInitialized>
+							<OnMouseUp>CMX.DeleteItemLog(self)</OnMouseUp>
+                            <Textures
+                                normal="CombatMetrics/icons/deletelogiconup.dds"
+                                pressed="CombatMetrics/icons/deletelogicondown.dds"
+                                mouseOver="CombatMetrics/icons/deletelogiconover.dds"
+                                disabled="CombatMetrics/icons/deletelogicondisabled.dds"
+                            />
+                        </Button>
+
+                        <Button name="$(parent)Delete" mouseEnabled="true" inherits="CombatMetrics_ButtonTooltip">
+                            <Anchor point="TOPLEFT" relativePoint="TOP" offsetX="4" />
+                            <Anchor point="BOTTOMLEFT" relativePoint="BOTTOM" offsetX="4" />
+                            <Dimensions x="20" />
+							<ButtonState state="NORMAL" />
+							<OnInitialized>self.tooltip = {SI_COMBAT_METRICS_DELETE_FIGHT}</OnInitialized>
+							<OnMouseUp>CMX.DeleteItem(self)</OnMouseUp>
+                            <Textures
+                                normal="CombatMetrics/icons/deleteicon2up.dds"
+                                pressed="CombatMetrics/icons/deleteicon2down.dds"
+                                mouseOver="CombatMetrics/icons/deleteicon2over.dds"
+                                disabled="CombatMetrics/icons/deleteicon2disabled.dds"
+                            />
+                        </Button>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Line name="CombatMetrics_PlotLine" color="AAFFFF00" inherits="CombatMetrics_Line_Graph" layer="CONTROLS" level="2" virtual="true"/>
+
+        <Backdrop name="CombatMetrics_PlotBar" edgeColor="00000000" centerColor="66CCCCFF" layer="CONTROLS" level="2" virtual="true">
+        </Backdrop>
+
+        <Control name="CombatMetrics_PlotControlXY" virtual="true">
+            <AnchorFill />
+        </Control>
+
+        <Control name="CombatMetrics_PlotControlBar" virtual="true">
+            <Controls>
+                <Texture name="$(parent)Icon" inherits="CombatMetrics_TextureTooltip">
+                    <Anchor point="LEFT" />
+                    <Dimensions x="20" y="20" />
+                </Texture>
+            </Controls>
+        </Control>
+
+        <EditBox name="CombatMetrics_GraphTickLabel_Edit" hidden="true" inherits="ZO_DefaultEdit" virtual="true">
+            <Controls>
+                <Control name="$(parent)Font">
+                    <AnchorFill />
+                    <OnInitialized>
+                        self.font = {GetString(SI_COMBAT_METRICS_STD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE_SMALL), "soft-shadow-thin"}
+                        self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
+                    </OnInitialized>
+                </Control>
+            </Controls>
+
+            <OnFocusLost>
+                CMX.EditLabelEnd(self)
+            </OnFocusLost>
+        </EditBox>
+    </Controls>
+</GuiXml>

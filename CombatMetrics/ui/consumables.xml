@@ -1,0 +1,64 @@
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
+    <Controls>
+        <Control name="CombatMetrics_ConsumableItem" virtual="true" mouseEnabled="true">
+            <Dimensions x="202" />
+            <Controls>
+                <Texture name="$(parent)Icon1" textureFile="EsoUI/Art/CharacterWindow/gearSlot_head.dds">
+                    <Anchor point="TOPLEFT" offsetX="2" />
+                    <Dimensions x="20" y="20" />
+                </Texture>
+
+                <Label name="$(parent)Name1" text="Name" inherits="CombatMetrics_LabelFontControl" verticalAlignment="CENTER"
+                    wrapMode="ELLIPSIS">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon1" relativePoint="RIGHT" offsetX="4" offsetY="0" />
+                    <Dimensions x="170" y="20" />
+
+                    <OnMouseEnter> CMX.BuildInfo_OnMouseEnter(self) </OnMouseEnter>
+                    <OnMouseExit> CMX.BuildInfo_OnMouseExit(self) </OnMouseExit>
+                </Label>
+
+                <Texture name="$(parent)Icon2" textureFile="EsoUI/Art/CharacterWindow/gearSlot_head.dds">
+                    <Anchor point="BOTTOMLEFT" offsetX="0" />
+                    <Dimensions x="20" y="20" />
+                </Texture>
+
+                <Label name="$(parent)Name2" text="Name" inherits="CombatMetrics_LabelFontControl" verticalAlignment="CENTER"
+                    wrapMode="ELLIPSIS">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon2" relativePoint="RIGHT" offsetX="4" offsetY="0" />
+                    <Dimensions x="170" y="20" />
+
+                    <OnMouseEnter> CMX.BuildInfo_OnMouseEnter(self) </OnMouseEnter>
+                    <OnMouseExit> CMX.BuildInfo_OnMouseExit(self) </OnMouseExit>
+                </Label>
+            </Controls>
+        </Control>
+        <Control name="CombatMetrics_ConsumablesPanel" virtual="true">
+            <Controls>
+                <Control name="$(parent)Mundus" inherits="CombatMetrics_ConsumableItem">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMLEFT" />
+                </Control>
+
+                <Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
+                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Mundus" offsetX="2" />
+                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Mundus" offsetX="2" />
+                </Line>
+
+                <Control name="$(parent)DrinkFood" inherits="CombatMetrics_ConsumableItem">
+                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Mundus" offsetX="5" />
+                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Mundus" offsetX="5" />
+                </Control>
+
+                <Line name="$(parent)Sep2" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
+                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)DrinkFood" offsetX="2" />
+                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)DrinkFood" offsetX="2" />
+                </Line>
+
+                <Control name="$(parent)Potions" inherits="CombatMetrics_ConsumableItem">
+                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)DrinkFood" offsetX="5" />
+                    <Anchor point="BOTTOMRIGHT" />
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

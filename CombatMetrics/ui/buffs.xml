@@ -1,0 +1,225 @@
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
+    <Controls>
+        <Control name="CombatMetrics_BuffPanelBox" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)Bg" edgeColor="00000000" centerColor="00000000">
+                    <Edge edgeSize="1" />
+                    <AnchorFill />
+                </Backdrop>
+
+                <Backdrop name="$(parent)Overlay" edgeColor="BB000000" centerColor="BB000000" hidden="true" layer="OVERLAY"
+                    excludeFromResizeToFitExtents="true">
+                    <Edge edgeSize="1" />
+                    <Anchor point="TOPLEFT" offsetX="4" offsetY="2" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-2" offsetY="2" />
+                </Backdrop>
+
+                <Line name="$(parent)Line" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
+                    <Anchor point="BOTTOMLEFT" offsetX="4" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-4" />
+                </Line>
+
+                <Label name="$(parent)Label" inherits="CombatMetrics_LabelFontControl" text="" horizontalAlignment="CENTER"
+                    verticalAlignment="CENTER">
+                    <AnchorFill />
+                </Label>
+            </Controls>
+            <OnMouseUp>CMX.SelectRightPanel(self)</OnMouseUp>
+        </Control>
+
+        <Control name="CombatMetrics_ResourceListTemplate" virtual="true">
+            <OnInitialized>
+                local scrollList = GetControl(self, "PanelScrollChild")
+                scrollList:SetResizeToFitPadding(0, 20)
+            </OnInitialized>
+            <Controls>
+                <Control name="$(parent)Header">
+                    <Anchor point="TOPLEFT" offsetX="4" />
+                    <Anchor point="TOPRIGHT" offsetX="-4" />
+                    <Dimensions y="20" />
+                    <Controls>
+                        <Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_REGENERATION"
+                            horizontalAlignment="LEFT">
+                            <Anchor point="BOTTOMLEFT" offsetX="0" offsetY="0" />
+                            <Dimensions x="246" y="20" />
+                        </Label>
+
+                        <Label name="$(parent)Count" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"
+                            text="SI_COMBAT_METRICS_SHARP" horizontalAlignment="RIGHT">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="4" offsetY="0" />
+                            <Dimensions x="30" y="20" />
+                            <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_BUFFCOUNT_TT}</OnInitialized>
+                        </Label>
+
+                        <Label name="$(parent)Rate" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"
+                            text="SI_COMBAT_METRICS_PM_SEC" horizontalAlignment="RIGHT">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Count" offsetX="4" offsetY="0" />
+                            <Dimensions x="50" y="20" />
+                            <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_UPTIME_TT}</OnInitialized>
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Header" offsetY="2" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Header" offsetY="2" />
+                </Line>
+
+                <Control name="$(parent)Panel" inherits="ZO_ScrollContainer">
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Sep" offsetX="0" offsetY="2" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4" />
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_BuffPanel" inherits="CombatMetrics_ControlFramed" virtual="true">
+            <Controls>
+                <Control name="$(parent)Selector" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" constrains="X" />
+                    <Controls>
+                        <Control name="$(parent)BuffsIn" inherits="CombatMetrics_BuffPanelBox" mouseEnabled="true">
+                            <Anchor point="TOPLEFT" />
+                            <Dimensions x="90" y="48" />
+                            <OnInitialized>
+                                self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_DEBUFF_IN))
+                                self.menukey = "buffs"
+                            </OnInitialized>
+                        </Control>
+
+                        <Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)BuffsIn" offsetY="6" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BuffsIn" offsetY="-6" />
+                        </Line>
+
+                        <Control name="$(parent)BuffsOut" inherits="CombatMetrics_BuffPanelBox" mouseEnabled="true">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)BuffsIn" />
+                            <Dimensions x="90" y="48" />
+                            <OnInitialized>
+                                self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_DEBUFF_OUT))
+                                self.menukey = "buffsout"
+                            </OnInitialized>
+                        </Control>
+
+                        <Line name="$(parent)Sep2" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)BuffsOut" offsetY="6" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)BuffsOut" offsetY="-6" />
+                        </Line>
+
+                        <Control name="$(parent)MagickaStats" inherits="CombatMetrics_BuffPanelBox" mouseEnabled="true">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)BuffsOut" />
+                            <Dimensions x="90" y="48" />
+                            <OnInitialized>
+                                self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_MAGICKA_PM))
+                                CMX.SetLabelColor(self, GetString(SI_COMBAT_METRICS_MAGICKA_COLOR))
+                                self.menukey = "magicka"
+                            </OnInitialized>
+                        </Control>
+
+                        <Line name="$(parent)Sep3" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)MagickaStats" offsetY="6" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)MagickaStats" offsetY="-6" />
+                        </Line>
+
+                        <Control name="$(parent)StaminaStats" inherits="CombatMetrics_BuffPanelBox" mouseEnabled="true">
+                            <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)MagickaStats" />
+                            <Anchor point="TOPRIGHT" />
+                            <OnInitialized>
+                                self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_STAMINA_PM))
+                                CMX.SetLabelColor(self, GetString(SI_COMBAT_METRICS_STAMINA_COLOR))
+                                self.menukey = "stamina"
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)BuffList">
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Selector" offsetX="0" offsetY="4" />
+                    <Anchor point="BOTTOMRIGHT" />
+                    <Controls>
+                        <Control name="$(parent)Header">
+                            <Anchor point="TOPLEFT" offsetX="4" />
+                            <Anchor point="TOPRIGHT" offsetX="-4" />
+                            <Dimensions y="20" />
+                            <Controls>
+                                <Control name="$(parent)Indicator">
+                                    <Anchor point="LEFT" offsetX="0" offsetY="0" />
+                                    <Dimensions x="10" y="10" />
+                                </Control>
+
+                                <Control name="$(parent)Icon">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Indicator" offsetX="2"
+                                        offsetY="0" />
+                                    <Dimensions x="20" y="20" />
+                                    <Controls>
+                                        <Texture name="$(parent)Texture" textureFile="esoui/art/miscellaneous/eso_icon_warning.dds"
+                                            layer="CONTROLS" inherits="CombatMetrics_TextureTooltip" color="FFFF8800">
+                                            <AnchorFill />
+                                            <OnInitialized>
+                                                self.tooltip = {SI_COMBAT_METRICS_SIGIL_WARNING}
+                                            </OnInitialized>
+                                        </Texture>
+                                    </Controls>
+                                </Control>
+
+                                <Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_BUFF"
+                                    horizontalAlignment="LEFT" verticalAlignment="CENTER">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="4" offsetY="0" />
+                                    <Dimensions x="176" y="20" />
+                                </Label>
+
+                                <Label name="$(parent)Count" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"
+                                    text="SI_COMBAT_METRICS_SHARP" horizontalAlignment="CENTER" verticalAlignment="CENTER">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="2" offsetY="0" />
+                                    <Dimensions x="58" y="20" />
+                                    <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_BUFFCOUNT_TT}</OnInitialized>
+                                </Label>
+
+                                <Label name="$(parent)Uptime" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"
+                                    text="SI_COMBAT_METRICS_UPTIME" horizontalAlignment="CENTER" verticalAlignment="CENTER">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Count" offsetX="2" offsetY="0" />
+                                    <Dimensions x="58" y="20" />
+                                    <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_UPTIME_TT}</OnInitialized>
+                                </Label>
+                            </Controls>
+                        </Control>
+
+                        <Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Header" offsetY="2" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Header" offsetY="2" />
+                        </Line>
+
+                        <Control name="$(parent)Panel" inherits="ZO_ScrollContainer">
+                            <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Sep" offsetX="0" offsetY="2" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4" />
+                        </Control>
+                    </Controls>
+
+                    <OnInitialized>
+                        local scrollList = GetControl(self, "PanelScrollChild")
+                        scrollList:SetResizeToFitPadding(0, 20)
+                    </OnInitialized>
+                </Control>
+
+                <Control name="$(parent)ResourceList" hidden="true">
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Selector" offsetX="0" offsetY="4" />
+                    <Anchor point="BOTTOMRIGHT" />
+                    <Controls>
+                        <Control name="$(parent)Gains" inherits="CombatMetrics_ResourceListTemplate">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="BOTTOMRIGHT" relativePoint="RIGHT" offsetY="-2" />
+                        </Control>
+
+                        <Control name="$(parent)Drains" inherits="CombatMetrics_ResourceListTemplate">
+                            <Anchor point="TOPLEFT" relativePoint="LEFT" offsetY="2" />
+                            <Anchor point="BOTTOMRIGHT" />
+                            <OnInitialized>
+                                self:GetNamedChild("Header"):GetNamedChild("Name"):SetText(GetString(SI_COMBAT_METRICS_CONSUMPTION))
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

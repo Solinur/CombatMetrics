@@ -1,0 +1,146 @@
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
+    <Controls>
+        <Control name="CombatMetrics_EquipLine" virtual="true">
+            <Dimensions y="22" />
+            <Controls>
+                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/CharacterWindow/gearSlot_head.dds">
+                    <Anchor point="TOPLEFT" />
+                    <Dimensions x="22" y="22" />
+                </Texture>
+
+                <Texture name="$(parent)Icon2" textureFile="EsoUI/Art/CharacterWindow/gearSlot_head.dds">
+                    <Anchor point="TOPLEFT" />
+                    <Dimensions x="22" y="22" />
+                </Texture>
+
+                <Label name="$(parent)ItemLink" text="" inherits="CombatMetrics_LabelFontControl" linkEnabled="true" mouseEnabled="true">
+                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="4" offsetY="0" />
+                    <Dimensions x="280" y="22" />
+                    <OnMouseEnter> CMX.ItemTooltip_OnMouseEnter(self) </OnMouseEnter>
+                    <OnMouseExit> CMX.ItemTooltip_OnMouseExit(self) </OnMouseExit>
+                    <OnLinkClicked> 
+                        ClearTooltip(ItemTooltip)
+                        ZO_LinkHandler_OnLinkClicked(linkText, button)
+                    </OnLinkClicked>
+                </Label>
+
+                <Label name="$(parent)Trait" text="" inherits="CombatMetrics_ValueFontControl">
+                    <Anchor point="LEFT" relativeTo="$(parent)ItemLink" relativePoint="RIGHT" offsetX="4" offsetY="0" />
+                    <Dimensions x="100" y="22" />
+                </Label>
+
+                <Label name="$(parent)Enchant" text="" inherits="CombatMetrics_ValueFontControl" linkEnabled="true" mouseEnabled="true">
+                    <Anchor point="LEFT" relativeTo="$(parent)Trait" relativePoint="RIGHT" offsetX="10" offsetY="0" />
+                    <Anchor point="RIGHT" offsetX="-4" />
+                    <Dimensions y="22" />
+                    <OnMouseEnter> CMX.ItemTooltip_OnMouseEnter(self) </OnMouseEnter>
+                    <OnMouseExit> CMX.ItemTooltip_OnMouseExit(self) </OnMouseExit>
+                    <OnLinkClicked> 
+                        ClearTooltip(ItemTooltip)
+                        ZO_LinkHandler_OnLinkClicked(linkText, button) 
+                    </OnLinkClicked>
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_GearPanel" virtual="true">
+            <Controls>
+                <Control name="$(parent)EquipLine1" inherits="CombatMetrics_EquipLine">
+                    <Anchor point="TOPLEFT" offsetX="5" offsetY="4" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)" offsetX="0" constrains="X" />
+                </Control>
+
+                <Control name="$(parent)EquipLine2" inherits="CombatMetrics_EquipLine">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine1" relativePoint="BOTTOMLEFT" offsetX="0"
+                        offsetY="2" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine1" relativePoint="BOTTOMRIGHT" offsetX="0"
+                        offsetY="2" />
+                </Control>
+
+                <Control name="$(parent)EquipLine3" inherits="CombatMetrics_EquipLine">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine2" relativePoint="BOTTOMLEFT" offsetX="0"
+                        offsetY="8" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine2" relativePoint="BOTTOMRIGHT" offsetX="0"
+                        offsetY="8" />
+                </Control>
+
+                <Control name="$(parent)EquipLine4" inherits="CombatMetrics_EquipLine">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine3" relativePoint="BOTTOMLEFT" offsetX="0"
+                        offsetY="2" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine3" relativePoint="BOTTOMRIGHT" offsetX="0"
+                        offsetY="2" />
+                </Control>
+
+                <Control name="$(parent)EquipLine5" inherits="CombatMetrics_EquipLine">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine4" relativePoint="BOTTOMLEFT" offsetX="0"
+                        offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine4" relativePoint="BOTTOMRIGHT" offsetX="0"
+                        offsetY="10" />
+                </Control>
+
+                <Control name="$(parent)EquipLine6" inherits="CombatMetrics_EquipLine">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine5" relativePoint="BOTTOMLEFT" offsetX="0"
+                        offsetY="2" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine5" relativePoint="BOTTOMRIGHT" offsetX="0"
+                        offsetY="2" />
+                </Control>
+
+                <Control name="$(parent)EquipLine7" inherits="CombatMetrics_EquipLine">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine6" relativePoint="BOTTOMLEFT" offsetX="0"
+                        offsetY="2" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine6" relativePoint="BOTTOMRIGHT" offsetX="0"
+                        offsetY="2" />
+                </Control>
+
+                <Control name="$(parent)EquipLine8" inherits="CombatMetrics_EquipLine">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine7" relativePoint="BOTTOMLEFT" offsetX="0"
+                        offsetY="2" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine7" relativePoint="BOTTOMRIGHT" offsetX="0"
+                        offsetY="2" />
+                </Control>
+
+                <Control name="$(parent)EquipLine9" inherits="CombatMetrics_EquipLine">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine8" relativePoint="BOTTOMLEFT" offsetX="0"
+                        offsetY="2" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine8" relativePoint="BOTTOMRIGHT" offsetX="0"
+                        offsetY="2" />
+                </Control>
+
+                <Control name="$(parent)EquipLine10" inherits="CombatMetrics_EquipLine">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine9" relativePoint="BOTTOMLEFT" offsetX="0"
+                        offsetY="2" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine9" relativePoint="BOTTOMRIGHT" offsetX="0"
+                        offsetY="2" />
+                </Control>
+
+                <Control name="$(parent)EquipLine11" inherits="CombatMetrics_EquipLine">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine10" relativePoint="BOTTOMLEFT" offsetX="0"
+                        offsetY="2" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine10" relativePoint="BOTTOMRIGHT" offsetX="0"
+                        offsetY="2" />
+                </Control>
+
+                <Control name="$(parent)EquipLine12" inherits="CombatMetrics_EquipLine">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine11" relativePoint="BOTTOMLEFT" offsetX="0"
+                        offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine11" relativePoint="BOTTOMRIGHT" offsetX="0"
+                        offsetY="10" />
+                </Control>
+
+                <Control name="$(parent)EquipLine13" inherits="CombatMetrics_EquipLine">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine12" relativePoint="BOTTOMLEFT" offsetX="0"
+                        offsetY="2" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine12" relativePoint="BOTTOMRIGHT" offsetX="0"
+                        offsetY="2" />
+                </Control>
+
+                <Control name="$(parent)EquipLine14" inherits="CombatMetrics_EquipLine">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)EquipLine13" relativePoint="BOTTOMLEFT" offsetX="0"
+                        offsetY="2" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)EquipLine13" relativePoint="BOTTOMRIGHT" offsetX="0"
+                        offsetY="2" />
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

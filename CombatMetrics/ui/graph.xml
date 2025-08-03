@@ -1,0 +1,313 @@
+    <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
+    <Controls>
+        <Line name="CombatMetrics_GraphTickY" color="FF444444" inherits="CombatMetrics_Line_Thin" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0" horizontalAlignment="RIGHT"
+                    verticalAlignment="CENTER" mouseEnabled="true">
+                    <Anchor point="RIGHT" relativePoint="LEFT" offsetX="-3" />
+                    <Dimensions x="45" y="20" />
+                </Label>
+
+                <Label name="$(parent)LabelR" inherits="CombatMetrics_ValueFontSmallControl" text="100%" horizontalAlignment="RIGHT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" offsetX="3" />
+                    <Dimensions x="30" y="20" />
+                </Label>
+            </Controls>
+        </Line>
+
+        <Line name="CombatMetrics_GraphTickX" color="FF333333" inherits="CombatMetrics_Line_Thin" virtual="true">
+            <Controls>
+                <Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0" horizontalAlignment="CENTER"
+                    verticalAlignment="TOP">
+                    <Anchor point="TOP" relativePoint="BOTTOM" offsetY="3" />
+                    <Dimensions x="45" y="20" />
+                </Label>
+            </Controls>
+        </Line>
+
+        <Control name="CombatMetrics_GraphBuffSelector" virtual="true">
+            <Dimensions y="24" />
+            <Controls>
+                <Backdrop name="$(parent)ColorBox" centerColor="FF333333" edgeColor="FF333333" mouseEnabled="true">
+                    <Anchor point="LEFT" offsetX="0" offsetY="0" />
+                    <Dimensions x="10" y="24" />
+                    <Edge edgeSize="2" />
+                </Backdrop>
+
+                <Texture name="$(parent)GroupSelector" textureFile="esoui/art/journal/gamepad/gp_questtypeicon_group.dds"
+                    inherits="CombatMetrics_TextureTooltip">
+                    <Anchor point="RIGHT" offsetX="4" offsetY="0" />
+                    <Dimensions x="22" y="22" />
+                </Texture>
+
+                <Label name="$(parent)Label" inherits="CombatMetrics_LabelFontControl" text="-" horizontalAlignment="LEFT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativeTo="$(parent)ColorBox" relativePoint="RIGHT" offsetX="8" offsetY="0" />
+                    <Anchor point="RIGHT" relativeTo="$(parent)GroupSelector" relativePoint="RIGHT" offsetX="-8" offsetY="0" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_DataSelector" virtual="true">
+            <Dimensions y="24" />
+            <Controls>
+                <Backdrop name="$(parent)ColorBox" centerColor="FF333333" edgeColor="FF333333" mouseEnabled="true" layer="CONTROLS">
+                    <Anchor point="LEFT" offsetX="0" offsetY="0" />
+                    <Dimensions x="10" y="24" />
+                    <Edge edgeSize="2" />
+                </Backdrop>
+
+                <Backdrop name="$(parent)Dropdown" centerColor="FF000000" edgeColor="FF333333" mouseEnabled="true" layer="CONTROLS">
+                    <Anchor point="LEFT" relativeTo="$(parent)ColorBox" relativePoint="RIGHT" offsetX="4" offsetY="0" />
+                    <Anchor point="RIGHT" offsetX="0" offsetY="0" />
+                    <Dimensions y="24" />
+                    <Edge edgeSize="2" />
+                    <OnMouseUp> CMX.PlotSelectionMenu(self) </OnMouseUp>
+                </Backdrop>
+
+                <Label name="$(parent)Label" inherits="CombatMetrics_LabelFontControl" text="-" horizontalAlignment="LEFT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Dropdown" offsetX="4" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Dropdown" offsetX="-4" />
+                </Label>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_GraphPanel" inherits="CombatMetrics_ControlFramed" hidden="true" mouseEnabled="true" virtual="true">
+            <Controls>
+                <Control name="$(parent)Toolbar" mouseEnabled="true" layer="BACKGROUND">
+                    <Anchor point="TOPLEFT" offsetX="4" offsetY="4" />
+                    <Anchor point="BOTTOMLEFT" offsetX="4" offsetY="-4" />
+                    <Dimensions x="140" />
+                    <Controls>
+                        <Control name="$(parent)ToggleSize" mouseEnabled="true">
+                            <Anchor point="TOPLEFT" offsetX="2" offsetY="4" />
+                            <Anchor point="TOPRIGHT" offsetX="-30" offsetY="4" />
+                            <Dimensions y="20" />
+                            <OnMouseUp> CMX.ToggleGraphSize(self) </OnMouseUp>
+                            <Controls>
+                                <Backdrop name="$(parent)Bg" inherits="CombatMetrics_BackgroundFramed_Solid"
+                                    centerColor="CC222222">
+                                    <Anchor point="TOPLEFT" offsetX="0" />
+                                    <Anchor point="BOTTOMRIGHT" offsetX="0" />
+                                </Backdrop>
+
+                                <Label name="$(parent)Label" inherits="CombatMetrics_LabelFontControl"
+                                    text="SI_COMBAT_METRICS_ENLARGE" verticalAlignment="CENTER"
+                                    horizontalAlignment="CENTER">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Bg" />
+                                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Bg" />
+                                </Label>
+                            </Controls>
+                        </Control>
+
+                        <Texture name="$(parent)ToggleCursor" mouseEnabled="true"
+                            textureFile="esoui/art/compass/ava_returnpoint_neutral.dds" color="FFFFFFFF"
+                            inherits="CombatMetrics_TextureTooltip">
+                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" offsetX="-26" offsetY="2" />
+                            <Anchor point="TOPRIGHT" offsetX="-2" offsetY="2" />
+                            <Dimensions y="24" />
+                            <OnMouseUp> CMX.ToggleCursorDisplay(self) </OnMouseUp>
+                            <OnInitialized>
+                                self.tooltip = {SI_COMBAT_METRICS_TOGGLE_CURSOR}
+                            </OnInitialized>
+                        </Texture>
+
+                        <Control name="$(parent)SmoothControl" mouseEnabled="true">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ToggleSize" relativePoint="BOTTOMLEFT" offsetX="0"
+                                offsetY="8" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)ToggleCursor" relativePoint="BOTTOMRIGHT"
+                                offsetX="0" offsetY="6" />
+                            <Dimensions y="50" />
+                            <Controls>
+                                <Label name="$(parent)Label" inherits="CombatMetrics_LabelFontControl" text="Smooth: 5s"
+                                    horizontalAlignment="LEFT" mouseEnabled="true">
+                                    <Anchor point="TOPLEFT" />
+                                    <Anchor point="TOPRIGHT" />
+                                    <Dimensions y="22" />
+                                </Label>
+
+                                <Slider name="$(parent)Slider" inherits="ZO_Slider" step="1">
+                                    <Anchor point="TOPLEFT" relativeTo="$(parent)Label" relativePoint="BOTTOMLEFT"
+                                        offsetY="8" />
+                                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Label" relativePoint="BOTTOMRIGHT"
+                                        offsetY="8" />
+                                    <Limits min="1" max="60" />
+                                    <OnValueChanged>
+                                        CMX.SetSliderValue(self, value)
+                                    </OnValueChanged>
+
+                                    <OnMouseWheel>
+                                        self:SetValue(self:GetValue() + delta * self:GetValueStep()) 
+                                    </OnMouseWheel>
+                                </Slider>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)DataSelector1" inherits="CombatMetrics_DataSelector">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)SmoothControl" relativePoint="BOTTOMLEFT"
+                                offsetX="0" offsetY="8" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)SmoothControl" relativePoint="BOTTOMRIGHT"
+                                offsetX="0" offsetY="8" />
+                        </Control>
+
+                        <Control name="$(parent)DataSelector2" inherits="CombatMetrics_DataSelector">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)DataSelector1" relativePoint="BOTTOMLEFT"
+                                offsetX="0" offsetY="8" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)DataSelector1" relativePoint="BOTTOMRIGHT"
+                                offsetX="0" offsetY="8" />
+                        </Control>
+
+                        <Control name="$(parent)DataSelector3" inherits="CombatMetrics_DataSelector">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)DataSelector2" relativePoint="BOTTOMLEFT"
+                                offsetX="0" offsetY="8" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)DataSelector2" relativePoint="BOTTOMRIGHT"
+                                offsetX="0" offsetY="8" />
+                        </Control>
+
+                        <Control name="$(parent)DataSelector4" inherits="CombatMetrics_DataSelector">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)DataSelector3" relativePoint="BOTTOMLEFT"
+                                offsetX="0" offsetY="8" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)DataSelector3" relativePoint="BOTTOMRIGHT"
+                                offsetX="0" offsetY="8" />
+                        </Control>
+
+                        <Control name="$(parent)DataSelector5" inherits="CombatMetrics_DataSelector">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)DataSelector4" relativePoint="BOTTOMLEFT"
+                                offsetX="0" offsetY="8" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)DataSelector4" relativePoint="BOTTOMRIGHT"
+                                offsetX="0" offsetY="8" />
+                        </Control>
+
+                        <Control name="$(parent)BuffSelector1" inherits="CombatMetrics_GraphBuffSelector">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)DataSelector5" relativePoint="BOTTOMLEFT"
+                                offsetX="0" offsetY="12" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)DataSelector5" relativePoint="BOTTOMRIGHT"
+                                offsetX="0" offsetY="12" />
+                        </Control>
+
+                        <Control name="$(parent)BuffSelector2" inherits="CombatMetrics_GraphBuffSelector">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)BuffSelector1" relativePoint="BOTTOMLEFT"
+                                offsetX="0" offsetY="8" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)BuffSelector1" relativePoint="BOTTOMRIGHT"
+                                offsetX="0" offsetY="8" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Line name="$(parent)Sep" color="FF888888" inherits="CombatMetrics_Line_Thin">
+                    <Anchor point="TOP" relativePoint="TOPRIGHT" relativeTo="$(parent)Toolbar" offsetX="4" offsetY="2" />
+                    <Anchor point="BOTTOM" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Toolbar" offsetX="4"
+                        offsetY="-2" />
+                    <Dimensions x="0" />
+                </Line>
+
+                <Control name="$(parent)PlotWindow" mouseEnabled="true">
+                    <Anchor point="TOPRIGHT" offsetX="-41" offsetY="12" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Sep" offsetX="98" offsetY="-50" />
+                    <OnMouseDown> CMX.onPlotMouseDown(self, button) </OnMouseDown>
+                    <OnMouseUp> CMX.onPlotMouseUp(self, button, upInside) </OnMouseUp>
+                    <OnMouseEnter> CMX.onPlotMouseEnter(self) </OnMouseEnter>
+                    <OnMouseExit> CMX.onPlotMouseExit(self) </OnMouseExit>
+                    <Controls>
+                        <Backdrop name="$(parent)Zoom" centerColor="33FFFFFF" edgeColor="55FFFFFF" layer="CONTROLS"
+                            level="1" hidden="true">
+                            <Anchor point="TOPLEFT" relativeTo="GuiRoot" />
+                            <Dimensions x="0" y="0" />
+                            <Edge edgeSize="2" />
+                        </Backdrop>
+
+                        <Line name="$(parent)Cursor" color="66FFFFFF" level="0" inherits="CombatMetrics_Line_Thin"
+                            hidden="true">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="BOTTOMLEFT" />
+                        </Line>
+
+                        <Control name="$(parent)Spacer1">
+                            <Anchor point="TOPLEFT" relativePoint="TOPLEFT" />
+                            <Anchor point="BOTTOMRIGHT" relativePoint="CENTER" />
+                        </Control>
+
+                        <Control name="$(parent)Spacer2">
+                            <Anchor point="TOPLEFT" relativePoint="LEFT" />
+                            <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM" />
+                        </Control>
+
+                        <Control name="$(parent)Spacer3">
+                            <Anchor point="TOPLEFT" relativePoint="TOP" />
+                            <Anchor point="BOTTOMRIGHT" relativePoint="RIGHT" />
+                        </Control>
+
+                        <Control name="$(parent)Spacer4">
+                            <Anchor point="TOPLEFT" relativePoint="CENTER" />
+                            <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" />
+                        </Control>
+
+                        <Line name="$(parent)YTick5" color="FFFFFFFF" level="1" inherits="CombatMetrics_GraphTickY">
+                            <Anchor point="LEFT" relativePoint="TOPLEFT" offsetX="-3" />
+                            <Anchor point="RIGHT" relativePoint="TOPRIGHT" offsetX="3" />
+                        </Line>
+
+                        <Line name="$(parent)YTick4" inherits="CombatMetrics_GraphTickY">
+                            <Anchor point="LEFT" relativePoint="LEFT" relativeTo="$(parent)Spacer1" offsetX="-3" />
+                            <Anchor point="RIGHT" relativePoint="RIGHT" relativeTo="$(parent)Spacer3" offsetX="3" />
+                        </Line>
+
+                        <Line name="$(parent)YTick3" inherits="CombatMetrics_GraphTickY">
+                            <Anchor point="LEFT" relativePoint="LEFT" offsetX="-3" />
+                            <Anchor point="RIGHT" relativePoint="RIGHT" offsetX="3" />
+                        </Line>
+
+                        <Line name="$(parent)YTick2" inherits="CombatMetrics_GraphTickY">
+                            <Anchor point="LEFT" relativePoint="LEFT" relativeTo="$(parent)Spacer2" offsetX="-3" />
+                            <Anchor point="RIGHT" relativePoint="RIGHT" relativeTo="$(parent)Spacer4" offsetX="3" />
+                        </Line>
+
+                        <Line name="$(parent)YTick1" color="FFFFFFFF" level="1" inherits="CombatMetrics_GraphTickY">
+                            <Anchor point="LEFT" relativePoint="BOTTOMLEFT" offsetX="-3" />
+                            <Anchor point="RIGHT" relativePoint="BOTTOMRIGHT" offsetX="3" />
+                        </Line>
+
+                        <Line name="$(parent)XTick1" color="FFFFFFFF" level="1" inherits="CombatMetrics_GraphTickX">
+                            <Anchor point="TOP" relativePoint="TOPLEFT" offsetY="0" />
+                            <Anchor point="BOTTOM" relativePoint="BOTTOMLEFT" offsetY="3" />
+                        </Line>
+
+                        <Line name="$(parent)XTick2" inherits="CombatMetrics_GraphTickX">
+                            <Anchor point="TOP" relativePoint="TOP" relativeTo="$(parent)Spacer1" offsetY="0" />
+                            <Anchor point="BOTTOM" relativePoint="BOTTOM" relativeTo="$(parent)Spacer2" offsetY="3" />
+                        </Line>
+
+                        <Line name="$(parent)XTick3" inherits="CombatMetrics_GraphTickX">
+                            <Anchor point="TOP" relativePoint="TOP" offsetY="0" />
+                            <Anchor point="BOTTOM" relativePoint="BOTTOM" offsetY="3" />
+                        </Line>
+
+                        <Line name="$(parent)XTick4" inherits="CombatMetrics_GraphTickX">
+                            <Anchor point="TOP" relativePoint="TOP" relativeTo="$(parent)Spacer3" offsetY="0" />
+                            <Anchor point="BOTTOM" relativePoint="BOTTOM" relativeTo="$(parent)Spacer4" offsetY="3" />
+                        </Line>
+
+                        <Line name="$(parent)XTick5" color="FFFFFFFF" level="1" inherits="CombatMetrics_GraphTickX">
+                            <Anchor point="TOP" relativePoint="TOPRIGHT" offsetY="0" />
+                            <Anchor point="BOTTOM" relativePoint="BOTTOMRIGHT" offsetY="3" />
+                        </Line>
+                    </Controls>
+                </Control>
+
+                <Label name="$(parent)XLabel" inherits="CombatMetrics_LabelFontControl" text="Time (s)"
+                    horizontalAlignment="CENTER" mouseEnabled="true">
+                    <Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)PlotWindow" offsetY="28" />
+                    <Dimensions x="200" y="20" />
+                </Label>
+
+                <Label name="$(parent)YLabel" inherits="CombatMetrics_LabelFontControl" text="DPS"
+                    horizontalAlignment="CENTER" mouseEnabled="true">
+                    <Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)PlotWindow" offsetX="-56" />
+                    <Dimensions x="50" y="20" />
+                </Label>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

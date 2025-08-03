@@ -1,0 +1,55 @@
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
+    <Controls>
+        <Control name="CombatMetrics_UnitPanel" inherits="CombatMetrics_ControlFramed" virtual="true">
+            <Dimensions x="360" />
+            <OnInitialized>
+                local scrollList = GetControl(self, "PanelScrollChild")
+                scrollList:SetResizeToFitPadding(0, 20)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Header">
+                    <Anchor point="TOPLEFT" offsetX="4" />
+                    <Anchor point="TOPRIGHT" offsetX="-4" />
+                    <Dimensions y="20" />
+                    <Controls>
+                        <Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_TARGET"
+                            horizontalAlignment="LEFT">
+                            <Anchor point="BOTTOMLEFT" offsetX="1" offsetY="0" />
+                            <Dimensions x="152" y="20" />
+                        </Label>
+
+                        <Label name="$(parent)PerSecond" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"
+                            text="SI_COMBAT_METRICS_DPS" horizontalAlignment="RIGHT">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="4" offsetY="0" />
+                            <Dimensions x="70" y="20" />
+                            <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_UNITDPS_TT}</OnInitialized>
+                        </Label>
+
+                        <Label name="$(parent)Total" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"
+                            text="SI_COMBAT_METRICS_DAMAGE" horizontalAlignment="RIGHT">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)PerSecond" offsetX="4" offsetY="0" />
+                            <Dimensions x="58" y="20" />
+                        </Label>
+
+                        <Label name="$(parent)Fraction" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"
+                            text="SI_COMBAT_METRICS_PERCENT" horizontalAlignment="CENTER">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Total" offsetX="4" offsetY="0" />
+                            <Dimensions x="45" y="20" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Header" offsetY="2" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Header" offsetY="2" />
+                </Line>
+
+                <Control name="$(parent)Panel" inherits="ZO_ScrollContainer">
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Sep" offsetX="0" offsetY="2" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4" />
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

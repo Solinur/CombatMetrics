@@ -1,0 +1,371 @@
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
+    <Controls>
+        <Control name="CombatMetrics_CombatLogButtonTemplate" mouseEnabled="true" virtual="true">
+            <Dimensions x="22" y="22" />
+            <Controls>
+                <Texture name="$(parent)Icon">
+                    <AnchorFill />
+                </Texture>
+
+                <Backdrop name="$(parent)Overlay" edgeColor="66FFFFFF" centerColor="CC000000" layer="OVERLAY">
+                    <AnchorFill />
+                    <Edge edgeSize="1" />
+                </Backdrop>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_CombatLogTextButtonTemplate" mouseEnabled="true" virtual="true">
+            <Dimensions x="22" y="22" />
+            <Controls>
+                <Label name="$(parent)Label" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="CENTER"
+                    verticalAlignment="CENTER">
+                    <AnchorFill />
+                </Label>
+
+                <Backdrop name="$(parent)Overlay" edgeColor="66FFFFFF" centerColor="CC000000" layer="OVERLAY">
+                    <AnchorFill />
+                    <Edge edgeSize="1" />
+                </Backdrop>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_CombatLog" inherits="CombatMetrics_ControlFramed" hidden="true">
+            <Controls>
+                <Control name="$(parent)Header">
+                    <Anchor point="TOPLEFT" offsetX="4" offsetY="0" />
+                    <Anchor point="TOPRIGHT" offsetX="-4" offsetY="0" />
+                    <Dimensions y="26" />
+                    <Controls>
+                        <Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl"
+                            text="SI_COMBAT_METRICS_COMBAT_LOG" horizontalAlignment="LEFT" verticalAlignment="CENTER">
+                            <Anchor point="LEFT" offsetX="0" offsetY="0" />
+                            <Dimensions x="80" y="20" />
+                        </Label>
+
+                        <Control name="$(parent)PageButtonRow" resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Name" offsetX="0"
+                                offsetY="2" />
+                            <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Name" offsetX="0"
+                                offsetY="2" />
+                            <OnInitialized>
+                                CMX.InitCLNavButtonRow(self)
+                            </OnInitialized>
+
+                            <Controls>
+                                <Control name="$(parent)PageLeft"
+                                    inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
+                                    <Anchor point="LEFT" offsetX="0" offsetY="0" />
+                                    <OnInitialized>
+                                        self.tooltip = {SI_COMBAT_METRICS_GOTO_PREVIOUS}
+                                        self.func = -1
+                                        self.texture = "CombatMetrics/icons/leftarrowover.dds"
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)Page1"
+                                    inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogTextButtonTemplate">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)PageLeft" offsetX="3"
+                                        offsetY="0" />
+                                    <OnInitialized>
+                                        self.tooltip = {SI_COMBAT_METRICS_GOTO_PAGE}
+                                        self.value = 1
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)Page2"
+                                    inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogTextButtonTemplate">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Page1" offsetX="3"
+                                        offsetY="0" />
+                                    <OnInitialized>
+                                        self.tooltip = {SI_COMBAT_METRICS_PAGE}
+                                        self.value = 2
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)Page3"
+                                    inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogTextButtonTemplate">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Page2" offsetX="3"
+                                        offsetY="0" />
+                                    <OnInitialized>
+                                        self.tooltip = {SI_COMBAT_METRICS_PAGE}
+                                        self.value = 3
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)Page4"
+                                    inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogTextButtonTemplate">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Page3" offsetX="3"
+                                        offsetY="0" />
+                                    <OnInitialized>
+                                        self.tooltip = {SI_COMBAT_METRICS_PAGE}
+                                        self.value = 4
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)Page5"
+                                    inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogTextButtonTemplate">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Page4" offsetX="3"
+                                        offsetY="0" />
+                                    <OnInitialized>
+                                        self.tooltip = {SI_COMBAT_METRICS_PAGE}
+                                        self.value = 5
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)PageRight"
+                                    inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Page5" offsetX="3"
+                                        offsetY="0" />
+                                    <OnInitialized>
+                                        self.tooltip = {SI_COMBAT_METRICS_GOTO_NEXT}
+                                        self.func = 1
+                                        self.texture = "CombatMetrics/icons/rightarrowover.dds"
+                                    </OnInitialized>
+                                </Control>
+                            </Controls>
+                        </Control>
+
+                        <Control name="$(parent)FilterButtonRow" resizeToFitDescendents="true">
+                            <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="0" offsetY="4" />
+                            <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" offsetX="0" offsetY="0" />
+
+                            <Controls>
+                                <Control name="$(parent)Performance"
+                                    inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
+                                    <Anchor point="LEFT" offsetX="0" offsetY="0" />
+                                    <OnInitialized>
+                                        self.tooltip = {SI_COMBAT_METRICS_TOGGLE_PERFORMANCE_EVENTS}
+                                        self.func = LIBCOMBAT_EVENT_PERFORMANCE
+                                        self.texture = "EsoUI/Art/Campaign/campaignBrowser_hiPop.dds"
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)Skills"
+                                    inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Performance"
+                                        offsetX="3" offsetY="0" />
+                                    <OnInitialized>
+                                        self.tooltip = {SI_COMBAT_METRICS_TOGGLE_SKILL_USE_EVENTS}
+                                        self.func = LIBCOMBAT_EVENT_SKILL_TIMINGS
+                                        self.texture = "esoui/art/lfg/gamepad/lfg_roleicon_dps.dds"
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)Info"
+                                    inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Skills" offsetX="3"
+                                        offsetY="0" />
+                                    <OnInitialized>
+                                        self.tooltip = {SI_COMBAT_METRICS_TOGGLE_MESSAGE_CHANGE_EVENTS}
+                                        self.func = LIBCOMBAT_EVENT_MESSAGES
+                                        self.texture = "esoui/art/menubar/gamepad/gp_playermenu_icon_tutorial.dds"
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)Stats"
+                                    inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Info" offsetX="3"
+                                        offsetY="0" />
+                                    <OnInitialized>
+                                        self.tooltip = {SI_COMBAT_METRICS_TOGGLE_STATS_CHANGE_EVENTS}
+                                        self.func = LIBCOMBAT_EVENT_PLAYERSTATS
+                                        self.texture = "esoui/art/menubar/gamepad/gp_playermenu_icon_cadwell.dds"
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)Resources"
+                                    inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Stats" offsetX="3"
+                                        offsetY="0" />
+                                    <OnInitialized>
+                                        self.tooltip = {SI_COMBAT_METRICS_TOGGLE_RESOURCE_EVENTS}
+                                        self.func = LIBCOMBAT_EVENT_RESOURCES
+                                        self.texture = "esoui/art/icons/alchemy/crafting_alchemy_trait_restoremagicka.dds"
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)BuffsIn"
+                                    inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Resources" offsetX="7"
+                                        offsetY="0" />
+                                    <OnInitialized>
+                                        self.tooltip = {SI_COMBAT_METRICS_TOGGLE_BUFFIN_EVENTS}
+                                        self.func = LIBCOMBAT_EVENT_EFFECTS_IN
+                                        self.texture = "/esoui/art/icons/alchemy/crafting_alchemy_trait_unstoppable_match.dds"
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)BuffsOut"
+                                    inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)BuffsIn" offsetX="3"
+                                        offsetY="0" />
+                                    <OnInitialized>
+                                        self.tooltip = {SI_COMBAT_METRICS_TOGGLE_BUFFOUT_EVENTS}
+                                        self.func = LIBCOMBAT_EVENT_EFFECTS_OUT
+                                        self.texture = "esoui/art/treeicons/gamepad/gp_tutorial_idexicon_death.dds"
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)GrouBuffsIn"
+                                    inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)BuffsOut" offsetX="3"
+                                        offsetY="0" />
+                                    <OnInitialized>
+                                        self.tooltip = {SI_COMBAT_METRICS_TOGGLE_GROUPBUFFIN_EVENTS}
+                                        self.func = LIBCOMBAT_EVENT_GROUPEFFECTS_IN
+                                        self.texture = "/esoui/art/icons/alchemy/crafting_alchemy_trait_unstoppable_match.dds"
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)GroupBuffsOut"
+                                    inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)GrouBuffsIn"
+                                        offsetX="3" offsetY="0" />
+                                    <OnInitialized>
+                                        self.tooltip = {SI_COMBAT_METRICS_TOGGLE_GROUPBUFFOUT_EVENTS}
+                                        self.func = LIBCOMBAT_EVENT_GROUPEFFECTS_OUT
+                                        self.texture = "esoui/art/treeicons/gamepad/gp_tutorial_idexicon_death.dds"
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)DamageOut"
+                                    inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)GroupBuffsOut"
+                                        offsetX="7" offsetY="0" />
+                                    <OnInitialized>
+                                        self.tooltip = {SI_COMBAT_METRICS_TOGGLE_YOUR_DAMAGE}
+                                        self.func = LIBCOMBAT_EVENT_DAMAGE_OUT
+                                        self.texture = "/esoui/art/icons/heraldrycrests_weapon_axe_02.dds"
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)HealingOut"
+                                    inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DamageOut" offsetX="3"
+                                        offsetY="0" />
+                                    <OnInitialized>
+                                        self.tooltip = {SI_COMBAT_METRICS_TOGGLE_YOUR_HEAL}
+                                        self.func = LIBCOMBAT_EVENT_HEAL_OUT
+                                        self.texture = "/esoui/art/buttons/gamepad/gp_plus_large.dds"
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)DamageIn"
+                                    inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)HealingOut" offsetX="3"
+                                        offsetY="0" />
+                                    <OnInitialized>
+                                        self.tooltip = {SI_COMBAT_METRICS_TOGGLE_DAMAGE}
+                                        self.func = LIBCOMBAT_EVENT_DAMAGE_IN
+                                        self.texture = "/esoui/art/icons/heraldrycrests_weapon_shield_01.dds"
+                                    </OnInitialized>
+                                </Control>
+
+                                <Control name="$(parent)HealingIn"
+                                    inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DamageIn" offsetX="3"
+                                        offsetY="0" />
+                                    <OnInitialized>
+                                        self.tooltip = {SI_COMBAT_METRICS_TOGGLE_HEAL}
+                                        self.func = LIBCOMBAT_EVENT_HEAL_IN
+                                        self.texture = "/esoui/art/hud/gamepad/gp_radialicon_invitegroup_down.dds"
+                                    </OnInitialized>
+
+                                </Control>
+
+                                <Control name="$(parent)CopyPaste"
+                                    inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
+                                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)HealingIn" offsetX="7"
+                                        offsetY="0" />
+
+                                    <OnInitialized>
+                                        self.tooltip = {SI_COMBAT_METRICS_COPY_PASTE}
+                                        self.func = "CopyPaste"
+                                        self.texture = "/esoui/art/guild/gamepad/gp_guild_menuicon_changemessage.dds"
+                                    </OnInitialized>
+                                </Control>
+                            </Controls>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Header" offsetY="2" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Header" offsetY="2" />
+                </Line>
+
+                <Control name="$(parent)Window">
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Sep" offsetX="0" offsetY="2" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4" />
+                    <OnInitialized>CMX.InitCombatLog(self)</OnInitialized>
+                    <Controls>
+                        <TextBuffer name="$(parent)Buffer" linkEnabled="false" maxHistoryLines="1000" mouseEnabled="true">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-12" offsetY="0" />
+                            <OnInitialized>
+                                self.font = {GetString(SI_COMBAT_METRICS_STD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE), "soft-shadow-thin"}
+                                self:SetFont(string.format("%s|%s|%s", unpack(self.font)))
+                            </OnInitialized>
+                        </TextBuffer>
+
+                        <Slider name="$(parent)Slider" mouseEnabled="true" step="1">
+                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Buffer" offsetX="0"
+                                offsetY="12" />
+                            <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Buffer" offsetX="0"
+                                offsetY="-24" />
+                            <Dimensions x="8" />
+                            <Limits min="1" max="1" />
+                            <BackgroundMiddle textureFile="EsoUI/Art/ChatWindow/chat_scrollbar_track.dds" />
+                            <ThumbTexture
+                                textureFile="EsoUI/Art/ChatWindow/chat_thumb.dds"
+                                disabledTextureFile="EsoUI/Art/ChatWindow/chat_thumb_disabled.dds"
+                                thumbWidth="8"
+                                thumbHeight="22"
+                                bottom="0.6875"
+                            />
+
+                            <Controls>
+                                <Button name="$(parent)ScrollUp" inherits="ZO_ScrollUpButton">
+                                    <Anchor point="BOTTOM" relativePoint="TOP" offsetX="-1" />
+                                    <Dimensions x="12" y="12" />
+                                    <Textures
+                                        normal="EsoUI/Art/ChatWindow/chat_scrollbar_upArrow_up.dds"
+                                        pressed="EsoUI/Art/ChatWindow/chat_scrollbar_upArrow_down.dds"
+                                        mouseOver="EsoUI/Art/ChatWindow/chat_scrollbar_upArrow_over.dds"
+                                        disabled="EsoUI/Art/ChatWindow/chat_scrollbar_upArrow_disabled.dds"
+                                    />
+                                </Button>
+
+                                <Button name="$(parent)ScrollDown" inherits="ZO_ScrollDownButton">
+                                    <Anchor point="TOP" relativePoint="BOTTOM" offsetX="-1" />
+                                    <Dimensions x="12" y="12" />
+                                    <Textures
+                                        normal="EsoUI/Art/ChatWindow/chat_scrollbar_downArrow_up.dds"
+                                        pressed="EsoUI/Art/ChatWindow/chat_scrollbar_downArrow_down.dds"
+                                        mouseOver="EsoUI/Art/ChatWindow/chat_scrollbar_downArrow_over.dds"
+                                        disabled="EsoUI/Art/ChatWindow/chat_scrollbar_downArrow_disabled.dds"
+                                    />
+                                </Button>
+
+                                <Button name="$(parent)ScrollEnd" inherits="ZO_ScrollEndButton">
+                                    <Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)ScrollDown" />
+                                    <Dimensions x="12" y="12" />
+                                </Button>
+                            </Controls>
+                        </Slider>
+                    </Controls>
+                </Control>
+                <EditBox name="$(parent)CopyPasteBox" layer="TEXT" editEnabled="false" hidden="true"
+                    maxInputCharacters="29903" newLineEnabled="true" inherits="ZO_DefaultEditMultiLine">
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Sep" offsetX="0" offsetY="2" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4" />
+                    <OnInitialized>
+                        self.font = {GetString(SI_COMBAT_METRICS_STD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE), "soft-shadow-thin"}
+                        self:SetFont(string.format("%s|%s|%s", unpack(self.font)))
+                        self:SetText("Test 123 CopyPasteBox CopyPasteBox CopyPasteBox CopyPasteBox \n CopyPasteBox CopyPasteBox 123")
+                    </OnInitialized>
+                </EditBox>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

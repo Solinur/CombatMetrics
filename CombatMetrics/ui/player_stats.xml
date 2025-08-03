@@ -1,0 +1,300 @@
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
+    <Controls>
+        <Control name="CombatMetrics_PlayerStatsPanel" virtual="true">
+            <Controls>
+                <Control name="$(parent)ResourceTitle" inherits="CombatMetrics_StatRowTitleLine"
+                    resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" offsetX="4" offsetY="4" />
+                    <Anchor point="TOPRIGHT" constrains="X" offsetX="-4" />
+
+                    <Controls>
+                        <Label name="$(parent)Label2" inherits="CombatMetrics_StatRowLabel" text="Reg/s"
+                            horizontalAlignment="RIGHT">
+                            <Anchor point="TOPLEFT" offsetX="120" />
+                            <Dimensions x="72" />
+                        </Label>
+
+                        <Label name="$(parent)Label3" inherits="CombatMetrics_StatRowLabel" text="Drain/s"
+                            horizontalAlignment="RIGHT">
+                            <Anchor point="TOPLEFT" offsetX="196" />
+                            <Dimensions x="72" />
+                        </Label>
+                    </Controls>
+
+                    <OnInitialized>
+                        self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_RESOURCES))
+                    </OnInitialized>
+                </Control>
+
+                <Control name="$(parent)ResourceMagicka" inherits="CombatMetrics_StatRowLine2"
+                    resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)ResourceTitle"
+                        offsetY="6" />
+                    <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)ResourceTitle"
+                        offsetY="6" constrains="X" />
+                    <OnInitialized>
+                        self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_MAGICKA)..":")
+                        CMX.SetLabelColor(self, GetString(SI_COMBAT_METRICS_MAGICKA_COLOR))
+                    </OnInitialized>
+                </Control>
+
+                <Control name="$(parent)ResourceStamina" inherits="CombatMetrics_StatRowLine2"
+                    resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)ResourceMagicka"
+                        offsetY="4" />
+                    <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)ResourceMagicka"
+                        offsetY="4" constrains="X" />
+                    <OnInitialized>
+                        self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_STAMINA)..":")
+                        CMX.SetLabelColor(self, GetString(SI_COMBAT_METRICS_STAMINA_COLOR))
+                    </OnInitialized>
+                </Control>
+
+                <Control name="$(parent)ResourceUltimate" inherits="CombatMetrics_StatRowLine2"
+                    resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)ResourceStamina"
+                        offsetY="4" />
+                    <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)ResourceStamina"
+                        offsetY="4" constrains="X" />
+                    <OnInitialized>
+                        self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_ULTIMATE)..":")
+                        CMX.SetLabelColor(self, GetString(SI_COMBAT_METRICS_ULTIMATE_COLOR))
+                    </OnInitialized>
+                </Control>
+
+                <Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ResourceUltimate" offsetY="8" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)ResourceUltimate" offsetY="8" />
+                </Line>
+
+                <Control name="$(parent)SelectRow">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)Sep" relativePoint="BOTTOMLEFT" offsetX="-4" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)Sep" relativePoint="BOTTOMRIGHT" offsetX="4"
+                        constrains="X" />
+                    <Dimensions y="46" />
+                    <Controls>
+                        <Control name="$(parent)Magicka" mouseEnabled="true">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="BOTTOMLEFT" />
+                            <Dimensions x="93" />
+                            <Controls>
+                                <Texture name="$(parent)Icon"
+                                    textureFile="/esoui/art/champion/champion_points_magicka_icon.dds">
+                                    <Anchor point="CENTER" />
+                                    <Dimensions x="32" y="32" />
+                                </Texture>
+
+                                <Line name="$(parent)Line" inherits="CombatMetrics_Line_Thin">
+                                    <Anchor point="BOTTOMLEFT" offsetX="6" />
+                                    <Anchor point="BOTTOMRIGHT" offsetX="-6" />
+
+                                    <OnInitialized>
+                                        local color = ZO_ColorDef:New(GetString(SI_COMBAT_METRICS_MAGICKA_COLOR))
+                                        self.color = color
+                                        self:SetColor(color.r, color.g, color.b, color.a)
+                                    </OnInitialized>
+                                </Line>
+                            </Controls>
+
+                            <OnMouseUp>
+                                CMX.UpdateAttackStatsSelector(self)
+                            </OnMouseUp>
+
+                            <OnInitialized>
+                                self.powerType = POWERTYPE_MAGICKA
+                            </OnInitialized>
+                        </Control>
+
+                        <Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR"
+                            inherits="CombatMetrics_Line_Thin">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Magicka" offsetY="6" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Magicka" offsetY="-6" />
+                        </Line>
+
+                        <Control name="$(parent)Stamina" mouseEnabled="true">
+                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Magicka" />
+                            <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Magicka" />
+                            <Dimensions x="94" />
+                            <Controls>
+                                <Texture name="$(parent)Icon"
+                                    textureFile="/esoui/art/champion/champion_points_stamina_icon.dds">
+                                    <Anchor point="CENTER" />
+                                    <Dimensions x="32" y="32" />
+                                </Texture>
+
+                                <Line name="$(parent)Line" inherits="CombatMetrics_Line_Thin">
+                                    <Anchor point="BOTTOMLEFT" offsetX="6" />
+                                    <Anchor point="BOTTOMRIGHT" offsetX="-6" />
+
+                                    <OnInitialized>
+                                        local color = ZO_ColorDef:New(GetString(SI_COMBAT_METRICS_STAMINA_COLOR))
+                                        self.color = color
+                                        self:SetColor(color.r, color.g, color.b, color.a)
+                                    </OnInitialized>
+                                </Line>
+                            </Controls>
+
+                            <OnMouseUp>
+                                CMX.UpdateAttackStatsSelector(self)
+                            </OnMouseUp>
+
+                            <OnInitialized>
+                                self.powerType = POWERTYPE_STAMINA
+                            </OnInitialized>
+                        </Control>
+
+                        <Line name="$(parent)Sep2" color="SI_COMBAT_METRICS_SEP_COLOR"
+                            inherits="CombatMetrics_Line_Thin">
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)Stamina" offsetY="6" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Stamina" offsetY="-6" />
+                        </Line>
+
+                        <Control name="$(parent)Health" mouseEnabled="true">
+                            <Anchor point="TOPRIGHT" />
+                            <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Stamina" />
+                            <Controls>
+                                <Texture name="$(parent)Icon"
+                                    textureFile="/esoui/art/champion/champion_points_health_icon.dds">
+                                    <Anchor point="CENTER" />
+                                    <Dimensions x="32" y="32" />
+                                </Texture>
+
+                                <Line name="$(parent)Line" inherits="CombatMetrics_Line_Thin">
+                                    <Anchor point="BOTTOMLEFT" offsetX="6" />
+                                    <Anchor point="BOTTOMRIGHT" offsetX="-6" />
+
+                                    <OnInitialized>
+                                        local color = ZO_ColorDef:New(GetString(SI_COMBAT_METRICS_HEALTH_COLOR))
+                                        self.color = color
+                                        self:SetColor(color.r, color.g, color.b, color.a)
+                                    </OnInitialized>
+                                </Line>
+                            </Controls>
+
+                            <OnMouseUp>
+                                CMX.UpdateAttackStatsSelector(self)
+                            </OnMouseUp>
+
+                            <OnInitialized>
+                                self.powerType = POWERTYPE_HEALTH
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)AttackStats">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SelectRow" relativePoint="BOTTOMLEFT" offsetX="4"
+                        offsetY="8.2" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="4" />
+                    <Controls>
+                        <Control name="$(parent)Title" inherits="CombatMetrics_StatRowTitleLine"
+                            resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="TOPRIGHT" constrains="X" />
+
+                            <Controls>
+                                <Label name="$(parent)Label2" inherits="CombatMetrics_StatRowLabel"
+                                    text="SI_COMBAT_METRICS_EFFECTIVE" horizontalAlignment="RIGHT">
+                                    <Anchor point="TOPLEFT" offsetX="120" />
+                                    <Dimensions x="72" />
+                                </Label>
+
+                                <Label name="$(parent)Label3" inherits="CombatMetrics_StatRowLabel"
+                                    text="SI_COMBAT_METRICS_MAX" horizontalAlignment="RIGHT">
+                                    <Anchor point="TOPLEFT" offsetX="196" />
+                                    <Dimensions x="72" />
+                                </Label>
+                            </Controls>
+
+                            <OnInitialized>
+                                self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_STATS))
+                                self.nocolor = true
+                            </OnInitialized>
+                        </Control>
+
+                        <Control name="$(parent)Row1" inherits="CombatMetrics_StatRowLine2"
+                            resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Title"
+                                offsetY="6" />
+                            <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Title"
+                                offsetY="6" constrains="X" />
+                            <OnInitialized>
+                                self:GetNamedChild("Label"):SetText(GetString("SI_COMBAT_METRICS_STATS_MAGICKA",1))
+                            </OnInitialized>
+                        </Control>
+
+                        <Control name="$(parent)Row2" inherits="CombatMetrics_StatRowLine2"
+                            resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Row1"
+                                offsetY="4" />
+                            <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Row1"
+                                offsetY="4" constrains="X" />
+                            <OnInitialized>
+                                self:GetNamedChild("Label"):SetText(GetString("SI_COMBAT_METRICS_STATS_MAGICKA",2))
+                            </OnInitialized>
+                        </Control>
+
+                        <Control name="$(parent)Row3" inherits="CombatMetrics_StatRowLine2"
+                            resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Row2"
+                                offsetY="4" />
+                            <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Row2"
+                                offsetY="4" constrains="X" />
+                            <OnInitialized>
+                                self:GetNamedChild("Label"):SetText(GetString("SI_COMBAT_METRICS_STATS_MAGICKA",3))
+                            </OnInitialized>
+                        </Control>
+
+                        <Control name="$(parent)Row4" inherits="CombatMetrics_StatRowLine2"
+                            resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Row3"
+                                offsetY="4" />
+                            <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Row3"
+                                offsetY="4" constrains="X" />
+                            <OnInitialized>
+                                self:GetNamedChild("Label"):SetText(GetString("SI_COMBAT_METRICS_STATS_MAGICKA",4))
+                            </OnInitialized>
+                        </Control>
+
+                        <Control name="$(parent)Row5" inherits="CombatMetrics_StatRowLine2"
+                            resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Row4"
+                                offsetY="4" />
+                            <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Row4"
+                                offsetY="4" constrains="X" />
+                            <OnInitialized>
+                                self:GetNamedChild("Label"):SetText(GetString("SI_COMBAT_METRICS_STATS_MAGICKA",5))
+                            </OnInitialized>
+                        </Control>
+
+                        <Control name="$(parent)Row6" inherits="CombatMetrics_StatRowLine3"
+                            resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Row5"
+                                offsetY="4" />
+                            <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Row5"
+                                offsetY="4" constrains="X" />
+                            <OnInitialized>
+                                self:GetNamedChild("Label"):SetText(GetString("SI_COMBAT_METRICS_STATS_MAGICKA",6))
+                            </OnInitialized>
+                        </Control>
+
+                        <Control name="$(parent)Row7" inherits="CombatMetrics_StatRowLine2"
+                            resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Row6"
+                                offsetY="4" />
+                            <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Row6"
+                                offsetY="4" constrains="X" />
+                            <OnInitialized>
+                                self:GetNamedChild("Label"):SetText(GetString("SI_COMBAT_METRICS_STATS_MAGICKA",7))
+                            </OnInitialized>
+                        </Control>
+                    </Controls>
+
+                    <OnInitialized>
+                        CMX.SetLabelColor(self, GetString(SI_COMBAT_METRICS_MAGICKA_COLOR))
+                    </OnInitialized>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

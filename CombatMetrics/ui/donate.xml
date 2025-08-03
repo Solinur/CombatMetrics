@@ -1,0 +1,50 @@
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
+    <Controls>
+        <Control name="CombatMetrics_DonateDialog" hidden="true" tier="2" virtual="true">
+            <Dimensions x="340" y="240" />
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="CombatMetrics_BackgroundFramed" edgeColor="FFEEEECC" centerColor="F8050505">
+                    <AnchorFill />
+                </Backdrop>
+
+                <Label name="$(parent)TextField" text="SI_COMBAT_METRICS_DONATE_CROWNS_TEXT" verticalAlignment="CENTER"
+                    horizontalAlignment="CENTER" inherits="CombatMetrics_LabelFontControl">
+                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="10" offsetY="10" />
+                    <Anchor point="TOPRIGHT" relativePoint="TOPRIGHT" offsetX="-10" offsetY="10" />
+                    <Dimensions y="140" />
+                </Label>
+
+                <Control name="$(parent)AccountInfo">
+                    <Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)TextField" offsetX="0" offsetY="12" />
+                    <Dimensions x="160" />
+                    <Controls>
+                        <Label name="$(parent)Label" text="SI_COMBAT_METRICS_DONATE_CROWNS_ACCOUNT" verticalAlignment="TOP"
+                            horizontalAlignment="RIGHT" inherits="CombatMetrics_LabelFontControl">
+                            <Anchor point="TOPRIGHT" relativePoint="TOP" offsetX="-4" />
+                            <Dimensions x="100" y="20" />
+                        </Label>
+
+                        <EditBox name="$(parent)EditBox" font="ZoFontGame" color="FFFFFFFF"
+                            allowMarkupType="ALLOW_MARKUP_TYPE_NONE" inherits="ZO_DefaultEditForBackdrop ZO_DefaultEdit"
+                            editEnabled="false" mouseEnabled="true" newLineEnabled="false" multiLine="false">
+                            <Anchor point="TOPLEFT" relativePoint="TOP" offsetX="4" />
+                            <Dimensions x="80" y="20" />
+                        </EditBox>
+                    </Controls>
+                </Control>
+
+                <Button name="$(parent)Button" text="SI_COMBAT_METRICS_OK" verticalAlignment="CENTER" horizontalAlignment="CENTER"
+                    inherits="CombatMetrics_ButtonFontControl" mouseEnabled="true">
+                    <Anchor point="BOTTOM" relativePoint="BOTTOM" offsetX="0" offsetY="-8" />
+                    <Dimensions x="100" y="30" />
+                    <Controls>
+                        <Backdrop name="$(parent)BG" inherits="CombatMetrics_BackgroundFramed" edgeColor="FFEEEEEE"
+                            centerColor="F8000000">
+                            <AnchorFill />
+                        </Backdrop>
+                    </Controls>
+                </Button>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

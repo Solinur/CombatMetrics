@@ -1,0 +1,143 @@
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
+    <Controls>
+        <TopLevelControl name="CombatMetrics_Report" clampedToScreen="true" mouseEnabled="true" movable="true" hidden="true">
+            <Dimensions x="1000" y="770" />
+            <OnMoveStop>CMX.SavePosition(self)</OnMoveStop>
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="CombatMetrics_BackgroundFramed_Solid" edgeColor="FF000000" centerColor="EE000000">
+                    <AnchorFill />
+                </Backdrop>
+
+                <Backdrop name="$(parent)ResizeFrame" inherits="CombatMetrics_BackgroundFramed_Solid" edgeColor="00000000"
+                    centerColor="00000000" mouseEnabled="true" resizeHandleSize="10" layer="CONTROLS">
+                    <AnchorFill />
+                    <DimensionConstraints minX="500" maxX="3000" minY="385" maxY="2310" />
+                    <OnRectChanged>CMX.NewSize(self, newLeft, newTop, newRight, newBottom, oldLeft, oldTop, oldRight, oldBottom)</OnRectChanged>
+                    <OnResizeStart>CMX.Resizing(self, true)</OnResizeStart>
+                    <OnResizeStop>CMX.Resizing(self, false)</OnResizeStop>
+                </Backdrop>
+
+                <Control name="$(parent)_Title" inherits="CombatMetrics_TitleBar">
+                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="4" offsetY="4" />
+                    <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" offsetX="-4" offsetY="48" />
+                </Control>
+
+                <Control name="$(parent)_MainPanel" inherits="CombatMetrics_ControlFramed">
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)_Title" offsetX="0" offsetY="4" />
+                    <Dimensions x="628" y="374" />
+                    <Controls>
+                        <Control name="$(parent)CombatStats" inherits="CombatMetrics_CombatStatsPanel">
+                            <Anchor point="TOPLEFT" />
+                            <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM" relativeTo="$(parent)" offsetX="34" offsetY="-6"/>
+                        </Control>
+                        
+                        <Control name="$(parent)PlayerStats" inherits="CombatMetrics_PlayerStatsPanel">
+                            <Anchor point="TOPRIGHT" />
+                            <Anchor point="BOTTOMLEFT" relativePoint="BOTTOM" relativeTo="$(parent)Sep" offsetX="34" offsetY="-6"/>
+                        </Control>
+
+                        <Control name="$(parent)CombatLog" inherits="CombatMetrics_CombatLog">
+                            <AnchorFill />
+                        </Control>
+
+                        <Control name="$(parent)Graph" inherits="CombatMetrics_GraphPanel">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)_MainPanel" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)_MainPanel" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)_Menubar" inherits="CombatMetrics_Menubar">
+                    <Anchor point="RIGHT" relativePoint="LEFT" constrains="X" />
+                    <Anchor point="TOP" relativePoint="TOP" relativeTo="$(parent)_MainPanel" constrains="Y" />
+                </Control>
+
+                <Control name="$(parent)_BuffPanel" inherits="CombatMetrics_BuffPanel">
+                    <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)_Title" offsetX="0" offsetY="4" />
+                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)_MainPanel" offsetX="4" offsetY="0" />
+                </Control>
+
+                <Control name="$(parent)_UnitPanel" inherits="CombatMetrics_UnitPanel">
+                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" offsetX="4" offsetY="-28" />
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)_MainPanel" offsetX="0" offsetY="4"
+                        constrains="Y" />
+                </Control>
+
+                <Control name="$(parent)_AbilitiesPanel" inherits="CombatMetrics_AbilitiesPanel">
+                    <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)_BuffPanel" offsetX="0" offsetY="4" />
+                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)_UnitPanel" offsetX="4" offsetY="0" />
+                </Control>
+
+                <Control name="$(parent)_SetupPanel" inherits="CombatMetrics_ControlFramed" hidden="true" mouseEnabled="true">
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)_Title" offsetX="0" offsetY="4" />
+                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)_AbilitiesPanel" offsetX="0" offsetY="0" />
+
+                    <Controls>
+                        <Control name="$(parent)SkillsPanel" inherits="CombatMetrics_SkillsPanel">
+                            <Anchor point="TOPLEFT" offsetX="4" offsetY="0" />
+                        </Control>
+
+                        <Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)SkillsPanel" offsetY="3" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)SkillsPanel" offsetY="3" />
+                        </Line>
+
+                        <Control name="$(parent)ScribedSkillsPanel" resizeToFitDescendents="true">
+                            <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)SkillsPanel" offsetX="4" offsetY="0" />
+                            <Anchor point="TOPRIGHT" offsetX="0" offsetY="0" />
+                            <DimensionConstraints minY="0" />
+                            <OnInitialized>CMX.InitializeScribedSkillsPanel(self)</OnInitialized>
+                        </Control>
+
+                        <Line name="$(parent)Sep2" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ScribedSkillsPanel" relativePoint="BOTTOMLEFT" offsetX="2"
+                                offsetY="6" />
+                            <Anchor point="TOPRIGHT" relativeTo="$(parent)ScribedSkillsPanel" relativePoint="BOTTOMRIGHT" offsetX="-2"
+                                offsetY="6" />
+                        </Line>
+
+                        <Control name="$(parent)ChampionPointsPanel" inherits="ZO_ScrollContainer">
+                            <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Sep2" offsetX="2" offsetY="4" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="0" offsetY="-2" />
+                            <OnInitialized>CMX.InitializeChampionPointsPanel(self)</OnInitialized>
+                        </Control>
+
+                        <Line name="$(parent)Sep3" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
+                            <Anchor point="TOPLEFT" relativeTo="$(parent)ScribedSkillsPanel" offsetX="0" offsetY="2" />
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ChampionPointsPanel" offsetX="0" offsetY="-2" />
+                        </Line>
+
+                        <Control name="$(parent)GearPanel" inherits="CombatMetrics_GearPanel">
+                            <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Left" offsetX="0" offsetY="6" />
+                            <Anchor point="BOTTOMLEFT" offsetX="4" offsetY="-50" />
+                        </Control>
+
+                        <Line name="$(parent)Sep4" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)GearPanel" offsetY="0" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)GearPanel" offsetY="0" />
+                        </Line>
+
+                        <Control name="$(parent)ConsumablesPanel" inherits="CombatMetrics_ConsumablesPanel">
+                            <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)GearPanel" offsetX="0" offsetY="3" />
+                            <Anchor point="BOTTOMLEFT" offsetX="4" offsetY="-3" />
+                        </Control>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)_InfoRow" inherits="CombatMetrics_InfoRow">
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)_UnitPanel" offsetX="0" offsetY="4" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4" />
+                </Control>
+
+                <Control name="$(parent)_FightList" inherits="CombatMetrics_FightList">
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)_Title" offsetX="0" offsetY="4" />
+                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)_AbilitiesPanel" offsetX="0" offsetY="0" />
+                </Control>
+
+                <Control name="$(parent)_DonateDialog" hidden="true" tier="2" inherits="CombatMetrics_DonateDialog">
+                    <Anchor point="CENTER" relativePoint="CENTER" offsetX="0" offsetY="0" />
+                </Control>
+            </Controls>
+        </TopLevelControl>
+    </Controls>
+</GuiXml>

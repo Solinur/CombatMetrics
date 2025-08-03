@@ -1,0 +1,92 @@
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
+    <Controls>
+        <Control name="CombatMetrics_AbilitiesPanel" inherits="CombatMetrics_ControlFramed" virtual="true">
+            <OnInitialized>
+                local scrollList = GetControl(self, "PanelScrollChild")
+                scrollList:SetResizeToFitPadding(0, 20)
+            </OnInitialized>
+
+            <Controls>
+                <Control name="$(parent)Header">
+                    <Anchor point="TOPLEFT" offsetX="4" />
+                    <Anchor point="TOPRIGHT" offsetX="-4" />
+                    <Dimensions y="20" />
+                    <Controls>
+                        <Control name="$(parent)Icon">
+                            <Anchor point="BOTTOMLEFT" offsetX="2" />
+                            <Dimensions x="20" y="20" />
+                        </Control>
+
+                        <Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_ABILITY"
+                            horizontalAlignment="LEFT">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="2" offsetY="0" />
+                            <Dimensions x="182" y="20" />
+                        </Label>
+
+                        <Label name="$(parent)Fraction" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"
+                            text="SI_COMBAT_METRICS_PERCENT" horizontalAlignment="CENTER">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="2" offsetY="0" />
+                            <Dimensions x="38" y="20" />
+                        </Label>
+
+                        <Label name="$(parent)PerSecond" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"
+                            text="SI_COMBAT_METRICS_DPS" horizontalAlignment="RIGHT">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Fraction" offsetX="2" offsetY="0" />
+                            <Dimensions x="50" y="20" />
+                        </Label>
+
+                        <Label name="$(parent)Total" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"
+                            text="SI_COMBAT_METRICS_DAMAGE" horizontalAlignment="RIGHT">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)PerSecond" offsetX="2" offsetY="0" />
+                            <Dimensions x="73" y="20" />
+                        </Label>
+
+                        <Label name="$(parent)Crits" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"
+                            text="SI_COMBAT_METRICS_CRITS" color="FFFFFFCC" horizontalAlignment="RIGHT">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Total" offsetX="2" offsetY="0" />
+                            <Dimensions x="42" y="20" />
+                            <OnMouseUp> CMX.HitCritContextMenu(self, button)</OnMouseUp>
+                        </Label>
+
+                        <Label name="$(parent)Hits" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"
+                            text="SI_COMBAT_METRICS_PER_HITS" color="FFFFFFCC" horizontalAlignment="LEFT">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Crits" offsetX="0" offsetY="0" />
+                            <Dimensions x="42" y="20" />
+                            <OnMouseUp> CMX.HitCritContextMenu(self, button)</OnMouseUp>
+                        </Label>
+
+                        <Label name="$(parent)CritRatio" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"
+                            text="SI_COMBAT_METRICS_CRITS_PER" horizontalAlignment="RIGHT">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Hits" offsetX="2" offsetY="0" />
+                            <Dimensions x="35" y="20" />
+                        </Label>
+
+                        <Label name="$(parent)Average" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"
+                            text="SI_COMBAT_METRICS_AVE" color="FFFFFFCC" horizontalAlignment="RIGHT">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)CritRatio" offsetX="2" offsetY="0" />
+                            <Dimensions x="50" y="20" />
+                            <OnMouseUp> CMX.AverageContextMenu(self, button, "hitcrit")</OnMouseUp>
+                        </Label>
+
+                        <Label name="$(parent)MinMax" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"
+                            text="SI_COMBAT_METRICS_MAX" color="FFFFFFCC" horizontalAlignment="RIGHT">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Average" offsetX="2" offsetY="0" />
+                            <Dimensions x="50" y="20" />
+                            <OnMouseUp> CMX.MinMaxContextMenu(self, button, "hitcrit")</OnMouseUp>
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Header" offsetY="2" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Header" offsetY="2" />
+                </Line>
+
+                <Control name="$(parent)Panel" inherits="ZO_ScrollContainer">
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Sep" offsetX="0" offsetY="2" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4" />
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

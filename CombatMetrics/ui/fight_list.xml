@@ -1,0 +1,114 @@
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
+    <Controls>
+        <Control name="CombatMetrics_FightListTemplate" virtual="true">
+            <Controls>
+                <Control name="$(parent)Header">
+                    <Anchor point="TOPLEFT" offsetX="6" offsetY="4" />
+                    <Anchor point="TOPRIGHT" offsetX="-4" offsetY="4" />
+                    <Dimensions y="20" />
+                    <Controls>
+                        <Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_RECENT_FIGHT"
+                            horizontalAlignment="LEFT">
+                            <Anchor point="BOTTOMLEFT" offsetX="0" offsetY="0" />
+                            <Dimensions x="260" y="20" />
+                        </Label>
+
+                        <Label name="$(parent)Char" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_CHARACTER"
+                            horizontalAlignment="LEFT">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="4" offsetY="0" />
+                            <Dimensions x="176" y="20" />
+                        </Label>
+
+                        <Label name="$(parent)Zone" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_ZONE"
+                            horizontalAlignment="LEFT">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Char" offsetX="4" offsetY="0" />
+                            <Dimensions x="176" y="20" />
+                        </Label>
+
+                        <Label name="$(parent)Time" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_TIME2"
+                            horizontalAlignment="LEFT">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Zone" offsetX="4" offsetY="0" />
+                            <Dimensions x="128" y="20" />
+                        </Label>
+
+                        <Label name="$(parent)Duration" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_DURATION"
+                            horizontalAlignment="CENTER">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Time" offsetX="4" offsetY="0" />
+                            <Dimensions x="68" y="20" />
+                        </Label>
+
+                        <Label name="$(parent)DPS" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_DPS"
+                            horizontalAlignment="CENTER">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Duration" offsetX="4" offsetY="0" />
+                            <Dimensions x="68" y="20" />
+                        </Label>
+
+                        <Label name="$(parent)Buttons" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_DELETE"
+                            horizontalAlignment="CENTER">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DPS" offsetX="4" offsetY="0" />
+                            <Dimensions x="68" y="20" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Header" offsetY="2" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Header" offsetY="2" />
+                </Line>
+
+                <Control name="$(parent)Panel" inherits="ZO_ScrollContainer" mouseEnabled="true">
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Sep" offsetX="-2" offsetY="2" />
+                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" offsetX="-4" offsetY="-4" />
+                </Control>
+
+                <Label name="$(parent)LoadingLabel" text="SI_COMBAT_METRICS_LOADING" verticalAlignment="CENTER"
+                    horizontalAlignment="CENTER" inherits="CombatMetrics_TitleFontControl" hidden="true">
+                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Panel" />
+                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Panel" />
+                </Label>
+            </Controls>
+
+            <OnInitialized>
+                local scrollList = GetControl(self, "PanelScrollChild")
+                scrollList:SetResizeToFitPadding(0, 20)
+            </OnInitialized>
+        </Control>
+
+        <Control name="CombatMetrics_FightList" hidden="true" tier="1" virtual="true">
+            <Controls>
+                <Backdrop name="$(parent)BG" inherits="CombatMetrics_BackgroundFramed" edgeColor="FFEEEEEE" centerColor="F8050510">
+                    <AnchorFill />
+                </Backdrop>
+
+                <Control name="$(parent)Recent" inherits="CombatMetrics_FightListTemplate">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMRIGHT" relativePoint="RIGHT" offsetY="-1" />
+                    <OnInitialized>	
+                        local scrollList = GetControl(self, "PanelScrollChild")
+                        scrollList:SetResizeToFitPadding(0, 20)
+                        self.numItems = 0	
+                    </OnInitialized>
+                </Control>
+
+                <Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Recent" offsetX="4" offsetY="1" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Recent" offsetX="-4" offsetY="1" />
+                </Line>
+
+                <Control name="$(parent)Saved" inherits="CombatMetrics_FightListTemplate">
+                    <Anchor point="TOPLEFT" relativePoint="LEFT" offsetY="0" />
+                    <Anchor point="BOTTOMRIGHT" />
+                    <OnInitialized>
+                        local scrollList = GetControl(self, "PanelScrollChild")
+                        scrollList:SetResizeToFitPadding(0, 20)
+
+                        local label = GetControl(self, "HeaderName")
+                        label:SetText(GetString(SI_COMBAT_METRICS_SAVED_FIGHTS))
+
+                        self.numItems = 0
+                    </OnInitialized>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

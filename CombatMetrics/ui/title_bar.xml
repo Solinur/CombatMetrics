@@ -1,0 +1,210 @@
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
+    <Controls>
+        <Button name="CombatMetrics_NavigationButton" virtual="true">
+            <Dimensions x="32" y="32" />
+            <ButtonState state="DISABLED" />
+        </Button>
+
+        <Control name="CombatMetrics_TitleBar" virtual="true">
+            <Controls>
+                <Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line">
+                    <Anchor point="BOTTOMLEFT" />
+                    <Anchor point="BOTTOMRIGHT" />
+                </Line>
+
+                <Control name="$(parent)NavigationRow" resizeToFitDescendents="true">
+                    <Anchor point="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" />
+                    <Controls>
+                        <Button name="$(parent)Previous" mouseEnabled="true" inherits="CombatMetrics_ButtonTooltip CombatMetrics_NavigationButton">
+                            <Anchor point="LEFT" offsetY="-2" />
+                            <Textures
+                                normal="CombatMetrics/icons/leftarrowup.dds"
+                                pressed="CombatMetrics/icons/leftarrowdown.dds"
+                                mouseOver="CombatMetrics/icons/leftarrowover.dds"
+                                disabled="CombatMetrics/icons/leftarrowdisabled.dds"
+                            />
+
+                            <OnInitialized>
+                                self.tooltip = {SI_COMBAT_METRICS_PREVIOUS_FIGHT}
+                                self.func = "previous"
+                            </OnInitialized>
+                        </Button>
+
+                        <Button name="$(parent)Next" mouseEnabled="true"
+                            inherits="CombatMetrics_ButtonTooltip CombatMetrics_NavigationButton">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Previous" offsetX="4" />
+                            <Textures
+                                normal="CombatMetrics/icons/rightarrowup.dds"
+                                pressed="CombatMetrics/icons/rightarrowdown.dds"
+                                mouseOver="CombatMetrics/icons/rightarrowover.dds"
+                                disabled="CombatMetrics/icons/rightarrowdisabled.dds"
+                            />
+
+                            <OnInitialized>
+                                self.tooltip = {SI_COMBAT_METRICS_NEXT_FIGHT}
+                                self.func = "next"
+                            </OnInitialized>
+
+                        </Button>
+
+                        <Button name="$(parent)Last" mouseEnabled="true"
+                            inherits="CombatMetrics_ButtonTooltip CombatMetrics_NavigationButton">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Next" offsetX="4" />
+                            <Textures
+                                normal="CombatMetrics/icons/endarrowup.dds"
+                                pressed="CombatMetrics/icons/endarrowdown.dds"
+                                mouseOver="CombatMetrics/icons/endarrowover.dds"
+                                disabled="CombatMetrics/icons/endarrowdisabled.dds"
+                            />
+
+                            <OnInitialized>
+                                self.tooltip = {SI_COMBAT_METRICS_MOST_RECENT_FIGHT}
+                                self.func = "last"
+                            </OnInitialized>
+                        </Button>
+
+                        <Button name="$(parent)Load" mouseEnabled="true"
+                            inherits="CombatMetrics_ButtonTooltip CombatMetrics_NavigationButton">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Last" offsetX="4" />
+                            <Textures
+                                normal="CombatMetrics/icons/loadiconup.dds"
+                                pressed="CombatMetrics/icons/loadicondown.dds"
+                                mouseOver="CombatMetrics/icons/loadiconover.dds"
+                                disabled="CombatMetrics/icons/loadicondisabled.dds"
+                            />
+
+                            <OnInitialized>
+                                self.tooltip = {SI_COMBAT_METRICS_LOAD_FIGHT}
+                                self.func = "load"
+                            </OnInitialized>
+                        </Button>
+
+                        <Button name="$(parent)Save" mouseEnabled="true"
+                            inherits="CombatMetrics_ButtonTooltip CombatMetrics_NavigationButton">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Load" offsetX="4" />
+                            <Textures
+                                normal="CombatMetrics/icons/saveiconup.dds"
+                                pressed="CombatMetrics/icons/saveicondown.dds"
+                                mouseOver="CombatMetrics/icons/saveiconover.dds"
+                                disabled="CombatMetrics/icons/saveicondisabled.dds"
+                            />
+
+                            <OnInitialized>
+                                self.tooltip = {SI_COMBAT_METRICS_SAVE_FIGHT, SI_COMBAT_METRICS_SAVE_FIGHT2}
+                                self.func = "save"
+                            </OnInitialized>
+                        </Button>
+
+                        <Button name="$(parent)Delete" mouseEnabled="true"
+                            inherits="CombatMetrics_ButtonTooltip CombatMetrics_NavigationButton">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Save" offsetX="4" />
+                            <Textures
+                                normal="CombatMetrics/icons/deleteicon2up.dds"
+                                pressed="CombatMetrics/icons/deleteicon2down.dds"
+                                mouseOver="CombatMetrics/icons/deleteicon2over.dds"
+                                disabled="CombatMetrics/icons/deleteicon2disabled.dds"
+                            />
+
+                            <OnInitialized>
+                                self.tooltip = {SI_COMBAT_METRICS_DELETE_FIGHT}
+                                self.func = "delete"
+                            </OnInitialized>
+                        </Button>
+                    </Controls>
+
+                    <OnInitialized>
+                        CMX.InitNavButtons(self)
+                    </OnInitialized>
+                </Control>
+
+                <Control name="$(parent)CharacterInfo" resizeToFitDescendents="true">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMLEFT" />
+                    <Controls>
+                        <Texture name="$(parent)RaceIcon" textureFile="esoui/art/champion/champion_icon.dds"
+                            inherits="CombatMetrics_TextureTooltip">
+                            <Anchor point="LEFT" />
+                            <Dimensions x="34" y="34" />
+                        </Texture>
+
+                        <Texture name="$(parent)ClassIcon" textureFile="esoui/art/champion/champion_icon.dds"
+                            inherits="CombatMetrics_TextureTooltip">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)RaceIcon" offsetX="-2" />
+                            <Dimensions x="34" y="34" />
+                        </Texture>
+
+                        <Label name="$(parent)Charname" inherits="CombatMetrics_InfoFontControl">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ClassIcon" offsetX="4" />
+                        </Label>
+
+                        <Texture name="$(parent)CPIcon" textureFile="esoui/art/champion/champion_icon.dds">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Charname" offsetX="10" />
+                            <Dimensions x="20" y="20" />
+                        </Texture>
+
+                        <Label name="$(parent)CPValue" inherits="CombatMetrics_InfoFontControl">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)CPIcon" offsetX="4" />
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Control name="$(parent)FightTitle" mouseEnabled="true" inherits="CombatMetrics_ControlTooltip">
+                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)CharacterInfo" offsetX="8" />
+                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)NavigationRow" offsetX="-8" />
+                    <Controls>
+                        <Label name="$(parent)Name" inherits="CombatMetrics_TitleFontControl" text="Test"
+                            verticalAlignment="CENTER" horizontalAlignment="CENTER">
+                            <Anchor point="LEFT" />
+                            <Anchor point="RIGHT" />
+                        </Label>
+
+                        <EditBox name="$(parent)Edit" hidden="true" inherits="ZO_DefaultEdit">
+                            <Anchor point="LEFT" />
+                            <Anchor point="RIGHT" />
+
+                            <Controls>
+                                <Control name="$(parent)Font">
+                                    <AnchorFill />
+                                    <OnInitialized>
+                                        self.font = {GetString(SI_COMBAT_METRICS_BOLD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE_TITLE), "soft-shadow-thin"}
+                                        self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
+                                    </OnInitialized>
+                                </Control>
+                            </Controls>
+
+                            <OnFocusLost>
+                                CMX.EditTitleEnd(self)
+                            </OnFocusLost>
+                        </EditBox>
+
+                        <StatusBar name="$(parent)Bar" orientation="HORIZONTAL" color="CC00BB00" hidden="true">
+                            <Anchor point="TOPLEFT" offsetX="20" offsetY="4" />
+                            <Anchor point="BOTTOMRIGHT" offsetX="-20" offsetY="-6" />
+                            <Limits min="0" max="1" />
+                            <Controls>
+                                <Backdrop name="$(parent)BarBg" centerColor="00000000" edgeColor="FFCCCCCC" layer="CONTROLS"
+                                    level="1">
+                                    <AnchorFill />
+                                    <Edge edgeSize="1" />
+                                </Backdrop>
+                            </Controls>
+                        </StatusBar>
+                    </Controls>
+
+                    <OnInitialized>
+                        self.tooltip = {SI_COMBAT_METRICS_EDIT_TITLE}
+                    </OnInitialized>
+
+                    <OnMouseDoubleClick>
+                        CMX.EditTitleStart(self)
+                    </OnMouseDoubleClick>
+
+                    <OnMouseDown>
+                        CombatMetrics_Report:StartMoving()
+                    </OnMouseDown>
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

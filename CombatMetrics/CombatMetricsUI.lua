@@ -290,7 +290,7 @@ local function selectMainPanel(button)
 	local rightPanel = CombatMetrics_Report_RightPanel
 	local unitPanel = CombatMetrics_Report_UnitPanel
 	local abilityPanel = CombatMetrics_Report_AbilityPanel
-	local infoPanel = CombatMetrics_Report_InfoPanel
+	local setupPanel =     CombatMetrics_Report_SetupPanel
 	local graphPanel = CombatMetrics_Report_MainPanelGraph
 
 	local isInfo = category == "Info"
@@ -299,7 +299,7 @@ local function selectMainPanel(button)
 	rightPanel:SetHidden(isInfo)
 	unitPanel:SetHidden(isInfo)
 	abilityPanel:SetHidden(isInfo)
-	infoPanel:SetHidden(not isInfo)
+	setupPanel:SetHidden(not isInfo)
 
 	local isGraph = category == "Graph"
 
@@ -322,7 +322,7 @@ local function selectMainPanel(button)
 
 	else
 
-		infoPanel:Update()
+		setupPanel:Update()
 
 	end
 end
@@ -384,66 +384,24 @@ local function initSelectorButtons(selectorButtons)
 	end
 end
 
-local LegacyStrings = CMX.CPLegacyStrings[GetCVar("language.2")] or CMX.CPLegacyStrings["en"]
-
-function CMX.InitializeCPRowsLegacy(panel)
-	for i = 1, 9 do
-		local discipline = (7-i)%9+1	-- start with apprentice and then clockwise (seriously, how did they come up with those ids?)
-		local color = GetString(SI_COMBAT_METRICS_MAGICKA_COLOR)
-
-		if i > 6 then
-			color = GetString(SI_COMBAT_METRICS_STAMINA_COLOR)
-		elseif i > 3 then
-			color = GetString(SI_COMBAT_METRICS_HEALTH_COLOR)
-		end
-
-		local signcontrol = panel:GetNamedChild("StarSign"..i)
-		local title = signcontrol:GetNamedChild("Title")
-		local name = LegacyStrings and LegacyStrings[discipline] and LegacyStrings[discipline].name or "???"
-		title:SetText(name)
-
-		local width = title:GetTextWidth() + 4
-		local height = title:GetHeight()
-		title:SetDimensions(width, height)
-
-		CMX.SetLabelColor(signcontrol, color)
-
-		for i = 1, 4 do
-			local row = signcontrol:GetNamedChild("Row"..i)
-			local label = row:GetNamedChild("Name")
-			local name = LegacyStrings and LegacyStrings[discipline] and LegacyStrings[discipline][i] or "???"
-			label:SetText(name)
-
-			local passive = signcontrol:GetNamedChild("Passive"..i)
-			passive.discipline = discipline
-			passive.skillId = i + 4
-			passive.points = 0
-		end
-	end
-end
-
 local labelcolors = {
-
 	[CHAMPION_DISCIPLINE_TYPE_COMBAT] = GetString(SI_COMBAT_METRICS_MAGICKA_COLOR),
 	[CHAMPION_DISCIPLINE_TYPE_CONDITIONING] = GetString(SI_COMBAT_METRICS_HEALTH_COLOR),
 	[CHAMPION_DISCIPLINE_TYPE_WORLD] = GetString(SI_COMBAT_METRICS_STAMINA_COLOR),
-
 }
 
 local starcolors = {
-
 	[CHAMPION_DISCIPLINE_TYPE_COMBAT] = ZO_ColorDef:New(0.8, 0.8, 1),
 	[CHAMPION_DISCIPLINE_TYPE_CONDITIONING] = ZO_ColorDef:New(1, 0.80, 0.8),
 	[CHAMPION_DISCIPLINE_TYPE_WORLD] = ZO_ColorDef:New(0.8, 1, 0.7),
-
 }
 
 
-local function InitializeScribedSkillsPanel(panel)
+function CMX.InitializeScribedSkillsPanel(panel)
 	local nameBase = panel:GetName()
 	local anchor
 	for i = 1, 10 do
-		local scribedSkillControl = CreateControlFromVirtual(nameBase, panel, "CombatMetrics_ScribedSkillControl", i)
+		local scribedSkillControl = CreateControlFromVirtual(nameBase, panel, "CombatMetrics_ScribedSkillTemplate", i)
 		-- scribedSkillControl:SetHidden(false)
 
 		if i == 1 then
@@ -457,10 +415,9 @@ local function InitializeScribedSkillsPanel(panel)
 	end
 end
 
-function CMX.InitializeRightInfoPanel(panel)
-	InitializeScribedSkillsPanel(panel:GetNamedChild("ScribedSkills"))
-
-	local scrollchild = GetControl(panel, "PanelScrollChild")
+function CMX.InitializeChampionPointsPanel(panel)
+	local scrollchild = GetControl(panel, "ScrollChild")
+	scrollchild:SetResizeToFitPadding(0, 20)
 	scrollchild:SetAnchor(TOPRIGHT, nil, TOPRIGHT, 0, 0)
 	local currentanchor = {TOPLEFT, scrollchild, TOPLEFT, 0, dx}
 	local currentanchor2 = {TOPRIGHT, scrollchild, TOPRIGHT, 0, dx}
@@ -470,7 +427,7 @@ function CMX.InitializeRightInfoPanel(panel)
 		local color = labelcolors[disciplineType]
 
 		local panelName = scrollchild:GetName() .. "Panel" .. disciplineId
-		local constellationControl = _G[panelName] or CreateControlFromVirtual(panelName, scrollchild, "CombatMetrics_Constellation")
+		local constellationControl = _G[panelName] or CreateControlFromVirtual(panelName, scrollchild, "CombatMetrics_ConstellationTemplate")
 		constellationControl:SetAnchor(unpack(currentanchor))
 		constellationControl:SetAnchor(unpack(currentanchor2))
 		constellationControl:SetHidden(false)
@@ -487,7 +444,7 @@ function CMX.InitializeRightInfoPanel(panel)
 		local anchor
 
 		for i = 1, 24 do
-			local starControl = CreateControlFromVirtual(nameBase, constellationControl, "CombatMetrics_StarControl", i)
+			local starControl = CreateControlFromVirtual(nameBase, constellationControl, "CombatMetrics_StarTemplate", i)
 
 			if i == 1 then
 				starControl:SetAnchor(TOPLEFT, title, BOTTOMLEFT, 0, 4)
@@ -524,7 +481,7 @@ end
 
 function CMX.InitializeSkillStats(panel)
 
-	local block = panel:GetNamedChild("AbilityBlock1")
+	local block = panel:GetNamedChild("ActionBar1")
 	local title = block:GetNamedChild("Title")
 	title:SetText(GetString(SI_COMBAT_METRICS_BAR) .. 1)
 
@@ -537,7 +494,7 @@ function CMX.InitializeSkillStats(panel)
 	label2.tooltip = {SI_COMBAT_METRICS_SKILLTOTAL_TT}
 	label2:SetText(string.format("%s    -", GetString(SI_COMBAT_METRICS_TOTALC)))
 
-	local block2 = panel:GetNamedChild("AbilityBlock2")
+	local block2 = panel:GetNamedChild("ActionBar2")
 	local title2 = block2:GetNamedChild("Title")
 	title2:SetText(GetString(SI_COMBAT_METRICS_BAR) .. 2)
 
@@ -1029,7 +986,7 @@ do	-- Handling Buffs Context Menu
 
 		end
 
-		CombatMetrics_Report:GetNamedChild("_RightPanel"):GetNamedChild("BuffList"):Update()
+		CombatMetrics_Report:GetNamedChild("_BuffPanel"):GetNamedChild("BuffList"):Update()
 
 	end
 
@@ -1103,7 +1060,7 @@ function CMX.CollapseButton( button, upInside )
 
 	end
 
-	CombatMetrics_Report:GetNamedChild("_RightPanel"):GetNamedChild("BuffList"):Update()
+	CombatMetrics_Report:GetNamedChild("_BuffPanel"):GetNamedChild("BuffList"):Update()
 
 end
 
@@ -1721,7 +1678,7 @@ local CountStrings = {
 	["healingIn"]  = "healsIn",
 }
 
-local function updateFightStatsPanelLeft(panel)
+local function updateCombatStatsPanel(panel)
 
 	CMX.Log("UI", LOG_LEVEL_DEBUG, "Updating FightStatsPanelLeft")
 
@@ -1964,7 +1921,7 @@ local statFormat = { 			-- {label, format, convert}
 }
 
 
-local function updateFightStatsPanelRight(panel)
+local function updatePlayerStatsPanel(panel)
 	CMX.Log("UI", LOG_LEVEL_DEBUG, "Updating FightStatsPanelRight")
 
 	local data = fightData or {}
@@ -2214,21 +2171,9 @@ local function updateFightStatsPanelRight(panel)
 	end
 end
 
-local function updateFightStatsPanel(panel)
-
-	CMX.Log("UI", LOG_LEVEL_DEBUG, "Updating FightStatsPanel")
-
-	panel:GetNamedChild("Left"):Update(fightData, selectionData)
-	panel:GetNamedChild("Right"):Update(fightData)
-
-end
-
 local function updateMainPanel(mainpanel)
-
 	CMX.Log("UI", LOG_LEVEL_DEBUG, "Updating MainPanel")
-
 	mainpanel.active:Update()
-
 end
 
 local function adjustRowSize(row, header) 	-- this function resizes the row elements to match the size of the header elements of a scrolllist.
@@ -4458,7 +4403,7 @@ local function updateGraphPanel(panel)
 	if enlargedGraph == true then
 
 		panel:SetParent(CombatMetrics_Report)
-		panel:SetAnchor(BOTTOMRIGHT, CombatMetrics_Report_InfoPanel, BOTTOMRIGHT, 0, 0)
+		panel:SetAnchor(BOTTOMRIGHT,     CombatMetrics_Report_SetupPanel, BOTTOMRIGHT, 0, 0)
 
 	else
 
@@ -4469,7 +4414,7 @@ local function updateGraphPanel(panel)
 
 	CombatMetrics_Report:GetNamedChild("_AbilityPanel"):SetHidden(enlargedGraph)
 	CombatMetrics_Report:GetNamedChild("_UnitPanel"):SetHidden(enlargedGraph)
-	CombatMetrics_Report:GetNamedChild("_RightPanel"):SetHidden(enlargedGraph)
+	CombatMetrics_Report:GetNamedChild("_BuffPanel"):SetHidden(enlargedGraph)
 	CombatMetrics_Report:GetNamedChild("_MainPanel"):SetHidden(enlargedGraph)
 
 	local plotWindow = panel:GetNamedChild("PlotWindow")
@@ -5385,18 +5330,6 @@ function CMX.ScribedSkillTooltip_OnMouseExit(control)
 	ClearTooltip(SkillTooltip)
 end
 
-function CMX.CPTooltip_OnMouseEnterLegacy(control)
-
-	if control.skillId == nil then return end
-
-	InitializeTooltip(InformationTooltip, control, TOPLEFT, 0, 5, BOTTOMLEFT)
-
-	local string = LegacyStrings[control.discipline][control.skillId]
-
-	AddTooltipLine(control, InformationTooltip, string)
-
-end
-
 function CMX.CPTooltip_OnMouseEnter(starControl)
 
 	if starControl.starId == nil then return end
@@ -5404,12 +5337,6 @@ function CMX.CPTooltip_OnMouseEnter(starControl)
 	InitializeTooltip(ChampionSkillTooltip, starControl, TOPLEFT, 0, 5, BOTTOMLEFT)
 
 	ChampionSkillTooltip:SetChampionSkill(starControl.starId, starControl.points, nil, starControl.slotted)
-
-end
-
-function CMX.CPTooltip_OnMouseExitLegacy(control)
-
-	ClearTooltip(InformationTooltip)
 
 end
 
@@ -5478,7 +5405,7 @@ local DisabledColor = ZO_ColorDef:New("FF999999")
 local WerewolfColor = ZO_ColorDef:New("FFf3c86e")
 local WhiteColor = ZO_ColorDef:New("FFFFFFFF")
 
-local function updateLeftInfoPanel(panel)
+local function updateSkillsPanel(panel)
 
 	if fightData == nil then return end
 
@@ -5499,7 +5426,7 @@ local function updateLeftInfoPanel(panel)
 
 	for subPanelIndex = 1, 2 do
 
-		local subPanel = panel:GetNamedChild("AbilityBlock" .. subPanelIndex)
+		local subPanel = panel:GetNamedChild("ActionBar" .. subPanelIndex)
 
 		if subPanelIndex == 2 then	-- show extra option for werewolf bar
 
@@ -5603,8 +5530,8 @@ local function updateLeftInfoPanel(panel)
 		end
 	end
 
-	local statrow = panel:GetNamedChild("AbilityBlock1"):GetNamedChild("Stats2")
-	local statrow2 = panel:GetNamedChild("AbilityBlock2"):GetNamedChild("Stats2")
+	local statrow = panel:GetNamedChild("ActionBar1"):GetNamedChild("Stats2")
+	local statrow2 = panel:GetNamedChild("ActionBar2"):GetNamedChild("Stats2")
 
 	local totalWeavingTimeCount = data.totalWeavingTimeCount or data.totalSkills
 	local totalWeavingTimeSum = data.totalWeavingTimeSum or data.totalSkillTime
@@ -5644,53 +5571,9 @@ function CMX.SkillbarToggleWerewolf(control)
 
 	db.FightReport.showWereWolf = not db.FightReport.showWereWolf
 
-	updateLeftInfoPanel(control:GetParent():GetParent())
+	updateSkillsPanel(control:GetParent():GetParent())
 
 end
-
-local passiveRequirements = {10, 30, 75, 120}
-
-local function updateRightInfoPanelLegacy(panel)
-
-	local CPData = fightData.CP
-
-	for i = 1, 9 do
-
-		local discipline = (7-i)%9+1	-- start with apprentice and then clockwise (seriously, how did they come up with those ids?)
-
-		local signcontrol = panel:GetNamedChild("StarSign"..i)
-
-		local sum = 0
-
-		for id = 1, 4 do
-
-			local cpvalue = CPData[discipline][id]
-
-			local row = signcontrol:GetNamedChild("Row" .. id)
-
-			local value = row:GetNamedChild("Value")
-
-			sum = sum + cpvalue
-
-			value:SetText(tostring(cpvalue))
-
-		end
-
-		for k = 1, 4 do
-
-			local passiveControl = signcontrol:GetNamedChild("Passive" .. k)
-
-			local show = sum >= passiveRequirements[k]
-
-			local texture = show and "esoui/art/mainmenu/menubar_champion_down.dds" or "esoui/art/mainmenu/menubar_champion_up.dds"
-			local alpha = show and 1 or 0.4
-
-			passiveControl:SetTexture(texture)
-			passiveControl:SetAlpha(alpha)
-		end
-	end
-end
-
 
 ---@param panel Control
 ---@param setHidden boolean
@@ -5759,26 +5642,13 @@ local function SetStarControlEmpty(starControl)
 	starControl.points = nil
 end
 
-local function updateRightInfoPanel(panel)
+local function updateChampionPointsPanel(panel)
 	if fightData == nil then return end
-	
-	updateScribedSkillsPanel(panel:GetNamedChild("ScribedSkills"))
 	local CPData = fightData.CP
 	if CPData == nil then return end
 
-	local legacyPanel = panel:GetParent():GetNamedChild("RightOld")
-	if GetAPIVersion() < 100034 or (CPData.version or 0) < 2 then
-		panel:SetHidden(true)
-		legacyPanel:SetHidden(false)
-
-		updateRightInfoPanelLegacy(legacyPanel)
-		return
-	end
-
 	panel:SetHidden(false)
-	legacyPanel:SetHidden(true)
 	local scrollchild = GetControl(panel, "PanelScrollChild")
-
 
 	for disciplineId, discipline in pairs(CPData) do
 		if type(discipline) == "table" then
@@ -5901,7 +5771,7 @@ local function GetEnchantQuality(itemLink)	-- From Enchanted Quality (Rhyono, vo
 	return 0
 end
 
-local function updateBottomInfoPanel(panel)
+local function updateGearInfoPanel(panel)
 	if fightData == nil then return end
 
 	local charData = fightData.charData
@@ -5985,7 +5855,7 @@ local function valueOrder(t,a,b)
 	return t[a] < t[b]
 end
 
-local function updateMiscPanelItem(control, data, childName)
+local function updateConsumablesPanelItem(control, data, childName)
 	local numItems = NonContiguousCount(data)
 
 	if numItems == 0 then
@@ -6028,7 +5898,7 @@ local function updateMiscPanelItem(control, data, childName)
 	end
 end
 
-local function updateMiscInfoPanel(panel)
+local function updateConsumablesPanel(panel)
 	local mundusControl = panel:GetNamedChild("Mundus")
 	local drinksFoodsControl = panel:GetNamedChild("DrinkFood")
 	local potionsControl = panel:GetNamedChild("Potions")
@@ -6041,18 +5911,19 @@ local function updateMiscInfoPanel(panel)
 	end
 
 	local buildInfo = fightData.calculated.buildInfo
-	updateMiscPanelItem(mundusControl, buildInfo.mundus, "Mundus")
-	updateMiscPanelItem(drinksFoodsControl, buildInfo.drinkFood, "DrinkFood")
-	updateMiscPanelItem(potionsControl, buildInfo.potions, "Potions")
+	updateConsumablesPanelItem(mundusControl, buildInfo.mundus, "Mundus")
+	updateConsumablesPanelItem(drinksFoodsControl, buildInfo.drinkFood, "DrinkFood")
+	updateConsumablesPanelItem(potionsControl, buildInfo.potions, "Potions")
 end
 
-local function updateInfoPanel(panel)
+local function updateSetupPanel(panel)
 	if panel:IsHidden() then return end
 
-	updateLeftInfoPanel(panel:GetNamedChild("Left")) -- TODO: Rename
-	updateRightInfoPanel(panel:GetNamedChild("Right")) -- TODO: Rename
-	updateBottomInfoPanel(panel:GetNamedChild("Bottom")) -- TODO: Rename
-	updateMiscInfoPanel(panel:GetNamedChild("Misc"))
+	updateSkillsPanel(panel:GetNamedChild("SkillsPanel")) -- TODO: Rename
+	updateChampionPointsPanel(panel:GetNamedChild("ChampionPoints")) -- TODO: Rename
+	updateScribedSkillsPanel(panel:GetNamedChild("ScribedSkillsPanel"))
+	updateGearInfoPanel(panel:GetNamedChild("GearPanel")) -- TODO: Rename
+	updateConsumablesPanel(panel:GetNamedChild("ConsumablesPanel"))
 end
 
 local function updateInfoRowPanel(panel)
@@ -6986,18 +6857,15 @@ local function initFightReport()
 	local mainPanel = fightReport:GetNamedChild("_MainPanel")
 	mainPanel.Update = updateMainPanel
 
-		local fightStatsPanel = mainPanel:GetNamedChild("FightStats")
-		fightStatsPanel.Update = updateFightStatsPanel
-		mainPanel.active = fightStatsPanel
+		local combatStatsPanel = mainPanel:GetNamedChild("CombatStats")
+		combatStatsPanel.Update = updateCombatStatsPanel
+		mainPanel.active = combatStatsPanel
 
-			local fightStatsPanelLeft = fightStatsPanel:GetNamedChild("Left")
-			fightStatsPanelLeft.Update = updateFightStatsPanelLeft
+		local playerStatsPanel = combatStatsPanel:GetNamedChild("PlayerStats")
+		playerStatsPanel.Update = updatePlayerStatsPanel
 
-			local fightStatsPanelRight = fightStatsPanel:GetNamedChild("Right")
-			fightStatsPanelRight.Update = updateFightStatsPanelRight
-
-			local fightStatsButton = fightStatsPanelRight:GetNamedChild("SelectRow"):GetNamedChild(maxStat())
-			CMX.UpdateAttackStatsSelector(fightStatsButton)
+		local playerStatsButton = playerStatsPanel:GetNamedChild("SelectRow"):GetNamedChild(maxStat())
+		CMX.UpdateAttackStatsSelector(playerStatsButton) -- TODO: Unify stats window -> this button becomes obsolete
 
 		local combatLogPanel = mainPanel:GetNamedChild("CombatLog")
 		combatLogPanel.Update = updateCombatLog
@@ -7017,10 +6885,10 @@ local function initFightReport()
 			local plotWindow = graphPanel:GetNamedChild("PlotWindow")
 			initPlotWindow(plotWindow)
 
-	local infoPanel = fightReport:GetNamedChild("_InfoPanel")
-	infoPanel.Update = updateInfoPanel
+	local setupPanel = fightReport:GetNamedChild("_SetupPanel")
+	setupPanel.Update = updateSetupPanel
 
-	local rightPanel = fightReport:GetNamedChild("_RightPanel")
+	local rightPanel = fightReport:GetNamedChild("_BuffPanel")
 	rightPanel.Update = updateRightPanel
 
 		local buffPanel = rightPanel:GetNamedChild("BuffList")
@@ -7046,7 +6914,7 @@ local function initFightReport()
 
 	-- setup buttons:
 
-	local selectorButtons = fightReport:GetNamedChild("_SelectorRow")
+	local selectorButtons = fightReport:GetNamedChild("_MenuBar")
 	selectorButtons.Update = updateSelectorButtons
 	initSelectorButtons(selectorButtons)
 
