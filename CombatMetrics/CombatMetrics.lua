@@ -2431,144 +2431,6 @@ local function maxStat()
 
 end
 
-local svdefaults = {
-
-	["accountwide"] = false,
-
-	["fighthistory"] = 25,
-	["maxSavedFights"] = 50,
-	["keepbossfights"] = false,
-	["chunksize"] = 1000,
-
-	["recordgrp"] = true,
-	["recordgrpinlarge"] = true,
-
-	["showstacks"] = true,
-	["crusherValue"] = 2108,
-	["alkoshValue"] = 6000,
-	["tremorscaleValue"] = 2640,
-	["unitresistance"] = 18200,
-
-	["lightmode"] = false,
-	["offincyrodil"] = false,
-	["lightmodeincyrodil"] = true,
-
-	["autoselectchatchannel"] = true,
-
-	["autoscreenshot"] = false,
-	["autoscreenshotmintime"] = 30,
-
-	["currentNotificationVersion"] = 0,
-	["NotificationRead"] = 0,
-	["NotificationAllowed"] = true,
-	["ForceNotification"] = false,	-- for dev use
-
-	["showDebugIds"] = false,
-
-	["CombatMetrics_LiveReport"] = { x = 700, y = 500},
-	["CombatMetrics_Report"] = { x = GuiRoot:GetWidth()/2, y = GuiRoot:GetHeight()/2-75},
-
-	["FightReport"] = {
-
-		["scale"] 				= zo_roundToNearest(1 / GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE), 0.1),
-		["category"] 			= "damageOut",
-		["mainpanel"] 			= "FightStats",
-		["rightpanel"] 			= "buffs",
-		["fightstatspanel"] 	= maxStat(),
-
-		["useDisplayNames"] 	= false,
-		["showPets"] 			= true,
-
-		["SmoothWindow"] 		= 5,
-
-		["Cursor"]				= true,
-
-		["showWereWolf"] 		= false,
-
-		["PlotColors"]				= {
-
-			[1]	= {1, 1, 0, 0.66},	-- yellow
-			[2]	= {1, 0, 0, 0.66},	-- red
-			[3]	= {0, 1, 0, 0.66},	-- green
-			[4]	= {0, 0, 1, 0.66},	-- blue
-			[5]	= {1, 0, 1, 0.66},	-- violet
-			[6]	= {0.4, 1, 0.4, 0.4},	-- Buffs: green
-			[7]	= {1, 0.4, 0.9, 0.4},	-- Debuffs: violet
-
-		},
-
-		["ShowGroupBuffsInPlots"]	= true,
-
-		["FavouriteBuffs"] = {},
-
-		["CLSelection"] = {
-
-			[LIBCOMBAT_EVENT_DAMAGE_OUT] 		= true,
-			[LIBCOMBAT_EVENT_DAMAGE_IN] 		= false,
-			[LIBCOMBAT_EVENT_HEAL_OUT] 			= false,
-			[LIBCOMBAT_EVENT_HEAL_IN] 			= false,
-			[LIBCOMBAT_EVENT_EFFECTS_IN] 		= false,
-			[LIBCOMBAT_EVENT_EFFECTS_OUT] 		= false,
-			[LIBCOMBAT_EVENT_GROUPEFFECTS_IN] 	= false,
-			[LIBCOMBAT_EVENT_GROUPEFFECTS_OUT] 	= false,
-			[LIBCOMBAT_EVENT_PLAYERSTATS] 		= false,
-			[LIBCOMBAT_EVENT_RESOURCES] 		= false,
-			[LIBCOMBAT_EVENT_MESSAGES] 			= false,
-
-		},
-
-		["hitCritLayout"] = {
-			damageOut = 1,
-			damageIn = 1,
-			healingOut = 1,
-			healingIn = 1,
-		},
-
-		["averageLayout"] = {
-			damageOut = 1,
-			damageIn = 1,
-			healingOut = 1,
-			healingIn = 1,
-		},
-
-		["maxValue"] = {
-			damageOut = true,
-			damageIn = true,
-			healingOut = true,
-			healingIn = true,
-		},
-	},
-
-	["liveReport"] = {
-
-		["enabled"] 		= true,
-		["locked"] 			= false,
-		["layout"]			="Compact",
-		["scale"]			= zo_roundToNearest(1 / GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE), 0.1),
-		["bgalpha"]			= 95,
-		["alignmentleft"] 	= false,
-		["damageOut"] 		= true,
-		["damageOutSingle"] = false,
-		["healOut"] 		= true,
-		["damageIn"] 		= true,
-		["healIn"] 			= true,
-		["time"] 			= true,
-		["healOutAbsolute"]	= false,
-
-	},
-
-	["chatLog"] = {
-
-		["enabled"] 	= false,
-		["name"] 		= "CMX Combat Log",
-		["damageOut"] 	= true,
-		["healingOut"] 	= false,
-		["damageIn"] 	= false,
-		["healingIn"] 	= false,
-
-	},
-}
-
 -- Next we create a function that will initialize our addon
 local function Initialize(event, addon)
   -- filter for just CMX addon event
@@ -2576,28 +2438,12 @@ local function Initialize(event, addon)
 
 	em:UnregisterForEvent(CMX.name, EVENT_ADD_ON_LOADED)
 
-	-- remove old saved variables
-
-	local svmain = _G[CMX.name.."_Save"]
-	local svtable = svmain and svmain.Default and svmain.Default[GetDisplayName()] or nil
-
-	if svtable then
-
-		for k,v in pairs(svtable) do
-
-			if v.version and v.version < 5 then svtable[k] = nil end
-
-		end
-	end
-
 	-- load saved variables
 
-	CMX.db = ZO_SavedVars:NewAccountWide("CombatMetrics_Save", 5, "Settings", svdefaults)
-	if not CMX.db.accountwide then CMX.db = ZO_SavedVars:NewCharacterIdSettings("CombatMetrics_Save", 5, "Settings", svdefaults) end
+	CMX.db = ZO_SavedVars:NewAccountWide("CombatMetrics_Save", 6, "Settings", svdefaults)
+	if not CMX.db.accountwide then CMX.db = ZO_SavedVars:NewCharacterIdSettings("CombatMetrics_Save", 6, "Settings", svdefaults) end
 
 	db = CMX.db
-
-	local fightdata = CombatMetricsFightData
 
 	-- convert legacy data into new format
 
@@ -2605,9 +2451,7 @@ local function Initialize(event, addon)
 	--
 
 	for debuffKey, _ in pairs(variablePenetrationDebuffAbilityIds) do
-
 		CMX.SetPenetrationDebuffValue(debuffKey, nil)	-- Load values from SV
-
 	end
 
 	if db.chatLog.enabled then zo_callLater(CMX.InitializeChat, 500) end
