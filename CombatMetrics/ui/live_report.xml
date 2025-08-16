@@ -1,9 +1,184 @@
 <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
     <Controls>
-        <TopLevelControl name="CombatMetrics_LiveReport" clampedToScreen="true" movable="true" resizeToFitDescendents="true" hidden="false">
+        <Control name="CombatMetrics_LiveReport_DamageOutSingle" virtual="true">
+            <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="2" offsetY="2" />
+            <Dimensions x="150" y="26" />
+            <OnInitialized>self.blocksize = 1</OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Icon" textureFile="/esoui/art/icons/mapkey/mapkey_fightersguild.dds">
+                    <Anchor point="LEFT" />
+                    <Dimensions x="24" y="24" />
+                </Texture>
+
+                <Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0" horizontalAlignment="RIGHT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" />
+                    <Dimensions x="120" y="24" />
+                </Label>
+
+                <Control name="$(parent)Tooltip" inherits="CombatMetrics_ControlTooltip">
+                    <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3" />
+                    <OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
+                    <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_DPSSINGLE_TOOLTIP}</OnInitialized>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_LiveReport_DamageOut" virtual="true">
+            <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="2" offsetY="2" />
+            <Dimensions x="150" y="26" />
+            <OnInitialized>self.blocksize = 1</OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Icon" textureFile="/esoui/art/icons/poi/poi_battlefield_complete.dds">
+                    <Anchor point="LEFT" />
+                    <Dimensions x="24" y="24" />
+                </Texture>
+
+                <Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0" horizontalAlignment="RIGHT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" />
+                    <Dimensions x="120" y="24" />
+                </Label>
+
+                <Control name="$(parent)Tooltip" inherits="CombatMetrics_ControlTooltip">
+                    <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3" />
+                    <OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
+                    <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_DPSMULTI_TOOLTIP}</OnInitialized>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_LiveReport_HealOut" virtual="true">
+            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DamageOut" />
+            <Dimensions x="150" y="26" />
+            <OnInitialized>self.blocksize = 1</OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Icon" textureFile="/esoui/art/buttons/gamepad/pointsplus_up.dds">
+                    <Anchor point="LEFT" offsetX="2" />
+                    <Dimensions x="20" y="20" />
+                </Texture>
+
+                <Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0" horizontalAlignment="RIGHT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="2" />
+                    <Dimensions x="120" y="24" />
+                </Label>
+
+                <Control name="$(parent)Tooltip" inherits="CombatMetrics_ControlTooltip">
+                    <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3" />
+                    <OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
+                    <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_HPSOUT_TOOLTIP}</OnInitialized>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_LiveReport_HealOutAbsolute" virtual="true">
+            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DamageOut" />
+            <Dimensions x="85" y="26" />
+            <OnInitialized>self.blocksize = 0.57</OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Icon" textureFile="/esoui/art/buttons/gamepad/pointsplus_up.dds" color="FF888888">
+                    <Anchor point="LEFT" offsetX="2" />
+                    <Dimensions x="20" y="20" />
+                </Texture>
+
+                <Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0" horizontalAlignment="RIGHT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="2" />
+                    <Dimensions x="55" y="24" />
+                </Label>
+
+                <Control name="$(parent)Tooltip" inherits="CombatMetrics_ControlTooltip">
+                    <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3" />
+                    <OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
+                    <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_HPSRAW_TOOLTIP}</OnInitialized>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_LiveReport_DamageIn" virtual="true">
+            <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)HealOut" />
+            <Dimensions x="150" y="26" />
+            <OnInitialized>self.blocksize = 1</OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Icon" textureFile="/esoui/art/icons/heraldrycrests_weapon_shield_01.dds">
+                    <Anchor point="LEFT" />
+                    <Dimensions x="24" y="24" />
+                </Texture>
+
+                <Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0" horizontalAlignment="RIGHT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" />
+                    <Dimensions x="120" y="24" />
+                </Label>
+
+                <Control name="$(parent)Tooltip" inherits="CombatMetrics_ControlTooltip">
+                    <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3" />
+                    <OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
+                    <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_DPSINC_TOOLTIP}</OnInitialized>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_LiveReport_HealIn" virtual="true">
+            <Anchor point="TOPLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)DamageOut" />
+            <Dimensions x="85" y="26" />
+            <OnInitialized>self.blocksize = 0.57</OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Icon" textureFile="/esoui/art/buttons/gamepad/xbox/nav_xbone_dpad.dds">
+                    <Anchor point="LEFT" offsetX="2" />
+                    <Dimensions x="20" y="20" />
+                </Texture>
+
+                <Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0" horizontalAlignment="RIGHT"
+                    verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="2" />
+                    <Dimensions x="55" y="24" />
+                </Label>
+
+                <Control name="$(parent)Tooltip" inherits="CombatMetrics_ControlTooltip">
+                    <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3" />
+                    <OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
+                    <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_HPSINC_TOOLTIP}</OnInitialized>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_LiveReport_Time" virtual="true">
+            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)HealIn" />
+            <Dimensions x="65" y="26" />
+            <OnInitialized>self.blocksize = 0.43</OnInitialized>
+            <Controls>
+                <Texture name="$(parent)Icon" textureFile="/esoui/art/tutorial/timer_icon.dds">
+                    <Anchor point="LEFT" offsetX="2" />
+                    <Dimensions x="20" y="20" />
+                </Texture>
+
+                <Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0:00.0"
+                    horizontalAlignment="RIGHT" verticalAlignment="CENTER">
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" />
+                    <Dimensions x="38" y="24" />
+                </Label>
+
+                <Control name="$(parent)Tooltip" inherits="CombatMetrics_ControlTooltip">
+                    <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3" />
+                    <OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
+                    <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_TIME_TOOLTIP}</OnInitialized>
+                </Control>
+            </Controls>
+        </Control>
+
+        <TopLevelControl name="CombatMetrics_LiveReport" clampedToScreen="true" movable="true" resizeToFitDescendents="true" hidden="true">
             <Anchor point="BOTTOM" relativePoint="BOTTOM" offsetY="-150" />
             <DimensionConstraints minX="150" maxX="900" minY="26" maxY="156" />
-            <OnMoveStop> CMX.SavePosition(self) </OnMoveStop>
+            <OnInitialized>CMX.internal.LiveReport = self</OnInitialized>
             <Controls>
                 <Backdrop name="$(parent)BG" excludeFromResizeToFitExtents="true" inherits="CombatMetrics_BackgroundFramed_Solid"
                     edgeColor="FF000000" centerColor="FF000000">
@@ -19,181 +194,6 @@
                     <OnResizeStop>CMX.Resizing(self, false)</OnResizeStop>
                     <OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
                 </Backdrop>
-
-                <Control name="$(parent)DamageOutSingle">
-                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="2" offsetY="2" />
-                    <Dimensions x="150" y="26" />
-                    <OnInitialized>self.blocksize = 1</OnInitialized>
-                    <Controls>
-                        <Texture name="$(parent)Icon" textureFile="/esoui/art/icons/mapkey/mapkey_fightersguild.dds">
-                            <Anchor point="LEFT" />
-                            <Dimensions x="24" y="24" />
-                        </Texture>
-
-                        <Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0" horizontalAlignment="RIGHT"
-                            verticalAlignment="CENTER">
-                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" />
-                            <Dimensions x="120" y="24" />
-                        </Label>
-
-                        <Control name="$(parent)Tooltip" inherits="CombatMetrics_ControlTooltip">
-                            <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
-                            <Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3" />
-                            <OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
-                            <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_DPSSINGLE_TOOLTIP}</OnInitialized>
-                        </Control>
-                    </Controls>
-                </Control>
-
-                <Control name="$(parent)DamageOut">
-                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" offsetX="2" offsetY="2" />
-                    <Dimensions x="150" y="26" />
-                    <OnInitialized>self.blocksize = 1</OnInitialized>
-                    <Controls>
-                        <Texture name="$(parent)Icon" textureFile="/esoui/art/icons/poi/poi_battlefield_complete.dds">
-                            <Anchor point="LEFT" />
-                            <Dimensions x="24" y="24" />
-                        </Texture>
-
-                        <Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0" horizontalAlignment="RIGHT"
-                            verticalAlignment="CENTER">
-                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" />
-                            <Dimensions x="120" y="24" />
-                        </Label>
-
-                        <Control name="$(parent)Tooltip" inherits="CombatMetrics_ControlTooltip">
-                            <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
-                            <Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3" />
-                            <OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
-                            <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_DPSMULTI_TOOLTIP}</OnInitialized>
-                        </Control>
-                    </Controls>
-                </Control>
-
-                <Control name="$(parent)HealOut">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DamageOut" />
-                    <Dimensions x="150" y="26" />
-                    <OnInitialized>self.blocksize = 1</OnInitialized>
-                    <Controls>
-                        <Texture name="$(parent)Icon" textureFile="/esoui/art/buttons/gamepad/pointsplus_up.dds">
-                            <Anchor point="LEFT" offsetX="2" />
-                            <Dimensions x="20" y="20" />
-                        </Texture>
-
-                        <Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0" horizontalAlignment="RIGHT"
-                            verticalAlignment="CENTER">
-                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="2" />
-                            <Dimensions x="120" y="24" />
-                        </Label>
-
-                        <Control name="$(parent)Tooltip" inherits="CombatMetrics_ControlTooltip">
-                            <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
-                            <Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3" />
-                            <OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
-                            <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_HPSOUT_TOOLTIP}</OnInitialized>
-                        </Control>
-                    </Controls>
-                </Control>
-
-                <Control name="$(parent)HealOutAbsolute">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DamageOut" />
-                    <Dimensions x="85" y="26" />
-                    <OnInitialized>self.blocksize = 0.57</OnInitialized>
-                    <Controls>
-                        <Texture name="$(parent)Icon" textureFile="/esoui/art/buttons/gamepad/pointsplus_up.dds" color="FF888888">
-                            <Anchor point="LEFT" offsetX="2" />
-                            <Dimensions x="20" y="20" />
-                        </Texture>
-
-                        <Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0" horizontalAlignment="RIGHT"
-                            verticalAlignment="CENTER">
-                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="2" />
-                            <Dimensions x="55" y="24" />
-                        </Label>
-
-                        <Control name="$(parent)Tooltip" inherits="CombatMetrics_ControlTooltip">
-                            <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
-                            <Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3" />
-                            <OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
-                            <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_HPSRAW_TOOLTIP}</OnInitialized>
-                        </Control>
-                    </Controls>
-                </Control>
-
-                <Control name="$(parent)DamageIn">
-                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)HealOut" />
-                    <Dimensions x="150" y="26" />
-                    <OnInitialized>self.blocksize = 1</OnInitialized>
-                    <Controls>
-                        <Texture name="$(parent)Icon" textureFile="/esoui/art/icons/heraldrycrests_weapon_shield_01.dds">
-                            <Anchor point="LEFT" />
-                            <Dimensions x="24" y="24" />
-                        </Texture>
-
-                        <Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0" horizontalAlignment="RIGHT"
-                            verticalAlignment="CENTER">
-                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" />
-                            <Dimensions x="120" y="24" />
-                        </Label>
-
-                        <Control name="$(parent)Tooltip" inherits="CombatMetrics_ControlTooltip">
-                            <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
-                            <Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3" />
-                            <OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
-                            <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_DPSINC_TOOLTIP}</OnInitialized>
-                        </Control>
-                    </Controls>
-                </Control>
-
-                <Control name="$(parent)HealIn">
-                    <Anchor point="TOPLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)DamageOut" />
-                    <Dimensions x="85" y="26" />
-                    <OnInitialized>self.blocksize = 0.57</OnInitialized>
-                    <Controls>
-                        <Texture name="$(parent)Icon" textureFile="/esoui/art/buttons/gamepad/xbox/nav_xbone_dpad.dds">
-                            <Anchor point="LEFT" offsetX="2" />
-                            <Dimensions x="20" y="20" />
-                        </Texture>
-
-                        <Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0" horizontalAlignment="RIGHT"
-                            verticalAlignment="CENTER">
-                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="2" />
-                            <Dimensions x="55" y="24" />
-                        </Label>
-
-                        <Control name="$(parent)Tooltip" inherits="CombatMetrics_ControlTooltip">
-                            <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
-                            <Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3" />
-                            <OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
-                            <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_HPSINC_TOOLTIP}</OnInitialized>
-                        </Control>
-                    </Controls>
-                </Control>
-
-                <Control name="$(parent)Time">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)HealIn" />
-                    <Dimensions x="65" y="26" />
-                    <OnInitialized>self.blocksize = 0.43</OnInitialized>
-                    <Controls>
-                        <Texture name="$(parent)Icon" textureFile="/esoui/art/tutorial/timer_icon.dds">
-                            <Anchor point="LEFT" offsetX="2" />
-                            <Dimensions x="20" y="20" />
-                        </Texture>
-
-                        <Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0:00.0"
-                            horizontalAlignment="RIGHT" verticalAlignment="CENTER">
-                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" />
-                            <Dimensions x="38" y="24" />
-                        </Label>
-
-                        <Control name="$(parent)Tooltip" inherits="CombatMetrics_ControlTooltip">
-                            <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
-                            <Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3" />
-                            <OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
-                            <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_TIME_TOOLTIP}</OnInitialized>
-                        </Control>
-                    </Controls>
-                </Control>
             </Controls>
         </TopLevelControl>
     </Controls>
