@@ -7,9 +7,10 @@ local logger
 local CountStrings = CMXint.CountStrings
 local DPSstrings = CMXint.DPSstrings
 
+local CombatStatsPanel = CMXint.PanelObject:New("CombatStats", CombatMetrics_Report_MainPanelCombatStats)
 
-local function updateCombatStatsPanel(self, fightData)
-	logger:Debug("Updating CombatStatsPanel")
+function CombatStatsPanel:Update(fightData)
+	logger:Debug("Updating Combat Stats Panel")
 
 	local data = fightData and fightData.calculated or {}
 	local settings = self.settings
@@ -163,7 +164,7 @@ local function updateCombatStatsPanel(self, fightData)
 	end
 end
 
-CMXint.PanelObject:New("CombatStats", CombatMetrics_Report_AbilitiesPanel, updateCombatStatsPanel, function() end)
+function CombatStatsPanel:Release() end
 
 local isFileInitialized = false
 function CMXint.InitializeCombatStatsPanel()

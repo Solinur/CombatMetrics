@@ -1,0 +1,130 @@
+local CMX = CombatMetrics
+local CMXint = CMX.internal
+local CMXf = CMXint.functions
+local CMXd = CMXint.data
+local logger
+
+local dx = CMXint.dx
+local DPSstrings = CMXint.DPSstrings
+local adjustRowSize = CMXf.adjustRowSize
+
+local function GetShortFormattedNumber(number)
+	local exponent = zo_floor(math.log(number)/math.log(10))
+	local loweredNumber = zo_roundToNearest(number, zo_pow(10, exponent-2))
+	local shortNumber = ZO_AbbreviateNumber(loweredNumber, 2, exponent>=6)
+
+	return shortNumber
+end
+
+local UnitPanel = CMXint.PanelObject:New("Units", CombatMetrics_Report_UnitPanel)
+
+function UnitPanel:Update(fightData)
+	logger:Debug("Updating Unit Panel")
+
+	self:ResetBars()
+
+	local settings = self.settings
+	local category = settings.category
+	local isdamage = (category == "damageOut" or category == "damageIn")
+
+	local label1 = ((category == "damageOut" or category == "healingOut") and GetString(SI_COMBAT_METRICS_TARGET)) or GetString(SI_COMBAT_METRICS_SOURCE)
+	local label2 = (isdamage and GetString(SI_COMBAT_METRICS_DPS)) or GetString(SI_COMBAT_METRICS_HPS)
+	local label3 = (isdamage and GetString(SI_COMBAT_METRICS_DAMAGE)) or GetString(SI_COMBAT_METRICS_HEALING)
+
+	local header = self:GetNamedChild("Header")
+
+	header:GetNamedChild("Name"):SetText(label1)
+	header:GetNamedChild("PerSecond"):SetText(label2)
+	header:GetNamedChild("Total"):SetText(label3)
+
+	-- prepare data
+
+	if fightData == nil then return end
+	local data = fightData.calculated
+	local selectedunits = CMXint.selections.unit[category]
+
+	local totalAmountKey = category.."Total"
+	local totalAmount = data[totalAmountKey] -- i.e. damageOutTotal
+	local APSKey = DPSstrings[category]
+
+	local scrollchild = GetControl(self, "PanelScrollChild")
+	local currentanchor = {TOPLEFT, scrollchild, TOPLEFT, 0, 1}
+
+	local rightpanel = settings.rightpanel
+	local showids = settings.showDebugIds
+
+	for unitId, unit in CMX.spairs(data.units, function(t, a, b) return t[a][totalAmountKey]>t[b][totalAmountKey] end) do -- i.e. for damageOut sort by damageOutTotal
+		local totalUnitAmount = unit[totalAmountKey]
+		local unitData = fightData.units[unitId]
+
+		if (totalUnitAmount > 0 or (rightpanel == "buffsout" and NonContiguousCount(unit.buffs) > 0 and (unitData.isFriendly == false and isdamage) or (unitData.isFriendly and not isdamage))) and (not (unitData.unitType == 2 and settings.showPets == false)) then
+			local highlight = false
+			if selectedunits ~= nil then highlight = selectedunits[unitId] ~= nil end
+			
+			local dbug = showids and string.format("(%d) ", unitId) or ""
+
+			local name = dbug .. (settings.useDisplayNames and unitData.displayname or unitData.name)
+
+			local isboss = unitData.bossId
+			local namecolor = (isboss and {1, .8, .3, 1}) or {1, 1, 1, 1}
+
+			local unitTime = unitData.dpsend and unitData.dpsstart and zo_max((unitData.dpsend - unitData.dpsstart) / 1000, 1) or 1
+			local dps  = unitTime and totalUnitAmount / unitTime or unit[APSKey]
+			local damage = totalUnitAmount
+			local ratio = damage / totalAmount
+
+			local rowId = #self.bars + 1
+
+			local rowName = scrollchild:GetName() .. "Row" .. rowId
+			local row = _G[rowName] or CreateControlFromVirtual(rowName, scrollchild, "CombatMetrics_UnitRowTemplate")
+			row:SetAnchor(unpack(currentanchor))
+			row:SetHidden(false)
+
+			local header = self:GetNamedChild("Header")
+			adjustRowSize(row, header)
+
+			local highlightControl = row:GetNamedChild("HighLight")
+			highlightControl:SetHidden(not highlight)
+
+			local nameControl = row:GetNamedChild("Name")
+			nameControl:SetText(name)
+			--nameControl:SetFont(font)
+			nameControl:SetColor(unpack(namecolor))
+
+			local maxwidth = nameControl:GetWidth()
+
+			local barControl = row:GetNamedChild("Bar")
+			barControl:SetWidth(maxwidth * ratio)
+
+			local rateControl = row:GetNamedChild("PerSecond")
+			rateControl:SetText(string.format("%.0f", dps))
+
+			local amountControl = row:GetNamedChild("Total")
+			amountControl:SetText(GetShortFormattedNumber(damage))
+
+			local fractionControl = row:GetNamedChild("Fraction")
+			fractionControl:SetText(string.format("%.1f%%", 100 * ratio))
+
+			currentanchor = {TOPLEFT, row, BOTTOMLEFT, 0, dx}
+
+			self.bars[rowId] = row
+
+			row.dataId = unitId
+			row.type = "unit"
+			row.id = rowId
+			row.self = self
+
+		end
+	end
+end
+
+function UnitPanel:Release() end
+
+local isFileInitialized = false
+function CMXint.InitializeUnitPanel()
+	if isFileInitialized == true then return false end
+	logger = CMXf.initSublogger("UnitPanel")
+
+    isFileInitialized = true
+	return true
+end

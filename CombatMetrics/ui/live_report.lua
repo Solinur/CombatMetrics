@@ -190,7 +190,7 @@ end
 ---@param LiveReport TopLevelWindow
 local function InitLiveReport(LiveReport)
 	local self = LiveReport
-	local settings = CMX.db.liveReport
+	local settings = CMXint.settings.FightReport
 	if settings.enabled == false then return end
 
 	self.initilazed = true
@@ -315,7 +315,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeLiveReport()
 	if isFileInitialized == true then return false end
-	logger = CMXf.initSublogger("XXX")
+	logger = CMXf.initSublogger("LiveReport")
 	db = CMX.db
 
 	InitLiveReport(CMX.internal.LiveReport)

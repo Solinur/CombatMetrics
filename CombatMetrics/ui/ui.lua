@@ -4,6 +4,7 @@ local CMXf = CMXint.functions
 local logger
 
 CMXint.dx = zo_ceil(GuiRoot:GetWidth() / tonumber(GetCVar("WindowedWidth")) * 1000) / 1000
+CMXint.fontSize = tonumber(GetString(SI_COMBAT_METRICS_FONT_SIZE_SMALL))
 
 CMXint.DPSstrings = {
 	["damageOut"]  = "DPSOut",
@@ -19,11 +20,26 @@ CMXint.CountStrings = {
 	["healingIn"]  = "healsIn",
 }
 
+local function storeOrigLayout(tlc)
+	tlc.sizes = {tlc:GetDimensions()}
+	tlc.anchors = {}
+
+	for i = 1, 2 do
+		local valid, point, relativeTo, relativePoint, x, y, constrains = tlc:GetAnchor(i-1)
+		if valid then tlc.anchors[i] = {point, relativeTo, relativePoint, x, y, constrains} end
+	end
+
+	for i = 1, tlc:GetNumChildren() do
+		local child = tlc:GetChild(i)
+		if child then storeOrigLayout(child) end
+	end
+end
+CMXf.storeOrigLayout = storeOrigLayout
 
 -- this function resizes the row elements to match the size of the header elements of a scrolllist.
 -- It's important to maintain the naming and structure of the header elements to match those of the row elements.
 function CMXf.adjustRowSize(row, header)
-	local settings = CMX.db.FightReport
+	local settings = CMXint.settings.FightReport
 	if row == nil or row.scale == settings.scale then return end -- if sizes are good already, bail out.
 	row.scale = settings.scale
 
@@ -55,7 +71,10 @@ end
 local PanelObject = ZO_Object:InitializingObject()
 CMXint.PanelObject = PanelObject
 
-function PanelObject:Initialize(name, control, updateFunc, releaseFunc)
+PanelObject.Update = PanelObject:MUST_IMPLEMENT()
+PanelObject.Release = PanelObject:MUST_IMPLEMENT()
+
+function PanelObject:Initialize(name, control)
 	if CMXint.panels[name] then
 		logger:Error("Cannot create %s panel. A panel with this name already exists.", name)
 		return
@@ -63,10 +82,8 @@ function PanelObject:Initialize(name, control, updateFunc, releaseFunc)
 
 	self.name = name
 	self.control = control
-	self.settings = CMX.db.FightReport
+	self.settings = CMXint.settings.FightReport
 	control.panel = self
-	self.Update = updateFunc
-	self.Release = releaseFunc
 	CMXint.panels[name] = self
 end
 
@@ -89,7 +106,11 @@ function CMXint.InitializeUI()
 	if isFileInitialized == true then return false end
 	logger = CMXf.initSublogger("UI")
 
+	assert(CMXint.InitializeTitlePanel(), "Initialization of title panel failed")
+	assert(CMXint.InitializeCombatStatsPanel(), "Initialization of combat stats panel failed")
+	assert(CMXint.InitializePlayerStatsPanel(), "Initialization of player stats panel failed")
 	assert(CMXint.InitializeAbilitiesPanel(), "Initialization of abilities panel failed")
+	assert(CMXint.InitializeCombatLogPanel(), "Initialization of combat log panel failed")
 
 	CMXint.SVHandler = CombatMetricsFightData
 

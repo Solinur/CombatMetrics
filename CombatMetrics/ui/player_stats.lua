@@ -61,7 +61,9 @@ local statFormat = { 			-- {label, format, convert}
 
 }
 
-local function updatePlayerStatsPanel(self, fightData)
+local PlayerStatsPanel = CMXint.PanelObject:New("PlayerStats", CombatMetrics_Report_MainPanelPlayerStats)
+
+function PlayerStatsPanel:Update(fightData)
 	logger:Debug("Updating CombatStatsPanel")
 
 	local data = fightData or {}
@@ -316,7 +318,7 @@ local function updatePlayerStatsPanel(self, fightData)
 	end
 end
 
-CMXint.PanelObject:New("PlayerStats", CombatMetrics_Report_AbilitiesPanel, updatePlayerStatsPanel, function() end)
+function PlayerStatsPanel:Release() end
 
 local isFileInitialized = false
 function CMXint.InitializePlayerStatsPanel()

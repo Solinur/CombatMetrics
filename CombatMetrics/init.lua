@@ -96,6 +96,8 @@ local svdefaults = {
 		["enablePvP"] = "light",
 	},
 
+	["autoSelectChatChannel"] = true,
+
 	["fights"] = {
 		["maxLiveFights"] = 25,
 		["maxSavedFights"] = 50,
@@ -131,7 +133,7 @@ local svdefaults = {
 		["category"] 			= "damageOut",
 		["rightpanel"] 			= "buffs",
 
-		["showDebugIds"] = false,
+		["showDebugIds"] 		= false,
 		["useDisplayNames"] 	= false,
 		["showPets"] 			= true,
 
@@ -219,7 +221,7 @@ local svdefaults = {
 
 local function loadSV()
 	CMXint.settings = ZO_SavedVars:NewAccountWide("CombatMetrics_Save", 6, "Settings", svdefaults)
-	if not CMX.settings.accountwide then CMXint.settings = ZO_SavedVars:NewCharacterIdSettings("CombatMetrics_Save", 6, "Settings", svdefaults) end
+	if not CMXint.settings.accountwide then CMXint.settings = ZO_SavedVars:NewCharacterIdSettings("CombatMetrics_Save", 6, "Settings", svdefaults) end
 end
 
 local function Initialize(eventId, addon)

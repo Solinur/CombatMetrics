@@ -2478,9 +2478,9 @@ local function Initialize(event, addon)
 		LC.AddCustomAbilityData(CMX.LoadCustomizations())
 	end
 
-	function CMX.GetCombatLogString(fight, logline, fontsize)
+	function CMX.GetCombatLogString(fight, logline, fontSize)
 
-		local text, color = LC:GetCombatLogString(fight, logline, fontsize, db.showDebugIds)
+		local text, color = LC:GetCombatLogString(fight, logline, fontSize, db.showDebugIds)
 		return text, color
 
 	end

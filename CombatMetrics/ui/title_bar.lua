@@ -6,7 +6,9 @@ local logger
 
 local SVHandler
 
-local function updateTitlePanel(self, fightData)
+local TitlePanel = CMXint.PanelObject:New("Title", CombatMetrics_Report_Title)
+
+function TitlePanel:Update(fightData)
 	logger:Debug("Updating TitlePanel")
 
 	-- update character info
@@ -144,7 +146,8 @@ local function updateTitlePanel(self, fightData)
 	end
 end
 
-CMXint.PanelObject:New("TitlePanel", CombatMetrics_Report_AbilitiesPanel, updateTitlePanel, function() end)
+function TitlePanel:Release() end
+
 
 local isFileInitialized = false
 function CMXint.InitializeTitlePanel()

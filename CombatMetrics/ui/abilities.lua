@@ -113,8 +113,10 @@ do -- Context Menu for Min/Max column on ability panel
 	end
 end
 
-local function updateAbilityPanel(self, fightData)
-	logger:Debug("Updating AbilityPanel")
+local AbilityPanel = CMXint.PanelObject:New("Abilities", CombatMetrics_Report_AbilitiesPanel)
+
+function AbilityPanel:Update(fightData)
+	logger:Debug("Updating Ability Panel")
 
 	self:ResetBars()
 
@@ -300,7 +302,7 @@ local function updateAbilityPanel(self, fightData)
 	end
 end
 
-CMXint.PanelObject:New("Abilities", CombatMetrics_Report_AbilitiesPanel, updateAbilityPanel, function() end)
+function AbilityPanel:Release() end
 
 local isFileInitialized = false
 function CMXint.InitializeAbilitiesPanel()

@@ -297,7 +297,7 @@
                 <Control name="$(parent)Window">
                     <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Sep" offsetX="0" offsetY="2" />
                     <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4" />
-                    <OnInitialized>CMX.InitCombatLog(self)</OnInitialized>
+                    <OnInitialized>CMXf.InitCombatLog(self)</OnInitialized>
                     <Controls>
                         <TextBuffer name="$(parent)Buffer" linkEnabled="false" maxHistoryLines="1000" mouseEnabled="true">
                             <Anchor point="TOPLEFT" />
