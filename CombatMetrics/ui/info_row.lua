@@ -6,8 +6,8 @@ local logger
 local SVHandler
 local InfoRowPanel = CMXint.PanelObject:New("InfoRow", CombatMetrics_Report_InfoRow)
 
-local LC = LibCombat
 assert(LibCombat, "Could not find LibCombat")
+local LC = LibCombat
 
 function InfoRowPanel:Update(fightData)
 	logger:Debug("Updating Info Row")

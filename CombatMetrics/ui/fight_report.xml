@@ -2,7 +2,7 @@
     <Controls>
         <TopLevelControl name="CombatMetrics_Report" clampedToScreen="true" mouseEnabled="true" movable="true" hidden="true">
             <Dimensions x="1000" y="770" />
-            <OnMoveStop>CMX.SavePosition(self)</OnMoveStop>
+            <OnMoveStop>CMX.internal.SavePosition(self)</OnMoveStop>
             <Controls>
                 <Backdrop name="$(parent)BG" inherits="CombatMetrics_BackgroundFramed_Solid" edgeColor="FF000000" centerColor="EE000000">
                     <AnchorFill />
@@ -86,7 +86,6 @@
                             <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)SkillsPanel" offsetX="4" offsetY="0" />
                             <Anchor point="TOPRIGHT" offsetX="0" offsetY="0" />
                             <DimensionConstraints minY="0" />
-                            <OnInitialized>CMX.InitializeScribedSkillsPanel(self)</OnInitialized>
                         </Control>
 
                         <Line name="$(parent)Sep2" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
@@ -99,7 +98,6 @@
                         <Control name="$(parent)ChampionPointsPanel" inherits="ZO_ScrollContainer">
                             <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Sep2" offsetX="2" offsetY="4" />
                             <Anchor point="BOTTOMRIGHT" offsetX="0" offsetY="-2" />
-                            <OnInitialized>CMX.InitializeChampionPointsPanel(self)</OnInitialized>
                         </Control>
 
                         <Line name="$(parent)Sep3" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
@@ -107,18 +105,18 @@
                             <Anchor point="BOTTOMLEFT" relativeTo="$(parent)ChampionPointsPanel" offsetX="0" offsetY="-2" />
                         </Line>
 
-                        <Control name="$(parent)GearPanel" inherits="CombatMetrics_GearPanel">
+                        <Control name="$(parent)EquipmentPanel" inherits="CombatMetrics_EquipmentPanel">
                             <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Left" offsetX="0" offsetY="6" />
                             <Anchor point="BOTTOMLEFT" offsetX="4" offsetY="-50" />
                         </Control>
 
                         <Line name="$(parent)Sep4" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
-                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)GearPanel" offsetY="0" />
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)GearPanel" offsetY="0" />
+                            <Anchor point="BOTTOMLEFT" relativeTo="$(parent)EquipmentPanel" offsetY="0" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)EquipmentPanel" offsetY="0" />
                         </Line>
 
                         <Control name="$(parent)ConsumablesPanel" inherits="CombatMetrics_ConsumablesPanel">
-                            <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)GearPanel" offsetX="0" offsetY="3" />
+                            <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)EquipmentPanel" offsetX="0" offsetY="3" />
                             <Anchor point="BOTTOMLEFT" offsetX="4" offsetY="-3" />
                         </Control>
                     </Controls>

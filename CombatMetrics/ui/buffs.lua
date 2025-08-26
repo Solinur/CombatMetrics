@@ -244,6 +244,7 @@ local function buffSortFunction(data, a, b)
 
 	return ishigher
 end
+CMXf.buffSortFunction = buffSortFunction
 
 local function GetBuffData()
 	local buffData
@@ -258,7 +259,7 @@ local function GetBuffData()
 
 	return buffData
 end
-
+CMXf.GetBuffData = GetBuffData
 
 local function addBuffPanelRow(panel, scrollchild, anchor, rowdata, parentrow)
 	local hideGroupValues = rowdata.count == rowdata.groupCount and rowdata.uptimeRatio == rowdata.groupUptimeRatio
@@ -448,10 +449,40 @@ end
 
 function BuffPanel:Release() end
 
+function CMXint.SelectRightPanel(control)
+	local rightpanel = control.menukey
+	CMXint.settings.FightReport.rightpanel = rightpanel
+	local menubar = control:GetParent()
+
+	for i=1, menubar:GetNumChildren() do
+		local child = menubar:GetChild(i)
+
+		if child:GetType() == CT_CONTROL then
+			child:GetNamedChild("Overlay"):SetHidden(child == control)
+		end
+	end
+
+	local isbuffpanel = rightpanel == "buffs" or rightpanel == "buffsout"
+	local panel = menubar:GetParent()
+
+	local buffList = panel:GetNamedChild("BuffList")
+	buffList:SetHidden(not isbuffpanel)
+	local resourceList = panel:GetNamedChild("ResourceList")
+	resourceList:SetHidden(isbuffpanel)
+
+	panel.active = isbuffpanel and buffList or resourceList
+
+	BuffPanel:Update(CMXint.currentFight)
+	CombatMetrics_Report_MainPanelGraph:Update()
+end
+
 local isFileInitialized = false
 function CMXint.InitializeBuffPanel()
 	if isFileInitialized == true then return false end
 	logger = CMXf.initSublogger("BuffPanel")
+
+	local buffbutton = GetControl(BuffPanel.control, "SelectorBuffsIn")
+	CMXint.SelectRightPanel(buffbutton)
 
     isFileInitialized = true
 	return true

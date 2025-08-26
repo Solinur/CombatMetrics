@@ -24,7 +24,7 @@
                     <AnchorFill />
                 </Label>
             </Controls>
-            <OnMouseUp>CMX.SelectRightPanel(self)</OnMouseUp>
+            <OnMouseUp>CMX.internal.SelectRightPanel(self)</OnMouseUp>
         </Control>
 
         <Control name="CombatMetrics_ResourceListTemplate" virtual="true">

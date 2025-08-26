@@ -68,6 +68,35 @@ function CMXf.adjustRowSize(row, header)
 	end
 end
 
+local function AddTooltipLine(control, tooltipControl, tooltip)
+	local tooltipTextType = type(tooltip)
+
+	if tooltipTextType == "string" then
+		if tooltip == "" then ZO_Options_OnMouseExit(control) return end
+	elseif tooltipTextType == "number" then	tooltip = GetString(tooltip)
+	elseif tooltipTextType == "function" then tooltip = tooltip()
+	else ZO_Options_OnMouseExit(control) return end
+
+	SetTooltipText(tooltipControl, tooltip)
+end
+CMXf.AddTooltipLine = AddTooltipLine
+
+function CMXint.OnMouseEnter(control) --copy from ZO_Options_OnMouseEnter but modified to support multiple tooltip lines
+	local tooltipText = control.tooltip
+
+    if tooltipText ~= nil and #tooltipText>0 then
+		InitializeTooltip(InformationTooltip, control, BOTTOMLEFT, 0, -2, TOPLEFT)
+
+		if type(tooltipText) == "table" then
+			for i=1, #tooltipText do
+				AddTooltipLine(control, InformationTooltip, tooltipText[i])
+			end
+		else
+			AddTooltipLine(control, InformationTooltip, tooltipText)
+		end
+	end
+end
+
 local PanelObject = ZO_Object:InitializingObject()
 CMXint.PanelObject = PanelObject
 
@@ -93,6 +122,7 @@ function PanelObject:GetParent()
 end
 
 function PanelObject:ResetBars(panel) -- TODO: Probably can be removed when ScrollList implementation is done
+	if panel == nil then panel = self.control end
 	if panel.bars == nil or #panel.bars == 0 then return end
 
 	for i = 1, #panel.bars do

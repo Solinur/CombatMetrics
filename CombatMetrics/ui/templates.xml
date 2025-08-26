@@ -112,7 +112,7 @@
 
         <Control name="CombatMetrics_ControlTooltip" mouseEnabled="true" virtual="true">
             <OnMouseEnter>
-                CMX.OnMouseEnter(self)
+                CMX.internal.OnMouseEnter(self)
             </OnMouseEnter>
 
             <OnMouseExit>
@@ -122,7 +122,7 @@
 
         <Button name="CombatMetrics_ButtonTooltip" mouseEnabled="true" virtual="true">
             <OnMouseEnter>
-                CMX.OnMouseEnter(self)
+                CMX.internal.OnMouseEnter(self)
             </OnMouseEnter>
 
             <OnMouseExit>
@@ -132,7 +132,7 @@
 
         <Label name="CombatMetrics_LabelTooltip" mouseEnabled="true" virtual="true">
             <OnMouseEnter>
-                CMX.OnMouseEnter(self)
+                CMX.internal.OnMouseEnter(self)
             </OnMouseEnter>
 
             <OnMouseExit>
@@ -142,7 +142,7 @@
 
         <Texture name="CombatMetrics_TextureTooltip" mouseEnabled="true" virtual="true">
             <OnMouseEnter>
-                CMX.OnMouseEnter(self)
+                CMX.internal.OnMouseEnter(self)
             </OnMouseEnter>
 
             <OnMouseExit>
@@ -231,8 +231,8 @@
 
         <Control name="CombatMetrics_StarTemplate" virtual="true" mouseEnabled="true" excludeFromResizeToFitExtents="true">
             <Dimensions x="165" y="20" />
-            <OnMouseEnter> CMX.CPTooltip_OnMouseEnter(self) </OnMouseEnter>
-            <OnMouseExit> CMX.CPTooltip_OnMouseExit(self) </OnMouseExit>
+            <OnMouseEnter> CMX.internal.CPTooltip_OnMouseEnter(self) </OnMouseEnter>
+            <OnMouseExit> CMX.internal.CPTooltip_OnMouseExit() </OnMouseExit>
             <Controls>
                 <Texture name="$(parent)Icon" textureFile="/esoui/art/champion/champion_star_pulse.dds">
                     <Anchor point="CENTER" relativeTo="$(parent)" relativePoint="LEFT" offsetX="10" offsetY="0" />
@@ -283,8 +283,8 @@
 
         <Control name="CombatMetrics_ScribedSkillTemplate" virtual="true" mouseEnabled="true">
             <Dimensions x="330" y="35" />
-            <OnMouseEnter> CMX.ScribedSkillTooltip_OnMouseEnter(self) </OnMouseEnter>
-            <OnMouseExit> CMX.ScribedSkillTooltip_OnMouseExit(self) </OnMouseExit>
+            <OnMouseEnter> CMX.internal.ScribedSkillTooltip_OnMouseEnter(self) </OnMouseEnter>
+            <OnMouseExit> CMX.internal.SkillTooltip_Clear(self) </OnMouseExit>
             <Controls>
                 <Control name="$(parent)Icon" inherits="CombatMetrics_InfoSkillIcon">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="4" offsetY="0" />
@@ -547,7 +547,7 @@
         <Control name="CombatMetrics_FightlistRowTemplate" resizeToFitDescendents="true" mouseEnabled="true" virtual="true">
             <OnMouseEnter> self:GetNamedChild("HighLight"):SetHidden(false) </OnMouseEnter>
             <OnMouseExit> self:GetNamedChild("HighLight"):SetHidden(true) </OnMouseExit>
-            <OnMouseUp>CMX.LoadItem(self)</OnMouseUp>
+            <OnMouseUp>CMX.internal.LoadItem(self)</OnMouseUp>
             <Controls>
                 <Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="LEFT"
                     verticalAlignment="CENTER">
@@ -602,7 +602,7 @@
                             <Dimensions x="20" />
 							<ButtonState state="NORMAL" />
 							<OnInitialized>self.tooltip = {SI_COMBAT_METRICS_DELETE_COMBAT_LOG}</OnInitialized>
-							<OnMouseUp>CMX.DeleteItemLog(self)</OnMouseUp>
+							<OnMouseUp>CMX.internal.DeleteItemLog(self)</OnMouseUp>
                             <Textures
                                 normal="CombatMetrics/icons/deletelogiconup.dds"
                                 pressed="CombatMetrics/icons/deletelogicondown.dds"
@@ -617,7 +617,7 @@
                             <Dimensions x="20" />
 							<ButtonState state="NORMAL" />
 							<OnInitialized>self.tooltip = {SI_COMBAT_METRICS_DELETE_FIGHT}</OnInitialized>
-							<OnMouseUp>CMX.DeleteItem(self)</OnMouseUp>
+							<OnMouseUp>CMX.internal.DeleteItem(self)</OnMouseUp>
                             <Textures
                                 normal="CombatMetrics/icons/deleteicon2up.dds"
                                 pressed="CombatMetrics/icons/deleteicon2down.dds"
@@ -660,7 +660,7 @@
             </Controls>
 
             <OnFocusLost>
-                CMX.EditLabelEnd(self)
+                CMX.internal.EditLabelEnd(self)
             </OnFocusLost>
         </EditBox>
     </Controls>

@@ -20,7 +20,7 @@
                 <Control name="$(parent)Icon" inherits="CombatMetrics_InfoSkillIcon" mouseEnabled="true">
                     <Anchor point="LEFT" />
                     <OnMouseEnter> if self:GetParent().id then CMX.SkillTooltip_OnMouseEnter(self) end </OnMouseEnter>
-                    <OnMouseExit> CMX.SkillTooltip_OnMouseExit(self) </OnMouseExit>
+                    <OnMouseExit> CMX.SkillTooltip_Clear() </OnMouseExit>
                 </Control>
 
                 <Label name="$(parent)Label" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="LEFT"
@@ -28,7 +28,7 @@
                     <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="4" />
                     <Dimensions x="134" y="20" />
                     <OnMouseEnter> if self:GetParent().id then CMX.SkillTooltip_OnMouseEnter(self) end </OnMouseEnter>
-                    <OnMouseExit> CMX.SkillTooltip_OnMouseExit(self) </OnMouseExit>
+                    <OnMouseExit> CMX.SkillTooltip_Clear() </OnMouseExit>
                 </Label>
 
                 <Label name="$(parent)Value1" inherits="CombatMetrics_ValueFontControl" text="-" horizontalAlignment="CENTER">
@@ -64,9 +64,9 @@
                 <Control name="$(parent)Werewolf" mouseEnabled="true" hidden="true">
                     <Anchor point="TOPRIGHT" offsetX="0" offsetY="2" />
                     <Dimensions x="20" y="20" />
-                    <OnMouseEnter>CMX.SkillbarButtonMouseOver(self, true)</OnMouseEnter>
-                    <OnMouseExit>CMX.SkillbarButtonMouseOver(self, false)</OnMouseExit>
-                    <OnMouseUp>CMX.SkillbarToggleWerewolf(self)</OnMouseUp>
+                    <OnMouseEnter>CMX.internal.SkillbarButtonMouseOver(self, true)</OnMouseEnter>
+                    <OnMouseExit>CMX.internal.SkillbarButtonMouseOver(self, false)</OnMouseExit>
+                    <OnMouseUp>CMX.internal.SkillbarToggleWerewolf()</OnMouseUp>
                     <Controls>
                         <Backdrop name="$(parent)Bg" inherits="CombatMetrics_BackgroundFramed">
                             <AnchorFill />

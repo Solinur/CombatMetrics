@@ -135,7 +135,7 @@
                                         offsetY="8" />
                                     <Limits min="1" max="60" />
                                     <OnValueChanged>
-                                        CMX.SetSliderValue(self, value)
+                                        CMX.internal.SetSliderValue(self, value)
                                     </OnValueChanged>
 
                                     <OnMouseWheel>
@@ -206,10 +206,10 @@
                 <Control name="$(parent)PlotWindow" mouseEnabled="true">
                     <Anchor point="TOPRIGHT" offsetX="-41" offsetY="12" />
                     <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Sep" offsetX="98" offsetY="-50" />
-                    <OnMouseDown> CMX.onPlotMouseDown(self, button) </OnMouseDown>
-                    <OnMouseUp> CMX.onPlotMouseUp(self, button, upInside) </OnMouseUp>
-                    <OnMouseEnter> CMX.onPlotMouseEnter(self) </OnMouseEnter>
-                    <OnMouseExit> CMX.onPlotMouseExit(self) </OnMouseExit>
+                    <OnMouseDown> CMX.internal.onPlotMouseDown(self, button) </OnMouseDown>
+                    <OnMouseUp> CMX.internal.onPlotMouseUp(self, button, upInside) </OnMouseUp>
+                    <OnMouseEnter> CMX.internal.onPlotMouseEnter(self) </OnMouseEnter>
+                    <OnMouseExit> CMX.internal.onPlotMouseExit(self) </OnMouseExit>
                     <Controls>
                         <Backdrop name="$(parent)Zoom" centerColor="33FFFFFF" edgeColor="55FFFFFF" layer="CONTROLS"
                             level="1" hidden="true">

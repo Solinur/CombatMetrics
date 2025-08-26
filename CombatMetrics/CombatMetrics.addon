@@ -33,9 +33,9 @@ ui/combat_log.xml
 ui/combat_stats.xml
 ui/consumables.xml
 ui/donate.xml
+ui/equipment.xml
 ui/fight_list.xml
 ui/fight_report.xml
-ui/gear.xml
 ui/graph.xml
 ui/info_row.xml
 ui/menu_bar.xml

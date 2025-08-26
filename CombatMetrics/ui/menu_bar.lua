@@ -119,7 +119,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeMenuBarPanel()
 	if isFileInitialized == true then return false end
-	logger = CMXf.initSublogger("MenuBarPanel")
+	logger = CMXf.initSublogger("Menu Bar")
 
 	MenuBarPanel:InitButtons()
 

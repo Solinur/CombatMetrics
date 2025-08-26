@@ -3,7 +3,6 @@ local CMXint = CMX.internal
 local CMXf = CMXint.functions
 local CMXd = CMXint.data
 local logger
-local settings
 
 local GetFormattedAbilityIcon = CMXf.GetFormattedAbilityIcon
 local GetFormattedAbilityName = CMXf.GetFormattedAbilityName
@@ -24,12 +23,12 @@ local hitCritLayoutTable = {
 
 do -- Context Menu for hit/crit column on ability panel
 	local function getMenuData(id)
-		local category = settings.category
+		local category = CMXint.settings.FightReport.category
 		local hitCritLayout = hitCritLayoutTable[id]
 		local text = string.format("%s/%s", hitCritLayout[3], hitCritLayout[4])
 
 		local function callback()
-			settings.hitCritLayout[category] = id
+			CMXint.settings.FightReport.hitCritLayout[category] = id
 			CombatMetrics_Report_AbilityPanel:Update()
 		end
 
@@ -39,7 +38,7 @@ do -- Context Menu for hit/crit column on ability panel
 	function CMX.HitCritContextMenu(control, button)
 		ClearMenu()
 
-		if settings.category == "damageIn" then
+		if CMXint.settings.FightReport.category == "damageIn" then
 			AddCustomMenuItem(getMenuData(4))
 			AddCustomMenuItem(getMenuData(5))
 			AddCustomMenuItem(getMenuData(6))
@@ -64,10 +63,10 @@ do -- Context Menu for average column on ability panel
 	local function getMenuData(id)
 		local averageLayout = averageLayoutTable[id]
 		local text = string.format("%s %s", GetString(SI_COMBAT_METRICS_AVERAGE), averageLayout[3])
-		local category = settings.category
+		local category = CMXint.settings.FightReport.category
 
 		local function callback()
-			settings.averageLayout[category] = id
+			CMXint.settings.FightReport.averageLayout[category] = id
 			CombatMetrics_Report_AbilityPanel:Update()
 		end
 
@@ -81,7 +80,7 @@ do -- Context Menu for average column on ability panel
 		AddCustomMenuItem(getMenuData(2))
 		AddCustomMenuItem(getMenuData(3))
 
-		if settings.category == "damageIn" then AddCustomMenuItem(getMenuData(4)) end
+		if CMXint.settings.FightReport.category == "damageIn" then AddCustomMenuItem(getMenuData(4)) end
 
 		ShowMenu(control)
 	end
@@ -89,14 +88,14 @@ end
 
 do -- Context Menu for Min/Max column on ability panel
 	local function selectMinMaxOption1()
-		local category = settings.category
-		settings.maxValue[category] = true
+		local category = CMXint.settings.FightReport.category
+		CMXint.settings.FightReport.maxValue[category] = true
 		CombatMetrics_Report_AbilityPanel:Update()
 	end
 
 	local function selectMinMaxOption2()
-		local category = settings.category
-		settings.maxValue[category] = false
+		local category = CMXint.settings.FightReport.category
+		CMXint.settings.FightReport.maxValue[category] = false
 		CombatMetrics_Report_AbilityPanel:Update()
 	end
 
@@ -308,7 +307,6 @@ local isFileInitialized = false
 function CMXint.InitializeAbilitiesPanel()
 	if isFileInitialized == true then return false end
 	logger = CMXf.initSublogger("Abilities")
-	settings = CMXint.settings.FightReport
 
 	isFileInitialized = true
 	return true
