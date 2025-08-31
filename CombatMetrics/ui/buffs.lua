@@ -4,6 +4,7 @@ local CMXf = CMXint.functions
 local CMXd = CMXint.data
 local logger
 local uncollapsedBuffs = {}
+local BuffPanel
 
 local dx = CMXint.dx
 local adjustRowSize = CMXf.adjustRowSize
@@ -15,7 +16,7 @@ local SigilAbilities = { -- Ailities to display a warning icon in the buff list 
 	[236968] = true, -- Sigil of Defense
 	[236994] = true, -- Sigil of Ultimate
 	[237014] = true, -- Sigil of Speed
-} 
+}
 
 local function isSigilAbility(buffAbilityIds)
 	if type(buffAbilityIds) ~= "table" then return false end
@@ -333,121 +334,121 @@ local function addBuffPanelRow(panel, scrollchild, anchor, rowdata, parentrow)
 	return currentanchor, row
 end
 
-local BuffPanel = CMXint.PanelObject:New("Buffs", CombatMetrics_Report_BuffPanel)
+function CMXint.InitializeBuffsPanel(control)
+	BuffPanel = CMXint.PanelObject:New(control, "buffs")
 
-function BuffPanel:Update(fightData)
-	logger:Debug("Updating Buff Panel")
+	function BuffPanel:Update(fightData)
+		logger:Debug("Updating Buff Panel")
 
-	self:ResetBars()
-	local sigilIcon = GetControl(self, "HeaderIconTexture")
-	sigilIcon:SetHidden(true)
+		self:ResetBars()
+		local sigilIcon = GetControl(control, "HeaderIconTexture")
+		sigilIcon:SetHidden(true)
 
-	if fightData == nil then return end
-	local buffData = GetBuffData()
-	if buffData == nil then return end
+		if fightData == nil then return end
+		local buffData = GetBuffData()
+		if buffData == nil then return end
 
-	local settings = CMXint.settings.FightReport
-	local showids = settings.showDebugIds
-	
-	local selectedbuffs = CMXint.selections.buff.buff
-	local maxtime = zo_max(fightData.activetime or 0, fightData.dpstime or 0, fightData.hpstime or 0)
-	local totalUnitTime = buffData.totalUnitTime or maxtime * 1000
-	local favs = CMXint.settings.FightReport.buffs.favourites
-	
-	local scrollchild = GetControl(self, "PanelScrollChild")
-	local currentanchor = {TOPLEFT, scrollchild, TOPLEFT, 0, 1}
-	local parentrow
+		local settings = CMXint.settings.FightReport
+		local showids = settings.showDebugIds
+		
+		local selectedbuffs = CMXint.selections.buff.buff
+		local maxtime = zo_max(fightData.activetime or 0, fightData.dpstime or 0, fightData.hpstime or 0)
+		local totalUnitTime = buffData.totalUnitTime or maxtime * 1000
+		local favs = CMXint.settings.FightReport.buffs.favourites
+		
+		local scrollchild = GetControl(control, "PanelScrollChild")
+		local currentanchor = {TOPLEFT, scrollchild, TOPLEFT, 0, 1}
+		local parentrow
 
-	for buffName, buff in CMX.spairs(buffData["buffs"], buffSortFunction) do
-		if buff.groupUptime > 0 then
-			if isSigilAbility(buff.instances) then sigilIcon:SetHidden(false) end
+		for buffName, buff in CMX.spairs(buffData["buffs"], buffSortFunction) do
+			if buff.groupUptime > 0 then
+				if isSigilAbility(buff.instances) then sigilIcon:SetHidden(false) end
 
-			local labelFormat = showids and "(<<1>>) <<2>>" or "<<2>>"
-			local rowdata = {}
+				local labelFormat = showids and "(<<1>>) <<2>>" or "<<2>>"
+				local rowdata = {}
 
-			local shownUptime = buff.uptime
-			local shownGroupUptime = buff.groupUptime
+				local shownUptime = buff.uptime
+				local shownGroupUptime = buff.groupUptime
 
-			local hasInstances = buff.instances and NonContiguousCount(buff.instances) > 1
-			local hasStacks = buff.instances and (buff.iconId == 126597 or buff.maxStacks > 1)
+				local hasInstances = buff.instances and NonContiguousCount(buff.instances) > 1
+				local hasStacks = buff.instances and (buff.iconId == 126597 or buff.maxStacks > 1)
 
-			local showName = buffName
-			if hasStacks then
-				local mainInstance = buff.instances[buff.iconId]
+				local showName = buffName
+				if hasStacks then
+					local mainInstance = buff.instances[buff.iconId]
 
-				shownUptime = mainInstance.uptime
-				shownGroupUptime = mainInstance.groupUptime
+					shownUptime = mainInstance.uptime
+					shownGroupUptime = mainInstance.groupUptime
 
-				showName = ZO_CachedStrFormat("<<2>>x <<1>>", buffName, buff.maxStacks)
-			end
-
-			rowdata.buffName = buffName
-			rowdata.color = (buff.effectType == BUFF_EFFECT_TYPE_BUFF and {0, 0.6, 0, 0.6}) or (buff.effectType == BUFF_EFFECT_TYPE_DEBUFF and {0.75, 0, 0.6, 0.6}) or {0.6, 0.6, 0.6, 0.6}
-			rowdata.groupColor = (buff.effectType == BUFF_EFFECT_TYPE_BUFF and {0, 0.6, 0, 0.3}) or (buff.effectType == BUFF_EFFECT_TYPE_DEBUFF and {0.75, 0, 0.6, 0.3}) or {0.6, 0.6, 0.6, 0.3}
-			rowdata.highlight = selectedbuffs ~= nil and (selectedbuffs[buffName] ~= nil) or false
-			rowdata.icon = GetFormattedAbilityIcon(buff.iconId)
-			rowdata.label = ZO_CachedStrFormat(labelFormat, buff.iconId, showName)
-			rowdata.uptimeRatio = shownUptime / totalUnitTime
-			rowdata.groupUptimeRatio = shownGroupUptime / totalUnitTime
-			rowdata.count = buff.count
-			rowdata.groupCount = buff.groupCount
-			rowdata.textcolor = favs[buffName] and {1, .8, .3, 1} or {1, 1, 1, 1} -- show favs in different color
-			rowdata.indent = 0
-			rowdata.hasDetails = hasInstances or hasStacks
-
-			currentanchor, parentrow = addBuffPanelRow(self, scrollchild, currentanchor, rowdata)
-
-			if hasInstances and uncollapsedBuffs[buffName] then
-				rowdata.indent = 1
-				rowdata.highlight = false
-				rowdata.hasDetails = false
-
-				for abilityId, instance in pairs(buff.instances) do
-					rowdata.icon = GetFormattedAbilityIcon(abilityId)
-					rowdata.label = ZO_CachedStrFormat("(<<1>>) <<2>>", abilityId, buffName)
-
-					rowdata.uptimeRatio = instance.uptime / totalUnitTime
-					rowdata.groupUptimeRatio = instance.groupUptime / totalUnitTime
-					rowdata.count = instance.count
-					rowdata.groupCount = instance.groupCount
-
-					currentanchor = addBuffPanelRow(self, scrollchild, currentanchor, rowdata, parentrow)
-				end
-			end
-
-			if hasStacks and uncollapsedBuffs[buffName] then
-				rowdata.indent = 1
-				rowdata.highlight = false
-				rowdata.hasDetails = false
-
-				local keys = {}
-				local instanceData = buff.instances[buff.iconId]
-
-				for stacks, stackData in pairs(instanceData) do
-					if type(stacks) == "number" then keys[#keys+1] = stacks end
+					showName = ZO_CachedStrFormat("<<2>>x <<1>>", buffName, buff.maxStacks)
 				end
 
-				table.sort(keys)
+				rowdata.buffName = buffName
+				rowdata.color = (buff.effectType == BUFF_EFFECT_TYPE_BUFF and {0, 0.6, 0, 0.6}) or (buff.effectType == BUFF_EFFECT_TYPE_DEBUFF and {0.75, 0, 0.6, 0.6}) or {0.6, 0.6, 0.6, 0.6}
+				rowdata.groupColor = (buff.effectType == BUFF_EFFECT_TYPE_BUFF and {0, 0.6, 0, 0.3}) or (buff.effectType == BUFF_EFFECT_TYPE_DEBUFF and {0.75, 0, 0.6, 0.3}) or {0.6, 0.6, 0.6, 0.3}
+				rowdata.highlight = selectedbuffs ~= nil and (selectedbuffs[buffName] ~= nil) or false
+				rowdata.icon = GetFormattedAbilityIcon(buff.iconId)
+				rowdata.label = ZO_CachedStrFormat(labelFormat, buff.iconId, showName)
+				rowdata.uptimeRatio = shownUptime / totalUnitTime
+				rowdata.groupUptimeRatio = shownGroupUptime / totalUnitTime
+				rowdata.count = buff.count
+				rowdata.groupCount = buff.groupCount
+				rowdata.textcolor = favs[buffName] and {1, .8, .3, 1} or {1, 1, 1, 1} -- show favs in different color
+				rowdata.indent = 0
+				rowdata.hasDetails = hasInstances or hasStacks
 
-				for i = 1, #keys do
-					local stacks = keys[i]
-					local stackData = instanceData[stacks]
+				currentanchor, parentrow = addBuffPanelRow(control, scrollchild, currentanchor, rowdata)
 
-					rowdata.label = ZO_CachedStrFormat("<<1>>x <<2>>", stacks, buffName)
+				if hasInstances and uncollapsedBuffs[buffName] then
+					rowdata.indent = 1
+					rowdata.highlight = false
+					rowdata.hasDetails = false
 
-					rowdata.uptimeRatio = stackData.uptime / totalUnitTime
-					rowdata.groupUptimeRatio = stackData.groupUptime / totalUnitTime
-					rowdata.count = stackData.count
-					rowdata.groupCount = stackData.groupCount
+					for abilityId, instance in pairs(buff.instances) do
+						rowdata.icon = GetFormattedAbilityIcon(abilityId)
+						rowdata.label = ZO_CachedStrFormat("(<<1>>) <<2>>", abilityId, buffName)
 
-					currentanchor = addBuffPanelRow(self, scrollchild, currentanchor, rowdata, parentrow)
+						rowdata.uptimeRatio = instance.uptime / totalUnitTime
+						rowdata.groupUptimeRatio = instance.groupUptime / totalUnitTime
+						rowdata.count = instance.count
+						rowdata.groupCount = instance.groupCount
+
+						currentanchor = addBuffPanelRow(control, scrollchild, currentanchor, rowdata, parentrow)
+					end
+				end
+
+				if hasStacks and uncollapsedBuffs[buffName] then
+					rowdata.indent = 1
+					rowdata.highlight = false
+					rowdata.hasDetails = false
+
+					local keys = {}
+					local instanceData = buff.instances[buff.iconId]
+
+					for stacks, stackData in pairs(instanceData) do
+						if type(stacks) == "number" then keys[#keys+1] = stacks end
+					end
+
+					table.sort(keys)
+
+					for i = 1, #keys do
+						local stacks = keys[i]
+						local stackData = instanceData[stacks]
+
+						rowdata.label = ZO_CachedStrFormat("<<1>>x <<2>>", stacks, buffName)
+
+						rowdata.uptimeRatio = stackData.uptime / totalUnitTime
+						rowdata.groupUptimeRatio = stackData.groupUptime / totalUnitTime
+						rowdata.count = stackData.count
+						rowdata.groupCount = stackData.groupCount
+
+						currentanchor = addBuffPanelRow(control, scrollchild, currentanchor, rowdata, parentrow)
+					end
 				end
 			end
 		end
 	end
 end
-
-function BuffPanel:Release() end
 
 function CMXint.SelectRightPanel(control)
 	local rightpanel = control.menukey
@@ -477,7 +478,7 @@ function CMXint.SelectRightPanel(control)
 end
 
 local isFileInitialized = false
-function CMXint.InitializeBuffPanel()
+function CMXint.InitializeBuffs()
 	if isFileInitialized == true then return false end
 	logger = CMXf.initSublogger("BuffPanel")
 

@@ -101,9 +101,8 @@ local PanelObject = ZO_Object:InitializingObject()
 CMXint.PanelObject = PanelObject
 
 PanelObject.Update = PanelObject:MUST_IMPLEMENT()
-PanelObject.Release = PanelObject:MUST_IMPLEMENT()
 
-function PanelObject:Initialize(name, control)
+function PanelObject:Initialize(control, name)
 	if CMXint.panels[name] then
 		logger:Error("Cannot create %s panel. A panel with this name already exists.", name)
 		return
@@ -116,7 +115,10 @@ function PanelObject:Initialize(name, control)
 	CMXint.panels[name] = self
 end
 
-function PanelObject:GetParent()
+function PanelObject:Release()
+end
+
+function PanelObject:GetParentControl()
 	local parentControl = self.control:GetParent()
 	if parentControl then return parentControl.panel end
 end
@@ -131,16 +133,40 @@ function PanelObject:ResetBars(panel) -- TODO: Probably can be removed when Scro
 	end
 end
 
+function PanelObject:SetHidden(hide)
+	return self.control:SetHidden(hide)
+end
+
+
 local isFileInitialized = false
 function CMXint.InitializeUI()
 	if isFileInitialized == true then return false end
 	logger = CMXf.initSublogger("UI")
 
-	assert(CMXint.InitializeTitlePanel(), "Initialization of title panel failed")
-	assert(CMXint.InitializeCombatStatsPanel(), "Initialization of combat stats panel failed")
-	assert(CMXint.InitializePlayerStatsPanel(), "Initialization of player stats panel failed")
-	assert(CMXint.InitializeAbilitiesPanel(), "Initialization of abilities panel failed")
-	assert(CMXint.InitializeCombatLogPanel(), "Initialization of combat log panel failed")
+	
+	assert(CMXint.InitializeTitle(), "Initialization of title ui failed")
+	assert(CMXint.InitializeMenu(), "Initialization of menu ui failed")
+	assert(CMXint.InitializeCombatStats(), "Initialization of combat stats ui failed")
+	-- assert(CMXint.InitializeResource(), "Initialization of resource ui failed")
+	assert(CMXint.InitializePlayerStats(), "Initialization of player stats ui failed")
+	assert(CMXint.InitializeBuffs(), "Initialization of buffs ui failed")
+	assert(CMXint.InitializeUnits(), "Initialization of units ui failed")
+	assert(CMXint.InitializeAbilities(), "Initialization of abilities ui failed")
+	
+	assert(CMXint.InitializeSkills(), "Initialization of skills ui failed")
+	assert(CMXint.InitializeEquipment(), "Initialization of equipment ui failed")
+	assert(CMXint.InitializeChampionPoints(), "Initialization of champion points ui failed")
+	assert(CMXint.InitializeConsumables(), "Initialization of consumables ui failed")
+	
+	assert(CMXint.InitializeCombatLog(), "Initialization of combat log ui failed")
+	assert(CMXint.InitializeGraph(), "Initialization of graph ui failed")
+	
+	assert(CMXint.InitializeFightList(), "Initialization of fight list ui failed")
+	assert(CMXint.InitializeDonations(), "Initialization of donations ui failed")
+	assert(CMXint.InitializeInfoRow(), "Initialization of info row failed")
+	
+	assert(CMXint.InitializeFightReport(), "Initialization of fight report ui failed")
+	assert(CMXint.InitializeLiveReport(), "Initialization of live report failed")
 
 	CMXint.SVHandler = CombatMetricsFightData
 

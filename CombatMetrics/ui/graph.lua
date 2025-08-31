@@ -662,59 +662,7 @@ local function UpdateBarPlot(plot)
 	plot:DrawPlot()
 end
 
-local GraphPanel = CMXint.PanelObject:New("Graph", CombatMetrics_Report__MainPanelGraph)
-GraphPanel.plotWindow = GraphPanel.control:GetNamedChild("PlotWindow")
-
-function GraphPanel:Update(fightData)
-	local control = self.control
-	if control:IsHidden() then return end
-	
-	local settings = self.settings
-
-	if enlargedGraph == true then
-		control:SetParent(CombatMetrics_Report)
-		control:SetAnchor(BOTTOMRIGHT, CombatMetrics_Report_SetupPanel, BOTTOMRIGHT, 0, 0)
-	else
-		control:SetParent(CombatMetrics_Report_MainPanel)
-		control:SetAnchor(BOTTOMRIGHT, CombatMetrics_Report_MainPanel, BOTTOMRIGHT, 0, 0)
-	end
-
-	CombatMetrics_Report:GetNamedChild("_AbilityPanel"):SetHidden(enlargedGraph)
-	CombatMetrics_Report:GetNamedChild("_UnitPanel"):SetHidden(enlargedGraph)
-	CombatMetrics_Report:GetNamedChild("_BuffPanel"):SetHidden(enlargedGraph)
-	CombatMetrics_Report:GetNamedChild("_MainPanel"):SetHidden(enlargedGraph)
-
-	local plotWindow = control:GetNamedChild("PlotWindow")
-	local toolbar = control:GetNamedChild("Toolbar")
-	local smoothSlider = toolbar:GetNamedChild("SmoothControl"):GetNamedChild("Slider")
-	local SmoothWindow = settings.SmoothWindow
-
-	smoothSlider:SetValue(SmoothWindow)
-
-	local groupSelector = toolbar:GetNamedChild("BuffSelector1"):GetNamedChild("GroupSelector")
-	groupSelector:SetHidden(settings.rightpanel ~= "buffsout")
-
-	if fightData == nil then plotWindow:SetHidden(true) return end
-
-	plotWindow:SetHidden(false)
-	plotWindow.RangesX = {0, 0, {}}
-	plotWindow.RangesY = {0, 0, {}}
-
-	UpdatePlotBuffSelection()
-
-	for id, plot in ipairs(plotWindow.plots) do
-		plot:Update()
-	end
-
-	for id, plot in pairs(plotWindow.plots) do
-		if plot.DrawPlot then
-			plot:DrawPlot()
-		end
-	end
-end
-
-function GraphPanel:MapUIPosXY(x, y)
-	local plotWindow = self.plotWindow
+local function MapUIPosXY(plotWindow, x, y)
 	local t, IsInRangeX = plotWindow:MapUIPos(CMX_PLOT_DIMENSION_X, x)
 	local v, IsInRangeY = plotWindow:MapUIPos(CMX_PLOT_DIMENSION_Y, y)
 
@@ -723,8 +671,7 @@ function GraphPanel:MapUIPosXY(x, y)
 	return t, v, IsInRange
 end
 
-function GraphPanel:UpdateScales(ranges, exact)
-	local plotWindow = self.plotWindow
+local function UpdateScales(plotWindow, ranges, exact)
 	local xMin, xMax, yMin, yMax = unpack(ranges)
 
 	if not exact then
@@ -751,8 +698,7 @@ function CMXint.SetSliderValue(control, value)
 	local labelControl = control:GetParent():GetNamedChild("Label")
 	labelControl:SetText(string.format(GetString(SI_COMBAT_METRICS_SMOOTH_LABEL), value))
 	CMXint.settings.FightReport.SmoothWindow = value
-	local graphPanel = control:GetParent():GetParent():GetParent()
-	graphPanel:Update()
+	CMXint.panels.graph:Update()
 end
 
 do
@@ -780,9 +726,9 @@ do
 		if x == oldx and y == oldy then return end
 
 		oldx, oldy = x, y
-		local cursorTime, cursorValue = GraphPanel:MapUIPosXY(x, y)
+		local plotWindow = CMXint.panels.graph.plotWindow
+		local cursorTime, cursorValue = MapUIPosXY(plotWindow, x, y)
 		local dataAtCursorTime = {}
-		local plotWindow = GraphPanel.plotWindow
 
 		for _, plot in pairs(plotWindow.plots) do
 			if plot.plotType == CMX_PLOT_TYPE_XY and plot.XYData then
@@ -858,8 +804,8 @@ do
 				return
 			end
 
-			local t1, v1 = GraphPanel:MapUIPosXY(startX, startY)
-			local t2, v2 = GraphPanel:MapUIPosXY(x, y)
+			local t1, v1 = MapUIPosXY(plotWindow, startX, startY)
+			local t2, v2 = MapUIPosXY(plotWindow, x, y)
 			local minT, maxT = unpack(plotWindow.RangesX)
 			local minV, maxV = unpack(plotWindow.RangesY)
 
@@ -871,7 +817,7 @@ do
 			local vMin = zo_min(v1, v2)
 			local vMax = zo_max(v1, v2)
 
-			GraphPanel:UpdateScales({tMin, tMax, vMin, vMax})
+			UpdateScales(plotWindow, {tMin, tMax, vMin, vMax})
 
 			for id, plot in pairs(plotWindow.plots) do
 				if plot.DrawPlot then
@@ -887,7 +833,7 @@ do
 			for id, plot in pairs(plotWindow.plots) do
 				if plot.XYData and plot.autoRange and plot:IsHidden() == false then
 					local newRange = plotWindow:GetRequiredRange(plot.range, true)
-					GraphPanel:UpdateScales(newRange)
+					UpdateScales(plotWindow, newRange)
 				end
 			end
 
@@ -950,7 +896,7 @@ do
 		local vMin = zo_min(v1, v2)
 		local vMax = zo_max(v1, v2)
 
-		GraphPanel:UpdateScales({tMin, tMax, vMin, vMax}, true)
+		UpdateScales(plotWindow, {tMin, tMax, vMin, vMax}, true)
 
 		for id, plot in pairs(plotWindow.plots) do
 			if plot.DrawPlot then
@@ -1082,8 +1028,7 @@ local plotDefaultFunction = {
 	[2] = Total,
 }
 
-function GraphPanel:InitBarPlot(id)
-	local plotWindow = self.plotWindow
+local function InitBarPlot(plotWindow, id)
 	local plots = plotWindow.plots
 	local newPlot = plots[id]
 
@@ -1125,11 +1070,11 @@ local function UpdateXYPlot(plot)
 		range[4] = 1
 	end
 
-	local plotWindow = GraphPanel.plotWindow
+	local plotWindow = plot.plotWindow
 
 	if plot.autoRange then
 		local newRange, isChanged = plotWindow:GetRequiredRange(range, true)
-		if isChanged then GraphPanel:UpdateScales(newRange) end
+		if isChanged then UpdateScales(plotWindow, newRange) end
 	end
 
 	plot.range = range
@@ -1137,8 +1082,7 @@ local function UpdateXYPlot(plot)
 	plot.YAxisSide = YAxisSide
 end
 
-function GraphPanel:InitXYPlot(id)
-	local plotWindow = self.plotWindow
+local function InitXYPlot(plotWindow, id)
 	local plots = plotWindow.plots
 	local newPlot = plots[id]
 
@@ -1150,6 +1094,7 @@ function GraphPanel:InitXYPlot(id)
 		newPlot.Update = UpdateXYPlot
 		newPlot.autoRange = true
 		newPlot.id = id
+		newPlot.plotWindow = plotWindow
 
 		local category = CMXint.settings.FightReport.category
 		local catId = 1
@@ -1174,7 +1119,7 @@ function GraphPanel:InitXYPlot(id)
 	return newPlot
 end
 
-local function getCustomMenuFunction(basefunc, parameter, labelString)
+local function GetCustomMenuFunction(basefunc, parameter, labelString)
 	local function newFunc()
 		local selector = lastPlotSelector
 		local control = selector:GetParent()
@@ -1201,14 +1146,14 @@ local function getCustomMenuFunction(basefunc, parameter, labelString)
 	return newFunc
 end
 
-function GraphPanel:InitPlotWindow()
-	local plotWindow = self.control:GetNamedChild("PlotWindow")
+local function initPlotWindow(panel)
+	local plotWindow = panel.control:GetNamedChild("PlotWindow")
+	panel.plotWindow = plotWindow
 
 	plotWindow.MapValue = MapValue
 	plotWindow.MapValueXY = MapValueXY
 	plotWindow.MapUIPos = MapUIPos
 	plotWindow.GetRequiredRange = GetRequiredRange
-
 	plotWindow.plots = {}
 
 	for i = 1, 5 do
@@ -1245,12 +1190,12 @@ function GraphPanel:InitPlotWindow()
 			local labelString = zo_strformat("<<1>> - <<2>>", GetString(categoryString), GetString(data2.label))
 			local basefunc = data2.func
 
-			PlotFunctions[funcId] = getCustomMenuFunction(basefunc, category, labelString)
+			PlotFunctions[funcId] = GetCustomMenuFunction(basefunc, category, labelString)
 			funcId = funcId + 1
 		end
 	end
 
-	PlotFunctions[funcId] = getCustomMenuFunction(BossHPAbsolute, nil, GetString(SI_COMBAT_METRICS_BOSS_HP))
+	PlotFunctions[funcId] = GetCustomMenuFunction(BossHPAbsolute, nil, GetString(SI_COMBAT_METRICS_BOSS_HP))
 	funcId = funcId + 1
 
 	for id, data in ipairs(ResourceStrings) do
@@ -1258,7 +1203,7 @@ function GraphPanel:InitPlotWindow()
 		local powerType = data.powerType
 		local labelString = GetString(resourceString) .. " %"
 
-		PlotFunctions[funcId] = getCustomMenuFunction(ResourceAbsolute, powerType, labelString)
+		PlotFunctions[funcId] = GetCustomMenuFunction(ResourceAbsolute, powerType, labelString)
 		funcId = funcId + 1
 	end
 
@@ -1267,7 +1212,7 @@ function GraphPanel:InitPlotWindow()
 		local statId = data.statId
 		local labelString = GetString(statString) .. " %"
 
-		PlotFunctions[funcId] = getCustomMenuFunction(StatAbsolute, statId, labelString)
+		PlotFunctions[funcId] = GetCustomMenuFunction(StatAbsolute, statId, labelString)
 		funcId = funcId + 1
 	end
 
@@ -1276,21 +1221,22 @@ function GraphPanel:InitPlotWindow()
 		local perfId = data.statId
 		local labelString = GetString(perfString)
 
-		PlotFunctions[funcId] = getCustomMenuFunction(PerformancePlot, perfId, labelString)
+		PlotFunctions[funcId] = GetCustomMenuFunction(PerformancePlot, perfId, labelString)
 		funcId = funcId + 1
 	end
 
 	for id = 1, maxXYPlots do
-		self:InitXYPlot(id)
+		InitXYPlot(plotWindow, id)
 	end
 
 	for id = maxXYPlots + 1, maxXYPlots + maxBarPlots do
-		self:InitBarPlot(id)
+		InitBarPlot(plotWindow, id)
 	end
 end
 
-function GraphPanel:InitToolbar()
-	local toolbar = self.control:GetNamedChild("PlotWindow")
+local function initToolbar(panel)
+	local toolbar = panel.control:GetNamedChild("Toolbar")
+	panel.toolbar = toolbar
 
 	local PlotColors = CMXint.settings.FightReport.PlotColors
 	local cursorToggle = toolbar:GetNamedChild("ToggleCursor")
@@ -1341,7 +1287,7 @@ function GraphPanel:InitToolbar()
 			colorbox:SetCenterColor(r, g, b, a)
 			selector.color = {r, g, b, a}
 			PlotColors[i + 5] = {r, g, b, a}
-			self:Update()
+			panel:Update()
 		end
 
 		colorbox:SetHandler("OnMouseUp", function(self, button, upInside)
@@ -1375,13 +1321,70 @@ function GraphPanel:InitToolbar()
 	end
 end
 
+
+function CMXint.InitializeGraphPanel(control)
+	GraphPanel = CMX.internal.PanelObject:New(control, "graph")
+
+	function GraphPanel:Update(fightData)
+		local control = self.control
+		if control:IsHidden() then return end
+		
+		local settings = self.settings
+
+		if enlargedGraph == true then
+			control:SetParent(CombatMetrics_Report)
+			control:SetAnchor(BOTTOMRIGHT, CombatMetrics_Report_SetupPanel, BOTTOMRIGHT, 0, 0)
+		else
+			control:SetParent(CombatMetrics_Report_MainPanel)
+			control:SetAnchor(BOTTOMRIGHT, CombatMetrics_Report_MainPanel, BOTTOMRIGHT, 0, 0)
+		end
+
+		CombatMetrics_Report:GetNamedChild("_AbilityPanel"):SetHidden(enlargedGraph)
+		CombatMetrics_Report:GetNamedChild("_UnitPanel"):SetHidden(enlargedGraph)
+		CombatMetrics_Report:GetNamedChild("_BuffPanel"):SetHidden(enlargedGraph)
+		CombatMetrics_Report:GetNamedChild("_MainPanel"):SetHidden(enlargedGraph)
+
+		local plotWindow = control:GetNamedChild("PlotWindow")
+		local toolbar = control:GetNamedChild("Toolbar")
+		local smoothSlider = toolbar:GetNamedChild("SmoothControl"):GetNamedChild("Slider")
+		local SmoothWindow = settings.SmoothWindow
+
+		smoothSlider:SetValue(SmoothWindow)
+
+		local groupSelector = toolbar:GetNamedChild("BuffSelector1"):GetNamedChild("GroupSelector")
+		groupSelector:SetHidden(settings.rightpanel ~= "buffsout")
+
+		if fightData == nil then plotWindow:SetHidden(true) return end
+
+		plotWindow:SetHidden(false)
+		plotWindow.RangesX = {0, 0, {}}
+		plotWindow.RangesY = {0, 0, {}}
+
+		UpdatePlotBuffSelection()
+
+		for id, plot in ipairs(plotWindow.plots) do
+			plot:Update()
+		end
+
+		for id, plot in pairs(plotWindow.plots) do
+			if plot.DrawPlot then
+				plot:DrawPlot()
+			end
+		end
+	end
+
+	initPlotWindow(GraphPanel)
+	initToolbar(GraphPanel)
+end
+
+
 function CMX.ToggleGraphSize(self)
 	enlargedGraph = not enlargedGraph
 
 	local labelText = enlargedGraph and GetString(SI_COMBAT_METRICS_SHRINK) or GetString(SI_COMBAT_METRICS_ENLARGE)
 	self:GetNamedChild("Label"):SetText(labelText)
 
-	GraphPanel:Update()
+	CMXint.panels.graph:Update()
 end
 
 
@@ -1393,12 +1396,9 @@ end
 
 
 local isFileInitialized = false
-function CMXint.InitializeGraphPanel()
+function CMXint.InitializeGraph()
 	if isFileInitialized == true then return false end
 	logger = CMXf.initSublogger("Graph")
-
-	GraphPanel:InitPlotWindow()
-	GraphPanel:InitToolbar()
 
     isFileInitialized = true
 	return true

@@ -72,7 +72,7 @@
             </Controls>
         </Control>
 
-        <Control name="CombatMetrics_BuffPanel" inherits="CombatMetrics_ControlFramed" virtual="true">
+        <Control name="CombatMetrics_BuffsPanel" inherits="CombatMetrics_ControlFramed" virtual="true">
             <Controls>
                 <Control name="$(parent)Selector" resizeToFitDescendents="true">
                     <Anchor point="TOPLEFT" />

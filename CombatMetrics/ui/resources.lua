@@ -8,10 +8,8 @@ local GetFormattedAbilityName = CMXf.GetFormattedAbilityName
 local adjustRowSize = CMXf.adjustRowSize
 local dx = CMXint.dx
 
-local ResourcePanel = CMXint.PanelObject:New("Resources", CombatMetrics_Report_ResourcePanel)
-
-function ResourcePanel:UpdateResourceBars(panel, currentanchor, data, totalRate, selectedresources, color)
-	local settings = self.settings
+local function UpdateResourceBars(panel, currentanchor, data, totalRate, selectedresources, color)
+	local settings = CMXint.settings.FightReport
 	local showids = settings.showDebugIds
 
 	local scrollchild = GetControl(panel, "PanelScrollChild")
@@ -69,7 +67,8 @@ function ResourcePanel:UpdateResourceBars(panel, currentanchor, data, totalRate,
 	return currentanchor
 end
 
-function ResourcePanel:Update(fightData)
+
+local function updateResourcePanel(self, fightData)
 	logger:Debug("Updating Resource Panel")
 	if fightData == nil then return end
 
@@ -101,18 +100,23 @@ function ResourcePanel:Update(fightData)
 	local scrollchild = GetControl(subpanel1, "PanelScrollChild")
 	local currentanchor = {TOPLEFT, scrollchild, TOPLEFT, 0, 1}
 
-	self:UpdateResourceBars(subpanel1, currentanchor, data.gains, data.gainRate, selectedresources, color1) -- generate bars for resource gains
+	UpdateResourceBars(subpanel1, currentanchor, data.gains, data.gainRate, selectedresources, color1) -- generate bars for resource gains
 
 	local scrollchild = GetControl(subpanel2, "PanelScrollChild")
 	local currentanchor = {TOPLEFT, scrollchild, TOPLEFT, 0, 1}
 
-	self:UpdateResourceBars(subpanel2, currentanchor, data.drains, data.drainRate, selectedresources, color2) -- generate bars for resource drains
+	UpdateResourceBars(subpanel2, currentanchor, data.drains, data.drainRate, selectedresources, color2) -- generate bars for resource drains
 end
 
 local isFileInitialized = false
 function CMXint.InitializeResourcePanel()
 	if isFileInitialized == true then return false end
 	logger = CMXf.initSublogger("Resources")
+	
+	-- TODO: make control
+	-- ResourcePanel = CMXint.panels.resources
+	-- ResourcePanel.Update = updateResourcePanel
+	-- ResourcePanel.Release = function() end
 
     isFileInitialized = true
 	return true

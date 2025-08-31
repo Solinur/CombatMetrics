@@ -13,7 +13,7 @@ local function InitializeFightReport()
 	CMXf.storeOrigLayout(fightReport)
 
 	local settings = CMXint.settings.FightReport
-	local pos_x = settings.pos_x
+	local pos_x = settings.pos_xs
 	local pos_y = settings.pos_y
 
 	fightReport:ClearAnchors()

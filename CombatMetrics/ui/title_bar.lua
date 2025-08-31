@@ -4,157 +4,128 @@ local CMXf = CMXint.functions
 local CMXd = CMXint.data
 local logger
 
-local SVHandler
+function CMXint.InitializeTitlePanel(control)
+	TitlePanel = CMXint.PanelObject:New(control, "title")
+	function TitlePanel:Update(fightData)
+		logger:Debug("Updating TitlePanel")
 
-local TitlePanel = CMXint.PanelObject:New("Title", CombatMetrics_Report_Title)
+		-- update character info
 
-function TitlePanel:Update(fightData)
-	logger:Debug("Updating TitlePanel")
+		local charInfo = self:GetNamedChild("CharacterInfo")
+		local charData = {}
+		local fightlabel
 
-	-- update character info
+		if fightData == nil then
+			charData.name = GetUnitName("player")
+			charData.raceId = GetUnitRaceId("player")
+			charData.gender = GetUnitGender("player")
+			charData.classId = GetUnitClassId("player")
+			charData.level = GetUnitLevel("player")
+			charData.CPtotal = GetUnitChampionPoints("player")
 
-	local charInfo = self:GetNamedChild("CharacterInfo")
-	local charData = {}
-	local fightlabel
+			fightlabel = "Combat Metrics"
+		elseif (fightData.charData == nil or fightData.charData.classId == nil) and fightData.char == GetUnitName("player") then -- legacy
+			charData.name = fightData.char
+			charData.raceId = GetUnitRaceId("player")
+			charData.gender = GetUnitGender("player")
+			charData.classId = GetUnitClassId("player")
+			charData.level = 0
+			charData.CPtotal = 0
 
-	if fightData == nil then
-		charData.name = GetUnitName("player")
-		charData.raceId = GetUnitRaceId("player")
-		charData.gender = GetUnitGender("player")
-		charData.classId = GetUnitClassId("player")
-		charData.level = GetUnitLevel("player")
-		charData.CPtotal = GetUnitChampionPoints("player")
-
-		fightlabel = "Combat Metrics"
-	elseif (fightData.charData == nil or fightData.charData.classId == nil) and fightData.char == GetUnitName("player") then -- legacy
-		charData.name = fightData.char
-		charData.raceId = GetUnitRaceId("player")
-		charData.gender = GetUnitGender("player")
-		charData.classId = GetUnitClassId("player")
-		charData.level = 0
-		charData.CPtotal = 0
-
-		fightData.charData = charData
-		fightlabel = zo_strgsub(fightData.fightlabel, ".+%:%d%d %- ([A-Z])", "%1") or ""
-	else
-		charData = fightData.charData or {}
-		charData.name = charData.name or fightData.char
-		fightlabel = zo_strgsub(fightData.fightlabel, ".+%:%d%d %- ([A-Z])", "%1") or ""
-	end
-
-	-- RaceIcon
-
-	local racetextures = {
-		"esoui/art/icons/heraldrycrests_race_breton_01.dds",
-		"esoui/art/icons/heraldrycrests_race_redguard_01.dds",
-		"esoui/art/icons/heraldrycrests_race_orc_01.dds",
-		"esoui/art/icons/heraldrycrests_race_dunmer_01.dds",
-		"esoui/art/icons/heraldrycrests_race_nord_01.dds",
-		"esoui/art/icons/heraldrycrests_race_argonian_01.dds",
-		"esoui/art/icons/heraldrycrests_race_altmer_01.dds",
-		"esoui/art/icons/heraldrycrests_race_bosmer_01.dds",
-		"esoui/art/icons/heraldrycrests_race_khajiit_01.dds",
-		"esoui/art/icons/heraldrycrests_race_imperial_01.dds",
-	}
-
-	local raceIcon = charInfo:GetNamedChild("RaceIcon")
-	local raceId = charData.raceId
-	local gender = charData.gender
-
-	raceIcon:SetHidden(raceId == nil)
-	raceIcon:SetTexture(racetextures[raceId])
-
-	local race = GetRaceName(gender, raceId)
-	raceIcon.tooltip = race
-
-	-- ClassIcon
-
-	local classIcon = charInfo:GetNamedChild("ClassIcon")
-	local classId = charData.classId
-
-	for i = 1, GetNumClasses() do
-		local id, _, _, _, _, _, texture = GetClassInfo(i)
-
-		if id == classId then
-			local class = GetClassName(gender, id)
-
-			classIcon:SetTexture(texture)
-			classIcon.tooltip = { class }
-			classIcon:SetHidden(false)
-
-			break
+			fightData.charData = charData
+			fightlabel = zo_strgsub(fightData.fightlabel, ".+%:%d%d %- ([A-Z])", "%1") or ""
+		else
+			charData = fightData.charData or {}
+			charData.name = charData.name or fightData.char
+			fightlabel = zo_strgsub(fightData.fightlabel, ".+%:%d%d %- ([A-Z])", "%1") or ""
 		end
 
-		classIcon:SetHidden(true)
-	end
+		-- RaceIcon
 
-	-- charName
+		local racetextures = {
+			"esoui/art/icons/heraldrycrests_race_breton_01.dds",
+			"esoui/art/icons/heraldrycrests_race_redguard_01.dds",
+			"esoui/art/icons/heraldrycrests_race_orc_01.dds",
+			"esoui/art/icons/heraldrycrests_race_dunmer_01.dds",
+			"esoui/art/icons/heraldrycrests_race_nord_01.dds",
+			"esoui/art/icons/heraldrycrests_race_argonian_01.dds",
+			"esoui/art/icons/heraldrycrests_race_altmer_01.dds",
+			"esoui/art/icons/heraldrycrests_race_bosmer_01.dds",
+			"esoui/art/icons/heraldrycrests_race_khajiit_01.dds",
+			"esoui/art/icons/heraldrycrests_race_imperial_01.dds",
+		}
 
-	local charName = charInfo:GetNamedChild("Charname")
-	local name = charData.name
+		local raceIcon = charInfo:GetNamedChild("RaceIcon")
+		local raceId = charData.raceId
+		local gender = charData.gender
 
-	charName:SetText(name)
+		raceIcon:SetHidden(raceId == nil)
+		raceIcon:SetTexture(racetextures[raceId])
 
-	-- CPValue
+		local race = GetRaceName(gender, raceId)
+		raceIcon.tooltip = race
 
-	local CPIcon = charInfo:GetNamedChild("CPIcon")
-	local CPValue = charInfo:GetNamedChild("CPValue")
+		-- ClassIcon
 
-	local level = charData.level
-	local CP = charData.CPtotal
+		local classIcon = charInfo:GetNamedChild("ClassIcon")
+		local classId = charData.classId
 
-	if level == nil or level == 0 then
-		CPIcon:SetHidden(true)
-		CPValue:SetHidden(true)
-	elseif level < 50 then
-		CPIcon:SetHidden(true)
-		CPValue:SetHidden(false)
-		CPValue:SetText(level)
-	else
-		CPIcon:SetHidden(false)
-		CPValue:SetHidden(false)
-		CPValue:SetText(CP)
-	end
+		for i = 1, GetNumClasses() do
+			local id, _, _, _, _, _, texture = GetClassInfo(i)
 
-	-- Fight Title
+			if id == classId then
+				local class = GetClassName(gender, id)
 
-	local fightTitle = self:GetNamedChild("FightTitle"):GetNamedChild("Name")
-	fightTitle:SetText(fightlabel)
+				classIcon:SetTexture(texture)
+				classIcon.tooltip = { class }
+				classIcon:SetHidden(false)
 
-	-- Nav Buttons
+				break
+			end
 
-	local NavButtons = self:GetNamedChild("NavigationRow")
+			classIcon:SetHidden(true)
+		end
 
-	local fightId = CMXint.currentFight or 0
+		-- charName
 
-	local ButtonStates = {
+		local charName = charInfo:GetNamedChild("Charname")
+		local name = charData.name
 
-		["previous"] = CMX.lastfights[fightId - 1] ~= nil,
-		["next"]     = CMX.lastfights[fightId + 1] ~= nil,
-		["last"]     = CMX.lastfights[fightId + 1] ~= nil,
-		["load"]     = SVHandler ~= nil and SVHandler.GetNumFights() > 0,
-		["save"]     = CMX.lastfights[fightId] ~= nil and
-		not CMXf.searchtable(SVHandler.GetFights(), "date", fightData.date),
-		["delete"]   = CMX.lastfights[fightId] ~= nil and #CMX.lastfights > 0 ~= nil
-	}
+		charName:SetText(name)
 
-	for i = 1, NavButtons:GetNumChildren() do
-		local child = NavButtons:GetChild(i)
-		local state = ButtonStates[child.func]
+		-- CPValue
 
-		child:SetState(state and BSTATE_NORMAL or BSTATE_DISABLED, not state)
+		local CPIcon = charInfo:GetNamedChild("CPIcon")
+		local CPValue = charInfo:GetNamedChild("CPValue")
+
+		local level = charData.level
+		local CP = charData.CPtotal
+
+		if level == nil or level == 0 then
+			CPIcon:SetHidden(true)
+			CPValue:SetHidden(true)
+		elseif level < 50 then
+			CPIcon:SetHidden(true)
+			CPValue:SetHidden(false)
+			CPValue:SetText(level)
+		else
+			CPIcon:SetHidden(false)
+			CPValue:SetHidden(false)
+			CPValue:SetText(CP)
+		end
+
+		-- Fight Title
+
+		local fightTitle = self:GetNamedChild("FightTitle"):GetNamedChild("Name")
+		fightTitle:SetText(fightlabel)
 	end
 end
 
-function TitlePanel:Release() end
-
 
 local isFileInitialized = false
-function CMXint.InitializeTitlePanel()
+function CMXint.InitializeTitle()
 	if isFileInitialized == true then return false end
 	logger = CMXf.initSublogger("TitlePanel")
-	SVHandler = CMXint.SVHandler
-
 	isFileInitialized = true
 	return true
 end

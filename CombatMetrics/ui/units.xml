@@ -1,6 +1,6 @@
 <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
     <Controls>
-        <Control name="CombatMetrics_UnitPanel" inherits="CombatMetrics_ControlFramed" virtual="true">
+        <Control name="CombatMetrics_UnitsPanel" inherits="CombatMetrics_ControlFramed" virtual="true">
             <Dimensions x="360" />
             <OnInitialized>
                 local scrollList = GetControl(self, "PanelScrollChild")

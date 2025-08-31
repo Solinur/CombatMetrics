@@ -4,82 +4,83 @@ local CMXf = CMXint.functions
 local CMXd = CMXint.data
 local logger
 local SVHandler
-local InfoRowPanel = CMXint.PanelObject:New("InfoRow", CombatMetrics_Report_InfoRow)
-
 assert(LibCombat, "Could not find LibCombat")
 local LC = LibCombat
 
-function InfoRowPanel:Update(fightData)
-	logger:Debug("Updating Info Row")
 
-	local datetimecontrol = self:GetNamedChild("DateTime")
-	local versioncontrol = self:GetNamedChild("ESOVersion")
-	local barcontrol = self:GetNamedChild("Bar")
-	local performancecontrol = self:GetNamedChild("Performance")
+function CMXint.InitializeInfoRowPanel(control)
+	local InfoRowPanel = CMX.internal.PanelObject:New(control, "infoRow")
 
-	local data = fightData or {
-		["date"] = GetTimeStamp(),
-		["time"] = GetTimeString(),
-		["ESOversion"] = GetESOVersionString(),
-		["account"] = GetDisplayName()
-	}
+	function InfoRowPanel:Update(fightData)
+		logger:Debug("Updating Info Row")
 
-	local date = data.date
-	local account = data.account
-	local accountstring = account and string.format("%s, ", account) or ""
+		local datetimecontrol = self:GetNamedChild("DateTime")
+		local versioncontrol = self:GetNamedChild("ESOVersion")
+		local barcontrol = self:GetNamedChild("Bar")
+		local performancecontrol = self:GetNamedChild("Performance")
 
-	local datestring = type(date) == "number" and GetDateStringFromTimestamp(date) or date
-	local timestring = string.format("%s%s, %s", accountstring, datestring, data.time)
-	local versionstring = string.format("%s / CMX %s / LC %s", data.ESOversion or "<= 3.2" , CMX.version, tostring(LC.version))
+		local data = fightData or {
+			["date"] = GetTimeStamp(),
+			["time"] = GetTimeString(),
+			["ESOversion"] = GetESOVersionString(),
+			["account"] = GetDisplayName()
+		}
 
-	datetimecontrol:SetText(timestring)
-	versioncontrol:SetText(versionstring)
+		local date = data.date
+		local account = data.account
+		local accountstring = account and string.format("%s, ", account) or ""
 
-	local hideBar = fightData ~= nil and self:GetParent():GetNamedChild("_FightList"):IsHidden()
+		local datestring = type(date) == "number" and GetDateStringFromTimestamp(date) or date
+		local timestring = string.format("%s%s, %s", accountstring, datestring, data.time)
+		local versionstring = string.format("%s / CMX %s / LC %s", data.ESOversion or "<= 3.2" , CMX.version, tostring(LC.version))
 
-	barcontrol:SetHidden(hideBar)
+		datetimecontrol:SetText(timestring)
+		versioncontrol:SetText(versionstring)
 
-	if not hideBar then
-		local maxSavedFights = CMXint.settings.fights.maxSavedFights
-		performancecontrol:SetHidden(true)
+		local hideBar = fightData ~= nil and self:GetParent():GetNamedChild("_FightList"):IsHidden()
 
-		local numSaved = SVHandler.GetNumFights()
-		local usedSpace = numSaved/maxSavedFights
-		barcontrol:SetValue(usedSpace)
+		barcontrol:SetHidden(hideBar)
 
-		local barlabelcontrol = barcontrol:GetNamedChild("Label")
-		barlabelcontrol:SetText(string.format("%s: %d / %d", GetString(SI_COMBAT_METRICS_SAVED_FIGHTS), SVHandler.GetNumFights(), maxSavedFights))
+		if not hideBar then
+			local maxSavedFights = CMXint.settings.fights.maxSavedFights
+			performancecontrol:SetHidden(true)
 
-	else	-- show performance stats
+			local numSaved = SVHandler.GetNumFights()
+			local usedSpace = numSaved/maxSavedFights
+			barcontrol:SetValue(usedSpace)
 
-		local data = fightData and fightData.calculated
-		local performance = data and data.performance
-		local count = performance and performance.count or 0
+			local barlabelcontrol = barcontrol:GetNamedChild("Label")
+			barlabelcontrol:SetText(string.format("%s: %d / %d", GetString(SI_COMBAT_METRICS_SAVED_FIGHTS), SVHandler.GetNumFights(), maxSavedFights))
 
-		if count > 0 then
+		else	-- show performance stats
 
-			performancecontrol:SetHidden(false)
+			local data = fightData and fightData.calculated
+			local performance = data and data.performance
+			local count = performance and performance.count or 0
 
-			local fpsString = string.format("FPS: %d  |cAAAAAA(%d - %d)|r ", performance.avgAvg, performance.minAvg, performance.maxAvg)
-			local pingString = string.format("Ping: %d ms", performance.avgPing)
+			if count > 0 then
 
-			local delayString = data.delayAvg and string.format(" - Desync: %d ms", data.delayAvg) or ""
+				performancecontrol:SetHidden(false)
 
-			local fullString = string.format("%s - %s%s", fpsString, pingString, delayString)
+				local fpsString = string.format("FPS: %d  |cAAAAAA(%d - %d)|r ", performance.avgAvg, performance.minAvg, performance.maxAvg)
+				local pingString = string.format("Ping: %d ms", performance.avgPing)
 
-			performancecontrol:SetText(fullString)
+				local delayString = data.delayAvg and string.format(" - Desync: %d ms", data.delayAvg) or ""
 
+				local fullString = string.format("%s - %s%s", fpsString, pingString, delayString)
+
+				performancecontrol:SetText(fullString)
+
+			end
 		end
 	end
 end
-
-function InfoRowPanel:Release() end
 
 local isFileInitialized = false
 function CMXint.InitializeInfoRow()
 	if isFileInitialized == true then return false end
 	logger = CMXf.initSublogger("InfoRow")
-
+	
 	SVHandler = CMXint.SVHandler
 
     isFileInitialized = true

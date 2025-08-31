@@ -26,34 +26,6 @@ local logtypeCategories = {
 }
 
 
-local function updateCLPageButtons(buttonrow, page, maxpage)
-
-	local first = zo_max(page-2, 1)
-	local last = first + 4
-
-	buttonrow:GetNamedChild("PageLeft"):SetHidden(page == 1)
-	buttonrow:GetNamedChild("PageRight"):SetHidden(page >= maxpage)
-
-	for i = first, last do
-
-		local key = "Page" .. (i - first + 1)
-
-		local button = buttonrow:GetNamedChild(key)
-
-		button.tooltip = {zo_strformat(SI_COMBAT_METRICS_PAGE, i)}
-		button.value = i
-
-		button:SetHidden(i > maxpage)
-
-		buttonrow:GetNamedChild(key .. "Label"):SetText(i)
-
-		local bg = buttonrow:GetNamedChild(key.."Overlay")
-
-		bg:SetCenterColor( 0 , 0 , 0 , page == i and 0 or 0.8 )
-		bg:SetEdgeColor( 1 , 1 , 1 , page == i and 1 or .4 )
-
-	end
-end
 
 local function CLNavButtonFunction(self)
 	currentCLPage = tonumber(self.value or (currentCLPage + self.func))
@@ -117,25 +89,7 @@ function toggleCopyPaste(self)
 	CLFilterButtonFunction(self)
 end
 
-local function initCLButtonRow(rowControl)
-	local CLSelection = CMXint.settings.FightReport.CLSelection
-	for i = 1, rowControl:GetNumChildren() do
-		local button = rowControl:GetChild(i)
 
-		if button.texture then button:GetNamedChild("Icon"):SetTexture(button.texture) end
-		if button.label then button:GetNamedChild("Label"):SetText(button.label) end
-
-		local func = (button.func == "CopyPaste") and toggleCopyPaste or CLFilterButtonFunction
-		button:SetHandler("OnMouseUp", func)
-
-		CLSelection["CopyPaste"] = false
-		local selected = CLSelection[button.func]
-		local overlay = button:GetNamedChild("Overlay")
-
-		overlay:SetCenterColor(0, 0, 0, selected and 0 or 0.8)
-		overlay:SetEdgeColor(1, 1, 1, selected and 1 or .5)
-	end
-end
 
 local function adjustSlider(self)
 	local buffer = self:GetNamedChild("Buffer")
@@ -231,179 +185,228 @@ function CMXf.InitCombatLog(control)
 	end)
 end
 
-local CombatLogPanel = CMXint.PanelObject:New("CombatLog", CombatMetrics_Report_MainPanelCombatLog)
+function CMXint.InitializeCombatLogPanel(control)
+	if true then return end
 
-function CombatLogPanel:Update(self, fightData)
-	if fightData == nil or self:IsHidden() then return end
+	-- TODO: refactor
 
-	logger:Debug("Updating CombatLog")
-	local settings = self.settings
-	local CLSelection = settings.CLSelection
+	CombatLogPanel = CMX.internal.PanelObject:New(control, "combatLog")
+	local settings = CombatLogPanel.settings
+	local currentCLPage = 1
 
-	local window = self:GetNamedChild("Window")
-	local copyPasteBox = self:GetNamedChild("CopyPasteBox")
-	local buffer = window:GetNamedChild("Buffer")
-	local slider = window:GetNamedChild("Slider")
+	function CombatLogPanel:Update(fightData)
+		if fightData == nil or self:IsHidden() then return end
 
-	local logdata = fightData.log or {}
-	local loglength = #logdata
+		logger:Debug("Updating CombatLog")
+		local CLSelection = settings.CLSelection
 
-	local isCopyPasteMode = buffer:IsHidden()
-	local lastLine = buffer:GetNumHistoryLines() - buffer:GetScrollPosition()
-	local firstLine = lastLine - buffer:GetNumVisibleLines()
-	local copyPasteText = {}
+		local window = control:GetNamedChild("Window")
+		local copyPasteBox = control:GetNamedChild("CopyPasteBox")
+		local buffer = window:GetNamedChild("Buffer")
+		local slider = window:GetNamedChild("Slider")
 
-	buffer:Clear()
-	if loglength == 0 then return end
+		local logdata = fightData.log or {}
+		local loglength = #logdata
 
-	buffer:SetMaxHistoryLines(zo_min(loglength, 1000))
-	buffer:SetFont(string.format("%s|%s|%s", GetString(SI_COMBAT_METRICS_STD_FONT),
-		tonumber(GetString(SI_COMBAT_METRICS_FONT_SIZE)) * settings.scale, ""))
+		local isCopyPasteMode = buffer:IsHidden()
+		local lastLine = buffer:GetNumHistoryLines() - buffer:GetScrollPosition()
+		local firstLine = lastLine - buffer:GetNumVisibleLines()
+		local copyPasteText = {}
 
-	local maxpage = zo_ceil(loglength / 1000)
-	local page = (currentCLPage or 1) <= maxpage and currentCLPage or 1
+		buffer:Clear()
+		if loglength == 0 then return end
 
-	local writtenlines = 0
+		buffer:SetMaxHistoryLines(zo_min(loglength, 1000))
+		buffer:SetFont(string.format("%s|%s|%s", GetString(SI_COMBAT_METRICS_STD_FONT),
+			tonumber(GetString(SI_COMBAT_METRICS_FONT_SIZE)) * settings.scale, ""))
 
-	local selections = CMXint.selections
-	local unitSelection = selections.unit
-	local abilitySelection = selections.ability
-	local buffSelection = selections.buff.buff
-	local resourceSelection = selections.resource.resource
+		local maxpage = zo_ceil(loglength / 1000)
+		local page = zo_clamp(currentCLPage, 1, maxpage)
 
-	local unitSelectionAll = {}
+		local writtenlines = 0
 
-	local unitsSelected = false
+		local selections = CMXint.selections
+		local unitSelection = selections.unit
+		local abilitySelection = selections.ability
+		local buffSelection = selections.buff.buff
+		local resourceSelection = selections.resource.resource
 
-	for _, category in pairs({ "healingIn", "healingOut", "damageIn", "damageOut" }) do
-		local subcategory = unitSelection[category]
+		local unitSelectionAll = {}
 
-		if subcategory ~= nil then
-			for unitId, bool in pairs(subcategory) do
-				unitSelectionAll[unitId] = bool
-				unitsSelected = true
+		local unitsSelected = false
+
+		for _, category in pairs({ "healingIn", "healingOut", "damageIn", "damageOut" }) do
+			local subcategory = unitSelection[category]
+
+			if subcategory ~= nil then
+				for unitId, bool in pairs(subcategory) do
+					unitSelectionAll[unitId] = bool
+					unitsSelected = true
+				end
 			end
 		end
-	end
 
-	for k, logline in ipairs(logdata) do
-		local condition2 = false
-		local logtype = logline[1]
+		for k, logline in ipairs(logdata) do
+			local condition2 = false
+			local logtype = logline[1]
 
-		local condition1 =
-			CLSelection[logtype]
-			or
-			(logtype == LIBCOMBAT_EVENT_DAMAGE_SELF and (CLSelection[LIBCOMBAT_EVENT_DAMAGE_IN] or CLSelection[LIBCOMBAT_EVENT_DAMAGE_OUT]))
-			or
-			(logtype == LIBCOMBAT_EVENT_HEAL_SELF and (CLSelection[LIBCOMBAT_EVENT_HEAL_IN] or CLSelection[LIBCOMBAT_EVENT_HEAL_OUT]))
-			or (logtype == LIBCOMBAT_EVENT_BOSSHP and (CLSelection[LIBCOMBAT_EVENT_MESSAGES]))
-			or (logtype == LIBCOMBAT_EVENT_DEATH and (CLSelection[LIBCOMBAT_EVENT_MESSAGES]))
+			local condition1 =
+				CLSelection[logtype]
+				or
+				(logtype == LIBCOMBAT_EVENT_DAMAGE_SELF and (CLSelection[LIBCOMBAT_EVENT_DAMAGE_IN] or CLSelection[LIBCOMBAT_EVENT_DAMAGE_OUT]))
+				or
+				(logtype == LIBCOMBAT_EVENT_HEAL_SELF and (CLSelection[LIBCOMBAT_EVENT_HEAL_IN] or CLSelection[LIBCOMBAT_EVENT_HEAL_OUT]))
+				or (logtype == LIBCOMBAT_EVENT_BOSSHP and (CLSelection[LIBCOMBAT_EVENT_MESSAGES]))
+				or (logtype == LIBCOMBAT_EVENT_DEATH and (CLSelection[LIBCOMBAT_EVENT_MESSAGES]))
 
-		if condition1 == true then
-			local category = logtypeCategories[logtype]
-			local unitSelCat = unitSelection[category]
+			if condition1 == true then
+				local category = logtypeCategories[logtype]
+				local unitSelCat = unitSelection[category]
 
-			if logtype == LIBCOMBAT_EVENT_DAMAGE_IN or logtype == LIBCOMBAT_EVENT_DAMAGE_OUT or logtype == LIBCOMBAT_EVENT_HEAL_IN or logtype == LIBCOMBAT_EVENT_HEAL_OUT then
-				local sourceUnitId = logline[4]
-				local targetUnitId = logline[5]
-				local abilityId = logline[6]
+				if logtype == LIBCOMBAT_EVENT_DAMAGE_IN or logtype == LIBCOMBAT_EVENT_DAMAGE_OUT or logtype == LIBCOMBAT_EVENT_HEAL_IN or logtype == LIBCOMBAT_EVENT_HEAL_OUT then
+					local sourceUnitId = logline[4]
+					local targetUnitId = logline[5]
+					local abilityId = logline[6]
 
-				condition2 = (
+					condition2 = (
 
-					unitSelCat == nil
-					or (unitSelCat[targetUnitId] ~= nil and (logtype == LIBCOMBAT_EVENT_HEAL_OUT or logtype == LIBCOMBAT_EVENT_DAMAGE_OUT))
-					or (unitSelCat[sourceUnitId] ~= nil and (logtype == LIBCOMBAT_EVENT_HEAL_IN or logtype == LIBCOMBAT_EVENT_DAMAGE_IN))
-				) and (
-					abilitySelection[category] == nil
-					or abilitySelection[category][abilityId] ~= nil
-				)
-			elseif logtype == LIBCOMBAT_EVENT_HEAL_SELF then
-				local sourceUnitId = logline[4]
-				local targetUnitId = logline[5]
-				local abilityId = logline[6]
-
-				condition2 = (
-
-					(unitSelection.healingIn == nil and CLSelection[LIBCOMBAT_EVENT_HEAL_IN])
-					or (unitSelection.healingIn ~= nil and unitSelection.healingIn[sourceUnitId] ~= nil)
-					or (unitSelection.healingOut == nil and CLSelection[LIBCOMBAT_EVENT_HEAL_OUT])
-					or (unitSelection.healingOut ~= nil and unitSelection.healingOut[targetUnitId] ~= nil)
-				) and (
-					(abilitySelection.healingIn == nil and CLSelection[LIBCOMBAT_EVENT_HEAL_IN])
-					or (abilitySelection.healingIn ~= nil and abilitySelection.healingIn[abilityId] ~= nil)
-					or (abilitySelection.healingOut == nil and CLSelection[LIBCOMBAT_EVENT_HEAL_OUT])
-					or (abilitySelection.healingOut ~= nil and abilitySelection.healingOut[abilityId] ~= nil)
-				)
-			elseif logtype == LIBCOMBAT_EVENT_EFFECTS_IN or logtype == LIBCOMBAT_EVENT_EFFECTS_OUT or logtype == LIBCOMBAT_EVENT_GROUPEFFECTS_IN or logtype == LIBCOMBAT_EVENT_GROUPEFFECTS_OUT then
-				local unitId = logline[3]
-				local abilityId = logline[4]
-
-				local ability = GetFormattedAbilityName(abilityId)
-
-				condition2 = (
-						buffSelection == nil and unitsSelected == false)
-					or (buffSelection ~= nil and buffSelection[ability] ~= nil and unitsSelected == false)
-					or (buffSelection == nil and unitSelectionAll[unitId] ~= nil)
-					or (buffSelection ~= nil and buffSelection[ability] ~= nil and unitsSelected == true and unitSelectionAll[unitId] ~= nil
+						unitSelCat == nil
+						or (unitSelCat[targetUnitId] ~= nil and (logtype == LIBCOMBAT_EVENT_HEAL_OUT or logtype == LIBCOMBAT_EVENT_DAMAGE_OUT))
+						or (unitSelCat[sourceUnitId] ~= nil and (logtype == LIBCOMBAT_EVENT_HEAL_IN or logtype == LIBCOMBAT_EVENT_DAMAGE_IN))
+					) and (
+						abilitySelection[category] == nil
+						or abilitySelection[category][abilityId] ~= nil
 					)
-			elseif logtype == LIBCOMBAT_EVENT_RESOURCES then
-				local abilityId = logline[3]
-				local powerType = logline[5]
+				elseif logtype == LIBCOMBAT_EVENT_HEAL_SELF then
+					local sourceUnitId = logline[4]
+					local targetUnitId = logline[5]
+					local abilityId = logline[6]
 
-				condition2 = powerType ~= POWERTYPE_HEALTH and
-					(resourceSelection == nil or resourceSelection[abilityId or 0] ~= nil)
-			elseif logtype == LIBCOMBAT_EVENT_PLAYERSTATS or logtype == LIBCOMBAT_EVENT_MESSAGES or logtype == LIBCOMBAT_EVENT_SKILL_TIMINGS or logtype == LIBCOMBAT_EVENT_BOSSHP or logtype == LIBCOMBAT_EVENT_DEATH or logtype == LIBCOMBAT_EVENT_PERFORMANCE then
-				condition2 = true
-			end
+					condition2 = (
 
-			if condition2 == true then
-				writtenlines = writtenlines + 1
-				if isCopyPasteMode then
-					if writtenlines >= (page - 1) * 1000 + firstLine and writtenlines <= (page - 1) * 1000 + lastLine then
-						local text, color = CMX.GetCombatLogString(fightData, logline, fontSize)
-						copyPasteText[#copyPasteText + 1] = text:gsub("|c......", ""):gsub("|r", ""):gsub("|t.-|t ", "")
-					end
-				else
-					if writtenlines > (page - 1) * 1000 and writtenlines <= page * 1000 then
-						local text, color = CMX.GetCombatLogString(fightData, logline, fontSize)
-						window:AddColoredText(text, color)
+						(unitSelection.healingIn == nil and CLSelection[LIBCOMBAT_EVENT_HEAL_IN])
+						or (unitSelection.healingIn ~= nil and unitSelection.healingIn[sourceUnitId] ~= nil)
+						or (unitSelection.healingOut == nil and CLSelection[LIBCOMBAT_EVENT_HEAL_OUT])
+						or (unitSelection.healingOut ~= nil and unitSelection.healingOut[targetUnitId] ~= nil)
+					) and (
+						(abilitySelection.healingIn == nil and CLSelection[LIBCOMBAT_EVENT_HEAL_IN])
+						or (abilitySelection.healingIn ~= nil and abilitySelection.healingIn[abilityId] ~= nil)
+						or (abilitySelection.healingOut == nil and CLSelection[LIBCOMBAT_EVENT_HEAL_OUT])
+						or (abilitySelection.healingOut ~= nil and abilitySelection.healingOut[abilityId] ~= nil)
+					)
+				elseif logtype == LIBCOMBAT_EVENT_EFFECTS_IN or logtype == LIBCOMBAT_EVENT_EFFECTS_OUT or logtype == LIBCOMBAT_EVENT_GROUPEFFECTS_IN or logtype == LIBCOMBAT_EVENT_GROUPEFFECTS_OUT then
+					local unitId = logline[3]
+					local abilityId = logline[4]
+
+					local ability = GetFormattedAbilityName(abilityId)
+
+					condition2 = (
+							buffSelection == nil and unitsSelected == false)
+						or (buffSelection ~= nil and buffSelection[ability] ~= nil and unitsSelected == false)
+						or (buffSelection == nil and unitSelectionAll[unitId] ~= nil)
+						or (buffSelection ~= nil and buffSelection[ability] ~= nil and unitsSelected == true and unitSelectionAll[unitId] ~= nil
+						)
+				elseif logtype == LIBCOMBAT_EVENT_RESOURCES then
+					local abilityId = logline[3]
+					local powerType = logline[5]
+
+					condition2 = powerType ~= POWERTYPE_HEALTH and
+						(resourceSelection == nil or resourceSelection[abilityId or 0] ~= nil)
+				elseif logtype == LIBCOMBAT_EVENT_PLAYERSTATS or logtype == LIBCOMBAT_EVENT_MESSAGES or logtype == LIBCOMBAT_EVENT_SKILL_TIMINGS or logtype == LIBCOMBAT_EVENT_BOSSHP or logtype == LIBCOMBAT_EVENT_DEATH or logtype == LIBCOMBAT_EVENT_PERFORMANCE then
+					condition2 = true
+				end
+
+				if condition2 == true then
+					writtenlines = writtenlines + 1
+					if isCopyPasteMode then
+						if writtenlines >= (page - 1) * 1000 + firstLine and writtenlines <= (page - 1) * 1000 + lastLine then
+							local text, color = CMX.GetCombatLogString(fightData, logline, fontSize)
+							copyPasteText[#copyPasteText + 1] = text:gsub("|c......", ""):gsub("|r", ""):gsub("|t.-|t ",
+								"")
+						end
+					else
+						if writtenlines > (page - 1) * 1000 and writtenlines <= page * 1000 then
+							local text, color = CMX.GetCombatLogString(fightData, logline, fontSize)
+							window:AddColoredText(text, color)
+						end
 					end
 				end
 			end
 		end
+
+		maxpage = zo_max(zo_ceil(writtenlines / 1000), 1)
+		local buttonrow = GetControl(control, "HeaderPageButtonRow")
+
+		buttonrow:Update(page, maxpage)
+		local totalLines = buffer:GetNumHistoryLines()
+
+		buffer:SetScrollPosition(zo_min(buffer:GetScrollPosition() + totalLines,
+			zo_floor(buffer:GetNumHistoryLines() - buffer:GetNumVisibleLines())))
+		slider:SetValue(slider:GetValue() - totalLines)
+
+		if isCopyPasteMode then
+			local text = table.concat(copyPasteText, "\n")
+			copyPasteBox:SetText(text)
+			copyPasteBox:SelectAll(text)
+			copyPasteBox:TakeFocus()
+		end
 	end
 
-	maxpage = zo_max(zo_ceil(writtenlines / 1000), 1)
-	local buttonrow = GetControl(self, "HeaderPageButtonRow")
+	CombatLogPanel.currentCLPage = 1
+	local combatLogFilterButtonRow = GetControl(CombatLogPanel.control, "HeaderFilterButtonRow")
+	local CLSelection = settings.CLSelection
 
-	buttonrow:Update(page, maxpage)
-	local totalLines = buffer:GetNumHistoryLines()
+	for i = 1, combatLogFilterButtonRow:GetNumChildren() do
+		local button = combatLogFilterButtonRow:GetChild(i)
 
-	buffer:SetScrollPosition(zo_min(buffer:GetScrollPosition() + totalLines,
-		zo_floor(buffer:GetNumHistoryLines() - buffer:GetNumVisibleLines())))
-	slider:SetValue(slider:GetValue() - totalLines)
+		if button.texture then button:GetNamedChild("Icon"):SetTexture(button.texture) end
+		if button.label then button:GetNamedChild("Label"):SetText(button.label) end
 
-	if isCopyPasteMode then
-		local text = table.concat(copyPasteText, "\n")
-		copyPasteBox:SetText(text)
-		copyPasteBox:SelectAll(text)
-		copyPasteBox:TakeFocus()
+		local func = (button.func == "CopyPaste") and toggleCopyPaste or CLFilterButtonFunction
+		button:SetHandler("OnMouseUp", func)
+
+		CLSelection["CopyPaste"] = false
+		local selected = CLSelection[button.func]
+		local overlay = button:GetNamedChild("Overlay")
+
+		overlay:SetCenterColor(0, 0, 0, selected and 0 or 0.8)
+		overlay:SetEdgeColor(1, 1, 1, selected and 1 or .5)
 	end
+
+	
+	function CombatLogPanel:UpdatePageButtons(page, maxpage)
+		local buttonrow = GetControl(self.control, "HeaderPageButtonRow")
+
+		local first = zo_max(page - 2, 1)
+		local last = first + 4
+
+		buttonrow:GetNamedChild("PageLeft"):SetHidden(page == 1)
+		buttonrow:GetNamedChild("PageRight"):SetHidden(page >= maxpage)
+
+		for i = first, last do
+			local key = "Page" .. (i - first + 1)
+
+			local button = buttonrow:GetNamedChild(key)
+
+			button.tooltip = { zo_strformat(SI_COMBAT_METRICS_PAGE, i) }
+			button.value = i
+
+			button:SetHidden(i > maxpage)
+
+			buttonrow:GetNamedChild(key .. "Label"):SetText(i)
+
+			local bg = buttonrow:GetNamedChild(key .. "Overlay")
+
+			bg:SetCenterColor(0, 0, 0, page == i and 0 or 0.8)
+			bg:SetEdgeColor(1, 1, 1, page == i and 1 or .4)
+		end
+	end	
 end
 
-function CombatLogPanel:Release() end
-
 local isFileInitialized = false
-function CMXint.InitializeCombatLogPanel()
+function CMXint.InitializeCombatLog()
 	if isFileInitialized == true then return false end
 	logger = CMXf.initSublogger("Combat Log Panel")
-
-	currentCLPage = 1
-	local combatLogFilterButtonRow = GetControl(CombatLogPanel.control, "HeaderFilterButtonRow")
-	initCLButtonRow(combatLogFilterButtonRow)
-
-	local combatLogPageButtonRow = GetControl(CombatLogPanel.control, "HeaderPageButtonRow")
-	combatLogPageButtonRow.Update = updateCLPageButtons
 
 	isFileInitialized = true
 	return true

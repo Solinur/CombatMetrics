@@ -102,65 +102,6 @@ function CMX.EditTitleEnd(editbox)
 
 end
 
-
-local NavButtonFunctions = {}
-
-function NavButtonFunctions.previous(control)
-
-	if control:GetState() == BSTATE_DISABLED then
-		return
-	else
-		CombatMetrics_Report:Update(currentFight-1)
-	end
-
-end
-
-function NavButtonFunctions.next(control)
-
-	if control:GetState() == BSTATE_DISABLED then
-		return
-	else
-		CombatMetrics_Report:Update(currentFight+1)
-	end
-
-end
-
-function NavButtonFunctions.last(control)
-
-	if control:GetState() == BSTATE_DISABLED then
-		return
-	else
-		CombatMetrics_Report:Update(#CMX.lastfights)
-	end
-
-end
-
-function NavButtonFunctions.load(control)
-
-	if control:GetState() == BSTATE_DISABLED then
-		return
-	else
-		CMXint.panels["FightList"]:Update()
-	end
-
-end
-
-function NavButtonFunctions.save(control, _, _, _, _, shiftkey )
-	if control:GetState() == BSTATE_DISABLED then
-		return
-	else
-		local numFights = SVHandler.GetNumFights()
-		local lastsaved = SVHandler.GetFight(numFights)
-		if lastsaved ~= nil and lastsaved.date == fightData.date then return end -- bail out if fight is already saved
-
-		local spaceLeft = db.maxSavedFights - numFights
-		assert(spaceLeft > 0, zo_strformat(SI_COMBAT_METRICS_SAVEDFIGHTS_FULL, 1-spaceLeft))
-
-		SVHandler.Save(fightData, shiftkey)
-		CombatMetrics_Report:Update()
-	end
-end
-
 function CMXint.ClearSelections()
 
 	local category = db.FightReport.category or "damageOut"
@@ -170,33 +111,6 @@ function CMXint.ClearSelections()
 	selections["buff"]["buff"] = nil
 	selections["resource"]["resource"] = nil
 
-end
-
-function NavButtonFunctions.delete(control)
-
-	if control:GetState() == BSTATE_DISABLED then
-
-		return
-
-	else
-
-		table.remove(CMX.lastfights, currentFight)
-		CMXint.ClearSelections()
-
-		if #CMX.lastfights == 0 then CombatMetrics_Report:Update() else CombatMetrics_Report:Update(zo_min(currentFight, #CMX.lastfights)) end
-
-	end
-end
-
-function CMX.InitNavButtons(rowControl)
-
-	for i=1, rowControl:GetNumChildren() do
-
-		local child = rowControl:GetChild(i)
-
-		if child then child:SetHandler( "OnMouseUp", NavButtonFunctions[child.func]) end
-
-	end
 end
 
 

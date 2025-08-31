@@ -3,6 +3,7 @@ local CMXint = CMX.internal
 local CMXf = CMXint.functions
 local CMXd = CMXint.data
 local logger
+local SkillsPanel
 
 local GetFormattedAbilityIcon = CMXf.GetFormattedAbilityIcon
 local GetFormattedAbilityName = CMXf.GetFormattedAbilityName
@@ -12,143 +13,142 @@ local DisabledColor = ZO_ColorDef:New("FF999999")
 local WerewolfColor = ZO_ColorDef:New("FFf3c86e")
 local WhiteColor = ZO_ColorDef:New("FFFFFFFF")
 
-local SkillStatsPanel = CMXint.PanelObject:New("Skills", CombatMetrics_Report_SetupPanelSkillsPanel)
+function CMXint.InitializeSkillsPanel(control)
+	SkillsPanel = CMXint.PanelObject:New(control, "skills")
 
-function SkillStatsPanel:Update(fightData)
-	if fightData == nil then return end
+	function SkillsPanel:Update(fightData)
+		if fightData == nil then return end
 
-	local charData = fightData.charData
-	if charData == nil then return end
+		local charData = fightData.charData
+		if charData == nil then return end
+			
+		local data = fightData.calculated
+		if data == nil then return end
 		
-	local data = fightData.calculated
-	if data == nil then return end
-	
-	local panel = self.control
-	local settings = self.settings
-	local category = settings.category
-	local skillBars = charData.skillBars
-	local skilldata = data.skills
-	local barStatData = data.barStats
+		local settings = self.settings
+		local category = settings.category
+		local skillBars = charData.skillBars
+		local skilldata = data.skills
+		local barStatData = data.barStats
 
-	for subPanelIndex = 1, 2 do
-		local subPanel = panel:GetNamedChild("ActionBar" .. subPanelIndex)
+		for subPanelIndex = 1, 2 do
+			local subPanel = control:GetNamedChild("ActionBar" .. subPanelIndex)
 
-		if subPanelIndex == 2 then	-- show extra option for werewolf bar
-			local hasWerewolfData = skillBars[HOTBAR_CATEGORY_WEREWOLF+1] ~= nil
-			local titleControl = subPanel:GetNamedChild("Title")
-			local werewolfButton = subPanel:GetNamedChild("Werewolf")
+			if subPanelIndex == 2 then	-- show extra option for werewolf bar
+				local hasWerewolfData = skillBars[HOTBAR_CATEGORY_WEREWOLF+1] ~= nil
+				local titleControl = subPanel:GetNamedChild("Title")
+				local werewolfButton = subPanel:GetNamedChild("Werewolf")
 
-			werewolfButton:SetHidden(not hasWerewolfData)
+				werewolfButton:SetHidden(not hasWerewolfData)
 
-			local titleString
-			local titleColor = WhiteColor
+				local titleString
+				local titleColor = WhiteColor
 
-			if hasWerewolfData then
-				local color = DisabledColor
+				if hasWerewolfData then
+					local color = DisabledColor
 
-				if settings.showWereWolf then
-					color = WerewolfColor
-					subPanelIndex = HOTBAR_CATEGORY_WEREWOLF + 1
-					titleString = GetString(SI_HOTBARCATEGORY8)
-					titleColor = WerewolfColor
+					if settings.showWereWolf then
+						color = WerewolfColor
+						subPanelIndex = HOTBAR_CATEGORY_WEREWOLF + 1
+						titleString = GetString(SI_HOTBARCATEGORY8)
+						titleColor = WerewolfColor
+					end
+
+					werewolfButton:GetNamedChild("Texture"):SetColor(color:UnpackRGB())
+					werewolfButton:GetNamedChild("Bg"):SetEdgeColor(color:UnpackRGB())
+				end
+				titleControl:SetText(titleString or zo_strformat("<<1>> 2", GetString(SI_COMBAT_METRICS_BAR)))
+				titleControl:SetColor(titleColor:UnpackRGB())
+			end
+
+			local bardata = skillBars and skillBars[subPanelIndex] or nil
+			local barStats = barStatData and barStatData[subPanelIndex] or nil
+			local dpsratio, timeratio
+
+			if barStats and type(barStats[category]) == "number" then
+				dpsratio = (barStats[category] or 0) / data[category.."Total"]
+				local totalTime = (category == "healingIn" or category == "healingOut") and fightData.hpstime or fightData.dpstime or 1
+				timeratio = (barStats.totalTime or 0) / totalTime
+			end
+
+			local ratioControl = subPanel:GetNamedChild("Value1")
+			local timeControl = subPanel:GetNamedChild("Value2")
+
+			ratioControl:SetText(string.format("%.1f%%", (timeratio or 0) * 100))
+			timeControl:SetText(string.format("%.1f%%", (dpsratio or 0) * 100))
+
+			for line, controlName in ipairs(SkillBarItems) do
+				local control = subPanel:GetNamedChild(controlName)
+				local abilityId = bardata and bardata[line] or nil
+				
+				control.id = abilityId
+				
+				local icon = GetControl(control, "IconTexture")
+				local texture = abilityId and abilityId > 0 and GetFormattedAbilityIcon(abilityId) or "EsoUI/Art/crafting/gamepad/crafting_alchemy_trait_unknown.dds"
+				icon:SetTexture(texture)
+				
+				local name = control:GetNamedChild("Label")
+				local abilityName = abilityId and abilityId > 0 and GetFormattedAbilityName(abilityId) or ""
+				name:SetText(abilityName)
+
+				local reducedslot = (subPanelIndex-1) * 10 + line
+				local slotdata = skilldata and skilldata[reducedslot] or nil
+				local strings = {"-", "-", "-", "-"}
+				local color = WhiteColor
+
+				if slotdata and slotdata.count and slotdata.count > 0 then
+					strings[1] = string.format("%d", slotdata.count) or "-"
+
+					local weave = slotdata.weavingTimeAvg or slotdata.skillNextAvg
+					strings[2] = weave and string.format("%.2f", weave/1000) or "-"
+
+					local errors = slotdata.weavingErrors
+					strings[3] = weave and errors and string.format("%d", errors) or "-"
+
+					local diff = slotdata.diffTimeAvg or slotdata.difftimesAvg
+					strings[4] = diff and string.format("%.2f", diff/1000) or "-"
+
+					control.delay = slotdata.delayAvg
+					if slotdata.ignored then color = DisabledColor end
+					control.ignored = slotdata.ignored
 				end
 
-				werewolfButton:GetNamedChild("Texture"):SetColor(color:UnpackRGB())
-				werewolfButton:GetNamedChild("Bg"):SetEdgeColor(color:UnpackRGB())
-			end
-			titleControl:SetText(titleString or zo_strformat("<<1>> 2", GetString(SI_COMBAT_METRICS_BAR)))
-			titleControl:SetColor(titleColor:UnpackRGB())
-		end
+				name:SetColor(color:UnpackRGB())
 
-		local bardata = skillBars and skillBars[subPanelIndex] or nil
-		local barStats = barStatData and barStatData[subPanelIndex] or nil
-		local dpsratio, timeratio
-
-		if barStats and type(barStats[category]) == "number" then
-			dpsratio = (barStats[category] or 0) / data[category.."Total"]
-			local totalTime = (category == "healingIn" or category == "healingOut") and fightData.hpstime or fightData.dpstime or 1
-			timeratio = (barStats.totalTime or 0) / totalTime
-		end
-
-		local ratioControl = subPanel:GetNamedChild("Value1")
-		local timeControl = subPanel:GetNamedChild("Value2")
-
-		ratioControl:SetText(string.format("%.1f%%", (timeratio or 0) * 100))
-		timeControl:SetText(string.format("%.1f%%", (dpsratio or 0) * 100))
-
-		for line, controlName in ipairs(SkillBarItems) do
-			local control = subPanel:GetNamedChild(controlName)
-			local abilityId = bardata and bardata[line] or nil
-			
-			control.id = abilityId
-			
-			local icon = GetControl(control, "IconTexture")
-			local texture = abilityId and abilityId > 0 and GetFormattedAbilityIcon(abilityId) or "EsoUI/Art/crafting/gamepad/crafting_alchemy_trait_unknown.dds"
-			icon:SetTexture(texture)
-			
-			local name = control:GetNamedChild("Label")
-			local abilityName = abilityId and abilityId > 0 and GetFormattedAbilityName(abilityId) or ""
-			name:SetText(abilityName)
-
-			local reducedslot = (subPanelIndex-1) * 10 + line
-			local slotdata = skilldata and skilldata[reducedslot] or nil
-			local strings = {"-", "-", "-", "-"}
-			local color = WhiteColor
-
-			if slotdata and slotdata.count and slotdata.count > 0 then
-				strings[1] = string.format("%d", slotdata.count) or "-"
-
-				local weave = slotdata.weavingTimeAvg or slotdata.skillNextAvg
-				strings[2] = weave and string.format("%.2f", weave/1000) or "-"
-
-				local errors = slotdata.weavingErrors
-				strings[3] = weave and errors and string.format("%d", errors) or "-"
-
-				local diff = slotdata.diffTimeAvg or slotdata.difftimesAvg
-				strings[4] = diff and string.format("%.2f", diff/1000) or "-"
-
-				control.delay = slotdata.delayAvg
-				if slotdata.ignored then color = DisabledColor end
-				control.ignored = slotdata.ignored
-			end
-
-			name:SetColor(color:UnpackRGB())
-
-			for k = 1, 4 do
-				local label = control:GetNamedChild("Value" .. k)
-				label:SetText(strings[k])
-				label:SetColor(color:UnpackRGB())
+				for k = 1, 4 do
+					local label = control:GetNamedChild("Value" .. k)
+					label:SetText(strings[k])
+					label:SetColor(color:UnpackRGB())
+				end
 			end
 		end
+
+		local statrow = control:GetNamedChild("ActionBar1"):GetNamedChild("Stats2")
+		local statrow2 = control:GetNamedChild("ActionBar2"):GetNamedChild("Stats2")
+
+		local totalWeavingTimeCount = data.totalWeavingTimeCount or data.totalSkills
+		local totalWeavingTimeSum = data.totalWeavingTimeSum or data.totalSkillTime
+		local totalWeaponAttacks = data.totalWeaponAttacks
+		local totalSkillsFired = data.totalSkillsFired
+
+		local value1string = " -"
+		local value2string = " -"
+
+		if totalWeavingTimeCount and totalWeavingTimeCount > 0 and totalWeavingTimeSum then
+			value1string = (totalWeavingTimeSum and totalWeavingTimeCount) and string.format("%.3f s", totalWeavingTimeSum / (1000 * totalWeavingTimeCount)) or " -"
+			value2string = totalWeavingTimeSum and string.format("%.3f s", totalWeavingTimeSum / 1000) or " -"
+		end
+
+		local value3string = totalWeaponAttacks or " -"
+		local value4string = totalSkillsFired or " -"
+
+		statrow:GetNamedChild("Label"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_SKILLTIME_WEAVING), value1string))
+		statrow:GetNamedChild("Label2"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALC), value2string))
+		statrow2:GetNamedChild("Label"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALWA), value3string))
+		statrow2:GetNamedChild("Label2"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALSKILLS), value4string))
 	end
 
-	local statrow = panel:GetNamedChild("ActionBar1"):GetNamedChild("Stats2")
-	local statrow2 = panel:GetNamedChild("ActionBar2"):GetNamedChild("Stats2")
-
-	local totalWeavingTimeCount = data.totalWeavingTimeCount or data.totalSkills
-	local totalWeavingTimeSum = data.totalWeavingTimeSum or data.totalSkillTime
-	local totalWeaponAttacks = data.totalWeaponAttacks
-	local totalSkillsFired = data.totalSkillsFired
-
-	local value1string = " -"
-	local value2string = " -"
-
-	if totalWeavingTimeCount and totalWeavingTimeCount > 0 and totalWeavingTimeSum then
-		value1string = (totalWeavingTimeSum and totalWeavingTimeCount) and string.format("%.3f s", totalWeavingTimeSum / (1000 * totalWeavingTimeCount)) or " -"
-		value2string = totalWeavingTimeSum and string.format("%.3f s", totalWeavingTimeSum / 1000) or " -"
-	end
-
-	local value3string = totalWeaponAttacks or " -"
-	local value4string = totalSkillsFired or " -"
-
-	statrow:GetNamedChild("Label"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_SKILLTIME_WEAVING), value1string))
-	statrow:GetNamedChild("Label2"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALC), value2string))
-	statrow2:GetNamedChild("Label"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALWA), value3string))
-	statrow2:GetNamedChild("Label2"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALSKILLS), value4string))
-end
-
-function SkillStatsPanel:InitializeSkillStats()
-	local control = self.control
+	-- Init Controls
 
 	local block = control:GetNamedChild("ActionBar1")
 	local title = block:GetNamedChild("Title")
@@ -176,11 +176,9 @@ function SkillStatsPanel:InitializeSkillStats()
 
 	label4:SetText(string.format("%s    -", GetString(SI_COMBAT_METRICS_TOTALSKILLS)))
 	label4.tooltip = {SI_COMBAT_METRICS_TOTALSKILLS_TT}
-
 end
 
 
-local ScribedSkillsPanel = CMXint.PanelObject:New("ScribedSkills", CombatMetrics_Report_SetupPanelScribedSkillsPanel)
 
 ---@param setHidden boolean
 function ScribedSkillsPanel:Hide(setHidden)
@@ -189,46 +187,46 @@ function ScribedSkillsPanel:Hide(setHidden)
 	panel:GetParent():GetNamedChild("Sep"):SetHidden(setHidden)
 end
 
-function ScribedSkillsPanel:Update(fightData)
-	if fightData == nil then return self:Hide(true) end
-	local control = self.control
-	local scribedSkills = fightData.charData.scribedSkills or {}
+function CMXint.InitializeScribedSkillsPanel(control)
+	ScribedSkillsPanel = CMXint.PanelObject:New(control, "scribedSkills")
 
-	local index = 0
-	for abilityId, data in CMX.spairs(scribedSkills) do
-		index = index + 1
-		local skillControl = control:GetNamedChild(tostring(index))
-		skillControl:SetHidden(false)
-		local abilityName = GetFormattedAbilityName(abilityId)
-		local iconTexture = GetFormattedAbilityIcon(abilityId)
+	function ScribedSkillsPanel:Update(fightData)
+		if fightData == nil then return self:Hide(true) end
+		local control = self.control
+		local scribedSkills = fightData.charData.scribedSkills or {}
 
-		skillControl:GetNamedChild("Name"):SetText(abilityName)
-		skillControl.abilityId = abilityId
-		skillControl.scriptIds = data
-		GetControl(skillControl, "IconTexture"):SetTexture(iconTexture)
+		local index = 0
+		for abilityId, data in CMX.spairs(scribedSkills) do
+			index = index + 1
+			local skillControl = control:GetNamedChild(tostring(index))
+			skillControl:SetHidden(false)
+			local abilityName = GetFormattedAbilityName(abilityId)
+			local iconTexture = GetFormattedAbilityIcon(abilityId)
 
-		for i = 1, 3 do
-			local scriptId = data[i]
-			local scriptControl = skillControl:GetNamedChild("Script" .. i)
-			local scriptName = GetFormattedAbilityName(scriptId, true)
-			local iconTexture = GetFormattedAbilityIcon(scriptId, true)
+			skillControl:GetNamedChild("Name"):SetText(abilityName)
+			skillControl.abilityId = abilityId
+			skillControl.scriptIds = data
+			GetControl(skillControl, "IconTexture"):SetTexture(iconTexture)
 
-			scriptControl:GetNamedChild("Name"):SetText(scriptName)
-			scriptControl:GetNamedChild("Icon"):SetTexture(iconTexture)
+			for i = 1, 3 do
+				local scriptId = data[i]
+				local scriptControl = skillControl:GetNamedChild("Script" .. i)
+				local scriptName = GetFormattedAbilityName(scriptId, true)
+				local iconTexture = GetFormattedAbilityIcon(scriptId, true)
+
+				scriptControl:GetNamedChild("Name"):SetText(scriptName)
+				scriptControl:GetNamedChild("Icon"):SetTexture(iconTexture)
+			end
+			if index == 10 then break end
 		end
-		if index == 10 then break end
+
+		for i = index + 1, control:GetNumChildren() do
+			control:GetNamedChild(tostring(i)):SetHidden(true)
+		end
+
+		self:Hide(index == 0)
 	end
 
-	for i = index + 1, control:GetNumChildren() do
-		control:GetNamedChild(tostring(i)):SetHidden(true)
-	end
-
-	self:Hide(index == 0)
-end
-
-
-function ScribedSkillsPanel:InitializeControls()
-	local control = self.control
 	local nameBase = control:GetName()
 	local anchor
 	for i = 1, 10 do
@@ -253,9 +251,10 @@ function CMXint.SkillbarButtonMouseOver(control, isOver)
 end
 
 function CMXint.SkillbarToggleWerewolf()
-	local settings = SkillStatsPanel.settings
+	assert(SkillsPanel and SkillsPanel.settings)
+	local settings = SkillsPanel.settings
 	settings.showWereWolf = not settings.showWereWolf
-	SkillStatsPanel:Update()
+	SkillsPanel:Update()
 end
 
 
@@ -290,12 +289,9 @@ end
 
 
 local isFileInitialized = false
-function CMXint.InitializeSkillsPanel()
+function CMXint.InitializeSkills()
 	if isFileInitialized == true then return false end
 	logger = CMXf.initSublogger("Skills")
-
-	SkillStatsPanel:InitializeSkillStats()
-	ScribedSkillsPanel:InitializeControls()
 
     isFileInitialized = true
 	return true

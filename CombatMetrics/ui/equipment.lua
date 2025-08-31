@@ -56,77 +56,80 @@ local function GetEnchantQuality(itemLink)	-- From Enchanted Quality (Rhyono, vo
 	return 0
 end
 
-local EquipmentPanel = CMXint.PanelObject:New("Equipment", CombatMetrics_Report_SetupPanelEquipmentPanel)
 
-function EquipmentPanel:Update(fightData)
-	if fightData == nil then return end
-	local charData = fightData.charData
-	if charData == nil then return end
+function CMXint.InitializeEquipmentPanel(control)
+	local EquipmentPanel = CMX.internal.PanelObject:New(control, "equipment")
 
-	local control = self.control
-	local equipdata = charData and charData.equip or {}
+	function EquipmentPanel:Update(fightData)
+		if fightData == nil then return end
+		local charData = fightData.charData
+		if charData == nil then return end
 
-	local poison1 = equipdata[EQUIP_SLOT_POISON]
-	local poison2 = equipdata[EQUIP_SLOT_BACKUP_POISON]
+		local control = self.control
+		local equipdata = charData and charData.equip or {}
 
-	for i, slotData in ipairs(equipslots) do
+		local poison1 = equipdata[EQUIP_SLOT_POISON]
+		local poison2 = equipdata[EQUIP_SLOT_BACKUP_POISON]
 
-		local slot = slotData[1]
-		local texture = slotData[2]
+		for i, slotData in ipairs(equipslots) do
 
-		local equipline = control:GetNamedChild("EquipLine" .. i)
-		local label = equipline:GetNamedChild("ItemLink")
-		local icon = equipline:GetNamedChild("Icon")
-		local icon2 = equipline:GetNamedChild("Icon2")	-- textures are added twice since icons are so low in contrast
-		local trait = equipline:GetNamedChild("Trait")
-		local enchant = equipline:GetNamedChild("Enchant")
+			local slot = slotData[1]
+			local texture = slotData[2]
 
-		local item = equipdata[slot] or ""
+			local equipline = control:GetNamedChild("EquipLine" .. i)
+			local label = equipline:GetNamedChild("ItemLink")
+			local icon = equipline:GetNamedChild("Icon")
+			local icon2 = equipline:GetNamedChild("Icon2")	-- textures are added twice since icons are so low in contrast
+			local trait = equipline:GetNamedChild("Trait")
+			local enchant = equipline:GetNamedChild("Enchant")
 
-		local armortype = GetItemLinkArmorType(item)
-		local color = item:len() > 0 and armorcolors[armortype] or {0, 0, 0, 1}
-		local color2 = item:len() > 0 and {1, 1, 1, 1} or {0.5, 0.5, 0.5, 1}
+			local item = equipdata[slot] or ""
 
-		label:SetText(item)
+			local armortype = GetItemLinkArmorType(item)
+			local color = item:len() > 0 and armorcolors[armortype] or {0, 0, 0, 1}
+			local color2 = item:len() > 0 and {1, 1, 1, 1} or {0.5, 0.5, 0.5, 1}
 
-		label.itemLink = item == "" and nil or item
+			label:SetText(item)
 
-		icon:SetTexture(texture)
-		icon:SetColor(unpack(color))
-		icon:SetBlendMode(TEX_BLEND_MODE_ADD)
+			label.itemLink = item == "" and nil or item
 
-		icon2:SetTexture(texture)
-		icon2:SetColor(unpack(color2))
-		icon2:SetBlendMode(TEX_BLEND_MODE_ADD)
+			icon:SetTexture(texture)
+			icon:SetColor(unpack(color))
+			icon:SetBlendMode(TEX_BLEND_MODE_ADD)
 
-		local traitType, _ = GetItemLinkTraitInfo(item)
-		local traitName = traitType > 0 and GetString("SI_ITEMTRAITTYPE", traitType) or ""
+			icon2:SetTexture(texture)
+			icon2:SetColor(unpack(color2))
+			icon2:SetBlendMode(TEX_BLEND_MODE_ADD)
 
-		trait:SetText(traitName)
+			local traitType, _ = GetItemLinkTraitInfo(item)
+			local traitName = traitType > 0 and GetString("SI_ITEMTRAITTYPE", traitType) or ""
 
-		local enchantString, enchantDescription
-		local enchantColor = {1, 1, 1, 1}
+			trait:SetText(traitName)
 
-		if (slot == EQUIP_SLOT_MAIN_HAND or slot == EQUIP_SLOT_OFF_HAND) and poison1:len() > 0 then
-			enchantString = poison1
-			enchant.itemLink = poison1
-		elseif (slot == EQUIP_SLOT_BACKUP_MAIN or slot == EQUIP_SLOT_BACKUP_OFF) and poison2:len() > 0 then
-			enchantString = poison2
-			enchant.itemLink = poison2
-		else
-			_, enchantString, enchantDescription = GetItemLinkEnchantInfo(item)
-			enchantString = enchantString:gsub(GetString(SI_COMBAT_METRICS_ENCHANTMENT_TRIM), "")
-			local enchantId = GetItemLinkAppliedEnchantId(item)
-			enchant.enchantDescription = enchantDescription
-			enchant.itemLink = ""
-			local quality = GetEnchantQuality(item)
-			enchantColor = {GetItemQualityColor(quality):UnpackRGBA()}
+			local enchantString, enchantDescription
+			local enchantColor = {1, 1, 1, 1}
+
+			if (slot == EQUIP_SLOT_MAIN_HAND or slot == EQUIP_SLOT_OFF_HAND) and poison1:len() > 0 then
+				enchantString = poison1
+				enchant.itemLink = poison1
+			elseif (slot == EQUIP_SLOT_BACKUP_MAIN or slot == EQUIP_SLOT_BACKUP_OFF) and poison2:len() > 0 then
+				enchantString = poison2
+				enchant.itemLink = poison2
+			else
+				_, enchantString, enchantDescription = GetItemLinkEnchantInfo(item)
+				enchantString = enchantString:gsub(GetString(SI_COMBAT_METRICS_ENCHANTMENT_TRIM), "")
+				local enchantId = GetItemLinkAppliedEnchantId(item)
+				enchant.enchantDescription = enchantDescription
+				enchant.itemLink = ""
+				local quality = GetEnchantQuality(item)
+				enchantColor = {GetItemQualityColor(quality):UnpackRGBA()}
+			end
+
+			enchant:SetText(enchantString)
+			enchant:SetColor(unpack(enchantColor))
+			-- GetEnchantProcAbilityId(GetItemLinkAppliedEnchantId())
+			-- GetItemLinkAppliedEnchantId
 		end
-
-		enchant:SetText(enchantString)
-		enchant:SetColor(unpack(enchantColor))
-		-- GetEnchantProcAbilityId(GetItemLinkAppliedEnchantId())
-		-- GetItemLinkAppliedEnchantId
 	end
 end
 
@@ -150,7 +153,7 @@ function CMXint.ItemTooltip_OnMouseExit(control)
 end
 
 local isFileInitialized = false
-function CMXint.InitializeEquipmentPanel()
+function CMXint.InitializeEquipment()
 	if isFileInitialized == true then return false end
 	logger = CMXf.initSublogger("Equipment")
 
