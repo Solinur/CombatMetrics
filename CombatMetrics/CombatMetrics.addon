@@ -1,8 +1,8 @@
 ﻿## Title: CombatMetrics
-## APIVersion: 101045 101046
+## APIVersion: 101047
 ## Author: Solinur
-## Version: 1.7.5
-## AddOnVersion: 10705
+## Version: 2.0.0
+## AddOnVersion: 19999
 ## DependsOn: CombatMetricsFightData>=22 LibCombat>=82 LibAddonMenu-2.0>=38 LibCustomMenu>=730 LibDataEncode
 ## OptionalDependsOn: LibDebugLogger
 ## SavedVariables: CombatMetrics_Save
@@ -17,31 +17,33 @@
 lang/en.lua
 lang/$(language).lua
 
-CombatMetrics.lua
-CombatMetricsMenu.lua
-CombatMetricsLegacy.lua
-CombatMetricsUI.lua
-Customisations.lua
+init.lua
+; menu.lua
 
 bindings.xml
 
+ui/ui.lua
 ui/templates.xml
 
-ui/abilities.xml
-ui/buffs.xml
-ui/combat_log.xml
-ui/combat_stats.xml
-ui/consumables.xml
-ui/donate.xml
-ui/equipment.xml
-ui/fight_list.xml
-ui/fight_report.xml
-ui/graph.xml
-ui/info_row.xml
-ui/menu_bar.xml
-ui/player_stats.xml
-ui/skills.xml
 ui/title_bar.xml
-ui/units.xml
+; ui/menu_bar.xml
+; ui/combat_stats.xml
+; ui/player_stats.xml
+; ui/buffs.xml
+; ui/units.xml
+; ui/abilities.xml
+; 
+; ui/skills.xml
+; ui/equipment.xml
+; ui/consumables.xml
+; 
+; ui/combat_log.xml
+; ui/graph.xml
+; 
+; ui/fight_list.xml
+; ui/donate.xml
+; ui/info_row.xml
 
-ui/live_report.xml
+ui/fight_report.xml
+ui/fight_report.lua
+; ui/live_report.xml

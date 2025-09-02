@@ -196,7 +196,7 @@ function CMXint.InitializeChampionPointsPanel(control)
 			local bottom = constellationControl:GetNamedChild("StarControl4"):GetBottom()
 			constellationControl:SetHeight(bottom-top)
 
-			CMX.SetLabelColor(constellationControl, color)
+			CMXint.SetLabelColor(constellationControl, color)
 		end
 	end
 

@@ -97,6 +97,170 @@ function CMXint.OnMouseEnter(control) --copy from ZO_Options_OnMouseEnter but mo
 	end
 end
 
+function CMXint.SetLabelColor(control, setcolor)  -- setcolor can be hex or rgba, ZO_ColorDef takes care of this
+	for i=1, control:GetNumChildren(control) do
+		local child = control:GetChild(i)
+		local color = ZO_ColorDef:New(setcolor)
+
+		if child:GetType() == CT_LABEL and child.nocolor ~= true then
+			child:SetColor(color.r, color.g, color.b, color.a)
+		elseif child:GetType() == CT_CONTROL and child.nocolor ~= true then
+			CMX.SetLabelColor(child, setcolor)
+		end
+	end
+end
+
+-- function CMXint.ClearSelections()
+-- 	local category = CMXint.settings.FightReport.category or "damageOut"
+-- 	local selections = CMXint.selections
+
+-- 	selections.ability[category] = nil
+-- 	selections.unit[category] = nil
+-- 	selections.buff.buff = nil
+-- 	selections.resource.resource = nil
+-- end
+
+-- function CMX.AddSelection( self, button, upInside, ctrlkey, alt, shiftkey )
+-- 	local id = self.id
+-- 	local dataId = self.dataId
+-- 	local selecttype = self.type
+
+-- 	if button ~= MOUSE_BUTTON_INDEX_LEFT and button ~= MOUSE_BUTTON_INDEX_MIDDLE then return end
+
+-- 	local category = selecttype == "buff" and "buff" or selecttype == "resource" and "resource" or CMXint.settings.FightReport.category
+
+-- 	local selections = CMXint.selections
+-- 	local lastSelections = CMXint.lastSelections
+-- 	local sel = selections[selecttype][category] -- can be nil so this is not always a reference
+-- 	local lastsel = lastSelections[selecttype][category]
+-- 	local bars = self.panel.bars
+
+-- 	if button == MOUSE_BUTTON_INDEX_MIDDLE then
+-- 		selections[selecttype][category] = nil
+-- 		lastSelections[selecttype][category] = nil
+-- 		CombatMetrics_Report:Update(currentFight)
+
+-- 		return
+-- 	end
+
+-- 	if sel == nil then	-- if nothing is selected yet, just select this, disregarding all modifiers.
+-- 		sel = {[dataId] = id}
+-- 		lastsel = id
+-- 	elseif shiftkey and not ctrlkey and lastsel ~= nil then 	-- select everything between this and the previous sel if shiftkey is pressed
+-- 		local istart = zo_min(lastsel, id)
+-- 		local iend = zo_max(lastsel, id)
+
+-- 		sel = {} 	-- forget/disregard other selections
+
+-- 		for i=istart, iend do
+-- 			local irowcontrol = bars[i]
+-- 			sel[irowcontrol.dataId] = i
+-- 		end
+-- 	elseif ctrlkey and not shiftkey then	-- toggle additional sel if ctrlkey is pressed
+-- 		if sel[dataId] ~= nil then
+-- 			lastsel = nil
+-- 			sel[dataId] = nil
+-- 		else
+-- 			lastsel = id
+-- 			sel[dataId] = id
+-- 		end
+
+-- 	elseif shiftkey and ctrlkey and lastsel ~= nil then  -- additionally select everything between this and the previous sel if ctrlkey + shift key is pressed
+-- 		local istart = zo_min(lastsel, id)
+-- 		local iend = zo_max(lastsel, id)
+
+-- 		for i=istart, iend do
+-- 			local irowcontrol = bars[i]
+-- 			sel[irowcontrol.dataId] = i
+-- 		end
+
+-- 	elseif not shiftkey and not ctrlkey then -- normal LMB click
+-- 		if lastsel == id and sel[dataId] ~= nil then -- remove sel if this was pressed just before
+-- 			lastsel = nil
+-- 			sel = nil
+-- 		else
+-- 			lastsel = id
+-- 			sel = {[dataId] = id}
+-- 		end
+-- 	end
+
+-- 	lastSelections[selecttype][category] = lastsel
+-- 	selections[selecttype][category] = sel
+-- 	CombatMetrics_Report:Update(currentFight)
+-- end
+
+function CMXf.GetCurrentData()
+	local data = CMX.currentdata
+
+	if data.units == nil then
+		if #CMX.lastfights == 0 then return end
+		data = CMX.lastfights[#CMX.lastfights]
+	end
+
+	return data
+end
+
+local lastResize
+function CMXint.Resizing(control, resizing)
+	if control:IsHidden() then return end
+	if resizing then
+		control:SetEdgeColor(1,1,1,1)
+		control:SetCenterColor(1,1,1,.2)
+		control:SetDrawTier(2)
+	else
+		control:SetEdgeColor(1,1,1,0)
+		control:SetCenterColor(1,1,1,0)
+		control:SetDrawTier(0)
+
+		if lastResize == nil then return end
+
+		local scale, newpos = unpack(lastResize)
+		local parent = control:GetParent()
+
+		CMXint.settings[parent:GetName()] = newpos
+
+		parent:ClearAnchors()
+		parent:SetAnchor(CENTER, nil , TOPLEFT, newpos.x, newpos.y)
+		parent:Resize(scale)
+	end
+end
+
+
+function CMXint.NewSize(control, newLeft, newTop, newRight, newBottom, oldLeft, oldTop, oldRight, oldBottom)
+	if control.sizes == nil or control:IsHidden() then return end
+
+	
+	local newHeight = newBottom - newTop
+	local newWidth = newRight - newLeft
+	local oldHeight = oldBottom - oldTop
+	local oldWidth = oldRight - oldLeft
+	
+	local baseWidth, baseHeight = unpack(control.sizes)
+	local heightChange = (newHeight-oldHeight)/oldHeight
+	local widthChange = (newWidth-oldWidth)/oldWidth
+	local newscale
+	
+	if zo_abs(heightChange) > zo_abs(widthChange) then
+		newscale = newHeight / baseHeight
+		newWidth = baseWidth * newscale
+
+		control:SetWidth(newWidth)
+	else
+		newscale = newWidth / baseWidth
+		newHeight = baseHeight * newscale
+
+		control:SetHeight(newHeight)
+	end
+
+	newscale = zo_roundToNearest(newscale, 0.01)
+
+	local centerX, centerY = control:GetCenter()
+	local newpos = { x = centerX, y = centerY}
+
+	lastResize = {newscale, newpos}
+end
+
+
 local PanelObject = ZO_Object:InitializingObject()
 CMXint.PanelObject = PanelObject
 
@@ -143,27 +307,40 @@ function CMXint.InitializeUI()
 	if isFileInitialized == true then return false end
 	logger = CMXf.initSublogger("UI")
 
+	-- CMXint.selections = {
+	-- 	["ability"]		= {},
+	-- 	["unit"] 		= {},
+	-- 	["buff"] 		= {},
+	-- 	["resource"] 	= {},
+	-- }
+
+	-- CMXint.lastSelections = {
+	-- 	["ability"] 	= {},
+	-- 	["unit"] 		= {},
+	-- 	["buff"] 		= {},
+	-- 	["resource"] 	= {},
+	-- }
 	
-	assert(CMXint.InitializeTitle(), "Initialization of title ui failed")
-	assert(CMXint.InitializeMenu(), "Initialization of menu ui failed")
-	assert(CMXint.InitializeCombatStats(), "Initialization of combat stats ui failed")
-	-- assert(CMXint.InitializeResource(), "Initialization of resource ui failed")
-	assert(CMXint.InitializePlayerStats(), "Initialization of player stats ui failed")
-	assert(CMXint.InitializeBuffs(), "Initialization of buffs ui failed")
-	assert(CMXint.InitializeUnits(), "Initialization of units ui failed")
-	assert(CMXint.InitializeAbilities(), "Initialization of abilities ui failed")
+	-- assert(CMXint.InitializeTitle(), "Initialization of title ui failed")
+	-- assert(CMXint.InitializeMenu(), "Initialization of menu ui failed")
+	-- assert(CMXint.InitializeCombatStats(), "Initialization of combat stats ui failed")
+	-- -- assert(CMXint.InitializeResource(), "Initialization of resource ui failed")
+	-- assert(CMXint.InitializePlayerStats(), "Initialization of player stats ui failed")
+	-- assert(CMXint.InitializeBuffs(), "Initialization of buffs ui failed")
+	-- assert(CMXint.InitializeUnits(), "Initialization of units ui failed")
+	-- assert(CMXint.InitializeAbilities(), "Initialization of abilities ui failed")
 	
-	assert(CMXint.InitializeSkills(), "Initialization of skills ui failed")
-	assert(CMXint.InitializeEquipment(), "Initialization of equipment ui failed")
-	assert(CMXint.InitializeChampionPoints(), "Initialization of champion points ui failed")
-	assert(CMXint.InitializeConsumables(), "Initialization of consumables ui failed")
+	-- assert(CMXint.InitializeSkills(), "Initialization of skills ui failed")
+	-- assert(CMXint.InitializeEquipment(), "Initialization of equipment ui failed")
+	-- assert(CMXint.InitializeChampionPoints(), "Initialization of champion points ui failed")
+	-- assert(CMXint.InitializeConsumables(), "Initialization of consumables ui failed")
 	
-	assert(CMXint.InitializeCombatLog(), "Initialization of combat log ui failed")
-	assert(CMXint.InitializeGraph(), "Initialization of graph ui failed")
+	-- assert(CMXint.InitializeCombatLog(), "Initialization of combat log ui failed")
+	-- assert(CMXint.InitializeGraph(), "Initialization of graph ui failed")
 	
-	assert(CMXint.InitializeFightList(), "Initialization of fight list ui failed")
-	assert(CMXint.InitializeDonations(), "Initialization of donations ui failed")
-	assert(CMXint.InitializeInfoRow(), "Initialization of info row failed")
+	-- assert(CMXint.InitializeFightList(), "Initialization of fight list ui failed")
+	-- assert(CMXint.InitializeDonations(), "Initialization of donations ui failed")
+	-- assert(CMXint.InitializeInfoRow(), "Initialization of info row failed")
 	
 	assert(CMXint.InitializeFightReport(), "Initialization of fight report ui failed")
 	assert(CMXint.InitializeLiveReport(), "Initialization of live report failed")

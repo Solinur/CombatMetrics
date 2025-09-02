@@ -2267,7 +2267,6 @@ local registrationStatus
 local registeredGroup
 
 local function UpdateEvents(event)
-
 	local isGrouped = IsUnitGrouped("player")
 	local ava = IsPlayerInAvAWorld() or IsActiveWorldBattleground()
 
@@ -2330,106 +2329,6 @@ local function UpdateEvents(event)
 	Log("group", LOG_LEVEL_DEBUG, "State: %d, Group: %s", registrationStatus or 0, tostring(registeredGroup or false))
 end
 
-do
-	--[[ from LUI Extended
-	 * Fix Combat Log window settings
-	 ]]--
-	local function fixCombatLog(cc, window)
-
-		local tabIndex = window.tab.index
-
-		cc:SetInteractivity(tabIndex, true)
-		cc:SetLocked(tabIndex, true)
-
-		for category = 1, GetNumChatCategories() do
-
-			cc:SetWindowFilterEnabled(tabIndex, category, false)
-
-		end
-	end
-
-
-	--[[ from LUI Extended
-	 * Prepare Combat Log window
-	 ]]--
-	local function getCombatLog()
-
-		for k, cc in ipairs(CHAT_SYSTEM.containers) do
-
-			for i = 1, #cc.windows do
-
-				if cc:GetTabName(i) == db.chatLog.name then
-
-					return cc, cc.windows[i]
-
-				end
-			end
-		end
-
-		-- previous lookup did not find proper window, so create it in primary container
-
-		local cc = CHAT_SYSTEM.primaryContainer
-		local window, key = cc.windowPool:AcquireObject()
-
-		window.key = key
-
-		cc:AddRawWindow(window, db.chatLog.name)
-
-		fixCombatLog(cc, window)
-
-		return cc, window
-	end
-
-	local cc, window
-
-	function CMX.InitializeChat()
-
-		if CHAT_SYSTEM.containers[1] then
-
-			cc, window = getCombatLog()
-
-			chatContainer = cc
-			chatWindow = window
-
-		else
-
-			zo_callLater(CMX.InitializeChat, 200)
-
-		end
-	end
-
-	function CMX.ChangeCombatLogLabel(name)
-
-		if not (cc and window) then return end
-
-		cc:SetTabName(window.key, name)
-
-	end
-
-	function CMX.RemoveCombatLog()
-
-		cc:RemoveWindow(window.key)
-
-		cc = nil
-		window = nil
-	end
-
-end
-
-local function maxStat()
-
-	local _, magicka = GetUnitPower("player", POWERTYPE_MAGICKA )
-	local _, stamina = GetUnitPower("player", POWERTYPE_STAMINA )
-	local _, health = GetUnitPower("player", POWERTYPE_HEALTH )
-
-	local maxPower = POWERTYPE_MAGICKA
-
-	if stamina > magicka then maxPower = POWERTYPE_STAMINA end
-	if health > magicka and health > stamina then maxPower = POWERTYPE_HEALTH end
-
-	return maxPower
-
-end
 
 -- Next we create a function that will initialize our addon
 local function Initialize(event, addon)

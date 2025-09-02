@@ -4,6 +4,32 @@ local CMXf = CMXint.functions
 local CMXd = CMXint.data
 local logger
 
+function CMXint.EditTitleStart(control)
+	local label = control:GetNamedChild("Name")
+	local editbox = control:GetNamedChild("Edit")
+
+	label:SetHidden(true)
+	editbox:SetHidden(false)
+
+	editbox:SetText( label:GetText() )
+	editbox:SelectAll()
+	editbox:TakeFocus()
+end
+
+function CMXint.EditTitleEnd(editbox)
+	local control = editbox:GetParent()
+	local label = control:GetNamedChild("Name")
+
+	editbox:SetHidden(true)
+	label:SetHidden(false)
+
+	local newtext = editbox:GetText()
+
+	label:SetText( newtext )
+
+	if fightData then fightData.fightlabel = newtext end
+end
+
 function CMXint.InitializeTitlePanel(control)
 	TitlePanel = CMXint.PanelObject:New(control, "title")
 	function TitlePanel:Update(fightData)

@@ -82,6 +82,136 @@ function CMX.InitNavButtons(rowControl)
 	end
 end
 
+do
+	local function toggleShowIds()
+		CMXint.settings.showDebugIds = not CMXint.settings.showDebugIds
+		CombatMetrics_Report:Update()
+	end
+
+	local function toggleShowPets()
+		CMXint.settings.FightReport.showPets = not CMXint.settings.FightReport.showPets
+		CombatMetrics_Report:Update()
+	end
+
+	local function toggleOverhealMode()
+		CMX.showOverHeal = not CMX.showOverHeal
+		CombatMetrics_Report:Update()
+	end
+
+	local function postSingleDPS()
+		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SINGLE, currentFight)
+	end
+
+	local function postSmartDPS()
+		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SMART, currentFight)
+	end
+
+	local function postMultiDPS()
+		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_MULTI, currentFight)
+	end
+
+	local function postAllDPS()
+		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SINGLEANDMULTI, currentFight)
+	end
+
+	local function postSelectionDPS()
+		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SELECTION, currentFight)
+	end
+
+	local function postHPS()
+		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_HEALING, currentFight)
+	end
+
+	local function postSelectionHPS()
+		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SELECTION_HEALING, currentFight)
+	end
+
+	function CMX.SettingsContextMenu( settingsbutton, upInside )
+		if not upInside then return end
+		local selections = CMXint.selections
+
+		local showIdString = CMXint.settings.showDebugIds and SI_COMBAT_METRICS_HIDEIDS or SI_COMBAT_METRICS_SHOWIDS
+		local showOverhealString = CMX.showOverHeal and SI_COMBAT_METRICS_HIDEOVERHEAL or SI_COMBAT_METRICS_SHOWOVERHEAL
+		local showPetString = CMXint.settings.FightReport.showPets and SI_COMBAT_METRICS_MENU_HIDEPETS or SI_COMBAT_METRICS_MENU_SHOWPETS_NAME
+		local postoptions = {}
+
+		table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTSINGLEDPS), callback = postSingleDPS})
+
+		local fight = CMX.lastfights[currentFight]
+
+		if fight and fight.bossfight == true then
+			table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTSMARTDPS), callback = postSmartDPS})
+		end
+
+		table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTMULTIDPS), callback = postMultiDPS})
+		table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTALLDPS), callback = postAllDPS})
+
+		local category = CMXint.settings.FightReport.category
+
+		if category == "damageOut" and selections.unit[category] then
+			table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTSELECTIONDPS), callback = postSelectionDPS})
+		end
+
+		table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTHPS), callback = postHPS})
+
+		if category == "healingOut" and selections.unit[category] then
+			table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTSELECTIONHPS), callback = postSelectionHPS})
+		end
+
+		ClearMenu()
+
+		AddCustomMenuItem(GetString(showIdString), toggleShowIds)
+		AddCustomMenuItem(GetString(showOverhealString), toggleOverhealMode)
+		AddCustomMenuItem(GetString(showPetString), toggleShowPets)
+		AddCustomSubMenuItem(GetString(SI_COMBAT_METRICS_POSTDPS), postoptions)
+		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_SETTINGS), CMX.OpenSettings)
+
+		if fight and fight.CalculateFight and (fight.svversion == nil or fight.svversion > 2) then
+			local function calculate()
+				fight:CalculateFight()
+				CombatMetrics_Report:Update(currentFight)
+			end
+
+			AddCustomMenuItem(GetString(SI_COMBAT_METRICS_RECALCULATE), calculate)
+		end
+
+		ShowMenu(settingsbutton)
+		AnchorMenu(settingsbutton)
+	end
+end
+
+do
+	local function ShowGuildInfo()
+		GUILD_BROWSER_GUILD_INFO_KEYBOARD:SetGuildToShow(64745)
+        MAIN_MENU_KEYBOARD:ShowSceneGroup("guildsSceneGroup", "linkGuildInfoKeyboard")
+        GUILD_BROWSER_GUILD_INFO_KEYBOARD.closeCallback = CombatMetrics_Report.Toggle
+	end
+
+	local function NotificationRead()
+		CMXint.settings.NotificationRead = CMXint.settings.currentNotificationVersion
+		CombatMetrics_Report:Update(currentFight)
+	end
+
+	local function DisableNotifications()
+		CMXint.settings.NotificationRead = CMXint.settings.currentNotificationVersion
+		CMXint.settings.NotificationAllowed = false
+		CombatMetrics_Report:Update(currentFight)
+	end
+
+	function CMX.NotificationContextMenu( settingsbutton, upInside )
+		if not upInside then return end
+		ClearMenu()
+
+		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_NOTIFICATION_GUILD), ShowGuildInfo)
+		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_NOTIFICATION_ACCEPT), NotificationRead)
+		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_NOTIFICATION_DISCARD), DisableNotifications)
+
+		ShowMenu(settingsbutton)
+		AnchorMenu(settingsbutton)
+	end
+end
+
+
 function CMXint.InitializeMenuPanel(control)
 	local MenuPanel = CMX.internal.PanelObject:New(control, "menu")
 	local category = MenuPanel.settings.category

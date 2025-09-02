@@ -46,11 +46,11 @@ do	-- Handling Buffs Context Menu
 	end
 
 	local function postBuffUptime()
-		if buffname then CMX.PostBuffUptime(currentFight, buffname) end
+		if buffname then CMXf.PostBuffUptime(currentFight, buffname) end
 	end
 
 	local function postSelectionBuffUptime()
-		if buffname then CMX.PostBuffUptime(currentFight, buffname, unitType) end
+		if buffname then CMXf.PostBuffUptime(currentFight, buffname, unitType) end
 	end
 
 	local function toggleCollapseBuff()
@@ -119,133 +119,9 @@ function CMX.CollapseButton( button, upInside )
 	CombatMetrics_Report:GetNamedChild("_BuffPanel"):GetNamedChild("BuffList"):Update()
 end
 
-local function GetUnitsByType(unitType, fightData)
-	if not unitType then return end
-	local units = {}
 
-	for unitId, unit in pairs(fightData.units) do
-		if (unitType == "boss" and unit.bossId) or (unitType == "group" and (unit.unitType == COMBAT_UNIT_TYPE_GROUP or unit.unitType == COMBAT_UNIT_TYPE_PLAYER)) then
-			units[unitId] = true
-		end
-	end
 
-	return units
-end
 
-local function GetBuffDataAndUnits(unitType, fightData)
-	local buffData
-	local buffTypeSelection = CMXint.selection.buffTypeSelection
-	local units = 0
-	local unitName = ""
-	local settings = CMXint.settings.FightReport
-
-	if buffTypeSelection == "buffsout" then
-		local category = settings.category
-		local tempSelections = {}
-
-		ZO_DeepTableCopy(CMXint.selections, tempSelections)
-		if unitType then tempSelections.unit[category] = GetUnitsByType(unitType) end
-		buffData = CMX.GenerateSelectionStats(fightData, category, tempSelections) -- yeah, yeah I'm lazy.
-
-		for unitId, _ in pairs(tempSelections.unit[category] or fightData.units) do
-			local unit = fightData.calculated.units[unitId]
-			local unitData = fightData.units[unitId]
-			local unitTotalValue = unit[category.."Total"]
-
-			local isNotEmpty = unitTotalValue > 0 or NonContiguousCount(unit.buffs) > 0
-			local isEnemy = unitData.unitType ~= COMBAT_UNIT_TYPE_GROUP and unitData.unitType ~= COMBAT_UNIT_TYPE_PLAYER_PET and unitData.unitType ~= COMBAT_UNIT_TYPE_PLAYER
-			local isDamageCategory = category == "damageIn" or category == "damageOut"
-
-			if isNotEmpty and (isEnemy == isDamageCategory) then
-				units = units + 1
-				unitName = unitData.name
-			end
-		end
-
-	elseif buffTypeSelection == "buffs" then
-		buffData = fightData.calculated
-	end
-
-	if units == 1 then 
-		return buffData, unitName 
-	end
-
-	return buffData, units
-end
-
-local function GetCurrentData()
-	local data = CMX.currentdata
-
-	if data.units == nil then
-		if #CMX.lastfights == 0 then return end
-		data = CMX.lastfights[#CMX.lastfights]
-	end
-
-	return data
-end
-
-function CMX.PostBuffUptime(fight, buffname, unitType)
-	local data = fight and CMX.lastfights[fight]
-	if not data then return end
-
-	local settings = CMXint.settings
-	local category = settings.FightReport.category or "damageOut"
-	local timedata = ""
-
-	if data ~= GetCurrentData() then
-		local date = data.date
-		local datestring = type(date) == "number" and GetDateStringFromTimestamp(date) or date
-		timedata = string.format("[%s, %s] ", datestring, data.time)
-	end
-
-	local buffDataTable, units = GetBuffDataAndUnits(unitType) -- TODO provide the single unit if units is 1
-	local buffData = buffDataTable.buffs[buffname]
-	if buffData == nil then return end
-	local totalUnitTime = buffDataTable.totalUnitTime
-
-	if totalUnitTime then totalUnitTime = totalUnitTime / 1000 end
-	local activetime = totalUnitTime or data.dpstime
-
-	if category == "healingOut" or category == "healingIn" then activetime = totalUnitTime or data.hpstime end
-
-	local uptime = buffData.uptime / 1000
-	local groupUptime = buffData.groupUptime / 1000
-	local relativeUptimeString = string.format("%.1f%%", uptime / activetime * 100)
-	local uptimeString = string.format("%d:%02d", uptime/60, uptime%60)
-
-	local output
-	if groupUptime > uptime then
-		local relativeGroupUptimeString = string.format("%.1f%%", groupUptime / activetime * 100)
-		local groupUptimeString = string.format("%d:%02d", groupUptime/60, groupUptime%60)
-		output = zo_strformat(GetString(SI_COMBAT_METRICS_POSTBUFF_FORMAT_GROUP), buffname, relativeUptimeString, uptimeString, units, relativeGroupUptimeString, groupUptimeString)
-	else
-		output = zo_strformat(GetString(SI_COMBAT_METRICS_POSTBUFF_FORMAT), buffname, relativeUptimeString, uptimeString, units)
-	end
-
-	-- Determine appropriate channel
-	local channel = CMXint.settings.autoSelectChatChannel == true and (IsUnitGrouped('player') and CHAT_CHANNEL_PARTY or CHAT_CHANNEL_SAY) or nil
-
-	-- Log output to chat
-	local outputtext = string.format("%s%s", timedata, output)
-	StartChatInput(outputtext, channel)
-end
-
-local function buffSortFunction(data, a, b)
-	local ishigher = false
-	local favs = CMXint.settings.FightReport.buffs.favourites
-
-	local isFavA = favs[a]
-	local isFavB = favs[b]
-
-	if isFavA and not isFavB then
-		ishigher = true
-	elseif isFavA == isFavB then
-		ishigher = data[a]["groupUptime"] > data[b]["groupUptime"]
-	end
-
-	return ishigher
-end
-CMXf.buffSortFunction = buffSortFunction
 
 local function GetBuffData()
 	local buffData
@@ -334,6 +210,22 @@ local function addBuffPanelRow(panel, scrollchild, anchor, rowdata, parentrow)
 	return currentanchor, row
 end
 
+function CMXf.buffSortFunction(data, a, b)
+	local ishigher = false
+	local favs = CMXint.settings.FightReport.buffs.favourites
+
+	local isFavA = favs[a]
+	local isFavB = favs[b]
+
+	if isFavA and not isFavB then
+		ishigher = true
+	elseif isFavA == isFavB then
+		ishigher = data[a]["groupUptime"] > data[b]["groupUptime"]
+	end
+
+	return ishigher
+end
+
 function CMXint.InitializeBuffsPanel(control)
 	BuffPanel = CMXint.PanelObject:New(control, "buffs")
 
@@ -360,7 +252,7 @@ function CMXint.InitializeBuffsPanel(control)
 		local currentanchor = {TOPLEFT, scrollchild, TOPLEFT, 0, 1}
 		local parentrow
 
-		for buffName, buff in CMX.spairs(buffData["buffs"], buffSortFunction) do
+		for buffName, buff in CMX.spairs(buffData["buffs"], CMXf.buffSortFunction) do
 			if buff.groupUptime > 0 then
 				if isSigilAbility(buff.instances) then sigilIcon:SetHidden(false) end
 

@@ -174,7 +174,7 @@
                             </Controls>
 
                             <OnFocusLost>
-                                CMX.EditTitleEnd(self)
+                                CMX.internal.EditTitleEnd(self)
                             </OnFocusLost>
                         </EditBox>
 
@@ -197,7 +197,7 @@
                     </OnInitialized>
 
                     <OnMouseDoubleClick>
-                        CMX.EditTitleStart(self)
+                        CMX.internal.EditTitleStart(self)
                     </OnMouseDoubleClick>
 
                     <OnMouseDown>

@@ -8,6 +8,50 @@ local dx = CMXint.dx
 local DPSstrings = CMXint.DPSstrings
 local adjustRowSize = CMXf.adjustRowSize
 
+do	-- Handling Unit Context Menu
+	local UnitContextMenuUnitId
+	local function postUnitDPS()
+		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SELECTED_UNIT, currentFight, UnitContextMenuUnitId)
+	end
+
+	local function postUnitNameDPS()
+		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SELECTED_UNITNAME, currentFight, UnitContextMenuUnitId)
+	end
+
+	local function postSelectionDPS()
+		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SELECTION, currentFight)
+	end
+
+	local function postSelectionHPS()
+		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SELECTION_HEALING, currentFight)
+	end
+
+	function CMX.UnitContextMenu( unitItem, upInside )
+		local category = CMXint.settings.FightReport.category
+		if not (upInside or category == "damageOut" or category == "healingOut") then return end
+		local dataId = unitItem.dataId
+		local selections = CMXint.selections
+
+		ClearMenu()
+
+		if category == "damageOut" then
+			UnitContextMenuUnitId = dataId
+
+			local unitName = fightData.units[dataId].name
+
+			AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTUNITDPS), postUnitDPS)
+			AddCustomMenuItem(zo_strformat(GetString(SI_COMBAT_METRICS_POSTUNITNAMEDPS), unitName, 2), postUnitNameDPS)
+
+			if selections.unit[category] then AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTSELECTIONDPS), postSelectionDPS) end
+
+		elseif category == "healingOut" and selections.unit[category] then
+			AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTSELECTIONHPS), postSelectionHPS)
+		end
+
+		ShowMenu(unitItem)
+	end
+end
+
 local function GetShortFormattedNumber(number)
 	local exponent = zo_floor(math.log(number)/math.log(10))
 	local loweredNumber = zo_roundToNearest(number, zo_pow(10, exponent-2))

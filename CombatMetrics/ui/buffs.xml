@@ -111,7 +111,7 @@
                             <Dimensions x="90" y="48" />
                             <OnInitialized>
                                 self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_MAGICKA_PM))
-                                CMX.SetLabelColor(self, GetString(SI_COMBAT_METRICS_MAGICKA_COLOR))
+                                CMX.internal.SetLabelColor(self, GetString(SI_COMBAT_METRICS_MAGICKA_COLOR))
                                 self.menukey = "magicka"
                             </OnInitialized>
                         </Control>
@@ -126,7 +126,7 @@
                             <Anchor point="TOPRIGHT" />
                             <OnInitialized>
                                 self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_STAMINA_PM))
-                                CMX.SetLabelColor(self, GetString(SI_COMBAT_METRICS_STAMINA_COLOR))
+                                CMX.internal.SetLabelColor(self, GetString(SI_COMBAT_METRICS_STAMINA_COLOR))
                                 self.menukey = "stamina"
                             </OnInitialized>
                         </Control>

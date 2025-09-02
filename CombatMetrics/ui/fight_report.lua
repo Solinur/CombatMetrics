@@ -8,6 +8,10 @@ local fightReport
 local em = GetEventManager()
 -- local 
 
+local function UpdateReport2()
+	CombatMetrics_Report:Update()
+end
+
 local function InitializeFightReport()
 	fightReport = CombatMetrics_Report
 	CMXf.storeOrigLayout(fightReport)
@@ -18,11 +22,18 @@ local function InitializeFightReport()
 
 	fightReport:ClearAnchors()
 	fightReport:SetAnchor(CENTER, nil , TOPLEFT, pos_x, pos_y)
-
+	
 	local fragment = ZO_HUDFadeSceneFragment:New(fightReport)
-
+	
 	local scene = ZO_Scene:New("CMX_REPORT_SCENE", SCENE_MANAGER)
 	scene:AddFragment(fragment)
+	
+	function fightReport:SavePosition()
+		local x, y = self:GetCenter()
+		self.settings.pos_x = x
+		self.settings.pos_y = y
+	end
+	fightReport:SetHandler("OnMoveStop", function () fightReport:SavePosition() end)
 
 	local function resize(control, scale)
 		if control.sizes == nil and control.anchors == nil then return end

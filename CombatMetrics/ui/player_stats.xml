@@ -34,7 +34,7 @@
                         offsetY="6" constrains="X" />
                     <OnInitialized>
                         self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_MAGICKA)..":")
-                        CMX.SetLabelColor(self, GetString(SI_COMBAT_METRICS_MAGICKA_COLOR))
+                        CMX.internal.SetLabelColor(self, GetString(SI_COMBAT_METRICS_MAGICKA_COLOR))
                     </OnInitialized>
                 </Control>
 
@@ -46,7 +46,7 @@
                         offsetY="4" constrains="X" />
                     <OnInitialized>
                         self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_STAMINA)..":")
-                        CMX.SetLabelColor(self, GetString(SI_COMBAT_METRICS_STAMINA_COLOR))
+                        CMX.internal.SetLabelColor(self, GetString(SI_COMBAT_METRICS_STAMINA_COLOR))
                     </OnInitialized>
                 </Control>
 
@@ -58,7 +58,7 @@
                         offsetY="4" constrains="X" />
                     <OnInitialized>
                         self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_ULTIMATE)..":")
-                        CMX.SetLabelColor(self, GetString(SI_COMBAT_METRICS_ULTIMATE_COLOR))
+                        CMX.internal.SetLabelColor(self, GetString(SI_COMBAT_METRICS_ULTIMATE_COLOR))
                     </OnInitialized>
                 </Control>
 
@@ -291,7 +291,7 @@
                     </Controls>
 
                     <OnInitialized>
-                        CMX.SetLabelColor(self, GetString(SI_COMBAT_METRICS_MAGICKA_COLOR))
+                        CMX.internal.SetLabelColor(self, GetString(SI_COMBAT_METRICS_MAGICKA_COLOR))
                     </OnInitialized>
                 </Control>
             </Controls>

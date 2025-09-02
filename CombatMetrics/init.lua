@@ -182,21 +182,21 @@ local svdefaults = {
 
 		["showWereWolf"] 		= false,
 
-		["CombatLog"] = {
-			["Filters"] = {
-				[LIBCOMBAT_EVENT_DAMAGE_OUT] 		= true,
-				[LIBCOMBAT_EVENT_DAMAGE_IN] 		= false,
-				[LIBCOMBAT_EVENT_HEAL_OUT] 			= false,
-				[LIBCOMBAT_EVENT_HEAL_IN] 			= false,
-				[LIBCOMBAT_EVENT_EFFECTS_IN] 		= false,
-				[LIBCOMBAT_EVENT_EFFECTS_OUT] 		= false,
-				[LIBCOMBAT_EVENT_GROUPEFFECTS_IN] 	= false,
-				[LIBCOMBAT_EVENT_GROUPEFFECTS_OUT] 	= false,
-				[LIBCOMBAT_EVENT_PLAYERSTATS] 		= false,
-				[LIBCOMBAT_EVENT_RESOURCES] 		= false,
-				[LIBCOMBAT_EVENT_MESSAGES] 			= false,
-			},
-		},
+		-- ["CombatLog"] = {
+		-- 	["Filters"] = {
+		-- 		[LIBCOMBAT_EVENT_DAMAGE_OUT] 		= true,
+		-- 		[LIBCOMBAT_EVENT_DAMAGE_IN] 		= false,
+		-- 		[LIBCOMBAT_EVENT_HEAL_OUT] 			= false,
+		-- 		[LIBCOMBAT_EVENT_HEAL_IN] 			= false,
+		-- 		[LIBCOMBAT_EVENT_EFFECTS_IN] 		= false,
+		-- 		[LIBCOMBAT_EVENT_EFFECTS_OUT] 		= false,
+		-- 		[LIBCOMBAT_EVENT_GROUPEFFECTS_IN] 	= false,
+		-- 		[LIBCOMBAT_EVENT_GROUPEFFECTS_OUT] 	= false,
+		-- 		[LIBCOMBAT_EVENT_PLAYERSTATS] 		= false,
+		-- 		[LIBCOMBAT_EVENT_RESOURCES] 		= false,
+		-- 		[LIBCOMBAT_EVENT_MESSAGES] 			= false,
+		-- 	},
+		-- },
 	},
 
 	["LiveReport"] = {
@@ -228,8 +228,9 @@ local function Initialize(eventId, addon)
 	if addon ~= CMX.name then return end
 
 	loadSV()
-
 	assert(CMXint.InitializeUI(), "Initialization of ui module failed")
+	assert(CMXint.InitializeUtils(), "Initialization of utils module failed")
+	-- assert(CMXint.InitMenu(svdefaults), "Initialization of settings menu failed")
 
 	EVENT_MANAGER:UnregisterForEvent("CombatMetrics_Initialize", EVENT_ADD_ON_LOADED)
 end

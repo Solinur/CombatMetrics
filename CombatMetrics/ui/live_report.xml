@@ -189,9 +189,9 @@
                     edgeColor="00000000" centerColor="00000000" mouseEnabled="true" resizeHandleSize="8">
                     <AnchorFill />
                     <DimensionConstraints minX="150" maxX="900" minY="26" maxY="156" />
-                    <OnRectChanged>CMX.NewSize(self, newLeft, newTop, newRight, newBottom, oldLeft, oldTop, oldRight, oldBottom)</OnRectChanged>
-                    <OnResizeStart>CMX.Resizing(self, true)</OnResizeStart>
-                    <OnResizeStop>CMX.Resizing(self, false)</OnResizeStop>
+                    <OnRectChanged>CMX.internal.NewSize(self, newLeft, newTop, newRight, newBottom, oldLeft, oldTop, oldRight, oldBottom)</OnRectChanged>
+                    <OnResizeStart>CMX.internal.Resizing(self, true)</OnResizeStart>
+                    <OnResizeStop>CMX.internal.Resizing(self, false)</OnResizeStop>
                     <OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
                 </Backdrop>
             </Controls>

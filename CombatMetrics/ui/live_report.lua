@@ -187,10 +187,9 @@ function LiveReportControl:Refresh(anchorControl)
 end
 
 ---comment
----@param LiveReport TopLevelWindow
-local function InitLiveReport(LiveReport)
-	local self = LiveReport
-	local settings = CMXint.settings.FightReport
+---@param self TopLevelWindow
+local function InitLiveReport(self)
+	local settings = CMXint.settings.LiveReport
 	if settings.enabled == false then return end
 
 	self.initilazed = true
@@ -201,20 +200,20 @@ local function InitLiveReport(LiveReport)
 		if settings[name] == true then LiveReportControl:New(name) end
 	end
 
-	LiveReport:ClearAnchors()
-	LiveReport:SetAnchor(CENTER, nil , TOPLEFT, settings.pos_x, settings.pos_y)
-    LiveReport:SetHandler("OnMoveStop", function () LiveReport:SavePosition() end)
-	
-	CMXf.storeOrigLayout(LiveReport)
-	self.fragment = ZO_HUDFadeSceneFragment:New(LiveReport)
-
-	function LiveReport:SavePosition()
+	function self:SavePosition()
 		local x, y = self:GetCenter()
 		self.settings.pos_x = x
 		self.settings.pos_y = y
 	end
 
-	function LiveReport:Toggle(value)
+	self:ClearAnchors()
+	self:SetAnchor(CENTER, nil , TOPLEFT, settings.pos_x, settings.pos_y)
+    self:SetHandler("OnMoveStop", function () self:SavePosition() end)
+	
+	CMXf.storeOrigLayout(self)
+	self.fragment = ZO_HUDFadeSceneFragment:New(self)
+
+	function self:Toggle(value)
 		if value == nil then value = self:IsHidden() end
 		local fragment = self.fragment
 		if value == true and SCENE_MANAGER then
@@ -234,23 +233,23 @@ local function InitLiveReport(LiveReport)
 		end
 	end
 
-	function LiveReport:RefreshBG()
-		local newwidth, newheight = LiveReport:GetDimensions()
+	function self:RefreshBG()
+		local newwidth, newheight = self:GetDimensions()
 
-		local bg = LiveReport:GetNamedChild("BG")
-		local resizeFrame = LiveReport:GetNamedChild("ResizeFrame")
+		local bg = self:GetNamedChild("BG")
+		local resizeFrame = self:GetNamedChild("ResizeFrame")
 
 		bg:SetDimensions(newwidth, newheight)
 		resizeFrame:SetDimensions(newwidth, newheight)
 		resizeFrame:SetAnchorFill(self)
 
-		LiveReport.sizes = {newwidth/settings.scale, newheight/settings.scale}
+		self.sizes = {newwidth/settings.scale, newheight/settings.scale}
 		bg.sizes = {newwidth/settings.scale, newheight/settings.scale}
 		resizeFrame.sizes = {newwidth/settings.scale, newheight/settings.scale}
 		resizeFrame:SetDimensionConstraints(newwidth/settings.scale*0.5, newheight/settings.scale*0.5, newwidth/settings.scale*3, newheight/settings.scale*3)
 	end
 
-	function LiveReport:GetTotalSize()
+	function self:GetTotalSize()
 		local totalBlocks = 0
 		for _, module in pairs(self.modules) do
 			if module.active then totalBlocks = totalBlocks + module.blocksize end
@@ -258,7 +257,7 @@ local function InitLiveReport(LiveReport)
 		return totalBlocks
 	end
 
-	function LiveReport:Refresh()
+	function self:Refresh()
 		local totalWidth  = self:GetTotalSize()
 		local layout = settings.layout or "Compact"
 
@@ -296,20 +295,20 @@ local function InitLiveReport(LiveReport)
 		zo_callLater(function() self:RefreshBG() end, 1)
 	end
 
-	function LiveReport:Resize(scale)
-		for i = 1, LiveReport:GetNumChildren() do	-- dont resize liveReport!
-			local child = LiveReport:GetChild(i)
+	function self:Resize(scale)
+		for i = 1, self:GetNumChildren() do	-- dont resize liveReport!
+			local child = self:GetChild(i)
 			if child then resize(child, scale) end
 		end
-		LiveReport:Refresh()
+		self:Refresh()
 	end
 
-	LiveReport.Update = updateLiveReport
-	LiveReport:Toggle(settings.enabled)
-	LiveReport:Resize(settings.scale)
-	LiveReport:GetNamedChild("ResizeFrame"):SetMouseEnabled(not settings.locked)
-	LiveReport:SetMovable(not settings.locked)
-	LiveReport:GetNamedChild("BG"):SetAlpha(settings.bgalpha/100)
+	self.Update = updateLiveReport
+	self:Toggle(settings.enabled)
+	self:Resize(settings.scale)
+	self:GetNamedChild("ResizeFrame"):SetMouseEnabled(not settings.locked)
+	self:SetMovable(not settings.locked)
+	self:GetNamedChild("BG"):SetAlpha(settings.bgalpha/100)
 end
 
 local isFileInitialized = false
