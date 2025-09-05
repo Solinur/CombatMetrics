@@ -343,7 +343,7 @@ function CMXint.InitializeUI()
 	-- assert(CMXint.InitializeInfoRow(), "Initialization of info row failed")
 	
 	assert(CMXint.InitializeFightReport(), "Initialization of fight report ui failed")
-	assert(CMXint.InitializeLiveReport(), "Initialization of live report failed")
+	-- assert(CMXint.InitializeLiveReport(), "Initialization of live report failed")
 
 	CMXint.SVHandler = CombatMetricsFightData
 
