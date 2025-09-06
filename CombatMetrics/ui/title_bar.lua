@@ -4,34 +4,51 @@ local CMXf = CMXint.functions
 local CMXd = CMXint.data
 local logger
 
-function CMXint.EditTitleStart(control)
-	local label = control:GetNamedChild("Name")
-	local editbox = control:GetNamedChild("Edit")
-
-	label:SetHidden(true)
-	editbox:SetHidden(false)
-
-	editbox:SetText( label:GetText() )
-	editbox:SelectAll()
-	editbox:TakeFocus()
-end
-
-function CMXint.EditTitleEnd(editbox)
-	local control = editbox:GetParent()
-	local label = control:GetNamedChild("Name")
-
-	editbox:SetHidden(true)
-	label:SetHidden(false)
-
-	local newtext = editbox:GetText()
-
-	label:SetText( newtext )
-
-	if fightData then fightData.fightlabel = newtext end
-end
+local racetextures = {
+	"esoui/art/icons/heraldrycrests_race_breton_01.dds",
+	"esoui/art/icons/heraldrycrests_race_redguard_01.dds",
+	"esoui/art/icons/heraldrycrests_race_orc_01.dds",
+	"esoui/art/icons/heraldrycrests_race_dunmer_01.dds",
+	"esoui/art/icons/heraldrycrests_race_nord_01.dds",
+	"esoui/art/icons/heraldrycrests_race_argonian_01.dds",
+	"esoui/art/icons/heraldrycrests_race_altmer_01.dds",
+	"esoui/art/icons/heraldrycrests_race_bosmer_01.dds",
+	"esoui/art/icons/heraldrycrests_race_khajiit_01.dds",
+	"esoui/art/icons/heraldrycrests_race_imperial_01.dds",
+}
 
 function CMXint.InitializeTitlePanel(control)
 	TitlePanel = CMXint.PanelObject:New(control, "title")
+
+	---@cast control Control
+	control.tooltip = {SI_COMBAT_METRICS_EDIT_TITLE}
+	local label = control:GetNamedChild("Name")
+	local editbox = control:GetNamedChild("Edit")
+
+	local function OnEditTitleStart()
+		label:SetHidden(true)
+		editbox:SetHidden(false)
+
+		editbox:SetText(label:GetText())
+		editbox:SelectAll()
+		editbox:TakeFocus()
+	end
+
+	local function OnEditTitleEnd()
+		editbox:SetHidden(true)
+		label:SetHidden(false)
+
+		local newtext = editbox:GetText()
+
+		label:SetText(newtext)
+
+		local fightData = CMXf.GetCurrentFight()
+		if fightData then fightData.fightlabel = newtext end
+	end
+
+	control:SetHandler("OnMouseDoubleClick", OnEditTitleStart, "CMX")
+	editbox:SetHandler("OnFocusLost", OnEditTitleEnd, "CMX")
+
 	function TitlePanel:Update(fightData)
 		logger:Debug("Updating TitlePanel")
 
@@ -50,36 +67,13 @@ function CMXint.InitializeTitlePanel(control)
 			charData.CPtotal = GetUnitChampionPoints("player")
 
 			fightlabel = "Combat Metrics"
-		elseif (fightData.charData == nil or fightData.charData.classId == nil) and fightData.char == GetUnitName("player") then -- legacy
-			charData.name = fightData.char
-			charData.raceId = GetUnitRaceId("player")
-			charData.gender = GetUnitGender("player")
-			charData.classId = GetUnitClassId("player")
-			charData.level = 0
-			charData.CPtotal = 0
-
-			fightData.charData = charData
-			fightlabel = zo_strgsub(fightData.fightlabel, ".+%:%d%d %- ([A-Z])", "%1") or ""
 		else
-			charData = fightData.charData or {}
+			charData = fightData.charData
 			charData.name = charData.name or fightData.char
 			fightlabel = zo_strgsub(fightData.fightlabel, ".+%:%d%d %- ([A-Z])", "%1") or ""
 		end
 
 		-- RaceIcon
-
-		local racetextures = {
-			"esoui/art/icons/heraldrycrests_race_breton_01.dds",
-			"esoui/art/icons/heraldrycrests_race_redguard_01.dds",
-			"esoui/art/icons/heraldrycrests_race_orc_01.dds",
-			"esoui/art/icons/heraldrycrests_race_dunmer_01.dds",
-			"esoui/art/icons/heraldrycrests_race_nord_01.dds",
-			"esoui/art/icons/heraldrycrests_race_argonian_01.dds",
-			"esoui/art/icons/heraldrycrests_race_altmer_01.dds",
-			"esoui/art/icons/heraldrycrests_race_bosmer_01.dds",
-			"esoui/art/icons/heraldrycrests_race_khajiit_01.dds",
-			"esoui/art/icons/heraldrycrests_race_imperial_01.dds",
-		}
 
 		local raceIcon = charInfo:GetNamedChild("RaceIcon")
 		local raceId = charData.raceId
@@ -89,7 +83,7 @@ function CMXint.InitializeTitlePanel(control)
 		raceIcon:SetTexture(racetextures[raceId])
 
 		local race = GetRaceName(gender, raceId)
-		raceIcon.tooltip = race
+		raceIcon.tooltip = {race}
 
 		-- ClassIcon
 
@@ -103,7 +97,7 @@ function CMXint.InitializeTitlePanel(control)
 				local class = GetClassName(gender, id)
 
 				classIcon:SetTexture(texture)
-				classIcon.tooltip = { class }
+				classIcon.tooltip = {class}
 				classIcon:SetHidden(false)
 
 				break
@@ -146,7 +140,6 @@ function CMXint.InitializeTitlePanel(control)
 		fightTitle:SetText(fightlabel)
 	end
 end
-
 
 local isFileInitialized = false
 function CMXint.InitializeTitle()
