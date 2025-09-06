@@ -3,7 +3,6 @@ local CMXint = CMX.internal
 local CMXf = CMXint.functions
 local CMXd = CMXint.data
 local logger
-local SVHandler
 
 local ValidRaids = {
 
@@ -15,190 +14,296 @@ local ValidRaids = {
 }
 
 
-local NavButtonFunctions = {}
+local function initCategoryButtons(MenuPanel)
+	local categoryButtons = {}
+	local i = 1
+	local anchorControl = MenuPanel.control
 
-function NavButtonFunctions.previous(control)
-	if control:GetState() == BSTATE_DISABLED then
-		return
-	else
-		CombatMetrics_Report:Update(currentFight-1)
+	local function onMouseUp(button)
+		MenuPanel:SelectCategory(button)
 	end
+
+	local function initCategoryButton(category, texture, color, tooltip)
+		local button = CreateControlFromVirtual("CombatMetrics_CategoryButton", MenuPanel.control,
+			"CombatMetrics_MenuButton", i)
+		---@cast button TextureControl
+
+		button:SetTexture(texture)
+		button:SetColor(ZO_ColorDef.HexToRGBA(color))
+		local anchorSide = i == 1 and TOP or BOTTOM
+		button:SetAnchor(TOP, anchorControl, anchorSide, nil, 4)
+		button.tooltip = tooltip
+		button.category = category
+		button:SetHandler("OnMouseUp", onMouseUp, "CMX")
+		anchorControl = button
+		categoryButtons[category] = button
+
+		i = i + 1
+	end
+
+	initCategoryButton("damageOut", "/esoui/art/icons/heraldrycrests_weapon_axe_02.dds", "FFFFCCCC",
+		SI_COMBAT_METRICS_DAMAGE_CAUSED)
+	initCategoryButton("healingOut", "/esoui/art/buttons/gamepad/gp_plus_large.dds", "FFCCFFCC",
+		SI_COMBAT_METRICS_HEALING_DONE)
+	initCategoryButton("damageIn", "/esoui/art/icons/heraldrycrests_weapon_shield_01.dds", "FFCCCCFF",
+		SI_COMBAT_METRICS_DAMAGE_CAUSED)
+	initCategoryButton("healingIn", "/esoui/art/hud/gamepad/gp_radialicon_invitegroup_down.dds", "FFFFFFCC",
+		SI_COMBAT_METRICS_HEALING_RECEIVED)
+
+	MenuPanel.categoryButtons = categoryButtons
 end
 
-function NavButtonFunctions.next(control)
-	if control:GetState() == BSTATE_DISABLED then
-		return
-	else
-		CombatMetrics_Report:Update(currentFight+1)
+local function initSceneButtons(MenuPanel)
+	local sceneButtons = {}
+	local i = 1
+	local anchorControl = MenuPanel.categoryButtons.healingIn
+
+	local function onMouseUp(button)
+		MenuPanel:SelectScene(button)
 	end
+
+	local function initSceneButton(scene, texture, color, tooltip)
+		local button = CreateControlFromVirtual("CombatMetrics_SceneButton", MenuPanel.control,
+			"CombatMetrics_MenuButton", i)
+		---@cast button TextureControl
+
+		button:SetTexture(texture)
+		button:SetColor(ZO_ColorDef.HexToRGBA(color))
+		local offset = i == 1 and 30 or 4
+		button:SetAnchor(TOP, anchorControl, BOTTOM, nil, offset)
+		button.tooltip = tooltip
+		button.category = scene
+		button:SetHandler("OnMouseUp", onMouseUp, "CMX")
+		anchorControl = button
+		sceneButtons[scene] = button
+
+		i = i + 1
+	end
+
+	initSceneButton("fightStats", "esoui/art/menubar/gamepad/gp_playermenu_icon_skills.dds", "FFFFFFFF",
+		SI_COMBAT_METRICS_TOGGLE_FIGHTSTATS)
+	initSceneButton("combatLog", "esoui/art/guild/gamepad/gp_guild_menuicon_roster.dds", "33FFFFFF",
+		SI_COMBAT_METRICS_TOGGLE_COMBAT_LOG)
+	initSceneButton("graph", "esoui/art/treeicons/gamepad/gp_tutorial_idexicon_charprogression.dds", "33FFFFFF",
+		SI_COMBAT_METRICS_TOGGLE_GRAPH)
+	initSceneButton("info", "esoui/art/menubar/gamepad/gp_playermenu_icon_tutorial.dds", "FFFFFFFF",
+		SI_COMBAT_METRICS_TOGGLE_INFO)
+
+	MenuPanel.sceneButtons = sceneButtons
 end
 
-function NavButtonFunctions.last(control)
-	if control:GetState() == BSTATE_DISABLED then
-		return
-	else
-		CombatMetrics_Report:Update(#CMX.lastfights)
-	end
-end
 
-function NavButtonFunctions.load(control)
-	if control:GetState() == BSTATE_DISABLED then
-		return
-	else
-		CMXint.panels["FightList"]:Update()
-	end
-end
+local function initSettingsButton(MenuPanel)
+	local button = CreateControlFromVirtual("CombatMetrics_SettingsButton", MenuPanel.control, "CombatMetrics_MenuButton")
+	---@cast button TextureControl
 
-function NavButtonFunctions.save(control, _, _, _, _, shiftkey )
-	if control:GetState() == BSTATE_DISABLED then
-		return
-	else
-		local numFights = SVHandler.GetNumFights()
-		local lastsaved = SVHandler.GetFight(numFights)
-		if lastsaved ~= nil and lastsaved.date == fightData.date then return end -- bail out if fight is already saved
-
-		local spaceLeft = CMXint.settings.maxSavedFights - numFights
-		assert(spaceLeft > 0, zo_strformat(SI_COMBAT_METRICS_SAVEDFIGHTS_FULL, 1-spaceLeft))
-
-		SVHandler.Save(fightData, shiftkey)
-		CombatMetrics_Report:Update()
-	end
-end
-
-function NavButtonFunctions.delete(control)
-	if control:GetState() == BSTATE_DISABLED then
-		return
-	else
-		table.remove(CMX.lastfights, currentFight)
-		CMXint.ClearSelections()
-		if #CMX.lastfights == 0 then CombatMetrics_Report:Update() else CombatMetrics_Report:Update(zo_min(currentFight, #CMX.lastfights)) end
-	end
-end
-
-function CMX.InitNavButtons(rowControl)
-	for i=1, rowControl:GetNumChildren() do
-		local child = rowControl:GetChild(i)
-		if child then child:SetHandler( "OnMouseUp", NavButtonFunctions[child.func]) end
-	end
-end
-
-do
 	local function toggleShowIds()
 		CMXint.settings.showDebugIds = not CMXint.settings.showDebugIds
-		CombatMetrics_Report:Update()
+		CombatMetricsReport:Update()
 	end
 
 	local function toggleShowPets()
-		CMXint.settings.FightReport.showPets = not CMXint.settings.FightReport.showPets
-		CombatMetrics_Report:Update()
+		CMXint.settings.fightReport.showPets = not CMXint.settings.fightReport.showPets
+		CombatMetricsReport:Update()
 	end
 
 	local function toggleOverhealMode()
 		CMX.showOverHeal = not CMX.showOverHeal
-		CombatMetrics_Report:Update()
+		CombatMetricsReport:Update()
 	end
 
-	local function postSingleDPS()
-		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SINGLE, currentFight)
-	end
+	-- local function postSingleDPS()
+	-- 	CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SINGLE, currentFight)
+	-- end
 
-	local function postSmartDPS()
-		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SMART, currentFight)
-	end
+	-- local function postSmartDPS()
+	-- 	CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SMART, currentFight)
+	-- end
 
-	local function postMultiDPS()
-		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_MULTI, currentFight)
-	end
+	-- local function postMultiDPS()
+	-- 	CMX.PosttoChat(CMX_POSTTOCHAT_MODE_MULTI, currentFight)
+	-- end
 
-	local function postAllDPS()
-		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SINGLEANDMULTI, currentFight)
-	end
+	-- local function postAllDPS()
+	-- 	CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SINGLEANDMULTI, currentFight)
+	-- end
 
-	local function postSelectionDPS()
-		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SELECTION, currentFight)
-	end
+	-- local function postSelectionDPS()
+	-- 	CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SELECTION, currentFight)
+	-- end
 
-	local function postHPS()
-		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_HEALING, currentFight)
-	end
+	-- local function postHPS()
+	-- 	CMX.PosttoChat(CMX_POSTTOCHAT_MODE_HEALING, currentFight)
+	-- end
 
-	local function postSelectionHPS()
-		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SELECTION_HEALING, currentFight)
-	end
+	-- local function postSelectionHPS()
+	-- 	CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SELECTION_HEALING, currentFight)
+	-- end
 
-	function CMX.SettingsContextMenu( settingsbutton, upInside )
+	local function onMouseUp(button, _, upInside)
 		if not upInside then return end
 		local selections = CMXint.selections
 
 		local showIdString = CMXint.settings.showDebugIds and SI_COMBAT_METRICS_HIDEIDS or SI_COMBAT_METRICS_SHOWIDS
 		local showOverhealString = CMX.showOverHeal and SI_COMBAT_METRICS_HIDEOVERHEAL or SI_COMBAT_METRICS_SHOWOVERHEAL
-		local showPetString = CMXint.settings.FightReport.showPets and SI_COMBAT_METRICS_MENU_HIDEPETS or SI_COMBAT_METRICS_MENU_SHOWPETS_NAME
-		local postoptions = {}
+		local showPetString = CMXint.settings.fightReport.showPets and SI_COMBAT_METRICS_MENU_HIDEPETS or
+		SI_COMBAT_METRICS_MENU_SHOWPETS_NAME
 
-		table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTSINGLEDPS), callback = postSingleDPS})
+		-- local postoptions = {}
 
-		local fight = CMX.lastfights[currentFight]
+		-- table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTSINGLEDPS), callback = postSingleDPS})
 
-		if fight and fight.bossfight == true then
-			table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTSMARTDPS), callback = postSmartDPS})
-		end
+		-- local fight = CMX.lastfights[currentFight]
 
-		table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTMULTIDPS), callback = postMultiDPS})
-		table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTALLDPS), callback = postAllDPS})
+		-- if fight and fight.bossfight == true then
+		-- 	table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTSMARTDPS), callback = postSmartDPS})
+		-- end
 
-		local category = CMXint.settings.FightReport.category
+		-- table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTMULTIDPS), callback = postMultiDPS})
+		-- table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTALLDPS), callback = postAllDPS})
 
-		if category == "damageOut" and selections.unit[category] then
-			table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTSELECTIONDPS), callback = postSelectionDPS})
-		end
+		-- local category = CMXint.settings.fightReport.category
 
-		table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTHPS), callback = postHPS})
+		-- if category == "damageOut" and selections.unit[category] then
+		-- 	table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTSELECTIONDPS), callback = postSelectionDPS})
+		-- end
 
-		if category == "healingOut" and selections.unit[category] then
-			table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTSELECTIONHPS), callback = postSelectionHPS})
-		end
+		-- table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTHPS), callback = postHPS})
+
+		-- if category == "healingOut" and selections.unit[category] then
+		-- 	table.insert(postoptions, {label = GetString(SI_COMBAT_METRICS_POSTSELECTIONHPS), callback = postSelectionHPS})
+		-- end
 
 		ClearMenu()
 
 		AddCustomMenuItem(GetString(showIdString), toggleShowIds)
 		AddCustomMenuItem(GetString(showOverhealString), toggleOverhealMode)
 		AddCustomMenuItem(GetString(showPetString), toggleShowPets)
-		AddCustomSubMenuItem(GetString(SI_COMBAT_METRICS_POSTDPS), postoptions)
-		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_SETTINGS), CMX.OpenSettings)
+		-- AddCustomSubMenuItem(GetString(SI_COMBAT_METRICS_POSTDPS), postoptions)
+		-- AddCustomMenuItem(GetString(SI_COMBAT_METRICS_SETTINGS), CMX.OpenSettings)
 
-		if fight and fight.CalculateFight and (fight.svversion == nil or fight.svversion > 2) then
-			local function calculate()
-				fight:CalculateFight()
-				CombatMetrics_Report:Update(currentFight)
-			end
-
-			AddCustomMenuItem(GetString(SI_COMBAT_METRICS_RECALCULATE), calculate)
-		end
-
-		ShowMenu(settingsbutton)
-		AnchorMenu(settingsbutton)
+		ShowMenu(button)
+		AnchorMenu(button)
 	end
+
+	button:SetTexture("esoui/art/tutorial/gamepad/gp_playermenu_icon_settings.dds")
+	button:SetColor(ZO_ColorDef.HexToRGBA("FFFFFFFF"))
+	button:SetAnchor(TOP, MenuPanel.sceneButtons.info, BOTTOM, nil, 30)
+	button.tooltip = SI_COMBAT_METRICS_TOGGLE_SETTINGS
+	button:SetHandler("OnMouseUp", onMouseUp, "CMX")
+
+	MenuPanel.settingsButton = button
 end
 
-do
+local function initFeedbackButton(MenuPanel)
+	local button = CreateControlFromVirtual("CombatMetrics_FeedbackButton", MenuPanel.control, "CombatMetrics_MenuButton")
+	---@cast button TextureControl
+
+	local sendGold
+
+	local function PrefillMail()
+		local isDonation = sendGold and sendGold > 0
+		local headerString = GetString(isDonation and SI_COMBAT_METRICS_DONATE_GOLD_HEADER or
+		SI_COMBAT_METRICS_FEEDBACK_MAIL_HEADER)
+
+		ZO_MailSendToField:SetText("@Solinur")
+		ZO_MailSendSubjectField:SetText(string.format(headerString, CMX.version))
+		ZO_MailSendBodyField:TakeFocus()
+
+		if sendGold and sendGold > 0 then
+			QueueMoneyAttachment(sendGold)
+			ZO_MailSendSendCurrency:OnBeginInput()
+		else
+			ZO_MailSendBodyField:TakeFocus()
+		end
+	end
+
+	local function SendIngameMail()
+		sendGold = 0
+		SCENE_MANAGER:Show('mailSend')
+		zo_callLater(PrefillMail, 250) -- TODO: Bind to onShowEvent ?
+	end
+
+	local function GotoESOUI()
+		RequestOpenUnsafeURL(GetString(SI_COMBAT_METRICS_FEEDBACK_ESOUIURL))
+	end
+
+	local function GotoGithub()
+		RequestOpenUnsafeURL(GetString(SI_COMBAT_METRICS_FEEDBACK_GITHUBURL))
+	end
+
+	local function GotoDiscord()
+		RequestOpenUnsafeURL(GetString(SI_COMBAT_METRICS_FEEDBACK_DISCORDURL))
+	end
+
+	local function DonateGold()
+		sendGold = 5000
+		SCENE_MANAGER:Show('mailSend')
+		zo_callLater(PrefillMail, 250)
+	end
+
+	local function GotoESOUIDonation()
+		RequestOpenUnsafeURL(GetString(SI_COMBAT_METRICS_DONATE_ESOUIURL))
+	end
+
+	local function onMouseUp(button, _, upInside)
+		if not upInside then return end
+		ClearMenu()
+
+		local isEUServer = GetWorldName() == "EU Megaserver"
+		local stringFormatEU = isEUServer and "<<1>>" or SI_COMBAT_METRICS_FEEDBACK_EUONLY_FORMAT
+
+		local feedbackSubItems = {
+			{ label = ZO_CachedStrFormat(stringFormatEU, GetString(SI_COMBAT_METRICS_FEEDBACK_MAIL)), callback = SendIngameMail, disabled = not isEUServer },
+			{ label = GetString(SI_COMBAT_METRICS_FEEDBACK_ESOUI),                                    callback = GotoESOUI },
+			{ label = GetString(SI_COMBAT_METRICS_FEEDBACK_GITHUB),                                   callback = GotoGithub },
+			{ label = GetString(SI_COMBAT_METRICS_FEEDBACK_DISCORD),                                  callback = GotoDiscord },
+		}
+
+		local donationSubItems = {
+			{ label = ZO_CachedStrFormat(stringFormatEU, GetString(SI_COMBAT_METRICS_DONATE_GOLD)), callback = DonateGold,       disabled = not isEUServer },
+			{ label = GetString(SI_COMBAT_METRICS_DONATE_ESOUI),                                    callback = GotoESOUIDonation },
+		}
+
+		AddCustomSubMenuItem(GetString(SI_COMBAT_METRICS_FEEDBACK_SEND), feedbackSubItems, nil, nil, nil, 2)
+		AddCustomSubMenuItem(GetString(SI_COMBAT_METRICS_DONATE), donationSubItems, nil, nil, nil, 2)
+
+		ShowMenu(button)
+		AnchorMenu(button)
+	end
+
+	button:SetTexture("CombatMetrics/icons/addonlogo.dds")
+	button:SetColor(ZO_ColorDef.HexToRGBA("FFFFC52A"))
+	button:SetAnchor(TOP, MenuPanel.settingsButton, BOTTOM, nil, 8)
+	button.tooltip = SI_COMBAT_METRICS_FEEDBACK
+	button:SetHandler("OnMouseUp", onMouseUp, "CMX")
+
+	MenuPanel.feedbackButton = button
+end
+
+
+local function initNotificationButton(MenuPanel)
+	local button = CreateControlFromVirtual("CombatMetrics_FeedbackButton", MenuPanel.control, "CombatMetrics_MenuButton")
+	---@cast button TextureControl
+
 	local function ShowGuildInfo()
 		GUILD_BROWSER_GUILD_INFO_KEYBOARD:SetGuildToShow(64745)
-        MAIN_MENU_KEYBOARD:ShowSceneGroup("guildsSceneGroup", "linkGuildInfoKeyboard")
-        GUILD_BROWSER_GUILD_INFO_KEYBOARD.closeCallback = CombatMetrics_Report.Toggle
+		MAIN_MENU_KEYBOARD:ShowSceneGroup("guildsSceneGroup", "linkGuildInfoKeyboard")
+		GUILD_BROWSER_GUILD_INFO_KEYBOARD.closeCallback = CombatMetricsReport.Toggle
 	end
 
 	local function NotificationRead()
-		CMXint.settings.NotificationRead = CMXint.settings.currentNotificationVersion
-		CombatMetrics_Report:Update(currentFight)
+		CMXint.settings.notificationRead = CMXint.settings.currentNotificationVersion
+		CombatMetricsReport:Update()
 	end
 
 	local function DisableNotifications()
-		CMXint.settings.NotificationRead = CMXint.settings.currentNotificationVersion
-		CMXint.settings.NotificationAllowed = false
-		CombatMetrics_Report:Update(currentFight)
+		CMXint.settings.notificationRead = CMXint.settings.currentNotificationVersion
+		CMXint.settings.notificationAllowed = false
+		CombatMetricsReport:Update()
 	end
 
-	function CMX.NotificationContextMenu( settingsbutton, upInside )
+	local function onMouseUp(button, _, upInside)
 		if not upInside then return end
 		ClearMenu()
 
@@ -206,18 +311,84 @@ do
 		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_NOTIFICATION_ACCEPT), NotificationRead)
 		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_NOTIFICATION_DISCARD), DisableNotifications)
 
-		ShowMenu(settingsbutton)
-		AnchorMenu(settingsbutton)
+		ShowMenu(button)
+		AnchorMenu(button)
 	end
+
+	button:SetTexture("esoui/art/mainmenu/menubar_notifications_down.dds")
+	button:SetColor(ZO_ColorDef.HexToRGBA("FFFFFFFF"))
+	button:SetAnchor(TOP, MenuPanel.feedbackButton, BOTTOM, nil, 8)
+	button.tooltip = SI_COMBAT_METRICS_NOTIFICATION
+	button:SetHandler("OnMouseUp", onMouseUp, "CMX")
+
+	MenuPanel.notificationButton = button
 end
 
+local function initFightNavButtons(MenuPanel)
+	local navButtons = {}
+	local i = 1
+	local anchorControl = MenuPanel.notificationButton
+
+	local function SelectPreviousFight()
+		CMXint.figthData:SelectPreviousFight()
+	end
+
+	local function SelectNextFight()
+		CMXint.figthData:SelectNextFight()
+	end
+
+	local function SelectMostRecentFight()
+		CMXint.figthData:SelectMostRecentFight()
+	end
+
+	local function LoadFight()
+		MenuPanel.fighReport:SelectScene("fightList")
+	end
+
+	local function SaveFight(_, _, _, _, _, shiftkey)
+		CMXint.figthData:SaveFight(shiftkey)
+	end
+
+	local function DeleteFight()
+		CMXint.figthData:RemoveCurrentFight()
+	end
+
+	local function initNavButton(name, texture, tooltip, func)
+		local button = CreateControlFromVirtual("CombatMetrics_FightNavigationButton", MenuPanel.control,
+			"CombatMetrics_FightNavigationButton", i)
+		---@cast button ButtonControl
+
+		button:SetNormalTexture(	texture .. "up.dds")
+		button:SetPressedTexture(	texture .. "down.dds")
+		button:SetMouseOverTexture(	texture .. "over.dds")
+		button:SetDisabledTexture(	texture .. "disabled.dds")
+		local offset = i == 1 and 30 or 4
+		button:SetAnchor(TOP, anchorControl, BOTTOM, nil, offset)
+		button.tooltip = tooltip
+		button.name = name
+		button:SetHandler("OnMouseUp", func, "CMX")
+		button:SetState()
+		anchorControl = button
+		
+		navButtons[name] = button
+		i = i + 1
+	end
+
+	initNavButton("previous", "CombatMetrics/icons/leftarrow", 	SI_COMBAT_METRICS_PREVIOUS_FIGHT, 								SelectPreviousFight)
+	initNavButton("next", 	"CombatMetrics/icons/rightarrow", 	SI_COMBAT_METRICS_NEXT_FIGHT, 									SelectNextFight)
+	initNavButton("last", 	"CombatMetrics/icons/endarrow", 	SI_COMBAT_METRICS_MOST_RECENT_FIGHT, 							SelectMostRecentFight)
+	initNavButton("load", 	"CombatMetrics/icons/loadicon", 	SI_COMBAT_METRICS_LOAD_FIGHT, 									LoadFight)
+	initNavButton("save", 	"CombatMetrics/icons/saveicon", 	{SI_COMBAT_METRICS_SAVE_FIGHT, SI_COMBAT_METRICS_SAVE_FIGHT2}, SaveFight)
+	initNavButton("delete", 	"CombatMetrics/icons/deleteicon2", SI_COMBAT_METRICS_DELETE_FIGHT, 								DeleteFight)
+
+	MenuPanel.navButtons = navButtons
+end
 
 function CMXint.InitializeMenuPanel(control)
 	local MenuPanel = CMX.internal.PanelObject:New(control, "menu")
-	local category = MenuPanel.settings.category
 
-	function MenuPanel:Update(fightData)
-		local notificationSettings = CMXint.settings.Notification
+	function MenuPanel:Update()
+		local notificationSettings = CMXint.settings.notification
 		notificationSettings.version = 1
 
 		local date = GetDate()
@@ -225,121 +396,77 @@ function CMXint.InitializeMenuPanel(control)
 		local isMe = GetDisplayName() == "@Solinur"
 		local isGerman = GetCVar("Language.2") == "de"
 		local isEUServer = GetWorldName() == "EU Megaserver"
-		local isNotInGuild = not IsPlayerInGuild(64745)
-		local isNotificationAllowed = notificationSettings.enabled and notificationSettings.version > notificationSettings.versionSeen
+		local isNotificationAllowed = notificationSettings.enabled and
+		notificationSettings.version > notificationSettings.versionSeen
 		local isVeteranRaid = ValidRaids[GetCurrentParticipatingRaidId()] == true
 		local isWithinAllowedTime = date >= 20200417 and date <= 20200423
 
-		local show = notificationSettings.force or ((isGerman or isMe) and isEUServer and isNotificationAllowed and isVeteranRaid and isWithinAllowedTime)
+		local show = notificationSettings.force or isMe or
+		(isGerman and isEUServer and isNotificationAllowed and isVeteranRaid and isWithinAllowedTime)
 		self.control:GetNamedChild("NotificationButton"):SetHidden(not show)
+
+		self:UpdateButtonStates()
 	end
 
-	do -- Nav Buttons
+	function MenuPanel:UpdateButtonStates()
+		local fightData = CMXint.figthData
+		local currentIndex = fightData.currentIndex
+		local maxIndex = fightData:GetNumFights()
+		local navButtons = MenuPanel.navButtons
+		local fight = fightData.data
 
-		-- local NavButtons = self:GetNamedChild("NavigationRow")
-		-- local fightId = CMXint.currentFight or 0
+		local previous = currentIndex > 1
+		navButtons.previous:SetState(previous and BSTATE_NORMAL or BSTATE_DISABLED, not previous)
 
-		-- local ButtonStates = {
+		local next = currentIndex < maxIndex
+		navButtons.next:SetState(next and BSTATE_NORMAL or BSTATE_DISABLED, not next)
+		navButtons.last:SetState(next and BSTATE_NORMAL or BSTATE_DISABLED, not next)
 
-		-- 	["previous"] = CMX.lastfights[fightId - 1] ~= nil,
-		-- 	["next"]     = CMX.lastfights[fightId + 1] ~= nil,
-		-- 	["last"]     = CMX.lastfights[fightId + 1] ~= nil,
-		-- 	["load"]     = SVHandler ~= nil and SVHandler.GetNumFights() > 0,
-		-- 	["save"]     = CMX.lastfights[fightId] ~= nil and
-		-- 	not CMXf.searchtable(SVHandler.GetFights(), "date", fightData.date),
-		-- 	["delete"]   = CMX.lastfights[fightId] ~= nil and #CMX.lastfights > 0 ~= nil
-		-- }
+		local load = SVHandler ~= nil and SVHandler.GetNumFights() > 0
+		navButtons.load:SetState(load and BSTATE_NORMAL or BSTATE_DISABLED, not load)
 
-		-- for i = 1, NavButtons:GetNumChildren() do
-		-- 	local child = NavButtons:GetChild(i)
-		-- 	local state = ButtonStates[child.func]
+		local save = fight ~= nil and not CMXf.searchtable(SVHandler.GetFights(), "date", fight.date) -- TODO: Make function of SVHandler to check for already saved fights
+		navButtons.save:SetState(save and BSTATE_NORMAL or BSTATE_DISABLED, not save)
 
-		-- 	child:SetState(state and BSTATE_NORMAL or BSTATE_DISABLED, not state)
-		-- end
-
-
-		-- TODO: rework using scenes
-
-		-- local mainPanel = CombatMetrics_Report_MainPanel
-		-- local rightPanel = CombatMetrics_Report_RightPanel
-		-- local unitPanel = CombatMetrics_Report_UnitPanel
-		-- local abilityPanel = CombatMetrics_Report_AbilityPanel
-		-- local setupPanel = CombatMetrics_Report_SetupPanel
-		-- local graphPanel = CombatMetrics_Report_MainPanelGraph
-
-		-- local isInfo = category == "Info"
-
-		-- mainPanel:SetHidden(isInfo)
-		-- rightPanel:SetHidden(isInfo)
-		-- unitPanel:SetHidden(isInfo)
-		-- abilityPanel:SetHidden(isInfo)
-		-- setupPanel:SetHidden(not isInfo)
-
-		-- local isGraph = category == "Graph"
-
-		-- graphPanel:SetHidden(not isGraph)
-
-		-- if not isInfo then
-		-- 	local selected = mainPanel:GetNamedChild(category) -- Panel Content to show
-		-- 	mainPanel.active = selected
-
-		-- 	for i = 2, mainPanel:GetNumChildren() do
-		-- 		local child = mainPanel:GetChild(i)
-		-- 		child:SetHidden(child ~= selected) -- Hide all other panels except the selected panel
-		-- 	end
-
-		-- 	selected:Update()
-		-- else
-		-- 	setupPanel:Update()
-		-- end
-		
+		local delete = fight ~= nil
+		navButtons.delete:SetState(delete and BSTATE_NORMAL or BSTATE_DISABLED, not delete)
 	end
 
-	do -- Menu Buttons
-		local function SelectCategory(button)
-			local selectControl = button:GetParent()
-
-			for i = 1, selectControl:GetNumChildren() do
-				local child = selectControl:GetChild(i)
-
-				if child and child.isMainCategory then
-					local r, g, b, _ = child:GetColor()
-					local a = child == button and 1 or .2
-					child:SetColor(r, g, b, a)
-				end
-			end
-			
-			CMXint.settings.category = button.category
-			if CMX and CMX.init then CombatMetrics_Report:Update(CMXint.currentFight) end
+	function MenuPanel:SelectCategory(selectedButton)
+		for _, button in self.categoryButtons do
+			local r, g, b, _ = button:GetColor()
+			local a = button == selectedButton and 1 or 0.2
+			button:SetColor(r, g, b, a)
 		end
 
-		local function SelectMainPanel(button)
-			local selectControl = button:GetParent()
-			local category = button.category
+		local oldCategory = self.settings.category
+		local newCategory = selectedButton.category
 
-			for i = 1, selectControl:GetNumChildren() do
-				local child = selectControl:GetChild(i)
-
-				if child and child.isSecondaryCategory then
-					local a = child == button and 1 or .2
-					child:SetColor(1, 1, 1, a)
-				end
-			end
-		end
-
-		for i = 1, control:GetNumChildren() do
-			local button = control:GetChild(i)
-
-			if button and button.isMainCategory then
-				button:SetHandler( "OnMouseUp", SelectCategory)
-				if button.category == category then SelectCategory(button) end
-			elseif button and button.isSecondaryCategory then
-				button:SetHandler( "OnMouseUp", SelectMainPanel)
-			end
-
-			SelectMainPanel(control:GetNamedChild("FightStatsButton"))
+		if oldCategory ~= newCategory then
+			self.settings.category = newCategory
+			self.fighReport:Update()
 		end
 	end
+
+	function MenuPanel:SelectScene(selectedButton)
+		local newScene
+		for sceneName, button in self.sceneButtons do
+			local a = .2
+			if button == selectedButton then
+				a = 1
+				newScene = sceneName
+			end
+			button:SetColor(1, 1, 1, a)
+		end
+		self.fighReport:SelectScene(newScene)
+	end
+
+	initCategoryButtons(MenuPanel)
+	initSceneButtons(MenuPanel)
+	initSettingsButton(MenuPanel)
+	initFeedbackButton(MenuPanel)
+	initNotificationButton(MenuPanel)
+	initFightNavButtons(MenuPanel)
 end
 
 local isFileInitialized = false
@@ -348,6 +475,6 @@ function CMXint.InitializeMenu()
 	logger = CMXf.initSublogger("Menu Bar")
 	SVHandler = CMXint.SVHandler
 
-    isFileInitialized = true
+	isFileInitialized = true
 	return true
 end

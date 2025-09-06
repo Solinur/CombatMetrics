@@ -23,10 +23,11 @@
                     <OnInitialized>CombatMetrics.internal.InitializeTitlePanel(self)</OnInitialized>
                 </Control>
 
-                <Control name="$(parent)_Menu" inherits="CombatMetrics_Menubar">
+                <Control name="$(parent)_Menu" resizeToFitDescendents="true" layer="BACKGROUND" >
                     <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)_Title" offsetY="8" />
                     <Anchor point="BOTTOMLEFT" offsetY="-4"/>
                     <Dimensions y="36"/>
+                    <ResizeToFitPadding width="8" height="8" />
                     <OnInitialized>CombatMetrics.internal.InitializeMenuPanel(self)</OnInitialized>
                 </Control>
 
@@ -123,9 +124,9 @@
                     <!-- <OnInitialized>CombatMetrics.internal.InitializeFightListPanel(self)</OnInitialized> -->
                 </Control>
 
-                <!-- <Control name="$(parent)_DonateDialog" hidden="true" tier="2" inherits="CombatMetrics_DonateDialog">
+                <Control name="$(parent)_DonateDialog" hidden="true" tier="2" inherits="CombatMetrics_DonateDialog">
                     <Anchor point="CENTER" relativePoint="CENTER" />
-                </Control> -->
+                </Control>
             </Controls>
         </TopLevelControl>
     </Controls>

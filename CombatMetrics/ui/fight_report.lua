@@ -117,6 +117,10 @@ local function InitializeFightReport()
 		self.currentFight = fights:GetFightData(numFights)
 	end
 
+	function FightReport:SelectScene(newScene)
+		-- TODO: implement
+	end
+
 	FightReport:Resize(settings.scale)
 	return FightReport
 end
