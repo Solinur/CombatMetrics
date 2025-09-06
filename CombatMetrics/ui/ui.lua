@@ -1,5 +1,6 @@
 local CMX = CombatMetrics
 local CMXint = CMX.internal
+CMXint.panels = {}
 local CMXf = CMXint.functions
 local logger
 
@@ -39,7 +40,7 @@ CMXf.storeOrigLayout = storeOrigLayout
 -- this function resizes the row elements to match the size of the header elements of a scrolllist.
 -- It's important to maintain the naming and structure of the header elements to match those of the row elements.
 function CMXf.adjustRowSize(row, header)
-	local settings = CMXint.settings.FightReport
+	local settings = CMXint.settings.fightReport
 	if row == nil or row.scale == settings.scale then return end -- if sizes are good already, bail out.
 	row.scale = settings.scale
 
@@ -111,7 +112,7 @@ function CMXint.SetLabelColor(control, setcolor)  -- setcolor can be hex or rgba
 end
 
 -- function CMXint.ClearSelections()
--- 	local category = CMXint.settings.FightReport.category or "damageOut"
+-- 	local category = CMXint.settings.fightReport.category or "damageOut"
 -- 	local selections = CMXint.selections
 
 -- 	selections.ability[category] = nil
@@ -127,7 +128,7 @@ end
 
 -- 	if button ~= MOUSE_BUTTON_INDEX_LEFT and button ~= MOUSE_BUTTON_INDEX_MIDDLE then return end
 
--- 	local category = selecttype == "buff" and "buff" or selecttype == "resource" and "resource" or CMXint.settings.FightReport.category
+-- 	local category = selecttype == "buff" and "buff" or selecttype == "resource" and "resource" or CMXint.settings.fightReport.category
 
 -- 	local selections = CMXint.selections
 -- 	local lastSelections = CMXint.lastSelections
@@ -138,7 +139,7 @@ end
 -- 	if button == MOUSE_BUTTON_INDEX_MIDDLE then
 -- 		selections[selecttype][category] = nil
 -- 		lastSelections[selecttype][category] = nil
--- 		CombatMetrics_Report:Update(currentFight)
+-- 		CombatMetricsReport:Update(currentFight)
 
 -- 		return
 -- 	end
@@ -186,7 +187,7 @@ end
 
 -- 	lastSelections[selecttype][category] = lastsel
 -- 	selections[selecttype][category] = sel
--- 	CombatMetrics_Report:Update(currentFight)
+-- 	CombatMetricsReport:Update(currentFight)
 -- end
 
 function CMXf.GetCurrentData()
@@ -260,8 +261,7 @@ function CMXint.NewSize(control, newLeft, newTop, newRight, newBottom, oldLeft, 
 	lastResize = {newscale, newpos}
 end
 
-
-local PanelObject = ZO_Object:InitializingObject()
+local PanelObject = ZO_InitializingObject:Subclass()
 CMXint.PanelObject = PanelObject
 
 PanelObject.Update = PanelObject:MUST_IMPLEMENT()
@@ -274,7 +274,7 @@ function PanelObject:Initialize(control, name)
 
 	self.name = name
 	self.control = control
-	self.settings = CMXint.settings.FightReport
+
 	control.panel = self
 	CMXint.panels[name] = self
 end
@@ -309,8 +309,6 @@ function CMXint.InitializeUI()
 
 	-- CMXint.selections = {
 	-- 	["ability"]		= {},
-	-- 	["unit"] 		= {},
-	-- 	["buff"] 		= {},
 	-- 	["resource"] 	= {},
 	-- }
 
@@ -321,8 +319,8 @@ function CMXint.InitializeUI()
 	-- 	["resource"] 	= {},
 	-- }
 	
-	-- assert(CMXint.InitializeTitle(), "Initialization of title ui failed")
-	-- assert(CMXint.InitializeMenu(), "Initialization of menu ui failed")
+	assert(CMXint.InitializeTitle(), "Initialization of title ui failed")
+	assert(CMXint.InitializeMenu(), "Initialization of menu ui failed")
 	-- assert(CMXint.InitializeCombatStats(), "Initialization of combat stats ui failed")
 	-- -- assert(CMXint.InitializeResource(), "Initialization of resource ui failed")
 	-- assert(CMXint.InitializePlayerStats(), "Initialization of player stats ui failed")
@@ -346,6 +344,9 @@ function CMXint.InitializeUI()
 	-- assert(CMXint.InitializeLiveReport(), "Initialization of live report failed")
 
 	CMXint.SVHandler = CombatMetricsFightData
+
+	PanelObject.fightReport = CMXint.fightReport
+	PanelObject.settings = CMXint.fightReport.settings
 
 	isFileInitialized = true
 	return true

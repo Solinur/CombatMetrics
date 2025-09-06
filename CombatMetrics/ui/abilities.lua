@@ -24,12 +24,12 @@ local hitCritLayoutTable = {
 
 do -- Context Menu for hit/crit column on ability panel
 	local function getMenuData(id)
-		local category = CMXint.settings.FightReport.category
+		local category = CMXint.settings.fightReport.category
 		local hitCritLayout = hitCritLayoutTable[id]
 		local text = string.format("%s/%s", hitCritLayout[3], hitCritLayout[4])
 
 		local function callback()
-			CMXint.settings.FightReport.hitCritLayout[category] = id
+			CMXint.settings.fightReport.hitCritLayout[category] = id
 			AbilityPanel:Update()
 		end
 
@@ -39,7 +39,7 @@ do -- Context Menu for hit/crit column on ability panel
 	function CMX.HitCritContextMenu(control, button)
 		ClearMenu()
 
-		if CMXint.settings.FightReport.category == "damageIn" then
+		if CMXint.settings.fightReport.category == "damageIn" then
 			AddCustomMenuItem(getMenuData(4))
 			AddCustomMenuItem(getMenuData(5))
 			AddCustomMenuItem(getMenuData(6))
@@ -64,10 +64,10 @@ do -- Context Menu for average column on ability panel
 	local function getMenuData(id)
 		local averageLayout = averageLayoutTable[id]
 		local text = string.format("%s %s", GetString(SI_COMBAT_METRICS_AVERAGE), averageLayout[3])
-		local category = CMXint.settings.FightReport.category
+		local category = CMXint.settings.fightReport.category
 
 		local function callback()
-			CMXint.settings.FightReport.averageLayout[category] = id
+			CMXint.settings.fightReport.averageLayout[category] = id
 			AbilityPanel:Update()
 		end
 
@@ -81,7 +81,7 @@ do -- Context Menu for average column on ability panel
 		AddCustomMenuItem(getMenuData(2))
 		AddCustomMenuItem(getMenuData(3))
 
-		if CMXint.settings.FightReport.category == "damageIn" then AddCustomMenuItem(getMenuData(4)) end
+		if CMXint.settings.fightReport.category == "damageIn" then AddCustomMenuItem(getMenuData(4)) end
 
 		ShowMenu(control)
 	end
@@ -89,14 +89,14 @@ end
 
 do -- Context Menu for Min/Max column on ability panel
 	local function selectMinMaxOption1()
-		local category = CMXint.settings.FightReport.category
-		CMXint.settings.FightReport.maxValue[category] = true
+		local category = CMXint.settings.fightReport.category
+		CMXint.settings.fightReport.maxValue[category] = true
 		AbilityPanel:Update()
 	end
 
 	local function selectMinMaxOption2()
-		local category = CMXint.settings.FightReport.category
-		CMXint.settings.FightReport.maxValue[category] = false
+		local category = CMXint.settings.fightReport.category
+		CMXint.settings.fightReport.maxValue[category] = false
 		AbilityPanel:Update()
 	end
 

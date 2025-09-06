@@ -27,7 +27,7 @@ do	-- Handling Unit Context Menu
 	end
 
 	function CMX.UnitContextMenu( unitItem, upInside )
-		local category = CMXint.settings.FightReport.category
+		local category = CMXint.settings.fightReport.category
 		if not (upInside or category == "damageOut" or category == "healingOut") then return end
 		local dataId = unitItem.dataId
 		local selections = CMXint.selections

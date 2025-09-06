@@ -18,8 +18,9 @@ lang/en.lua
 lang/$(language).lua
 
 init.lua
-; menu.lua
 util.lua
+fightdata.lua
+; menu.lua
 
 bindings.xml
 
@@ -28,8 +29,8 @@ ui/templates.xml
 
 ui/title_bar.lua
 ui/title_bar.xml
-; ui/menu_bar.lua
-; ui/menu_bar.xml
+ui/menu_bar.lua
+ui/menu_bar.xml
 
 ; ui/combat_stats.lua
 ; ui/combat_stats.xml

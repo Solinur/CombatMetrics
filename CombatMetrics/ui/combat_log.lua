@@ -51,7 +51,7 @@ local function CLFilterButtonFunction(self)
 	local overlay = self:GetNamedChild("Overlay")
 	local func = self.func
 
-	local settings = CMXint.settings.FightReport
+	local settings = CMXint.settings.fightReport
 	local CLSelection = settings.CLSelection
 
 	local newState = not CLSelection[func] -- Update Filter Selection
@@ -69,7 +69,7 @@ end
 
 function toggleCopyPaste(self)
 	local combatLog = self:GetParent():GetParent():GetParent()
-	local settings = CMXint.settings.FightReport
+	local settings = CMXint.settings.fightReport
 
 	---@type TextBufferControl
 	local textWindow = combatLog:GetNamedChild("Window")

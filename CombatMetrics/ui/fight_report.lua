@@ -1,164 +1,124 @@
 local CMX = CombatMetrics
 local CMXint = CMX.internal
+CMXint.scenes = {}
 local CMXf = CMXint.functions
 local CMXd = CMXint.data
 local logger
-local fightReport
+local FightReport
+local _
 
 local em = GetEventManager()
--- local 
 
-local function UpdateReport2()
-	CombatMetrics_Report:Update()
+local function ResizeControl(control, scale)
+	if control.sizes == nil and control.anchors == nil then return end
+	local width, height = unpack(control.sizes)
+	local maxwidth, maxheight = GuiRoot:GetDimensions()
+
+	scale = zo_min(zo_max(scale or 1, 0.5), 3, maxwidth / width, maxheight / height)
+
+	if width and control:GetResizeToFitDescendents() == false then control:SetWidth(width * scale) end
+	if height and control:GetResizeToFitDescendents() == false then control:SetHeight(height * scale) end
+
+	local anchors = {}
+	local oldanchors = control.anchors
+	if oldanchors then ZO_DeepTableCopy(control.anchors, anchors) end
+
+	local anchor1 = anchors[1]
+	local anchor2 = anchors[2]
+	if anchor1 or anchor2 then control:ClearAnchors() end
+
+	if anchor1 ~= nil then
+		anchor1[4] = anchor1[4] * scale
+		anchor1[5] = anchor1[5] * scale
+
+		control:SetAnchor(unpack(anchor1))
+	end
+
+	if anchor2 ~= nil then
+		anchor2[4] = anchor2[4] * scale
+		anchor2[5] = anchor2[5] * scale
+
+		control:SetAnchor(unpack(anchor2))
+	end
+
+	local fontcontrol = control:GetNamedChild("Font")
+
+	if fontcontrol ~= nil then
+		local font, size, style = unpack(fontcontrol.font)
+		if size then size = tonumber(size) * (scale + 0.2) / 1.2 end -- Don't Scale fonts as much
+		control:SetFont(string.format("%s|%s|%s", font, size, style))
+	end
+
+	for i = 1, control:GetNumChildren() do
+		local child = control:GetChild(i)
+		if child then ResizeControl(child, scale) end
+	end
 end
+
 
 local function InitializeFightReport()
-	fightReport = CombatMetrics_Report
-	CMXf.storeOrigLayout(fightReport)
+	FightReport = CombatMetricsReport
+	CMXf.storeOrigLayout(FightReport)
 
-	local settings = CMXint.settings.FightReport
-	local pos_x = settings.pos_xs
+	local settings = CMXint.settings.fightReport
+	local pos_x = settings.pos_x
 	local pos_y = settings.pos_y
+	FightReport:ClearAnchors()
+	FightReport:SetAnchor(CENTER, nil, TOPLEFT, pos_x, pos_y)
+	
+	FightReport.settings = settings
+	FightReport.panels = CMXint.panels
 
-	fightReport:ClearAnchors()
-	fightReport:SetAnchor(CENTER, nil , TOPLEFT, pos_x, pos_y)
-	
-	local fragment = ZO_HUDFadeSceneFragment:New(fightReport)
-	
+	local fragment = ZO_HUDFadeSceneFragment:New(FightReport)
 	local scene = ZO_Scene:New("CMX_REPORT_SCENE", SCENE_MANAGER)
 	scene:AddFragment(fragment)
-	
-	function fightReport:SavePosition()
-		local x, y = self:GetCenter()
-		self.settings.pos_x = x
-		self.settings.pos_y = y
-	end
-	fightReport:SetHandler("OnMoveStop", function () fightReport:SavePosition() end)
+	CMXint.scenes.report = scene
 
-	local function resize(control, scale)
-		if control.sizes == nil and control.anchors == nil then return end
-		local width, height = unpack(control.sizes)
-		local maxwidth, maxheight = GuiRoot:GetDimensions()
-
-		scale = zo_min(zo_max(scale or 1, 0.5), 3, maxwidth/width, maxheight/height)
-		settings.scale = scale
-
-		if width and control:GetResizeToFitDescendents() == false then control:SetWidth(width*scale) end
-		if height and control:GetResizeToFitDescendents() == false then control:SetHeight(height*scale) end
-
-		local anchors = {}
-		local oldanchors = control.anchors
-		if oldanchors then ZO_DeepTableCopy(control.anchors, anchors) end
-
-		local anchor1 = anchors[1]
-		local anchor2 = anchors[2]
-		if anchor1 or anchor2 then control:ClearAnchors() end
-
-		if anchor1 ~= nil then
-			anchor1[4] = anchor1[4] * scale
-			anchor1[5] = anchor1[5] * scale
-
-			control:SetAnchor(unpack(anchor1))
-		end
-
-		if anchor2 ~= nil then
-			anchor2[4] = anchor2[4] * scale
-			anchor2[5] = anchor2[5] * scale
-
-			control:SetAnchor(unpack(anchor2))
-		end
-
-		local fontcontrol = control:GetNamedChild("Font")
-
-		if fontcontrol ~= nil then
-			local font, size, style = unpack(fontcontrol.font)
-			if size then size = tonumber(size) * (scale + 0.2)/1.2 end			-- Don't Scale fonts as much
-			control:SetFont(string.format("%s|%s|%s", font, size, style))
-		end
-
-		for i = 1, control:GetNumChildren() do
-			local child = control:GetChild(i)
-			if child then resize(child, scale) end
-		end
+	local function savePos()
+		settings.pos_x, settings.pos_y = FightReport:GetCenter()
 	end
 
-	function fightReport:Resize(scale)
-		resize(fightReport, scale)
-		if not fightReport:IsHidden() then fightReport:Update() end
-	end
-
-	-- TODO: Update Panels
-
-	fightReport:Resize(settings.scale)
-end
-
-function CMXint.ToggleFightReport()
-	if not SCENE_MANAGER:IsShowing("CMX_REPORT_SCENE") then
-		CombatMetrics_Report_DonateDialog:SetHidden(true)
-		SCENE_MANAGER:Toggle("CMX_REPORT_SCENE")
-
-		CombatMetrics_Report:Update(#CMX.lastfights>0 and #CMX.lastfights or nil)
+	local function onShow()
+		if FightReport.currentFight == nil then FightReport:SelectRecentFight() end
+		FightReport:Update()
 		SCENE_MANAGER:SetInUIMode(true)
-	else
+	end
+	
+	FightReport:SetHandler("OnMoveStop", savePos)
+	FightReport:SetHandler("OnShow", onShow)
+
+	function FightReport:Resize(scale)
+		ResizeControl(FightReport, scale)
+		settings.scale = scale
+		if not FightReport:IsHidden() then FightReport:Update() end
+	end
+
+	function FightReport:Toggle()
 		SCENE_MANAGER:Toggle("CMX_REPORT_SCENE")
 	end
-end
 
-function CMXint.UpdateFightReport(control, fightId)
-	logger:Debug("Updating Fight Report")
-	em:UnregisterForUpdate("CMX_Report_Update_Delay")
+	function FightReport:Update()
+		logger:Debug("Updating Fight Report")
 
-	local settings = CMXint.settings.FightReport
-	local category = settings.category or "damageOut"
-
-	-- clear selections of abilities, buffs or units when selecting a different fight to display --
-
-	if fightId == nil or fightId ~= currentFight then
-		CMXint.ClearSelections()
-	end
-
-	-- determine which fight to show
-	fightId = fightId or currentFight  -- if no fightId was given, use the previous one (this will also select the next fight if one is deleted)
-	if fightId == nil or fightId < 0 or CMX.lastfights[fightId] == nil then -- if no valid fight is selected, fall back to the most recent one, if it exists.
-		if #CMX.lastfights == 0 then
-			fightId = -1 -- there is no fight saved in pos. -1, it will be nil.
-		else
-			fightId = #CMX.lastfights
+		for _, panel in pairs(CMXint.panels) do
+			panel:Update()
 		end
 	end
 
-	currentFight = fightId
-
-	fightData = CMX.lastfights[fightId] -- this is the fight of interest, can be nil
-
-	if fightData and fightData.calculated == nil and fightData.CalculateFight then -- if it wasn't calculated yet, do so now
-
-		fightData:CalculateFight()
-		UpdateReport2()
-		return
-
-	elseif fightData and fightData.calculating == true then  -- if it is still calculating wait for it to finish
-
-		em:RegisterForUpdate("CMX_Report_Update_Delay", 500, UpdateReport2)
-		return
-
+	function FightReport:SelectFight(fightIndex)
+		self.currentFight = CMXint.fights:GetFightData(fightIndex)
 	end
 
-	-- Generate Filtered Dataset
+	function FightReport:SelectRecentFight()
+		local fights = CMXint.fights
+		local numFights = fights:GetNumFights()
+		if numFights == 0 then self.currentFight = nil return end
 
-	selectionData = fightData and CMX.GenerateSelectionStats(fightData, category, selections) or nil
-
-	abilitystats = {fightData, selectionData}
-
-	-- Update Panels
-
-	for i = 2, control:GetNumChildren() do
-
-		local child = control:GetChild(i)
-
-		if child.Update then child:Update() end
-
+		self.currentFight = fights:GetFightData(numFights)
 	end
+
+	FightReport:Resize(settings.scale)
+	return FightReport
 end
 
 local isFileInitialized = false
@@ -166,8 +126,8 @@ function CMXint.InitializeFightReport()
 	if isFileInitialized == true then return false end
 	logger = CMXf.initSublogger("FightReport")
 
-	InitializeFightReport()
+	CMXint.fightReport = InitializeFightReport()
 
-    isFileInitialized = true
+	isFileInitialized = true
 	return true
 end

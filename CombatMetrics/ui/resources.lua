@@ -9,7 +9,7 @@ local adjustRowSize = CMXf.adjustRowSize
 local dx = CMXint.dx
 
 local function UpdateResourceBars(panel, currentanchor, data, totalRate, selectedresources, color)
-	local settings = CMXint.settings.FightReport
+	local settings = CMXint.settings.fightReport
 	local showids = settings.showDebugIds
 
 	local scrollchild = GetControl(panel, "PanelScrollChild")

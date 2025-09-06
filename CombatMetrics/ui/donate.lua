@@ -5,7 +5,7 @@ local CMXd = CMXint.data
 local logger
 local sendGold
 
-local donateDialog = CombatMetrics_Report_DonateDialog
+local donateDialog = CombatMetricsReport_DonateDialog
 
 local function PrefillMail()
 	local isDonation = sendGold and sendGold > 0

@@ -189,7 +189,7 @@ end
 ---comment
 ---@param self TopLevelWindow
 local function InitLiveReport(self)
-	local settings = CMXint.settings.LiveReport
+	local settings = CMXint.settings.liveReport
 	if settings.enabled == false then return end
 
 	self.initilazed = true
@@ -317,7 +317,7 @@ function CMXint.InitializeLiveReport()
 	logger = CMXf.initSublogger("LiveReport")
 	db = CMX.db
 
-	InitLiveReport(CMX.internal.LiveReport)
+	InitLiveReport(CMX.internal.LiveReport) -- TODO: Directly pass init function.
 
     isFileInitialized = true
 	return true

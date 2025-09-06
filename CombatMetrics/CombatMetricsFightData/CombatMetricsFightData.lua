@@ -713,18 +713,18 @@ local function FinishEncoding()
 	sv.version = AddonVersion
 	Log(LOG_LEVEL_INFO, "Conversion Finished!")
 
-	local titleBar = CombatMetrics_Report_TitleFightTitleBar
+	local titleBar = CombatMetricsReport_TitleFightTitleBar
 	titleBar:SetValue(0)
 	titleBar:SetHidden(true)
 
-	local fightlabel = CombatMetrics_Report_TitleFightTitleName
+	local fightlabel = CombatMetricsReport_TitleFightTitleName
 	fightlabel:SetText(zo_strformat(SI_COMBAT_METRICS_CONVERSION_FINISHED_TEXT))
 	oldSV = nil
 end
 
 local function EncodeNextFight()
-	local titleBar = CombatMetrics_Report_TitleFightTitleBar
-	local fightlabel = CombatMetrics_Report_TitleFightTitleName
+	local titleBar = CombatMetricsReport_TitleFightTitleBar
+	local fightlabel = CombatMetricsReport_TitleFightTitleName
 
 	if nextEncodeId <= #oldSV then
 		fightlabel:SetText(zo_strformat(SI_COMBAT_METRICS_CONVERSION_TITLE_TEXT, nextEncodeId, #oldSV))
@@ -754,14 +754,14 @@ local function StartEncodingSavedFights()
 	Log(LOG_LEVEL_INFO, "Converting saved fight from version %d to %d ...", sv.version, AddonVersion)
 	oldSV = ZO_ShallowTableCopy(sv)
 
-	local titleBar = CombatMetrics_Report_TitleFightTitleBar
+	local titleBar = CombatMetricsReport_TitleFightTitleBar
 	titleBar:SetValue(0)
 	titleBar:SetHidden(false)
 
-	local fightlabel = CombatMetrics_Report_TitleFightTitleName
+	local fightlabel = CombatMetricsReport_TitleFightTitleName
 	fightlabel:SetText(zo_strformat(SI_COMBAT_METRICS_CONVERSION_TITLE_TEXT, 1, #oldSV))
 
-	if SCENE_MANAGER:IsShowing("CMX_REPORT_SCENE") == false then CombatMetrics_Report.Toggle() end
+	if SCENE_MANAGER:IsShowing("CMX_REPORT_SCENE") == false then CombatMetricsReport.Toggle() end
 	zo_callLater(EncodeNextFight, 100)
 end
 

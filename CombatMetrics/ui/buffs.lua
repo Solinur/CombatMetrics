@@ -37,12 +37,12 @@ do	-- Handling Buffs Context Menu
 
 	local function addFavouriteBuff()
 		if buffname then favs[buffname] = true end
-		CombatMetrics_Report:Update()
+		CombatMetricsReport:Update()
 	end
 
 	local function removeFavouriteBuff()
 		if buffname then favs[buffname] = nil end
-		CombatMetrics_Report:Update()
+		CombatMetricsReport:Update()
 	end
 
 	local function postBuffUptime()
@@ -62,14 +62,14 @@ do	-- Handling Buffs Context Menu
 			end
 		end
 
-		CombatMetrics_Report:GetNamedChild("_BuffPanel"):GetNamedChild("BuffList"):Update()
+		CombatMetricsReport:GetNamedChild("_BuffPanel"):GetNamedChild("BuffList"):Update()
 	end
 
 	function CMX.BuffContextMenu( bufflistitem, upInside )
 		if not upInside then return end
 
 		buffname = bufflistitem.dataId
-		local settings = CMXint.settings.FightReport
+		local settings = CMXint.settings.fightReport
 		favs = settings.buffs.favourites
 		currentFight = CMXint.currentFight
 		local func, text
@@ -116,7 +116,7 @@ function CMX.CollapseButton( button, upInside )
 		end
 	end
 
-	CombatMetrics_Report:GetNamedChild("_BuffPanel"):GetNamedChild("BuffList"):Update()
+	CombatMetricsReport:GetNamedChild("_BuffPanel"):GetNamedChild("BuffList"):Update()
 end
 
 
@@ -126,7 +126,7 @@ end
 local function GetBuffData()
 	local buffData
 	-- TODO: redo
-	-- local rightpanel = db.FightReport.rightpanel
+	-- local rightpanel = db.fightReport.rightpanel
 
 	-- if rightpanel == "buffsout" then
 	-- 	buffData = selectionData
@@ -212,7 +212,7 @@ end
 
 function CMXf.buffSortFunction(data, a, b)
 	local ishigher = false
-	local favs = CMXint.settings.FightReport.buffs.favourites
+	local favs = CMXint.settings.fightReport.buffs.favourites
 
 	local isFavA = favs[a]
 	local isFavB = favs[b]
@@ -240,13 +240,13 @@ function CMXint.InitializeBuffsPanel(control)
 		local buffData = GetBuffData()
 		if buffData == nil then return end
 
-		local settings = CMXint.settings.FightReport
+		local settings = CMXint.settings.fightReport
 		local showids = settings.showDebugIds
 		
 		local selectedbuffs = CMXint.selections.buff.buff
 		local maxtime = zo_max(fightData.activetime or 0, fightData.dpstime or 0, fightData.hpstime or 0)
 		local totalUnitTime = buffData.totalUnitTime or maxtime * 1000
-		local favs = CMXint.settings.FightReport.buffs.favourites
+		local favs = CMXint.settings.fightReport.buffs.favourites
 		
 		local scrollchild = GetControl(control, "PanelScrollChild")
 		local currentanchor = {TOPLEFT, scrollchild, TOPLEFT, 0, 1}
@@ -344,7 +344,7 @@ end
 
 function CMXint.SelectRightPanel(control)
 	local rightpanel = control.menukey
-	CMXint.settings.FightReport.rightpanel = rightpanel
+	CMXint.settings.fightReport.rightpanel = rightpanel
 	local menubar = control:GetParent()
 
 	for i=1, menubar:GetNumChildren() do
@@ -366,7 +366,7 @@ function CMXint.SelectRightPanel(control)
 	panel.active = isbuffpanel and buffList or resourceList
 
 	BuffPanel:Update(CMXint.currentFight)
-	CombatMetrics_Report_MainPanelGraph:Update()
+	CombatMetricsReport_MainPanelGraph:Update()
 end
 
 local isFileInitialized = false

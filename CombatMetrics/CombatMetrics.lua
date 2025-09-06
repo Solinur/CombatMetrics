@@ -799,7 +799,7 @@ local function CalculateFight(fight) -- called by CMX.update or on user interact
 	fight.calculating = true
 	fight.special["wrathCP"] = fight.CP[1] and fight.CP[1]["slotted"] and fight.CP[1]["slotted"][276]
 
-	local titleBar = CombatMetrics_Report_TitleFightTitleBar
+	local titleBar = CombatMetricsReport_TitleFightTitleBar
 	titleBar:SetValue(0)
 	titleBar:SetHidden(false)
 
@@ -2084,7 +2084,7 @@ end
 local function Finalize(fight)
 	Log("calc", LOG_LEVEL_DEBUG, "Start end routine")
 	local scalcms = GetGameTimeSeconds()
-	CombatMetrics_Report_TitleFightTitleName:SetText(GetString(SI_COMBAT_METRICS_FINALIZING))
+	CombatMetricsReport_TitleFightTitleName:SetText(GetString(SI_COMBAT_METRICS_FINALIZING))
 
 	local data = fight.calculated
 	
@@ -2104,7 +2104,7 @@ local function Finalize(fight)
 	fight.cindex = nil
 	data.temp = nil
 
-	CombatMetrics_Report_TitleFightTitleBar:SetHidden(true)
+	CombatMetricsReport_TitleFightTitleBar:SetHidden(true)
 	Log("calc", LOG_LEVEL_DEBUG, "Time for final calculations: %.2f ms", (GetGameTimeSeconds() - scalcms) * 1000)
 end
 
@@ -2123,8 +2123,8 @@ local function CalculateChunk(fight)  -- called by CalculateFight or itself
 		if ProcessLog[logType] then ProcessLog[logType](fight, logline) end
 	end
 
-	local titleBar = CombatMetrics_Report_TitleFightTitleBar
-	local fightlabel = CombatMetrics_Report_TitleFightTitleName
+	local titleBar = CombatMetricsReport_TitleFightTitleBar
+	local fightlabel = CombatMetricsReport_TitleFightTitleName
 
 	if iend >= #logdata then
 		return fight:Finalize()
@@ -2256,7 +2256,7 @@ local function FightSummaryCallback(_, fight)
 	if fight.dpsstart ~= nil or fight.hpsstart ~= nil then table.insert(CMX.lastfights, fight) end
 	CheckNumberOfFights()
 
-	if SCENE_MANAGER.currentScene.name == "CMX_REPORT_SCENE" then CombatMetrics_Report:Update() end
+	if SCENE_MANAGER.currentScene.name == "CMX_REPORT_SCENE" then CombatMetricsReport:Update() end
 end
 
 local CMX_STATUS_DISABLED = 0

@@ -67,7 +67,7 @@ local function DrawLine(plot, coords, id)
 	local line = lineControls[id]
 
 	line:SetThickness(dx * 16)
-	line:SetColor(unpack(CMXint.settings.FightReport.PlotColors[plotid]))
+	line:SetColor(unpack(CMXint.settings.fightReport.PlotColors[plotid]))
 	line:ClearAnchors()
 
 	local x1, y1, x2, y2, inRange1, inRange2 = unpack(coords)
@@ -161,7 +161,7 @@ local function DrawBar(plot, x1, x2, id)
 	local left = zo_max(x1, minX) + xoffset
 	local right = zo_min(x2, maxX) + xoffset
 
-	local PlotColors = CMXint.settings.FightReport.PlotColors
+	local PlotColors = CMXint.settings.fightReport.PlotColors
 	local color = plot.effectType == BUFF_EFFECT_TYPE_BUFF and PlotColors[6] or PlotColors[7]
 
 	bar:SetAnchor(TOPLEFT, plot, TOPLEFT, left, 0)
@@ -240,13 +240,13 @@ local function Smooth(category)
 	if fightData == nil then return end
 
 	local calcData = fightData.calculated
-	local category = category or CMXint.settings.FightReport.category
+	local category = category or CMXint.settings.fightReport.category
 	local data = calcData.graph and calcData.graph[category] or nil -- DPS data, one value per second
 
 	if data == nil then return end
 
 	local totaltime = fightData.combattime
-	local smoothWindow = CMXint.settings.FightReport.SmoothWindow
+	local smoothWindow = CMXint.settings.fightReport.SmoothWindow
 	local XYData = {}
 
 	local t2 = zo_ceil(totaltime) - smoothWindow
@@ -273,7 +273,7 @@ local function Total(category)
 	if fightData == nil then return end
 
 	local calcData = fightData.calculated
-	local category = category or CMXint.settings.FightReport.category
+	local category = category or CMXint.settings.fightReport.category
 	local data = calcData.graph and calcData.graph[category] or nil -- DPS data, one value per second
 
 	if data == nil then return end
@@ -299,7 +299,7 @@ local function Total(category)
 		tmax = (dpsend - combatstart) / 1000
 	end
 
-	local startpoint = zo_max(CMXint.settings.FightReport.SmoothWindow / 2, t0)
+	local startpoint = zo_max(CMXint.settings.fightReport.SmoothWindow / 2, t0)
 
 	for t = 0, t2 do
 		sum = sum + (data[t] or 0)
@@ -318,7 +318,7 @@ local function Absolute(category)
 	if fightData == nil then return end
 
 	local calcData = fightData.calculated
-	local category = category or CMXint.settings.FightReport.category
+	local category = category or CMXint.settings.fightReport.category
 	local data = calcData.graph and calcData.graph[category] or nil -- DPS data, one value per second
 
 	if data == nil then return end
@@ -478,8 +478,8 @@ end
 local function AcquireBuffData(buffName)
 	if fightData == nil or fightData.log == nil then return end
 
-	local rightpanel = CMXint.settings.FightReport.rightpanel
-	local category = CMXint.settings.FightReport.category
+	local rightpanel = CMXint.settings.fightReport.rightpanel
+	local category = CMXint.settings.fightReport.category
 	local unitselections = rightpanel == "buffs" and {[fightData.playerid] = 1} or CMXint.selections.unit[category]
 	local logData = fightData.log
 
@@ -492,7 +492,7 @@ local function AcquireBuffData(buffName)
 	local lastSlot
 	local lastUnit
 	local slots = {}
-	local showGroupBuffs = CMXint.settings.FightReport.ShowGroupBuffsInPlots
+	local showGroupBuffs = CMXint.settings.fightReport.ShowGroupBuffsInPlots
 
 	for line, lineData in ipairs(logData) do
 		local result, timems, unitId, abilityId, changeType = unpack(lineData)	-- unpack only runs until it encounters nil
@@ -643,7 +643,7 @@ local function UpdateBarPlot(plot)
 	local totalSlots = #PlotBuffSelection > 4 and 8 or 4
 	local position = plotheight * (barId - 0.5)/totalSlots
 
-	local scale = CMXint.settings.FightReport.scale
+	local scale = CMXint.settings.fightReport.scale
 	local xoffset = scale * 24
 
 	plot:SetAnchor(LEFT, plotWindow, TOPLEFT, -xoffset, position)
@@ -697,7 +697,7 @@ end
 function CMXint.SetSliderValue(control, value)
 	local labelControl = control:GetParent():GetNamedChild("Label")
 	labelControl:SetText(string.format(GetString(SI_COMBAT_METRICS_SMOOTH_LABEL), value))
-	CMXint.settings.FightReport.SmoothWindow = value
+	CMXint.settings.fightReport.SmoothWindow = value
 	CMXint.panels.graph:Update()
 end
 
@@ -757,7 +757,7 @@ do
 		CMXf.AddTooltipLine(plotWindow, InformationTooltip, tooltipText)
 
 		for plotId, data in CMX.spairs(dataAtCursorTime) do
-			local r,g,b = unpack(CMXint.settings.FightReport.PlotColors[plotId])
+			local r,g,b = unpack(CMXint.settings.fightReport.PlotColors[plotId])
 			local formatter = data[2] and "|c%.2x%.2x%.2x%s: %d (%.1f%%)|r" or "|c%.2x%.2x%.2x%s: %d|r"
 			local label = plotWindow.plots[plotId].label
 
@@ -850,7 +850,7 @@ do
 	function CMXint.onPlotMouseEnter(plotWindowControl)
 		plotWindow = plotWindowControl
 
-		if CMXint.settings.FightReport.Cursor then
+		if CMXint.settings.fightReport.Cursor then
 			local cursor = plotWindow:GetNamedChild("Cursor")
 			cursor:SetHidden(false)
 			EM:RegisterForUpdate("CMX_Report_Cursor_Control", 40, updatePlotCursor)
@@ -1033,7 +1033,7 @@ local function InitBarPlot(plotWindow, id)
 	local newPlot = plots[id]
 
 	if newPlot == nil then
-		newPlot = CreateControlFromVirtual("CombatMetrics_Report_MainPanelGraphPlot", plotWindow, plotTypeTemplates[CMX_PLOT_TYPE_BAR], id)
+		newPlot = CreateControlFromVirtual("CombatMetricsReport_MainPanelGraphPlot", plotWindow, plotTypeTemplates[CMX_PLOT_TYPE_BAR], id)
 
 		newPlot.plotType = CMX_PLOT_TYPE_BAR
 		newPlot.barControls = {}
@@ -1087,7 +1087,7 @@ local function InitXYPlot(plotWindow, id)
 	local newPlot = plots[id]
 
 	if newPlot == nil then
-		newPlot = CreateControlFromVirtual("CombatMetrics_Report_MainPanelGraphPlot", plotWindow, plotTypeTemplates[CMX_PLOT_TYPE_XY], id)
+		newPlot = CreateControlFromVirtual("CombatMetricsReport_MainPanelGraphPlot", plotWindow, plotTypeTemplates[CMX_PLOT_TYPE_XY], id)
 		newPlot.plotType = CMX_PLOT_TYPE_XY
 		newPlot.lineControls = {}
 		newPlot.DrawPlot = DrawXYPlot
@@ -1096,7 +1096,7 @@ local function InitXYPlot(plotWindow, id)
 		newPlot.id = id
 		newPlot.plotWindow = plotWindow
 
-		local category = CMXint.settings.FightReport.category
+		local category = CMXint.settings.fightReport.category
 		local catId = 1
 
 		while CategoryStrings[catId].category ~= category do
@@ -1174,7 +1174,7 @@ local function initPlotWindow(panel)
 		editControl:SetAnchorFill(label)
 
 		local font, size, style = unpack(editControl:GetNamedChild("Font").font)			-- Need to manually scale font since it's created late
-		if size then size = tonumber(size) * (CMXint.settings.FightReport.scale + 0.2)/1.2 end
+		if size then size = tonumber(size) * (CMXint.settings.fightReport.scale + 0.2)/1.2 end
 
 		editControl:SetFont(string.format("%s|%s|%s", font, size, style))
 
@@ -1238,9 +1238,9 @@ local function initToolbar(panel)
 	local toolbar = panel.control:GetNamedChild("Toolbar")
 	panel.toolbar = toolbar
 
-	local PlotColors = CMXint.settings.FightReport.PlotColors
+	local PlotColors = CMXint.settings.fightReport.PlotColors
 	local cursorToggle = toolbar:GetNamedChild("ToggleCursor")
-	cursorToggle:SetAlpha(CMXint.settings.FightReport.Cursor and 1 or 0.3)
+	cursorToggle:SetAlpha(CMXint.settings.fightReport.Cursor and 1 or 0.3)
 
 	for i = 1,5 do
 		local selector = toolbar:GetNamedChild("DataSelector" .. i)
@@ -1268,7 +1268,7 @@ local function initToolbar(panel)
 	end
 
 	local labeltexts = {GetString(SI_COMBAT_METRICS_BUFFS), GetString(SI_COMBAT_METRICS_DEBUFFS)}
-	local showGroupBuffs = CMXint.settings.FightReport.ShowGroupBuffsInPlots
+	local showGroupBuffs = CMXint.settings.fightReport.ShowGroupBuffsInPlots
 
 	for i = 1,2 do
 		local selector = toolbar:GetNamedChild("BuffSelector" .. i)
@@ -1303,13 +1303,13 @@ local function initToolbar(panel)
 		groupSelector:SetAlpha(showGroupBuffs and 1 or 0.2)
 
 		if i == 1 then
-			groupSelector:SetHidden(CMXint.settings.FightReport.rightpanel ~= "buffsout")
+			groupSelector:SetHidden(CMXint.settings.fightReport.rightpanel ~= "buffsout")
 			groupSelector.tooltip = {SI_COMBAT_METRICS_GRAPH_BUFF_GROUP_SELECTOR}
 			groupSelector:SetHandler("OnMouseUp", function(self, button, upInside)
 
 					if upInside then
 						showGroupBuffs = not showGroupBuffs
-						CMXint.settings.FightReport.ShowGroupBuffsInPlots = showGroupBuffs
+						CMXint.settings.fightReport.ShowGroupBuffsInPlots = showGroupBuffs
 						groupSelector:SetAlpha(showGroupBuffs and 1 or 0.2)
 						self:Update()
 					end
@@ -1332,17 +1332,17 @@ function CMXint.InitializeGraphPanel(control)
 		local settings = self.settings
 
 		if enlargedGraph == true then
-			control:SetParent(CombatMetrics_Report)
-			control:SetAnchor(BOTTOMRIGHT, CombatMetrics_Report_SetupPanel, BOTTOMRIGHT, 0, 0)
+			control:SetParent(CombatMetricsReport)
+			control:SetAnchor(BOTTOMRIGHT, CombatMetricsReport_SetupPanel, BOTTOMRIGHT, 0, 0)
 		else
-			control:SetParent(CombatMetrics_Report_MainPanel)
-			control:SetAnchor(BOTTOMRIGHT, CombatMetrics_Report_MainPanel, BOTTOMRIGHT, 0, 0)
+			control:SetParent(CombatMetricsReport_MainPanel)
+			control:SetAnchor(BOTTOMRIGHT, CombatMetricsReport_MainPanel, BOTTOMRIGHT, 0, 0)
 		end
 
-		CombatMetrics_Report:GetNamedChild("_AbilityPanel"):SetHidden(enlargedGraph)
-		CombatMetrics_Report:GetNamedChild("_UnitPanel"):SetHidden(enlargedGraph)
-		CombatMetrics_Report:GetNamedChild("_BuffPanel"):SetHidden(enlargedGraph)
-		CombatMetrics_Report:GetNamedChild("_MainPanel"):SetHidden(enlargedGraph)
+		CombatMetricsReport:GetNamedChild("_AbilityPanel"):SetHidden(enlargedGraph)
+		CombatMetricsReport:GetNamedChild("_UnitPanel"):SetHidden(enlargedGraph)
+		CombatMetricsReport:GetNamedChild("_BuffPanel"):SetHidden(enlargedGraph)
+		CombatMetricsReport:GetNamedChild("_MainPanel"):SetHidden(enlargedGraph)
 
 		local plotWindow = control:GetNamedChild("PlotWindow")
 		local toolbar = control:GetNamedChild("Toolbar")
@@ -1389,9 +1389,9 @@ end
 
 
 function CMX.ToggleCursorDisplay(self)
-	local enable = not CMXint.settings.FightReport.Cursor
+	local enable = not CMXint.settings.fightReport.Cursor
 	self:SetAlpha(enable and 1 or 0.3)
-	CMXint.settings.FightReportCursor = enable
+	CMXint.settings.fightReportCursor = enable
 end
 
 

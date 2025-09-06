@@ -178,7 +178,7 @@
         <TopLevelControl name="CombatMetrics_LiveReport" clampedToScreen="true" movable="true" resizeToFitDescendents="true" hidden="true">
             <Anchor point="BOTTOM" relativePoint="BOTTOM" offsetY="-150" />
             <DimensionConstraints minX="150" maxX="900" minY="26" maxY="156" />
-            <OnInitialized>CMX.internal.LiveReport = self</OnInitialized>
+            <OnInitialized>CombatMetrics.internal.LiveReport = self</OnInitialized>
             <Controls>
                 <Backdrop name="$(parent)BG" excludeFromResizeToFitExtents="true" inherits="CombatMetrics_BackgroundFramed_Solid"
                     edgeColor="FF000000" centerColor="FF000000">
@@ -189,9 +189,9 @@
                     edgeColor="00000000" centerColor="00000000" mouseEnabled="true" resizeHandleSize="8">
                     <AnchorFill />
                     <DimensionConstraints minX="150" maxX="900" minY="26" maxY="156" />
-                    <OnRectChanged>CMX.internal.NewSize(self, newLeft, newTop, newRight, newBottom, oldLeft, oldTop, oldRight, oldBottom)</OnRectChanged>
-                    <OnResizeStart>CMX.internal.Resizing(self, true)</OnResizeStart>
-                    <OnResizeStop>CMX.internal.Resizing(self, false)</OnResizeStop>
+                    <OnRectChanged>CombatMetrics.internal.NewSize(self, newLeft, newTop, newRight, newBottom, oldLeft, oldTop, oldRight, oldBottom)</OnRectChanged>
+                    <OnResizeStart>CombatMetrics.internal.Resizing(self, true)</OnResizeStart>
+                    <OnResizeStop>CombatMetrics.internal.Resizing(self, false)</OnResizeStop>
                     <OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
                 </Backdrop>
             </Controls>

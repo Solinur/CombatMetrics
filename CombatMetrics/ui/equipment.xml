@@ -16,8 +16,8 @@
                 <Label name="$(parent)ItemLink" text="" inherits="CombatMetrics_LabelFontControl" linkEnabled="true" mouseEnabled="true">
                     <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="4" offsetY="0" />
                     <Dimensions x="280" y="22" />
-                    <OnMouseEnter> CMX.internal.ItemTooltip_OnMouseEnter(self) </OnMouseEnter>
-                    <OnMouseExit> CMX.internal.ItemTooltip_OnMouseExit(self) </OnMouseExit>
+                    <OnMouseEnter> CombatMetrics.internal.ItemTooltip_OnMouseEnter(self) </OnMouseEnter>
+                    <OnMouseExit> CombatMetrics.internal.ItemTooltip_OnMouseExit(self) </OnMouseExit>
                     <OnLinkClicked> 
                         ClearTooltip(ItemTooltip)
                         ZO_LinkHandler_OnLinkClicked(linkText, button)
@@ -33,8 +33,8 @@
                     <Anchor point="LEFT" relativeTo="$(parent)Trait" relativePoint="RIGHT" offsetX="10" offsetY="0" />
                     <Anchor point="RIGHT" offsetX="-4" />
                     <Dimensions y="22" />
-                    <OnMouseEnter> CMX.internal.ItemTooltip_OnMouseEnter(self) </OnMouseEnter>
-                    <OnMouseExit> CMX.internal.ItemTooltip_OnMouseExit(self) </OnMouseExit>
+                    <OnMouseEnter> CombatMetrics.internal.ItemTooltip_OnMouseEnter(self) </OnMouseEnter>
+                    <OnMouseExit> CombatMetrics.internal.ItemTooltip_OnMouseExit(self) </OnMouseExit>
                     <OnLinkClicked> 
                         ClearTooltip(ItemTooltip)
                         ZO_LinkHandler_OnLinkClicked(linkText, button) 

@@ -2,9 +2,9 @@
 	<Layer name="SI_KEYBINDINGS_LAYER_GENERAL">
 		<Category name="CombatMetrics">
 			<Action name="CMX_REPORT_TOGGLE">
-				<Up>CombatMetrics_Report:Toggle()</Up>
+				<Up>CombatMetricsReport:Toggle()</Up>
 			</Action>
-			<Action name="CMX_POST_DPS">
+			<!-- <Action name="CMX_POST_DPS">
 				<Up>CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SINGLEANDMULTI)</Up>
 			</Action>
 			<Action name="CMX_POST_DPS_SMART">
@@ -24,7 +24,7 @@
 			</Action>
 			<Action name="CMX_LIVEREPORT_TOGGLE">
 				<Up>CombatMetrics_LiveReport:Toggle()</Up>
-			</Action>
+			</Action> -->
 		</Category>
 	</Layer>
 </Bindings>

@@ -9,7 +9,6 @@ CMX.version = 85
 
 CMX.internal = {}
 local CMXint = CMX.internal
-CMX.init = {}
 CMXint.debug = false or GetDisplayName() == "@Solinur"
 CMXint.functions = {}
 CMXint.data = {}
@@ -117,7 +116,7 @@ local svdefaults = {
 	},
 	
 	
-	["Notification"] = {
+	["notification"] = {
 		["version"] = 0,
 		["versionSeen"] = 0,
 		["enabled"] = true,
@@ -125,13 +124,12 @@ local svdefaults = {
 	},
 	
 
-	["FightReport"] = {
+	["fightReport"] = {
 		["pos_x"] = GuiRoot:GetWidth()/2,
 		["pos_y"] = GuiRoot:GetHeight()/2-75,
 
 		["scale"] 				= zo_roundToNearest(1 / GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE), 0.1),
 		["category"] 			= "damageOut",
-		["rightpanel"] 			= "buffs",
 
 		["showDebugIds"] 		= false,
 		["useDisplayNames"] 	= false,
@@ -199,7 +197,7 @@ local svdefaults = {
 		-- },
 	},
 
-	["LiveReport"] = {
+	["liveReport"] = {
 		["pos_x"] = 700,
 		["pos_y"] = 500,
 
@@ -230,6 +228,7 @@ local function Initialize(eventId, addon)
 	loadSV()
 	assert(CMXint.InitializeUI(), "Initialization of ui module failed")
 	assert(CMXint.InitializeUtils(), "Initialization of utils module failed")
+	assert(CMXint.InitializeFightDataHandler(), "Initialization of fight data module failed")
 	-- assert(CMXint.InitMenu(svdefaults), "Initialization of settings menu failed")
 
 	EVENT_MANAGER:UnregisterForEvent("CombatMetrics_Initialize", EVENT_ADD_ON_LOADED)

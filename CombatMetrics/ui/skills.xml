@@ -64,9 +64,9 @@
                 <Control name="$(parent)Werewolf" mouseEnabled="true" hidden="true">
                     <Anchor point="TOPRIGHT" offsetX="0" offsetY="2" />
                     <Dimensions x="20" y="20" />
-                    <OnMouseEnter>CMX.internal.SkillbarButtonMouseOver(self, true)</OnMouseEnter>
-                    <OnMouseExit>CMX.internal.SkillbarButtonMouseOver(self, false)</OnMouseExit>
-                    <OnMouseUp>CMX.internal.SkillbarToggleWerewolf()</OnMouseUp>
+                    <OnMouseEnter>CombatMetrics.internal.SkillbarButtonMouseOver(self, true)</OnMouseEnter>
+                    <OnMouseExit>CombatMetrics.internal.SkillbarButtonMouseOver(self, false)</OnMouseExit>
+                    <OnMouseUp>CombatMetrics.internal.SkillbarToggleWerewolf()</OnMouseUp>
                     <Controls>
                         <Backdrop name="$(parent)Bg" inherits="CombatMetrics_BackgroundFramed">
                             <AnchorFill />
@@ -205,7 +205,7 @@
         </Control>
 
         <Control name="CombatMetrics_SkillsPanel" virtual="true">
-            <Dimensions x="626" y="270" />
+
             <OnInitialized> CMX.InitializeSkillStats(self) </OnInitialized>
             <Controls>
                 <Control name="$(parent)ActionBar1" inherits="CombatMetrics_ActionBarPanel">

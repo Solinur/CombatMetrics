@@ -175,9 +175,9 @@ function CMXint.LoadItem(listitem)
 		if loadedfight.log then CMX.AddFightCalculationFunctions(loadedfight) end
 		table.insert(lastfights, loadedfight)
 
-		CombatMetrics_Report:Update(#CMX.lastfights)
+		CombatMetricsReport:Update(#CMX.lastfights)
 	else
-		CombatMetrics_Report:Update((issaved and loadId or id))
+		CombatMetricsReport:Update((issaved and loadId or id))
 	end
 
 	CMXint.ClearSelections()
@@ -190,10 +190,10 @@ function CMXint.DeleteItem(control)
 
 	if issaved then
 		CMXint.SVHandler.Delete(id)
-		CombatMetrics_Report:Update()
+		CombatMetricsReport:Update()
 	else
 		table.remove(CMX.lastfights, id)
-		if #CMX.lastfights == 0 then CombatMetrics_Report:Update() else CombatMetrics_Report:Update(zo_min(currentFight, #CMX.lastfights)) end
+		if #CMX.lastfights == 0 then CombatMetricsReport:Update() else CombatMetricsReport:Update(zo_min(currentFight, #CMX.lastfights)) end
 	end
 
 	CMXint.panels["FightList"]:Update()

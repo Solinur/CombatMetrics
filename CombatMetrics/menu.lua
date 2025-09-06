@@ -247,38 +247,38 @@ function CMXint.InitMenu(svdefaults)
 			min = 50,
 			max = 300,
 			step = 1,
-			default = def.FightReport.scale,
-			getFunc = function() return settings.FightReport.scale*100  end,
+			default = def.fightReport.scale,
+			getFunc = function() return settings.fightReport.scale*100  end,
 			setFunc = function(value)
-					settings.FightReport.scale = value/100
-					CombatMetrics_Report:Resize(value/100)
+					settings.fightReport.scale = value/100
+					CombatMetricsReport:Resize(value/100)
 				end,
 		},
 		{
 			type = "checkbox",
 			name = GetString(SI_COMBAT_METRICS_MENU_DISPLAYNAMES_NAME),
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_DISPLAYNAMES_TOOLTIP),
-			default = def.FightReport.useDisplayNames,
-			getFunc = function() return settings.FightReport.useDisplayNames end,
-			setFunc = function(value) settings.FightReport.useDisplayNames = value end,
+			default = def.fightReport.useDisplayNames,
+			getFunc = function() return settings.fightReport.useDisplayNames end,
+			setFunc = function(value) settings.fightReport.useDisplayNames = value end,
 		},
 		{
 			type = "checkbox",
 			name = GetString(SI_COMBAT_METRICS_MENU_SHOWPETS_NAME),
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_SHOWPETS_TOOLTIP),
-			default = def.FightReport.showPets,
-			getFunc = function() return settings.FightReport.showPets end,
-			setFunc = function(value) settings.FightReport.showPets = value end,
+			default = def.fightReport.showPets,
+			getFunc = function() return settings.fightReport.showPets end,
+			setFunc = function(value) settings.fightReport.showPets = value end,
 		},
 		{
 			type = "checkbox",
 			name = GetString(SI_COMBAT_METRICS_MENU_NOTIFICATIONS),
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_NOTIFICATIONS_TOOLTIP),
-			default = def.NotificationAllowed,
-			getFunc = function() return settings.NotificationAllowed end,
+			default = def.notification.enabled,
+			getFunc = function() return settings.notification.enabled end,
 			setFunc = function(value)
-				settings.NotificationAllowed = value
-				if value == true then settings.NotificationRead = 0 end
+				settings.notification.enabled = value
+				if value == true then settings.notification.versionSeen = 0 end
 			end,
 		},
 		{

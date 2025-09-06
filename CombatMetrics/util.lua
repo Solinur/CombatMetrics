@@ -21,7 +21,7 @@ local function slashCommandFunction(extra)
 	elseif 	extra == "totdps" 	then CMXf.PosttoChat(CMX_POSTTOCHAT_MODE_MULTI)
 	elseif 	extra == "alldps" 	then CMXf.PosttoChat(CMX_POSTTOCHAT_MODE_SINGLEANDMULTI)
 	elseif 	extra == "hps" 		then CMXf.PosttoChat(CMX_POSTTOCHAT_MODE_HEALING)
-	else 						CombatMetrics_Report:Toggle()
+	else 						CombatMetricsReport:Toggle()
 	end
 end
 
@@ -182,7 +182,7 @@ local function GetBuffDataAndUnits(unitType, fightData)
 	local buffTypeSelection = CMXint.selection.buffTypeSelection
 	local units = 0
 	local unitName = ""
-	local settings = CMXint.settings.FightReport
+	local settings = CMXint.settings.fightReport
 
 	if buffTypeSelection == "buffsout" then
 		local category = settings.category
@@ -222,7 +222,7 @@ function CMXf.PostBuffUptime(fight, buffname, unitType)
 	local data = fight and CMX.lastfights[fight]
 	if not data then return end
 
-	local category = CMXint.settings.FightReport.category or "damageOut"
+	local category = CMXint.settings.fightReport.category or "damageOut"
 	local timedata = ""
 
 	if data ~= CMXf.GetCurrentData() then

@@ -24,7 +24,7 @@
                     <AnchorFill />
                 </Label>
             </Controls>
-            <OnMouseUp>CMX.internal.SelectRightPanel(self)</OnMouseUp>
+            <OnMouseUp>CombatMetrics.internal.SelectRightPanel(self)</OnMouseUp>
         </Control>
 
         <Control name="CombatMetrics_ResourceListTemplate" virtual="true">
@@ -111,7 +111,7 @@
                             <Dimensions x="90" y="48" />
                             <OnInitialized>
                                 self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_MAGICKA_PM))
-                                CMX.internal.SetLabelColor(self, GetString(SI_COMBAT_METRICS_MAGICKA_COLOR))
+                                CombatMetrics.internal.SetLabelColor(self, GetString(SI_COMBAT_METRICS_MAGICKA_COLOR))
                                 self.menukey = "magicka"
                             </OnInitialized>
                         </Control>
@@ -126,7 +126,7 @@
                             <Anchor point="TOPRIGHT" />
                             <OnInitialized>
                                 self:GetNamedChild("Label"):SetText(GetString(SI_COMBAT_METRICS_STAMINA_PM))
-                                CMX.internal.SetLabelColor(self, GetString(SI_COMBAT_METRICS_STAMINA_COLOR))
+                                CombatMetrics.internal.SetLabelColor(self, GetString(SI_COMBAT_METRICS_STAMINA_COLOR))
                                 self.menukey = "stamina"
                             </OnInitialized>
                         </Control>
