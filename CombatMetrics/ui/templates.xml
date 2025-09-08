@@ -601,7 +601,7 @@
                             <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM" offsetX="-4" />
                             <Dimensions x="20" />
 							<ButtonState state="NORMAL" />
-							<OnInitialized>self.tooltip = {SI_COMBAT_METRICS_DELETE_COMBAT_LOG}</OnInitialized>
+							<OnInitialized>self.tooltip = SI_COMBAT_METRICS_DELETE_COMBAT_LOG</OnInitialized>
 							<OnMouseUp>CombatMetrics.internal.DeleteItemLog(self)</OnMouseUp>
                             <Textures
                                 normal="CombatMetrics/icons/deletelogiconup.dds"
@@ -616,7 +616,7 @@
                             <Anchor point="BOTTOMLEFT" relativePoint="BOTTOM" offsetX="4" />
                             <Dimensions x="20" />
 							<ButtonState state="NORMAL" />
-							<OnInitialized>self.tooltip = {SI_COMBAT_METRICS_DELETE_FIGHT}</OnInitialized>
+							<OnInitialized>self.tooltip = SI_COMBAT_METRICS_DELETE_FIGHT</OnInitialized>
 							<OnMouseUp>CombatMetrics.internal.DeleteItem(self)</OnMouseUp>
                             <Textures
                                 normal="CombatMetrics/icons/deleteicon2up.dds"
@@ -672,8 +672,12 @@
                 </Label>
             </Controls>
         </Control>
+
+        <Texture name="CombatMetrics_MenuButton" mouseEnabled="true" inherits="CombatMetrics_TextureTooltip" layer="CONTROLS" virtual="true" >
+            <Dimensions x="32" y="32" />
+        </Texture>
         
-        <Button name="CombatMetrics_NavigationButton" virtual="true">
+        <Button name="CombatMetrics_FightNavigationButton" mouseEnabled="true" inherits="CombatMetrics_ButtonTooltip" layer="CONTROLS" virtual="true">
             <Dimensions x="32" y="32" />
             <ButtonState state="DISABLED" />
         </Button>

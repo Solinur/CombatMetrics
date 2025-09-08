@@ -22,7 +22,7 @@
                             text="SI_COMBAT_METRICS_DPS" horizontalAlignment="RIGHT">
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="4" offsetY="0" />
                             <Dimensions x="70" y="20" />
-                            <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_UNITDPS_TT}</OnInitialized>
+                            <OnInitialized>self.tooltip = SI_COMBAT_METRICS_UNITDPS_TT</OnInitialized>
                         </Label>
 
                         <Label name="$(parent)Total" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"

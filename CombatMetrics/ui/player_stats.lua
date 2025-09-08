@@ -140,7 +140,7 @@ function CMXint.InitializePlayerStatsPanel(control)
 				end
 
 				if i == 4 and powerType ~= POWERTYPE_HEALTH then	-- Add a hint for backstabber
-					rowcontrol.tooltip = {}
+					rowcontrol.tooltip = nil
 					local tooltiplines = {}
 					local backstabberTT
 					local CP = data.CP

@@ -79,18 +79,17 @@ local function InitializeFightReport()
 	end
 
 	local function onShow()
-		if FightReport.currentFight == nil then FightReport:SelectRecentFight() end
 		FightReport:Update()
 		SCENE_MANAGER:SetInUIMode(true)
 	end
-	
+
 	FightReport:SetHandler("OnMoveStop", savePos)
 	FightReport:SetHandler("OnShow", onShow)
 
 	function FightReport:Resize(scale)
 		ResizeControl(FightReport, scale)
 		settings.scale = scale
-		if not FightReport:IsHidden() then FightReport:Update() end
+		FightReport:Update()
 	end
 
 	function FightReport:Toggle()
@@ -98,23 +97,20 @@ local function InitializeFightReport()
 	end
 
 	function FightReport:Update()
+		if FightReport:IsHidden() then return end
 		logger:Debug("Updating Fight Report")
+
+		if CMXint.figthData.currentIndex == nil then FightReport:Clear() end
 
 		for _, panel in pairs(CMXint.panels) do
 			panel:Update()
 		end
 	end
 
-	function FightReport:SelectFight(fightIndex)
-		self.currentFight = CMXint.fights:GetFightData(fightIndex)
-	end
-
-	function FightReport:SelectRecentFight()
-		local fights = CMXint.fights
-		local numFights = fights:GetNumFights()
-		if numFights == 0 then self.currentFight = nil return end
-
-		self.currentFight = fights:GetFightData(numFights)
+	function FightReport:Clear()
+		for _, panel in pairs(CMXint.panels) do
+			panel:Clear()
+		end
 	end
 
 	function FightReport:SelectScene(newScene)

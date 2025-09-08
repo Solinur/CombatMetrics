@@ -115,28 +115,28 @@
                             text="SI_COMBAT_METRICS_SHARP" horizontalAlignment="CENTER">
                             <Anchor point="LEFT" relativeTo="$(parent)1" relativePoint="RIGHT" offsetX="4" />
                             <Dimensions x="28" y="20" />
-                            <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_SKILLTIME_TT1}</OnInitialized>
+                            <OnInitialized>self.tooltip = SI_COMBAT_METRICS_SKILLTIME_TT1</OnInitialized>
                         </Label>
 
                         <Label name="$(parent)3" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"
                             text="SI_COMBAT_METRICS_SKILLTIME_LABEL2" horizontalAlignment="CENTER">
                             <Anchor point="LEFT" relativeTo="$(parent)2" relativePoint="RIGHT" offsetX="4" />
                             <Dimensions x="40" y="20" />
-                            <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_SKILLTIME_TT2}</OnInitialized>
+                            <OnInitialized>self.tooltip = SI_COMBAT_METRICS_SKILLTIME_TT2</OnInitialized>
                         </Label>
 
                         <Label name="$(parent)4" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"
                             text="SI_COMBAT_METRICS_SKILLTIME_LABEL3" horizontalAlignment="CENTER">
                             <Anchor point="LEFT" relativeTo="$(parent)3" relativePoint="RIGHT" offsetX="4" />
                             <Dimensions x="28" y="20" />
-                            <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_SKILLTIME_TT3}</OnInitialized>
+                            <OnInitialized>self.tooltip = SI_COMBAT_METRICS_SKILLTIME_TT3</OnInitialized>
                         </Label>
 
                         <Label name="$(parent)5" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"
                             text="SI_COMBAT_METRICS_TIME" horizontalAlignment="CENTER">
                             <Anchor point="LEFT" relativeTo="$(parent)4" relativePoint="RIGHT" offsetX="4" />
                             <Dimensions x="40" y="20" />
-                            <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_SKILLTIME_TT4}</OnInitialized>
+                            <OnInitialized>self.tooltip = SI_COMBAT_METRICS_SKILLTIME_TT4</OnInitialized>
                         </Label>
                     </Controls>
                 </Control>

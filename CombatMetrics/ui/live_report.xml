@@ -20,7 +20,7 @@
                     <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
                     <Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3" />
                     <OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
-                    <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_DPSSINGLE_TOOLTIP}</OnInitialized>
+                    <OnInitialized>self.tooltip = SI_COMBAT_METRICS_LIVEREPORT_DPSSINGLE_TOOLTIP</OnInitialized>
                 </Control>
             </Controls>
         </Control>
@@ -45,7 +45,7 @@
                     <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
                     <Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3" />
                     <OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
-                    <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_DPSMULTI_TOOLTIP}</OnInitialized>
+                    <OnInitialized>self.tooltip = SI_COMBAT_METRICS_LIVEREPORT_DPSMULTI_TOOLTIP</OnInitialized>
                 </Control>
             </Controls>
         </Control>
@@ -70,7 +70,7 @@
                     <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
                     <Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3" />
                     <OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
-                    <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_HPSOUT_TOOLTIP}</OnInitialized>
+                    <OnInitialized>self.tooltip = SI_COMBAT_METRICS_LIVEREPORT_HPSOUT_TOOLTIP</OnInitialized>
                 </Control>
             </Controls>
         </Control>
@@ -95,7 +95,7 @@
                     <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
                     <Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3" />
                     <OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
-                    <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_HPSRAW_TOOLTIP}</OnInitialized>
+                    <OnInitialized>self.tooltip = SI_COMBAT_METRICS_LIVEREPORT_HPSRAW_TOOLTIP</OnInitialized>
                 </Control>
             </Controls>
         </Control>
@@ -120,7 +120,7 @@
                     <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
                     <Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3" />
                     <OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
-                    <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_DPSINC_TOOLTIP}</OnInitialized>
+                    <OnInitialized>self.tooltip = SI_COMBAT_METRICS_LIVEREPORT_DPSINC_TOOLTIP</OnInitialized>
                 </Control>
             </Controls>
         </Control>
@@ -145,7 +145,7 @@
                     <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
                     <Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3" />
                     <OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
-                    <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_HPSINC_TOOLTIP}</OnInitialized>
+                    <OnInitialized>self.tooltip = SI_COMBAT_METRICS_LIVEREPORT_HPSINC_TOOLTIP</OnInitialized>
                 </Control>
             </Controls>
         </Control>
@@ -170,7 +170,7 @@
                     <Anchor point="TOPLEFT" offsetX="3" offsetY="3" />
                     <Anchor point="BOTTOMRIGHT" offsetX="-3" offsetY="-3" />
                     <OnMouseDown>CombatMetrics_LiveReport:StartMoving()</OnMouseDown>
-                    <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_LIVEREPORT_TIME_TOOLTIP}</OnInitialized>
+                    <OnInitialized>self.tooltip = SI_COMBAT_METRICS_LIVEREPORT_TIME_TOOLTIP</OnInitialized>
                 </Control>
             </Controls>
         </Control>

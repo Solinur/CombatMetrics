@@ -56,7 +56,7 @@
                                     inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
                                     <Anchor point="LEFT" offsetX="0" offsetY="0" />
                                     <OnInitialized>
-                                        self.tooltip = {SI_COMBAT_METRICS_GOTO_PREVIOUS}
+                                        self.tooltip = SI_COMBAT_METRICS_GOTO_PREVIOUS
                                         self.func = -1
                                         self.texture = "CombatMetrics/icons/leftarrowover.dds"
                                     </OnInitialized>
@@ -67,7 +67,7 @@
                                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)PageLeft" offsetX="3"
                                         offsetY="0" />
                                     <OnInitialized>
-                                        self.tooltip = {SI_COMBAT_METRICS_GOTO_PAGE}
+                                        self.tooltip = SI_COMBAT_METRICS_GOTO_PAGE
                                         self.value = 1
                                     </OnInitialized>
                                 </Control>
@@ -77,7 +77,7 @@
                                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Page1" offsetX="3"
                                         offsetY="0" />
                                     <OnInitialized>
-                                        self.tooltip = {SI_COMBAT_METRICS_PAGE}
+                                        self.tooltip = SI_COMBAT_METRICS_PAGE
                                         self.value = 2
                                     </OnInitialized>
                                 </Control>
@@ -87,7 +87,7 @@
                                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Page2" offsetX="3"
                                         offsetY="0" />
                                     <OnInitialized>
-                                        self.tooltip = {SI_COMBAT_METRICS_PAGE}
+                                        self.tooltip = SI_COMBAT_METRICS_PAGE
                                         self.value = 3
                                     </OnInitialized>
                                 </Control>
@@ -97,7 +97,7 @@
                                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Page3" offsetX="3"
                                         offsetY="0" />
                                     <OnInitialized>
-                                        self.tooltip = {SI_COMBAT_METRICS_PAGE}
+                                        self.tooltip = SI_COMBAT_METRICS_PAGE
                                         self.value = 4
                                     </OnInitialized>
                                 </Control>
@@ -107,7 +107,7 @@
                                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Page4" offsetX="3"
                                         offsetY="0" />
                                     <OnInitialized>
-                                        self.tooltip = {SI_COMBAT_METRICS_PAGE}
+                                        self.tooltip = SI_COMBAT_METRICS_PAGE
                                         self.value = 5
                                     </OnInitialized>
                                 </Control>
@@ -117,7 +117,7 @@
                                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Page5" offsetX="3"
                                         offsetY="0" />
                                     <OnInitialized>
-                                        self.tooltip = {SI_COMBAT_METRICS_GOTO_NEXT}
+                                        self.tooltip = SI_COMBAT_METRICS_GOTO_NEXT
                                         self.func = 1
                                         self.texture = "CombatMetrics/icons/rightarrowover.dds"
                                     </OnInitialized>
@@ -134,7 +134,7 @@
                                     inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
                                     <Anchor point="LEFT" offsetX="0" offsetY="0" />
                                     <OnInitialized>
-                                        self.tooltip = {SI_COMBAT_METRICS_TOGGLE_PERFORMANCE_EVENTS}
+                                        self.tooltip = SI_COMBAT_METRICS_TOGGLE_PERFORMANCE_EVENTS
                                         self.func = LIBCOMBAT_EVENT_PERFORMANCE
                                         self.texture = "EsoUI/Art/Campaign/campaignBrowser_hiPop.dds"
                                     </OnInitialized>
@@ -145,7 +145,7 @@
                                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Performance"
                                         offsetX="3" offsetY="0" />
                                     <OnInitialized>
-                                        self.tooltip = {SI_COMBAT_METRICS_TOGGLE_SKILL_USE_EVENTS}
+                                        self.tooltip = SI_COMBAT_METRICS_TOGGLE_SKILL_USE_EVENTS
                                         self.func = LIBCOMBAT_EVENT_SKILL_TIMINGS
                                         self.texture = "esoui/art/lfg/gamepad/lfg_roleicon_dps.dds"
                                     </OnInitialized>
@@ -156,7 +156,7 @@
                                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Skills" offsetX="3"
                                         offsetY="0" />
                                     <OnInitialized>
-                                        self.tooltip = {SI_COMBAT_METRICS_TOGGLE_MESSAGE_CHANGE_EVENTS}
+                                        self.tooltip = SI_COMBAT_METRICS_TOGGLE_MESSAGE_CHANGE_EVENTS
                                         self.func = LIBCOMBAT_EVENT_MESSAGES
                                         self.texture = "esoui/art/menubar/gamepad/gp_playermenu_icon_tutorial.dds"
                                     </OnInitialized>
@@ -167,7 +167,7 @@
                                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Info" offsetX="3"
                                         offsetY="0" />
                                     <OnInitialized>
-                                        self.tooltip = {SI_COMBAT_METRICS_TOGGLE_STATS_CHANGE_EVENTS}
+                                        self.tooltip = SI_COMBAT_METRICS_TOGGLE_STATS_CHANGE_EVENTS
                                         self.func = LIBCOMBAT_EVENT_PLAYERSTATS
                                         self.texture = "esoui/art/menubar/gamepad/gp_playermenu_icon_cadwell.dds"
                                     </OnInitialized>
@@ -178,7 +178,7 @@
                                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Stats" offsetX="3"
                                         offsetY="0" />
                                     <OnInitialized>
-                                        self.tooltip = {SI_COMBAT_METRICS_TOGGLE_RESOURCE_EVENTS}
+                                        self.tooltip = SI_COMBAT_METRICS_TOGGLE_RESOURCE_EVENTS
                                         self.func = LIBCOMBAT_EVENT_RESOURCES
                                         self.texture = "esoui/art/icons/alchemy/crafting_alchemy_trait_restoremagicka.dds"
                                     </OnInitialized>
@@ -189,7 +189,7 @@
                                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Resources" offsetX="7"
                                         offsetY="0" />
                                     <OnInitialized>
-                                        self.tooltip = {SI_COMBAT_METRICS_TOGGLE_BUFFIN_EVENTS}
+                                        self.tooltip = SI_COMBAT_METRICS_TOGGLE_BUFFIN_EVENTS
                                         self.func = LIBCOMBAT_EVENT_EFFECTS_IN
                                         self.texture = "/esoui/art/icons/alchemy/crafting_alchemy_trait_unstoppable_match.dds"
                                     </OnInitialized>
@@ -200,7 +200,7 @@
                                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)BuffsIn" offsetX="3"
                                         offsetY="0" />
                                     <OnInitialized>
-                                        self.tooltip = {SI_COMBAT_METRICS_TOGGLE_BUFFOUT_EVENTS}
+                                        self.tooltip = SI_COMBAT_METRICS_TOGGLE_BUFFOUT_EVENTS
                                         self.func = LIBCOMBAT_EVENT_EFFECTS_OUT
                                         self.texture = "esoui/art/treeicons/gamepad/gp_tutorial_idexicon_death.dds"
                                     </OnInitialized>
@@ -211,7 +211,7 @@
                                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)BuffsOut" offsetX="3"
                                         offsetY="0" />
                                     <OnInitialized>
-                                        self.tooltip = {SI_COMBAT_METRICS_TOGGLE_GROUPBUFFIN_EVENTS}
+                                        self.tooltip = SI_COMBAT_METRICS_TOGGLE_GROUPBUFFIN_EVENTS
                                         self.func = LIBCOMBAT_EVENT_GROUPEFFECTS_IN
                                         self.texture = "/esoui/art/icons/alchemy/crafting_alchemy_trait_unstoppable_match.dds"
                                     </OnInitialized>
@@ -222,7 +222,7 @@
                                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)GrouBuffsIn"
                                         offsetX="3" offsetY="0" />
                                     <OnInitialized>
-                                        self.tooltip = {SI_COMBAT_METRICS_TOGGLE_GROUPBUFFOUT_EVENTS}
+                                        self.tooltip = SI_COMBAT_METRICS_TOGGLE_GROUPBUFFOUT_EVENTS
                                         self.func = LIBCOMBAT_EVENT_GROUPEFFECTS_OUT
                                         self.texture = "esoui/art/treeicons/gamepad/gp_tutorial_idexicon_death.dds"
                                     </OnInitialized>
@@ -233,7 +233,7 @@
                                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)GroupBuffsOut"
                                         offsetX="7" offsetY="0" />
                                     <OnInitialized>
-                                        self.tooltip = {SI_COMBAT_METRICS_TOGGLE_YOUR_DAMAGE}
+                                        self.tooltip = SI_COMBAT_METRICS_TOGGLE_YOUR_DAMAGE
                                         self.func = LIBCOMBAT_EVENT_DAMAGE_OUT
                                         self.texture = "/esoui/art/icons/heraldrycrests_weapon_axe_02.dds"
                                     </OnInitialized>
@@ -244,7 +244,7 @@
                                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DamageOut" offsetX="3"
                                         offsetY="0" />
                                     <OnInitialized>
-                                        self.tooltip = {SI_COMBAT_METRICS_TOGGLE_YOUR_HEAL}
+                                        self.tooltip = SI_COMBAT_METRICS_TOGGLE_YOUR_HEAL
                                         self.func = LIBCOMBAT_EVENT_HEAL_OUT
                                         self.texture = "/esoui/art/buttons/gamepad/gp_plus_large.dds"
                                     </OnInitialized>
@@ -255,7 +255,7 @@
                                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)HealingOut" offsetX="3"
                                         offsetY="0" />
                                     <OnInitialized>
-                                        self.tooltip = {SI_COMBAT_METRICS_TOGGLE_DAMAGE}
+                                        self.tooltip = SI_COMBAT_METRICS_TOGGLE_DAMAGE
                                         self.func = LIBCOMBAT_EVENT_DAMAGE_IN
                                         self.texture = "/esoui/art/icons/heraldrycrests_weapon_shield_01.dds"
                                     </OnInitialized>
@@ -266,7 +266,7 @@
                                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DamageIn" offsetX="3"
                                         offsetY="0" />
                                     <OnInitialized>
-                                        self.tooltip = {SI_COMBAT_METRICS_TOGGLE_HEAL}
+                                        self.tooltip = SI_COMBAT_METRICS_TOGGLE_HEAL
                                         self.func = LIBCOMBAT_EVENT_HEAL_IN
                                         self.texture = "/esoui/art/hud/gamepad/gp_radialicon_invitegroup_down.dds"
                                     </OnInitialized>
@@ -279,7 +279,7 @@
                                         offsetY="0" />
 
                                     <OnInitialized>
-                                        self.tooltip = {SI_COMBAT_METRICS_COPY_PASTE}
+                                        self.tooltip = SI_COMBAT_METRICS_COPY_PASTE
                                         self.func = "CopyPaste"
                                         self.texture = "/esoui/art/guild/gamepad/gp_guild_menuicon_changemessage.dds"
                                     </OnInitialized>

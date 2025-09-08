@@ -110,7 +110,7 @@
                             <Dimensions y="24" />
                             <OnMouseUp> CMX.ToggleCursorDisplay(self) </OnMouseUp>
                             <OnInitialized>
-                                self.tooltip = {SI_COMBAT_METRICS_TOGGLE_CURSOR}
+                                self.tooltip = SI_COMBAT_METRICS_TOGGLE_CURSOR
                             </OnInitialized>
                         </Texture>
 

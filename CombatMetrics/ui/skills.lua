@@ -158,9 +158,9 @@ function CMXint.InitializeSkillsPanel(control)
 	local label = statPanel:GetNamedChild("Label")
 	local label2 = statPanel:GetNamedChild("Label2")
 
-	label.tooltip = {SI_COMBAT_METRICS_SKILLAVG_TT}
+	label.tooltip = SI_COMBAT_METRICS_SKILLAVG_TT
 	label:SetText(string.format("%s    -", GetString(SI_COMBAT_METRICS_AVERAGEC)))
-	label2.tooltip = {SI_COMBAT_METRICS_SKILLTOTAL_TT}
+	label2.tooltip = SI_COMBAT_METRICS_SKILLTOTAL_TT
 	label2:SetText(string.format("%s    -", GetString(SI_COMBAT_METRICS_TOTALC)))
 
 	local block2 = control:GetNamedChild("ActionBar2")
@@ -172,10 +172,10 @@ function CMXint.InitializeSkillsPanel(control)
 	local label4 = statPanel2:GetNamedChild("Label2")
 
 	label3:SetText(string.format("%s    -", GetString(SI_COMBAT_METRICS_TOTALWA)))
-	label3.tooltip = {SI_COMBAT_METRICS_TOTALWA_TT}
+	label3.tooltip = SI_COMBAT_METRICS_TOTALWA_TT
 
 	label4:SetText(string.format("%s    -", GetString(SI_COMBAT_METRICS_TOTALSKILLS)))
-	label4.tooltip = {SI_COMBAT_METRICS_TOTALSKILLS_TT}
+	label4.tooltip = SI_COMBAT_METRICS_TOTALSKILLS_TT
 end
 
 

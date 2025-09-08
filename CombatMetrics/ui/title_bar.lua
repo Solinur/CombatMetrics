@@ -21,7 +21,7 @@ function CMXint.InitializeTitlePanel(control)
 	TitlePanel = CMXint.PanelObject:New(control, "title")
 
 	---@cast control Control
-	control.tooltip = {SI_COMBAT_METRICS_EDIT_TITLE}
+	control.tooltip = SI_COMBAT_METRICS_EDIT_TITLE
 	local label = control:GetNamedChild("Name")
 	local editbox = control:GetNamedChild("Edit")
 
@@ -83,7 +83,7 @@ function CMXint.InitializeTitlePanel(control)
 		raceIcon:SetTexture(racetextures[raceId])
 
 		local race = GetRaceName(gender, raceId)
-		raceIcon.tooltip = {race}
+		raceIcon.tooltip = race
 
 		-- ClassIcon
 
@@ -97,7 +97,7 @@ function CMXint.InitializeTitlePanel(control)
 				local class = GetClassName(gender, id)
 
 				classIcon:SetTexture(texture)
-				classIcon.tooltip = {class}
+				classIcon.tooltip = class
 				classIcon:SetHidden(false)
 
 				break

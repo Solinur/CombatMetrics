@@ -48,14 +48,14 @@
                             text="SI_COMBAT_METRICS_SHARP" horizontalAlignment="RIGHT">
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="4" offsetY="0" />
                             <Dimensions x="30" y="20" />
-                            <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_BUFFCOUNT_TT}</OnInitialized>
+                            <OnInitialized>self.tooltip = SI_COMBAT_METRICS_BUFFCOUNT_TT</OnInitialized>
                         </Label>
 
                         <Label name="$(parent)Rate" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"
                             text="SI_COMBAT_METRICS_PM_SEC" horizontalAlignment="RIGHT">
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Count" offsetX="4" offsetY="0" />
                             <Dimensions x="50" y="20" />
-                            <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_UPTIME_TT}</OnInitialized>
+                            <OnInitialized>self.tooltip = SI_COMBAT_METRICS_UPTIME_TT</OnInitialized>
                         </Label>
                     </Controls>
                 </Control>
@@ -156,7 +156,7 @@
                                             layer="CONTROLS" inherits="CombatMetrics_TextureTooltip" color="FFFF8800">
                                             <AnchorFill />
                                             <OnInitialized>
-                                                self.tooltip = {SI_COMBAT_METRICS_SIGIL_WARNING}
+                                                self.tooltip = SI_COMBAT_METRICS_SIGIL_WARNING
                                             </OnInitialized>
                                         </Texture>
                                     </Controls>
@@ -172,14 +172,14 @@
                                     text="SI_COMBAT_METRICS_SHARP" horizontalAlignment="CENTER" verticalAlignment="CENTER">
                                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="2" offsetY="0" />
                                     <Dimensions x="58" y="20" />
-                                    <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_BUFFCOUNT_TT}</OnInitialized>
+                                    <OnInitialized>self.tooltip = SI_COMBAT_METRICS_BUFFCOUNT_TT</OnInitialized>
                                 </Label>
 
                                 <Label name="$(parent)Uptime" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"
                                     text="SI_COMBAT_METRICS_UPTIME" horizontalAlignment="CENTER" verticalAlignment="CENTER">
                                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Count" offsetX="2" offsetY="0" />
                                     <Dimensions x="58" y="20" />
-                                    <OnInitialized>self.tooltip = {SI_COMBAT_METRICS_UPTIME_TT}</OnInitialized>
+                                    <OnInitialized>self.tooltip = SI_COMBAT_METRICS_UPTIME_TT</OnInitialized>
                                 </Label>
                             </Controls>
                         </Control>

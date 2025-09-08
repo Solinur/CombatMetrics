@@ -27,7 +27,7 @@
                     <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)_Title" offsetY="8" />
                     <Anchor point="BOTTOMLEFT" offsetY="-4"/>
                     <Dimensions y="36"/>
-                    <ResizeToFitPadding width="8" height="8" />
+                    <!-- <ResizeToFitPadding width="8" height="8" /> -->
                     <OnInitialized>CombatMetrics.internal.InitializeMenuPanel(self)</OnInitialized>
                 </Control>
 

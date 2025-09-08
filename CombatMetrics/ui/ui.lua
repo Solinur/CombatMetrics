@@ -83,18 +83,17 @@ end
 CMXf.AddTooltipLine = AddTooltipLine
 
 function CMXint.OnMouseEnter(control) --copy from ZO_Options_OnMouseEnter but modified to support multiple tooltip lines
+	---@type table | string
 	local tooltipText = control.tooltip
+	if tooltipText == nil or #tooltipText==0 then return end
 
-    if tooltipText ~= nil and #tooltipText>0 then
-		InitializeTooltip(InformationTooltip, control, BOTTOMLEFT, 0, -2, TOPLEFT)
-
-		if type(tooltipText) == "table" then
-			for i=1, #tooltipText do
-				AddTooltipLine(control, InformationTooltip, tooltipText[i])
-			end
-		else
-			AddTooltipLine(control, InformationTooltip, tooltipText)
+	InitializeTooltip(InformationTooltip, control, BOTTOMLEFT, 0, -2, TOPLEFT)
+	if type(tooltipText) == "table" then
+		for i=1, #tooltipText do
+			AddTooltipLine(control, InformationTooltip, tooltipText[i])
 		end
+	else
+		AddTooltipLine(control, InformationTooltip, tooltipText)
 	end
 end
 
@@ -342,8 +341,6 @@ function CMXint.InitializeUI()
 	
 	assert(CMXint.InitializeFightReport(), "Initialization of fight report ui failed")
 	-- assert(CMXint.InitializeLiveReport(), "Initialization of live report failed")
-
-	CMXint.SVHandler = CombatMetricsFightData
 
 	PanelObject.fightReport = CMXint.fightReport
 	PanelObject.settings = CMXint.fightReport.settings

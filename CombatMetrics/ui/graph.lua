@@ -653,7 +653,7 @@ local function UpdateBarPlot(plot)
 	local icon = plot:GetNamedChild("Icon")
 
 	icon:SetTexture(GetFormattedAbilityIcon(data.iconId))
-	icon.tooltip = {buffName}
+	icon.tooltip = buffName
 
 	plot.bardata = bardata
 	plot.xoffset = xoffset
@@ -1304,7 +1304,7 @@ local function initToolbar(panel)
 
 		if i == 1 then
 			groupSelector:SetHidden(CMXint.settings.fightReport.rightpanel ~= "buffsout")
-			groupSelector.tooltip = {SI_COMBAT_METRICS_GRAPH_BUFF_GROUP_SELECTOR}
+			groupSelector.tooltip = SI_COMBAT_METRICS_GRAPH_BUFF_GROUP_SELECTOR
 			groupSelector:SetHandler("OnMouseUp", function(self, button, upInside)
 
 					if upInside then
