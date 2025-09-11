@@ -5,7 +5,7 @@ local CMX = CombatMetrics
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = 85
+CMX.version = "2.0.0-alpha"
 
 CMX.internal = {}
 local CMXint = CMX.internal
