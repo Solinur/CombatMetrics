@@ -31,7 +31,8 @@ local function initCategoryButtons(MenuPanel)
 		button:SetTexture(texture)
 		button:SetColor(ZO_ColorDef.HexToFloats(color))
 		local anchorSide = i == 1 and TOP or BOTTOM
-		button:SetAnchor(TOP, anchorControl, anchorSide, nil, 4)
+		local offset = i == 1 and 0 or 4
+		button:SetAnchor(TOP, anchorControl, anchorSide, nil, offset)
 		button.tooltip = tooltip
 		button.category = category
 		button:SetHandler("OnMouseUp", onMouseUp, "CMX")
@@ -41,11 +42,13 @@ local function initCategoryButtons(MenuPanel)
 		i = i + 1
 	end
 
-	initCategoryButton("damageOut", "/esoui/art/icons/heraldrycrests_weapon_axe_02.dds", "FFFFCCCC",
+	-- initCategoryButton("damageOut", "/esoui/art/icons/heraldrycrests_weapon_axe_02.dds", "FFFFCCCC",
+	initCategoryButton("damageOut", "/EsoUI/Art/LFG/Gamepad/LFG_roleIcon_dps.dds", "FFFFCCCC",
 		SI_COMBAT_METRICS_DAMAGE_CAUSED)
-	initCategoryButton("healingOut", "/esoui/art/buttons/gamepad/gp_plus_large.dds", "FFCCFFCC",
+	initCategoryButton("healingOut", "/EsoUI/Art/LFG/Gamepad/LFG_roleIcon_healer.dds", "FFCCFFCC",
 		SI_COMBAT_METRICS_HEALING_DONE)
-	initCategoryButton("damageIn", "/esoui/art/icons/heraldrycrests_weapon_shield_01.dds", "FFCCCCFF",
+	-- initCategoryButton("damageIn", "/esoui/art/icons/heraldrycrests_weapon_shield_01.dds", "FFCCCCFF",
+	initCategoryButton("damageIn", "/EsoUI/Art/LFG/Gamepad/LFG_roleIcon_tank.dds", "FFCCCCFF",
 		SI_COMBAT_METRICS_DAMAGE_CAUSED)
 	initCategoryButton("healingIn", "/esoui/art/hud/gamepad/gp_radialicon_invitegroup_down.dds", "FFFFFFCC",
 		SI_COMBAT_METRICS_HEALING_RECEIVED)
@@ -68,7 +71,7 @@ local function initSceneButtons(MenuPanel)
 		---@cast button TextureControl
 
 		button:SetTexture(texture)
-		local offset = i == 1 and 30 or 4
+		local offset = i == 1 and 26 or 4
 		button:SetAnchor(TOP, anchorControl, BOTTOM, nil, offset)
 		button.tooltip = tooltip
 		button.category = scene
@@ -183,7 +186,7 @@ local function initSettingsButton(MenuPanel)
 
 	button:SetTexture("esoui/art/tutorial/gamepad/gp_playermenu_icon_settings.dds")
 	button:SetColor(ZO_ColorDef.HexToFloats("FFFFFFFF"))
-	button:SetAnchor(TOP, MenuPanel.sceneButtons.info, BOTTOM, nil, 30)
+	button:SetAnchor(TOP, MenuPanel.sceneButtons.info, BOTTOM, nil, 26)
 	button.tooltip = SI_COMBAT_METRICS_TOGGLE_SETTINGS
 	button:SetHandler("OnMouseUp", onMouseUp, "CMX")
 
@@ -357,7 +360,7 @@ local function initFightNavButtons(MenuPanel)
 		button:SetPressedTexture(	texture .. "down.dds")
 		button:SetMouseOverTexture(	texture .. "over.dds")
 		button:SetDisabledTexture(	texture .. "disabled.dds")
-		local offset = i == 1 and 30 or 4
+		local offset = i == 1 and 26 or 4
 		button:SetAnchor(TOP, anchorControl, BOTTOM, nil, offset)
 		button.tooltip = tooltip
 		button.name = name
