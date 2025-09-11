@@ -53,13 +53,13 @@ function CMXint.InitializeTitlePanel(control)
 	function TitlePanel:Update(fightData)
 		logger:Debug("Updating TitlePanel")
 
-		-- update character info
-
 		local charInfo = control:GetNamedChild("CharacterInfo")
 		local charData = {}
 		local fightlabel
+		local account 
 
 		if fightData == nil then
+			account = GetDisplayName()
 			charData.name = GetUnitName("player")
 			charData.raceId = GetUnitRaceId("player")
 			charData.gender = GetUnitGender("player")
@@ -72,47 +72,27 @@ function CMXint.InitializeTitlePanel(control)
 			charData = fightData.charData
 			charData.name = charData.name or fightData.char
 			fightlabel = zo_strgsub(fightData.fightlabel, ".+%:%d%d %- ([A-Z])", "%1") or ""
+			account = fightData.info.accountname
 		end
 		
 		label:SetText(fightlabel)
 
-		-- RaceIcon
+		-- Custom Icon
 
-		local raceIcon = charInfo:GetNamedChild("RaceIcon")
-		local raceId = charData.raceId
-		local gender = charData.gender
+		local customIconControl = charInfo:GetNamedChild("CustomIcon")
+		local customIcon = LibCustomIcons and LibCustomIcons.GetStatic(account)
 
-		raceIcon:SetHidden(raceId == nil)
-		raceIcon:SetTexture(racetextures[raceId])
-
-		local race = GetRaceName(gender, raceId)
-		raceIcon.tooltip = race
-
-		-- ClassIcon
-
-		local classIcon = charInfo:GetNamedChild("ClassIcon")
-		local classId = charData.classId
-
-		for i = 1, GetNumClasses() do
-			local id, _, _, _, _, _, texture = GetClassInfo(i)
-
-			if id == classId then
-				local class = GetClassName(gender, id)
-
-				classIcon:SetTexture(texture)
-				classIcon.tooltip = class
-				classIcon:SetHidden(false)
-
-				break
-			end
-
-			classIcon:SetHidden(true)
+		customIconControl:SetHidden(customIcon == nil)
+		if customIcon then
+			customIconControl:SetTexture(customIcon)
 		end
 
-		-- charName
+		-- Char Name
 
 		local charName = charInfo:GetNamedChild("Charname")
-		local name = charData.name
+		
+		local customName = LibCustomNames and LibCustomNames.Get(account, true)
+		local name = customName or charData.name
 
 		charName:SetText(name)
 
@@ -135,6 +115,44 @@ function CMXint.InitializeTitlePanel(control)
 			CPIcon:SetHidden(false)
 			CPValue:SetHidden(false)
 			CPValue:SetText(CP)
+		end
+
+		local classInfo = control:GetNamedChild("ClassInfo")
+
+		-- Race Icon
+
+		local raceIcon = classInfo:GetNamedChild("RaceIcon")
+		local raceId = charData.raceId
+		local gender = charData.gender
+
+		raceIcon:SetHidden(raceId == nil)
+		raceIcon:SetTexture(racetextures[raceId])
+
+		local race = GetRaceName(gender, raceId)
+		raceIcon.tooltip = race
+
+		-- Class Icon
+
+		local classIcon = classInfo:GetNamedChild("ClassIcon")
+		local classId = charData.classId
+		local class = GetClassName(gender, classId)
+		local texture = ZO_GetGamepadClassIcon(classId)
+
+		classIcon:SetTexture(texture)
+		classIcon.tooltip = class
+		classIcon:SetHidden(false)
+
+		-- Subclass Icons:
+
+		local subClassingLines = SKILLS_DATA_MANAGER.activeClassSkillLineDataList
+		for i = 1,3 do
+			local lineData = subClassingLines[i]
+			local iconControl = classInfo:GetNamedChild("SubClassIcon" .. i)
+			---@cast iconControl TextureControl
+			iconControl.tooltip = ZO_CachedStrFormat(SI_SKILLS_ENTRY_LINE_NAME_FORMAT, lineData:GetName())
+
+			local texture = lineData:GetSkillDataByIndex(3):GetProgressionData(0).icon
+			iconControl:SetTexture(texture)
 		end
 	end
 end

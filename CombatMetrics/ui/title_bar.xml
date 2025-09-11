@@ -8,23 +8,17 @@
                 </Line>
 
                 <Control name="$(parent)CharacterInfo" resizeToFitDescendents="true">
-                    <Anchor point="TOPLEFT" />
-                    <Anchor point="BOTTOMLEFT" />
+                    <Anchor point="TOPLEFT"/>
+                    <Anchor point="BOTTOMLEFT"/>
                     <Controls>
-                        <Texture name="$(parent)RaceIcon" textureFile="esoui/art/champion/champion_icon.dds"
-                            inherits="CombatMetrics_TextureTooltip">
-                            <Anchor point="LEFT" />
-                            <Dimensions x="34" y="34" />
-                        </Texture>
-
-                        <Texture name="$(parent)ClassIcon" textureFile="esoui/art/champion/champion_icon.dds"
-                            inherits="CombatMetrics_TextureTooltip">
-                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)RaceIcon" offsetX="-2" />
-                            <Dimensions x="34" y="34" />
+                        <Texture name="$(parent)CustomIcon" textureFile="esoui/art/champion/champion_icon.dds"
+                            inherits="CombatMetrics_TextureTooltip" layer="1" level="1">
+                            <Anchor point="LEFT" offsetX="2"/>
+                            <Dimensions x="30" y="30" />
                         </Texture>
 
                         <Label name="$(parent)Charname" inherits="CombatMetrics_InfoFontControl">
-                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ClassIcon" offsetX="4" />
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)CustomIcon" offsetX="6" />
                         </Label>
 
                         <Texture name="$(parent)CPIcon" textureFile="esoui/art/champion/champion_icon.dds">
@@ -38,19 +32,54 @@
                     </Controls>
                 </Control>
 
+                <Control name="$(parent)ClassInfo" resizeToFitDescendents="true">
+                    <Anchor point="TOPRIGHT"/>
+                    <Anchor point="BOTTOMRIGHT"/>
+                    <Controls>
+                        <Texture name="$(parent)SubClassIcon3" textureFile="esoui/art/champion/champion_icon.dds"
+                            inherits="CombatMetrics_TextureTooltip" layer="1" level="1">
+                            <Anchor point="RIGHT" />
+                            <Dimensions x="24" y="24" />
+                        </Texture>
+
+                        <Texture name="$(parent)SubClassIcon2" textureFile="esoui/art/champion/champion_icon.dds"
+                            inherits="CombatMetrics_TextureTooltip" layer="1" level="1">
+                            <Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)SubClassIcon3" offsetX="-4" />
+                            <Dimensions x="24" y="24" />
+                        </Texture>
+
+                        <Texture name="$(parent)SubClassIcon1" textureFile="esoui/art/champion/champion_icon.dds"
+                            inherits="CombatMetrics_TextureTooltip" layer="1" level="1">
+                            <Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)SubClassIcon2" offsetX="-4" />
+                            <Dimensions x="24" y="24" />
+                        </Texture>
+
+                        <Texture name="$(parent)ClassIcon" textureFile="esoui/art/champion/champion_icon.dds"
+                            inherits="CombatMetrics_TextureTooltip" layer="1" level="1">
+                            <Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)SubClassIcon1" offsetX="-6" />
+                            <Dimensions x="34" y="34" />
+                        </Texture>
+
+                        <Texture name="$(parent)RaceIcon" textureFile="esoui/art/champion/champion_icon.dds"
+                            inherits="CombatMetrics_TextureTooltip" layer="1" level="1">
+                            <Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)ClassIcon" offsetX="-4" />
+                            <Dimensions x="34" y="34" />
+                        </Texture>
+                    </Controls>
+                </Control>
+
                 <Control name="$(parent)FightTitle" mouseEnabled="true" inherits="CombatMetrics_ControlTooltip">
-                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)CharacterInfo" offsetX="8" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-4" />
+                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)CharacterInfo" offsetX="6" />
+                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)ClassInfo" offsetX="6" />
                     <Controls>
                         <Label name="$(parent)Name" inherits="CombatMetrics_TitleFontControl" text="Test"
                             verticalAlignment="CENTER" horizontalAlignment="CENTER">
-                            <Anchor point="LEFT" />
-                            <Anchor point="RIGHT" />
+                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)"/>
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(grandparent)"/>
                         </Label>
 
                         <EditBox name="$(parent)Edit" hidden="true" inherits="ZO_DefaultEdit">
-                            <Anchor point="LEFT" />
-                            <Anchor point="RIGHT" />
+                            <AnchorFill />
                         </EditBox>
 
                         <StatusBar name="$(parent)Bar" orientation="HORIZONTAL" color="CC00BB00" hidden="true">
