@@ -333,6 +333,7 @@ function CMXint.InitializeUI()
 	
 	assert(CMXint.InitializeTitle(), "Initialization of title ui failed")
 	assert(CMXint.InitializeMenu(), "Initialization of menu ui failed")
+	assert(CMXint.InitializeInfoRow(), "Initialization of info row failed")
 	-- assert(CMXint.InitializeCombatStats(), "Initialization of combat stats ui failed")
 	-- -- assert(CMXint.InitializeResource(), "Initialization of resource ui failed")
 	-- assert(CMXint.InitializePlayerStats(), "Initialization of player stats ui failed")
@@ -350,7 +351,6 @@ function CMXint.InitializeUI()
 	
 	-- assert(CMXint.InitializeFightList(), "Initialization of fight list ui failed")
 	-- assert(CMXint.InitializeDonations(), "Initialization of donations ui failed")
-	-- assert(CMXint.InitializeInfoRow(), "Initialization of info row failed")
 
 
 	isFileInitialized = true

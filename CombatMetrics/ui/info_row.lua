@@ -11,15 +11,16 @@ local LC = LibCombat
 function CMXint.InitializeInfoRowPanel(control)
 	local InfoRowPanel = CMX.internal.PanelObject:New(control, "infoRow")
 
+	
 	function InfoRowPanel:Update(fightData)
 		logger:Debug("Updating Info Row")
 
-		local datetimecontrol = self:GetNamedChild("DateTime")
-		local versioncontrol = self:GetNamedChild("ESOVersion")
-		local barcontrol = self:GetNamedChild("Bar")
-		local performancecontrol = self:GetNamedChild("Performance")
+		local datetimecontrol = control:GetNamedChild("DateTime")
+		local versioncontrol = control:GetNamedChild("ESOVersion")
+		local barcontrol = control:GetNamedChild("Bar")
+		local performancecontrol = control:GetNamedChild("Performance")
 
-		local data = fightData or {
+		local data = fightData and fightData.info or {
 			["date"] = GetTimeStamp(),
 			["time"] = GetTimeString(),
 			["ESOversion"] = GetESOVersionString(),
@@ -28,7 +29,8 @@ function CMXint.InitializeInfoRowPanel(control)
 
 		local date = data.date
 		local account = data.account
-		local accountstring = account and string.format("%s, ", account) or ""
+		local name = fightData and fightData.charData.name or ZO_CachedStrFormat(SI_UNIT_NAME,  GetRawUnitName("player"))
+		local accountstring = account and string.format("%s%s, ", name, account) or ""
 
 		local datestring = type(date) == "number" and GetDateStringFromTimestamp(date) or date
 		local timestring = string.format("%s%s, %s", accountstring, datestring, data.time)
@@ -37,7 +39,7 @@ function CMXint.InitializeInfoRowPanel(control)
 		datetimecontrol:SetText(timestring)
 		versioncontrol:SetText(versionstring)
 
-		local hideBar = fightData ~= nil and self:GetParent():GetNamedChild("_FightList"):IsHidden()
+		local hideBar = fightData ~= nil and control:GetParent():GetNamedChild("_FightList"):IsHidden()
 
 		barcontrol:SetHidden(hideBar)
 
