@@ -24,12 +24,12 @@ local function initCategoryButtons(MenuPanel)
 	end
 
 	local function initCategoryButton(category, texture, color, tooltip)
-		local button = CreateControlFromVirtual("CombatMetrics_CategoryButton", MenuPanel.control,
+		local button = CreateControlFromVirtual("CombatMetricsReport_MenuCategoryButton", MenuPanel.control,
 			"CombatMetrics_MenuButton", i)
 		---@cast button TextureControl
 
 		button:SetTexture(texture)
-		button:SetColor(ZO_ColorDef.HexToRGBA(color))
+		button:SetColor(ZO_ColorDef.HexToFloats(color))
 		local anchorSide = i == 1 and TOP or BOTTOM
 		button:SetAnchor(TOP, anchorControl, anchorSide, nil, 4)
 		button.tooltip = tooltip
@@ -62,13 +62,12 @@ local function initSceneButtons(MenuPanel)
 		MenuPanel:SelectScene(button)
 	end
 
-	local function initSceneButton(scene, texture, color, tooltip)
-		local button = CreateControlFromVirtual("CombatMetrics_SceneButton", MenuPanel.control,
+	local function initSceneButton(scene, texture, tooltip)
+		local button = CreateControlFromVirtual("CombatMetricsReport_MenuSceneButton", MenuPanel.control,
 			"CombatMetrics_MenuButton", i)
 		---@cast button TextureControl
 
 		button:SetTexture(texture)
-		button:SetColor(ZO_ColorDef.HexToRGBA(color))
 		local offset = i == 1 and 30 or 4
 		button:SetAnchor(TOP, anchorControl, BOTTOM, nil, offset)
 		button.tooltip = tooltip
@@ -80,21 +79,17 @@ local function initSceneButtons(MenuPanel)
 		i = i + 1
 	end
 
-	initSceneButton("fightStats", "esoui/art/menubar/gamepad/gp_playermenu_icon_skills.dds", "FFFFFFFF",
-		SI_COMBAT_METRICS_TOGGLE_FIGHTSTATS)
-	initSceneButton("combatLog", "esoui/art/guild/gamepad/gp_guild_menuicon_roster.dds", "33FFFFFF",
-		SI_COMBAT_METRICS_TOGGLE_COMBAT_LOG)
-	initSceneButton("graph", "esoui/art/treeicons/gamepad/gp_tutorial_idexicon_charprogression.dds", "33FFFFFF",
-		SI_COMBAT_METRICS_TOGGLE_GRAPH)
-	initSceneButton("info", "esoui/art/menubar/gamepad/gp_playermenu_icon_tutorial.dds", "FFFFFFFF",
-		SI_COMBAT_METRICS_TOGGLE_INFO)
+	initSceneButton("fightStats", "esoui/art/menubar/gamepad/gp_playermenu_icon_skills.dds", SI_COMBAT_METRICS_TOGGLE_FIGHTSTATS)
+	initSceneButton("combatLog", "esoui/art/guild/gamepad/gp_guild_menuicon_roster.dds", SI_COMBAT_METRICS_TOGGLE_COMBAT_LOG)
+	initSceneButton("graph", "esoui/art/treeicons/gamepad/gp_tutorial_idexicon_charprogression.dds", SI_COMBAT_METRICS_TOGGLE_GRAPH)
+	initSceneButton("info", "esoui/art/menubar/gamepad/gp_playermenu_icon_tutorial.dds", SI_COMBAT_METRICS_TOGGLE_INFO)
 
 	MenuPanel.sceneButtons = sceneButtons
 end
 
 
 local function initSettingsButton(MenuPanel)
-	local button = CreateControlFromVirtual("CombatMetrics_SettingsButton", MenuPanel.control, "CombatMetrics_MenuButton")
+	local button = CreateControlFromVirtual("CombatMetricsReport_MenuSettingsButton", MenuPanel.control, "CombatMetrics_MenuButton")
 	---@cast button TextureControl
 
 	local function toggleShowIds()
@@ -187,7 +182,7 @@ local function initSettingsButton(MenuPanel)
 	end
 
 	button:SetTexture("esoui/art/tutorial/gamepad/gp_playermenu_icon_settings.dds")
-	button:SetColor(ZO_ColorDef.HexToRGBA("FFFFFFFF"))
+	button:SetColor(ZO_ColorDef.HexToFloats("FFFFFFFF"))
 	button:SetAnchor(TOP, MenuPanel.sceneButtons.info, BOTTOM, nil, 30)
 	button.tooltip = SI_COMBAT_METRICS_TOGGLE_SETTINGS
 	button:SetHandler("OnMouseUp", onMouseUp, "CMX")
@@ -196,7 +191,7 @@ local function initSettingsButton(MenuPanel)
 end
 
 local function initFeedbackButton(MenuPanel)
-	local button = CreateControlFromVirtual("CombatMetrics_FeedbackButton", MenuPanel.control, "CombatMetrics_MenuButton")
+	local button = CreateControlFromVirtual("CombatMetricsReport_MenuFeedbackButton", MenuPanel.control, "CombatMetrics_MenuButton")
 	---@cast button TextureControl
 
 	local sendGold
@@ -273,7 +268,7 @@ local function initFeedbackButton(MenuPanel)
 	end
 
 	button:SetTexture("CombatMetrics/icons/addonlogo.dds")
-	button:SetColor(ZO_ColorDef.HexToRGBA("FFFFC52A"))
+	button:SetColor(ZO_ColorDef.HexToFloats("FFFFC52A"))
 	button:SetAnchor(TOP, MenuPanel.settingsButton, BOTTOM, nil, 8)
 	button.tooltip = SI_COMBAT_METRICS_FEEDBACK
 	button:SetHandler("OnMouseUp", onMouseUp, "CMX")
@@ -283,7 +278,7 @@ end
 
 
 local function initNotificationButton(MenuPanel)
-	local button = CreateControlFromVirtual("CombatMetrics_FeedbackButton", MenuPanel.control, "CombatMetrics_MenuButton")
+	local button = CreateControlFromVirtual("CombatMetricsReport_MenuNotificationButton", MenuPanel.control, "CombatMetrics_MenuButton")
 	---@cast button TextureControl
 
 	local function ShowGuildInfo()
@@ -316,7 +311,7 @@ local function initNotificationButton(MenuPanel)
 	end
 
 	button:SetTexture("esoui/art/mainmenu/menubar_notifications_down.dds")
-	button:SetColor(ZO_ColorDef.HexToRGBA("FFFFFFFF"))
+	button:SetColor(ZO_ColorDef.HexToFloats("FFFFFFFF"))
 	button:SetAnchor(TOP, MenuPanel.feedbackButton, BOTTOM, nil, 8)
 	button.tooltip = SI_COMBAT_METRICS_NOTIFICATION
 	button:SetHandler("OnMouseUp", onMouseUp, "CMX")
@@ -330,31 +325,31 @@ local function initFightNavButtons(MenuPanel)
 	local anchorControl = MenuPanel.notificationButton
 
 	local function SelectPreviousFight()
-		CMXint.figthData:SelectPreviousFight()
+		CMXint.fightData:SelectPreviousFight()
 	end
 
 	local function SelectNextFight()
-		CMXint.figthData:SelectNextFight()
+		CMXint.fightData:SelectNextFight()
 	end
 
 	local function SelectMostRecentFight()
-		CMXint.figthData:SelectMostRecentFight()
+		CMXint.fightData:SelectMostRecentFight()
 	end
 
 	local function LoadFight()
-		MenuPanel.fighReport:SelectScene("fightList")
+		MenuPanel.fightReport:SelectScene("fightList")
 	end
 
 	local function SaveFight(_, _, _, _, _, shiftkey)
-		CMXint.figthData:SaveFight(shiftkey)
+		CMXint.fightData:SaveFight(shiftkey)
 	end
 
 	local function DeleteFight()
-		CMXint.figthData:RemoveCurrentFight()
+		CMXint.fightData:RemoveCurrentFight()
 	end
 
 	local function initNavButton(name, texture, tooltip, func)
-		local button = CreateControlFromVirtual("CombatMetrics_FightNavigationButton", MenuPanel.control,
+		local button = CreateControlFromVirtual("CombatMetricsReport_MenuFightNavigationButton", MenuPanel.control,
 			"CombatMetrics_FightNavigationButton", i)
 		---@cast button ButtonControl
 
@@ -386,6 +381,7 @@ end
 
 function CMXint.InitializeMenuPanel(control)
 	local MenuPanel = CMX.internal.PanelObject:New(control, "menu")
+	SVHandler = CMXint.SVHandler
 
 	function MenuPanel:Update()
 		local notificationSettings = CMXint.settings.notification
@@ -403,14 +399,15 @@ function CMXint.InitializeMenuPanel(control)
 
 		local show = notificationSettings.force or isMe or
 		(isGerman and isEUServer and isNotificationAllowed and isVeteranRaid and isWithinAllowedTime)
-		self.control:GetNamedChild("NotificationButton"):SetHidden(not show)
+
+		control:GetNamedChild("NotificationButton"):SetHidden(not show)
 
 		self:UpdateButtonStates()
 	end
 
 	function MenuPanel:UpdateButtonStates()
-		local fightData = CMXint.figthData
-		local currentIndex = fightData.currentIndex
+		local fightData = CMXint.fightData
+		local currentIndex = fightData.currentIndex or 0
 		local maxIndex = fightData:GetNumFights()
 		local navButtons = MenuPanel.navButtons
 		local fight = fightData.data
@@ -433,7 +430,7 @@ function CMXint.InitializeMenuPanel(control)
 	end
 
 	function MenuPanel:SelectCategory(selectedButton)
-		for _, button in self.categoryButtons do
+		for _, button in pairs(self.categoryButtons) do
 			local r, g, b, _ = button:GetColor()
 			local a = button == selectedButton and 1 or 0.2
 			button:SetColor(r, g, b, a)
@@ -444,13 +441,13 @@ function CMXint.InitializeMenuPanel(control)
 
 		if oldCategory ~= newCategory then
 			self.settings.category = newCategory
-			self.fighReport:Update()
+			self.fightReport:Update()
 		end
 	end
 
 	function MenuPanel:SelectScene(selectedButton)
 		local newScene
-		for sceneName, button in self.sceneButtons do
+		for sceneName, button in pairs(self.sceneButtons) do
 			local a = .2
 			if button == selectedButton then
 				a = 1
@@ -458,7 +455,7 @@ function CMXint.InitializeMenuPanel(control)
 			end
 			button:SetColor(1, 1, 1, a)
 		end
-		self.fighReport:SelectScene(newScene)
+		self.fightReport:SelectScene(newScene)
 	end
 
 	initCategoryButtons(MenuPanel)
@@ -472,8 +469,12 @@ end
 local isFileInitialized = false
 function CMXint.InitializeMenu()
 	if isFileInitialized == true then return false end
-	logger = CMXf.initSublogger("Menu Bar")
-	SVHandler = CMXint.SVHandler
+	logger = CMXf.initSublogger("Menu")
+
+	MenuPanel = CMXint.panels.menu
+
+	MenuPanel:SelectScene(MenuPanel.sceneButtons.fightStats)
+	MenuPanel:SelectCategory(MenuPanel.categoryButtons.damageOut)
 
 	isFileInitialized = true
 	return true

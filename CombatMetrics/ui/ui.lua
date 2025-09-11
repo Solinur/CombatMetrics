@@ -83,9 +83,11 @@ end
 CMXf.AddTooltipLine = AddTooltipLine
 
 function CMXint.OnMouseEnter(control) --copy from ZO_Options_OnMouseEnter but modified to support multiple tooltip lines
+	logger:Info(control:GetName(), control.tooltip)
+
 	---@type table | string
 	local tooltipText = control.tooltip
-	if tooltipText == nil or #tooltipText==0 then return end
+	if tooltipText == nil then return end
 
 	InitializeTooltip(InformationTooltip, control, BOTTOMLEFT, 0, -2, TOPLEFT)
 	if type(tooltipText) == "table" then
@@ -264,6 +266,8 @@ local PanelObject = ZO_InitializingObject:Subclass()
 CMXint.PanelObject = PanelObject
 
 PanelObject.Update = PanelObject:MUST_IMPLEMENT()
+PanelObject.Clear = PanelObject:MUST_IMPLEMENT()
+PanelObject.Release = PanelObject:MUST_IMPLEMENT()
 
 function PanelObject:Initialize(control, name)
 	if CMXint.panels[name] then
@@ -279,6 +283,9 @@ function PanelObject:Initialize(control, name)
 end
 
 function PanelObject:Release()
+end
+
+function PanelObject:Clear()
 end
 
 function PanelObject:GetParentControl()
@@ -318,6 +325,12 @@ function CMXint.InitializeUI()
 	-- 	["resource"] 	= {},
 	-- }
 	
+	assert(CMXint.InitializeFightReport(), "Initialization of fight report ui failed")
+	-- assert(CMXint.InitializeLiveReport(), "Initialization of live report failed")
+	
+	PanelObject.fightReport = CMXint.fightReport
+	PanelObject.settings = CMXint.fightReport.settings
+	
 	assert(CMXint.InitializeTitle(), "Initialization of title ui failed")
 	assert(CMXint.InitializeMenu(), "Initialization of menu ui failed")
 	-- assert(CMXint.InitializeCombatStats(), "Initialization of combat stats ui failed")
@@ -338,12 +351,7 @@ function CMXint.InitializeUI()
 	-- assert(CMXint.InitializeFightList(), "Initialization of fight list ui failed")
 	-- assert(CMXint.InitializeDonations(), "Initialization of donations ui failed")
 	-- assert(CMXint.InitializeInfoRow(), "Initialization of info row failed")
-	
-	assert(CMXint.InitializeFightReport(), "Initialization of fight report ui failed")
-	-- assert(CMXint.InitializeLiveReport(), "Initialization of live report failed")
 
-	PanelObject.fightReport = CMXint.fightReport
-	PanelObject.settings = CMXint.fightReport.settings
 
 	isFileInitialized = true
 	return true

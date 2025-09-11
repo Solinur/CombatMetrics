@@ -8,7 +8,7 @@ local SVHandler
 local FightDataManager = ZO_InitializingObject:Subclass()
 
 function FightDataManager:Initialize()
-	if CMXint.figthData then
+	if CMXint.fightData then
 		logger:Error("Cannot create another FightDataManager when one already exists.")
 		return
 	end
@@ -99,7 +99,7 @@ function CMXint.InitializeFightDataHandler()
 	if isFileInitialized == true then return false end
 	logger = CMXf.initSublogger("Fights")
 
-    CMXint.figthData = FightDataManager:New()
+    CMXint.fightData = FightDataManager:New()
 
     isFileInitialized = true
 	return true

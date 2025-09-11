@@ -100,7 +100,7 @@ local function InitializeFightReport()
 		if FightReport:IsHidden() then return end
 		logger:Debug("Updating Fight Report")
 
-		if CMXint.figthData.currentIndex == nil then FightReport:Clear() end
+		if CMXint.fightData.currentIndex == nil then FightReport:Clear() end
 
 		for _, panel in pairs(CMXint.panels) do
 			panel:Update()

@@ -21,9 +21,10 @@ function CMXint.InitializeTitlePanel(control)
 	TitlePanel = CMXint.PanelObject:New(control, "title")
 
 	---@cast control Control
-	control.tooltip = SI_COMBAT_METRICS_EDIT_TITLE
-	local label = control:GetNamedChild("Name")
-	local editbox = control:GetNamedChild("Edit")
+	local fightTitleControl = control:GetNamedChild("FightTitle")
+	local label = fightTitleControl:GetNamedChild("Name")
+	local editbox = fightTitleControl:GetNamedChild("Edit")
+	fightTitleControl.tooltip = SI_COMBAT_METRICS_EDIT_TITLE
 
 	local function OnEditTitleStart()
 		label:SetHidden(true)
@@ -42,11 +43,11 @@ function CMXint.InitializeTitlePanel(control)
 
 		label:SetText(newtext)
 
-		local fightData = CMXf.GetCurrentFight()
+		local fightData = CMXint.fightData.data
 		if fightData then fightData.fightlabel = newtext end
 	end
 
-	control:SetHandler("OnMouseDoubleClick", OnEditTitleStart, "CMX")
+	fightTitleControl:SetHandler("OnMouseDoubleClick", OnEditTitleStart, "CMX")
 	editbox:SetHandler("OnFocusLost", OnEditTitleEnd, "CMX")
 
 	function TitlePanel:Update(fightData)
@@ -54,7 +55,7 @@ function CMXint.InitializeTitlePanel(control)
 
 		-- update character info
 
-		local charInfo = self:GetNamedChild("CharacterInfo")
+		local charInfo = control:GetNamedChild("CharacterInfo")
 		local charData = {}
 		local fightlabel
 
@@ -72,6 +73,8 @@ function CMXint.InitializeTitlePanel(control)
 			charData.name = charData.name or fightData.char
 			fightlabel = zo_strgsub(fightData.fightlabel, ".+%:%d%d %- ([A-Z])", "%1") or ""
 		end
+		
+		label:SetText(fightlabel)
 
 		-- RaceIcon
 
@@ -133,11 +136,6 @@ function CMXint.InitializeTitlePanel(control)
 			CPValue:SetHidden(false)
 			CPValue:SetText(CP)
 		end
-
-		-- Fight Title
-
-		local fightTitle = self:GetNamedChild("FightTitle"):GetNamedChild("Name")
-		fightTitle:SetText(fightlabel)
 	end
 end
 

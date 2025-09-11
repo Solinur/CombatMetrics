@@ -16,23 +16,23 @@
                     <OnResizeStop>CombatMetrics.internal.Resizing(self, false)</OnResizeStop>
                 </Backdrop>
 
-                <Control name="$(parent)_Title" inherits="CombatMetrics_TitleBar">
+                <Control name="$(parent)_Title" inherits="CombatMetrics_TitleBar CombatMetrics_ControlFramed">
                     <Anchor point="TOPLEFT" offsetX="4" offsetY="4" />
                     <Anchor point="TOPRIGHT" offsetX="-4" offsetY="4" />
                     <Dimensions y="48"/>
                     <OnInitialized>CombatMetrics.internal.InitializeTitlePanel(self)</OnInitialized>
                 </Control>
 
-                <Control name="$(parent)_Menu" resizeToFitDescendents="true" layer="BACKGROUND" >
+                <Control name="$(parent)_Menu" resizeToFitDescendents="true" layer="BACKGROUND" inherits="CombatMetrics_ControlFramed">
                     <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)_Title" offsetY="8" />
-                    <Anchor point="BOTTOMLEFT" offsetY="-4"/>
-                    <Dimensions y="36"/>
+                    <Anchor point="BOTTOMLEFT" offsetY="-4" constrains="Y"/>
+                    <Dimensions x="36"/>
                     <!-- <ResizeToFitPadding width="8" height="8" /> -->
                     <OnInitialized>CombatMetrics.internal.InitializeMenuPanel(self)</OnInitialized>
                 </Control>
 
                 <Control name="$(parent)_InfoRow" inherits="CombatMetrics_PlaceHolder"> <!-- CombatMetrics_InfoRow -->
-                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)_Menubar" offsetX="4" />
+                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)_Menu" offsetX="4" />
                     <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4" constrains="X"/>
                     <Dimensions y="24"/>
                     <!-- <OnInitialized>CombatMetrics.internal.InitializeInfoRowPanel(self)</OnInitialized> -->
@@ -44,7 +44,7 @@
                 </Control> -->
 
                 <Control name="$(parent)_CombatStats" inherits="CombatMetrics_PlaceHolder"> <!-- CombatMetrics_CombatStatsPanel -->
-                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)_Menubar" offsetX="4"/>
+                    <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)_Menu" offsetX="4"/>
                     <Dimensions x="346" y="374" />
                     <!-- <OnInitialized>CombatMetrics.internal.InitializeCombatStatsPanel(self)</OnInitialized> -->
                 </Control>
@@ -122,10 +122,6 @@
                     <Anchor point="TOPLEFT" relativeTo="$(parent)_CombatStats" />
                     <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)_AbilitiesPanel" />
                     <!-- <OnInitialized>CombatMetrics.internal.InitializeFightListPanel(self)</OnInitialized> -->
-                </Control>
-
-                <Control name="$(parent)_DonateDialog" hidden="true" tier="2" inherits="CombatMetrics_DonateDialog">
-                    <Anchor point="CENTER" relativePoint="CENTER" />
                 </Control>
             </Controls>
         </TopLevelControl>
