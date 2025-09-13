@@ -42,10 +42,10 @@
                     <Dimensions x="628" y="374" />
                 </Control> -->
 
-                <Control name="$(parent)_CombatStats" inherits="CombatMetrics_PlaceHolder"> <!-- CombatMetrics_CombatStatsPanel -->
+                <Control name="$(parent)_CombatStats" inherits="CombatMetrics_CombatStatsPanel"> <!-- CombatMetrics_CombatStatsPanel -->
                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)_Menu" offsetX="4"/>
                     <Dimensions x="346" y="374" />
-                    <!-- <OnInitialized>CombatMetrics.internal.InitializeCombatStatsPanel(self)</OnInitialized> -->
+                    <OnInitialized>CombatMetrics.internal.InitializeCombatStatsPanel(self)</OnInitialized>
                 </Control>
                 
                 <Control name="$(parent)_PlayerStats" inherits="CombatMetrics_PlaceHolder"> <!-- CombatMetrics_PlayerStatsPanel -->

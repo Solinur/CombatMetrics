@@ -65,9 +65,10 @@ function util.adjustRowSize(row, header)
 				rowchild:SetAnchor(point, relativeTo, relativePoint, x, y)
 			end
 
-			if rowchild:GetType() == CT_LABEL then rowchild:SetFont(string.format("%s|%s|%s",
-					GetString(SI_COMBAT_METRICS_STD_FONT), tonumber(GetString(SI_COMBAT_METRICS_FONT_SIZE)) * row.scale,
-					"soft-shadow-thin")) end
+			if rowchild:GetType() == CT_LABEL then
+				local font = string.format("%s|%s|%s", GetString(SI_COMBAT_METRICS_STD_FONT), tonumber(GetString(SI_COMBAT_METRICS_FONT_SIZE)) * row.scale, "soft-shadow-thin")
+				rowchild:SetFont(font)
+			end
 		end
 	end
 end
@@ -193,17 +194,6 @@ end
 -- 	selections[selecttype][category] = sel
 -- 	CombatMetricsReport:Update(currentFight)
 -- end
-
-function util.GetCurrentData()
-	local data = CMX.currentdata
-
-	if data.units == nil then
-		if #CMX.lastfights == 0 then return end
-		data = CMX.lastfights[#CMX.lastfights]
-	end
-
-	return data
-end
 
 local lastResize
 function CMXint.Resizing(control, resizing)
@@ -340,32 +330,33 @@ function CMXint.InitializeUI()
 	-- 	["resource"] 	= {},
 	-- }
 	
-	assert(CMXint.InitializeFightReport(), "Initialization of fight report ui failed")
+	assert(CMXint.InitializeControlHandler(), "Initialization of control handler failed")
+	assert(CMXint.InitializeFightReport(), "Initialization of fight report UI failed")
 	-- assert(CMXint.InitializeLiveReport(), "Initialization of live report failed")
 	
 	PanelObject.fightReport = CMXint.fightReport
 	PanelObject.settings = CMXint.fightReport.settings
 	
-	assert(CMXint.InitializeTitle(), "Initialization of title ui failed")
-	assert(CMXint.InitializeMenu(), "Initialization of menu ui failed")
-	assert(CMXint.InitializeInfoRow(), "Initialization of info row failed")
-	-- assert(CMXint.InitializeCombatStats(), "Initialization of combat stats ui failed")
-	-- -- assert(CMXint.InitializeResource(), "Initialization of resource ui failed")
-	-- assert(CMXint.InitializePlayerStats(), "Initialization of player stats ui failed")
-	-- assert(CMXint.InitializeBuffs(), "Initialization of buffs ui failed")
-	-- assert(CMXint.InitializeUnits(), "Initialization of units ui failed")
-	-- assert(CMXint.InitializeAbilities(), "Initialization of abilities ui failed")
+	assert(CMXint.InitializeTitle(), "Initialization of title UI failed")
+	assert(CMXint.InitializeMenu(), "Initialization of menu UI failed")
+	assert(CMXint.InitializeInfoRow(), "Initialization of info row UI failed")
+	assert(CMXint.InitializeCombatStats(), "Initialization of combat stats UI failed")
+	-- -- assert(CMXint.InitializeResource(), "Initialization of resource UI failed")
+	-- assert(CMXint.InitializePlayerStats(), "Initialization of player stats UI failed")
+	-- assert(CMXint.InitializeBuffs(), "Initialization of buffs UI failed")
+	-- assert(CMXint.InitializeUnits(), "Initialization of units UI failed")
+	-- assert(CMXint.InitializeAbilities(), "Initialization of abilities UI failed")
 	
-	-- assert(CMXint.InitializeSkills(), "Initialization of skills ui failed")
-	-- assert(CMXint.InitializeEquipment(), "Initialization of equipment ui failed")
-	-- assert(CMXint.InitializeChampionPoints(), "Initialization of champion points ui failed")
-	-- assert(CMXint.InitializeConsumables(), "Initialization of consumables ui failed")
+	-- assert(CMXint.InitializeSkills(), "Initialization of skills UI failed")
+	-- assert(CMXint.InitializeEquipment(), "Initialization of equipment UI failed")
+	-- assert(CMXint.InitializeChampionPoints(), "Initialization of champion points UI failed")
+	-- assert(CMXint.InitializeConsumables(), "Initialization of consumables UI failed")
 	
-	-- assert(CMXint.InitializeCombatLog(), "Initialization of combat log ui failed")
-	-- assert(CMXint.InitializeGraph(), "Initialization of graph ui failed")
+	-- assert(CMXint.InitializeCombatLog(), "Initialization of combat log UI failed")
+	-- assert(CMXint.InitializeGraph(), "Initialization of graph UI failed")
 	
-	-- assert(CMXint.InitializeFightList(), "Initialization of fight list ui failed")
-	-- assert(CMXint.InitializeDonations(), "Initialization of donations ui failed")
+	-- assert(CMXint.InitializeFightList(), "Initialization of fight list UI failed")
+	-- assert(CMXint.InitializeDonations(), "Initialization of donations UI failed")
 
 
 	isFileInitialized = true
