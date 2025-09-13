@@ -12,7 +12,7 @@
 ; The Elder Scrolls® and related logos are registered trademarks or trademarks of ZeniMax Media Inc.
 ; in the United States and/or other countries. All rights reserved.
 ;
-; You can read the full terms at https://account.elderscrollsonline.com/add-on-terms
+; You can read the full terms at https://account.elderscrollsonline.com/add-on-terms 
 
 lang/en.lua
 lang/$(language).lua
@@ -26,6 +26,7 @@ bindings.xml
 
 ui/ui.lua
 ui/templates.xml
+ui/controls.lua
 
 ui/title_bar.lua
 ui/title_bar.xml
@@ -34,8 +35,8 @@ ui/menu_bar.xml
 ui/info_row.lua
 ui/info_row.xml
 
-; ui/combat_stats.lua
-; ui/combat_stats.xml
+ui/combat_stats.lua
+ui/combat_stats.xml
 ; ui/resources.lua
 ; ui/player_stats.lua
 ; ui/player_stats.xml
