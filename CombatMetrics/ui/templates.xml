@@ -681,5 +681,8 @@
             <Dimensions x="32" y="32" />
             <ButtonState state="DISABLED" />
         </Button>
+
+        <Label name="CombatMetrics_SharedLabel" virtual="true" />
+        <Texture name="CombatMetrics_SharedTexture" virtual="true" />
     </Controls>
 </GuiXml>
