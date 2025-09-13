@@ -3,13 +3,13 @@
         <Control name="CombatMetrics_InfoRow" virtual="true">
             <Controls>
                 <Label name="$(parent)DateTime" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="LEFT">
-                    <Anchor point="LEFT" offsetX="4" />
-                    <Dimensions x="276" y="20" />
+                    <Anchor point="LEFT" />
+                    <Dimensions x="296" y="20" />
                 </Label>
 
                 <Label name="$(parent)ESOVersion" inherits="CombatMetrics_StatRowLabel" text="" horizontalAlignment="RIGHT">
-                    <Anchor point="RIGHT" offsetX="-4" />
-                    <Dimensions x="276" y="20" />
+                    <Anchor point="RIGHT" offsetX="-2" />
+                    <Dimensions x="296" y="20" />
                 </Label>
 
                 <Label name="$(parent)Performance" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="CENTER"
@@ -20,8 +20,8 @@
                 </Label>
 
                 <StatusBar name="$(parent)Bar" orientation="HORIZONTAL" color="CCBBBB77">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DateTime" offsetX="44" />
-                    <Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)ESOVersion" offsetX="-44" />
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)DateTime" offsetX="24" />
+                    <Anchor point="RIGHT" relativePoint="LEFT" relativeTo="$(parent)ESOVersion" offsetX="-24" />
                     <Dimensions y="20" />
                     <Limits min="0" max="1" />
                     <Controls>
