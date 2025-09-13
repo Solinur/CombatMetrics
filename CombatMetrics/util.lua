@@ -1,6 +1,6 @@
 local CMX = CombatMetrics
 local CMXint = CMX.internal
-local util = CMXint.util
+local util = CMXint.functions
 local logger
 
 CMX_POSTTOCHAT_MODE_NONE = 0
@@ -222,13 +222,10 @@ function util.PostBuffUptime(fight, buffname, unitType)
 	if not data then return end
 
 	local category = CMXint.settings.fightReport.category or "damageOut"
-	local timedata = ""
+	local date = data.date
+	local datestring = type(date) == "number" and GetDateStringFromTimestamp(date) or date
+	local timedata = string.format("[%s, %s] ", datestring, data.time)
 
-	if data ~= util.GetCurrentData() then
-		local date = data.date
-		local datestring = type(date) == "number" and GetDateStringFromTimestamp(date) or date
-		timedata = string.format("[%s, %s] ", datestring, data.time)
-	end
 
 	local buffDataTable, units = GetBuffDataAndUnits(unitType) -- TODO provide the single unit if units is 1
 	local buffData = buffDataTable.buffs[buffname]
@@ -266,15 +263,12 @@ function util.PostBuffUptime(fight, buffname, unitType)
 end
 
 function util.PosttoChat(mode, fight, UnitContextMenuUnitId)
-	local data = fight and CMX.lastfights[fight] or util.GetCurrentData()
+	local data = fight and CMX.lastfights[fight] or CMXint.fightData:GetFightData()
 	if data == nil then return end
 
-	local timedata = ""
-	if data ~= util.GetCurrentData() then
-		local date = data.date
-		local datestring = type(date) == "number" and GetDateStringFromTimestamp(date) or date
-		timedata = string.format("[%s, %s] ", datestring, data.time)
-	end
+	local date = data.date
+	local datestring = type(date) == "number" and GetDateStringFromTimestamp(date) or date
+	local timedata = string.format("[%s, %s] ", datestring, data.time)
 
 	local output = ""
 	local unitSelection = mode == CMX_POSTTOCHAT_MODE_SELECTION and selections.unit["damageOut"]
