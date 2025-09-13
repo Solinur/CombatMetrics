@@ -1,11 +1,11 @@
 local CMX = CombatMetrics
 local CMXint = CMX.internal
-local CMXf = CMXint.functions
-local CMXd = CMXint.data
+local util = CMXint.util
+local ui = CMXint.ui
 local logger
 local em = GetEventManager()
 
-local adjustRowSize = CMXf.adjustRowSize
+local adjustRowSize = util.adjustRowSize
 local DPSstrings = CMXint.DPSstrings
 local dx = CMXint.dx
 
@@ -150,7 +150,7 @@ function CMXint.InitializeFightListPanel(control)
 			self:Update()
 		end
 
-		CMXint.panels["InfoRow"]:Update()
+		ui:UpdatePanel("infoRow")
 	end
 end
 
@@ -168,7 +168,7 @@ function CMXint.LoadItem(listitem)
 		if isLoaded then isLoaded = lastfights[loadId]["time"] == savedFight["time"] end		-- ensures old fights load correctly
 	end
 
-	CMXint.panels["FightList"]:Update()
+	ui:UpdatePanel("fightList")
 
 	if issaved and isLoaded == false then
 		local loadedfight = CMXint.SVHandler.Load(id)
@@ -196,7 +196,7 @@ function CMXint.DeleteItem(control)
 		if #CMX.lastfights == 0 then CombatMetricsReport:Update() else CombatMetricsReport:Update(zo_min(currentFight, #CMX.lastfights)) end
 	end
 
-	CMXint.panels["FightList"]:Update()
+	ui:UpdatePanel("fightList")
 end
 
 
@@ -211,13 +211,13 @@ function CMXint.DeleteItemLog(control)
 		CMX.lastfights[id]["log"]={}
 	end
 
-	CMXint.panels["FightList"]:Update()
+	ui:UpdatePanel("fightList")
 end
 
 local isFileInitialized = false
 function CMXint.InitializeFightList()
 	if isFileInitialized == true then return false end
-	logger = CMXf.initSublogger("FightList")
+	logger = util.initSublogger("FightList")
 
     isFileInitialized = true
 	return true

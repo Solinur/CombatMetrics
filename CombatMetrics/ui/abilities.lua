@@ -1,12 +1,12 @@
 local CMX = CombatMetrics
 local CMXint = CMX.internal
-local CMXf = CMXint.functions
-local CMXd = CMXint.data
+local ui = CMXint.ui
+local util = CMXint.util
 local logger
 
-local GetFormattedAbilityIcon = CMXf.GetFormattedAbilityIcon
-local GetFormattedAbilityName = CMXf.GetFormattedAbilityName
-local adjustRowSize = CMXf.adjustRowSize
+local GetFormattedAbilityIcon = util.GetFormattedAbilityIcon
+local GetFormattedAbilityName = util.GetFormattedAbilityName
+local adjustRowSize = util.adjustRowSize
 
 local DPSstrings = CMXint.DPSstrings
 local CountStrings = CMXint.CountStrings
@@ -176,7 +176,7 @@ function CMXint.InitializeAbilitiesPanel(control)
 
 
 		if selectedunits ~= nil then
-			local selectionData = CMXf.GetSelectionData() -- TODO: Implement
+			local selectionData = util.GetSelectionData() -- TODO: Implement
 
 			data = selectionData
 			totaldmg = selectionData.totalValueSum
@@ -307,7 +307,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeAbilities()
 	if isFileInitialized == true then return false end
-	logger = CMXf.initSublogger("Abilities")
+	logger = util.initSublogger("Abilities")
 
 	isFileInitialized = true
 	return true

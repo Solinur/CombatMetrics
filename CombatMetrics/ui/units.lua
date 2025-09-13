@@ -1,12 +1,12 @@
 local CMX = CombatMetrics
 local CMXint = CMX.internal
-local CMXf = CMXint.functions
-local CMXd = CMXint.data
+local util = CMXint.util
+local ui = CMXint.ui
 local logger
 
 local dx = CMXint.dx
 local DPSstrings = CMXint.DPSstrings
-local adjustRowSize = CMXf.adjustRowSize
+local adjustRowSize = util.adjustRowSize
 
 do	-- Handling Unit Context Menu
 	local UnitContextMenuUnitId
@@ -167,7 +167,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeUnits()
 	if isFileInitialized == true then return false end
-	logger = CMXf.initSublogger("UnitPanel")
+	logger = util.initSublogger("UnitPanel")
 
     isFileInitialized = true
 	return true

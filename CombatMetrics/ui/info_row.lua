@@ -1,7 +1,7 @@
 local CMX = CombatMetrics
 local CMXint = CMX.internal
-local CMXf = CMXint.functions
-local CMXd = CMXint.data
+local util = CMXint.util
+local ui = CMXint.ui
 local logger
 local SVHandler
 assert(LibCombat, "Could not find LibCombat")
@@ -81,7 +81,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeInfoRow()
 	if isFileInitialized == true then return false end
-	logger = CMXf.initSublogger("InfoRow")
+	logger = util.initSublogger("InfoRow")
 	
 	SVHandler = CMXint.SVHandler
 

@@ -1,11 +1,11 @@
 local CMX = CombatMetrics
 local CMXint = CMX.internal
-local CMXf = CMXint.functions
-local CMXd = CMXint.data
+local util = CMXint.util
+local ui = CMXint.ui
 local logger
 
-local GetFormattedAbilityName = CMXf.GetFormattedAbilityName
-local adjustRowSize = CMXf.adjustRowSize
+local GetFormattedAbilityName = util.GetFormattedAbilityName
+local adjustRowSize = util.adjustRowSize
 local dx = CMXint.dx
 
 local function UpdateResourceBars(panel, currentanchor, data, totalRate, selectedresources, color)
@@ -111,7 +111,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeResourcePanel()
 	if isFileInitialized == true then return false end
-	logger = CMXf.initSublogger("Resources")
+	logger = util.initSublogger("Resources")
 	
 	-- TODO: make control
 	-- ResourcePanel = CMXint.panels.resources

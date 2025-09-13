@@ -1,7 +1,7 @@
 local CMX = CombatMetrics
 local CMXint = CMX.internal
-local CMXf = CMXint.functions
-local CMXd = CMXint.data
+local util = CMXint.util
+local ui = CMXint.ui
 local logger
 
 local ValidRaids = {
@@ -425,7 +425,7 @@ function CMXint.InitializeMenuPanel(control)
 		local load = SVHandler ~= nil and SVHandler.GetNumFights() > 0
 		navButtons.load:SetState(load and BSTATE_NORMAL or BSTATE_DISABLED, not load)
 
-		local save = fight ~= nil and not CMXf.searchtable(SVHandler.GetFights(), "date", fight.date) -- TODO: Make function of SVHandler to check for already saved fights
+		local save = fight ~= nil and not util.searchtable(SVHandler.GetFights(), "date", fight.date) -- TODO: Make function of SVHandler to check for already saved fights
 		navButtons.save:SetState(save and BSTATE_NORMAL or BSTATE_DISABLED, not save)
 
 		local delete = fight ~= nil
@@ -472,9 +472,9 @@ end
 local isFileInitialized = false
 function CMXint.InitializeMenu()
 	if isFileInitialized == true then return false end
-	logger = CMXf.initSublogger("Menu")
+	logger = util.initSublogger("Menu")
 
-	MenuPanel = CMXint.panels.menu
+	MenuPanel = ui:GetPanel("menu")
 
 	MenuPanel:SelectScene(MenuPanel.sceneButtons.fightStats)
 	MenuPanel:SelectCategory(MenuPanel.categoryButtons.damageOut)

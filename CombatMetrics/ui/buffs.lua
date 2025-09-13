@@ -1,14 +1,14 @@
 local CMX = CombatMetrics
 local CMXint = CMX.internal
-local CMXf = CMXint.functions
-local CMXd = CMXint.data
+local ui = CMXint.ui
+local util = CMXint.util
 local logger
 local uncollapsedBuffs = {}
 local BuffPanel
 
 local dx = CMXint.dx
-local adjustRowSize = CMXf.adjustRowSize
-local GetFormattedAbilityIcon = CMXf.GetFormattedAbilityIcon
+local adjustRowSize = util.adjustRowSize
+local GetFormattedAbilityIcon = util.GetFormattedAbilityIcon
 
 
 local SigilAbilities = { -- Ailities to display a warning icon in the buff list to indicate it cannot be considered a "clean" parse
@@ -46,11 +46,11 @@ do	-- Handling Buffs Context Menu
 	end
 
 	local function postBuffUptime()
-		if buffname then CMXf.PostBuffUptime(currentFight, buffname) end
+		if buffname then util.PostBuffUptime(currentFight, buffname) end
 	end
 
 	local function postSelectionBuffUptime()
-		if buffname then CMXf.PostBuffUptime(currentFight, buffname, unitType) end
+		if buffname then util.PostBuffUptime(currentFight, buffname, unitType) end
 	end
 
 	local function toggleCollapseBuff()
@@ -136,7 +136,7 @@ local function GetBuffData()
 
 	return buffData
 end
-CMXf.GetBuffData = GetBuffData
+util.GetBuffData = GetBuffData
 
 local function addBuffPanelRow(panel, scrollchild, anchor, rowdata, parentrow)
 	local hideGroupValues = rowdata.count == rowdata.groupCount and rowdata.uptimeRatio == rowdata.groupUptimeRatio
@@ -210,7 +210,7 @@ local function addBuffPanelRow(panel, scrollchild, anchor, rowdata, parentrow)
 	return currentanchor, row
 end
 
-function CMXf.buffSortFunction(data, a, b)
+function util.buffSortFunction(data, a, b)
 	local ishigher = false
 	local favs = CMXint.settings.fightReport.buffs.favourites
 
@@ -252,7 +252,7 @@ function CMXint.InitializeBuffsPanel(control)
 		local currentanchor = {TOPLEFT, scrollchild, TOPLEFT, 0, 1}
 		local parentrow
 
-		for buffName, buff in CMX.spairs(buffData["buffs"], CMXf.buffSortFunction) do
+		for buffName, buff in CMX.spairs(buffData["buffs"], util.buffSortFunction) do
 			if buff.groupUptime > 0 then
 				if isSigilAbility(buff.instances) then sigilIcon:SetHidden(false) end
 
@@ -372,7 +372,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeBuffs()
 	if isFileInitialized == true then return false end
-	logger = CMXf.initSublogger("BuffPanel")
+	logger = util.initSublogger("BuffPanel")
 
 	local buffbutton = GetControl(BuffPanel.control, "SelectorBuffsIn")
 	CMXint.SelectRightPanel(buffbutton)

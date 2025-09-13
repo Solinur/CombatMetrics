@@ -1,7 +1,7 @@
 local CMX = CombatMetrics
 local CMXint = CMX.internal
-local CMXf = CMXint.functions
-local CMXd = CMXint.data
+local ui = CMXint.ui
+local util = CMXint.util
 local logger
 
 
@@ -218,7 +218,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeChampionPoints()
 	if isFileInitialized == true then return false end
-	logger = CMXf.initSublogger("CP")
+	logger = util.initSublogger("CP")
 	
     isFileInitialized = true
 	return true

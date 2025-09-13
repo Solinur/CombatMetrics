@@ -1,12 +1,12 @@
 local CMX = CombatMetrics
 local CMXint = CMX.internal
-local CMXf = CMXint.functions
-local CMXd = CMXint.data
+local util = CMXint.util
+local ui = CMXint.ui
 local logger
 local SkillsPanel
 
-local GetFormattedAbilityIcon = CMXf.GetFormattedAbilityIcon
-local GetFormattedAbilityName = CMXf.GetFormattedAbilityName
+local GetFormattedAbilityIcon = util.GetFormattedAbilityIcon
+local GetFormattedAbilityName = util.GetFormattedAbilityName
 
 local SkillBarItems = {"LightAttack", "HeavyAttack", "Ability1", "Ability2", "Ability3", "Ability4", "Ability5", "Ultimate"}
 local DisabledColor = ZO_ColorDef:New("FF999999")
@@ -291,7 +291,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeSkills()
 	if isFileInitialized == true then return false end
-	logger = CMXf.initSublogger("Skills")
+	logger = util.initSublogger("Skills")
 
     isFileInitialized = true
 	return true

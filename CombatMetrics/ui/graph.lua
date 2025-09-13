@@ -1,7 +1,7 @@
 local CMX = CombatMetrics
 local CMXint = CMX.internal
-local CMXf = CMXint.functions
-local CMXd = CMXint.data
+local util = CMXint.util
+local ui = CMXint.ui
 local logger
 local fightData
 
@@ -10,8 +10,8 @@ local maxXYPlots = 5
 local maxBarPlots = 8
 local EM = GetEventManager()
 
-local GetFormattedAbilityIcon = CMXf.GetFormattedAbilityIcon
-local GetFormattedAbilityName = CMXf.GetFormattedAbilityName
+local GetFormattedAbilityIcon = util.GetFormattedAbilityIcon
+local GetFormattedAbilityName = util.GetFormattedAbilityName
 local dx = CMXint.dx
 
 local CMX_PLOT_DIMENSION_X = 1
@@ -615,11 +615,11 @@ local function UpdatePlotBuffSelection()
 	PlotBuffSelection = {}
 
 	local selectedbuffs = CMXint.selections["buff"]["buff"]
-	local buffData = CMXf.GetBuffData()
+	local buffData = util.GetBuffData()
 
 	if buffData == nil or buffData.buffs == nil then return end
 
-	for buffName, buff in CMX.spairs(buffData.buffs, CMXf.buffSortFunction) do
+	for buffName, buff in CMX.spairs(buffData.buffs, util.buffSortFunction) do
 		if selectedbuffs and selectedbuffs[buffName] ~= nil then PlotBuffSelection[#PlotBuffSelection + 1] = buffName end
 		if #PlotBuffSelection >= maxBarPlots then return end
 	end
@@ -628,7 +628,7 @@ end
 local function UpdateBarPlot(plot)
 	local barId = plot.barId or 0
 	local buffName = PlotBuffSelection[barId]
-	local buffData = CMXf.GetBuffData()
+	local buffData = util.GetBuffData()
 	local data = buffName and buffData and buffData.buffs[buffName] or nil
 
 	if buffName == nil or data == nil then
@@ -698,7 +698,7 @@ function CMXint.SetSliderValue(control, value)
 	local labelControl = control:GetParent():GetNamedChild("Label")
 	labelControl:SetText(string.format(GetString(SI_COMBAT_METRICS_SMOOTH_LABEL), value))
 	CMXint.settings.fightReport.SmoothWindow = value
-	CMXint.panels.graph:Update()
+	ui:UpdatePanel("graph")
 end
 
 do
@@ -726,7 +726,7 @@ do
 		if x == oldx and y == oldy then return end
 
 		oldx, oldy = x, y
-		local plotWindow = CMXint.panels.graph.plotWindow
+		local plotWindow = ui:GetPanel("graph").plotWindow
 		local cursorTime, cursorValue = MapUIPosXY(plotWindow, x, y)
 		local dataAtCursorTime = {}
 
@@ -754,7 +754,7 @@ do
 
 		InitializeTooltip(InformationTooltip, GuiRoot, TOPLEFT, x + 30, y + 30, TOPLEFT)
 		local tooltipText = string.format("|cddddddTime: %d:%02d", cursorTime/60, zo_floor(cursorTime%60))
-		CMXf.AddTooltipLine(plotWindow, InformationTooltip, tooltipText)
+		util.AddTooltipLine(plotWindow, InformationTooltip, tooltipText)
 
 		for plotId, data in CMX.spairs(dataAtCursorTime) do
 			local r,g,b = unpack(CMXint.settings.fightReport.PlotColors[plotId])
@@ -762,7 +762,7 @@ do
 			local label = plotWindow.plots[plotId].label
 
 			tooltipText = string.format(formatter, zo_floor(r * 255), zo_floor(g * 255), zo_floor(b * 255), label, unpack(data))
-			CMXf.AddTooltipLine(plotWindow, InformationTooltip, tooltipText)
+			util.AddTooltipLine(plotWindow, InformationTooltip, tooltipText)
 		end
 
 		local cursor = plotWindow:GetNamedChild("Cursor")
@@ -1384,7 +1384,7 @@ function CMX.ToggleGraphSize(self)
 	local labelText = enlargedGraph and GetString(SI_COMBAT_METRICS_SHRINK) or GetString(SI_COMBAT_METRICS_ENLARGE)
 	self:GetNamedChild("Label"):SetText(labelText)
 
-	CMXint.panels.graph:Update()
+	ui:UpdatePanel("graph")
 end
 
 
@@ -1398,7 +1398,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeGraph()
 	if isFileInitialized == true then return false end
-	logger = CMXf.initSublogger("Graph")
+	logger = util.initSublogger("Graph")
 
     isFileInitialized = true
 	return true

@@ -1,11 +1,14 @@
 local CMX = CombatMetrics
 local CMXint = CMX.internal
-CMXint.panels = {}
-local CMXf = CMXint.functions
+CMXint.ui = {}
+local ui = CMXint.ui
+ui.panels = {}
+local panels = ui.panels
+local util = CMXint.util
 local logger
 
-CMXint.dx = zo_ceil(GuiRoot:GetWidth() / tonumber(GetCVar("WindowedWidth")) * 1000) / 1000
-CMXint.fontSize = tonumber(GetString(SI_COMBAT_METRICS_FONT_SIZE_SMALL))
+ui.dx = zo_ceil(GuiRoot:GetWidth() / tonumber(GetCVar("WindowedWidth")) * 1000) / 1000
+ui.fontSize = tonumber(GetString(SI_COMBAT_METRICS_FONT_SIZE_SMALL))
 
 CMXint.DPSstrings = {
 	["damageOut"]  = "DPSOut",
@@ -35,11 +38,11 @@ local function storeOrigLayout(tlc)
 		if child then storeOrigLayout(child) end
 	end
 end
-CMXf.storeOrigLayout = storeOrigLayout
+util.storeOrigLayout = storeOrigLayout
 
 -- this function resizes the row elements to match the size of the header elements of a scrolllist.
 -- It's important to maintain the naming and structure of the header elements to match those of the row elements.
-function CMXf.adjustRowSize(row, header)
+function util.adjustRowSize(row, header)
 	local settings = CMXint.settings.fightReport
 	if row == nil or row.scale == settings.scale then return end -- if sizes are good already, bail out.
 	row.scale = settings.scale
@@ -80,7 +83,7 @@ local function AddTooltipLine(control, tooltipControl, tooltip)
 
 	SetTooltipText(tooltipControl, tooltip)
 end
-CMXf.AddTooltipLine = AddTooltipLine
+util.AddTooltipLine = AddTooltipLine
 
 function CMXint.OnMouseEnter(control) --copy from ZO_Options_OnMouseEnter but modified to support multiple tooltip lines
 	logger:Info(control:GetName(), control.tooltip)
@@ -191,7 +194,7 @@ end
 -- 	CombatMetricsReport:Update(currentFight)
 -- end
 
-function CMXf.GetCurrentData()
+function util.GetCurrentData()
 	local data = CMX.currentdata
 
 	if data.units == nil then
@@ -270,7 +273,7 @@ PanelObject.Clear = PanelObject:MUST_IMPLEMENT()
 PanelObject.Release = PanelObject:MUST_IMPLEMENT()
 
 function PanelObject:Initialize(control, name)
-	if CMXint.panels[name] then
+	if ui.panels[name] then
 		logger:Error("Cannot create %s panel. A panel with this name already exists.", name)
 		return
 	end
@@ -279,7 +282,7 @@ function PanelObject:Initialize(control, name)
 	self.control = control
 
 	control.panel = self
-	CMXint.panels[name] = self
+	ui.panels[name] = self
 end
 
 function PanelObject:Release()
@@ -307,11 +310,23 @@ function PanelObject:SetHidden(hide)
 	return self.control:SetHidden(hide)
 end
 
+function ui:GetPanel(name)
+	local panel = panels[name]
+	if panel then
+		return panels[name]
+	end
+	logger:Error("Attempt to access unknown panel: %s", name)
+end
+
+function ui:UpdatePanel(name)
+	return self:GetPanel(name):Update()
+end
+
 
 local isFileInitialized = false
 function CMXint.InitializeUI()
 	if isFileInitialized == true then return false end
-	logger = CMXf.initSublogger("UI")
+	logger = util.initSublogger("UI")
 
 	-- CMXint.selections = {
 	-- 	["ability"]		= {},

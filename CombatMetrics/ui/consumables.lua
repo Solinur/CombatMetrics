@@ -1,11 +1,11 @@
 local CMX = CombatMetrics
 local CMXint = CMX.internal
-local CMXf = CMXint.functions
-local CMXd = CMXint.data
+local util = CMXint.util
+local ui = CMXint.ui
 local logger
 
-local GetFormattedAbilityIcon = CMXf.GetFormattedAbilityIcon
-local GetFormattedAbilityName = CMXf.GetFormattedAbilityName
+local GetFormattedAbilityIcon = util.GetFormattedAbilityIcon
+local GetFormattedAbilityName = util.GetFormattedAbilityName
 
 assert(LibCombat, "Could not find LibCombat")
 local GetFoodDrinkItemLinkFromAbilityId = LibCombat.GetFoodDrinkItemLinkFromAbilityId
@@ -85,7 +85,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeConsumables()
 	if isFileInitialized == true then return false end
-	logger = CMXf.initSublogger("Consumables")
+	logger = util.initSublogger("Consumables")
 
     isFileInitialized = true
 	return true

@@ -1,7 +1,7 @@
 local CMX = CombatMetrics
 local CMXint = CMX.internal
-local CMXf = CMXint.functions
-local CMXd = CMXint.data
+local util = CMXint.util
+local ui = CMXint.ui
 local logger
 
 local CountStrings = CMXint.CountStrings
@@ -70,7 +70,7 @@ function CMXint.InitializePlayerStatsPanel(control)
 		local data = fightData or {}
 		local settings = self.settings
 		local selections = CMXint.selections
-		local selectionData = CMXf.GetSelectionData()
+		local selectionData = util.GetSelectionData()
 
 		local powerType = settings.fightstatspanel  -- TODO: This should be obsolete!
 		local category = settings.category
@@ -323,7 +323,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializePlayerStats()
 	if isFileInitialized == true then return false end
-	logger = CMXf.initSublogger("PlayerStats")
+	logger = util.initSublogger("PlayerStats")
 	
 
 

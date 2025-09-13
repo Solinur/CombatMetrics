@@ -1,7 +1,7 @@
 local CMX = CombatMetrics
 local CMXint = CMX.internal
-local CMXf = CMXint.functions
-local CMXd = CMXint.data
+local util = CMXint.util
+local ui = CMXint.ui
 local logger
 
 local equipslots = {
@@ -155,7 +155,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeEquipment()
 	if isFileInitialized == true then return false end
-	logger = CMXf.initSublogger("Equipment")
+	logger = util.initSublogger("Equipment")
 
     isFileInitialized = true
 	return true

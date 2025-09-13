@@ -1,13 +1,13 @@
 local CMX = CombatMetrics
 local CMXint = CMX.internal
-local CMXf = CMXint.functions
-local CMXd = CMXint.data
+local util = CMXint.util
+local ui = CMXint.ui
 local logger
 local currentCLPage
 local toggleCopyPaste
 
 local fontSize = CMXint.fontSize
-local GetFormattedAbilityName = CMXf.GetFormattedAbilityName
+local GetFormattedAbilityName = util.GetFormattedAbilityName
 
 local logtypeCategories = {
 	[LIBCOMBAT_EVENT_DAMAGE_OUT] = "damageOut",
@@ -131,7 +131,7 @@ local function addColoredText(control, text, color)
 	if control:GetNamedChild("Slider") then adjustSlider(control) end -- Set new slider value & check visibility
 end
 
-function CMXf.InitCombatLog(control)
+function util.InitCombatLog(control)
 	control.AddColoredText = addColoredText
 
 	local buffer = control:GetNamedChild("Buffer")
@@ -406,7 +406,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeCombatLog()
 	if isFileInitialized == true then return false end
-	logger = CMXf.initSublogger("Combat Log Panel")
+	logger = util.initSublogger("Combat Log Panel")
 
 	isFileInitialized = true
 	return true

@@ -2,8 +2,8 @@
 
 local CMX = CombatMetrics
 local CMXint = CMX.internal
-local CMXf = CMXint.functions
-local CMXd = CMXint.data
+local util = CMXint.util
+local ui = CMXint.ui
 local logger
 local db
 
@@ -144,7 +144,7 @@ function LiveReportControl:Initialize(name)
 	local templateName = "CombatMetrics_LiveReport_" .. name
 
 	local control = CreateControlFromVirtual(templateName, LiveReport, templateName)
-	CMXf.storeOrigLayout(control)
+	util.storeOrigLayout(control)
 
 	self.name = name
 	self.control = control
@@ -210,7 +210,7 @@ local function InitLiveReport(self)
 	self:SetAnchor(CENTER, nil , TOPLEFT, settings.pos_x, settings.pos_y)
     self:SetHandler("OnMoveStop", function () self:SavePosition() end)
 	
-	CMXf.storeOrigLayout(self)
+	util.storeOrigLayout(self)
 	self.fragment = ZO_HUDFadeSceneFragment:New(self)
 
 	function self:Toggle(value)
@@ -314,7 +314,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeLiveReport()
 	if isFileInitialized == true then return false end
-	logger = CMXf.initSublogger("LiveReport")
+	logger = util.initSublogger("LiveReport")
 	db = CMX.db
 
 	InitLiveReport(CMX.internal.LiveReport) -- TODO: Directly pass init function.

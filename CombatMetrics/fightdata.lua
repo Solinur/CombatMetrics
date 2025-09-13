@@ -1,7 +1,6 @@
 local CMX = CombatMetrics
 local CMXint = CMX.internal
-local CMXf = CMXint.functions
-local CMXd = CMXint.data
+local util = CMXint.util
 local logger
 local SVHandler
 
@@ -97,7 +96,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeFightDataHandler()
 	if isFileInitialized == true then return false end
-	logger = CMXf.initSublogger("Fights")
+	logger = util.initSublogger("Fights")
 
     CMXint.fightData = FightDataManager:New()
 

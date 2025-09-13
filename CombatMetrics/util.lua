@@ -1,7 +1,6 @@
 local CMX = CombatMetrics
 local CMXint = CMX.internal
-local CMXf = CMXint.functions
-local CMXd = CMXint.data
+local util = CMXint.util
 local logger
 
 CMX_POSTTOCHAT_MODE_NONE = 0
@@ -17,10 +16,10 @@ CMX_POSTTOCHAT_MODE_SELECTED_UNITNAME = 9
 
 local function slashCommandFunction(extra)
 	if 		extra == "reset" 	then CMX.ResetFight()
-	elseif 	extra == "dps" 		then CMXf.PosttoChat(CMX_POSTTOCHAT_MODE_SMART)
-	elseif 	extra == "totdps" 	then CMXf.PosttoChat(CMX_POSTTOCHAT_MODE_MULTI)
-	elseif 	extra == "alldps" 	then CMXf.PosttoChat(CMX_POSTTOCHAT_MODE_SINGLEANDMULTI)
-	elseif 	extra == "hps" 		then CMXf.PosttoChat(CMX_POSTTOCHAT_MODE_HEALING)
+	elseif 	extra == "dps" 		then util.PosttoChat(CMX_POSTTOCHAT_MODE_SMART)
+	elseif 	extra == "totdps" 	then util.PosttoChat(CMX_POSTTOCHAT_MODE_MULTI)
+	elseif 	extra == "alldps" 	then util.PosttoChat(CMX_POSTTOCHAT_MODE_SINGLEANDMULTI)
+	elseif 	extra == "hps" 		then util.PosttoChat(CMX_POSTTOCHAT_MODE_HEALING)
 	else 						CombatMetricsReport:Toggle()
 	end
 end
@@ -218,14 +217,14 @@ local function GetBuffDataAndUnits(unitType, fightData)
 	return buffData, units
 end
 
-function CMXf.PostBuffUptime(fight, buffname, unitType)
+function util.PostBuffUptime(fight, buffname, unitType)
 	local data = fight and CMX.lastfights[fight]
 	if not data then return end
 
 	local category = CMXint.settings.fightReport.category or "damageOut"
 	local timedata = ""
 
-	if data ~= CMXf.GetCurrentData() then
+	if data ~= util.GetCurrentData() then
 		local date = data.date
 		local datestring = type(date) == "number" and GetDateStringFromTimestamp(date) or date
 		timedata = string.format("[%s, %s] ", datestring, data.time)
@@ -266,12 +265,12 @@ function CMXf.PostBuffUptime(fight, buffname, unitType)
 	StartChatInput(outputtext, channel)
 end
 
-function CMXf.PosttoChat(mode, fight, UnitContextMenuUnitId)
-	local data = fight and CMX.lastfights[fight] or CMXf.GetCurrentData()
+function util.PosttoChat(mode, fight, UnitContextMenuUnitId)
+	local data = fight and CMX.lastfights[fight] or util.GetCurrentData()
 	if data == nil then return end
 
 	local timedata = ""
-	if data ~= CMXf.GetCurrentData() then
+	if data ~= util.GetCurrentData() then
 		local date = data.date
 		local datestring = type(date) == "number" and GetDateStringFromTimestamp(date) or date
 		timedata = string.format("[%s, %s] ", datestring, data.time)
@@ -385,7 +384,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeUtils()
 	if isFileInitialized == true then return false end
-	logger = CMXf.initSublogger("Utils")
+	logger = util.initSublogger("Utils")
 
     isFileInitialized = true
 	return true

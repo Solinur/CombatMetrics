@@ -1,8 +1,8 @@
 local CMX = CombatMetrics
 local CMXint = CMX.internal
 CMXint.scenes = {}
-local CMXf = CMXint.functions
-local CMXd = CMXint.data
+local util = CMXint.util
+local ui = CMXint.ui
 local logger
 local FightReport
 local _
@@ -58,7 +58,7 @@ end
 
 local function InitializeFightReport()
 	FightReport = CombatMetricsReport
-	CMXf.storeOrigLayout(FightReport)
+	util.storeOrigLayout(FightReport)
 
 	local settings = CMXint.settings.fightReport
 	local pos_x = settings.pos_x
@@ -67,7 +67,6 @@ local function InitializeFightReport()
 	FightReport:SetAnchor(CENTER, nil, TOPLEFT, pos_x, pos_y)
 	
 	FightReport.settings = settings
-	FightReport.panels = CMXint.panels
 
 	local fragment = ZO_HUDFadeSceneFragment:New(FightReport)
 	local scene = ZO_Scene:New("CMX_REPORT_SCENE", SCENE_MANAGER)
@@ -102,13 +101,13 @@ local function InitializeFightReport()
 
 		if CMXint.fightData.currentIndex == nil then FightReport:Clear() end
 
-		for _, panel in pairs(CMXint.panels) do
+		for _, panel in pairs(ui.panels) do
 			panel:Update()
 		end
 	end
 
 	function FightReport:Clear()
-		for _, panel in pairs(CMXint.panels) do
+		for _, panel in pairs(ui.panels) do
 			panel:Clear()
 		end
 	end
@@ -124,7 +123,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeFightReport()
 	if isFileInitialized == true then return false end
-	logger = CMXf.initSublogger("FightReport")
+	logger = util.initSublogger("FightReport")
 
 	CMXint.fightReport = InitializeFightReport()
 

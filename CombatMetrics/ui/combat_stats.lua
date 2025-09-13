@@ -1,7 +1,7 @@
 local CMX = CombatMetrics
 local CMXint = CMX.internal
-local CMXf = CMXint.functions
-local CMXd = CMXint.data
+local util = CMXint.util
+local ui = CMXint.ui
 local logger
 
 local CountStrings = CMXint.CountStrings
@@ -71,7 +71,7 @@ function CMXint.InitializeCombatStatsPanel(control)
 		local aps1 = data[key] or 0
 		local aps2, apsratio
 
-		local selectionData = CMXf.GetSelectionData()
+		local selectionData = util.GetSelectionData()
 		if not noselection or showOverHeal then
 			aps2 = selectionData and selectionData[key] or 0
 			apsratio = (aps1 == 0 and 0) or aps2 / aps1 * 100
@@ -170,7 +170,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeCombatStats()
 	if isFileInitialized == true then return false end
-	logger = CMXf.initSublogger("CombatStats")
+	logger = util.initSublogger("CombatStats")
 	isFileInitialized = true
 	return true
 end

@@ -10,10 +10,9 @@ CMX.version = "2.0.0-alpha"
 CMX.internal = {}
 local CMXint = CMX.internal
 CMXint.debug = false or GetDisplayName() == "@Solinur"
-CMXint.functions = {}
-CMXint.data = {}
+CMXint.util = {}
 CMXint.logger = {}
-local CMXf = CMXint.functions
+local util = CMXint.util
 
 -- Logger
 
@@ -31,7 +30,7 @@ else
 	CMXint.logger.main = internalLogger
 end
 
-function CMXf.initSublogger(name)
+function util.initSublogger(name)
 	local mainlogger = CMXint.logger.main
 	if mainlogger.Create == nil or name == nil or name == "" then return mainlogger end
 	if CMXint.logger[name] ~= nil then
@@ -51,10 +50,10 @@ if LC == nil then
 	return
 end
 
-CMXf.GetFormattedAbilityIcon = LC.GetFormattedAbilityIcon
-CMXf.GetFormattedAbilityName = LC.GetFormattedAbilityName
+util.GetFormattedAbilityIcon = LC.GetFormattedAbilityIcon
+util.GetFormattedAbilityName = LC.GetFormattedAbilityName
 
-function CMXf.spairs(t, order) -- from https://stackoverflow.com/questions/15706270/sort-a-table-in-lua
+function util.spairs(t, order) -- from https://stackoverflow.com/questions/15706270/sort-a-table-in-lua
     local keys = {}
     for k in pairs(t) do keys[#keys+1] = k end
 
@@ -73,7 +72,7 @@ function CMXf.spairs(t, order) -- from https://stackoverflow.com/questions/15706
     end
 end
 
-function CMXf.searchtable(t, field, value)
+function util.searchtable(t, field, value)
 	if value == nil then return false end
 
 	for k, v in pairs(t) do
