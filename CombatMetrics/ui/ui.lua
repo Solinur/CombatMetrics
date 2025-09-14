@@ -212,7 +212,7 @@ function CMXint.Resizing(control, resizing)
 		local scale, newpos = unpack(lastResize)
 		local parent = control:GetParent()
 
-		CMXint.settings[parent:GetName()] = newpos
+		CMXint.settings[parent:GetName()] = newpos	-- todo: reroute the settings update!
 
 		parent:ClearAnchors()
 		parent:SetAnchor(CENTER, nil , TOPLEFT, newpos.x, newpos.y)
@@ -270,12 +270,46 @@ function PanelObject:Initialize(control, name)
 
 	self.name = name
 	self.control = control
+	self.sharedControls = {}
 
 	control.panel = self
 	ui.panels[name] = self
 end
 
+function PanelObject:AcquireSharedLabel()
+	local control, objectKey = ui.sharedLabels:AcquireObject()
+	table.insert(self.sharedControls, control)
+	return control
+end
+
+function PanelObject:AcquireSharedTexture()
+	local control, objectKey = ui.sharedTextures:AcquireObject()
+	table.insert(self.sharedControls, control)
+	return control
+end
+
+function PanelObject:AcquirePositionedSharedLabel(...)
+	local control = self:AcquireSharedLabel()
+	control:ApplyPosition(...)
+	return control
+end
+
+function PanelObject:AcquirePositionedSharedTexture(...)
+	local control = self:AcquireSharedTexture()
+	control:ApplyPosition(...)
+	return control
+end
+
 function PanelObject:Release()
+	self:ReleaseSharedControls()
+end
+
+function PanelObject:ReleaseSharedControls()
+	for _, control in pairs(self.sharedControls) do
+		control:Release()
+	end
+
+	ZO_ClearTable(self.sharedControls)
 end
 
 function PanelObject:Clear()
@@ -299,6 +333,8 @@ end
 function PanelObject:SetHidden(hide)
 	return self.control:SetHidden(hide)
 end
+
+
 
 function ui:GetPanel(name)
 	local panel = panels[name]
