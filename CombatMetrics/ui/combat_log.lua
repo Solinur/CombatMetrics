@@ -225,7 +225,7 @@ function CMXint.InitializeCombatLogPanel(control)
 
 		local writtenlines = 0
 
-		local selections = CMXint.selections
+		local selections = ui.selections
 		local unitSelection = selections.unit
 		local abilitySelection = selections.ability
 		local buffSelection = selections.buff.buff

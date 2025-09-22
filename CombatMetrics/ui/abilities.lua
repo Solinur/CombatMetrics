@@ -164,7 +164,7 @@ function CMXint.InitializeAbilitiesPanel(control)
 		local data
 		local totaldmg
 
-		local selections = CMXint.selections
+		local selections = ui.selections
 
 		local selectedabilities = selections["ability"][category]
 		local selectedunits = selections["unit"][category]

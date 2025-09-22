@@ -74,7 +74,7 @@ local function updateResourcePanel(self, fightData)
 
 	local control = self.control
 	local settings = self.settings
-	local selections = CMXint.selections
+	local selections = ui.selections
 	local rightpanel = settings.rightpanel
 
 	local subpanel1 = control:GetNamedChild("Gains")

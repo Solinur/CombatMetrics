@@ -140,7 +140,7 @@ local function initSettingsButton(MenuPanel)
 
 	local function onMouseUp(button, _, upInside)
 		if not upInside then return end
-		local selections = CMXint.selections
+		local selections = ui.selections
 
 		local showIdString = CMXint.settings.showDebugIds and SI_COMBAT_METRICS_HIDEIDS or SI_COMBAT_METRICS_SHOWIDS
 		local showOverhealString = CMX.showOverHeal and SI_COMBAT_METRICS_HIDEOVERHEAL or SI_COMBAT_METRICS_SHOWOVERHEAL

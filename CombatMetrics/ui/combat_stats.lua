@@ -17,12 +17,17 @@ function CMXint.InitializeCombatStatsPanel(control)
 	function CombatStatsPanel:RecoverControls()
 		self.sharedControls = {}
 
+		
+
 		self.activeTimeLabel = self:AcquirePositionedSharedLabel(control, 4, 4, 86, nil)
 		self.activeTimeValue = self:AcquirePositionedSharedLabel(control, 94, 4, 76, nil)
 		self.combatTimeLabel = self:AcquirePositionedSharedLabel(control, 176, 4, 86, nil)
 		self.combatTimeValue = self:AcquirePositionedSharedLabel(control, 266, 4, 76, nil)
+		local separator1 = self:AcquirePositionedSharedSeparator(control, 28, 8, 342, 0)
 
-		-- add separator
+		-- Store total offset after adding control
+
+
 
 	end
 
@@ -33,8 +38,10 @@ function CMXint.InitializeCombatStatsPanel(control)
 		local settings = self.settings
 		local category = settings.category
 
-		local selectedabilities = CMXint.selections["ability"][category]
-		local selectedunits = CMXint.selections["unit"][category]
+		if true then return end
+
+		local selectedabilities = ui.selections["ability"][category]
+		local selectedunits = ui.selections["unit"][category]
 		local noselection = selectedunits == nil and selectedabilities == nil
 
 		local header2 = control:GetNamedChild("StatHeaderLabel2")

@@ -54,6 +54,7 @@ function CMXint.InitializeControlHandler()
 
 	ui.sharedTextures = CreateSharedControlType("CombatMetrics_SharedTexture")
 	ui.sharedLabels = CreateSharedControlType("CombatMetrics_SharedLabel")
+	ui.sharedSeparators = CreateSharedControlType("CombatMetrics_SharedSeparator")
 
     isFileInitialized = true
 	return true

@@ -30,7 +30,7 @@ do	-- Handling Unit Context Menu
 		local category = CMXint.settings.fightReport.category
 		if not (upInside or category == "damageOut" or category == "healingOut") then return end
 		local dataId = unitItem.dataId
-		local selections = CMXint.selections
+		local selections = ui.selections
 
 		ClearMenu()
 
@@ -86,7 +86,7 @@ function CMXint.InitializeUnitsPanel(control)
 
 		if fightData == nil then return end
 		local data = fightData.calculated
-		local selectedunits = CMXint.selections.unit[category]
+		local selectedunits = ui.selections.unit[category]
 
 		local totalAmountKey = category.."Total"
 		local totalAmount = data[totalAmountKey] -- i.e. damageOutTotal

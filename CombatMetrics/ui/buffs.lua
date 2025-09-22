@@ -243,7 +243,7 @@ function CMXint.InitializeBuffsPanel(control)
 		local settings = CMXint.settings.fightReport
 		local showids = settings.showDebugIds
 		
-		local selectedbuffs = CMXint.selections.buff.buff
+		local selectedbuffs = ui.selections.buff.buff
 		local maxtime = zo_max(fightData.activetime or 0, fightData.dpstime or 0, fightData.hpstime or 0)
 		local totalUnitTime = buffData.totalUnitTime or maxtime * 1000
 		local favs = CMXint.settings.fightReport.buffs.favourites

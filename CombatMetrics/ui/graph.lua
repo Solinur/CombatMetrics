@@ -480,7 +480,7 @@ local function AcquireBuffData(buffName)
 
 	local rightpanel = CMXint.settings.fightReport.rightpanel
 	local category = CMXint.settings.fightReport.category
-	local unitselections = rightpanel == "buffs" and {[fightData.playerid] = 1} or CMXint.selections.unit[category]
+	local unitselections = rightpanel == "buffs" and {[fightData.playerid] = 1} or ui.selections.unit[category]
 	local logData = fightData.log
 
 	if logData == nil then return end
@@ -614,7 +614,7 @@ local PlotBuffSelection = {}
 local function UpdatePlotBuffSelection()
 	PlotBuffSelection = {}
 
-	local selectedbuffs = CMXint.selections["buff"]["buff"]
+	local selectedbuffs = ui.selections["buff"]["buff"]
 	local buffData = util.GetBuffData()
 
 	if buffData == nil or buffData.buffs == nil then return end

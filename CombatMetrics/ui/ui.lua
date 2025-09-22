@@ -1,11 +1,14 @@
 local CMX = CombatMetrics
 local CMXint = CMX.internal
+local util = CMXint.util
 CMXint.ui = {}
 local ui = CMXint.ui
 ui.panels = {}
 local panels = ui.panels
-local util = CMXint.util
+ui.selections = {}
+local selections = ui.selections
 local logger
+local _
 
 ui.dx = zo_ceil(GuiRoot:GetWidth() / tonumber(GetCVar("WindowedWidth")) * 1000) / 1000
 ui.fontSize = tonumber(GetString(SI_COMBAT_METRICS_FONT_SIZE_SMALL))
@@ -118,7 +121,7 @@ end
 
 -- function CMXint.ClearSelections()
 -- 	local category = CMXint.settings.fightReport.category or "damageOut"
--- 	local selections = CMXint.selections
+-- 	local selections = ui.selections
 
 -- 	selections.ability[category] = nil
 -- 	selections.unit[category] = nil
@@ -135,7 +138,7 @@ end
 
 -- 	local category = selecttype == "buff" and "buff" or selecttype == "resource" and "resource" or CMXint.settings.fightReport.category
 
--- 	local selections = CMXint.selections
+-- 	local selections = ui.selections
 -- 	local lastSelections = CMXint.lastSelections
 -- 	local sel = selections[selecttype][category] -- can be nil so this is not always a reference
 -- 	local lastsel = lastSelections[selecttype][category]
@@ -276,27 +279,17 @@ function PanelObject:Initialize(control, name)
 	ui.panels[name] = self
 end
 
-function PanelObject:AcquireSharedLabel()
-	local control, objectKey = ui.sharedLabels:AcquireObject()
+function PanelObject:AcquireSharedControl(control_type)
+	local control
+	if control_type == CT_LABEL then
+		control, _ = ui.sharedLabels:AcquireObject()
+	elseif control_type == CT_TEXTURE then
+		control, _ = ui.sharedTextures:AcquireObject()
+	elseif control_type == CT_LINE then
+		control, _ = ui.sharedSeparators:AcquireObject()
+	end
+
 	table.insert(self.sharedControls, control)
-	return control
-end
-
-function PanelObject:AcquireSharedTexture()
-	local control, objectKey = ui.sharedTextures:AcquireObject()
-	table.insert(self.sharedControls, control)
-	return control
-end
-
-function PanelObject:AcquirePositionedSharedLabel(...)
-	local control = self:AcquireSharedLabel()
-	control:ApplyPosition(...)
-	return control
-end
-
-function PanelObject:AcquirePositionedSharedTexture(...)
-	local control = self:AcquireSharedTexture()
-	control:ApplyPosition(...)
 	return control
 end
 
@@ -354,7 +347,7 @@ function CMXint.InitializeUI()
 	if isFileInitialized == true then return false end
 	logger = util.initSublogger("UI")
 
-	-- CMXint.selections = {
+	-- ui.selections = {
 	-- 	["ability"]		= {},
 	-- 	["resource"] 	= {},
 	-- }

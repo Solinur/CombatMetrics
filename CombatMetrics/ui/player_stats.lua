@@ -69,7 +69,7 @@ function CMXint.InitializePlayerStatsPanel(control)
 
 		local data = fightData or {}
 		local settings = self.settings
-		local selections = CMXint.selections
+		local selections = ui.selections
 		local selectionData = util.GetSelectionData()
 
 		local powerType = settings.fightstatspanel  -- TODO: This should be obsolete!

@@ -1,6 +1,6 @@
 local CMX = CombatMetrics
 local CMXint = CMX.internal
-local util = CMXint.functions
+local util = CMXint.util
 local logger
 
 CMX_POSTTOCHAT_MODE_NONE = 0
@@ -187,7 +187,7 @@ local function GetBuffDataAndUnits(unitType, fightData)
 		local category = settings.category
 		local tempSelections = {}
 
-		ZO_DeepTableCopy(CMXint.selections, tempSelections)
+		ZO_DeepTableCopy(ui.selections, tempSelections)
 		if unitType then tempSelections.unit[category] = GetUnitsByType(unitType) end
 		buffData = CMX.GenerateSelectionStats(fightData, category, tempSelections) -- yeah, yeah I'm lazy.
 
