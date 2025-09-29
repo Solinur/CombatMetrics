@@ -327,8 +327,6 @@ function PanelObject:SetHidden(hide)
 	return self.control:SetHidden(hide)
 end
 
-
-
 function ui:GetPanel(name)
 	local panel = panels[name]
 	if panel then

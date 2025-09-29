@@ -8,27 +8,41 @@ local CountStrings = CMXint.CountStrings
 local DPSstrings = CMXint.DPSstrings
 
 
-
-
-
 function CMXint.InitializeCombatStatsPanel(control)
 	CombatStatsPanel = CMX.internal.PanelObject:New(control, "combatStats")
 
 	function CombatStatsPanel:RecoverControls()
 		self.sharedControls = {}
 
-		
+		self.xOffset = 4
+		self.yOffset = 4
+		self.maxHeight = 0
 
-		self.activeTimeLabel = self:AcquirePositionedSharedLabel(control, 4, 4, 86, nil)
-		self.activeTimeValue = self:AcquirePositionedSharedLabel(control, 94, 4, 76, nil)
-		self.combatTimeLabel = self:AcquirePositionedSharedLabel(control, 176, 4, 86, nil)
-		self.combatTimeValue = self:AcquirePositionedSharedLabel(control, 266, 4, 76, nil)
-		local separator1 = self:AcquirePositionedSharedSeparator(control, 28, 8, 342, 0)
+		self.activeTimeLabel = self:AddLabel(86)
+		self.activeTimeValue = self:AddLabel(76)
+		self.combatTimeLabel = self:AddLabel(86)
+		self.combatTimeValue = self:AddLabel(76)
+		self:NewLine()
 
-		-- Store total offset after adding control
+		---@type LineControl
+		local separator1 = self:AcquireSharedControl(CT_LINE)
+		separator1:ApplyPosition(control, self.xOffset, self.yOffset, 336, 0)
+		self:NewLine()
 
+	end
 
+	function CombatStatsPanel:AddLabel(width)
+		---@type LabelControl
+		local label = self:AcquireSharedControl(CT_LABEL)
+		label:ApplyPosition(control, self.xOffset, self.yOffset, width, nil)
+		self.xOffset = self.xOffset + 4 + width
+		self.maxHeight = zo_max(self.maxHeight, label:GetHeight())
+	end
 
+	function CombatStatsPanel:NewLine()
+		self.yOffset = self.yOffset + self.maxHeight + 4
+		self.maxHeight = 0
+		self.xOffset = 4
 	end
 
 	function CombatStatsPanel:Update(fightData)

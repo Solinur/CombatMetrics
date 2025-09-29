@@ -41,7 +41,14 @@ local function CreateSharedControlType(template)
 		local scale = CMXint.settings.FightReport.scale
 		self:SetParent(parent)
 		self:SetAnchor(TOPLEFT,  offsetX, TOPLEFT, offsetX*scale, offsetY*scale)
-		self:SetDimensions(width*scale, height*scale)
+
+		if width then
+			self:SetWidth(width*scale)
+		end
+
+		if height then
+			self:SetHeight(height*scale)
+		end
 	end
 
 	return ZO_ObjectPool:New(SharedControlType, ZO_ObjectPool_DefaultResetControl)
