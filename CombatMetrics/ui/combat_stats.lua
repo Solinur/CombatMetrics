@@ -7,28 +7,79 @@ local logger
 local CountStrings = CMXint.CountStrings
 local DPSstrings = CMXint.DPSstrings
 
+local ROW_KEY_FORMAT = "<<1>>Row<<2>>Value"
 
 function CMXint.InitializeCombatStatsPanel(control)
 	CombatStatsPanel = CMX.internal.PanelObject:New(control, "combatStats")
 
 	function CombatStatsPanel:RecoverControls()
-		self.sharedControls = {}
+		self:RecoverTimeControls()
+		self:RecoverDPSControls()
+		self:RecoverStatBlock("amount")
+		self:RecoverStatBlock("count")
+	end
 
+	function CombatStatsPanel:RecoverTimeControls()
+		self.sharedControls = {}
+		
 		self.xOffset = 4
 		self.yOffset = 4
 		self.maxHeight = 0
-
+		
 		self.activeTimeLabel = self:AddLabel(86)
 		self.activeTimeValue = self:AddLabel(76)
 		self.combatTimeLabel = self:AddLabel(86)
 		self.combatTimeValue = self:AddLabel(76)
 		self:NewLine()
-
+		
 		---@type LineControl
-		local separator1 = self:AcquireSharedControl(CT_LINE)
-		separator1:ApplyPosition(control, self.xOffset, self.yOffset, 336, 0)
+		local separator = self:AcquireSharedControl(CT_LINE)
+		separator:ApplyPosition(control, self.xOffset, self.yOffset, 336, 0)
+		self:NewLine()
+	end
+
+	function CombatStatsPanel:RecoverDPSControls()
+		self.xOffset = 120
+		self.dpsHeader1 = self:AddLabel(78)
+		self.dpsHeader2 = self:AddLabel(78)
+		self.dpsHeader3 = self:AddLabel(52)
 		self:NewLine()
 
+		self.xOffset = 120
+		---@type LineControl
+		local separator = self:AcquireSharedControl(CT_LINE)
+		separator:ApplyPosition(control, self.xOffset, self.yOffset, 216, 0)
+		self:NewLine()
+
+		self.xOffset = 120
+		self.dpsValue1 = self:AddLabel(78)
+		self.dpsValue2 = self:AddLabel(78)
+		self.dpsValue3 = self:AddLabel(52)
+		self:NewLine()
+	end
+	
+	function CombatStatsPanel:RecoverStatBlock(key)
+		self:RecoverStatBlockRow(key, 1)
+		
+		---@type LineControl
+		local separator = self:AcquireSharedControl(CT_LINE)
+		separator:ApplyPosition(control, self.xOffset, self.yOffset, 336, 0)
+		self:NewLine()
+
+		for rowId = 2,6 do
+			CombatStatsPanel:RecoverStatBlockRow(key, rowId)
+		end
+	end
+
+	function CombatStatsPanel:RecoverStatBlockRow(key, rowId, isHeader)
+		local row_key = ZO_CachedStrFormat(ROW_KEY_FORMAT, key, rowId)
+
+		self[row_key .. "1"] = self:AddLabel(116)
+		self[row_key .. "2"] = self:AddLabel(78)
+		self[row_key .. "3"] = self:AddLabel(78)
+		self[row_key .. "4"] = self:AddLabel(52)
+
+		self:NewLine()
 	end
 
 	function CombatStatsPanel:AddLabel(width)
