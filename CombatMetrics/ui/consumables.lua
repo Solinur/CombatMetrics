@@ -6,9 +6,7 @@ local logger
 
 local GetFormattedAbilityIcon = util.GetFormattedAbilityIcon
 local GetFormattedAbilityName = util.GetFormattedAbilityName
-
-assert(LibCombat, "Could not find LibCombat")
-local GetFoodDrinkItemLinkFromAbilityId = LibCombat.GetFoodDrinkItemLinkFromAbilityId
+local GetFoodDrinkItemLinkFromAbilityId = CMXint.LibCombat2.GetFoodDrinkItemLinkFromAbilityId
 
 
 local function valueOrder(t,a,b)

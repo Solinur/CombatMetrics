@@ -44,10 +44,12 @@ function util.initSublogger(name)
 	return sublogger
 end
 
-local LC = LibCombat
+local LC = LibCombat2
 if LC == nil then
-	CMXint.logger.main:Error("LibCombat not found!")
+	CMXint.logger.main:Error("LibCombat2 not found!")
 	return
+else
+	CMXint.LibCombat2 = LibCombat2
 end
 
 util.GetFormattedAbilityIcon = LC.GetFormattedAbilityIcon

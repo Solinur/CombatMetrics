@@ -64,9 +64,9 @@ CMX.Log = Log
 
 -- init and check for libs
 
-local LC = LibCombat
+local LC = LibCombat2
 if LC == nil then
-	Log("main", LOG_LEVEL_ERROR, "LibCombat not found!")
+	Log("main", LOG_LEVEL_ERROR, "LibCombat2 not found!")
 	return
 end
 

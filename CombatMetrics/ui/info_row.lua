@@ -4,8 +4,7 @@ local util = CMXint.util
 local ui = CMXint.ui
 local logger
 local SVHandler
-assert(LibCombat, "Could not find LibCombat")
-local LC = LibCombat
+local LC = CMXint.LibCombat2
 
 
 function CMXint.InitializeInfoRowPanel(control)
