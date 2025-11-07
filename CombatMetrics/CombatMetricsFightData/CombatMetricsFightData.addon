@@ -4,9 +4,9 @@
 ## Version: 22
 ## AddOnVersion: 22
 ## IsLibrary: true
-## DependsOn: LibCombat>=82 LibDataEncode>=2
+## DependsOn: LibCombat2>=8 LibDataEncode>=2
 ## SavedVariables: CombatMetricsFightDataSV
-## OptionalDependsOn: LibDebugLogger
+## OptionalDependsOn: LibDebugLogger 
 ## This Add-on is not created by, affiliated with or sponsored by ZeniMax Media Inc. or its affiliates.
 ## The Elder Scrolls® and related logos are registered trademarks or trademarks of ZeniMax Media Inc. in the United States and/or other countries.
 ## All rights reserved

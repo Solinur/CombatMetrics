@@ -813,6 +813,9 @@ function CMX_CopyFight(n)
 end
 
 function InitializeCMXFightData()
+	if true then
+		return -- TODO: Implement fight saving
+	end
 	Log(LOG_LEVEL_INFO, "Starting init of fight data ...")
 
 	sv = _G["CombatMetricsFightDataSV"]
