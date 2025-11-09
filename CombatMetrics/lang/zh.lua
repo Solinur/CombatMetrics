@@ -172,7 +172,7 @@ SafeAddString(SI_COMBAT_METRICS_IN_COMBAT, "战斗中: ", 1)
 
 SafeAddString(SI_COMBAT_METRICS_PLAYER, "玩家", 1) 
 
-SafeAddString(SI_COMBAT_METRICS_TOTALC, " 总共: ", 1) 
+SafeAddString(SI_COMBAT_METRICS_TOTALC, "总共: ", 1) 
 SafeAddString(SI_COMBAT_METRICS_NORMAL, "普通: ", 1) 
 SafeAddString(SI_COMBAT_METRICS_CRITICAL, "暴击: ", 1) 
 SafeAddString(SI_COMBAT_METRICS_BLOCKED, "格挡: ", 1) 

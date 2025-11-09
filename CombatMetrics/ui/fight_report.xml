@@ -42,7 +42,7 @@
                     <Dimensions x="628" y="374" />
                 </Control> -->
 
-                <Control name="$(parent)_CombatStats">
+                <Control name="$(parent)_CombatStats" inherits="CombatMetrics_ControlFramed">
                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)_Menu" offsetX="4"/>
                     <Dimensions x="346" y="374" />
                     <OnInitialized>CombatMetrics.internal.InitializeCombatStatsPanel(self)</OnInitialized>

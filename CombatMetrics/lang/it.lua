@@ -164,7 +164,7 @@ SafeAddString(SI_COMBAT_METRICS_IN_COMBAT, "In Combattimento: ", 1)
 
 SafeAddString(SI_COMBAT_METRICS_PLAYER, "Giocatore", 1)
 
-SafeAddString(SI_COMBAT_METRICS_TOTALC, " Totale: ", 1)
+SafeAddString(SI_COMBAT_METRICS_TOTALC, "Totale: ", 1)
 SafeAddString(SI_COMBAT_METRICS_NORMAL, "Normale: ", 1)
 SafeAddString(SI_COMBAT_METRICS_CRITICAL, "Critico: ", 1)
 SafeAddString(SI_COMBAT_METRICS_BLOCKED, "Bloccato: ", 1)

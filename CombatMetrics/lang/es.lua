@@ -199,7 +199,7 @@ local strings = {
 
 	SI_COMBAT_METRICS_PLAYER = "Jugador",
 
-	SI_COMBAT_METRICS_TOTALC = " Total: ",
+	SI_COMBAT_METRICS_TOTALC = "Total: ",
 	SI_COMBAT_METRICS_NORMAL = "Normal: ",
 	SI_COMBAT_METRICS_CRITICAL = "Crítico: ",
 	SI_COMBAT_METRICS_BLOCKED = "Bloqueado: ",

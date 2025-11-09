@@ -11,7 +11,16 @@ local logger
 local _
 
 ui.dx = zo_ceil(GuiRoot:GetWidth() / tonumber(GetCVar("WindowedWidth")) * 1000) / 1000
-ui.fontSize = tonumber(GetString(SI_COMBAT_METRICS_FONT_SIZE_SMALL))
+ui.fontSizeSmall = tonumber(GetString(SI_COMBAT_METRICS_FONT_SIZE_SMALL))
+ui.fontSize = tonumber(GetString(SI_COMBAT_METRICS_FONT_SIZE))
+
+function ui.GetFont(base_size, bold)
+	local scale = CMXint.settings.fightReport.scale
+	local size = base_size * (scale + 0.2) / 1.2
+	local base_font = bold == true and "BOLD_FONT" or "MEDIUM_FONT"
+
+	return string.format("$(%s)|%s|%s", base_font, size, "soft-shadow-thin")
+end
 
 CMXint.DPSstrings = {
 	["damageOut"]  = "DPSOut",
@@ -90,8 +99,6 @@ end
 util.AddTooltipLine = AddTooltipLine
 
 function CMXint.OnMouseEnter(control) --copy from ZO_Options_OnMouseEnter but modified to support multiple tooltip lines
-	logger:Info(control:GetName(), control.tooltip)
-
 	---@type table | string
 	local tooltipText = control.tooltip
 	if tooltipText == nil then return end
@@ -263,7 +270,15 @@ CMXint.PanelObject = PanelObject
 
 PanelObject.Update = PanelObject:MUST_IMPLEMENT()
 PanelObject.Clear = PanelObject:MUST_IMPLEMENT()
-PanelObject.Release = PanelObject:MUST_IMPLEMENT()
+PanelObject.Recover = PanelObject:MUST_IMPLEMENT()
+
+local function onShow(control)
+	control.panel:Recover()
+end
+
+local function onHide(control)
+	control.panel:Release()
+end
 
 function PanelObject:Initialize(control, name)
 	if ui.panels[name] then
@@ -276,21 +291,36 @@ function PanelObject:Initialize(control, name)
 	self.sharedControls = {}
 
 	control.panel = self
+
+	control:SetHandler("OnEffectivelyShown", onShow)
+	control:SetHandler("OnEffectivelyHidden", onHide)
+	
 	ui.panels[name] = self
 end
 
-function PanelObject:AcquireSharedControl(control_type)
+function PanelObject:AcquireSharedControl(controlType)
 	local control
-	if control_type == CT_LABEL then
+	if controlType == CT_LABEL then
 		control, _ = ui.sharedLabels:AcquireObject()
-	elseif control_type == CT_TEXTURE then
+	elseif controlType == CT_TEXTURE then
 		control, _ = ui.sharedTextures:AcquireObject()
-	elseif control_type == CT_LINE then
+	elseif controlType == CT_LINE then
 		control, _ = ui.sharedSeparators:AcquireObject()
+	else
+		logger:Error("Attempt to acquire unsupported control type: %d", controlType)
 	end
 
 	table.insert(self.sharedControls, control)
 	return control
+end
+
+function PanelObject.OnShow(control)
+	logger:Info("OnShow, Panel: %s", control.panel.name)
+	return control.panel:Recover()
+end
+
+function PanelObject:OnHide(control)
+	return control.panel:Release()
 end
 
 function PanelObject:Release()
@@ -306,6 +336,11 @@ function PanelObject:ReleaseSharedControls()
 end
 
 function PanelObject:Clear()
+	logger:Warn("Calling 'clear' on %s panel, but method is not set", self.name) -- Remove, once panels are implemented
+end
+
+function PanelObject:Recover()
+	logger:Warn("Calling 'recover' on %s panel, but method is not set", self.name) -- Remove, once panels are implemented
 end
 
 function PanelObject:GetParentControl()
@@ -358,6 +393,7 @@ function CMXint.InitializeUI()
 	-- }
 	
 	assert(CMXint.InitializeControlHandler(), "Initialization of control handler failed")
+	assert(CMXint.InitializeSelectionsHandler(), "Initialization of selections handler failed")
 	assert(CMXint.InitializeFightReport(), "Initialization of fight report UI failed")
 	-- assert(CMXint.InitializeLiveReport(), "Initialization of live report failed")
 	

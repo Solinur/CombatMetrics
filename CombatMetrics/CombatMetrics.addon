@@ -27,6 +27,7 @@ bindings.xml
 ui/ui.lua
 ui/templates.xml
 ui/controls.lua
+ui/selections.lua
 
 ui/title_bar.lua
 ui/title_bar.xml

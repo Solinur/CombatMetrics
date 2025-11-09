@@ -684,6 +684,6 @@
 
         <Label name="CombatMetrics_SharedLabel" virtual="true" />
         <Texture name="CombatMetrics_SharedTexture" virtual="true" />
-        <Line name="CombatMetrics_SharedSeparator" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin" />
+        <Line name="CombatMetrics_SharedSeparator" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin" virtual="true"/>
     </Controls>
 </GuiXml>

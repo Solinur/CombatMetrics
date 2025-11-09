@@ -150,7 +150,7 @@ SafeAddString(SI_COMBAT_METRICS_IN_COMBAT, "В бою:", 1)
 
 SafeAddString(SI_COMBAT_METRICS_PLAYER, "Игрок", 1) 
 
---SafeAddString(SI_COMBAT_METRICS_TOTALC, " Total: ", 1) 
+--SafeAddString(SI_COMBAT_METRICS_TOTALC, "Total: ", 1) 
 SafeAddString(SI_COMBAT_METRICS_NORMAL, "Обычн.:", 1) 
 SafeAddString(SI_COMBAT_METRICS_CRITICAL, "Крит.:", 1) 
 SafeAddString(SI_COMBAT_METRICS_BLOCKED, "Блок.:", 1) 

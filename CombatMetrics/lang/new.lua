@@ -148,7 +148,7 @@
 
 --SafeAddString(SI_COMBAT_METRICS_PLAYER, "Player", 1) 
 
---SafeAddString(SI_COMBAT_METRICS_TOTALC, " Total: ", 1) 
+--SafeAddString(SI_COMBAT_METRICS_TOTALC, "Total: ", 1) 
 --SafeAddString(SI_COMBAT_METRICS_NORMAL, "Normal: ", 1) 
 --SafeAddString(SI_COMBAT_METRICS_CRITICAL, "Critical: ", 1) 
 --SafeAddString(SI_COMBAT_METRICS_BLOCKED, "Blocked: ", 1) 

@@ -4,54 +4,59 @@ local util = CMXint.util
 local ui = CMXint.ui
 local logger
 
-local function CreateSharedControlType(template)
-	local SharedControlType = ZO_Object:Subclass()
 
-	function SharedControlType:New(pool, objectKey)
+
+local function InitializeSharedControl(control, pool, objectKey)
+	control.pool = pool
+	control.objectKey = objectKey
+	control.shared = true
+end
+
+function ReleaseSharedControl(control)
+	control:SetParent(CombatMetricsReport)
+	control.pool:ReleaseObject(control.objectKey)
+end
+
+local function ApplyPosition(control, parent, offsetX, offsetY, width, height)
+	local scale = CMXint.settings.fightReport.scale
+	control:SetParent(parent)
+	control:SetAnchor(TOPLEFT, parent, TOPLEFT, offsetX*scale, offsetY*scale)
+
+	if control:GetType() == CT_LINE then
+		local offsetX2 = offsetX + (width or 0)
+		local offsetY2 = offsetY + (height or 0)
+		control:SetAnchor(BOTTOMRIGHT, parent, TOPLEFT, offsetX2*scale, offsetY2*scale)
+	end
+
+	if width then
+		control:SetWidth(width*scale)
+	end
+
+	if height then
+		control:SetHeight(height*scale)
+	end
+end
+
+local function ShowControlOnAcquire(control)
+    control:SetHidden(false)
+end
+
+
+local function CreateSharedControlType(template)
+	function CreateControl(pool, objectKey)
 		local newControl = ZO_ObjectPool_CreateControl(template, pool, CombatMetricsReport)
-		local controlMeta = getmetatable(newControl)
-		newControl = setmetatable(newControl, {
-			__index = function(table, key)
-				local entry = controlMeta[key]
-				if entry ~= nil then
-					return entry
-				else
-					return self[key]
-				end
-			end
-		})
-		newControl.__index = newControl
-		newControl:Initialize(pool, objectKey)
+		InitializeSharedControl(newControl, pool, objectKey)
+
+		newControl.Release = ReleaseSharedControl
+		newControl.ApplyPosition = ApplyPosition
+
 		return newControl
 	end
 
-	function SharedControlType:Initialize(pool, objectKey)
-		self.pool = pool
-		self.objectKey = objectKey
-		self.template = template
-		self.shared = true
-	end
+	local pool = ZO_ObjectPool:New(CreateControl, ZO_ObjectPool_DefaultResetControl)
+	pool:SetCustomAcquireBehavior(ShowControlOnAcquire)
 
-	function SharedControlType:Release()
-		self:SetParent(CombatMetricsReport)
-		self.pool:ReleaseObject(self.objectKey)
-	end
-	
-	function SharedControlType:ApplyPosition(parent, offsetX, offsetY, width, height)
-		local scale = CMXint.settings.FightReport.scale
-		self:SetParent(parent)
-		self:SetAnchor(TOPLEFT,  offsetX, TOPLEFT, offsetX*scale, offsetY*scale)
-
-		if width then
-			self:SetWidth(width*scale)
-		end
-
-		if height then
-			self:SetHeight(height*scale)
-		end
-	end
-
-	return ZO_ObjectPool:New(SharedControlType, ZO_ObjectPool_DefaultResetControl)
+	return pool
 end
 
 local isFileInitialized = false
