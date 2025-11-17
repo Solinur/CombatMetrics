@@ -365,7 +365,7 @@ local function initFightNavButtons(MenuPanel)
 		button.tooltip = tooltip
 		button.name = name
 		button:SetHandler("OnMouseUp", func, "CMX")
-		button:SetState()
+		button:SetState(BSTATE_NORMAL, false)
 		anchorControl = button
 		
 		navButtons[name] = button

@@ -310,10 +310,6 @@
             </Controls>
         </Control>
 
-        <Control name="CombatMetrics_RowTemplate" resizeToFitDescendents="true" mouseEnabled="true" virtual="true">
-            <OnMouseUp> CMX.AddSelection( self, button, upInside, ctrl, alt, shift ) </OnMouseUp>
-        </Control>
-
         <Control name="CombatMetrics_UnitRowTemplate" resizeToFitDescendents="true" mouseEnabled="true" virtual="true">
             <OnMouseUp> 
                 if button == MOUSE_BUTTON_INDEX_RIGHT then 
@@ -370,6 +366,7 @@
 
             <Controls>
                 <Backdrop name="$(parent)HighLight" inherits="CombatMetrics_Highlight" />
+                
                 <Control name="$(parent)Indicator">
                     <Anchor point="LEFT" offsetX="0" offsetY="0" />
                     <Dimensions x="10" y="10" />
@@ -426,7 +423,7 @@
             </Controls>
         </Control>
 
-        <Control name="CombatMetrics_ResourceRowTemplate" inherits="CombatMetrics_RowTemplate" virtual="true">
+        <Control name="CombatMetrics_ResourceRowTemplate" virtual="true">
             <Controls>
                 <Backdrop name="$(parent)HighLight" inherits="CombatMetrics_Highlight" />
                 <Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="LEFT"
@@ -454,6 +451,8 @@
                     <Dimensions x="50" y="20" />
                 </Label>
             </Controls>
+            
+            <OnMouseUp> CMX.AddSelection( self, button, upInside, ctrl, alt, shift ) </OnMouseUp>
         </Control>
 
         <Control name="CombatMetrics_ResourceRowSeperatorTemplate" virtual="true"> <!-- TODO: Check if obsolete? -->
@@ -473,7 +472,7 @@
             </Controls>
         </Control>
 
-        <Control name="CombatMetrics_AbilityRowTemplate" inherits="CombatMetrics_RowTemplate" virtual="true">
+        <Control name="CombatMetrics_AbilityRowTemplate" virtual="true">
             <Controls>
                 <Backdrop name="$(parent)HighLight" inherits="CombatMetrics_Highlight" />
                 <Texture name="$(parent)Icon">
@@ -542,6 +541,8 @@
                     <Dimensions x="50" y="20" />
                 </Label>
             </Controls>
+            
+            <OnMouseUp> CMX.AddSelection( self, button, upInside, ctrl, alt, shift ) </OnMouseUp>
         </Control>
 
         <Control name="CombatMetrics_FightlistRowTemplate" resizeToFitDescendents="true" mouseEnabled="true" virtual="true">
@@ -685,5 +686,7 @@
         <Label name="CombatMetrics_SharedLabel" virtual="true" />
         <Texture name="CombatMetrics_SharedTexture" virtual="true" />
         <Line name="CombatMetrics_SharedSeparator" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin" virtual="true"/>
+
+        <Control name="CombatMetrics_RowTemplate" virtual="true"/>
     </Controls>
 </GuiXml>

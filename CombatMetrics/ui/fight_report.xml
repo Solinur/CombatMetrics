@@ -54,10 +54,10 @@
                     <!-- <OnInitialized>CombatMetrics.internal.InitializePlayerStatsPanel(self)</OnInitialized> -->
                 </Control>
 
-                <Control name="$(parent)_BuffsPanel" inherits="CombatMetrics_PlaceHolder"> <!-- CombatMetrics_BuffsPanel -->
+                <Control name="$(parent)_BuffsPanel" inherits="CombatMetrics_BuffsPanel">
                     <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)_Title" offsetY="4" />
                     <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)_PlayerStats" offsetX="4" />
-                    <!-- <OnInitialized>CombatMetrics.internal.InitializeBuffsPanel(self)</OnInitialized> -->
+                    <OnInitialized>CombatMetrics.internal.InitializeBuffsPanel(self)</OnInitialized>
                 </Control>
 
                 <Control name="$(parent)_UnitsPanel" inherits="CombatMetrics_PlaceHolder"> <!-- CombatMetrics_UnitsPanel -->

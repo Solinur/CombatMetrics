@@ -327,12 +327,22 @@ function PanelObject:Release()
 	self:ReleaseSharedControls()
 end
 
+
+function PanelObject:CreateSortFilterList(template, height, initFunc)
+	self.dataList = ui.SortFilterList:New(template, height)
+	initFunc(self)
+end
+
 function PanelObject:ReleaseSharedControls()
 	for _, control in pairs(self.sharedControls) do
 		control:Release()
 	end
 
 	ZO_ClearTable(self.sharedControls)
+
+	if self.dataList then
+		self.dataList:Release()
+	end
 end
 
 function PanelObject:Clear()
@@ -360,6 +370,16 @@ end
 
 function PanelObject:SetHidden(hide)
 	return self.control:SetHidden(hide)
+end
+
+function PanelObject:ShowIds()
+	local settings = self.settings
+
+	if settings then
+		return settings.showDebugIds
+	end
+
+	return false
 end
 
 function ui:GetPanel(name)
@@ -403,10 +423,12 @@ function CMXint.InitializeUI()
 	assert(CMXint.InitializeTitle(), "Initialization of title UI failed")
 	assert(CMXint.InitializeMenu(), "Initialization of menu UI failed")
 	assert(CMXint.InitializeInfoRow(), "Initialization of info row UI failed")
+	
 	assert(CMXint.InitializeCombatStats(), "Initialization of combat stats UI failed")
 	-- -- assert(CMXint.InitializeResource(), "Initialization of resource UI failed")
 	-- assert(CMXint.InitializePlayerStats(), "Initialization of player stats UI failed")
-	-- assert(CMXint.InitializeBuffs(), "Initialization of buffs UI failed")
+	assert(CMXint.InitializeBuffs(), "Initialization of buffs UI failed")
+	
 	-- assert(CMXint.InitializeUnits(), "Initialization of units UI failed")
 	-- assert(CMXint.InitializeAbilities(), "Initialization of abilities UI failed")
 	

@@ -1,32 +1,5 @@
 <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
     <Controls>
-        <Control name="CombatMetrics_BuffPanelBox" virtual="true">
-            <Controls>
-                <Backdrop name="$(parent)Bg" edgeColor="00000000" centerColor="00000000">
-                    <Edge edgeSize="1" />
-                    <AnchorFill />
-                </Backdrop>
-
-                <Backdrop name="$(parent)Overlay" edgeColor="BB000000" centerColor="BB000000" hidden="true" layer="OVERLAY"
-                    excludeFromResizeToFitExtents="true">
-                    <Edge edgeSize="1" />
-                    <Anchor point="TOPLEFT" offsetX="4" offsetY="2" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-2" offsetY="2" />
-                </Backdrop>
-
-                <Line name="$(parent)Line" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
-                    <Anchor point="BOTTOMLEFT" offsetX="4" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-4" />
-                </Line>
-
-                <Label name="$(parent)Label" inherits="CombatMetrics_LabelFontControl" text="" horizontalAlignment="CENTER"
-                    verticalAlignment="CENTER">
-                    <AnchorFill />
-                </Label>
-            </Controls>
-            <OnMouseUp>CombatMetrics.internal.SelectRightPanel(self)</OnMouseUp>
-        </Control>
-
         <Control name="CombatMetrics_ResourceListTemplate" virtual="true">
             <OnInitialized>
                 local scrollList = GetControl(self, "PanelScrollChild")
@@ -48,14 +21,18 @@
                             text="SI_COMBAT_METRICS_SHARP" horizontalAlignment="RIGHT">
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="4" offsetY="0" />
                             <Dimensions x="30" y="20" />
-                            <OnInitialized>self.tooltip = SI_COMBAT_METRICS_BUFFCOUNT_TT</OnInitialized>
+                            <OnInitialized>
+                                self.tooltip = SI_COMBAT_METRICS_BUFFCOUNT_TT
+                            </OnInitialized>
                         </Label>
 
                         <Label name="$(parent)Rate" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"
                             text="SI_COMBAT_METRICS_PM_SEC" horizontalAlignment="RIGHT">
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Count" offsetX="4" offsetY="0" />
                             <Dimensions x="50" y="20" />
-                            <OnInitialized>self.tooltip = SI_COMBAT_METRICS_UPTIME_TT</OnInitialized>
+                            <OnInitialized>
+                                self.tooltip = SI_COMBAT_METRICS_UPTIME_TT
+                            </OnInitialized>
                         </Label>
                     </Controls>
                 </Control>
@@ -72,7 +49,7 @@
             </Controls>
         </Control>
 
-        <Control name="CombatMetrics_BuffsPanel" inherits="CombatMetrics_ControlFramed" virtual="true">
+        <Control name="CombatMetrics_BuffsPanelOld" inherits="CombatMetrics_ControlFramed" virtual="true">
             <Controls>
                 <Control name="$(parent)Selector" resizeToFitDescendents="true">
                     <Anchor point="TOPLEFT" />
@@ -133,7 +110,7 @@
                     </Controls>
                 </Control>
 
-                <Control name="$(parent)BuffList">
+                <Control name="$(parent)BuffListOld">
                     <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Selector" offsetX="0" offsetY="4" />
                     <Anchor point="BOTTOMRIGHT" />
                     <Controls>
@@ -218,6 +195,85 @@
                             </OnInitialized>
                         </Control>
                     </Controls>
+                </Control>
+            </Controls>
+        </Control>
+
+        <Control name="CombatMetrics_BuffsPanelRowTemplate" virtual="true"></Control>
+
+        <Control name="CombatMetrics_BuffsPanel" inherits="CombatMetrics_ControlFramed" virtual="true">
+            <Controls>
+                <Control name="$(parent)SearchBar" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="TOPRIGHT" />
+                    <Dimensions y="20"/>
+                </Control>
+
+                <Line name="$(parent)SearchBarSep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)SearchBar" offsetY="2" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)SearchBar" offsetY="2" />
+                </Line>
+
+                <Control name="$(parent)Headers">
+                    <Anchor point="TOPLEFT" relativeTo="$(parent)SearchBarSep" offsetY="2" />
+                    <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchBarSep" offsetY="2" />
+                    <Dimensions y="20"/>
+                    <Controls>
+                        <Control name="$(parent)Indicator">
+                            <Anchor point="LEFT" offsetX="0"/>
+                            <Dimensions x="10" y="10" />
+                        </Control>
+
+                        <Control name="$(parent)Icon">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Indicator" offsetX="2"/>
+                            <Dimensions x="20" y="20" />
+                            <Controls>
+                                <Texture name="$(parent)Texture" textureFile="esoui/art/miscellaneous/eso_icon_warning.dds"
+                                    layer="CONTROLS" inherits="CombatMetrics_TextureTooltip" color="FFFF8800">
+                                    <AnchorFill />
+                                    <OnInitialized>
+                                        self.tooltip = SI_COMBAT_METRICS_SIGIL_WARNING
+                                    </OnInitialized>
+                                </Texture>
+                            </Controls>
+                        </Control>
+
+                        <Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_BUFF" horizontalAlignment="LEFT" verticalAlignment="CENTER">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="4" offsetY="0" />
+                            <Dimensions x="176"/>
+                            <OnInitialized>
+                                CMX_SortHeader_Initialize(self, "name", ZO_SORT_ORDER_UP)
+                            </OnInitialized>
+                        </Label>
+
+                        <Label name="$(parent)Count" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip" text="SI_COMBAT_METRICS_SHARP" horizontalAlignment="CENTER" verticalAlignment="CENTER">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="2" offsetY="0" />
+                            <Dimensions x="58"/>
+                            <OnInitialized>
+                                CMX_SortHeader_Initialize(self, "count", ZO_SORT_ORDER_DOWN)
+                                self.tooltip = SI_COMBAT_METRICS_BUFFCOUNT_TT
+                            </OnInitialized>
+                        </Label>
+
+                        <Label name="$(parent)Uptime" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip" text="SI_COMBAT_METRICS_UPTIME" horizontalAlignment="CENTER" verticalAlignment="CENTER">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Count" offsetX="2" offsetY="0" />
+                            <Dimensions x="58"/>
+                            <OnInitialized>
+                                CMX_SortHeader_Initialize(self, "uptime", ZO_SORT_ORDER_DOWN)
+                                self.tooltip = SI_COMBAT_METRICS_UPTIME_TT
+                            </OnInitialized>
+                        </Label>
+                    </Controls>
+                </Control>
+
+                <Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Headers" offsetY="2" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Headers" offsetY="2" />
+                </Line>
+
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Sep" offsetY="2" />
+                    <Anchor point="BOTTOMRIGHT" />
                 </Control>
             </Controls>
         </Control>

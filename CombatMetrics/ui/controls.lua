@@ -4,8 +4,6 @@ local util = CMXint.util
 local ui = CMXint.ui
 local logger
 
-
-
 local function InitializeSharedControl(control, pool, objectKey)
 	control.pool = pool
 	control.objectKey = objectKey
@@ -37,18 +35,30 @@ local function ApplyPosition(control, parent, offsetX, offsetY, width, height)
 	end
 end
 
+---@param control Control
+---@param indent number
+local function ApplyIndent(control, indent)
+	local scale = CMXint.settings.fightReport.scale
+
+	local indent = indent * scale
+
+	local _, point, relTo, relPoint, offsX, offsY, _ = control:GetAnchor(0)
+	control:SetAnchor(point, relTo, relPoint, offsX + indent, offsY)
+	control:SetWidth(control:GetWidth() - indent)
+end
+
 local function ShowControlOnAcquire(control)
     control:SetHidden(false)
 end
 
-
 local function CreateSharedControlType(template)
-	function CreateControl(pool, objectKey)
+	local function CreateControl(pool, objectKey)
 		local newControl = ZO_ObjectPool_CreateControl(template, pool, CombatMetricsReport)
 		InitializeSharedControl(newControl, pool, objectKey)
 
 		newControl.Release = ReleaseSharedControl
 		newControl.ApplyPosition = ApplyPosition
+		newControl.ApplyIndent = ApplyIndent
 
 		return newControl
 	end

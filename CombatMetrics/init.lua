@@ -232,6 +232,7 @@ local function Initialize(eventId, addon)
 
 	assert(CMXint.InitializeFightDataHandler(), "Initialization of fight data module failed")
 	assert(CMXint.InitializeUtils(), "Initialization of utils module failed")
+	assert(CMXint.InitializeStructs(), "Initialization of structs module failed")
 	assert(CMXint.InitializeUI(), "Initialization of ui module failed")
 	-- assert(CMXint.InitMenu(svdefaults), "Initialization of settings menu failed")
 

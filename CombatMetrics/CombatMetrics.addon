@@ -19,12 +19,14 @@ lang/$(language).lua
 
 init.lua
 util.lua
+structs.lua
 fightdata.lua
 ; menu.lua
 
 bindings.xml
 
 ui/ui.lua
+ui/scroll_lists.lua
 ui/templates.xml
 ui/controls.lua
 ui/selections.lua
@@ -41,8 +43,8 @@ ui/combat_stats.xml
 ; ui/resources.lua
 ; ui/player_stats.lua
 ; ui/player_stats.xml
-; ui/buffs.lua
-; ui/buffs.xml
+ui/buffs.lua
+ui/buffs.xml
 ; ui/units.lua
 ; ui/units.xml
 ; ui/abilities.lua
@@ -71,3 +73,5 @@ ui/fight_report.lua
 ui/fight_report.xml
 ; ui/live_report.lua
 ; ui/live_report.xml
+
+test/test.lua
