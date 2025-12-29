@@ -273,7 +273,7 @@ function CMX.MakeMenu(svdefaults)
 			min = 50,
 			max = 300,
 			step = 1,
-			default = def.FightReport.scale,
+			default = def.FightReport.scale*100,
 			getFunc = function() return db.FightReport.scale*100  end,
 			setFunc = function(value)
 					db.FightReport.scale = value/100
@@ -421,7 +421,7 @@ function CMX.MakeMenu(svdefaults)
 			min = 50,
 			max = 300,
 			step = 10,
-			default = def.liveReport.scale,
+			default = def.liveReport.scale*100,
 			getFunc = function() return db.liveReport.scale*100  end,
 			setFunc = function(value)
 					db.liveReport.scale = value/100

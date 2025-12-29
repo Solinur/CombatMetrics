@@ -7123,25 +7123,27 @@ local function initLiveReport()
 	end
 
 	function liveReport.Refresh(self)
-
-		local anchors = (setLR.layout == "Horizontal" and {
-
-			{TOPLEFT, TOPLEFT, 0, 0, liveReport},
-			{LEFT, RIGHT, 0, 0},
-			{LEFT, RIGHT, 0, 0}
-
-		}) or (setLR.layout == "Vertical" and {
-
-			{TOPLEFT, TOPLEFT, 0, 0, liveReport},
-			{TOPLEFT, BOTTOMLEFT, 0, 0},
-			{LEFT, RIGHT, 0, 0}
-
-		}) or { -- layout == "compact"
-
-			{TOPLEFT, TOPLEFT, 0, 0, liveReport},
-			{LEFT, RIGHT, 0, 0},
-			{TOPLEFT, BOTTOMLEFT, 0, 0},
-		}
+		local anchors
+		if setLR.layout == "Horizontal" then
+			anchors = {
+				{TOPLEFT, TOPLEFT, 0, 0, liveReport},
+				{LEFT, RIGHT, 0, 0},
+				{LEFT, RIGHT, 0, 0}
+			}
+		elseif setLR.layout == "Vertical" then
+			anchors = {
+				{TOPLEFT, TOPLEFT, 0, 0, liveReport},
+				{TOPLEFT, BOTTOMLEFT, 0, 0},
+				{LEFT, RIGHT, 0, 0}
+			}
+		else
+			assert(setLR.layout == "Compact")
+			anchors = {
+				{TOPLEFT, TOPLEFT, 0, 0, liveReport},
+				{LEFT, RIGHT, 0, 0},
+				{TOPLEFT, BOTTOMLEFT, 0, 0},
+			}
+		end
 
 		local liveReport = liveReport
 		local scale = setLR.scale
@@ -7149,30 +7151,21 @@ local function initLiveReport()
 		local totalBlocks = 0
 
 		for i = 3, liveReport:GetNumChildren() do
-
 			local child = liveReport:GetChild(i)
 			local name = zo_strgsub(zo_strgsub(child:GetName(), liveReport:GetName(), ""), "^%u", zo_strlower) -- difference in names is the child name e.g. "DamageOut". Outer gsub changes first letter to lowercase to match the settings, e.g. "damageOut".
-
 			local shown = setLR[name]
 
 			if shown == true then
-
 				local addspace = child.blocksize
-
 				totalBlocks = totalBlocks + addspace
-
 			end
-
 		end
 
-		local halfway = (setLR.layout == "Compact" and (zo_ceil(totalBlocks / 2) + 1)) or nil
-
+		local halfway = (setLR.layout == "Compact" and zo_ceil(totalBlocks / 2)) or nil
 		local blocks = 0
-
 		local firstBlock = nil	-- to anchor 2nd row to
 
 		for i = 3, liveReport:GetNumChildren() do
-
 			local child = liveReport:GetChild(i)
 			local name = zo_strgsub(zo_strgsub(child:GetName(), liveReport:GetName(), ""), "^%u", zo_strlower) -- difference in names is the child name e.g. "DamageOut". Outer gsub changes first letter to lowercase to match the settings, e.g. "damageOut".
 
@@ -7180,25 +7173,28 @@ local function initLiveReport()
 			child:SetHidden(not shown)
 
 			if shown then
-
 				local addspace = child.blocksize
-
-				local isnotfull = ( zo_ceil(blocks) - zo_ceil(blocks + addspace)) == 0
-
+				local isfull = zo_ceil(blocks) == zo_ceil(blocks + addspace)
 				blocks = blocks + addspace
 
-				if firstBlock == nil then firstBlock = child end
+				local anchorIndex
 
-				local anchorIndex = (blocks == 1 and 1) or ((blocks == halfway or (isnotfull and setLR.layout ~= "Compact")) and 3) or 2
+				if firstBlock == nil then
+					firstBlock = child
+					anchorIndex = 1
+				elseif halfway and blocks > halfway then
+					anchorIndex = 3
+					blocks = addspace
+				else
+					anchorIndex = 2
+				end
+				-- anchorIndex = ((blocks == halfway or (isfull and setLR.layout ~= "Compact")) and 3) or 2
 
 				local anchor = anchors[anchorIndex]
-
-				anchor[5] = (not isnotfull) and anchorIndex == 3 and firstBlock or last
-
-				child:ClearAnchors()
+				anchor[5] = anchorIndex == 3 and firstBlock or last
 
 				local width, height = unpack(child.sizes)
-
+				child:ClearAnchors()
 				child:SetDimensions(width*scale, height*scale)
 				child:SetAnchor(anchor[1], anchor[5], anchor[2], anchor[3]*scale, anchor[4]*scale)
 
@@ -7211,9 +7207,7 @@ local function initLiveReport()
 
 				label:SetHorizontalAlignment(alignment)
 
-				local showGroupTooltip = db.recordgrp == true
-
-				child:GetNamedChild("Tooltip").tooltip[2] = showGroupTooltip and SI_COMBAT_METRICS_LIVEREPORT_GROUP_TOOLTIP or nil
+				child:GetNamedChild("Tooltip").tooltip[2] = db.recordgrp and SI_COMBAT_METRICS_LIVEREPORT_GROUP_TOOLTIP or nil
 
 			end
 		end

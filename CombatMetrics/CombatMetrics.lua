@@ -23,7 +23,7 @@ local CMX = CMX
 
 -- Basic values
 CMX.name = "CombatMetrics"
-CMX.version = "1.7.5"
+CMX.version = "1.7.6"
 
 -- Logger
 
@@ -2399,16 +2399,13 @@ do
 	end
 
 	function CMX.ChangeCombatLogLabel(name)
-
 		if not (cc and window) then return end
 
 		cc:SetTabName(window.key, name)
-
 	end
 
 	function CMX.RemoveCombatLog()
-
-		cc:RemoveWindow(window.key)
+		if cc and window then cc:RemoveWindow(window.key) end
 
 		cc = nil
 		window = nil
@@ -2430,6 +2427,8 @@ local function maxStat()
 	return maxPower
 
 end
+
+local defaultScale = zo_roundToNearest(1 / GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE), 0.1)
 
 local svdefaults = {
 
@@ -2470,7 +2469,7 @@ local svdefaults = {
 
 	["FightReport"] = {
 
-		["scale"] 				= zo_roundToNearest(1 / GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE), 0.1),
+		["scale"] 				= defaultScale,
 		["category"] 			= "damageOut",
 		["mainpanel"] 			= "FightStats",
 		["rightpanel"] 			= "buffs",
