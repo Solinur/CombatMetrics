@@ -714,5 +714,8 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Reworked fight data initialization once more. This should fix the error that occured when only the subaddon was activated.
 [*] Added a warning symbol to the buff panel when certain sigils are used.
 
-1.7.6
+1.7.6 6,900,244 (29.12.2025) 13:10
 [*] Changed manifest file extension to ".addon"
+[*] Fixed layouting of the live report window involving the overheal display (Thx Nahkrinbah for reporting).
+[*] Fixed an error ocurring when reverting to default settings (Thx Nahkrinbah for reporting).
+[*] Fixed scale of UI elements when reverting to default settings
