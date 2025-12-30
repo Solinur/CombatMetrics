@@ -193,14 +193,14 @@ function CMXint.InitializeAbilitiesPanel(control)
 		countString .. "Critical"
 
 		local ratioKey1 = showOverHeal and "healsOutOverflow" or
-		countString .. hitCritLayout[1]                                                     -- first value of the crits/hits column display
+		countString .. hitCritLayout[1]														-- first value of the crits/hits column display
 		local ratioKey2 = showOverHeal and "healsOutAbsolute" or
-		countString .. hitCritLayout[2]                                                     -- second value of the crits/hits column display
+		countString .. hitCritLayout[2]														-- second value of the crits/hits column display
 
 		local avgKey1 = showOverHeal and "healingOutAbsolute" or
-		category .. averageLayout[1]                                                        -- damage value of the avg column display
+		category .. averageLayout[1]														-- damage value of the avg column display
 		local avgKey2 = showOverHeal and "healsOutAbsolute" or
-		countString .. averageLayout[1]                                                     -- hits value of the avg column display
+		countString .. averageLayout[1]														-- hits value of the avg column display
 
 		local DPSKey = showOverHeal and "HPSAOut" or DPSstrings[category]
 
@@ -215,39 +215,40 @@ function CMXint.InitializeAbilitiesPanel(control)
 					highlight = selectedabilities[abilityId] ~= nil
 				end
 
-				local icon        = GetFormattedAbilityIcon(abilityId)
+				local icon			= GetFormattedAbilityIcon(abilityId)
 
-				local duration    = GetAbilityDuration(abilityId)
+				local duration		= GetAbilityDuration(abilityId)
 
-				local dot         = ((duration and duration > 0) or (IsAbilityPassive(abilityId) and isDamage)) and "*" or ""
-				local pet         = ability.pet and " (pet)" or ""
-				local dbug        = showids and string.format("(%d) ", abilityId) or ""
-				local color       = ability.damageType and CMX.GetDamageColor(ability.damageType) or ""
+				local dot			= ((duration and duration > 0) or (IsAbilityPassive(abilityId) and isDamage)) and "*" or ""
+				local pet			= ability.pet and " (pet)" or ""
+				local dbug			= showids and string.format("(%d) ", abilityId) or ""
+				local color			= ability.damageType and CMX.GetDamageColor(ability.damageType) or ""
 
-				local name        = dbug .. color .. (ability.name or GetFormattedAbilityName(abilityId)) .. dot .. pet ..
+				local name			= dbug .. color .. (ability.name or GetFormattedAbilityName(abilityId)) .. dot .. pet ..
 				"|r"
 
-				local dps         = ability[DPSKey]
-				local total       = ability[totalAmountKey]
-				local ratio       = total and totaldmg and totaldmg > 0 and (total / totaldmg)
+				local dps			= ability[DPSKey]
+				local total			= ability[totalAmountKey]
+				local ratio			= total and totaldmg and totaldmg > 0 and (total / totaldmg)
 
-				local crits       = ability[critKey]
-				local hits        = ability[totalHitKey]
-				local critratio   = crits and hits and hits > 0 and (100 * crits / hits)
+				local crits			= ability[critKey]
+				local hits			= ability[totalHitKey]
+				local critratio		= crits and hits and hits > 0 and (100 * crits / hits)
 
-				local ratio1      = ability[ratioKey1]
-				local ratio2      = ability[ratioKey2]
+				local ratio1		= ability[ratioKey1]
+				local ratio2		= ability[ratioKey2]
 
-				local avg1        = ability[avgKey1]
-				local avg2        = ability[avgKey2] or 0
+				local avg1			= ability[avgKey1]
+				local avg2			= ability[avgKey2] or 0
 
-				local avg         = avg2 ~= 0 and (avg1 / avg2)
-				local minmaxValue = (showOverHeal and "-") or (minmax and ability.max) or (ability.min or 0)
+				local avg			= avg2 ~= 0 and (avg1 / avg2)
+				local minmaxValue	= (showOverHeal and "-") or (minmax and ability.max) or (ability.min or 0)
 
-				local rowId       = #control.bars + 1
+				local rowId			= #control.bars + 1
 
-				local rowName     = scrollchild:GetName() .. "Row" .. rowId
-				local row         = _G[rowName] or
+				local rowName		= scrollchild:GetName() .. "Row" .. rowId
+				local row			= _G[rowName] or
+				
 				CreateControlFromVirtual(rowName, scrollchild, "CombatMetrics_AbilityRowTemplate")
 				row:SetAnchor(unpack(currentanchor))
 				row:SetHidden(false)

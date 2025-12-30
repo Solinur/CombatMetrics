@@ -9,40 +9,40 @@ local util = CMXint.util
 local logger
 
 hstructure DataEntryStruct
-    typeId: number;
-    categoryId: number;
-    data: table;
+	typeId: number;
+	categoryId: number;
+	data: table;
 end
 
 function util.CreateDataEntry(typeId, categoryId, data)
-    local entry = hmake DataEntryStruct
-    {
-        typeId = typeId,
-        categoryId = categoryId,
-        data = data,
-    }
-    data.dataEntry = entry
-    return entry
+	local entry = hmake DataEntryStruct
+	{
+		typeId = typeId,
+		categoryId = categoryId,
+		data = data,
+	}
+	data.dataEntry = entry
+	return entry
 end
 
 local empty = {}
 empty._DESCRIPTION_ = "WRITE_PROTECTED"
 setmetatable(empty, {
-    __newindex = function() 
-        error("This table cannot be written!")
-    end
+	__newindex = function() 
+		error("This table cannot be written!")
+	end
 })
 
 local tableOfEmpty = {}
 tableOfEmpty._DESCRIPTION_ = "ALWAYS_RETURN_EMPTY"
 setmetatable(tableOfEmpty, {
-    __index = function(table, key)
-        return empty
-    end,
+	__index = function(table, key)
+		return empty
+	end,
 
-    __newindex = function() 
-        error("This table cannot be written!")
-    end
+	__newindex = function() 
+		error("This table cannot be written!")
+	end
 })
 
 util.tableOfEmpty = tableOfEmpty
@@ -52,6 +52,6 @@ function CMXint.InitializeStructs()
 	if isFileInitialized == true then return false end
 	logger = util.initSublogger("Structs")
 
-    isFileInitialized = true
+	isFileInitialized = true
 	return true
 end

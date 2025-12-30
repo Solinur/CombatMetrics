@@ -85,6 +85,6 @@ function CMXint.InitializeConsumables()
 	if isFileInitialized == true then return false end
 	logger = util.initSublogger("Consumables")
 
-    isFileInitialized = true
+	isFileInitialized = true
 	return true
 end

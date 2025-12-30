@@ -329,7 +329,7 @@ end
 
 
 function PanelObject:CreateSortFilterList(template, height, initFunc)
-	self.dataList = ui.SortFilterList:New(template, height)
+	self.dataList = ui.SortFilterList:New(self.control, template, height)
 	initFunc(self)
 end
 

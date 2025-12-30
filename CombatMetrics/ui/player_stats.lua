@@ -327,6 +327,6 @@ function CMXint.InitializePlayerStats()
 	
 
 
-    isFileInitialized = true
+	isFileInitialized = true
 	return true
 end

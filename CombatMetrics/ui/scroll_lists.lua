@@ -14,7 +14,7 @@ local SortFilterList = ZO_SortFilterList:Subclass()
 SortFilterList.UpdateRow = SortFilterList:MUST_IMPLEMENT()
 SortFilterList.BuildMasterList = SortFilterList:MUST_IMPLEMENT()
 
-
+ui.SortFilterList = SortFilterList
 
 local function onRowControlReset(self, pool)
     self.recovered = false
@@ -48,11 +48,12 @@ function SortFilterList:CreateDataEntry(...)
 end
 
 function SortFilterList:CompareItems(listEntry1, listEntry2)
-    return ZO_TableOrderingFunction(listEntry1.data, listEntry2.data, self.currentSortKey, self.sortKeys, self.currentSortOrder)
+    return ZO_TableOrderingFunction(listEntry1.data, listEntry2.data, self.currentSortKey, self.sortKeys,
+        self.currentSortOrder)
 end
 
 function SortFilterList:SortScrollList(...)
-    if(self.currentSortKey ~= nil and self.currentSortOrder ~= nil) then
+    if (self.currentSortKey ~= nil and self.currentSortOrder ~= nil) then
         local scrollData = ZO_ScrollList_GetDataList(self.list)
         table.sort(scrollData, self.sortFunction)
     end
@@ -60,11 +61,15 @@ function SortFilterList:SortScrollList(...)
     self:RefreshVisible()
 end
 
-ui.SortFilterList = SortFilterList
-
+---comment
+---@param control Control
+---@param key string
+---@param initialDirection boolean
+---@param highlightTemplate string
 function CMX_SortHeader_Initialize(control, key, initialDirection, highlightTemplate)
     control.key = key
     control.initialDirection = initialDirection or ZO_SORT_ORDER_DOWN
     control.usesArrow = true
-    control.highlightTemplate = highlightTemplate  -- TODO: Find highlight template
+    control.highlightTemplate = highlightTemplate -- TODO: Find highlight template
+    control:SetMouseEnabled(true)
 end

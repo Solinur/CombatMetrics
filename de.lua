@@ -2,7 +2,7 @@
 -- Functionality
 
 SafeAddString(SI_COMBAT_METRICS_LANG, "de", 1)
--- this will be removed from the items enchantment string to show the rest in the info panel, e.g. "Spell Damage Enchantment" is reduced to "Spell Damage".                                                         
+-- this will be removed from the items enchantment string to show the rest in the info panel, e.g. "Spell Damage Enchantment" is reduced to "Spell Damage".
 SafeAddString(SI_COMBAT_METRICS_ENCHANTMENT_TRIM, "Verzauberung:Â ", 1) -- ZOS uses a two byte char here !!!
 
 -- Fonts

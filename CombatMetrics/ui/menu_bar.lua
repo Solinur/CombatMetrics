@@ -253,14 +253,14 @@ local function initFeedbackButton(MenuPanel)
 
 		local feedbackSubItems = {
 			{ label = ZO_CachedStrFormat(stringFormatEU, GetString(SI_COMBAT_METRICS_FEEDBACK_MAIL)), callback = SendIngameMail, disabled = not isEUServer },
-			{ label = GetString(SI_COMBAT_METRICS_FEEDBACK_ESOUI),                                    callback = GotoESOUI },
-			{ label = GetString(SI_COMBAT_METRICS_FEEDBACK_GITHUB),                                   callback = GotoGithub },
-			{ label = GetString(SI_COMBAT_METRICS_FEEDBACK_DISCORD),                                  callback = GotoDiscord },
+			{ label = GetString(SI_COMBAT_METRICS_FEEDBACK_ESOUI), callback = GotoESOUI },
+			{ label = GetString(SI_COMBAT_METRICS_FEEDBACK_GITHUB), callback = GotoGithub },
+			{ label = GetString(SI_COMBAT_METRICS_FEEDBACK_DISCORD), callback = GotoDiscord },
 		}
 
 		local donationSubItems = {
-			{ label = ZO_CachedStrFormat(stringFormatEU, GetString(SI_COMBAT_METRICS_DONATE_GOLD)), callback = DonateGold,       disabled = not isEUServer },
-			{ label = GetString(SI_COMBAT_METRICS_DONATE_ESOUI),                                    callback = GotoESOUIDonation },
+			{ label = ZO_CachedStrFormat(stringFormatEU, GetString(SI_COMBAT_METRICS_DONATE_GOLD)), callback = DonateGold, disabled = not isEUServer },
+			{ label = GetString(SI_COMBAT_METRICS_DONATE_ESOUI), callback = GotoESOUIDonation },
 		}
 
 		AddCustomSubMenuItem(GetString(SI_COMBAT_METRICS_FEEDBACK_SEND), feedbackSubItems, nil, nil, nil, 2)

@@ -293,6 +293,6 @@ function CMXint.InitializeSkills()
 	if isFileInitialized == true then return false end
 	logger = util.initSublogger("Skills")
 
-    isFileInitialized = true
+	isFileInitialized = true
 	return true
 end

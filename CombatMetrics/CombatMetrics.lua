@@ -158,15 +158,15 @@ local StatDebuffs = {
 }
 
 local ignoredAbilityTiming = { -- Skills which ignore global cooldown
-    [132141] = true,    -- Blood Frenzy (Vampire Toggle)
-    [134160] = true,    -- Simmering Frenzy (Vampire Toggle)
-    [135841] = true,    -- Sated Fury (Vampire Toggle)
+	[132141] = true,	-- Blood Frenzy (Vampire Toggle)
+	[134160] = true,	-- Simmering Frenzy (Vampire Toggle)
+	[135841] = true,	-- Sated Fury (Vampire Toggle)
 }
 
 local ChangingAbilities = { -- Skills which can change un use
-    [61902] = 61907,    -- Grim Focus --> Assasins Will
-    [61919] = 61930,    -- Merciless Resolve --> Assasins Will
-	[61927] = 61932,    -- Relentless Focus --> Assasins Scourge
+	[61902] = 61907,	-- Grim Focus --> Assasins Will
+	[61919] = 61930,	-- Merciless Resolve --> Assasins Will
+	[61927] = 61932,	-- Relentless Focus --> Assasins Scourge
 	[117749] = 117773,  -- Stalking Blastbones (When greyed out)
 	[117690] = 117693,  -- Blighted Blastbones (When greyed out)
 	[46324] = 114716,  	-- Crystal Fragments Proc
@@ -179,9 +179,9 @@ for k,v in pairs(ChangingAbilities) do
 end
 
 local abilityDelay = {	-- Radiant Destruction and morphs have a 100ms delay after casting. 50ms for Jabs
-    [63044] = 100,
-    [63029] = 100,
-    [63046] = 100
+	[63044] = 100,
+	[63029] = 100,
+	[63046] = 100
 }
 
 local TrialDummyBuffs = {
@@ -236,8 +236,8 @@ end
 
 function CMX.spairs(t, order) -- from https://stackoverflow.com/questions/15706270/sort-a-table-in-lua
 
-    -- collect the keys
-    local keys = {}
+	-- collect the keys
+	local keys = {}
     for k in pairs(t) do keys[#keys+1] = k end
 
     -- if order function given, sort by it by passing the table and keys a, b,

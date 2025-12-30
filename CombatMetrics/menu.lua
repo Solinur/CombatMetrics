@@ -74,20 +74,20 @@ local function DonationContextMenu()
 end
 
 function CMXint.InitMenu(svdefaults)
-    -- load the settings->addons menu library
+	-- load the settings->addons menu library
 	local menu = LibAddonMenu2
 	if not LibAddonMenu2 then return end
 
 	local settings = CMXint.settings
 	local def = svdefaults
 
-    -- the panel for the addons menu
+	-- the panel for the addons menu
 	local panelData = {
 		type = "panel",
 		name = "Combat Metrics",
 		displayName = "Combat Metrics",
 		author = "Solinur",
-        version = "" .. CMXint.version,
+		version = "" .. CMXint.version,
 		registerForRefresh = true,
 		registerForDefaults = true,
 		website = "https://www.esoui.com/downloads/info1360-CombatMetrics.html",
@@ -95,7 +95,7 @@ function CMXint.InitMenu(svdefaults)
 		donation = DonationContextMenu,
 	}
 
-    --this adds entries in the addon menu
+	--this adds entries in the addon menu
 	local options = {
 		{
 			type = "header",

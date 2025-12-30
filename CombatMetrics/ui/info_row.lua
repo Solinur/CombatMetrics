@@ -84,6 +84,6 @@ function CMXint.InitializeInfoRow()
 	
 	SVHandler = CMXint.SVHandler
 
-    isFileInitialized = true
+	isFileInitialized = true
 	return true
 end

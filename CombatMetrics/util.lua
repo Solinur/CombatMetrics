@@ -380,6 +380,6 @@ function CMXint.InitializeUtils()
 	if isFileInitialized == true then return false end
 	logger = util.initSublogger("Utils")
 
-    isFileInitialized = true
+	isFileInitialized = true
 	return true
 end

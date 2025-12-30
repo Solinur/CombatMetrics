@@ -134,9 +134,9 @@ local LiveReportControls = {
 ---@diagnostic disable-next-line: duplicate-set-field
 function LiveReportControl:New(name)
 	assert(LiveReportControlSizes[name], "Invalid module name for LiveReportControl!")
-    local object = ZO_Object.New(self)
-    object:Initialize(name)
-    return object
+	local object = ZO_Object.New(self)
+	object:Initialize(name)
+	return object
 end
 
 function LiveReportControl:Initialize(name)
@@ -208,7 +208,7 @@ local function InitLiveReport(self)
 
 	self:ClearAnchors()
 	self:SetAnchor(CENTER, nil , TOPLEFT, settings.pos_x, settings.pos_y)
-    self:SetHandler("OnMoveStop", function () self:SavePosition() end)
+	self:SetHandler("OnMoveStop", function () self:SavePosition() end)
 	
 	util.storeOrigLayout(self)
 	self.fragment = ZO_HUDFadeSceneFragment:New(self)
@@ -319,6 +319,6 @@ function CMXint.InitializeLiveReport()
 
 	InitLiveReport(CMX.internal.LiveReport) -- TODO: Directly pass init function.
 
-    isFileInitialized = true
+	isFileInitialized = true
 	return true
 end

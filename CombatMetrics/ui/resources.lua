@@ -84,7 +84,7 @@ local function updateResourcePanel(self, fightData)
 	self:ResetBars(subpanel2)
 
 	local key, color1, color2
-    if rightpanel == "magicka" then
+	if rightpanel == "magicka" then
 		key = POWERTYPE_MAGICKA
 		color1 = {0.3, 0.4, 0.6, 1}
 		color2 = {0.4, 0.3, 0.6, 1}
@@ -118,6 +118,6 @@ function CMXint.InitializeResourcePanel()
 	-- ResourcePanel.Update = updateResourcePanel
 	-- ResourcePanel.Release = function() end
 
-    isFileInitialized = true
+	isFileInitialized = true
 	return true
 end

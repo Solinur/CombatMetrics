@@ -157,6 +157,6 @@ function CMXint.InitializeEquipment()
 	if isFileInitialized == true then return false end
 	logger = util.initSublogger("Equipment")
 
-    isFileInitialized = true
+	isFileInitialized = true
 	return true
 end

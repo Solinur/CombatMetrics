@@ -1400,6 +1400,6 @@ function CMXint.InitializeGraph()
 	if isFileInitialized == true then return false end
 	logger = util.initSublogger("Graph")
 
-    isFileInitialized = true
+	isFileInitialized = true
 	return true
 end

@@ -219,6 +219,6 @@ function CMXint.InitializeFightList()
 	if isFileInitialized == true then return false end
 	logger = util.initSublogger("FightList")
 
-    isFileInitialized = true
+	isFileInitialized = true
 	return true
 end

@@ -48,7 +48,7 @@ local function ApplyIndent(control, indent)
 end
 
 local function ShowControlOnAcquire(control)
-    control:SetHidden(false)
+	control:SetHidden(false)
 end
 
 local function CreateSharedControlType(template)
@@ -78,6 +78,6 @@ function CMXint.InitializeControlHandler()
 	ui.sharedLabels = CreateSharedControlType("CombatMetrics_SharedLabel")
 	ui.sharedSeparators = CreateSharedControlType("CombatMetrics_SharedSeparator")
 
-    isFileInitialized = true
+	isFileInitialized = true
 	return true
 end

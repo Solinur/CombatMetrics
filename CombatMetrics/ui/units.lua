@@ -169,6 +169,6 @@ function CMXint.InitializeUnits()
 	if isFileInitialized == true then return false end
 	logger = util.initSublogger("UnitPanel")
 
-    isFileInitialized = true
+	isFileInitialized = true
 	return true
 end
