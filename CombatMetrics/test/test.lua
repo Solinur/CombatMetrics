@@ -1,849 +1,789 @@
 CMX_TestData =
 {
-    ["charData"] = 
-    {
-        ["CPtotal"] = 2347,
-        ["name"] = "Solinur",
-        ["level"] = 50,
-        ["gender"] = 2,
-        ["classId"] = 6,
-        ["raceId"] = 4,
-    },
-    ["info"] = 
-    {
-        ["zone"] = "Hall of the Lunar Champion",
-        ["ESOversion"] = "eso.live.11.2.6.3164840",
-        ["zoneId"] = 1129,
-        ["time"] = "14:58:34",
-        ["APIversion"] = 101048,
-        ["subzone"] = "Hall of the Lunar Champion",
-        ["account"] = "@Solinur",
-        ["date"] = 1764424714,
-    },
-    ["prepared"] = true,
+    ["dataVersion"] = 3,
     ["healingDone"] = 
     {
-        [52025] = 
+        [35999] = 
         {
+            ["endTime"] = 5212644,
+            ["startTime"] = 5205180,
             ["totalHealing"] = 0,
-            ["startTime"] = 2253675,
-            ["endTime"] = 2254796,
-            [52025] = 
+            ["overflowHealing"] = 25964,
+            [35999] = 
             {
-                ["totalHealing"] = 0,
-                ["startTime"] = 2253675,
-                ["endTime"] = 2254796,
+                ["endTime"] = 5212644,
                 [201275] = 
                 {
-                    ["totalHealing"] = 0,
-                    ["overflowHealing"] = 11211,
-                    ["criticalHeals"] = 1,
-                    ["criticalHealing"] = 0,
-                    ["min"] = 4122,
                     ["normalHealing"] = 0,
-                    ["endTime"] = 2254796,
-                    ["absorbedHeals"] = 0,
-                    ["normalHeals"] = 1,
-                    ["startTime"] = 2253675,
-                    ["totalHeals"] = 2,
+                    ["criticalHealing"] = 0,
                     ["powerType"] = 0,
-                    ["absorbedHealing"] = 0,
+                    ["totalHealing"] = 0,
+                    ["min"] = 6424,
+                    ["overflowHealing"] = 12848,
+                    ["max"] = 6424,
+                    ["endTime"] = 5206211,
+                    ["startTime"] = 5205180,
+                    ["absorbedHeals"] = 0,
+                    ["totalHeals"] = 2,
                     ["overflowHeals"] = 2,
-                    ["max"] = 7089,
+                    ["absorbedHealing"] = 0,
+                    ["normalHeals"] = 0,
+                    ["criticalHeals"] = 2,
                 },
-                ["overflowHealing"] = 11211,
+                ["startTime"] = 5205180,
+                [69118] = 
+                {
+                    ["normalHealing"] = 0,
+                    ["criticalHealing"] = 0,
+                    ["powerType"] = 1,
+                    ["totalHealing"] = 0,
+                    ["min"] = 5305,
+                    ["overflowHealing"] = 13116,
+                    ["max"] = 7811,
+                    ["endTime"] = 5212644,
+                    ["startTime"] = 5212010,
+                    ["absorbedHeals"] = 0,
+                    ["totalHeals"] = 2,
+                    ["overflowHeals"] = 2,
+                    ["absorbedHealing"] = 0,
+                    ["normalHeals"] = 2,
+                    ["criticalHeals"] = 0,
+                },
+                ["overflowHealing"] = 25964,
+                ["totalHealing"] = 0,
             },
-            ["overflowHealing"] = 11211,
         },
     },
     ["processors"] = 
     {
-        ["effects"] = true,
         ["combat"] = true,
+        ["effects"] = true,
     },
-    ["isWipe"] = false,
-    ["dataVersion"] = 3,
     ["effects"] = 
     {
-        [72618] = 
+        [42509] = 
         {
             [183008] = 
             {
-                ["count"] = 0,
                 ["maxStacks"] = 1,
                 ["name"] = "Abyssal Ink",
+                ["uptime"] = 7464,
+                ["groupUptime"] = 7464,
+                ["groupCount"] = 1,
+                ["stacks"] = 
+                {
+                    [1] = 
+                    {
+                        ["uptime"] = 7464,
+                        ["groupCount"] = 1,
+                        ["count"] = 1,
+                        ["groupUptime"] = 7464,
+                    },
+                },
                 ["slots"] = 
                 {
                 },
                 ["effectType"] = 2,
-                ["stacks"] = 
-                {
-                },
-                ["uptime"] = 0,
-                ["groupUptime"] = 0,
+                ["count"] = 1,
                 ["iconId"] = 183008,
-                ["groupCount"] = 0,
             },
             [88401] = 
             {
-                ["count"] = 0,
                 ["maxStacks"] = 1,
                 ["name"] = "Minor Magickasteal",
+                ["uptime"] = 634,
+                ["groupUptime"] = 634,
+                ["groupCount"] = 1,
+                ["stacks"] = 
+                {
+                    [1] = 
+                    {
+                        ["uptime"] = 634,
+                        ["groupCount"] = 1,
+                        ["count"] = 1,
+                        ["groupUptime"] = 634,
+                    },
+                },
                 ["slots"] = 
                 {
                 },
                 ["effectType"] = 2,
-                ["stacks"] = 
-                {
-                },
-                ["uptime"] = 0,
-                ["groupUptime"] = 0,
+                ["count"] = 1,
                 ["iconId"] = 88401,
-                ["groupCount"] = 0,
             },
             [174250] = 
             {
-                ["count"] = 0,
-                ["maxStacks"] = 1,
+                ["firstStartTime"] = 5205183,
+                ["maxStacks"] = 3,
                 ["name"] = "Force of Nature",
+                ["uptime"] = 0,
+                ["groupUptime"] = 0,
+                ["groupCount"] = 0,
+                ["firstGroupStartTime"] = 5205183,
+                ["stacks"] = 
+                {
+                    [2] = 
+                    {
+                        ["uptime"] = 4065,
+                        ["groupCount"] = 1,
+                        ["count"] = 1,
+                        ["groupUptime"] = 4065,
+                    },
+                    [3] = 
+                    {
+                        ["uptime"] = 633,
+                        ["groupCount"] = 1,
+                        ["count"] = 1,
+                        ["groupUptime"] = 633,
+                    },
+                },
+                ["slots"] = 
+                {
+                    [0] = 
+                    {
+                        [1] = 5205183,
+                        [2] = 5211644,
+                        ["abilityId"] = 174250,
+                        ["isPlayerSource"] = true,
+                    },
+                },
+                ["effectType"] = 2,
+                ["count"] = 0,
+                ["iconId"] = 174250,
+            },
+            [178123] = 
+            {
+                ["maxStacks"] = 1,
+                ["name"] = "Sundered",
+                ["uptime"] = 3985,
+                ["groupUptime"] = 3985,
+                ["groupCount"] = 1,
+                ["stacks"] = 
+                {
+                    [1] = 
+                    {
+                        ["uptime"] = 0,
+                        ["groupCount"] = 1,
+                        ["count"] = 0,
+                        ["groupUptime"] = 3985,
+                    },
+                },
                 ["slots"] = 
                 {
                 },
                 ["effectType"] = 2,
+                ["count"] = 1,
+                ["iconId"] = 178123,
+            },
+            [18084] = 
+            {
+                ["maxStacks"] = 1,
+                ["name"] = "Burning",
+                ["uptime"] = 5065,
+                ["groupUptime"] = 5065,
+                ["groupCount"] = 2,
                 ["stacks"] = 
                 {
+                    [1] = 
+                    {
+                        ["uptime"] = 5065,
+                        ["groupCount"] = 2,
+                        ["count"] = 2,
+                        ["groupUptime"] = 5065,
+                    },
                 },
-                ["uptime"] = 0,
-                ["groupUptime"] = 0,
-                ["iconId"] = 174250,
-                ["groupCount"] = 0,
+                ["slots"] = 
+                {
+                },
+                ["effectType"] = 2,
+                ["count"] = 2,
+                ["iconId"] = 18084,
             },
             [178118] = 
             {
-                ["count"] = 0,
                 ["maxStacks"] = 1,
                 ["name"] = "Overcharged",
+                ["uptime"] = 633,
+                ["groupUptime"] = 633,
+                ["groupCount"] = 1,
+                ["stacks"] = 
+                {
+                    [1] = 
+                    {
+                        ["uptime"] = 0,
+                        ["groupCount"] = 1,
+                        ["count"] = 0,
+                        ["groupUptime"] = 633,
+                    },
+                },
                 ["slots"] = 
                 {
                 },
                 ["effectType"] = 2,
+                ["count"] = 1,
+                ["iconId"] = 178118,
+            },
+            [61742] = 
+            {
+                ["maxStacks"] = 1,
+                ["name"] = "Minor Breach",
+                ["uptime"] = 3988,
+                ["groupUptime"] = 3988,
+                ["groupCount"] = 1,
                 ["stacks"] = 
                 {
+                    [1] = 
+                    {
+                        ["uptime"] = 3988,
+                        ["groupCount"] = 1,
+                        ["count"] = 1,
+                        ["groupUptime"] = 3988,
+                    },
                 },
-                ["uptime"] = 0,
-                ["groupUptime"] = 0,
-                ["iconId"] = 178118,
-                ["groupCount"] = 0,
+                ["slots"] = 
+                {
+                },
+                ["effectType"] = 2,
+                ["count"] = 1,
+                ["iconId"] = 61742,
+            },
+            [63044] = 
+            {
+                ["maxStacks"] = 1,
+                ["name"] = "Radiant Glory",
+                ["uptime"] = 1060,
+                ["groupUptime"] = 1060,
+                ["groupCount"] = 1,
+                ["stacks"] = 
+                {
+                    [1] = 
+                    {
+                        ["uptime"] = 1060,
+                        ["groupCount"] = 1,
+                        ["count"] = 1,
+                        ["groupUptime"] = 1060,
+                    },
+                },
+                ["slots"] = 
+                {
+                },
+                ["effectType"] = 2,
+                ["count"] = 1,
+                ["iconId"] = 63044,
             },
         },
-        [52025] = 
+        [35999] = 
         {
             [61665] = 
             {
-                ["count"] = 0,
+                ["firstStartTime"] = 5198699,
                 ["maxStacks"] = 1,
                 ["name"] = "Major Brutality",
-                ["slots"] = 
-                {
-                },
-                ["effectType"] = 1,
+                ["uptime"] = 0,
+                ["groupUptime"] = 0,
+                ["groupCount"] = 0,
+                ["firstGroupStartTime"] = 5198699,
                 ["stacks"] = 
                 {
                 },
-                ["uptime"] = 0,
-                ["groupUptime"] = 0,
+                ["slots"] = 
+                {
+                    [10] = 
+                    {
+                        [1] = 5198699,
+                        ["abilityId"] = 61665,
+                        ["isPlayerSource"] = true,
+                    },
+                },
+                ["effectType"] = 1,
+                ["count"] = 0,
                 ["iconId"] = 61665,
-                ["groupCount"] = 0,
             },
             [61666] = 
             {
-                ["count"] = 0,
+                ["firstStartTime"] = 5209893,
                 ["maxStacks"] = 1,
                 ["name"] = "Minor Savagery",
-                ["slots"] = 
-                {
-                },
-                ["effectType"] = 1,
+                ["uptime"] = 5172,
+                ["groupUptime"] = 5172,
+                ["groupCount"] = 2,
+                ["firstGroupStartTime"] = 5209893,
                 ["stacks"] = 
                 {
+                    [1] = 
+                    {
+                        ["uptime"] = 5172,
+                        ["groupCount"] = 2,
+                        ["count"] = 2,
+                        ["groupUptime"] = 5172,
+                    },
                 },
-                ["uptime"] = 0,
-                ["groupUptime"] = 0,
+                ["slots"] = 
+                {
+                    [11] = 
+                    {
+                        [1] = 5209893,
+                        ["abilityId"] = 61666,
+                        ["isPlayerSource"] = true,
+                    },
+                },
+                ["effectType"] = 1,
+                ["count"] = 2,
                 ["iconId"] = 61666,
-                ["groupCount"] = 0,
-            },
-            [127331] = 
-            {
-                ["count"] = 0,
-                ["maxStacks"] = 1,
-                ["name"] = "Mystic Orb",
-                ["slots"] = 
-                {
-                },
-                ["effectType"] = 1,
-                ["stacks"] = 
-                {
-                },
-                ["uptime"] = 0,
-                ["groupUptime"] = 0,
-                ["iconId"] = 127331,
-                ["groupCount"] = 0,
-            },
-            [89957] = 
-            {
-                ["count"] = 0,
-                ["maxStacks"] = 1,
-                ["name"] = "Dubious Camoran Throne",
-                ["slots"] = 
-                {
-                },
-                ["effectType"] = 1,
-                ["stacks"] = 
-                {
-                },
-                ["uptime"] = 0,
-                ["groupUptime"] = 0,
-                ["iconId"] = 89957,
-                ["groupCount"] = 0,
-            },
-            [61736] = 
-            {
-                ["count"] = 0,
-                ["maxStacks"] = 1,
-                ["name"] = "Major Expedition",
-                ["slots"] = 
-                {
-                },
-                ["effectType"] = 1,
-                ["stacks"] = 
-                {
-                },
-                ["uptime"] = 0,
-                ["groupUptime"] = 0,
-                ["iconId"] = 61736,
-                ["groupCount"] = 0,
-            },
-            [76617] = 
-            {
-                ["count"] = 0,
-                ["maxStacks"] = 1,
-                ["name"] = "Minor Slayer",
-                ["slots"] = 
-                {
-                },
-                ["effectType"] = 1,
-                ["stacks"] = 
-                {
-                },
-                ["uptime"] = 0,
-                ["groupUptime"] = 0,
-                ["iconId"] = 76617,
-                ["groupCount"] = 0,
-            },
-            [21230] = 
-            {
-                ["count"] = 0,
-                ["maxStacks"] = 1,
-                ["name"] = "Berserker",
-                ["slots"] = 
-                {
-                },
-                ["effectType"] = 1,
-                ["stacks"] = 
-                {
-                },
-                ["uptime"] = 0,
-                ["groupUptime"] = 0,
-                ["iconId"] = 21230,
-                ["groupCount"] = 0,
-            },
-            [63569] = 
-            {
-                ["count"] = 0,
-                ["maxStacks"] = 1,
-                ["name"] = "Gallop",
-                ["slots"] = 
-                {
-                },
-                ["effectType"] = 1,
-                ["stacks"] = 
-                {
-                },
-                ["uptime"] = 0,
-                ["groupUptime"] = 0,
-                ["iconId"] = 63569,
-                ["groupCount"] = 0,
-            },
-            [185842] = 
-            {
-                ["count"] = 0,
-                ["maxStacks"] = 1,
-                ["name"] = "Inspired Scholarship",
-                ["slots"] = 
-                {
-                },
-                ["effectType"] = 1,
-                ["stacks"] = 
-                {
-                },
-                ["uptime"] = 0,
-                ["groupUptime"] = 0,
-                ["iconId"] = 185842,
-                ["groupCount"] = 0,
-            },
-            [61716] = 
-            {
-                ["count"] = 0,
-                ["maxStacks"] = 1,
-                ["name"] = "Major Evasion",
-                ["slots"] = 
-                {
-                },
-                ["effectType"] = 1,
-                ["stacks"] = 
-                {
-                },
-                ["uptime"] = 0,
-                ["groupUptime"] = 0,
-                ["iconId"] = 61716,
-                ["groupCount"] = 0,
-            },
-            [38901] = 
-            {
-                ["count"] = 0,
-                ["maxStacks"] = 1,
-                ["name"] = "Quick Cloak",
-                ["slots"] = 
-                {
-                },
-                ["effectType"] = 1,
-                ["stacks"] = 
-                {
-                },
-                ["uptime"] = 0,
-                ["groupUptime"] = 0,
-                ["iconId"] = 38901,
-                ["groupCount"] = 0,
-            },
-            [61687] = 
-            {
-                ["count"] = 0,
-                ["maxStacks"] = 1,
-                ["name"] = "Major Sorcery",
-                ["slots"] = 
-                {
-                },
-                ["effectType"] = 1,
-                ["stacks"] = 
-                {
-                },
-                ["uptime"] = 0,
-                ["groupUptime"] = 0,
-                ["iconId"] = 61687,
-                ["groupCount"] = 0,
-            },
-            [184220] = 
-            {
-                ["count"] = 0,
-                ["maxStacks"] = 3,
-                ["name"] = "Crux",
-                ["slots"] = 
-                {
-                },
-                ["effectType"] = 1,
-                ["stacks"] = 
-                {
-                },
-                ["uptime"] = 0,
-                ["groupUptime"] = 0,
-                ["iconId"] = 184220,
-                ["groupCount"] = 0,
-            },
-            [61689] = 
-            {
-                ["count"] = 0,
-                ["maxStacks"] = 1,
-                ["name"] = "Major Prophecy",
-                ["slots"] = 
-                {
-                },
-                ["effectType"] = 1,
-                ["stacks"] = 
-                {
-                },
-                ["uptime"] = 0,
-                ["groupUptime"] = 0,
-                ["iconId"] = 61689,
-                ["groupCount"] = 0,
-            },
-            [194875] = 
-            {
-                ["count"] = 0,
-                ["maxStacks"] = 1,
-                ["name"] = "Fated Fortune",
-                ["slots"] = 
-                {
-                },
-                ["effectType"] = 1,
-                ["stacks"] = 
-                {
-                },
-                ["uptime"] = 0,
-                ["groupUptime"] = 0,
-                ["iconId"] = 194875,
-                ["groupCount"] = 0,
-            },
-            [122587] = 
-            {
-                ["count"] = 0,
-                ["maxStacks"] = 6,
-                ["name"] = "Relentless Focus",
-                ["slots"] = 
-                {
-                },
-                ["effectType"] = 1,
-                ["stacks"] = 
-                {
-                },
-                ["uptime"] = 0,
-                ["groupUptime"] = 0,
-                ["iconId"] = 122587,
-                ["groupCount"] = 0,
-            },
-            [184860] = 
-            {
-                ["count"] = 0,
-                ["maxStacks"] = 1,
-                ["name"] = "Harnessed Quintessence",
-                ["slots"] = 
-                {
-                },
-                ["effectType"] = 1,
-                ["stacks"] = 
-                {
-                },
-                ["uptime"] = 0,
-                ["groupUptime"] = 0,
-                ["iconId"] = 184860,
-                ["groupCount"] = 0,
-            },
-            [61746] = 
-            {
-                ["count"] = 0,
-                ["maxStacks"] = 1,
-                ["name"] = "Minor Force",
-                ["slots"] = 
-                {
-                },
-                ["effectType"] = 1,
-                ["stacks"] = 
-                {
-                },
-                ["uptime"] = 0,
-                ["groupUptime"] = 0,
-                ["iconId"] = 61746,
-                ["groupCount"] = 0,
             },
             [61667] = 
             {
-                ["count"] = 0,
+                ["firstStartTime"] = 5198699,
                 ["maxStacks"] = 1,
                 ["name"] = "Major Savagery",
+                ["uptime"] = 0,
+                ["groupUptime"] = 0,
+                ["groupCount"] = 0,
+                ["firstGroupStartTime"] = 5198699,
+                ["stacks"] = 
+                {
+                },
+                ["slots"] = 
+                {
+                    [12] = 
+                    {
+                        [1] = 5198699,
+                        ["abilityId"] = 61667,
+                        ["isPlayerSource"] = true,
+                    },
+                },
+                ["effectType"] = 1,
+                ["count"] = 0,
+                ["iconId"] = 61667,
+            },
+            [61736] = 
+            {
+                ["maxStacks"] = 1,
+                ["name"] = "Major Expedition",
+                ["uptime"] = 3991,
+                ["groupUptime"] = 3991,
+                ["groupCount"] = 1,
+                ["stacks"] = 
+                {
+                    [1] = 
+                    {
+                        ["uptime"] = 3991,
+                        ["groupCount"] = 1,
+                        ["count"] = 1,
+                        ["groupUptime"] = 3991,
+                    },
+                },
                 ["slots"] = 
                 {
                 },
                 ["effectType"] = 1,
+                ["count"] = 1,
+                ["iconId"] = 61736,
+            },
+            [76617] = 
+            {
+                ["firstStartTime"] = 5198699,
+                ["maxStacks"] = 1,
+                ["name"] = "Minor Slayer",
+                ["uptime"] = 0,
+                ["groupUptime"] = 0,
+                ["groupCount"] = 0,
+                ["firstGroupStartTime"] = 5198699,
                 ["stacks"] = 
                 {
                 },
+                ["slots"] = 
+                {
+                    [80] = 
+                    {
+                        [1] = 5198699,
+                        ["abilityId"] = 76617,
+                        ["isPlayerSource"] = true,
+                    },
+                },
+                ["effectType"] = 1,
+                ["count"] = 0,
+                ["iconId"] = 76617,
+            },
+            [215727] = 
+            {
+                ["maxStacks"] = 1,
+                ["name"] = "Sunderer",
+                ["uptime"] = 3985,
+                ["groupUptime"] = 3985,
+                ["groupCount"] = 1,
+                ["stacks"] = 
+                {
+                    [1] = 
+                    {
+                        ["uptime"] = 3985,
+                        ["groupCount"] = 1,
+                        ["count"] = 1,
+                        ["groupUptime"] = 3985,
+                    },
+                },
+                ["slots"] = 
+                {
+                },
+                ["effectType"] = 1,
+                ["count"] = 1,
+                ["iconId"] = 215727,
+            },
+            [63569] = 
+            {
+                ["firstStartTime"] = 5198699,
+                ["maxStacks"] = 1,
+                ["name"] = "Gallop",
                 ["uptime"] = 0,
                 ["groupUptime"] = 0,
-                ["iconId"] = 61667,
                 ["groupCount"] = 0,
+                ["firstGroupStartTime"] = 5198699,
+                ["stacks"] = 
+                {
+                },
+                ["slots"] = 
+                {
+                    [62] = 
+                    {
+                        [1] = 5198699,
+                        ["abilityId"] = 63569,
+                        ["isPlayerSource"] = true,
+                    },
+                },
+                ["effectType"] = 1,
+                ["count"] = 0,
+                ["iconId"] = 63569,
+            },
+            [61746] = 
+            {
+                ["firstStartTime"] = 5198699,
+                ["maxStacks"] = 1,
+                ["name"] = "Minor Force",
+                ["uptime"] = 0,
+                ["groupUptime"] = 0,
+                ["groupCount"] = 0,
+                ["firstGroupStartTime"] = 5198699,
+                ["stacks"] = 
+                {
+                },
+                ["slots"] = 
+                {
+                    [52] = 
+                    {
+                        [1] = 5198699,
+                        ["abilityId"] = 61746,
+                        ["isPlayerSource"] = true,
+                    },
+                },
+                ["effectType"] = 1,
+                ["count"] = 0,
+                ["iconId"] = 61746,
+            },
+            [61716] = 
+            {
+                ["firstStartTime"] = 5203627,
+                ["maxStacks"] = 1,
+                ["name"] = "Major Evasion",
+                ["uptime"] = 0,
+                ["groupUptime"] = 0,
+                ["groupCount"] = 0,
+                ["firstGroupStartTime"] = 5203627,
+                ["stacks"] = 
+                {
+                },
+                ["slots"] = 
+                {
+                    [330] = 
+                    {
+                        [1] = 5203627,
+                        ["abilityId"] = 61716,
+                        ["isPlayerSource"] = true,
+                    },
+                },
+                ["effectType"] = 1,
+                ["count"] = 0,
+                ["iconId"] = 61716,
+            },
+            [38901] = 
+            {
+                ["firstStartTime"] = 5203627,
+                ["maxStacks"] = 1,
+                ["name"] = "Quick Cloak",
+                ["uptime"] = 0,
+                ["groupUptime"] = 0,
+                ["groupCount"] = 0,
+                ["firstGroupStartTime"] = 5203627,
+                ["stacks"] = 
+                {
+                },
+                ["slots"] = 
+                {
+                    [328] = 
+                    {
+                        [1] = 5203627,
+                        ["abilityId"] = 38901,
+                        ["isPlayerSource"] = true,
+                    },
+                },
+                ["effectType"] = 1,
+                ["count"] = 0,
+                ["iconId"] = 38901,
+            },
+            [61687] = 
+            {
+                ["firstStartTime"] = 5198699,
+                ["maxStacks"] = 1,
+                ["name"] = "Major Sorcery",
+                ["uptime"] = 0,
+                ["groupUptime"] = 0,
+                ["groupCount"] = 0,
+                ["firstGroupStartTime"] = 5198699,
+                ["stacks"] = 
+                {
+                },
+                ["slots"] = 
+                {
+                    [14] = 
+                    {
+                        [1] = 5198699,
+                        ["abilityId"] = 61687,
+                        ["isPlayerSource"] = true,
+                    },
+                },
+                ["effectType"] = 1,
+                ["count"] = 0,
+                ["iconId"] = 61687,
+            },
+            [184860] = 
+            {
+                ["firstStartTime"] = 5212010,
+                ["maxStacks"] = 1,
+                ["name"] = "Harnessed Quintessence",
+                ["uptime"] = 0,
+                ["groupUptime"] = 0,
+                ["groupCount"] = 0,
+                ["firstGroupStartTime"] = 5212010,
+                ["stacks"] = 
+                {
+                },
+                ["slots"] = 
+                {
+                    [353] = 
+                    {
+                        [1] = 5212010,
+                        ["abilityId"] = 184860,
+                        ["isPlayerSource"] = true,
+                    },
+                },
+                ["effectType"] = 1,
+                ["count"] = 0,
+                ["iconId"] = 184860,
+            },
+            [61689] = 
+            {
+                ["firstStartTime"] = 5198699,
+                ["maxStacks"] = 1,
+                ["name"] = "Major Prophecy",
+                ["uptime"] = 0,
+                ["groupUptime"] = 0,
+                ["groupCount"] = 0,
+                ["firstGroupStartTime"] = 5198699,
+                ["stacks"] = 
+                {
+                },
+                ["slots"] = 
+                {
+                    [16] = 
+                    {
+                        [1] = 5198699,
+                        ["abilityId"] = 61689,
+                        ["isPlayerSource"] = true,
+                    },
+                },
+                ["effectType"] = 1,
+                ["count"] = 0,
+                ["iconId"] = 61689,
+            },
+            [61685] = 
+            {
+                ["firstStartTime"] = 5211568,
+                ["maxStacks"] = 1,
+                ["name"] = "Minor Sorcery",
+                ["uptime"] = 0,
+                ["groupUptime"] = 0,
+                ["groupCount"] = 0,
+                ["firstGroupStartTime"] = 5211568,
+                ["stacks"] = 
+                {
+                },
+                ["slots"] = 
+                {
+                    [13] = 
+                    {
+                        [1] = 5211568,
+                        ["abilityId"] = 61685,
+                        ["isPlayerSource"] = true,
+                    },
+                },
+                ["effectType"] = 1,
+                ["count"] = 0,
+                ["iconId"] = 61685,
+            },
+            [122587] = 
+            {
+                ["firstStartTime"] = 5204721,
+                ["maxStacks"] = 3,
+                ["name"] = "Relentless Focus",
+                ["uptime"] = 0,
+                ["groupUptime"] = 0,
+                ["groupCount"] = 0,
+                ["firstGroupStartTime"] = 5204721,
+                ["stacks"] = 
+                {
+                },
+                ["slots"] = 
+                {
+                    [333] = 
+                    {
+                        [1] = 5204721,
+                        [2] = 5205828,
+                        [3] = 5206886,
+                        ["abilityId"] = 122587,
+                        ["isPlayerSource"] = true,
+                    },
+                },
+                ["effectType"] = 1,
+                ["count"] = 0,
+                ["iconId"] = 122587,
+            },
+            [184220] = 
+            {
+                ["firstStartTime"] = 5208210,
+                ["maxStacks"] = 3,
+                ["name"] = "Crux",
+                ["uptime"] = 1838,
+                ["groupUptime"] = 1838,
+                ["groupCount"] = 1,
+                ["firstGroupStartTime"] = 5208210,
+                ["stacks"] = 
+                {
+                    [1] = 
+                    {
+                        ["uptime"] = 1838,
+                        ["groupCount"] = 1,
+                        ["count"] = 1,
+                        ["groupUptime"] = 1838,
+                    },
+                    [2] = 
+                    {
+                        ["uptime"] = 1835,
+                        ["groupCount"] = 1,
+                        ["count"] = 1,
+                        ["groupUptime"] = 1835,
+                    },
+                    [3] = 
+                    {
+                        ["uptime"] = 804,
+                        ["groupCount"] = 1,
+                        ["count"] = 1,
+                        ["groupUptime"] = 804,
+                    },
+                },
+                ["slots"] = 
+                {
+                    [348] = 
+                    {
+                        [1] = 5208210,
+                        ["abilityId"] = 184220,
+                        ["isPlayerSource"] = true,
+                    },
+                },
+                ["effectType"] = 1,
+                ["count"] = 1,
+                ["iconId"] = 184220,
+            },
+            [185842] = 
+            {
+                ["firstStartTime"] = 5201183,
+                ["maxStacks"] = 1,
+                ["name"] = "Inspired Scholarship",
+                ["uptime"] = 0,
+                ["groupUptime"] = 0,
+                ["groupCount"] = 0,
+                ["firstGroupStartTime"] = 5201183,
+                ["stacks"] = 
+                {
+                },
+                ["slots"] = 
+                {
+                    [307] = 
+                    {
+                        [1] = 5201183,
+                        ["abilityId"] = 185842,
+                        ["isPlayerSource"] = true,
+                    },
+                },
+                ["effectType"] = 1,
+                ["count"] = 0,
+                ["iconId"] = 185842,
+            },
+            [194875] = 
+            {
+                ["firstStartTime"] = 5205177,
+                ["maxStacks"] = 1,
+                ["name"] = "Fated Fortune",
+                ["uptime"] = 0,
+                ["groupUptime"] = 0,
+                ["groupCount"] = 0,
+                ["firstGroupStartTime"] = 5205177,
+                ["stacks"] = 
+                {
+                },
+                ["slots"] = 
+                {
+                    [336] = 
+                    {
+                        [1] = 5205177,
+                        ["abilityId"] = 194875,
+                        ["isPlayerSource"] = true,
+                    },
+                },
+                ["effectType"] = 1,
+                ["count"] = 0,
+                ["iconId"] = 194875,
             },
             [13975] = 
             {
-                ["count"] = 0,
+                ["firstStartTime"] = 5198699,
                 ["maxStacks"] = 1,
                 ["name"] = "Boon: The Thief",
-                ["slots"] = 
-                {
-                },
-                ["effectType"] = 1,
+                ["uptime"] = 0,
+                ["groupUptime"] = 0,
+                ["groupCount"] = 0,
+                ["firstGroupStartTime"] = 5198699,
                 ["stacks"] = 
                 {
                 },
-                ["uptime"] = 0,
-                ["groupUptime"] = 0,
+                ["slots"] = 
+                {
+                    [83] = 
+                    {
+                        [1] = 5198699,
+                        ["abilityId"] = 13975,
+                        ["isPlayerSource"] = true,
+                    },
+                },
+                ["effectType"] = 1,
+                ["count"] = 0,
                 ["iconId"] = 13975,
-                ["groupCount"] = 0,
             },
         },
     },
-    ["damageDone"] = 
-    {
-        [52025] = 
-        {
-            ["endTime"] = 2259930,
-            ["startTime"] = 2252362,
-            [72618] = 
-            {
-                [62912] = 
-                {
-                    ["startTime"] = 2252362,
-                    ["endTime"] = 2259413,
-                    ["totalDamage"] = 44848,
-                    ["max"] = 7265,
-                    ["min"] = 3381,
-                    ["damageType"] = 3,
-                    ["totalHits"] = 44848,
-                    ["absorbedDamage"] = 0,
-                    ["normalHits"] = 3,
-                    ["criticalHits"] = 5,
-                    ["blockedDamage"] = 0,
-                    ["blockedHits"] = 0,
-                    ["absorbedHits"] = 0,
-                    ["criticalDamage"] = 33997,
-                    ["normalDamage"] = 10851,
-                },
-                ["startTime"] = 2252362,
-                [186370] = 
-                {
-                    ["startTime"] = 2256230,
-                    ["endTime"] = 2259930,
-                    ["totalDamage"] = 212729,
-                    ["max"] = 21923,
-                    ["min"] = 10696,
-                    ["damageType"] = 8,
-                    ["totalHits"] = 212729,
-                    ["absorbedDamage"] = 0,
-                    ["normalHits"] = 4,
-                    ["criticalHits"] = 8,
-                    ["blockedDamage"] = 0,
-                    ["blockedHits"] = 0,
-                    ["absorbedHits"] = 0,
-                    ["criticalDamage"] = 168451,
-                    ["normalDamage"] = 44278,
-                },
-                [185843] = 
-                {
-                    ["startTime"] = 2253668,
-                    ["endTime"] = 2256880,
-                    ["totalDamage"] = 9913,
-                    ["max"] = 5316,
-                    ["min"] = 4597,
-                    ["damageType"] = 8,
-                    ["totalHits"] = 9913,
-                    ["absorbedDamage"] = 0,
-                    ["normalHits"] = 2,
-                    ["criticalHits"] = 0,
-                    ["blockedDamage"] = 0,
-                    ["blockedHits"] = 0,
-                    ["absorbedHits"] = 0,
-                    ["criticalDamage"] = 0,
-                    ["normalDamage"] = 9913,
-                },
-                [16165] = 
-                {
-                    ["startTime"] = 2253439,
-                    ["endTime"] = 2253439,
-                    ["totalDamage"] = 79,
-                    ["max"] = 79,
-                    ["min"] = 79,
-                    ["damageType"] = 3,
-                    ["totalHits"] = 79,
-                    ["absorbedDamage"] = 0,
-                    ["normalHits"] = 0,
-                    ["criticalHits"] = 1,
-                    ["blockedDamage"] = 0,
-                    ["blockedHits"] = 0,
-                    ["absorbedHits"] = 0,
-                    ["criticalDamage"] = 79,
-                    ["normalDamage"] = 0,
-                },
-                ["endTime"] = 2259930,
-                [42029] = 
-                {
-                    ["startTime"] = 2254312,
-                    ["endTime"] = 2259271,
-                    ["totalDamage"] = 20293,
-                    ["max"] = 4090,
-                    ["min"] = 2184,
-                    ["damageType"] = 8,
-                    ["totalHits"] = 20293,
-                    ["absorbedDamage"] = 0,
-                    ["normalHits"] = 2,
-                    ["criticalHits"] = 4,
-                    ["blockedDamage"] = 0,
-                    ["blockedHits"] = 0,
-                    ["absorbedHits"] = 0,
-                    ["criticalDamage"] = 15869,
-                    ["normalDamage"] = 4424,
-                },
-                [148797] = 
-                {
-                    ["startTime"] = 2253675,
-                    ["endTime"] = 2256555,
-                    ["totalDamage"] = 8286,
-                    ["max"] = 4564,
-                    ["min"] = 3722,
-                    ["damageType"] = 8,
-                    ["totalHits"] = 8286,
-                    ["absorbedDamage"] = 0,
-                    ["normalHits"] = 0,
-                    ["criticalHits"] = 2,
-                    ["blockedDamage"] = 0,
-                    ["blockedHits"] = 0,
-                    ["absorbedHits"] = 0,
-                    ["criticalDamage"] = 8286,
-                    ["normalDamage"] = 0,
-                },
-                [183006] = 
-                {
-                    ["startTime"] = 2253668,
-                    ["endTime"] = 2254796,
-                    ["totalDamage"] = 35477,
-                    ["max"] = 19254,
-                    ["min"] = 16223,
-                    ["damageType"] = 2,
-                    ["totalHits"] = 35477,
-                    ["absorbedDamage"] = 0,
-                    ["normalHits"] = 0,
-                    ["criticalHits"] = 2,
-                    ["blockedDamage"] = 0,
-                    ["blockedHits"] = 0,
-                    ["absorbedHits"] = 0,
-                    ["criticalDamage"] = 35477,
-                    ["normalDamage"] = 0,
-                },
-                ["totalDamage"] = 331625,
-            },
-            ["totalDamage"] = 331625,
-        },
-    },
-    ["units"] = 
-    {
-        [72618] = 
-        {
-            ["maxHealth"] = 21896,
-            ["unitType"] = 4,
-            ["name"] = "The Precursor",
-            ["unitId"] = 72618,
-            ["isFriendly"] = false,
-            ["rawName"] = "The Precursor",
-        },
-        [52025] = 
-        {
-            ["maxHealth"] = 21896,
-            ["unitType"] = 1,
-            ["name"] = "Solinur",
-            ["unitId"] = 52025,
-            ["isFriendly"] = true,
-            ["unitTags"] = 
-            {
-                ["player"] = "player",
-            },
-            ["rawName"] = "Solinur^Mx",
-        },
-    },
-    ["damageReceived"] = 
-    {
-        [72618] = 
-        {
-            [52025] = 
-            {
-                [62912] = 
-                {
-                    ["startTime"] = 2252362,
-                    ["endTime"] = 2259413,
-                    ["totalDamage"] = 44848,
-                    ["max"] = 7265,
-                    ["min"] = 3381,
-                    ["damageType"] = 3,
-                    ["totalHits"] = 44848,
-                    ["absorbedDamage"] = 0,
-                    ["normalHits"] = 3,
-                    ["criticalHits"] = 5,
-                    ["blockedDamage"] = 0,
-                    ["blockedHits"] = 0,
-                    ["absorbedHits"] = 0,
-                    ["criticalDamage"] = 33997,
-                    ["normalDamage"] = 10851,
-                },
-                ["startTime"] = 2252362,
-                [186370] = 
-                {
-                    ["startTime"] = 2256230,
-                    ["endTime"] = 2259930,
-                    ["totalDamage"] = 212729,
-                    ["max"] = 21923,
-                    ["min"] = 10696,
-                    ["damageType"] = 8,
-                    ["totalHits"] = 212729,
-                    ["absorbedDamage"] = 0,
-                    ["normalHits"] = 4,
-                    ["criticalHits"] = 8,
-                    ["blockedDamage"] = 0,
-                    ["blockedHits"] = 0,
-                    ["absorbedHits"] = 0,
-                    ["criticalDamage"] = 168451,
-                    ["normalDamage"] = 44278,
-                },
-                [185843] = 
-                {
-                    ["startTime"] = 2253668,
-                    ["endTime"] = 2256880,
-                    ["totalDamage"] = 9913,
-                    ["max"] = 5316,
-                    ["min"] = 4597,
-                    ["damageType"] = 8,
-                    ["totalHits"] = 9913,
-                    ["absorbedDamage"] = 0,
-                    ["normalHits"] = 2,
-                    ["criticalHits"] = 0,
-                    ["blockedDamage"] = 0,
-                    ["blockedHits"] = 0,
-                    ["absorbedHits"] = 0,
-                    ["criticalDamage"] = 0,
-                    ["normalDamage"] = 9913,
-                },
-                [16165] = 
-                {
-                    ["startTime"] = 2253439,
-                    ["endTime"] = 2253439,
-                    ["totalDamage"] = 79,
-                    ["max"] = 79,
-                    ["min"] = 79,
-                    ["damageType"] = 3,
-                    ["totalHits"] = 79,
-                    ["absorbedDamage"] = 0,
-                    ["normalHits"] = 0,
-                    ["criticalHits"] = 1,
-                    ["blockedDamage"] = 0,
-                    ["blockedHits"] = 0,
-                    ["absorbedHits"] = 0,
-                    ["criticalDamage"] = 79,
-                    ["normalDamage"] = 0,
-                },
-                ["endTime"] = 2259930,
-                [42029] = 
-                {
-                    ["startTime"] = 2254312,
-                    ["endTime"] = 2259271,
-                    ["totalDamage"] = 20293,
-                    ["max"] = 4090,
-                    ["min"] = 2184,
-                    ["damageType"] = 8,
-                    ["totalHits"] = 20293,
-                    ["absorbedDamage"] = 0,
-                    ["normalHits"] = 2,
-                    ["criticalHits"] = 4,
-                    ["blockedDamage"] = 0,
-                    ["blockedHits"] = 0,
-                    ["absorbedHits"] = 0,
-                    ["criticalDamage"] = 15869,
-                    ["normalDamage"] = 4424,
-                },
-                [148797] = 
-                {
-                    ["startTime"] = 2253675,
-                    ["endTime"] = 2256555,
-                    ["totalDamage"] = 8286,
-                    ["max"] = 4564,
-                    ["min"] = 3722,
-                    ["damageType"] = 8,
-                    ["totalHits"] = 8286,
-                    ["absorbedDamage"] = 0,
-                    ["normalHits"] = 0,
-                    ["criticalHits"] = 2,
-                    ["blockedDamage"] = 0,
-                    ["blockedHits"] = 0,
-                    ["absorbedHits"] = 0,
-                    ["criticalDamage"] = 8286,
-                    ["normalDamage"] = 0,
-                },
-                [183006] = 
-                {
-                    ["startTime"] = 2253668,
-                    ["endTime"] = 2254796,
-                    ["totalDamage"] = 35477,
-                    ["max"] = 19254,
-                    ["min"] = 16223,
-                    ["damageType"] = 2,
-                    ["totalHits"] = 35477,
-                    ["absorbedDamage"] = 0,
-                    ["normalHits"] = 0,
-                    ["criticalHits"] = 2,
-                    ["blockedDamage"] = 0,
-                    ["blockedHits"] = 0,
-                    ["absorbedHits"] = 0,
-                    ["criticalDamage"] = 35477,
-                    ["normalDamage"] = 0,
-                },
-                ["totalDamage"] = 331625,
-            },
-            ["startTime"] = 2252362,
-            ["endTime"] = 2259930,
-            ["totalDamage"] = 331625,
-        },
-    },
-    ["unitIds"] = 
-    {
-        ["bosses"] = 
-        {
-        },
-        ["player"] = 52025,
-        ["group"] = 
-        {
-        },
-    },
-    ["healingReceived"] = 
-    {
-        [52025] = 
-        {
-            ["totalHealing"] = 0,
-            ["startTime"] = 2253675,
-            ["endTime"] = 2254796,
-            [52025] = 
-            {
-                ["totalHealing"] = 0,
-                ["startTime"] = 2253675,
-                ["endTime"] = 2254796,
-                [201275] = 
-                {
-                    ["totalHealing"] = 0,
-                    ["overflowHealing"] = 11211,
-                    ["criticalHeals"] = 1,
-                    ["criticalHealing"] = 0,
-                    ["min"] = 4122,
-                    ["normalHealing"] = 0,
-                    ["endTime"] = 2254796,
-                    ["absorbedHeals"] = 0,
-                    ["normalHeals"] = 1,
-                    ["startTime"] = 2253675,
-                    ["totalHeals"] = 2,
-                    ["powerType"] = 0,
-                    ["absorbedHealing"] = 0,
-                    ["overflowHeals"] = 2,
-                    ["max"] = 7089,
-                },
-                ["overflowHealing"] = 11211,
-            },
-            ["overflowHealing"] = 11211,
-        },
-    },
-    ["char"] = "Solinur",
     ["CP"] = 
     {
         [1] = 
         {
-            ["slotted"] = 
-            {
-                [276] = true,
-                [25] = true,
-                [12] = true,
-                [27] = true,
-            },
+            ["total"] = 720,
             ["stars"] = 
             {
                 [99] = 
@@ -952,17 +892,17 @@ CMX_TestData =
                     [2] = 1,
                 },
             },
-            ["total"] = 720,
+            ["slotted"] = 
+            {
+                [276] = true,
+                [25] = true,
+                [12] = true,
+                [27] = true,
+            },
         },
         [2] = 
         {
-            ["slotted"] = 
-            {
-                [2] = true,
-                [35] = true,
-                [270] = true,
-                [51] = true,
-            },
+            ["total"] = 742,
             ["stars"] = 
             {
                 [128] = 
@@ -1071,17 +1011,17 @@ CMX_TestData =
                     [2] = 2,
                 },
             },
-            ["total"] = 742,
+            ["slotted"] = 
+            {
+                [2] = true,
+                [35] = true,
+                [270] = true,
+                [51] = true,
+            },
         },
         [3] = 
         {
-            ["slotted"] = 
-            {
-                [92] = true,
-                [65] = true,
-                [78] = true,
-                [66] = true,
-            },
+            ["total"] = 737,
             ["stars"] = 
             {
                 [65] = 
@@ -1175,9 +1115,580 @@ CMX_TestData =
                     [2] = 0,
                 },
             },
-            ["total"] = 737,
+            ["slotted"] = 
+            {
+                [92] = true,
+                [65] = true,
+                [78] = true,
+                [66] = true,
+            },
         },
         ["version"] = 2,
     },
+    ["damageDone"] = 
+    {
+        [35999] = 
+        {
+            ["startTime"] = 5204718,
+            [42509] = 
+            {
+                [148800] = 
+                {
+                    ["endTime"] = 5205180,
+                    ["damageType"] = 2,
+                    ["totalHits"] = 1926,
+                    ["criticalHits"] = 0,
+                    ["min"] = 1926,
+                    ["blockedDamage"] = 0,
+                    ["absorbedDamage"] = 0,
+                    ["normalHits"] = 1,
+                    ["startTime"] = 5205180,
+                    ["totalDamage"] = 1926,
+                    ["normalDamage"] = 1926,
+                    ["criticalDamage"] = 0,
+                    ["absorbedHits"] = 0,
+                    ["blockedHits"] = 0,
+                    ["max"] = 1926,
+                },
+                [62529] = 
+                {
+                    ["endTime"] = 5211643,
+                    ["damageType"] = 2,
+                    ["totalHits"] = 14772,
+                    ["criticalHits"] = 2,
+                    ["min"] = 2392,
+                    ["blockedDamage"] = 0,
+                    ["absorbedDamage"] = 0,
+                    ["normalHits"] = 2,
+                    ["startTime"] = 5205678,
+                    ["totalDamage"] = 14772,
+                    ["normalDamage"] = 5541,
+                    ["criticalDamage"] = 9231,
+                    ["absorbedHits"] = 0,
+                    ["blockedHits"] = 0,
+                    ["max"] = 4740,
+                },
+                [186370] = 
+                {
+                    ["endTime"] = 5211243,
+                    ["damageType"] = 8,
+                    ["totalHits"] = 197701,
+                    ["criticalHits"] = 9,
+                    ["min"] = 9394,
+                    ["blockedDamage"] = 0,
+                    ["absorbedDamage"] = 0,
+                    ["normalHits"] = 3,
+                    ["startTime"] = 5207518,
+                    ["totalDamage"] = 197701,
+                    ["normalDamage"] = 28715,
+                    ["criticalDamage"] = 168986,
+                    ["absorbedHits"] = 0,
+                    ["blockedHits"] = 0,
+                    ["max"] = 19425,
+                },
+                [185843] = 
+                {
+                    ["endTime"] = 5211243,
+                    ["damageType"] = 8,
+                    ["totalHits"] = 18733,
+                    ["criticalHits"] = 1,
+                    ["min"] = 4281,
+                    ["blockedDamage"] = 0,
+                    ["absorbedDamage"] = 0,
+                    ["normalHits"] = 2,
+                    ["startTime"] = 5205177,
+                    ["totalDamage"] = 18733,
+                    ["normalDamage"] = 9041,
+                    ["criticalDamage"] = 9692,
+                    ["absorbedHits"] = 0,
+                    ["blockedHits"] = 0,
+                    ["max"] = 9692,
+                },
+                [18084] = 
+                {
+                    ["endTime"] = 5211644,
+                    ["damageType"] = 3,
+                    ["totalHits"] = 15425,
+                    ["criticalHits"] = 3,
+                    ["min"] = 2180,
+                    ["blockedDamage"] = 0,
+                    ["absorbedDamage"] = 0,
+                    ["normalHits"] = 1,
+                    ["startTime"] = 5205678,
+                    ["totalDamage"] = 15425,
+                    ["normalDamage"] = 2180,
+                    ["criticalDamage"] = 13245,
+                    ["absorbedHits"] = 0,
+                    ["blockedHits"] = 0,
+                    ["max"] = 4873,
+                },
+                [17895] = 
+                {
+                    ["endTime"] = 5211643,
+                    ["damageType"] = 3,
+                    ["totalHits"] = 3396,
+                    ["criticalHits"] = 0,
+                    ["min"] = 1698,
+                    ["blockedDamage"] = 0,
+                    ["absorbedDamage"] = 0,
+                    ["normalHits"] = 2,
+                    ["startTime"] = 5205678,
+                    ["totalDamage"] = 3396,
+                    ["normalDamage"] = 3396,
+                    ["criticalDamage"] = 0,
+                    ["absorbedHits"] = 0,
+                    ["blockedHits"] = 0,
+                    ["max"] = 1698,
+                },
+                [16499] = 
+                {
+                    ["endTime"] = 5206886,
+                    ["damageType"] = 2,
+                    ["totalHits"] = 237,
+                    ["criticalHits"] = 2,
+                    ["min"] = 51,
+                    ["blockedDamage"] = 0,
+                    ["absorbedDamage"] = 0,
+                    ["normalHits"] = 1,
+                    ["startTime"] = 5204718,
+                    ["totalDamage"] = 237,
+                    ["normalDamage"] = 51,
+                    ["criticalDamage"] = 186,
+                    ["absorbedHits"] = 0,
+                    ["blockedHits"] = 0,
+                    ["max"] = 98,
+                },
+                [63956] = 
+                {
+                    ["endTime"] = 5212644,
+                    ["damageType"] = 8,
+                    ["totalHits"] = 84051,
+                    ["criticalHits"] = 0,
+                    ["min"] = 33994,
+                    ["blockedDamage"] = 0,
+                    ["absorbedDamage"] = 0,
+                    ["normalHits"] = 2,
+                    ["startTime"] = 5212010,
+                    ["totalDamage"] = 84051,
+                    ["normalDamage"] = 84051,
+                    ["criticalDamage"] = 0,
+                    ["absorbedHits"] = 0,
+                    ["blockedHits"] = 0,
+                    ["max"] = 50057,
+                },
+                ["totalDamage"] = 370418,
+                ["endTime"] = 5212644,
+                ["startTime"] = 5204718,
+                [148797] = 
+                {
+                    ["endTime"] = 5212010,
+                    ["damageType"] = 8,
+                    ["totalHits"] = 2409,
+                    ["criticalHits"] = 0,
+                    ["min"] = 2409,
+                    ["blockedDamage"] = 0,
+                    ["absorbedDamage"] = 0,
+                    ["normalHits"] = 1,
+                    ["startTime"] = 5212010,
+                    ["totalDamage"] = 2409,
+                    ["normalDamage"] = 2409,
+                    ["criticalDamage"] = 0,
+                    ["absorbedHits"] = 0,
+                    ["blockedHits"] = 0,
+                    ["max"] = 2409,
+                },
+                [17902] = 
+                {
+                    ["endTime"] = 5209668,
+                    ["damageType"] = 11,
+                    ["totalHits"] = 6171,
+                    ["criticalHits"] = 2,
+                    ["min"] = 2911,
+                    ["blockedDamage"] = 0,
+                    ["absorbedDamage"] = 0,
+                    ["normalHits"] = 0,
+                    ["startTime"] = 5204718,
+                    ["totalDamage"] = 6171,
+                    ["normalDamage"] = 0,
+                    ["criticalDamage"] = 6171,
+                    ["absorbedHits"] = 0,
+                    ["blockedHits"] = 0,
+                    ["max"] = 3260,
+                },
+                [183006] = 
+                {
+                    ["endTime"] = 5206211,
+                    ["damageType"] = 2,
+                    ["totalHits"] = 25597,
+                    ["criticalHits"] = 1,
+                    ["min"] = 8396,
+                    ["blockedDamage"] = 0,
+                    ["absorbedDamage"] = 0,
+                    ["normalHits"] = 1,
+                    ["startTime"] = 5205178,
+                    ["totalDamage"] = 25597,
+                    ["normalDamage"] = 8396,
+                    ["criticalDamage"] = 17201,
+                    ["absorbedHits"] = 0,
+                    ["blockedHits"] = 0,
+                    ["max"] = 17201,
+                },
+            },
+            ["totalDamage"] = 370418,
+            ["endTime"] = 5212644,
+        },
+    },
+    ["info"] = 
+    {
+        ["account"] = "@Solinur",
+        ["combatStart"] = 5204721,
+        ["time"] = "16:58:56",
+        ["subzone"] = "Hall of the Lunar Champion",
+        ["ESOversion"] = "eso.live.11.2.7.3172487",
+        ["zone"] = "Hall of the Lunar Champion",
+        ["APIversion"] = 101048,
+        ["zoneId"] = 1129,
+        ["combatEnd"] = 5212647,
+        ["date"] = 1767110336,
+    },
+    ["healingReceived"] = 
+    {
+        [35999] = 
+        {
+            ["endTime"] = 5212644,
+            ["startTime"] = 5205180,
+            ["totalHealing"] = 0,
+            ["overflowHealing"] = 25964,
+            [35999] = 
+            {
+                ["endTime"] = 5212644,
+                [201275] = 
+                {
+                    ["normalHealing"] = 0,
+                    ["criticalHealing"] = 0,
+                    ["powerType"] = 0,
+                    ["totalHealing"] = 0,
+                    ["min"] = 6424,
+                    ["overflowHealing"] = 12848,
+                    ["max"] = 6424,
+                    ["endTime"] = 5206211,
+                    ["startTime"] = 5205180,
+                    ["absorbedHeals"] = 0,
+                    ["totalHeals"] = 2,
+                    ["overflowHeals"] = 2,
+                    ["absorbedHealing"] = 0,
+                    ["normalHeals"] = 0,
+                    ["criticalHeals"] = 2,
+                },
+                ["startTime"] = 5205180,
+                [69118] = 
+                {
+                    ["normalHealing"] = 0,
+                    ["criticalHealing"] = 0,
+                    ["powerType"] = 1,
+                    ["totalHealing"] = 0,
+                    ["min"] = 5305,
+                    ["overflowHealing"] = 13116,
+                    ["max"] = 7811,
+                    ["endTime"] = 5212644,
+                    ["startTime"] = 5212010,
+                    ["absorbedHeals"] = 0,
+                    ["totalHeals"] = 2,
+                    ["overflowHeals"] = 2,
+                    ["absorbedHealing"] = 0,
+                    ["normalHeals"] = 2,
+                    ["criticalHeals"] = 0,
+                },
+                ["overflowHealing"] = 25964,
+                ["totalHealing"] = 0,
+            },
+        },
+    },
+    ["units"] = 
+    {
+        [42509] = 
+        {
+            ["maxHealth"] = 18678,
+            ["unitId"] = 42509,
+            ["name"] = "The Precursor",
+            ["rawName"] = "The Precursor",
+            ["unitType"] = 4,
+            ["isFriendly"] = false,
+        },
+        [35999] = 
+        {
+            ["maxHealth"] = 18678,
+            ["unitId"] = 35999,
+            ["name"] = "Solinur",
+            ["unitTags"] = 
+            {
+                ["group1"] = "group1",
+                ["player"] = "player",
+            },
+            ["rawName"] = "Solinur^Mx",
+            ["unitType"] = 1,
+            ["isFriendly"] = true,
+        },
+    },
     ["group"] = false,
+    ["isWipe"] = false,
+    ["prepared"] = true,
+    ["damageReceived"] = 
+    {
+        [42509] = 
+        {
+            ["startTime"] = 5204718,
+            ["endTime"] = 5212644,
+            ["totalDamage"] = 370418,
+            [35999] = 
+            {
+                [148800] = 
+                {
+                    ["endTime"] = 5205180,
+                    ["damageType"] = 2,
+                    ["totalHits"] = 1926,
+                    ["criticalHits"] = 0,
+                    ["min"] = 1926,
+                    ["blockedDamage"] = 0,
+                    ["absorbedDamage"] = 0,
+                    ["normalHits"] = 1,
+                    ["startTime"] = 5205180,
+                    ["totalDamage"] = 1926,
+                    ["normalDamage"] = 1926,
+                    ["criticalDamage"] = 0,
+                    ["absorbedHits"] = 0,
+                    ["blockedHits"] = 0,
+                    ["max"] = 1926,
+                },
+                [62529] = 
+                {
+                    ["endTime"] = 5211643,
+                    ["damageType"] = 2,
+                    ["totalHits"] = 14772,
+                    ["criticalHits"] = 2,
+                    ["min"] = 2392,
+                    ["blockedDamage"] = 0,
+                    ["absorbedDamage"] = 0,
+                    ["normalHits"] = 2,
+                    ["startTime"] = 5205678,
+                    ["totalDamage"] = 14772,
+                    ["normalDamage"] = 5541,
+                    ["criticalDamage"] = 9231,
+                    ["absorbedHits"] = 0,
+                    ["blockedHits"] = 0,
+                    ["max"] = 4740,
+                },
+                [186370] = 
+                {
+                    ["endTime"] = 5211243,
+                    ["damageType"] = 8,
+                    ["totalHits"] = 197701,
+                    ["criticalHits"] = 9,
+                    ["min"] = 9394,
+                    ["blockedDamage"] = 0,
+                    ["absorbedDamage"] = 0,
+                    ["normalHits"] = 3,
+                    ["startTime"] = 5207518,
+                    ["totalDamage"] = 197701,
+                    ["normalDamage"] = 28715,
+                    ["criticalDamage"] = 168986,
+                    ["absorbedHits"] = 0,
+                    ["blockedHits"] = 0,
+                    ["max"] = 19425,
+                },
+                [185843] = 
+                {
+                    ["endTime"] = 5211243,
+                    ["damageType"] = 8,
+                    ["totalHits"] = 18733,
+                    ["criticalHits"] = 1,
+                    ["min"] = 4281,
+                    ["blockedDamage"] = 0,
+                    ["absorbedDamage"] = 0,
+                    ["normalHits"] = 2,
+                    ["startTime"] = 5205177,
+                    ["totalDamage"] = 18733,
+                    ["normalDamage"] = 9041,
+                    ["criticalDamage"] = 9692,
+                    ["absorbedHits"] = 0,
+                    ["blockedHits"] = 0,
+                    ["max"] = 9692,
+                },
+                [18084] = 
+                {
+                    ["endTime"] = 5211644,
+                    ["damageType"] = 3,
+                    ["totalHits"] = 15425,
+                    ["criticalHits"] = 3,
+                    ["min"] = 2180,
+                    ["blockedDamage"] = 0,
+                    ["absorbedDamage"] = 0,
+                    ["normalHits"] = 1,
+                    ["startTime"] = 5205678,
+                    ["totalDamage"] = 15425,
+                    ["normalDamage"] = 2180,
+                    ["criticalDamage"] = 13245,
+                    ["absorbedHits"] = 0,
+                    ["blockedHits"] = 0,
+                    ["max"] = 4873,
+                },
+                [17895] = 
+                {
+                    ["endTime"] = 5211643,
+                    ["damageType"] = 3,
+                    ["totalHits"] = 3396,
+                    ["criticalHits"] = 0,
+                    ["min"] = 1698,
+                    ["blockedDamage"] = 0,
+                    ["absorbedDamage"] = 0,
+                    ["normalHits"] = 2,
+                    ["startTime"] = 5205678,
+                    ["totalDamage"] = 3396,
+                    ["normalDamage"] = 3396,
+                    ["criticalDamage"] = 0,
+                    ["absorbedHits"] = 0,
+                    ["blockedHits"] = 0,
+                    ["max"] = 1698,
+                },
+                [16499] = 
+                {
+                    ["endTime"] = 5206886,
+                    ["damageType"] = 2,
+                    ["totalHits"] = 237,
+                    ["criticalHits"] = 2,
+                    ["min"] = 51,
+                    ["blockedDamage"] = 0,
+                    ["absorbedDamage"] = 0,
+                    ["normalHits"] = 1,
+                    ["startTime"] = 5204718,
+                    ["totalDamage"] = 237,
+                    ["normalDamage"] = 51,
+                    ["criticalDamage"] = 186,
+                    ["absorbedHits"] = 0,
+                    ["blockedHits"] = 0,
+                    ["max"] = 98,
+                },
+                [63956] = 
+                {
+                    ["endTime"] = 5212644,
+                    ["damageType"] = 8,
+                    ["totalHits"] = 84051,
+                    ["criticalHits"] = 0,
+                    ["min"] = 33994,
+                    ["blockedDamage"] = 0,
+                    ["absorbedDamage"] = 0,
+                    ["normalHits"] = 2,
+                    ["startTime"] = 5212010,
+                    ["totalDamage"] = 84051,
+                    ["normalDamage"] = 84051,
+                    ["criticalDamage"] = 0,
+                    ["absorbedHits"] = 0,
+                    ["blockedHits"] = 0,
+                    ["max"] = 50057,
+                },
+                ["totalDamage"] = 370418,
+                ["endTime"] = 5212644,
+                ["startTime"] = 5204718,
+                [148797] = 
+                {
+                    ["endTime"] = 5212010,
+                    ["damageType"] = 8,
+                    ["totalHits"] = 2409,
+                    ["criticalHits"] = 0,
+                    ["min"] = 2409,
+                    ["blockedDamage"] = 0,
+                    ["absorbedDamage"] = 0,
+                    ["normalHits"] = 1,
+                    ["startTime"] = 5212010,
+                    ["totalDamage"] = 2409,
+                    ["normalDamage"] = 2409,
+                    ["criticalDamage"] = 0,
+                    ["absorbedHits"] = 0,
+                    ["blockedHits"] = 0,
+                    ["max"] = 2409,
+                },
+                [17902] = 
+                {
+                    ["endTime"] = 5209668,
+                    ["damageType"] = 11,
+                    ["totalHits"] = 6171,
+                    ["criticalHits"] = 2,
+                    ["min"] = 2911,
+                    ["blockedDamage"] = 0,
+                    ["absorbedDamage"] = 0,
+                    ["normalHits"] = 0,
+                    ["startTime"] = 5204718,
+                    ["totalDamage"] = 6171,
+                    ["normalDamage"] = 0,
+                    ["criticalDamage"] = 6171,
+                    ["absorbedHits"] = 0,
+                    ["blockedHits"] = 0,
+                    ["max"] = 3260,
+                },
+                [183006] = 
+                {
+                    ["endTime"] = 5206211,
+                    ["damageType"] = 2,
+                    ["totalHits"] = 25597,
+                    ["criticalHits"] = 1,
+                    ["min"] = 8396,
+                    ["blockedDamage"] = 0,
+                    ["absorbedDamage"] = 0,
+                    ["normalHits"] = 1,
+                    ["startTime"] = 5205178,
+                    ["totalDamage"] = 25597,
+                    ["normalDamage"] = 8396,
+                    ["criticalDamage"] = 17201,
+                    ["absorbedHits"] = 0,
+                    ["blockedHits"] = 0,
+                    ["max"] = 17201,
+                },
+            },
+        },
+    },
+    ["char"] = "Solinur",
+    ["unitIds"] = 
+    {
+        ["group"] = 
+        {
+        },
+        ["player"] = 35999,
+        ["bosses"] = 
+        {
+        },
+    },
+    ["charData"] = 
+    {
+        ["equip"] = 
+        {
+            [1] = "|H0:item:194512:364:50:0:0:0:0:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h",
+            [2] = "|H0:item:151261:364:50:0:0:0:18:0:0:0:0:0:0:0:1:86:0:1:0:10000:0|h|h",
+            [3] = "|H0:item:59667:364:50:0:0:0:0:0:0:0:0:0:0:0:1:67:0:1:0:10000:0|h|h",
+            [4] = "|H0:item:87874:364:50:26587:370:50:26:0:0:0:0:0:0:0:2049:24:0:1:0:66:0|h|h",
+            [5] = "|H0:item:87874:364:50:26848:370:50:2:0:0:0:0:0:0:0:2049:24:0:1:0:347:0|h|h",
+            [6] = "|H0:item:147371:364:50:26582:370:50:18:0:0:0:0:0:0:0:2049:24:0:1:0:10000:0|h|h",
+            [7] = "",
+            [8] = "|H0:item:151218:364:50:0:0:0:0:0:0:0:0:0:0:0:1:86:0:1:0:10000:0|h|h",
+            [9] = "|H0:item:151194:364:50:0:0:0:18:0:0:0:0:0:0:0:2049:86:0:1:0:10000:0|h|h",
+            [10] = "",
+            [11] = "|H0:item:147512:364:50:45884:370:50:31:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h",
+            [12] = "|H0:item:147512:364:50:45884:370:50:31:0:0:0:0:0:0:0:1:0:0:1:0:0:0|h|h",
+            [13] = "",
+            [14] = "",
+            [15] = "",
+            [16] = "|H0:item:151279:364:50:0:0:0:18:0:0:0:0:0:0:0:1:86:0:1:0:10000:0|h|h",
+            [17] = "",
+            [18] = "",
+            [19] = "",
+            [20] = "|H0:item:166319:364:50:54484:370:50:4:0:0:0:0:0:0:0:1:14:0:1:0:423:0|h|h",
+            [21] = "",
+            [0] = "|H0:item:151196:364:50:0:0:0:18:0:0:0:0:0:0:0:1:86:0:1:0:10000:0|h|h",
+        },
+        ["name"] = "Solinur",
+        ["gender"] = 2,
+        ["raceId"] = 4,
+        ["CPtotal"] = 2348,
+        ["classId"] = 6,
+        ["level"] = 50,
+    },
 }
