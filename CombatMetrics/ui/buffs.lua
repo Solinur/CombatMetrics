@@ -6,15 +6,10 @@ local logger
 local uncollapsedBuffs = {}
 local BuffPanel
 
-local dx = CMXint.dx
-local adjustRowSize = util.adjustRowSize
 local GetFormattedAbilityIcon = util.GetFormattedAbilityIcon
 local GetFormattedAbilityName = util.GetFormattedAbilityName
 
 local NameToAbilityIDs = {}
-
-local BUFF_LIST_ROWHEIGHT = 20
-local BUFF_LIST_ROWHEIGHT_HALF = 10
 
 local BUFF_NAME_FORMAT_ID = "(<<2>>) <<1>>"
 local BUFF_NAME_FORMAT_DEFAULT = "<<1>>"
@@ -30,16 +25,6 @@ local SigilAbilities = { -- Abilities to display a warning icon in the buff list
 	[236994] = true, -- Sigil of Ultimate
 	[237014] = true, -- Sigil of Speed
 }
-
-local function isSigilAbility(buffAbilityIds)
-	if type(buffAbilityIds) ~= "table" then return false end
-
-	for abilityId, _ in pairs(buffAbilityIds) do
-		if SigilAbilities[abilityId] then return true end
-	end
-
-	return false
-end
 
 local BUFF_LABEL_COLOR_DEFAULT = {1, 1, 1, 1}
 local BUFF_LABEL_COLOR_FAV = {1, .8, .3, 1}
@@ -58,9 +43,9 @@ local BUFF_BAR_GROUP_COLORS = {
 
 BUfF_LIST_SORT_KEYS =
 {
-    ["name"] = { tiebreaker = "abilityId"},
-    ["count"] = { tiebreaker = "groupCount", isNumeric = true  },
-    ["uptime"]  = { tiebreaker = "groupUptime", isNumeric = true  },
+	["name"] = { tiebreaker = "abilityId"},
+	["count"] = { tiebreaker = "groupCount", isNumeric = true  },
+	["uptime"]  = { tiebreaker = "groupUptime", isNumeric = true  },
 
 }
 
@@ -188,29 +173,36 @@ end
 
 local function InitBuffsList(panel)
 	local dataList = panel.dataList
-	local listControl = dataList.list
+	dataList.panel = panel
 	dataList.groupList = {}
 	dataList.masterList = {}
 
 	function dataList:RecoverRow(rowControl)
+		local panel = self.panel
 		local expandButton = panel:AcquireSharedControl(CT_TEXTURE)
-		expandButton:ApplyPosition(rowControl, 0, BUFF_LIST_ROWHEIGHT_HALF/2, BUFF_LIST_ROWHEIGHT_HALF, BUFF_LIST_ROWHEIGHT_HALF)
+
+		local rowHeight = self.list.uniformControlHeight
+		local rowHeightHalf = rowHeight/2
+
+		expandButton:ApplyPosition(rowControl, 0, rowHeightHalf/2, rowHeightHalf, rowHeightHalf)
 
 		local icon = panel:AcquireSharedControl(CT_TEXTURE)
-		icon:ApplyPosition(rowControl, 12, 0, BUFF_LIST_ROWHEIGHT, BUFF_LIST_ROWHEIGHT)
+		icon:ApplyPosition(rowControl, 12, 0, rowHeight, rowHeight)
 
 		local label = panel:AcquireSharedControl(CT_LABEL)
 		label:ApplyPosition(rowControl, 36, 0, 176)
 
 		local bar = panel:AcquireSharedControl(CT_TEXTURE)
-		bar:ApplyPosition(rowControl, 36, 0, 176, BUFF_LIST_ROWHEIGHT)
+		bar:ApplyPosition(rowControl, 36, 0, 176, rowHeight)
+		bar:SetTexture("esoui/art/miscellaneous/progressbar_genericfill.dds")
 
 		local bar_group = panel:AcquireSharedControl(CT_TEXTURE)
-		bar_group:ApplyPosition(rowControl, 36, 0, 176, BUFF_LIST_ROWHEIGHT)
+		bar_group:ApplyPosition(rowControl, 36, 0, 176, rowHeight)
+		bar_group:SetTexture("esoui/art/miscellaneous/progressbar_genericfill.dds")
 
 		local count = panel:AcquireSharedControl(CT_LABEL)
 		count:ApplyPosition(rowControl, 216, 0, 58)
-
+		
 		local uptime = panel:AcquireSharedControl(CT_LABEL)
 		uptime:ApplyPosition(rowControl, 276, 0, 58)
 
@@ -220,39 +212,46 @@ local function InitBuffsList(panel)
 	end
 
 	function dataList:UpdateRow(rowControl, data, scrollList)
+		ROW_CONTROL = rowControl
+		local panel = self.panel
+
 		if rowControl.recovered ~= true then self:RecoverRow(rowControl) end
 		local expandButton, icon, label, bar, bar_group, count, uptime = unpack(rowControl.controls)
 
-		local labelFormat = panel.ShowIds() and BUFF_NAME_FORMAT_ID or BUFF_NAME_FORMAT_DEFAULT
+		local labelFormat = panel:ShowIds() and BUFF_NAME_FORMAT_ID or BUFF_NAME_FORMAT_DEFAULT
 		local labelText = ZO_CachedStrFormat(labelFormat, data.labelText, data.abilityId)
-		
+
 		local deltaIndent = (data.indent - rowControl.indent) * BUFF_LIST_ROWHEIGHT_HALF
 		rowControl.indent = data.indent
-		
-		local textcolor = favs[abilityId] and BUFF_LABEL_COLOR_FAV or BUFF_LABEL_COLOR_DEFAULT
+
+		local textcolor = panel.favs[abilityId] and BUFF_LABEL_COLOR_FAV or BUFF_LABEL_COLOR_DEFAULT
+		local font = ui.GetFont(ui.fontSize, false)
 
 		expandButton:SetHidden(not data.hasDetails)
 		icon:SetTexture(GetFormattedAbilityIcon(data.abilityId))
-		
+
 		label:SetText(labelText)
 		label:ApplyIndent(deltaIndent)
 		label:SetColor(unpack(textcolor))
+		label:SetFont(font)
 
 		local maxwidth = label:GetWidth()
-		
-		bar:SetCenterColor(unpack(BUFF_BAR_COLORS[data.effectType]))
+
+		bar:SetColor(unpack(BUFF_BAR_COLORS[data.effectType]))
 		bar:ApplyIndent(deltaIndent)
-		bar:SetWidth(maxwidth * data.uptimeRatio)
-		
-		bar_group:SetCenterColor(unpack(BUFF_BAR_GROUP_COLORS[data.effectType]))
+		bar:SetWidth(maxwidth * data.uptime)
+
+		bar_group:SetColor(unpack(BUFF_BAR_GROUP_COLORS[data.effectType]))
 		bar_group:ApplyIndent(deltaIndent)
-		bar_group:SetWidth(maxwidth * data.groupUptimeRatio)
+		bar_group:SetWidth(maxwidth * data.groupUptime)
 
 		local hideGroupValues = data.count == data.groupCount and data.uptime == data.groupUptime
 		local valueFormat = hideGroupValues and BUFF_VALUE_FORMAT_SINGLE or BUFF_VALUE_FORMAT_GROUP
 
 		count:SetText(string.format(valueFormat, data.count, data.groupCount))
-		uptime:SetText(string.format(valueFormat, data.uptimeRatio * 100, data.groupUptimeRatio * 100))
+		count:SetFont(font)
+		uptime:SetText(string.format(valueFormat, data.uptime * 100, data.groupUptime * 100))
+		uptime:SetFont(font)
 	end
 
 	function dataList:UpdateAbilityNames(effectData)
@@ -269,7 +268,7 @@ local function InitBuffsList(panel)
 	function dataList:AddDataEntry(abilityId, data, totalUnitTime)
 		if data.groupUptime <= 0 then return end
 
-		local hasStacks = effectData.stacks and (effectData.iconId == 126597 or effectData.maxStacks > 1) -- TODO: implement stack info !
+		local hasStacks = data.stacks and (data.iconId == 126597 or data.maxStacks > 1) -- TODO: implement stack info !
 		local selected = false -- selectedbuffs ~= nil and (selectedbuffs[buffName] ~= nil) or false -- TODO: Selections
 
 		local name = GetFormattedAbilityName(abilityId)
@@ -277,7 +276,7 @@ local function InitBuffsList(panel)
 
 		local mainAbilityId = NameToAbilityIDs[name]
 		local hasOtherId = mainAbilityId ~= abilityId
-		
+
 		if hasStacks then
 			labelText = ZO_CachedStrFormat(BUFF_NAME_FORMAT_STACKS, name, data.maxStacks)
 			if hasOtherId then logger:Warning("Ability %s (%d) has stacks as well as another Id: %d", name, abilityId, mainAbilityId) end
@@ -321,8 +320,8 @@ local function InitBuffsList(panel)
 
 			table.sort(keys)
 
-			if effectData.maxStacks > #keys then
-				logger:Warning("Missing stacks data for %s (%d). Expected %d entries but only got %d.", name, abilityId, effectData.maxStacks, #keys)
+			if data.maxStacks > #keys then
+				logger:Warn("Missing stacks data for %s (%d). Expected %d entries but only got %d.", name, abilityId, data.maxStacks, #keys)
 			end
 
 			local groupData = {}
@@ -353,7 +352,13 @@ local function InitBuffsList(panel)
 		end
 	end
 
-	function dataList:BuildMasterList(effectData)
+	function dataList:BuildMasterList()
+		local fightData = self.panel.fightData
+		local playerId = fightData.unitIds.player
+		local playerData = fightData.damageDone[playerId]
+		local totalUnitTime = playerData.endTime - playerData.startTime
+		local effectData = fightData.effects[playerId]
+
 		self:UpdateAbilityNames(effectData)
 
 		ZO_ClearTable(self.masterList)
@@ -363,9 +368,10 @@ local function InitBuffsList(panel)
 
 		for abilityId, data in pairs(effectData) do
 			self:AddDataEntry(abilityId, data, totalUnitTime)
-			if isSigilAbility(buff.instances) then hasSigil = true end
+			if SigilAbilities[abilityId] then hasSigil = true end
 		end
 
+		local sigilIcon = self.control:GetNamedChild("Headers"):GetNamedChild("Icon")
 		sigilIcon:SetHidden(not hasSigil)
 	end
 
@@ -376,7 +382,7 @@ local function InitBuffsList(panel)
 			local sumUptime = 0
 			local sumGroupUptime = 0
 			local maxStacks = #groupData
-			
+
 			for i, groupEntryData in groupData do
 				sumUptime = sumUptime + groupEntryData.uptime
 				sumGroupUptime = sumGroupUptime + groupEntryData.groupUptime
@@ -387,7 +393,7 @@ local function InitBuffsList(panel)
 
 			-- TODO: Check if more elaborate analysis needed (parallel buffs ?)
 		end
-		
+
 		-- multiple Id data
 		if isStackData then
 			for i, groupEntryData in groupData do
@@ -401,7 +407,7 @@ local function InitBuffsList(panel)
 		end
 	end
 
-	function dataList:FilterScrollList()    
+	function dataList:FilterScrollList()
 		local scrollData = ZO_ScrollList_GetDataList(self.list)
 		ZO_ScrollList_Clear(self.list)
 
@@ -417,7 +423,7 @@ local function InitBuffsList(panel)
 		local groupList = self.groupList
 
 		for i = #scrollData, 1, -1 do
-			local abilityId = masterList.abilityId
+			local abilityId = self.masterList.abilityId
 			local groupData = groupList[abilityId]
 
 			if groupData then
@@ -428,7 +434,7 @@ local function InitBuffsList(panel)
 				table.sort(groupData, self.sortFunction)
 				for j, groupEntry in ipairs(groupData) do
 					scrollData[i+j] = groupEntry
-				end 
+				end
 			end
 		end
 	end
@@ -442,27 +448,17 @@ function CMXint.InitializeBuffsPanel(control)
 	BuffPanel:CreateSortFilterList("CombatMetrics_BuffsPanelRowTemplate", BUFF_LIST_ROWHEIGHT, InitBuffsList)
 
 	BuffPanel.selections = {}
-	BuffPanel.favs = CMXint.settings.fightReport.buffs.favourites
 
 	function BuffPanel:Update(fightData)
-		if true then return end
-
 		logger:Debug("Updating Buff Panel")
 
-		self:ResetBars()
-		local sigilIcon = GetControl(control, "HeaderIconTexture")
-		sigilIcon:SetHidden(true)
+		if fightData == nil then 
+			fightData = CMX_TestData
+		end
 
-		if fightData == nil then return end
-		local buffData = GetBuffData()
-		if buffData == nil then return end
-		
-		local maxtime = zo_max(fightData.activetime or 0, fightData.dpstime or 0, fightData.hpstime or 0)
-		local totalUnitTime = buffData.totalUnitTime or maxtime * 1000
-
-		-- TODO: Get Selection Data
-
-		-- self.list:BuildMasterList(effectData, totalUnitTime)
+		self.fightData = fightData
+		self.dataList:SetHeight(BUFF_LIST_ROWHEIGHT)
+		self.dataList:RefreshData()
 	end
 end
 
@@ -471,6 +467,8 @@ function CMXint.InitializeBuffs()
 	if isFileInitialized == true then return false end
 	logger = util.initSublogger("BuffPanel")
 
-    isFileInitialized = true
+	BuffPanel.favs = CMXint.settings.fightReport.buffs.favourites
+
+	isFileInitialized = true
 	return true
 end

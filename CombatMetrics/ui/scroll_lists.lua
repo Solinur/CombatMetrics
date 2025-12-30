@@ -16,6 +16,8 @@ SortFilterList.BuildMasterList = SortFilterList:MUST_IMPLEMENT()
 
 ui.SortFilterList = SortFilterList
 
+local DEFAULT_ROWHEIGHT = 20
+
 local function onRowControlReset(self, pool)
     self.recovered = false
     ZO_ClearTable(self.controls)
@@ -33,7 +35,10 @@ function SortFilterList:Initialize(control, rowTemplate, rowHeight)
     self.sortFunction = function(listEntry1, listEntry2) return self:CompareItems(listEntry1, listEntry2) end
     self.sortKeys = util.tableOfEmpty
 
-    ZO_ScrollList_AddDataType(listControl, 1, rowTemplate, rowHeight, UpdateRow, nil, nil, onRowControlReset)
+    rowHeight = rowHeight or DEFAULT_ROWHEIGHT
+    local scaledRowHeight = rowHeight * CMXint.settings.fightReport.scale
+
+    ZO_ScrollList_AddDataType(listControl, 1, rowTemplate, scaledRowHeight, UpdateRow, nil, nil, onRowControlReset)
     ZO_ScrollList_EnableHighlight(listControl, "ZO_ThinListHighlight")
 end
 
@@ -50,6 +55,26 @@ end
 function SortFilterList:CompareItems(listEntry1, listEntry2)
     return ZO_TableOrderingFunction(listEntry1.data, listEntry2.data, self.currentSortKey, self.sortKeys,
         self.currentSortOrder)
+end
+
+function SortFilterList:SetHeight(rowHeight)
+    local scaledRowHeight = rowHeight * CMXint.settings.fightReport.scale
+
+    local listControl = self.list
+    if listControl.uniformControlHeight == scaledRowHeight then return end
+
+    ZO_ScrollList_Clear(listControl)
+    ZO_ScrollList_Commit(listControl)
+
+    listControl.uniformControlHeight = scaledRowHeight
+    for typeId, dataType in pairs(listControl.dataTypes) do
+        dataType.height = scaledRowHeight
+    end
+end
+
+function SortFilterList:GetHeight()
+    local height = self.list.uniformControlHeight
+    if height > 0 then return height end
 end
 
 function SortFilterList:SortScrollList(...)
