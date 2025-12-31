@@ -327,12 +327,6 @@ function PanelObject:Release()
 	self:ReleaseSharedControls()
 end
 
-
-function PanelObject:CreateSortFilterList(template, height, initFunc)
-	self.dataList = ui.SortFilterList:New(self.control, template, height)
-	initFunc(self)
-end
-
 function PanelObject:ReleaseSharedControls()
 	for _, control in pairs(self.sharedControls) do
 		control:Release()

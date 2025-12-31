@@ -13,6 +13,10 @@ end
 function ReleaseSharedControl(control)
 	control:SetParent(CombatMetricsReport)
 	control.pool:ReleaseObject(control.objectKey)
+
+	if control:GetType() == CT_TEXTURE then
+		control:SetTexture("")
+	end
 end
 
 local function ApplyPosition(control, parent, offsetX, offsetY, width, height)

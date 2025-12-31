@@ -201,6 +201,8 @@
 
         <Control name="CombatMetrics_BuffsPanelRowTemplate" virtual="true"></Control>
 
+        <Button name="CombatMetrics_BuffsPanelExpandButton" virtual="true" inherits="ZO_TreeButtonArrow"/>
+
         <Control name="CombatMetrics_BuffsPanel" inherits="CombatMetrics_ControlFramed" virtual="true">
             <Controls>
                 <Control name="$(parent)SearchBar" inherits="ZO_ScrollList">
@@ -220,7 +222,7 @@
                     <Dimensions y="20"/>
                     <Controls>
                         <Control name="$(parent)Indicator">
-                            <Anchor point="LEFT" offsetX="0"/>
+                            <Anchor point="LEFT" offsetX="2"/>
                             <Dimensions x="10" y="10" />
                         </Control>
 
@@ -239,15 +241,15 @@
                         </Control>
 
                         <Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_BUFF" horizontalAlignment="LEFT" verticalAlignment="CENTER">
-                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="4" offsetY="0" />
-                            <Dimensions x="176"/>
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="6" offsetY="0" />
+                            <Dimensions x="170"/>
                             <OnInitialized>
                                 CMX_SortHeader_Initialize(self, "name", ZO_SORT_ORDER_UP)
                             </OnInitialized>
                         </Label>
 
                         <Label name="$(parent)Count" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip" text="SI_COMBAT_METRICS_SHARP" horizontalAlignment="CENTER" verticalAlignment="CENTER">
-                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="2" offsetY="0" />
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="4" offsetY="0" />
                             <Dimensions x="58"/>
                             <OnInitialized>
                                 CMX_SortHeader_Initialize(self, "count", ZO_SORT_ORDER_DOWN)

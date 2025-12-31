@@ -15,16 +15,24 @@ SortFilterList.UpdateRow = SortFilterList:MUST_IMPLEMENT()
 SortFilterList.BuildMasterList = SortFilterList:MUST_IMPLEMENT()
 
 ui.SortFilterList = SortFilterList
-
-local DEFAULT_ROWHEIGHT = 20
+ui.DEFAULT_ROWHEIGHT = 20
 
 local function onRowControlReset(self, pool)
     self.recovered = false
-    ZO_ClearTable(self.controls)
+
+    local controls = self.controls
+
+    for k, control in pairs(controls) do
+        if control.shared then
+            control:Release()
+        end
+        controls[k] = nil
+    end
+
     ZO_ObjectPool_DefaultResetControl(self)
 end
 
-function SortFilterList:Initialize(control, rowTemplate, rowHeight)
+function SortFilterList:Initialize(control, rowTemplate, rowHeight) -- TODO: is rowHeight neccessary ?
     ZO_SortFilterList.Initialize(self, control)
 
     local function UpdateRow(...)
@@ -35,10 +43,10 @@ function SortFilterList:Initialize(control, rowTemplate, rowHeight)
     self.sortFunction = function(listEntry1, listEntry2) return self:CompareItems(listEntry1, listEntry2) end
     self.sortKeys = util.tableOfEmpty
 
-    rowHeight = rowHeight or DEFAULT_ROWHEIGHT
-    local scaledRowHeight = rowHeight * CMXint.settings.fightReport.scale
+    rowHeight = rowHeight or ui.DEFAULT_ROWHEIGHT
+    self.rowHeight = rowHeight
 
-    ZO_ScrollList_AddDataType(listControl, 1, rowTemplate, scaledRowHeight, UpdateRow, nil, nil, onRowControlReset)
+    ZO_ScrollList_AddDataType(listControl, 1, rowTemplate, rowHeight, UpdateRow, nil, nil, onRowControlReset)
     ZO_ScrollList_EnableHighlight(listControl, "ZO_ThinListHighlight")
 end
 
@@ -57,9 +65,8 @@ function SortFilterList:CompareItems(listEntry1, listEntry2)
         self.currentSortOrder)
 end
 
-function SortFilterList:SetHeight(rowHeight)
-    local scaledRowHeight = rowHeight * CMXint.settings.fightReport.scale
-
+function SortFilterList:UpdateRowHeight()
+    local scaledRowHeight = (2 + self.rowHeight) * CMXint.settings.fightReport.scale
     local listControl = self.list
     if listControl.uniformControlHeight == scaledRowHeight then return end
 
@@ -67,14 +74,14 @@ function SortFilterList:SetHeight(rowHeight)
     ZO_ScrollList_Commit(listControl)
 
     listControl.uniformControlHeight = scaledRowHeight
+
     for typeId, dataType in pairs(listControl.dataTypes) do
         dataType.height = scaledRowHeight
     end
 end
 
 function SortFilterList:GetHeight()
-    local height = self.list.uniformControlHeight
-    if height > 0 then return height end
+    return self.rowHeight
 end
 
 function SortFilterList:SortScrollList(...)

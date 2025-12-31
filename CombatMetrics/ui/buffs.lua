@@ -171,42 +171,78 @@ function util.buffSortFunction(data, a, b)
 	return ishigher
 end
 
+
+
 local function InitBuffsList(panel)
-	local dataList = panel.dataList
+	local dataList = ui.SortFilterList:New(panel.control, "CombatMetrics_BuffsPanelRowTemplate")
+	panel.dataList = dataList
 	dataList.panel = panel
 	dataList.groupList = {}
 	dataList.masterList = {}
 
+	local function ToggleBuffDetails(self, mouseButton, upInside, shift, ctrl, alt, command)
+		local rowControl = self:GetParent()
+		local abilityId = rowControl.dataEntry.data.abilityId
+		self:Toggle()
+
+		if abilityId then
+			if self.state then
+				uncollapsedBuffs[abilityId] = true
+			else
+				uncollapsedBuffs[abilityId] = nil
+			end
+		end
+
+		dataList:RefreshFilters()
+	end
+
+	local function CreateExpandButton(pool, objectKey)
+		local newControl = ZO_ObjectPool_CreateControl("CombatMetrics_BuffsPanelExpandButton", pool, panel.control)
+		newControl:SetHandler("OnMouseDown", ToggleBuffDetails)
+		newControl.key = objectKey
+
+		newControl.SetExpandState = ZO_ToggleButton_SetState
+		newControl.Toggle = ZO_ToggleButton_Toggle
+		return newControl
+	end
+
+	local expandButtonPool = ZO_ObjectPool:New(CreateExpandButton, ZO_ObjectPool_DefaultResetControl)
+	-- TODO: Use ZO_ControlPool  here insted ?
+
 	function dataList:RecoverRow(rowControl)
 		local panel = self.panel
-		local expandButton = panel:AcquireSharedControl(CT_TEXTURE)
-
-		local rowHeight = self.list.uniformControlHeight
+		local rowHeight = self:GetHeight()
 		local rowHeightHalf = rowHeight/2
-
-		expandButton:ApplyPosition(rowControl, 0, rowHeightHalf/2, rowHeightHalf, rowHeightHalf)
+		
+		-- local expandButton = panel:AcquireSharedControl(CT_TEXTURE)
+		-- expandButton:ApplyPosition(rowControl, 2, rowHeightHalf/2, rowHeightHalf, rowHeightHalf)
+		-- expandButton:SetTexture("esoui/art/buttons/dropbox_arrow_normal.dds")
 
 		local icon = panel:AcquireSharedControl(CT_TEXTURE)
-		icon:ApplyPosition(rowControl, 12, 0, rowHeight, rowHeight)
+		icon:ApplyPosition(rowControl, 14, 0, rowHeight, rowHeight)
 
 		local label = panel:AcquireSharedControl(CT_LABEL)
-		label:ApplyPosition(rowControl, 36, 0, 176)
+		label:ApplyPosition(rowControl, 40, 0, 170)
+		label:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
 
 		local bar = panel:AcquireSharedControl(CT_TEXTURE)
-		bar:ApplyPosition(rowControl, 36, 0, 176, rowHeight)
-		bar:SetTexture("esoui/art/miscellaneous/progressbar_genericfill.dds")
+		bar:ApplyPosition(rowControl, 38, 0, 174, rowHeight)
+		bar:SetTexture("esoui/art/unitframes/progressbar_raidhealth.dds")
 
 		local bar_group = panel:AcquireSharedControl(CT_TEXTURE)
-		bar_group:ApplyPosition(rowControl, 36, 0, 176, rowHeight)
-		bar_group:SetTexture("esoui/art/miscellaneous/progressbar_genericfill.dds")
-
+		bar_group:ApplyPosition(rowControl, 38, 0, 174, rowHeight)
+		bar_group:SetTexture("esoui/art/unitframes/progressbar_raidhealth.dds")
+		
+		---@type LabelControl
 		local count = panel:AcquireSharedControl(CT_LABEL)
 		count:ApplyPosition(rowControl, 216, 0, 58)
+		count:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
 		
 		local uptime = panel:AcquireSharedControl(CT_LABEL)
 		uptime:ApplyPosition(rowControl, 276, 0, 58)
+		uptime:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
 
-		rowControl.controls = {expandButton, icon, label, bar, bar_group, count, uptime}
+		rowControl.controls = {icon, label, bar, bar_group, count, uptime}
 		rowControl.recovered = true
 		rowControl.indent = 0
 	end
@@ -214,20 +250,42 @@ local function InitBuffsList(panel)
 	function dataList:UpdateRow(rowControl, data, scrollList)
 		ROW_CONTROL = rowControl
 		local panel = self.panel
-
+		
 		if rowControl.recovered ~= true then self:RecoverRow(rowControl) end
-		local expandButton, icon, label, bar, bar_group, count, uptime = unpack(rowControl.controls)
-
+		local icon, label, bar, bar_group, count, uptime = unpack(rowControl.controls)
+		
 		local labelFormat = panel:ShowIds() and BUFF_NAME_FORMAT_ID or BUFF_NAME_FORMAT_DEFAULT
 		local labelText = ZO_CachedStrFormat(labelFormat, data.labelText, data.abilityId)
-
-		local deltaIndent = (data.indent - rowControl.indent) * BUFF_LIST_ROWHEIGHT_HALF
+		
+		local rowHeight = icon:GetHeight()
+		local deltaIndent = (data.indent - rowControl.indent) * rowHeight/2
 		rowControl.indent = data.indent
 
 		local textcolor = panel.favs[abilityId] and BUFF_LABEL_COLOR_FAV or BUFF_LABEL_COLOR_DEFAULT
 		local font = ui.GetFont(ui.fontSize, false)
 
-		expandButton:SetHidden(not data.hasDetails)
+		local expandButton = rowControl.expandButton
+
+		if data.hasDetails then
+			if expandButton == nil then
+				local scale = self.panel.settings.scale
+				expandButton = expandButtonPool:AcquireObject()
+				expandButton:SetHidden(False)
+				expandButton:SetParent(rowControl)
+				expandButton:SetAnchor(TOPLEFT, rowControl, TOPLEFT, -2 * scale, scale)
+				expandButton:SetDimensions(rowHeight, rowHeight)
+				rowControl.expandButton = expandButton
+			end
+
+			expandButton:SetExpandState(uncollapsedBuffs[data.abilityId] == true)
+		else
+			if expandButton then
+				expandButton:ClearAnchors()
+				expandButtonPool:ReleaseObject(expandButton.key)
+				rowControl.expandButton = nil
+			end
+		end
+
 		icon:SetTexture(GetFormattedAbilityIcon(data.abilityId))
 
 		label:SetText(labelText)
@@ -395,7 +453,7 @@ local function InitBuffsList(panel)
 		end
 
 		-- multiple Id data
-		if isStackData then
+		if isStackData then -- TODO: Is this correct ??
 			for i, groupEntryData in groupData do
 				if groupEntryData.uptime > entryData.uptime then
 					entryData.uptime = groupEntryData.uptime
@@ -422,18 +480,20 @@ local function InitBuffsList(panel)
 
 		local groupList = self.groupList
 
+		CMX_BUFF_PANEL_LIST = scrollData
+
 		for i = #scrollData, 1, -1 do
-			local abilityId = self.masterList.abilityId
+			local abilityId = scrollData[i].data.abilityId
 			local groupData = groupList[abilityId]
 
 			if groupData then
 				dataList:ProcessGroupData(scrollData[i], groupData)
-			end
 
-			if uncollapsedBuffs[abilityId] then
-				table.sort(groupData, self.sortFunction)
-				for j, groupEntry in ipairs(groupData) do
-					scrollData[i+j] = groupEntry
+				if uncollapsedBuffs[abilityId] then
+					table.sort(groupData, self.sortFunction)
+					for j = #groupData, 1, -1 do
+						table.insert(scrollData, i+1, groupData[j])
+					end
 				end
 			end
 		end
@@ -445,8 +505,8 @@ end
 
 function CMXint.InitializeBuffsPanel(control)
 	BuffPanel = CMXint.PanelObject:New(control, "buffs")
-	BuffPanel:CreateSortFilterList("CombatMetrics_BuffsPanelRowTemplate", BUFF_LIST_ROWHEIGHT, InitBuffsList)
-
+	
+	InitBuffsList(BuffPanel)
 	BuffPanel.selections = {}
 
 	function BuffPanel:Update(fightData)
@@ -457,7 +517,7 @@ function CMXint.InitializeBuffsPanel(control)
 		end
 
 		self.fightData = fightData
-		self.dataList:SetHeight(BUFF_LIST_ROWHEIGHT)
+		self.dataList:UpdateRowHeight()
 		self.dataList:RefreshData()
 	end
 end
@@ -468,6 +528,9 @@ function CMXint.InitializeBuffs()
 	logger = util.initSublogger("BuffPanel")
 
 	BuffPanel.favs = CMXint.settings.fightReport.buffs.favourites
+	BuffPanel.uncollapsedBuffs = uncollapsedBuffs
+
+	CMX_BUFF_PANEL = BuffPanel
 
 	isFileInitialized = true
 	return true
