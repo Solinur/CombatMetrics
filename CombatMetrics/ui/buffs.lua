@@ -183,9 +183,10 @@ local function InitBuffsList(panel)
 	local function ToggleBuffDetails(self, mouseButton, upInside, shift, ctrl, alt, command)
 		local rowControl = self:GetParent()
 		local abilityId = rowControl.dataEntry.data.abilityId
-		self:Toggle()
 
 		if abilityId then
+			self:Toggle()
+
 			if self.state then
 				uncollapsedBuffs[abilityId] = true
 			else
@@ -254,7 +255,7 @@ local function InitBuffsList(panel)
 		if rowControl.recovered ~= true then self:RecoverRow(rowControl) end
 		local icon, label, bar, bar_group, count, uptime = unpack(rowControl.controls)
 		
-		local labelFormat = panel:ShowIds() and BUFF_NAME_FORMAT_ID or BUFF_NAME_FORMAT_DEFAULT
+		local labelFormat = panel:ShowIds() and data.abilityId and BUFF_NAME_FORMAT_ID or BUFF_NAME_FORMAT_DEFAULT
 		local labelText = ZO_CachedStrFormat(labelFormat, data.labelText, data.abilityId)
 		
 		local rowHeight = icon:GetHeight()
@@ -348,6 +349,7 @@ local function InitBuffsList(panel)
 			abilityId = abilityId,
 			effectType = data.effectType,
 			labelText = labelText,
+			name = name,
 
 			uptime = data.uptime / totalUnitTime,
 			groupUptime = data.groupUptime / totalUnitTime,
@@ -388,15 +390,16 @@ local function InitBuffsList(panel)
 			for i = 1, #keys do
 				local stacks = keys[i]
 				local stackData = stackDataTable[stacks]
+				local labeltext = ZO_CachedStrFormat(BUFF_NAME_FORMAT_STACKS, name, stacks)
 
 				local rowData = {
 					indent = 1,
 					selected = false,
 					hasDetails = false,
 
-					abilityId = abilityId,
 					effectType = data.effectType,
-					labelText = ZO_CachedStrFormat(BUFF_NAME_FORMAT_STACKS, name, stacks),
+					labelText = labeltext,
+					name = labeltext,
 
 					uptime = stackData.uptime / totalUnitTime,
 					groupUptime = stackData.groupUptime / totalUnitTime,
@@ -498,6 +501,8 @@ local function InitBuffsList(panel)
 			end
 		end
 	end
+
+	dataList.sortHeaderGroup:SelectHeaderByKey("uptime")
 
 	return dataList
 end

@@ -684,9 +684,24 @@
         </Button>
 
         <Label name="CombatMetrics_SharedLabel" virtual="true" />
+
         <Texture name="CombatMetrics_SharedTexture" virtual="true" />
+
         <Line name="CombatMetrics_SharedSeparator" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin" virtual="true"/>
 
         <Control name="CombatMetrics_RowTemplate" virtual="true"/>
+
+        <Control name="CombatMetrics_SortHeader" virtual="true" mouseEnabled="true">
+            <Dimensions y="20"/>
+            <OnMouseUp>
+                ZO_SortHeader_OnMouseUp(self, upInside)
+            </OnMouseUp>
+
+            <Controls>
+                <Label name="$(parent)Name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" inherits="CombatMetrics_ValueFontControl" horizontalAlignment="CENTER" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
+                    <AnchorFill />
+                </Label>
+            </Controls>
+        </Control>
     </Controls>
 </GuiXml>
