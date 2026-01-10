@@ -9,7 +9,7 @@ assignees: ''
 **Addon Version**
 Which version are you using?
 
-**Describe the Bug**
+**Bug Description**
 Clear description of what's wrong.
 
 **Steps to Reproduce**
