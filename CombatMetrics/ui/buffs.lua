@@ -469,16 +469,16 @@ local function InitBuffsList(panel)
 	end
 
 	function dataList:FilterScrollList()
+	end
+
+	function dataList:SortScrollList()
 		local scrollData = ZO_ScrollList_GetDataList(self.list)
 		ZO_ScrollList_Clear(self.list)
 
 		for i, data in ipairs(self.masterList) do
 			scrollData[#scrollData + 1] = data
 		end
-	end
 
-	function dataList:SortScrollList()
-		local scrollData = ZO_ScrollList_GetDataList(self.list)
 		table.sort(scrollData, self.sortFunction)
 
 		local groupList = self.groupList

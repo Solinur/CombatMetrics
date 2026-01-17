@@ -52,7 +52,7 @@ SafeAddString(SI_COMBAT_METRICS_TOGGLE_GRAPH, "Graph", 1)
 SafeAddString(SI_COMBAT_METRICS_TOGGLE_INFO, "Info", 1)
 SafeAddString(SI_COMBAT_METRICS_TOGGLE_SETTINGS, "Optionen", 1)
 
-SafeAddString(SI_COMBAT_METRICS_NOTIFICATION, "Mein Raid |cffff00Beyond Infinity|r sucht einen MagDK/Necro für vCR+3 (Greifenherz).", 1)
+SafeAddString(SI_COMBAT_METRICS_NOTIFICATION, "PLACEHOLDER", 1)
 
 SafeAddString(SI_COMBAT_METRICS_NOTIFICATION_GUILD, "Info: |cffff00Beyond Infinity|r", 1)
 SafeAddString(SI_COMBAT_METRICS_NOTIFICATION_ACCEPT, "Gelesen", 1)
