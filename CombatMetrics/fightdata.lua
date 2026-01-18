@@ -4,6 +4,16 @@ local util = CMXint.util
 local logger
 local SVHandler
 
+function util:GetEnemyUnits(units)	-- TODO: Attach this to fight_data
+	local unitIds = {}
+
+	for unitId, unit in pairs(units) do
+		if not unit.isFriendly then unitIds[#unitIds+1] = unitId end
+	end
+
+	return unitIds
+end
+
 local FightDataManager = ZO_InitializingObject:Subclass()
 
 function FightDataManager:Initialize()
@@ -73,8 +83,7 @@ function FightDataManager:RemoveFight(fightIndex)
 end
 
 function FightDataManager:RemoveCurrentFight()
-	local currentIndex = self.currentIndex
-	FightDataManager:RemoveFight(currentIndex)
+	FightDataManager:RemoveFight(self.currentIndex)
 end
 
 function FightDataManager:SaveFight(saveLog)

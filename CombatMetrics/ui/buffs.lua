@@ -18,6 +18,9 @@ local BUFF_NAME_FORMAT_STACKS = "<<2>>x <<1>>"
 local BUFF_VALUE_FORMAT_SINGLE = "%d"
 local BUFF_VALUE_FORMAT_GROUP = "%d/%d"
 
+local BUFF_CATEGORY_PLAYER = "Player"
+local BUFF_CATEGORY_GROUP = "Group"
+local BUFF_CATEGORY_ENEMY = "Enemy"
 
 local SigilAbilities = { -- Abilities to display a warning icon in the buff list to indicate it cannot be considered a "clean" parse
 	[236960] = true, -- Sigil of Power
@@ -31,8 +34,8 @@ local BUFF_LABEL_COLOR_FAV = {1, .8, .3, 1}
 
 local BUFF_BAR_COLORS = {
 	[BUFF_EFFECT_TYPE_BUFF] = {0, 0.6, 0, 0.6},
-	[BUFF_EFFECT_TYPE_DEBUFF] = {0, 0.6, 0, 0.6},
-	[BUFF_EFFECT_TYPE_NOT_AN_EFFECT] = {0, 0.6, 0, 0.6},
+	[BUFF_EFFECT_TYPE_DEBUFF] = {0.75, 0, 0.6, 0.6},
+	[BUFF_EFFECT_TYPE_NOT_AN_EFFECT] = {0.6, 0.6, 0.6, 0.6},
 }
 
 local BUFF_BAR_GROUP_COLORS = {
@@ -139,21 +142,104 @@ function CMX.CollapseButton( button, upInside )
 	CombatMetricsReport:GetNamedChild("_BuffPanel"):GetNamedChild("BuffList"):Update()
 end
 
-local function GetBuffData()
-	local buffData
-	-- TODO: redo
-	-- local rightpanel = db.fightReport.rightpanel
+local function CombineEffects(source, dest)
+	assert(dest.name == source.name, debug.traceback(string.format("Name mismatch when combining buff data: %s ~= %s.", dest.name, source.name)))
+	assert(dest.iconId == source.iconId, debug.traceback(string.format("ID mismatch when combining buff data: %d ~= %d.", dest.iconId, source.iconId)))
+	dest.uptime = dest.uptime + source.uptime
+	dest.count = dest.count + source.count
+	dest.groupUptime = dest.groupUptime + source.groupUptime
+	dest.groupCount = dest.groupCount + source.groupCount
+	dest.effectType = dest.effectType + source.effectType
+	dest.maxStacks = dest.maxStacks + source.maxStacks
+	local destStacks = dest.stacks
+	for stacks, stackData in pairs(source[stacks]) do
+		if destStacks[stacks] == nil then
+			destStacks[stacks] = ZO_ShallowTableCopy(stackData)
+		else
+			local destData = destStacks[stacks]
+			destData.uptime = destData.uptime + stackData.uptime
+			destData.count = destData.count + stackData.count
+			destData.groupUptime = destData.groupUptime + stackData.groupUptime
+			destData.groupCount = destData.groupCount + stackData.groupCount
+		end
+	end
+end
 
-	-- if rightpanel == "buffsout" then
-	-- 	buffData = selectionData
-	-- elseif rightpanel == "buffs" then
-	-- 	buffData = fightData.calculated
-	-- end
+local effectData = {}
+local unitIds = {}
+local function GetBuffData(fightData, category)
+	local totalUnitTime = 0
 
-	return buffData
+	CMX_EFFECT_DATA = {fightData, category, effectData, unitIds}
+	ZO_ClearTable(unitIds)
+	ZO_ClearTable(effectData)
+
+	if fightData == nil then return effectData, totalUnitTime end
+
+	if category == BUFF_CATEGORY_PLAYER then
+		unitIds[#unitIds+1] = fightData.unitIds.player
+	elseif category == BUFF_CATEGORY_GROUP then
+		local group = fightData.unitIds.group
+		if group and #group > 0 then
+			ZO_ShallowTableCopy(fightData.unitIds, unitIds)
+		else
+			unitIds[#unitIds+1] = fightData.unitIds.player
+		end
+	elseif category == BUFF_CATEGORY_ENEMY then
+		ZO_ShallowTableCopy(util:GetEnemyUnits(fightData.units), unitIds)
+	end
+
+	for i, unitId in ipairs(unitIds) do
+		-- TODO: replace with info stored in unit table
+		local startTime = math.huge
+		local endTime = 0
+		
+		local unitData = fightData.damageDone[unitId]
+		if unitData then
+			endTime = zo_max(unitData.endTime, endTime)
+			startTime = zo_min(unitData.startTime, startTime)
+		end
+
+		local unitData2 = fightData.damageReceived[unitId]
+		if unitData2 then
+			endTime = zo_max(unitData2.endTime, endTime)
+			startTime = zo_min(unitData2.startTime, startTime)
+		end
+
+		if endTime > startTime then
+			totalUnitTime = totalUnitTime + (endTime - startTime)
+			
+			local unitEffectData = fightData.effects[unitId]
+			for abilityId, data in pairs(unitEffectData) do
+				if effectData[abilityId] == nil then
+					effectData[abilityId] = ZO_ShallowTableCopy(data)
+				else
+					CombineEffects(data, effectData[abilityId])
+				end
+			end
+		end
+	end
+	return effectData, totalUnitTime
 end
 util.GetBuffData = GetBuffData
 
+
+local buffCategoryTextures = {
+	[BUFF_CATEGORY_ENEMY] = "esoui/art/mainmenu/menubar_skills",
+	[BUFF_CATEGORY_GROUP] = "esoui/art/mainmenu/menubar_group",
+	[BUFF_CATEGORY_PLAYER] = "esoui/art/mainmenu/menubar_character"
+}
+
+function CMXint.InitializeBuffCategoryButton(control, buffCategory)
+	local baseTexture = buffCategoryTextures[buffCategory]
+
+	control:SetNormalTexture(string.format("%s_up.dds", baseTexture))
+	control:SetPressedTexture(string.format("%s_down.dds", baseTexture))
+	control:SetMouseOverTexture(string.format("%s_over.dds", baseTexture))
+	control:SetDisabledTexture(string.format("%s_disabled.dds", baseTexture))
+
+	control.buffCategory = buffCategory
+end
 
 function util.buffSortFunction(data, a, b)
 	local ishigher = false
@@ -359,10 +445,12 @@ local function InitBuffsList(panel)
 
 		if hasOtherId and not hasStacks then
 			local groupData = self.groupList[mainAbilityId]
+
 			if groupData == nil then
 				groupData = {}
 				self.groupList[mainAbilityId] = groupData
 			end
+
 			rowData.mainAbilityId = mainAbilityId
 			table.insert(groupData, ZO_ScrollList_CreateDataEntry(1, rowData))
 		else
@@ -400,6 +488,7 @@ local function InitBuffsList(panel)
 					effectType = data.effectType,
 					labelText = labeltext,
 					name = labeltext,
+					abilityId = abilityId,
 
 					uptime = stackData.uptime / totalUnitTime,
 					groupUptime = stackData.groupUptime / totalUnitTime,
@@ -415,10 +504,8 @@ local function InitBuffsList(panel)
 
 	function dataList:BuildMasterList()
 		local fightData = self.panel.fightData
-		local playerId = fightData.unitIds.player
-		local playerData = fightData.damageDone[playerId]
-		local totalUnitTime = playerData.endTime - playerData.startTime
-		local effectData = fightData.effects[playerId]
+		local category = self.panel.category
+		local effectData, totalUnitTime = GetBuffData(fightData, category)
 
 		self:UpdateAbilityNames(effectData)
 
@@ -437,27 +524,25 @@ local function InitBuffsList(panel)
 	end
 
 	function dataList:ProcessGroupData(entryData, groupData)
-		local isStackData = groupData[1].stacks ~= nil
-
-		if isStackData then
+		if groupData[1].data.stacks ~= nil then
 			local sumUptime = 0
 			local sumGroupUptime = 0
-			local maxStacks = #groupData
+			local maxStacks = 0
 
-			for i, groupEntryData in groupData do
+			for i, groupEntry in ipairs(groupData) do
+				local groupEntryData = groupEntry.data
 				sumUptime = sumUptime + groupEntryData.uptime
 				sumGroupUptime = sumGroupUptime + groupEntryData.groupUptime
+				maxStacks = zo_max(maxStacks, groupEntryData.stacks)
 			end
 
 			entryData.uptime = sumUptime / maxStacks
 			entryData.groupUptime = sumGroupUptime / maxStacks
 
 			-- TODO: Check if more elaborate analysis needed (parallel buffs ?)
-		end
-
-		-- multiple Id data
-		if isStackData then -- TODO: Is this correct ??
-			for i, groupEntryData in groupData do
+		elseif groupData[1].mainAbilityId then
+			for i, groupEntry in groupData do
+				local groupEntryData = groupEntry.data
 				if groupEntryData.uptime > entryData.uptime then
 					entryData.uptime = groupEntryData.uptime
 					entryData.groupUptime = groupEntryData.uptime
@@ -469,6 +554,7 @@ local function InitBuffsList(panel)
 	end
 
 	function dataList:FilterScrollList()
+		-- TODO: Add searchbar filter.
 	end
 
 	function dataList:SortScrollList()
@@ -483,14 +569,13 @@ local function InitBuffsList(panel)
 
 		local groupList = self.groupList
 
-		CMX_BUFF_PANEL_LIST = scrollData
-
 		for i = #scrollData, 1, -1 do
-			local abilityId = scrollData[i].data.abilityId
+			local dataEntry = scrollData[i].data
+			local abilityId = dataEntry.abilityId
 			local groupData = groupList[abilityId]
 
 			if groupData then
-				dataList:ProcessGroupData(scrollData[i], groupData)
+				dataList:ProcessGroupData(dataEntry, groupData)
 
 				if uncollapsedBuffs[abilityId] then
 					table.sort(groupData, self.sortFunction)
@@ -507,9 +592,24 @@ local function InitBuffsList(panel)
 	return dataList
 end
 
-
+---@param control Control
 function CMXint.InitializeBuffsPanel(control)
 	BuffPanel = CMXint.PanelObject:New(control, "buffs")
+
+	BuffPanel.radioButtons = ZO_RadioButtonGroup:New(false)
+
+	local function onBuffCategoryClicked(control, buttonId, ignoreCallback)
+		BuffPanel.category = control.buffCategory
+		BuffPanel.dataList:RefreshData()
+	end
+	
+	BuffPanel.radioButtons:SetCustomClickHandler(onBuffCategoryClicked)
+
+	local searchBar = control:GetNamedChild("SearchBar")
+	for i = 1, searchBar:GetNumChildren() do
+		local child = searchBar:GetChild(i)
+		if child.buffCategory then BuffPanel.radioButtons:Add(child) end
+	end
 	
 	InitBuffsList(BuffPanel)
 	BuffPanel.selections = {}
@@ -525,6 +625,8 @@ function CMXint.InitializeBuffsPanel(control)
 		self.dataList:UpdateRowHeight()
 		self.dataList:RefreshData()
 	end
+
+	BuffPanel.radioButtons:SetClickedButton(searchBar:GetNamedChild("Player"))
 end
 
 local isFileInitialized = false
