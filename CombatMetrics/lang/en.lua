@@ -78,121 +78,6 @@
 	SI_COMBAT_METRICS_NOTIFICATION_ACCEPT = "Message Read",
 	SI_COMBAT_METRICS_NOTIFICATION_DISCARD = "Turn off notifications",
 
-	-- Options Menu Strings
-
-	SI_COMBAT_METRICS_SHOWIDS = "Show IDs", -- (for units, buffs and abilities)
-	SI_COMBAT_METRICS_HIDEIDS = "Hide IDs", -- (for units, buffs and abilities)
-
-	SI_COMBAT_METRICS_SHOWOVERHEAL = "Show overheal", -- (for units, buffs and abilities)
-	SI_COMBAT_METRICS_HIDEOVERHEAL = "Hide overheal", -- (for units, buffs and abilities)
-
-	SI_COMBAT_METRICS_POSTDPS = "Post DPS/HPS",
-	SI_COMBAT_METRICS_POSTSINGLEDPS = "Post single target DPS",
-	SI_COMBAT_METRICS_POSTSMARTDPS = "Post boss target DPS",
-	SI_COMBAT_METRICS_POSTMULTIDPS = "Post total DPS",
-	SI_COMBAT_METRICS_POSTALLDPS = "Post single and total DPS",
-	SI_COMBAT_METRICS_POSTHPS = "Post HPS",
-	SI_COMBAT_METRICS_POSTUNITDPS = "Post DPS to this unit",
-	SI_COMBAT_METRICS_POSTUNITNAMEDPS = "Post DPS to '<<tm:1>>' units", -- <<tm:1>> is unitname
-	SI_COMBAT_METRICS_POSTSELECTIONDPS = "Post DPS to selected units",
-	SI_COMBAT_METRICS_POSTSELECTIONHPS = "Post HPS to selected units",
-
-	-- Format Strings for DPS posting
-
-	SI_COMBAT_METRICS_BOSS_DPS = "Boss DPS",
-
-	SI_COMBAT_METRICS_POSTDPS_FORMAT = "<<1>> - DPS: <<2>> (<<3>> in <<4>>)", -- for single target DPS (<<1>> = fightname, <<2>> = DPS, <<3>> = damage, <<4>> =  ) e.g. Z'Maja - DPS: 10000 (1000000 in 1:40.0)
-	SI_COMBAT_METRICS_POSTSMARTDPS_FORMAT = "<<1>><<2>> - Boss DPS: <<3>> (<<4>> in <<5>>)", -- (<<1>> = fightname, <<2>> = extraunits (can be ""), <<3>> = DPS, <<4>> = damage, <<5>> = time) e.g. Valariel (+5) - Boss DPS: 10000 (1000000 in 1:40.0)
-	SI_COMBAT_METRICS_POSTMULTIDPS_FORMAT = "<<1>> (+<<2>>) - DPS: <<3>> (<<4>> in <<5>>)", -- (<<1>> = fightname, <<2>> = extraunits, <<3>> = DPS, <<4>> = damage, <<5>> = time) e.g. Some random Mob (+5) - DPS: 10000 (1000000 in 1:40.0)
-	SI_COMBAT_METRICS_POSTALLDPS_FORMAT_A = "<<1>> - Total DPS (+<<2>>): <<3>> (<<4>> in <<5>>)", -- multi target part (<<1>> = fightname, <<2>> = extraunits, <<3>> = DPS, <<4>> = damage, <<5>> = time) e.g. Valariel - Total DPS (+5): 10000 (1000000 in 1:40.0)
-	SI_COMBAT_METRICS_POSTALLDPS_FORMAT_B = "<<1>>: <<2>> (<<3>> in <<4>>)", --  single target part (<<1>> = Label, <<2>> = DPS, <<3>> = damage) e.g. Boss DPS (+2): 10000 (1000000 in 1:40.0)
-	SI_COMBAT_METRICS_POSTSELECTIONDPS_FORMAT = "<<1>><<2>> - Selection DPS: <<3>> (<<4>> in <<5>>)", -- (<<1>> = fightname, <<2>> = extraunits (can be ""), <<3>> = DPS, <<4>> = damage, <<5>> = time) e.g. Valariel (+5) - Boss DPS: 10000 (1000000 in 1:40.0)
-	SI_COMBAT_METRICS_POSTHPS_FORMAT = "<<1>> - HPS: <<2>> (<<3>> in <<4>>)", -- (<<1>> = fightname, <<2>> = HPS, <<3>> = damage, <<4>> = time)  e.g. Z'Maja - HPS: 10000 (1000000 in 1:40.0)
-	SI_COMBAT_METRICS_POSTSELECTIONHPS_FORMAT = "<<1>> - Selection HPS (x<<2>>): <<3>> (<<4>> in <<5>>)", -- (<<1>> = fightname, <<2>> = units, <<3>> = HPS, <<4>> = damage, <<5>> = time) e.g. Z'Maja - HPS (12): 10000 (1000000 in 1:40.0)
-
-	SI_COMBAT_METRICS_POSTBUFF = "Post buff uptime",
-	SI_COMBAT_METRICS_POSTBUFF_BOSS = "Post buff uptime on bosses",
-	SI_COMBAT_METRICS_POSTBUFF_GROUP = "Post buff uptime on group members",
-	SI_COMBAT_METRICS_POSTBUFF_FORMAT = "<<1>> - Uptime: <<2>> (<<3>><<4[/ on $d/ on $d units]>>)", -- (<<1>> = buff name, <<2>> = relative uptime, <<3>> = uptime, <<4>> = time) e.g. Major Intellect - Uptime: 93.2% (9:26 in 10:07)
-	SI_COMBAT_METRICS_POSTBUFF_FORMAT_GROUP = "<<1>> - Uptime: <<2>>/<<5>> (<<3>>/<<6>><<4[/ on $d/ on $d units]>>)", -- (<<1>> = buff name, <<2>> = relative uptime, <<3>> = uptime, <<4>> = units, <<5>> = relative group uptime, <<6>> = group uptime) e.g. Minor Sorcery - Uptime: 55.4%/100.6% (5:36/10:11 in 10:07)
-
-	SI_COMBAT_METRICS_SETTINGS = "Addon Settings",
-
-	-- Graph
-
-	SI_COMBAT_METRICS_TOGGLE_CURSOR = "Toggle to show cursor and value tooltip",
-	SI_COMBAT_METRICS_GRAPH_BUFF_GROUP_SELECTOR = "Toggle to show group uptime",
-
-	SI_COMBAT_METRICS_RECALCULATE = "Recalculate Fight",
-	SI_COMBAT_METRICS_SMOOTHED = "Smoothed",
-	SI_COMBAT_METRICS_TOTAL = "Total",
-	SI_COMBAT_METRICS_ABSOLUTE = "Absolute %",
-	SI_COMBAT_METRICS_SMOOTH_LABEL = "Smooth: %d s",
-	SI_COMBAT_METRICS_NONE = "None",
-	SI_COMBAT_METRICS_BOSS_HP = "Boss HP",
-	SI_COMBAT_METRICS_ENLARGE = "Enlarge",
-	SI_COMBAT_METRICS_SHRINK = "Shrink",
-
-	-- Feedback
-
-	SI_COMBAT_METRICS_FEEDBACK = "Feedback",
-
-	SI_COMBAT_METRICS_FEEDBACK_SEND = "Send feedback",
-
-	SI_COMBAT_METRICS_FEEDBACK_EUONLY_FORMAT = "<<1>> (EU only)",
-	SI_COMBAT_METRICS_FEEDBACK_MAIL = "Ingame mail",
-	SI_COMBAT_METRICS_FEEDBACK_MAIL_HEADER = "Feedback: Combat Metrics %s",
-
-	SI_COMBAT_METRICS_FEEDBACK_ESOUI = "ESOUI page",
-	SI_COMBAT_METRICS_FEEDBACK_GITHUB = "GitHub repository",
-	SI_COMBAT_METRICS_FEEDBACK_DISCORD = "Discord",
-
-	SI_COMBAT_METRICS_DONATE = "Donate",
-	SI_COMBAT_METRICS_DONATE_GOLD = "Gold",
-	SI_COMBAT_METRICS_DONATE_GOLD_HEADER = "Donation: Combat Metrics %s",
-	SI_COMBAT_METRICS_DONATE_CROWNS = "Crowns",
-	SI_COMBAT_METRICS_DONATE_CROWNS_TEXT = "If you wish to gift something from the crown store, I'd be happy to receive some crown crates or consumable items. \nYou can also contact me if you wish to gift something else.",
-	SI_COMBAT_METRICS_DONATE_CROWNS_ACCOUNT = "My account:",
-	SI_COMBAT_METRICS_DONATE_ESOUI = "Donation Page",
-	
-	SI_COMBAT_METRICS_OK = "OK",
-	
-	SI_COMBAT_METRICS_SAVEDFIGHTS_FULL = "You're exceeding the maximum number of saved fights. Delete <<1[a fight/a fight/$d fights]>> or increase the allowed number in the settings!",
-	SI_COMBAT_METRICS_CONVERT_DB_TITLE = "COMBAT METRICS",
-	SI_COMBAT_METRICS_CONVERT_DB_TEXT = "This version features a new way to store fights. It takes up less space and reduces UI loading times, even with much more fights saved. \n\nTo benefit from this and allow new fights to be saved, all stored fights need to be converted. \n\nThis process may take a up to a few minutes.",
-	SI_COMBAT_METRICS_CONVERT_DB_BUTTON1_TEXT = "Convert",
-	SI_COMBAT_METRICS_CONVERT_DB_BUTTON2_TEXT = "Abort",
-	SI_COMBAT_METRICS_CONVERSION_TITLE_TEXT = "Converting Fight <<1>>/<<2>> ...",
-	SI_COMBAT_METRICS_CONVERSION_FINISHED_TEXT = "Conversion Finished!",
-
-	-- Fight Control Button Tooltips
-
-	SI_COMBAT_METRICS_PREVIOUS_FIGHT = "Previous Fight",
-	SI_COMBAT_METRICS_NEXT_FIGHT = "Next Fight",
-	SI_COMBAT_METRICS_MOST_RECENT_FIGHT = "Most Recent Fight",
-	SI_COMBAT_METRICS_LOAD_FIGHT = "Load Fight",
-	SI_COMBAT_METRICS_SAVE_FIGHT = "Click: Save fight",
-	SI_COMBAT_METRICS_SAVE_FIGHT2 = "Shift+Click: Save fight with combat log",
-	SI_COMBAT_METRICS_DELETE_COMBAT_LOG = "Delete Combat Log",
-	SI_COMBAT_METRICS_DELETE_FIGHT = "Delete Fight",
-
-	-- Fight List
-
-	SI_COMBAT_METRICS_RECENT_FIGHT = "Recent Fights",
-	SI_COMBAT_METRICS_DURATION = "Duration",
-	SI_COMBAT_METRICS_CHARACTER = "Character",
-	SI_COMBAT_METRICS_ZONE = "Zone",
-	SI_COMBAT_METRICS_TIME = "Time",
-	SI_COMBAT_METRICS_TIME2 = "Time",
-	SI_COMBAT_METRICS_TIMEC = "Time: ",
-
-	SI_COMBAT_METRICS_SHOW = "Show",
-	SI_COMBAT_METRICS_DELETE = "Delete",
-
-	SI_COMBAT_METRICS_SAVED_FIGHTS = "Saved Fights",
-
-	-- More UI Strings
-
 	SI_COMBAT_METRICS_ACTIVE_TIME = "Active Time: ",
 	SI_COMBAT_METRICS_ZERO_SEC = "0 s",
 	SI_COMBAT_METRICS_IN_COMBAT = "In Combat: ",
@@ -284,22 +169,6 @@
 	SI_COMBAT_METRICS_TOGGLE_SKILL_USE_EVENTS = "Toggle used skills events",
 	SI_COMBAT_METRICS_TOGGLE_PERFORMANCE_EVENTS = "Toggle performance info",
 
-	-- \n = new line
-
-	SI_COMBAT_METRICS_DEBUFF_IN = "(De-)Buffs\nIn",
-	SI_COMBAT_METRICS_DEBUFF_OUT = "(De-)Buffs\nOut",
-	SI_COMBAT_METRICS_MAGICKA_PM = "Magicka\n +/-",
-	SI_COMBAT_METRICS_STAMINA_PM = "Stamina\n +/-",
-	SI_COMBAT_METRICS_RESOURCES_PM = "Resources\n +/-",
-
-	SI_COMBAT_METRICS_BUFF = "Buff",
-	SI_COMBAT_METRICS_BUFFS = "Buffs",
-	SI_COMBAT_METRICS_DEBUFFS = "Debuffs",
-	SI_COMBAT_METRICS_SHARP = "#",
-	SI_COMBAT_METRICS_BUFFCOUNT_TT = "Player / Overall",
-	SI_COMBAT_METRICS_UPTIME = "Uptime %",
-	SI_COMBAT_METRICS_UPTIME_TT = "Player % / Overall %",
-
 	SI_COMBAT_METRICS_REGENERATION = "Regeneration",
 	SI_COMBAT_METRICS_CONSUMPTION = "Consumption",
 	SI_COMBAT_METRICS_PM_SEC = "±/s",
@@ -310,12 +179,6 @@
 	SI_COMBAT_METRICS_ABILITY = "Ability",
 	SI_COMBAT_METRICS_PER_HITS = "/Hits",
 	SI_COMBAT_METRICS_CRITS_PER = "Crit %",
-
-	SI_COMBAT_METRICS_FAVOURITE_ADD = "Add to Favourites",
-	SI_COMBAT_METRICS_FAVOURITE_REMOVE = "Remove from Favourites",
-
-	SI_COMBAT_METRICS_UNCOLLAPSE = "Show Details",
-	SI_COMBAT_METRICS_COLLAPSE = "Collapse",
 
 	SI_COMBAT_METRICS_SKILL = "Skill",
 
@@ -341,6 +204,148 @@
 	SI_COMBAT_METRICS_TOTALSKILLS_TT = "Total skills cast",
 
 	SI_COMBAT_METRICS_SAVED_DATA = "Saved Data",
+
+	-- Buff Panel
+
+	SI_COMBAT_METRICS_DEBUFF_IN = "(De-)Buffs\nIn",
+	SI_COMBAT_METRICS_DEBUFF_OUT = "(De-)Buffs\nOut",
+
+	SI_COMBAT_METRICS_BUFF = "Buff",
+	SI_COMBAT_METRICS_BUFFS = "Buffs",
+	SI_COMBAT_METRICS_DEBUFFS = "Debuffs",
+	SI_COMBAT_METRICS_SHARP = "#",
+	SI_COMBAT_METRICS_BUFFCOUNT_TT = "Player / Overall",
+	SI_COMBAT_METRICS_UPTIME = "Uptime %",
+	SI_COMBAT_METRICS_UPTIME_TT = "Player % / Overall %",
+
+	SI_COMBAT_METRICS_FAVOURITE_ADD = "Add to Favourites",
+	SI_COMBAT_METRICS_FAVOURITE_REMOVE = "Remove from Favourites",
+
+	SI_COMBAT_METRICS_UNCOLLAPSE = "Show Details",
+	SI_COMBAT_METRICS_COLLAPSE = "Collapse",
+
+	SI_COMBAT_METRICS_ENEMY = "Enemy",
+
+	-- Resources
+	
+	SI_COMBAT_METRICS_MAGICKA_PM = "Magicka\n +/-",
+	SI_COMBAT_METRICS_STAMINA_PM = "Stamina\n +/-",
+	SI_COMBAT_METRICS_RESOURCES_PM = "Resources\n +/-",
+	
+	-- Graph
+
+	SI_COMBAT_METRICS_TOGGLE_CURSOR = "Toggle to show cursor and value tooltip",
+	SI_COMBAT_METRICS_GRAPH_BUFF_GROUP_SELECTOR = "Toggle to show group uptime",
+
+	SI_COMBAT_METRICS_RECALCULATE = "Recalculate Fight",
+	SI_COMBAT_METRICS_SMOOTHED = "Smoothed",
+	SI_COMBAT_METRICS_TOTAL = "Total",
+	SI_COMBAT_METRICS_ABSOLUTE = "Absolute %",
+	SI_COMBAT_METRICS_SMOOTH_LABEL = "Smooth: %d s",
+	SI_COMBAT_METRICS_NONE = "None",
+	SI_COMBAT_METRICS_BOSS_HP = "Boss HP",
+	SI_COMBAT_METRICS_ENLARGE = "Enlarge",
+	SI_COMBAT_METRICS_SHRINK = "Shrink",
+
+	-- Options Menu Strings
+
+	SI_COMBAT_METRICS_SHOWIDS = "Show IDs", -- (for units, buffs and abilities)
+	SI_COMBAT_METRICS_HIDEIDS = "Hide IDs", -- (for units, buffs and abilities)
+
+	SI_COMBAT_METRICS_SHOWOVERHEAL = "Show overheal", -- (for units, buffs and abilities)
+	SI_COMBAT_METRICS_HIDEOVERHEAL = "Hide overheal", -- (for units, buffs and abilities)
+
+	SI_COMBAT_METRICS_POSTDPS = "Post DPS/HPS",
+	SI_COMBAT_METRICS_POSTSINGLEDPS = "Post single target DPS",
+	SI_COMBAT_METRICS_POSTSMARTDPS = "Post boss target DPS",
+	SI_COMBAT_METRICS_POSTMULTIDPS = "Post total DPS",
+	SI_COMBAT_METRICS_POSTALLDPS = "Post single and total DPS",
+	SI_COMBAT_METRICS_POSTHPS = "Post HPS",
+	SI_COMBAT_METRICS_POSTUNITDPS = "Post DPS to this unit",
+	SI_COMBAT_METRICS_POSTUNITNAMEDPS = "Post DPS to '<<tm:1>>' units", -- <<tm:1>> is unitname
+	SI_COMBAT_METRICS_POSTSELECTIONDPS = "Post DPS to selected units",
+	SI_COMBAT_METRICS_POSTSELECTIONHPS = "Post HPS to selected units",
+
+	-- Format Strings for DPS posting
+
+	SI_COMBAT_METRICS_BOSS_DPS = "Boss DPS",
+
+	SI_COMBAT_METRICS_POSTDPS_FORMAT = "<<1>> - DPS: <<2>> (<<3>> in <<4>>)", -- for single target DPS (<<1>> = fightname, <<2>> = DPS, <<3>> = damage, <<4>> =  ) e.g. Z'Maja - DPS: 10000 (1000000 in 1:40.0)
+	SI_COMBAT_METRICS_POSTSMARTDPS_FORMAT = "<<1>><<2>> - Boss DPS: <<3>> (<<4>> in <<5>>)", -- (<<1>> = fightname, <<2>> = extraunits (can be ""), <<3>> = DPS, <<4>> = damage, <<5>> = time) e.g. Valariel (+5) - Boss DPS: 10000 (1000000 in 1:40.0)
+	SI_COMBAT_METRICS_POSTMULTIDPS_FORMAT = "<<1>> (+<<2>>) - DPS: <<3>> (<<4>> in <<5>>)", -- (<<1>> = fightname, <<2>> = extraunits, <<3>> = DPS, <<4>> = damage, <<5>> = time) e.g. Some random Mob (+5) - DPS: 10000 (1000000 in 1:40.0)
+	SI_COMBAT_METRICS_POSTALLDPS_FORMAT_A = "<<1>> - Total DPS (+<<2>>): <<3>> (<<4>> in <<5>>)", -- multi target part (<<1>> = fightname, <<2>> = extraunits, <<3>> = DPS, <<4>> = damage, <<5>> = time) e.g. Valariel - Total DPS (+5): 10000 (1000000 in 1:40.0)
+	SI_COMBAT_METRICS_POSTALLDPS_FORMAT_B = "<<1>>: <<2>> (<<3>> in <<4>>)", --  single target part (<<1>> = Label, <<2>> = DPS, <<3>> = damage) e.g. Boss DPS (+2): 10000 (1000000 in 1:40.0)
+	SI_COMBAT_METRICS_POSTSELECTIONDPS_FORMAT = "<<1>><<2>> - Selection DPS: <<3>> (<<4>> in <<5>>)", -- (<<1>> = fightname, <<2>> = extraunits (can be ""), <<3>> = DPS, <<4>> = damage, <<5>> = time) e.g. Valariel (+5) - Boss DPS: 10000 (1000000 in 1:40.0)
+	SI_COMBAT_METRICS_POSTHPS_FORMAT = "<<1>> - HPS: <<2>> (<<3>> in <<4>>)", -- (<<1>> = fightname, <<2>> = HPS, <<3>> = damage, <<4>> = time)  e.g. Z'Maja - HPS: 10000 (1000000 in 1:40.0)
+	SI_COMBAT_METRICS_POSTSELECTIONHPS_FORMAT = "<<1>> - Selection HPS (x<<2>>): <<3>> (<<4>> in <<5>>)", -- (<<1>> = fightname, <<2>> = units, <<3>> = HPS, <<4>> = damage, <<5>> = time) e.g. Z'Maja - HPS (12): 10000 (1000000 in 1:40.0)
+
+	SI_COMBAT_METRICS_POSTBUFF = "Post buff uptime",
+	SI_COMBAT_METRICS_POSTBUFF_BOSS = "Post buff uptime on bosses",
+	SI_COMBAT_METRICS_POSTBUFF_GROUP = "Post buff uptime on group members",
+	SI_COMBAT_METRICS_POSTBUFF_FORMAT = "<<1>> - Uptime: <<2>> (<<3>><<4[/ on $d/ on $d units]>>)", -- (<<1>> = buff name, <<2>> = relative uptime, <<3>> = uptime, <<4>> = time) e.g. Major Intellect - Uptime: 93.2% (9:26 in 10:07)
+	SI_COMBAT_METRICS_POSTBUFF_FORMAT_GROUP = "<<1>> - Uptime: <<2>>/<<5>> (<<3>>/<<6>><<4[/ on $d/ on $d units]>>)", -- (<<1>> = buff name, <<2>> = relative uptime, <<3>> = uptime, <<4>> = units, <<5>> = relative group uptime, <<6>> = group uptime) e.g. Minor Sorcery - Uptime: 55.4%/100.6% (5:36/10:11 in 10:07)
+
+	SI_COMBAT_METRICS_SETTINGS = "Addon Settings",
+
+
+	-- Feedback
+
+	SI_COMBAT_METRICS_FEEDBACK = "Feedback",
+
+	SI_COMBAT_METRICS_FEEDBACK_SEND = "Send feedback",
+
+	SI_COMBAT_METRICS_FEEDBACK_EUONLY_FORMAT = "<<1>> (EU only)",
+	SI_COMBAT_METRICS_FEEDBACK_MAIL = "Ingame mail",
+	SI_COMBAT_METRICS_FEEDBACK_MAIL_HEADER = "Feedback: Combat Metrics %s",
+
+	SI_COMBAT_METRICS_FEEDBACK_ESOUI = "ESOUI page",
+	SI_COMBAT_METRICS_FEEDBACK_GITHUB = "GitHub repository",
+	SI_COMBAT_METRICS_FEEDBACK_DISCORD = "Discord",
+
+	SI_COMBAT_METRICS_DONATE = "Donate",
+	SI_COMBAT_METRICS_DONATE_GOLD = "Gold",
+	SI_COMBAT_METRICS_DONATE_GOLD_HEADER = "Donation: Combat Metrics %s",
+	SI_COMBAT_METRICS_DONATE_CROWNS = "Crowns",
+	SI_COMBAT_METRICS_DONATE_CROWNS_TEXT = "If you wish to gift something from the crown store, I'd be happy to receive some crown crates or consumable items. \nYou can also contact me if you wish to gift something else.",
+	SI_COMBAT_METRICS_DONATE_CROWNS_ACCOUNT = "My account:",
+	SI_COMBAT_METRICS_DONATE_ESOUI = "Donation Page",
+	
+	SI_COMBAT_METRICS_OK = "OK",
+	
+	SI_COMBAT_METRICS_SAVEDFIGHTS_FULL = "You're exceeding the maximum number of saved fights. Delete <<1[a fight/a fight/$d fights]>> or increase the allowed number in the settings!",
+	SI_COMBAT_METRICS_CONVERT_DB_TITLE = "COMBAT METRICS",
+	SI_COMBAT_METRICS_CONVERT_DB_TEXT = "This version features a new way to store fights. It takes up less space and reduces UI loading times, even with much more fights saved. \n\nTo benefit from this and allow new fights to be saved, all stored fights need to be converted. \n\nThis process may take a up to a few minutes.",
+	SI_COMBAT_METRICS_CONVERT_DB_BUTTON1_TEXT = "Convert",
+	SI_COMBAT_METRICS_CONVERT_DB_BUTTON2_TEXT = "Abort",
+	SI_COMBAT_METRICS_CONVERSION_TITLE_TEXT = "Converting Fight <<1>>/<<2>> ...",
+	SI_COMBAT_METRICS_CONVERSION_FINISHED_TEXT = "Conversion Finished!",
+
+	-- Fight Control Button Tooltips
+
+	SI_COMBAT_METRICS_PREVIOUS_FIGHT = "Previous Fight",
+	SI_COMBAT_METRICS_NEXT_FIGHT = "Next Fight",
+	SI_COMBAT_METRICS_MOST_RECENT_FIGHT = "Most Recent Fight",
+	SI_COMBAT_METRICS_LOAD_FIGHT = "Load Fight",
+	SI_COMBAT_METRICS_SAVE_FIGHT = "Click: Save fight",
+	SI_COMBAT_METRICS_SAVE_FIGHT2 = "Shift+Click: Save fight with combat log",
+	SI_COMBAT_METRICS_DELETE_COMBAT_LOG = "Delete Combat Log",
+	SI_COMBAT_METRICS_DELETE_FIGHT = "Delete Fight",
+
+	-- Fight List
+
+	SI_COMBAT_METRICS_RECENT_FIGHT = "Recent Fights",
+	SI_COMBAT_METRICS_DURATION = "Duration",
+	SI_COMBAT_METRICS_CHARACTER = "Character",
+	SI_COMBAT_METRICS_ZONE = "Zone",
+	SI_COMBAT_METRICS_TIME = "Time",
+	SI_COMBAT_METRICS_TIME2 = "Time",
+	SI_COMBAT_METRICS_TIMEC = "Time: ",
+
+	SI_COMBAT_METRICS_SHOW = "Show",
+	SI_COMBAT_METRICS_DELETE = "Delete",
+
+	SI_COMBAT_METRICS_SAVED_FIGHTS = "Saved Fights",
+
 
 -- Live report window
 
