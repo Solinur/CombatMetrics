@@ -1,8 +1,13 @@
+---@class CMX
 local CMX = CombatMetrics
+---@class CMXint
 local CMXint = CMX.internal
+---@class CMXutil
 local util = CMXint.util
-local ui = CMXint.ui
+---@type Logger
 local logger
+---@class CMXui
+local ui = CMXint.ui
 
 local GetFormattedAbilityIcon = util.GetFormattedAbilityIcon
 local GetFormattedAbilityName = util.GetFormattedAbilityName

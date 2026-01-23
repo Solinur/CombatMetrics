@@ -1,10 +1,15 @@
+---@class CMX
 local CMX = CombatMetrics
+---@class CMXint
 local CMXint = CMX.internal
+---@class CMXutil
 local util = CMXint.util
-local ui = CMXint.ui
+---@type Logger
 local logger
-local fightData
+---@class CMXui
+local ui = CMXint.ui
 
+local fightData
 local enlargedGraph = false
 local maxXYPlots = 5
 local maxBarPlots = 8
@@ -12,7 +17,7 @@ local EM = GetEventManager()
 
 local GetFormattedAbilityIcon = util.GetFormattedAbilityIcon
 local GetFormattedAbilityName = util.GetFormattedAbilityName
-local dx = CMXint.dx
+local dx = ui.dx
 
 local CMX_PLOT_DIMENSION_X = 1
 local CMX_PLOT_DIMENSION_Y = 2

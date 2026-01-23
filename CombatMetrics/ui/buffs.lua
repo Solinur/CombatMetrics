@@ -1,8 +1,14 @@
+---@class CMX
 local CMX = CombatMetrics
+---@class CMXint
 local CMXint = CMX.internal
-local ui = CMXint.ui
+---@class CMXutil
 local util = CMXint.util
+---@type Logger
 local logger
+---@class CMXui
+local ui = CMXint.ui
+
 local uncollapsedBuffs = {}
 local BuffPanel
 

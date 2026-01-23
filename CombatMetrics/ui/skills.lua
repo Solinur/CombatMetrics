@@ -1,8 +1,14 @@
+---@class CMX
 local CMX = CombatMetrics
+---@class CMXint
 local CMXint = CMX.internal
+---@class CMXutil
 local util = CMXint.util
-local ui = CMXint.ui
+---@type Logger
 local logger
+---@class CMXui
+local ui = CMXint.ui
+
 local SkillsPanel
 
 local GetFormattedAbilityIcon = util.GetFormattedAbilityIcon
@@ -14,6 +20,7 @@ local WerewolfColor = ZO_ColorDef:New("FFf3c86e")
 local WhiteColor = ZO_ColorDef:New("FFFFFFFF")
 
 function CMXint.InitializeSkillsPanel(control)
+	---@class SkillsPanel: Panel
 	SkillsPanel = CMXint.PanelObject:New(control, "skills")
 
 	function SkillsPanel:Update(fightData)

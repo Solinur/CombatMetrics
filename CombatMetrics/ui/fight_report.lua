@@ -1,9 +1,15 @@
+---@class CMX
 local CMX = CombatMetrics
+---@class CMXint
 local CMXint = CMX.internal
-CMXint.scenes = {}
+---@class CMXutil
 local util = CMXint.util
-local ui = CMXint.ui
+---@type Logger
 local logger
+---@class CMXui
+local ui = CMXint.ui
+
+CMXint.scenes = {}
 local FightReport
 local _
 
@@ -57,6 +63,7 @@ end
 
 
 local function InitializeFightReport()
+	---@class FightReport: TopLevelWindow
 	FightReport = CombatMetricsReport
 	util.storeOrigLayout(FightReport)
 

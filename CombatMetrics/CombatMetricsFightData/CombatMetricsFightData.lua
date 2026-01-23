@@ -24,7 +24,7 @@ local function Log(...)
 	return CMX.Log("save", ...)
 end
 
-
+---@class CombatMetricsFightData
 CombatMetricsFightData = {}
 
 local AddonName = "CombatMetricsFightData"

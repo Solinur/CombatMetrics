@@ -1,12 +1,17 @@
+---@class CMX
 local CMX = CombatMetrics
+---@class CMXint
 local CMXint = CMX.internal
+---@class CMXutil
 local util = CMXint.util
-local ui = CMXint.ui
+---@type Logger
 local logger
+---@class CMXui
+local ui = CMXint.ui
 
 local GetFormattedAbilityName = util.GetFormattedAbilityName
 local adjustRowSize = util.adjustRowSize
-local dx = CMXint.dx
+local dx = ui.dx
 
 local function UpdateResourceBars(panel, currentanchor, data, totalRate, selectedresources, color)
 	local settings = CMXint.settings.fightReport

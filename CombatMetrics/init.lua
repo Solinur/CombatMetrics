@@ -1,23 +1,37 @@
 -- This file contains the initialziation code 
 
+---@class CMX
 CombatMetrics = CombatMetrics or {}
+---@class CMX
 local CMX = CombatMetrics
 
 -- Basic values
 CMX.name = "CombatMetrics"
 CMX.version = "2.0.0-alpha"
 
+---@class CMXint
 CMX.internal = {}
 local CMXint = CMX.internal
 CMXint.debug = false or GetDisplayName() == "@Solinur"
+---@class CMXutil
 CMXint.util = {}
 CMXint.logger = {}
+---@class CMXutil
 local util = CMXint.util
 
 -- Logger
+---@class Logger
+---@field Debug fun(self: Logger, format: string?, message: string):
+---@field Warn fun(self: Logger, format: string?, message: string):
+---@field Info fun(self: Logger, format: string?, message: string):
+---@field Error fun(self: Logger, format: string?, message: string):
+---@field Verbose fun(self: Logger, format: string?, message: string):
+---@field Create fun(self: Logger, tag: string): Logger
 
 if LibDebugLogger then
+	---@type Logger
 	CMXint.logger.main = LibDebugLogger.Create(CMX.name)
+	CMXint.logger.main:Error()
 else
 	local internalLogger = {}
 	function internalLogger:Debug(...)
@@ -30,17 +44,20 @@ else
 	CMXint.logger.main = internalLogger
 end
 
-function util.initSublogger(name)
+---Creates a new sublogger
+---@param tag string
+---@return Logger
+function util.initSublogger(tag)
 	local mainlogger = CMXint.logger.main
-	if mainlogger.Create == nil or name == nil or name == "" then return mainlogger end
-	if CMXint.logger[name] ~= nil then
-		CMXint.logger.main:Warn("Sublogger %s already exists!", name)
-		return CMXint.logger[name]
+	if mainlogger.Create == nil or tag == nil or tag == "" then return mainlogger end
+	if CMXint.logger[tag] ~= nil then
+		mainlogger:Warn("Sublogger %s already exists!", tag)
+		return CMXint.logger[tag]
 	end
 
-	local sublogger = CMXint.logger.main:Create(name)
-	mainlogger:Info("Sublogger %s created", name)
-	CMXint.logger[name] = sublogger
+	local sublogger = mainlogger:Create(tag)
+	mainlogger:Info("Sublogger %s created", tag)
+	CMXint.logger[tag] = sublogger
 	return sublogger
 end
 

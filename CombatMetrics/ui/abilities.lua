@@ -1,8 +1,13 @@
+---@class CMX
 local CMX = CombatMetrics
+---@class CMXint
 local CMXint = CMX.internal
-local ui = CMXint.ui
+---@class CMXutil
 local util = CMXint.util
+---@type Logger
 local logger
+---@class CMXui
+local ui = CMXint.ui
 
 local GetFormattedAbilityIcon = util.GetFormattedAbilityIcon
 local GetFormattedAbilityName = util.GetFormattedAbilityName
@@ -10,7 +15,6 @@ local adjustRowSize = util.adjustRowSize
 
 local DPSstrings = CMXint.DPSstrings
 local CountStrings = CMXint.CountStrings
-local dx = CMXint.dx
 local AbilityPanel
 
 local hitCritLayoutTable = {
@@ -292,7 +296,7 @@ function CMXint.InitializeAbilitiesPanel(control)
 				local maxControl = row:GetNamedChild("MinMax")
 				maxControl:SetText(minmaxValue)
 
-				currentanchor = { TOPLEFT, row, BOTTOMLEFT, 0, dx }
+				currentanchor = { TOPLEFT, row, BOTTOMLEFT, 0, ui.dx }
 
 				control.bars[rowId] = row
 

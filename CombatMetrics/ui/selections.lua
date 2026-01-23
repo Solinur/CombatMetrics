@@ -1,9 +1,16 @@
+---@class CMX
 local CMX = CombatMetrics
+---@class CMXint
 local CMXint = CMX.internal
+---@class CMXutil
 local util = CMXint.util
-CMXint.selections = {}
-local CMXSel = CMXint.selections
+---@type Logger
 local logger
+---@class CMXui
+local ui = CMXint.ui
+
+ui.selections = {}
+local CMXSel = ui.selections
 
 local SelectionsObject = ZO_InitializingObject:Subclass()
 

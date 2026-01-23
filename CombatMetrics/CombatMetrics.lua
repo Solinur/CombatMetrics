@@ -18,8 +18,7 @@ local stringformat = string.format
 local inf = math.huge
 
 -- namespace for thg addon
-if CMX == nil then CMX = {} end
-local CMX = CMX
+local CMX = {}
 
 -- Basic values
 CMX.name = "CombatMetrics"

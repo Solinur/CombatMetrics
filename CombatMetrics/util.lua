@@ -1,6 +1,10 @@
+---@class CMX
 local CMX = CombatMetrics
+---@class CMXint
 local CMXint = CMX.internal
+---@class CMXutil
 local util = CMXint.util
+---@type Logger
 local logger
 
 CMX_POSTTOCHAT_MODE_NONE = 0

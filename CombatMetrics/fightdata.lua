@@ -1,6 +1,10 @@
+---@class CMX
 local CMX = CombatMetrics
+---@class CMXint
 local CMXint = CMX.internal
+---@class CMXutil
 local util = CMXint.util
+---@type Logger
 local logger
 local SVHandler
 
@@ -14,6 +18,10 @@ function util:GetEnemyUnits(units)	-- TODO: Attach this to fight_data
 	return unitIds
 end
 
+---@class FightDataManager
+---@field fights table<integer,Fight>
+---@field data Fight?
+---@field currentIndex integer?
 local FightDataManager = ZO_InitializingObject:Subclass()
 
 function FightDataManager:Initialize()
@@ -35,12 +43,15 @@ function FightDataManager:GetNumFights()
 	return #self.fights
 end
 
+
+---@param fightData Fight
 function FightDataManager:AddFight(fightData)
 	-- TODO: Add logic for keeping / removing fights.
 	table.insert(self.fights, fightData)
 	self:SelectMostRecentFight()
 end
 
+---@param fightIndex integer
 function FightDataManager:SelectFightByIndex(fightIndex)
 	local fightData = self.fights[fightIndex]
 	if fightData == nil then

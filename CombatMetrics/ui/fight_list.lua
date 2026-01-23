@@ -1,13 +1,19 @@
+---@class CMX
 local CMX = CombatMetrics
+---@class CMXint
 local CMXint = CMX.internal
+---@class CMXutil
 local util = CMXint.util
-local ui = CMXint.ui
+---@type Logger
 local logger
+---@class CMXui
+local ui = CMXint.ui
+
 local em = GetEventManager()
 
 local adjustRowSize = util.adjustRowSize
 local DPSstrings = CMXint.DPSstrings
-local dx = CMXint.dx
+local dx = ui.dx
 
 function CMXint.InitializeFightListPanel(control)
 	local FightListPanel = CMX.internal.PanelObject:New(control, "fightList")

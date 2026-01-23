@@ -3,9 +3,13 @@
 ---@diagnostic disable: exp-in-action
 ---@diagnostic disable: miss-symbol
 
+---@class CMX
 local CMX = CombatMetrics
+---@class CMXint
 local CMXint = CMX.internal
+---@class CMXutil
 local util = CMXint.util
+---@type Logger
 local logger
 
 hstructure DataEntryStruct

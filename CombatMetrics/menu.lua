@@ -1,5 +1,7 @@
-local CMXint = CMX
-if CMXint == nil then CMXint = {} end
+---@class CMX
+local CMX = CombatMetrics
+---@class CMXint
+local CMXint = CMX.internal
 local _
 --
 -- Register with LibMenu and ESO

@@ -1,12 +1,19 @@
+---@class CMX
 local CMX = CombatMetrics
+---@class CMXint
 local CMXint = CMX.internal
+---@class CMXutil
 local util = CMXint.util
+
+---@class CMXui
 CMXint.ui = {}
+---@class CMXui
 local ui = CMXint.ui
 ui.panels = {}
 local panels = ui.panels
 ui.selections = {}
 local selections = ui.selections
+---@type Logger
 local logger
 local _
 
@@ -52,8 +59,12 @@ local function storeOrigLayout(tlc)
 end
 util.storeOrigLayout = storeOrigLayout
 
--- this function resizes the row elements to match the size of the header elements of a scrolllist.
--- It's important to maintain the naming and structure of the header elements to match those of the row elements.
+--- this function resizes the row elements to match the size of the header elements of a scrolllist.
+--- 
+--- It's important to maintain the naming and structure of the header elements to match those of the row elements.
+
+---@param row Control
+---@param header Control
 function util.adjustRowSize(row, header)
 	local settings = CMXint.settings.fightReport
 	if row == nil or row.scale == settings.scale then return end -- if sizes are good already, bail out.
@@ -85,6 +96,10 @@ function util.adjustRowSize(row, header)
 	end
 end
 
+---comment
+---@param control Control
+---@param tooltipControl TooltipControl
+---@param tooltip string
 local function AddTooltipLine(control, tooltipControl, tooltip)
 	local tooltipTextType = type(tooltip)
 
@@ -98,6 +113,7 @@ local function AddTooltipLine(control, tooltipControl, tooltip)
 end
 util.AddTooltipLine = AddTooltipLine
 
+---@param control Control
 function CMXint.OnMouseEnter(control) --copy from ZO_Options_OnMouseEnter but modified to support multiple tooltip lines
 	---@type table | string
 	local tooltipText = control.tooltip
@@ -113,7 +129,9 @@ function CMXint.OnMouseEnter(control) --copy from ZO_Options_OnMouseEnter but mo
 	end
 end
 
-function CMXint.SetLabelColor(control, setcolor)  -- setcolor can be hex or rgba, ZO_ColorDef takes care of this
+---@param control Control
+---@param setcolor any can be hex or rgba, ZO_ColorDef takes care of this
+function CMXint.SetLabelColor(control, setcolor)
 	for i=1, control:GetNumChildren(control) do
 		local child = control:GetChild(i)
 		local color = ZO_ColorDef:New(setcolor)
@@ -206,6 +224,10 @@ end
 -- end
 
 local lastResize
+
+---comment
+---@param control Control
+---@param resizing bool
 function CMXint.Resizing(control, resizing)
 	if control:IsHidden() then return end
 	if resizing then
@@ -230,7 +252,7 @@ function CMXint.Resizing(control, resizing)
 	end
 end
 
-
+---@param control Control
 function CMXint.NewSize(control, newLeft, newTop, newRight, newBottom, oldLeft, oldTop, oldRight, oldBottom)
 	if control.sizes == nil or control:IsHidden() then return end
 
@@ -265,6 +287,7 @@ function CMXint.NewSize(control, newLeft, newTop, newRight, newBottom, oldLeft, 
 	lastResize = {newscale, newpos}
 end
 
+---@class Panel
 local PanelObject = ZO_InitializingObject:Subclass()
 CMXint.PanelObject = PanelObject
 
@@ -376,6 +399,8 @@ function PanelObject:ShowIds()
 	return false
 end
 
+---@param name string
+---@return Panel
 function ui:GetPanel(name)
 	local panel = panels[name]
 	if panel then
