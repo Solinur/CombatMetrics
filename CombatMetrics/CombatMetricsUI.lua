@@ -35,6 +35,7 @@ end
 
 if GetAPIVersion() < 100034 then CHAMPION_DISCIPLINE_TYPE_COMBAT, CHAMPION_DISCIPLINE_TYPE_CONDITIONING, CHAMPION_DISCIPLINE_TYPE_WORLD = 0, 1, 2 end
 
+---@class CMX
 local CMX = CMX
 if CMX == nil then CMX = {} end
 local _
