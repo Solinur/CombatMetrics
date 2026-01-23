@@ -43,17 +43,18 @@ CMXint.CountStrings = {
 	["healingIn"]  = "healsIn",
 }
 
-local function storeOrigLayout(tlc)
-	tlc.sizes = {tlc:GetDimensions()}
-	tlc.anchors = {}
+---@param control Control
+local function storeOrigLayout(control)
+	control.sizes = {control:GetDimensions()}
+	control.anchors = {}
 
 	for i = 1, 2 do
-		local valid, point, relativeTo, relativePoint, x, y, constrains = tlc:GetAnchor(i-1)
-		if valid then tlc.anchors[i] = {point, relativeTo, relativePoint, x, y, constrains} end
+		local valid, point, relativeTo, relativePoint, x, y, constrains = control:GetAnchor(i-1)
+		if valid then control.anchors[i] = {point, relativeTo, relativePoint, x, y, constrains} end
 	end
 
-	for i = 1, tlc:GetNumChildren() do
-		local child = tlc:GetChild(i)
+	for i = 1, control:GetNumChildren() do
+		local child = control:GetChild(i)
 		if child then storeOrigLayout(child) end
 	end
 end
