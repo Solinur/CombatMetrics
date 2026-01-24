@@ -3,8 +3,6 @@ local CMX = CombatMetrics
 ---@class CMXint
 local CMXint = CMX.internal
 local _
---
--- Register with LibMenu and ESO
 
 local sendGold
 
