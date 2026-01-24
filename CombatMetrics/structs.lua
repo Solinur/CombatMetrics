@@ -12,13 +12,25 @@ local util = CMXint.util
 ---@type Logger
 local logger
 
+
+---@class DataEntryStruct
+---@field typeId number;
+---@field categoryId number;
+---@field data table;
+
 hstructure DataEntryStruct
 	typeId: number;
 	categoryId: number;
 	data: table;
 end
 
+---comment
+---@param typeId integer
+---@param categoryId integer
+---@param data table
+---@return DataEntryStruct
 function util.CreateDataEntry(typeId, categoryId, data)
+	---@type DataEntryStruct
 	local entry = hmake DataEntryStruct
 	{
 		typeId = typeId,
