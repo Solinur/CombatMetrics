@@ -177,6 +177,18 @@ local function GetUnitsByName(data, unitId) -- Gets all units that share the nam
 	return selectedUnits
 end
 
+local function HasUnitType(unit, unitType)
+	if unitType == "boss" and unit.bossId then
+		return true
+	end
+	if
+		unitType == "group" and (unit.unitType == COMBAT_UNIT_TYPE_GROUP or unit.unitType == COMBAT_UNIT_TYPE_PLAYER)
+	then
+		return true
+	end
+	return false
+end
+
 local function GetUnitsByType(unitType, fightData)
 	if not unitType then
 		return
@@ -184,13 +196,7 @@ local function GetUnitsByType(unitType, fightData)
 	local units = {}
 
 	for unitId, unit in pairs(fightData.units) do
-		if
-			(unitType == "boss" and unit.bossId)
-			or (
-				unitType == "group"
-				and (unit.unitType == COMBAT_UNIT_TYPE_GROUP or unit.unitType == COMBAT_UNIT_TYPE_PLAYER)
-			)
-		then
+		if HasUnitType(unit, unitType) then
 			units[unitId] = true
 		end
 	end
