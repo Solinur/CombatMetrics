@@ -22,6 +22,7 @@ end
 ---@field fights table<integer,Fight>
 ---@field data Fight?
 ---@field currentIndex integer?
+---@field New fun(): FightDataManager
 local FightDataManager = ZO_InitializingObject:Subclass()
 
 function FightDataManager:Initialize()
