@@ -160,6 +160,7 @@ local svdefaults = {
 		["showDebugIds"] = false,
 		["useDisplayNames"] = false,
 		["showPets"] = true,
+		["showOverHeal"] = false,
 
 		["abilities"] = {
 			["hitCritLayout"] = {
