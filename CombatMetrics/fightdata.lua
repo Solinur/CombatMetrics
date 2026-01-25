@@ -8,11 +8,13 @@ local util = CMXint.util
 local logger
 local SVHandler
 
-function util:GetEnemyUnits(units)	-- TODO: Attach this to fight_data
+function util:GetEnemyUnits(units) -- TODO: Attach this to fight_data
 	local unitIds = {}
 
 	for unitId, unit in pairs(units) do
-		if not unit.isFriendly then unitIds[#unitIds+1] = unitId end
+		if not unit.isFriendly then
+			unitIds[#unitIds + 1] = unitId
+		end
 	end
 
 	return unitIds
@@ -22,10 +24,11 @@ end
 ---@field fights table<integer,Fight>
 ---@field data Fight?
 ---@field currentIndex integer?
+---@field New fun(): FightDataManager
 local FightDataManager = ZO_InitializingObject:Subclass()
 
 function FightDataManager:Initialize()
-	if CMXint.fightData then
+	if CMXint.FightData then
 		logger:Error("Cannot create another FightDataManager when one already exists.")
 		return
 	end
@@ -35,14 +38,13 @@ function FightDataManager:Initialize()
 	self.currentIndex = nil
 end
 
-function FightDataManager:GetFightData()
+function FightDataManager:GetCurrentFight()
 	return self.data
 end
 
 function FightDataManager:GetNumFights()
 	return #self.fights
 end
-
 
 ---@param fightData Fight
 function FightDataManager:AddFight(fightData)
@@ -55,7 +57,11 @@ end
 function FightDataManager:SelectFightByIndex(fightIndex)
 	local fightData = self.fights[fightIndex]
 	if fightData == nil then
-		logger:Warn("Trying to load non-existent fightdata. Index: %d / %d", fightIndex, FightDataManager:GetNumFights())
+		logger:Warn(
+			"Trying to load non-existent fightdata. Index: %d / %d",
+			fightIndex,
+			FightDataManager:GetNumFights()
+		)
 		return
 	end
 	self.data = fightData
@@ -72,13 +78,17 @@ end
 
 function FightDataManager:SelectNextFight()
 	local currentIndex = self.currentIndex
-	if currentIndex <= 1 then return end
+	if currentIndex <= 1 then
+		return
+	end
 	FightDataManager:SelectFightByIndex(currentIndex + 1)
 end
 
 function FightDataManager:SelectPreviousFight()
 	local currentIndex = self.currentIndex
-	if currentIndex >= FightDataManager:GetNumFights() then return end
+	if currentIndex >= FightDataManager:GetNumFights() then
+		return
+	end
 	FightDataManager:SelectFightByIndex(currentIndex - 1)
 end
 
@@ -105,7 +115,9 @@ function FightDataManager:SaveFight(saveLog)
 	local fightData = self.data
 
 	--TODO: Update timestamp location in data structure
-	if lastsaved ~= nil and lastsaved.date == fightData.date then return end -- bail out if fight is already saved
+	if lastsaved ~= nil and lastsaved.date == fightData.date then
+		return
+	end -- bail out if fight is already saved
 
 	local spaceLeft = CMXint.settings.maxSavedFights - numFights
 	assert(spaceLeft > 0, zo_strformat(SI_COMBAT_METRICS_SAVEDFIGHTS_FULL, 1 - spaceLeft))
@@ -115,10 +127,12 @@ end
 
 local isFileInitialized = false
 function CMXint.InitializeFightDataHandler()
-	if isFileInitialized == true then return false end
+	if isFileInitialized == true then
+		return false
+	end
 	logger = util.initSublogger("Fights")
 
-	CMXint.fightData = FightDataManager:New()
+	CMXint.FightData = FightDataManager:New()
 
 	isFileInitialized = true
 	return true

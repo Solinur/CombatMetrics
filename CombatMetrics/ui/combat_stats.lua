@@ -14,7 +14,7 @@ local DPSstrings = CMXint.DPSstrings
 
 local ROW_KEY_FORMAT = "<<1>>Row<<2>>Value"
 local higlightColor = ZO_ColorDef:New("FFFFFFCC")
-local DPSLabelText = GetString(SI_COMBAT_METRICS_DPS)..":"
+local DPSLabelText = GetString(SI_COMBAT_METRICS_DPS) .. ":"
 
 local ZERO = "0"
 local ZERO_SECONDS = "0.000 s"
@@ -46,7 +46,7 @@ function CMXint.InitializeCombatStatsPanel(control)
 		self.combatTimeLabel = self:AddLabel(86, true)
 		self.combatTimeValue = self:AddLabel(76, true)
 		self:NewLine()
-		
+
 		---@type LineControl
 		local separator = self:AcquireSharedControl(CT_LINE)
 		separator:ApplyPosition(control, self.xOffset, self.yOffset, 336, 0)
@@ -76,19 +76,19 @@ function CMXint.InitializeCombatStatsPanel(control)
 		self.dpsValue3 = self:AddLabel(52)
 		self:NewLine()
 	end
-	
+
 	function CombatStatsPanel:RecoverStatBlock(key)
 		local header = self:AddLabel(116, true)
 		header:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
 		self[key .. "Label"] = header
 		self:NewLine()
-		
+
 		---@type LineControl
 		local separator = self:AcquireSharedControl(CT_LINE)
 		separator:ApplyPosition(control, self.xOffset, self.yOffset, 336, 0)
 		self:NewLine()
 
-		for rowId = 1,5 do
+		for rowId = 1, 5 do
 			self:RecoverStatBlockRow(key, rowId)
 		end
 	end
@@ -113,9 +113,9 @@ function CMXint.InitializeCombatStatsPanel(control)
 		label:SetFont(font)
 		label:SetText("-")
 		label:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
-		
+
 		self.xOffset = self.xOffset + 4 + width
-		self.maxHeight = zo_max(self.maxHeight, label:GetHeight()/self.settings.scale)
+		self.maxHeight = zo_max(self.maxHeight, label:GetHeight() / self.settings.scale)
 
 		return label
 	end
@@ -133,11 +133,11 @@ function CMXint.InitializeCombatStatsPanel(control)
 
 	function CombatStatsPanel:Clear()
 		self:UpdateLabels()
-			self.activeTimeValue:SetText(ZERO_SECONDS)
-			self.combatTimeValue:SetText(ZERO_SECONDS)
-			self.dpsValue1:SetText(ZERO)
-			self.dpsValue2:SetText(ZERO)
-			self.dpsValue3:SetText(ZERO_PER_CENT)
+		self.activeTimeValue:SetText(ZERO_SECONDS)
+		self.combatTimeValue:SetText(ZERO_SECONDS)
+		self.dpsValue1:SetText(ZERO)
+		self.dpsValue2:SetText(ZERO)
+		self.dpsValue3:SetText(ZERO_PER_CENT)
 
 		for rowId = 1, 5 do
 			local amount_key = ZO_CachedStrFormat(ROW_KEY_FORMAT, "amount", rowId)
@@ -158,13 +158,13 @@ function CMXint.InitializeCombatStatsPanel(control)
 		if category == "damageOut" or category == "damageIn" then
 			local amountLabel = SI_COMBAT_METRICS_DAMAGE
 			local countLabel = SI_COMBAT_METRICS_HIT
-			
-			local labelList = { 
-				SI_COMBAT_METRICS_TOTALC, 
-				SI_COMBAT_METRICS_NORMAL, 
-				SI_COMBAT_METRICS_CRITICAL, 
-				SI_COMBAT_METRICS_BLOCKED, 
-				SI_COMBAT_METRICS_SHIELDED 
+
+			local labelList = {
+				SI_COMBAT_METRICS_TOTALC,
+				SI_COMBAT_METRICS_NORMAL,
+				SI_COMBAT_METRICS_CRITICAL,
+				SI_COMBAT_METRICS_BLOCKED,
+				SI_COMBAT_METRICS_SHIELDED,
 			}
 			return amountLabel, countLabel, labelList
 		end
@@ -174,11 +174,11 @@ function CMXint.InitializeCombatStatsPanel(control)
 			local countLabel = SI_COMBAT_METRICS_HEALS
 
 			local labelList = {
-				SI_COMBAT_METRICS_TOTALC, 
-				SI_COMBAT_METRICS_NORMAL, 
-				SI_COMBAT_METRICS_CRITICAL, 
-				SI_COMBAT_METRICS_OVERHEAL, 
-				SI_COMBAT_METRICS_ABSOLUTEC
+				SI_COMBAT_METRICS_TOTALC,
+				SI_COMBAT_METRICS_NORMAL,
+				SI_COMBAT_METRICS_CRITICAL,
+				SI_COMBAT_METRICS_OVERHEAL,
+				SI_COMBAT_METRICS_ABSOLUTEC,
 			}
 			return amountLabel, countLabel, labelList
 		end
@@ -192,7 +192,8 @@ function CMXint.InitializeCombatStatsPanel(control)
 		self.activeTimeLabel:SetText(GetString(SI_COMBAT_METRICS_ACTIVE_TIME))
 		self.combatTimeLabel:SetText(GetString(SI_COMBAT_METRICS_IN_COMBAT))
 
-		local SecondaryColumnHeader = CMXint.IsSelectionActive() and SI_COMBAT_METRICS_SELECTION or SI_COMBAT_METRICS_GROUP
+		local SecondaryColumnHeader = CMXint.IsSelectionActive() and SI_COMBAT_METRICS_SELECTION
+			or SI_COMBAT_METRICS_GROUP
 
 		-- Add DPS label ? If yes, consider Overheal!
 
@@ -213,10 +214,7 @@ function CMXint.InitializeCombatStatsPanel(control)
 			self[amount_key .. "1"]:SetText(GetString(labelList[rowId]))
 			self[count_key .. "1"]:SetText(GetString(labelList[rowId]))
 		end
-
 	end
-
-
 
 	-- function CombatStatsPanel:Update(fightData)
 
@@ -375,7 +373,9 @@ end
 
 local isFileInitialized = false
 function CMXint.InitializeCombatStats()
-	if isFileInitialized == true then return false end
+	if isFileInitialized == true then
+		return false
+	end
 	logger = util.initSublogger("CombatStats")
 	isFileInitialized = true
 	return true

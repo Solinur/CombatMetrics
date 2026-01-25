@@ -51,19 +51,19 @@
 
         <Control name="CombatMetrics_BuffsPanelRowTemplate" virtual="true"></Control>
 
-        <Button name="CombatMetrics_BuffsPanelExpandButton" virtual="true" inherits="ZO_TreeButtonArrow"/>
+        <Button name="CombatMetrics_BuffsPanelExpandButton" virtual="true" inherits="ZO_TreeButtonArrow" />
 
         <Control name="CombatMetrics_BuffsPanel" inherits="CombatMetrics_ControlFramed" virtual="true">
             <Controls>
                 <Control name="$(parent)SearchBar">
                     <Anchor point="TOPLEFT" />
                     <Anchor point="TOPRIGHT" />
-                    <Dimensions y="30"/>
+                    <Dimensions y="30" />
 
                     <Controls>
                         <Button name="$(parent)Enemy" inherits="CombatMetrics_ButtonTooltip" clickSound="Click">
                             <Anchor point="RIGHT" offsetX="-4" />
-                            <Dimensions x="30" y="30"/>
+                            <Dimensions x="30" y="30" />
                             <OnInitialized>
                                 self.tooltip = SI_COMBAT_METRICS_ENEMY
                                 CombatMetrics.internal.InitializeBuffCategoryButton(self, "Enemy")
@@ -72,7 +72,7 @@
 
                         <Button name="$(parent)Group" inherits="CombatMetrics_ButtonTooltip" clickSound="Click">
                             <Anchor point="RIGHT" relativeTo="$(parent)Enemy" relativePoint="LEFT" offsetX="-4" />
-                            <Dimensions x="30" y="30"/>
+                            <Dimensions x="30" y="30" />
                             <OnInitialized>
                                 self.tooltip = SI_COMBAT_METRICS_GROUP
                                 CombatMetrics.internal.InitializeBuffCategoryButton(self, "Group")
@@ -81,7 +81,7 @@
 
                         <Button name="$(parent)Player" inherits="CombatMetrics_ButtonTooltip" clickSound="Click">
                             <Anchor point="RIGHT" relativeTo="$(parent)Group" relativePoint="LEFT" offsetX="-4" />
-                            <Dimensions x="30" y="30"/>
+                            <Dimensions x="30" y="30" />
                             <OnInitialized>
                                 self.tooltip = SI_COMBAT_METRICS_PLAYER
                                 CombatMetrics.internal.InitializeBuffCategoryButton(self, "Player")
@@ -98,15 +98,15 @@
                 <Control name="$(parent)Headers">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)SearchBarSep" offsetY="2" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)SearchBarSep" offsetY="2" />
-                    <Dimensions y="20"/>
+                    <Dimensions y="20" />
                     <Controls>
                         <Control name="$(parent)Indicator">
-                            <Anchor point="LEFT" offsetX="2"/>
+                            <Anchor point="LEFT" offsetX="2" />
                             <Dimensions x="10" y="10" />
                         </Control>
 
                         <Control name="$(parent)Icon">
-                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Indicator" offsetX="2"/>
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Indicator" offsetX="2" />
                             <Dimensions x="20" y="20" />
                             <Controls>
                                 <Texture name="$(parent)Texture" textureFile="esoui/art/miscellaneous/eso_icon_warning.dds"
@@ -121,7 +121,7 @@
 
                         <Control name="$(parent)Name" inherits="CombatMetrics_SortHeader">
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="6" offsetY="0" />
-                            <Dimensions x="170"/>
+                            <Dimensions x="170" />
                             <OnInitialized>
                                 ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_BUFF), "name", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT)
                             </OnInitialized>
@@ -129,7 +129,7 @@
 
                         <Control name="$(parent)Count" inherits="CombatMetrics_ControlTooltip CombatMetrics_SortHeader">
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="4" offsetY="0" />
-                            <Dimensions x="58"/>
+                            <Dimensions x="58" />
                             <OnInitialized>
                                 ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_SHARP), "count", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_CENTER)
                                 self.tooltip = SI_COMBAT_METRICS_BUFFCOUNT_TT
@@ -138,7 +138,7 @@
 
                         <Control name="$(parent)Uptime" inherits="CombatMetrics_ControlTooltip CombatMetrics_SortHeader">
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Count" offsetX="2" offsetY="0" />
-                            <Dimensions x="58"/>
+                            <Dimensions x="58" />
                             <OnInitialized>
                                 ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_UPTIME),"uptime", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_CENTER)
                                 self.tooltip = SI_COMBAT_METRICS_UPTIME_TT

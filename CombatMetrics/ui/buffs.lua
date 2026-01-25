@@ -28,58 +28,65 @@ local BUFF_CATEGORY_PLAYER = "Player"
 local BUFF_CATEGORY_GROUP = "Group"
 local BUFF_CATEGORY_ENEMY = "Enemy"
 
-local SigilAbilities = { -- Abilities to display a warning icon in the buff list to indicate it cannot be considered a "clean" parse
-	[236960] = true, -- Sigil of Power
-	[236968] = true, -- Sigil of Defense
-	[236994] = true, -- Sigil of Ultimate
-	[237014] = true, -- Sigil of Speed
-}
+local SigilAbilities =
+	{ -- Abilities to display a warning icon in the buff list to indicate it cannot be considered a "clean" parse
+		[236960] = true, -- Sigil of Power
+		[236968] = true, -- Sigil of Defense
+		[236994] = true, -- Sigil of Ultimate
+		[237014] = true, -- Sigil of Speed
+	}
 
-local BUFF_LABEL_COLOR_DEFAULT = {1, 1, 1, 1}
-local BUFF_LABEL_COLOR_FAV = {1, .8, .3, 1}
+local BUFF_LABEL_COLOR_DEFAULT = { 1, 1, 1, 1 }
+local BUFF_LABEL_COLOR_FAV = { 1, 0.8, 0.3, 1 }
 
 local BUFF_BAR_COLORS = {
-	[BUFF_EFFECT_TYPE_BUFF] = {0, 0.6, 0, 0.6},
-	[BUFF_EFFECT_TYPE_DEBUFF] = {0.75, 0, 0.6, 0.6},
-	[BUFF_EFFECT_TYPE_NOT_AN_EFFECT] = {0.6, 0.6, 0.6, 0.6},
+	[BUFF_EFFECT_TYPE_BUFF] = { 0, 0.6, 0, 0.6 },
+	[BUFF_EFFECT_TYPE_DEBUFF] = { 0.75, 0, 0.6, 0.6 },
+	[BUFF_EFFECT_TYPE_NOT_AN_EFFECT] = { 0.6, 0.6, 0.6, 0.6 },
 }
 
 local BUFF_BAR_GROUP_COLORS = {
-	[BUFF_EFFECT_TYPE_BUFF] = {0, 0.6, 0, 0.3},
-	[BUFF_EFFECT_TYPE_DEBUFF] = {0.75, 0, 0.6, 0.3},
-	[BUFF_EFFECT_TYPE_NOT_AN_EFFECT] = {0.6, 0.6, 0.6, 0.3},
+	[BUFF_EFFECT_TYPE_BUFF] = { 0, 0.6, 0, 0.3 },
+	[BUFF_EFFECT_TYPE_DEBUFF] = { 0.75, 0, 0.6, 0.3 },
+	[BUFF_EFFECT_TYPE_NOT_AN_EFFECT] = { 0.6, 0.6, 0.6, 0.3 },
 }
 
-BUfF_LIST_SORT_KEYS =
-{
-	["name"] = { tiebreaker = "abilityId"},
-	["count"] = { tiebreaker = "groupCount", isNumeric = true  },
-	["uptime"]  = { tiebreaker = "groupUptime", isNumeric = true  },
-
+BUfF_LIST_SORT_KEYS = {
+	["name"] = { tiebreaker = "abilityId" },
+	["count"] = { tiebreaker = "groupCount", isNumeric = true },
+	["uptime"] = { tiebreaker = "groupUptime", isNumeric = true },
 }
 
-do	-- Handling Buffs Context Menu
+do -- Handling Buffs Context Menu
 	local favs
 	local abilityId
 	local unitType
 	local currentFight
 
 	local function addFavouriteBuff()
-		if abilityId then favs[abilityId] = true end
+		if abilityId then
+			favs[abilityId] = true
+		end
 		CombatMetricsReport:Update()
 	end
 
 	local function removeFavouriteBuff()
-		if abilityId then favs[abilityId] = nil end
+		if abilityId then
+			favs[abilityId] = nil
+		end
 		CombatMetricsReport:Update()
 	end
 
 	local function postBuffUptime()
-		if abilityId then util.PostBuffUptime(currentFight, abilityId) end
+		if abilityId then
+			util.PostBuffUptime(currentFight, abilityId)
+		end
 	end
 
 	local function postSelectionBuffUptime()
-		if abilityId then util.PostBuffUptime(currentFight, abilityId, unitType) end
+		if abilityId then
+			util.PostBuffUptime(currentFight, abilityId, unitType)
+		end
 	end
 
 	local function toggleCollapseBuff()
@@ -94,8 +101,10 @@ do	-- Handling Buffs Context Menu
 		CombatMetricsReport:GetNamedChild("_BuffPanel"):GetNamedChild("BuffList"):Update()
 	end
 
-	function CMX.BuffContextMenu( bufflistitem, upInside )
-		if not upInside then return end
+	function CMX.BuffContextMenu(bufflistitem, upInside)
+		if not upInside then
+			return
+		end
 
 		abilityId = bufflistitem.dataId
 		local settings = CMXint.settings.fightReport
@@ -134,7 +143,7 @@ do	-- Handling Buffs Context Menu
 	end
 end
 
-function CMX.CollapseButton( button, upInside )
+function CMX.CollapseButton(button, upInside)
 	local buffname = button:GetParent().dataId
 
 	if buffname then
@@ -149,8 +158,14 @@ function CMX.CollapseButton( button, upInside )
 end
 
 local function CombineEffects(source, dest)
-	assert(dest.name == source.name, debug.traceback(string.format("Name mismatch when combining buff data: %s ~= %s.", dest.name, source.name)))
-	assert(dest.iconId == source.iconId, debug.traceback(string.format("ID mismatch when combining buff data: %d ~= %d.", dest.iconId, source.iconId)))
+	assert(
+		dest.name == source.name,
+		debug.traceback(string.format("Name mismatch when combining buff data: %s ~= %s.", dest.name, source.name))
+	)
+	assert(
+		dest.iconId == source.iconId,
+		debug.traceback(string.format("ID mismatch when combining buff data: %d ~= %d.", dest.iconId, source.iconId))
+	)
 	dest.uptime = dest.uptime + source.uptime
 	dest.count = dest.count + source.count
 	dest.groupUptime = dest.groupUptime + source.groupUptime
@@ -176,30 +191,32 @@ local unitIds = {}
 local function GetBuffData(fightData, category)
 	local totalUnitTime = 0
 
-	CMX_EFFECT_DATA = {fightData, category, effectData, unitIds}
+	CMX_EFFECT_DATA = { fightData, category, effectData, unitIds }
 	ZO_ClearTable(unitIds)
 	ZO_ClearTable(effectData)
 
-	if fightData == nil then return effectData, totalUnitTime end
+	if fightData == nil then
+		return effectData, totalUnitTime
+	end
 
 	if category == BUFF_CATEGORY_PLAYER then
-		unitIds[#unitIds+1] = fightData.unitIds.player
+		unitIds[#unitIds + 1] = fightData.unitIds.player
 	elseif category == BUFF_CATEGORY_GROUP then
 		local group = fightData.unitIds.group
 		if group and #group > 0 then
 			ZO_ShallowTableCopy(fightData.unitIds, unitIds)
 		else
-			unitIds[#unitIds+1] = fightData.unitIds.player
+			unitIds[#unitIds + 1] = fightData.unitIds.player
 		end
 	elseif category == BUFF_CATEGORY_ENEMY then
 		ZO_ShallowTableCopy(util:GetEnemyUnits(fightData.units), unitIds)
 	end
 
 	for i, unitId in ipairs(unitIds) do
-		-- TODO: replace with info stored in unit table
+		-- TODO: replace unit time with info stored in unit table
 		local startTime = math.huge
 		local endTime = 0
-		
+
 		local unitData = fightData.damageDone[unitId]
 		if unitData then
 			endTime = zo_max(unitData.endTime, endTime)
@@ -214,7 +231,7 @@ local function GetBuffData(fightData, category)
 
 		if endTime > startTime then
 			totalUnitTime = totalUnitTime + (endTime - startTime)
-			
+
 			local unitEffectData = fightData.effects[unitId]
 			for abilityId, data in pairs(unitEffectData) do
 				if effectData[abilityId] == nil then
@@ -229,11 +246,10 @@ local function GetBuffData(fightData, category)
 end
 util.GetBuffData = GetBuffData
 
-
 local buffCategoryTextures = {
 	[BUFF_CATEGORY_ENEMY] = "esoui/art/mainmenu/menubar_skills",
 	[BUFF_CATEGORY_GROUP] = "esoui/art/mainmenu/menubar_group",
-	[BUFF_CATEGORY_PLAYER] = "esoui/art/mainmenu/menubar_character"
+	[BUFF_CATEGORY_PLAYER] = "esoui/art/mainmenu/menubar_character",
 }
 
 function CMXint.InitializeBuffCategoryButton(control, buffCategory)
@@ -263,8 +279,8 @@ function util.buffSortFunction(data, a, b)
 	return ishigher
 end
 
-
-
+---@param panel Panel
+---@return SortFilterList
 local function InitBuffsList(panel)
 	local dataList = ui.SortFilterList:New(panel.control, "CombatMetrics_BuffsPanelRowTemplate")
 	panel.dataList = dataList
@@ -300,13 +316,13 @@ local function InitBuffsList(panel)
 	end
 
 	local expandButtonPool = ZO_ObjectPool:New(CreateExpandButton, ZO_ObjectPool_DefaultResetControl)
-	-- TODO: Use ZO_ControlPool  here insted ?
 
+	---@param rowControl Control
 	function dataList:RecoverRow(rowControl)
 		local panel = self.panel
 		local rowHeight = self:GetHeight()
-		local rowHeightHalf = rowHeight/2
-		
+		local rowHeightHalf = rowHeight / 2
+
 		-- local expandButton = panel:AcquireSharedControl(CT_TEXTURE)
 		-- expandButton:ApplyPosition(rowControl, 2, rowHeightHalf/2, rowHeightHalf, rowHeightHalf)
 		-- expandButton:SetTexture("esoui/art/buttons/dropbox_arrow_normal.dds")
@@ -325,33 +341,37 @@ local function InitBuffsList(panel)
 		local bar_group = panel:AcquireSharedControl(CT_TEXTURE)
 		bar_group:ApplyPosition(rowControl, 38, 0, 174, rowHeight)
 		bar_group:SetTexture("esoui/art/unitframes/progressbar_raidhealth.dds")
-		
+
 		---@type LabelControl
 		local count = panel:AcquireSharedControl(CT_LABEL)
 		count:ApplyPosition(rowControl, 216, 0, 58)
 		count:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
-		
+
 		local uptime = panel:AcquireSharedControl(CT_LABEL)
 		uptime:ApplyPosition(rowControl, 276, 0, 58)
 		uptime:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
 
-		rowControl.controls = {icon, label, bar, bar_group, count, uptime}
+		rowControl.controls = { icon, label, bar, bar_group, count, uptime }
 		rowControl.recovered = true
 		rowControl.indent = 0
 	end
 
+	---@param rowControl Control
+	---@param data table
+	---@param scrollList Object
 	function dataList:UpdateRow(rowControl, data, scrollList)
-		ROW_CONTROL = rowControl
 		local panel = self.panel
-		
-		if rowControl.recovered ~= true then self:RecoverRow(rowControl) end
+
+		if rowControl.recovered ~= true then
+			self:RecoverRow(rowControl)
+		end
 		local icon, label, bar, bar_group, count, uptime = unpack(rowControl.controls)
-		
+
 		local labelFormat = panel:ShowIds() and data.abilityId and BUFF_NAME_FORMAT_ID or BUFF_NAME_FORMAT_DEFAULT
 		local labelText = ZO_CachedStrFormat(labelFormat, data.labelText, data.abilityId)
-		
+
 		local rowHeight = icon:GetHeight()
-		local deltaIndent = (data.indent - rowControl.indent) * rowHeight/2
+		local deltaIndent = (data.indent - rowControl.indent) * rowHeight / 2
 		rowControl.indent = data.indent
 
 		local textcolor = panel.favs[abilityId] and BUFF_LABEL_COLOR_FAV or BUFF_LABEL_COLOR_DEFAULT
@@ -417,9 +437,11 @@ local function InitBuffsList(panel)
 	end
 
 	function dataList:AddDataEntry(abilityId, data, totalUnitTime)
-		if data.groupUptime <= 0 then return end
+		if data.groupUptime <= 0 then
+			return
+		end
 
-		local hasStacks = data.stacks and (data.iconId == 126597 or data.maxStacks > 1) -- TODO: implement stack info !
+		local hasStacks = data.stacks and (data.iconId == 126597 or data.maxStacks > 1)
 		local selected = false -- selectedbuffs ~= nil and (selectedbuffs[buffName] ~= nil) or false -- TODO: Selections
 
 		local name = GetFormattedAbilityName(abilityId)
@@ -430,7 +452,9 @@ local function InitBuffsList(panel)
 
 		if hasStacks then
 			labelText = ZO_CachedStrFormat(BUFF_NAME_FORMAT_STACKS, name, data.maxStacks)
-			if hasOtherId then logger:Warning("Ability %s (%d) has stacks as well as another Id: %d", name, abilityId, mainAbilityId) end
+			if hasOtherId then
+				logger:Warning("Ability %s (%d) has stacks as well as another Id: %d", name, abilityId, mainAbilityId)
+			end
 		end
 
 		local rowData = {
@@ -469,13 +493,21 @@ local function InitBuffsList(panel)
 
 			--  TODO: Check if still n neccessary
 			for stacks, data in pairs(stackDataTable) do
-				if type(stacks) == "number" then keys[#keys+1] = stacks end
+				if type(stacks) == "number" then
+					keys[#keys + 1] = stacks
+				end
 			end
 
 			table.sort(keys)
 
 			if data.maxStacks > #keys then
-				logger:Warn("Missing stacks data for %s (%d). Expected %d entries but only got %d.", name, abilityId, data.maxStacks, #keys)
+				logger:Warn(
+					"Missing stacks data for %s (%d). Expected %d entries but only got %d.",
+					name,
+					abilityId,
+					data.maxStacks,
+					#keys
+				)
 			end
 
 			local groupData = {}
@@ -500,7 +532,7 @@ local function InitBuffsList(panel)
 					groupUptime = stackData.groupUptime / totalUnitTime,
 					count = stackData.count,
 					groupCount = stackData.groupCount,
-					stacks = stacks
+					stacks = stacks,
 				}
 
 				table.insert(groupData, ZO_ScrollList_CreateDataEntry(1, rowData))
@@ -509,7 +541,7 @@ local function InitBuffsList(panel)
 	end
 
 	function dataList:BuildMasterList()
-		local fightData = self.panel.fightData
+		local fightData = self.panel.GetCurrentFightData()
 		local category = self.panel.category
 		local effectData, totalUnitTime = GetBuffData(fightData, category)
 
@@ -522,7 +554,9 @@ local function InitBuffsList(panel)
 
 		for abilityId, data in pairs(effectData) do
 			self:AddDataEntry(abilityId, data, totalUnitTime)
-			if SigilAbilities[abilityId] then hasSigil = true end
+			if SigilAbilities[abilityId] then
+				hasSigil = true
+			end
 		end
 
 		local sigilIcon = self.control:GetNamedChild("Headers"):GetNamedChild("Icon")
@@ -586,7 +620,7 @@ local function InitBuffsList(panel)
 				if uncollapsedBuffs[abilityId] then
 					table.sort(groupData, self.sortFunction)
 					for j = #groupData, 1, -1 do
-						table.insert(scrollData, i+1, groupData[j])
+						table.insert(scrollData, i + 1, groupData[j])
 					end
 				end
 			end
@@ -608,26 +642,23 @@ function CMXint.InitializeBuffsPanel(control)
 		BuffPanel.category = control.buffCategory
 		BuffPanel.dataList:RefreshData()
 	end
-	
+
 	BuffPanel.radioButtons:SetCustomClickHandler(onBuffCategoryClicked)
 
 	local searchBar = control:GetNamedChild("SearchBar")
 	for i = 1, searchBar:GetNumChildren() do
 		local child = searchBar:GetChild(i)
-		if child.buffCategory then BuffPanel.radioButtons:Add(child) end
+		if child.buffCategory then
+			BuffPanel.radioButtons:Add(child)
+		end
 	end
-	
+
 	InitBuffsList(BuffPanel)
 	BuffPanel.selections = {}
 
-	function BuffPanel:Update(fightData)
+	function BuffPanel:Update()
 		logger:Debug("Updating Buff Panel")
 
-		if fightData == nil then 
-			fightData = CMX_TestData
-		end
-
-		self.fightData = fightData
 		self.dataList:UpdateRowHeight()
 		self.dataList:RefreshData()
 	end
@@ -637,7 +668,9 @@ end
 
 local isFileInitialized = false
 function CMXint.InitializeBuffs()
-	if isFileInitialized == true then return false end
+	if isFileInitialized == true then
+		return false
+	end
 	logger = util.initSublogger("BuffPanel")
 
 	BuffPanel.favs = CMXint.settings.fightReport.buffs.favourites

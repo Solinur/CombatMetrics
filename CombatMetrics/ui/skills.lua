@@ -14,7 +14,8 @@ local SkillsPanel
 local GetFormattedAbilityIcon = util.GetFormattedAbilityIcon
 local GetFormattedAbilityName = util.GetFormattedAbilityName
 
-local SkillBarItems = {"LightAttack", "HeavyAttack", "Ability1", "Ability2", "Ability3", "Ability4", "Ability5", "Ultimate"}
+local SkillBarItems =
+	{ "LightAttack", "HeavyAttack", "Ability1", "Ability2", "Ability3", "Ability4", "Ability5", "Ultimate" }
 local DisabledColor = ZO_ColorDef:New("FF999999")
 local WerewolfColor = ZO_ColorDef:New("FFf3c86e")
 local WhiteColor = ZO_ColorDef:New("FFFFFFFF")
@@ -24,14 +25,20 @@ function CMXint.InitializeSkillsPanel(control)
 	SkillsPanel = CMXint.PanelObject:New(control, "skills")
 
 	function SkillsPanel:Update(fightData)
-		if fightData == nil then return end
+		if fightData == nil then
+			return
+		end
 
 		local charData = fightData.charData
-		if charData == nil then return end
-			
+		if charData == nil then
+			return
+		end
+
 		local data = fightData.calculated
-		if data == nil then return end
-		
+		if data == nil then
+			return
+		end
+
 		local settings = self.settings
 		local category = settings.category
 		local skillBars = charData.skillBars
@@ -41,8 +48,8 @@ function CMXint.InitializeSkillsPanel(control)
 		for subPanelIndex = 1, 2 do
 			local subPanel = control:GetNamedChild("ActionBar" .. subPanelIndex)
 
-			if subPanelIndex == 2 then	-- show extra option for werewolf bar
-				local hasWerewolfData = skillBars[HOTBAR_CATEGORY_WEREWOLF+1] ~= nil
+			if subPanelIndex == 2 then -- show extra option for werewolf bar
+				local hasWerewolfData = skillBars[HOTBAR_CATEGORY_WEREWOLF + 1] ~= nil
 				local titleControl = subPanel:GetNamedChild("Title")
 				local werewolfButton = subPanel:GetNamedChild("Werewolf")
 
@@ -73,8 +80,10 @@ function CMXint.InitializeSkillsPanel(control)
 			local dpsratio, timeratio
 
 			if barStats and type(barStats[category]) == "number" then
-				dpsratio = (barStats[category] or 0) / data[category.."Total"]
-				local totalTime = (category == "healingIn" or category == "healingOut") and fightData.hpstime or fightData.dpstime or 1
+				dpsratio = (barStats[category] or 0) / data[category .. "Total"]
+				local totalTime = (category == "healingIn" or category == "healingOut") and fightData.hpstime
+					or fightData.dpstime
+					or 1
 				timeratio = (barStats.totalTime or 0) / totalTime
 			end
 
@@ -87,36 +96,39 @@ function CMXint.InitializeSkillsPanel(control)
 			for line, controlName in ipairs(SkillBarItems) do
 				local control = subPanel:GetNamedChild(controlName)
 				local abilityId = bardata and bardata[line] or nil
-				
+
 				control.id = abilityId
-				
+
 				local icon = GetControl(control, "IconTexture")
-				local texture = abilityId and abilityId > 0 and GetFormattedAbilityIcon(abilityId) or "EsoUI/Art/crafting/gamepad/crafting_alchemy_trait_unknown.dds"
+				local texture = abilityId and abilityId > 0 and GetFormattedAbilityIcon(abilityId)
+					or "EsoUI/Art/crafting/gamepad/crafting_alchemy_trait_unknown.dds"
 				icon:SetTexture(texture)
-				
+
 				local name = control:GetNamedChild("Label")
 				local abilityName = abilityId and abilityId > 0 and GetFormattedAbilityName(abilityId) or ""
 				name:SetText(abilityName)
 
-				local reducedslot = (subPanelIndex-1) * 10 + line
+				local reducedslot = (subPanelIndex - 1) * 10 + line
 				local slotdata = skilldata and skilldata[reducedslot] or nil
-				local strings = {"-", "-", "-", "-"}
+				local strings = { "-", "-", "-", "-" }
 				local color = WhiteColor
 
 				if slotdata and slotdata.count and slotdata.count > 0 then
 					strings[1] = string.format("%d", slotdata.count) or "-"
 
 					local weave = slotdata.weavingTimeAvg or slotdata.skillNextAvg
-					strings[2] = weave and string.format("%.2f", weave/1000) or "-"
+					strings[2] = weave and string.format("%.2f", weave / 1000) or "-"
 
 					local errors = slotdata.weavingErrors
 					strings[3] = weave and errors and string.format("%d", errors) or "-"
 
 					local diff = slotdata.diffTimeAvg or slotdata.difftimesAvg
-					strings[4] = diff and string.format("%.2f", diff/1000) or "-"
+					strings[4] = diff and string.format("%.2f", diff / 1000) or "-"
 
 					control.delay = slotdata.delayAvg
-					if slotdata.ignored then color = DisabledColor end
+					if slotdata.ignored then
+						color = DisabledColor
+					end
 					control.ignored = slotdata.ignored
 				end
 
@@ -142,17 +154,27 @@ function CMXint.InitializeSkillsPanel(control)
 		local value2string = " -"
 
 		if totalWeavingTimeCount and totalWeavingTimeCount > 0 and totalWeavingTimeSum then
-			value1string = (totalWeavingTimeSum and totalWeavingTimeCount) and string.format("%.3f s", totalWeavingTimeSum / (1000 * totalWeavingTimeCount)) or " -"
+			value1string = (totalWeavingTimeSum and totalWeavingTimeCount)
+					and string.format("%.3f s", totalWeavingTimeSum / (1000 * totalWeavingTimeCount))
+				or " -"
 			value2string = totalWeavingTimeSum and string.format("%.3f s", totalWeavingTimeSum / 1000) or " -"
 		end
 
 		local value3string = totalWeaponAttacks or " -"
 		local value4string = totalSkillsFired or " -"
 
-		statrow:GetNamedChild("Label"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_SKILLTIME_WEAVING), value1string))
-		statrow:GetNamedChild("Label2"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALC), value2string))
-		statrow2:GetNamedChild("Label"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALWA), value3string))
-		statrow2:GetNamedChild("Label2"):SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALSKILLS), value4string))
+		statrow
+			:GetNamedChild("Label")
+			:SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_SKILLTIME_WEAVING), value1string))
+		statrow
+			:GetNamedChild("Label2")
+			:SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALC), value2string))
+		statrow2
+			:GetNamedChild("Label")
+			:SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALWA), value3string))
+		statrow2
+			:GetNamedChild("Label2")
+			:SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALSKILLS), value4string))
 	end
 
 	-- Init Controls
@@ -185,8 +207,6 @@ function CMXint.InitializeSkillsPanel(control)
 	label4.tooltip = SI_COMBAT_METRICS_TOTALSKILLS_TT
 end
 
-
-
 ---@param setHidden boolean
 function ScribedSkillsPanel:Hide(setHidden)
 	local panel = self.control
@@ -198,7 +218,9 @@ function CMXint.InitializeScribedSkillsPanel(control)
 	ScribedSkillsPanel = CMXint.PanelObject:New(control, "scribedSkills")
 
 	function ScribedSkillsPanel:Update(fightData)
-		if fightData == nil then return self:Hide(true) end
+		if fightData == nil then
+			return self:Hide(true)
+		end
 		local control = self.control
 		local scribedSkills = fightData.charData.scribedSkills or {}
 
@@ -224,7 +246,9 @@ function CMXint.InitializeScribedSkillsPanel(control)
 				scriptControl:GetNamedChild("Name"):SetText(scriptName)
 				scriptControl:GetNamedChild("Icon"):SetTexture(iconTexture)
 			end
-			if index == 10 then break end
+			if index == 10 then
+				break
+			end
 		end
 
 		for i = index + 1, control:GetNumChildren() do
@@ -264,7 +288,6 @@ function CMXint.SkillbarToggleWerewolf()
 	SkillsPanel:Update()
 end
 
-
 function CMXint.SkillTooltip_OnMouseEnter(control)
 	InitializeTooltip(SkillTooltip, control, TOPLEFT, 0, 5, BOTTOMLEFT)
 
@@ -276,8 +299,19 @@ function CMXint.SkillTooltip_OnMouseEnter(control)
 
 	SkillTooltip:SetAbilityId(id)
 	SkillTooltip:AddVerticalPadding(15)
-	SkillTooltip:AddLine(string.format(format, id), font, .7, .7, .8 , TOP, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER)
-	if delay then SkillTooltip:AddLine(string.format("Average delay: %d ms", delay), font, .7, .7, .8 , TOP, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER) end
+	SkillTooltip:AddLine(string.format(format, id), font, 0.7, 0.7, 0.8, TOP, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER)
+	if delay then
+		SkillTooltip:AddLine(
+			string.format("Average delay: %d ms", delay),
+			font,
+			0.7,
+			0.7,
+			0.8,
+			TOP,
+			MODIFY_TEXT_TYPE_NONE,
+			TEXT_ALIGN_CENTER
+		)
+	end
 end
 
 function CMXint.SkillTooltip_Clear()
@@ -285,19 +319,27 @@ function CMXint.SkillTooltip_Clear()
 end
 
 function CMXint.ScribedSkillTooltip_OnMouseEnter(control)
-	if control.scriptIds == nil then return end
+	if control.scriptIds == nil then
+		return
+	end
 	local abilityId = control.abilityId
 	local scriptIds = control.scriptIds
 
 	InitializeTooltip(SkillTooltip, control, TOPLEFT, 0, 5, BOTTOMLEFT)
-	SetCraftedAbilityScriptSelectionOverride(GetAbilityCraftedAbilityId(abilityId), scriptIds[1], scriptIds[2], scriptIds[3])
+	SetCraftedAbilityScriptSelectionOverride(
+		GetAbilityCraftedAbilityId(abilityId),
+		scriptIds[1],
+		scriptIds[2],
+		scriptIds[3]
+	)
 	SkillTooltip:SetAbilityId(abilityId)
 end
 
-
 local isFileInitialized = false
 function CMXint.InitializeSkills()
-	if isFileInitialized == true then return false end
+	if isFileInitialized == true then
+		return false
+	end
 	logger = util.initSublogger("Skills")
 
 	isFileInitialized = true

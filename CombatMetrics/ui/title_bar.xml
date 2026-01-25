@@ -8,12 +8,12 @@
                 </Line>
 
                 <Control name="$(parent)CharacterInfo" resizeToFitDescendents="true">
-                    <Anchor point="TOPLEFT"/>
-                    <Anchor point="BOTTOMLEFT"/>
+                    <Anchor point="TOPLEFT" />
+                    <Anchor point="BOTTOMLEFT" />
                     <Controls>
                         <Texture name="$(parent)CustomIcon" textureFile="esoui/art/champion/champion_icon.dds"
                             inherits="CombatMetrics_TextureTooltip" layer="1" level="1">
-                            <Anchor point="LEFT" offsetX="2"/>
+                            <Anchor point="LEFT" offsetX="2" />
                             <Dimensions x="30" y="30" />
                         </Texture>
 
@@ -33,8 +33,8 @@
                 </Control>
 
                 <Control name="$(parent)ClassInfo" resizeToFitDescendents="true">
-                    <Anchor point="TOPRIGHT"/>
-                    <Anchor point="BOTTOMRIGHT"/>
+                    <Anchor point="TOPRIGHT" />
+                    <Anchor point="BOTTOMRIGHT" />
                     <Controls>
                         <Texture name="$(parent)SubClassIcon3" textureFile="esoui/art/champion/champion_icon.dds"
                             inherits="CombatMetrics_TextureTooltip" layer="1" level="1">
@@ -74,8 +74,8 @@
                     <Controls>
                         <Label name="$(parent)Name" inherits="CombatMetrics_TitleFontControl" text="Test"
                             verticalAlignment="CENTER" horizontalAlignment="CENTER">
-                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)"/>
-                            <Anchor point="BOTTOMRIGHT" relativeTo="$(grandparent)"/>
+                            <Anchor point="TOPLEFT" relativeTo="$(grandparent)" />
+                            <Anchor point="BOTTOMRIGHT" relativeTo="$(grandparent)" />
                         </Label>
 
                         <EditBox name="$(parent)Edit" hidden="true" inherits="ZO_DefaultEdit">

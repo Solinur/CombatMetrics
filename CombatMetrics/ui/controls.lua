@@ -27,20 +27,20 @@ end
 local function ApplyPosition(control, parent, offsetX, offsetY, width, height)
 	local scale = CMXint.settings.fightReport.scale
 	control:SetParent(parent)
-	control:SetAnchor(TOPLEFT, parent, TOPLEFT, offsetX*scale, offsetY*scale)
+	control:SetAnchor(TOPLEFT, parent, TOPLEFT, offsetX * scale, offsetY * scale)
 
 	if control:GetType() == CT_LINE then
 		local offsetX2 = offsetX + (width or 0)
 		local offsetY2 = offsetY + (height or 0)
-		control:SetAnchor(BOTTOMRIGHT, parent, TOPLEFT, offsetX2*scale, offsetY2*scale)
+		control:SetAnchor(BOTTOMRIGHT, parent, TOPLEFT, offsetX2 * scale, offsetY2 * scale)
 	end
 
 	if width then
-		control:SetWidth(width*scale)
+		control:SetWidth(width * scale)
 	end
 
 	if height then
-		control:SetHeight(height*scale)
+		control:SetHeight(height * scale)
 	end
 end
 
@@ -80,7 +80,9 @@ end
 
 local isFileInitialized = false
 function CMXint.InitializeControlHandler()
-	if isFileInitialized == true then return false end
+	if isFileInitialized == true then
+		return false
+	end
 	logger = util.initSublogger("Controls")
 
 	ui.sharedTextures = CreateSharedControlType("CombatMetrics_SharedTexture")

@@ -11,46 +11,51 @@ local ui = CMXint.ui
 
 local equipslots = {
 
-	{EQUIP_SLOT_MAIN_HAND, "EsoUI/Art/CharacterWindow/gearslot_mainhand.dds"},
-	{EQUIP_SLOT_OFF_HAND, "EsoUI/Art/CharacterWindow/gearslot_offhand.dds"},
-	{EQUIP_SLOT_BACKUP_MAIN, "EsoUI/Art/CharacterWindow/gearslot_mainhand.dds"},
-	{EQUIP_SLOT_BACKUP_OFF, "EsoUI/Art/CharacterWindow/gearslot_offhand.dds"},
-	{EQUIP_SLOT_HEAD, "EsoUI/Art/CharacterWindow/gearslot_head.dds"},
-	{EQUIP_SLOT_SHOULDERS, "EsoUI/Art/CharacterWindow/gearslot_shoulders.dds"},
-	{EQUIP_SLOT_CHEST, "EsoUI/Art/CharacterWindow/gearslot_chest.dds"},
-	{EQUIP_SLOT_HAND, "EsoUI/Art/CharacterWindow/gearslot_hands.dds"},
-	{EQUIP_SLOT_WAIST, "EsoUI/Art/CharacterWindow/gearslot_belt.dds"},
-	{EQUIP_SLOT_LEGS, "EsoUI/Art/CharacterWindow/gearslot_legs.dds"},
-	{EQUIP_SLOT_FEET, "EsoUI/Art/CharacterWindow/gearslot_feet.dds"},
-	{EQUIP_SLOT_NECK, "EsoUI/Art/CharacterWindow/gearslot_neck.dds"},
-	{EQUIP_SLOT_RING1, "EsoUI/Art/CharacterWindow/gearslot_ring.dds"},
-	{EQUIP_SLOT_RING2, "EsoUI/Art/CharacterWindow/gearslot_ring.dds"},
+	{ EQUIP_SLOT_MAIN_HAND, "EsoUI/Art/CharacterWindow/gearslot_mainhand.dds" },
+	{ EQUIP_SLOT_OFF_HAND, "EsoUI/Art/CharacterWindow/gearslot_offhand.dds" },
+	{ EQUIP_SLOT_BACKUP_MAIN, "EsoUI/Art/CharacterWindow/gearslot_mainhand.dds" },
+	{ EQUIP_SLOT_BACKUP_OFF, "EsoUI/Art/CharacterWindow/gearslot_offhand.dds" },
+	{ EQUIP_SLOT_HEAD, "EsoUI/Art/CharacterWindow/gearslot_head.dds" },
+	{ EQUIP_SLOT_SHOULDERS, "EsoUI/Art/CharacterWindow/gearslot_shoulders.dds" },
+	{ EQUIP_SLOT_CHEST, "EsoUI/Art/CharacterWindow/gearslot_chest.dds" },
+	{ EQUIP_SLOT_HAND, "EsoUI/Art/CharacterWindow/gearslot_hands.dds" },
+	{ EQUIP_SLOT_WAIST, "EsoUI/Art/CharacterWindow/gearslot_belt.dds" },
+	{ EQUIP_SLOT_LEGS, "EsoUI/Art/CharacterWindow/gearslot_legs.dds" },
+	{ EQUIP_SLOT_FEET, "EsoUI/Art/CharacterWindow/gearslot_feet.dds" },
+	{ EQUIP_SLOT_NECK, "EsoUI/Art/CharacterWindow/gearslot_neck.dds" },
+	{ EQUIP_SLOT_RING1, "EsoUI/Art/CharacterWindow/gearslot_ring.dds" },
+	{ EQUIP_SLOT_RING2, "EsoUI/Art/CharacterWindow/gearslot_ring.dds" },
 }
 
 local armorcolors = {
 
-	[ARMORTYPE_NONE] = {1, 1, 1, 1},
-	[ARMORTYPE_HEAVY] = {1, 0.3, 0.3, 1},
-	[ARMORTYPE_MEDIUM] = {0.3, 1, 0.3, 1},
-	[ARMORTYPE_LIGHT] = {0.3, 0.3, 1, 1},
+	[ARMORTYPE_NONE] = { 1, 1, 1, 1 },
+	[ARMORTYPE_HEAVY] = { 1, 0.3, 0.3, 1 },
+	[ARMORTYPE_MEDIUM] = { 0.3, 1, 0.3, 1 },
+	[ARMORTYPE_LIGHT] = { 0.3, 0.3, 1, 1 },
 }
 local subIdToQuality = {}
 
-local function GetEnchantQuality(itemLink)	-- From Enchanted Quality (Rhyono, votan)
+local function GetEnchantQuality(itemLink) -- From Enchanted Quality (Rhyono, votan)
 	local itemId, itemIdSub, enchantSub = itemLink:match("|H[^:]+:item:([^:]+):([^:]+):[^:]+:[^:]+:([^:]+):")
-	if not itemId then return 0 end
+	if not itemId then
+		return 0
+	end
 
 	enchantSub = tonumber(enchantSub)
 	if enchantSub == 0 and not IsItemLinkCrafted(itemLink) then
 		local hasSet = GetItemLinkSetInfo(itemLink, false)
-		if hasSet then enchantSub = tonumber(itemIdSub) end -- For non-crafted sets, the "built-in" enchantment has the same quality as the item itself
+		if hasSet then
+			enchantSub = tonumber(itemIdSub)
+		end -- For non-crafted sets, the "built-in" enchantment has the same quality as the item itself
 	end
 
 	if enchantSub > 0 then
 		local quality = subIdToQuality[enchantSub]
 		if not quality then
 			-- Create a fake itemLink to get the quality from built-in function
-			local itemLink = string.format("|H1:item:%i:%i:50:0:0:0:0:0:0:0:0:0:0:0:0:1:1:0:0:10000:0|h|h", itemId, enchantSub)
+			local itemLink =
+				string.format("|H1:item:%i:%i:50:0:0:0:0:0:0:0:0:0:0:0:0:1:1:0:0:10000:0|h|h", itemId, enchantSub)
 			quality = GetItemLinkQuality(itemLink)
 			subIdToQuality[enchantSub] = quality
 		end
@@ -61,14 +66,17 @@ local function GetEnchantQuality(itemLink)	-- From Enchanted Quality (Rhyono, vo
 	return 0
 end
 
-
 function CMXint.InitializeEquipmentPanel(control)
 	local EquipmentPanel = CMX.internal.PanelObject:New(control, "equipment")
 
 	function EquipmentPanel:Update(fightData)
-		if fightData == nil then return end
+		if fightData == nil then
+			return
+		end
 		local charData = fightData.charData
-		if charData == nil then return end
+		if charData == nil then
+			return
+		end
 
 		local control = self.control
 		local equipdata = charData and charData.equip or {}
@@ -77,22 +85,21 @@ function CMXint.InitializeEquipmentPanel(control)
 		local poison2 = equipdata[EQUIP_SLOT_BACKUP_POISON]
 
 		for i, slotData in ipairs(equipslots) do
-
 			local slot = slotData[1]
 			local texture = slotData[2]
 
 			local equipline = control:GetNamedChild("EquipLine" .. i)
 			local label = equipline:GetNamedChild("ItemLink")
 			local icon = equipline:GetNamedChild("Icon")
-			local icon2 = equipline:GetNamedChild("Icon2")	-- textures are added twice since icons are so low in contrast
+			local icon2 = equipline:GetNamedChild("Icon2") -- textures are added twice since icons are so low in contrast
 			local trait = equipline:GetNamedChild("Trait")
 			local enchant = equipline:GetNamedChild("Enchant")
 
 			local item = equipdata[slot] or ""
 
 			local armortype = GetItemLinkArmorType(item)
-			local color = item:len() > 0 and armorcolors[armortype] or {0, 0, 0, 1}
-			local color2 = item:len() > 0 and {1, 1, 1, 1} or {0.5, 0.5, 0.5, 1}
+			local color = item:len() > 0 and armorcolors[armortype] or { 0, 0, 0, 1 }
+			local color2 = item:len() > 0 and { 1, 1, 1, 1 } or { 0.5, 0.5, 0.5, 1 }
 
 			label:SetText(item)
 
@@ -112,7 +119,7 @@ function CMXint.InitializeEquipmentPanel(control)
 			trait:SetText(traitName)
 
 			local enchantString, enchantDescription
-			local enchantColor = {1, 1, 1, 1}
+			local enchantColor = { 1, 1, 1, 1 }
 
 			if (slot == EQUIP_SLOT_MAIN_HAND or slot == EQUIP_SLOT_OFF_HAND) and poison1:len() > 0 then
 				enchantString = poison1
@@ -127,7 +134,7 @@ function CMXint.InitializeEquipmentPanel(control)
 				enchant.enchantDescription = enchantDescription
 				enchant.itemLink = ""
 				local quality = GetEnchantQuality(item)
-				enchantColor = {GetItemQualityColor(quality):UnpackRGBA()}
+				enchantColor = { GetItemQualityColor(quality):UnpackRGBA() }
 			end
 
 			enchant:SetText(enchantString)
@@ -159,7 +166,9 @@ end
 
 local isFileInitialized = false
 function CMXint.InitializeEquipment()
-	if isFileInitialized == true then return false end
+	if isFileInitialized == true then
+		return false
+	end
 	logger = util.initSublogger("Equipment")
 
 	isFileInitialized = true

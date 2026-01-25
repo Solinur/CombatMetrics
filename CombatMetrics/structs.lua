@@ -24,7 +24,6 @@ hstructure DataEntryStruct
 	data: table;
 end
 
----comment
 ---@param typeId integer
 ---@param categoryId integer
 ---@param data table
