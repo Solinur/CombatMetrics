@@ -279,7 +279,7 @@ function util.buffSortFunction(data, a, b)
 	return ishigher
 end
 
----@param panel Panel
+---@param panel BuffPanel
 ---@return SortFilterList
 local function InitBuffsList(panel)
 	local dataList = ui.SortFilterList:New(panel.control, "CombatMetrics_BuffsPanelRowTemplate")
@@ -634,6 +634,7 @@ end
 
 ---@param control Control
 function CMXint.InitializeBuffsPanel(control)
+	---@class BuffPanel: Panel
 	BuffPanel = CMXint.PanelObject:New(control, "buffs")
 
 	BuffPanel.radioButtons = ZO_RadioButtonGroup:New(false)
@@ -653,7 +654,7 @@ function CMXint.InitializeBuffsPanel(control)
 		end
 	end
 
-	InitBuffsList(BuffPanel)
+	BuffPanel.dataList = InitBuffsList(BuffPanel)
 	BuffPanel.selections = {}
 
 	function BuffPanel:Update()
