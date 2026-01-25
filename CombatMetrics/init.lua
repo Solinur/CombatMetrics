@@ -1,4 +1,4 @@
--- This file contains the initialziation code 
+-- This file contains the initialziation code
 
 ---@class CMX
 CombatMetrics = CombatMetrics or {}
@@ -11,6 +11,7 @@ CMX.version = "2.0.0-alpha"
 
 ---@class CMXint
 CMX.internal = {}
+---@class CMXint
 local CMXint = CMX.internal
 CMXint.debug = false or GetDisplayName() == "@Solinur"
 ---@class CMXutil
@@ -49,7 +50,9 @@ end
 ---@return Logger
 function util.initSublogger(tag)
 	local mainlogger = CMXint.logger.main
-	if mainlogger.Create == nil or tag == nil or tag == "" then return mainlogger end
+	if mainlogger.Create == nil or tag == nil or tag == "" then
+		return mainlogger
+	end
 	if CMXint.logger[tag] ~= nil then
 		mainlogger:Warn("Sublogger %s already exists!", tag)
 		return CMXint.logger[tag]
@@ -74,10 +77,14 @@ util.GetFormattedAbilityName = LC.GetFormattedAbilityName
 
 function util.spairs(t, order) -- from https://stackoverflow.com/questions/15706270/sort-a-table-in-lua
 	local keys = {}
-	for k in pairs(t) do keys[#keys+1] = k end
+	for k in pairs(t) do
+		keys[#keys + 1] = k
+	end
 
 	if order then
-		table.sort(keys, function(a,b) return order(t, a, b) end)
+		table.sort(keys, function(a, b)
+			return order(t, a, b)
+		end)
 	else
 		table.sort(keys)
 	end
@@ -92,7 +99,9 @@ function util.spairs(t, order) -- from https://stackoverflow.com/questions/15706
 end
 
 function util.searchtable(t, field, value)
-	if value == nil then return false end
+	if value == nil then
+		return false
+	end
 
 	for k, v in pairs(t) do
 		if type(v) == "table" and field and v[field] == value then
@@ -105,6 +114,7 @@ function util.searchtable(t, field, value)
 	return false, nil
 end
 
+---@class CMXsettings
 local svdefaults = {
 	["accountwide"] = false,
 
@@ -132,26 +142,24 @@ local svdefaults = {
 		["tremorscaleValue"] = 2640,
 		["unitresistance"] = 18200,
 	},
-	
-	
+
 	["notification"] = {
 		["version"] = 0,
 		["versionSeen"] = 0,
 		["enabled"] = true,
-		["force"] = false,	-- for dev use
+		["force"] = false, -- for dev use
 	},
-	
 
 	["fightReport"] = {
-		["pos_x"] = GuiRoot:GetWidth()/2,
-		["pos_y"] = GuiRoot:GetHeight()/2-75,
+		["pos_x"] = GuiRoot:GetWidth() / 2,
+		["pos_y"] = GuiRoot:GetHeight() / 2 - 75,
 
-		["scale"] 				= zo_roundToNearest(1 / GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE), 0.1),
-		["category"] 			= "damageOut",
+		["scale"] = zo_roundToNearest(1 / GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE), 0.1),
+		["category"] = "damageOut",
 
-		["showDebugIds"] 		= false,
-		["useDisplayNames"] 	= false,
-		["showPets"] 			= true,
+		["showDebugIds"] = false,
+		["useDisplayNames"] = false,
+		["showPets"] = true,
 
 		["abilities"] = {
 			["hitCritLayout"] = {
@@ -182,21 +190,21 @@ local svdefaults = {
 		},
 
 		["graph"] = {
-			["SmoothWindow"] 	= 5,
-			["Cursor"]			= true,
-			["showGroupBuffs"]	= true,
-			["PlotColors"]			= {
-				[1]	= "1, 1, 0, 0.66",	-- yellow
-				[2]	= "1, 0, 0, 0.66",	-- red
-				[3]	= "0, 1, 0, 0.66",	-- green
-				[4]	= "0, 0, 1, 0.66",	-- blue
-				[5]	= "1, 0, 1, 0.66",	-- violet
-				[6]	= "0.4, 1, 0.4, 0.4",	-- Buffs: green
-				[7]	= "1, 0.4, 0.9, 0.4",	-- Debuffs: violet
+			["SmoothWindow"] = 5,
+			["Cursor"] = true,
+			["showGroupBuffs"] = true,
+			["PlotColors"] = {
+				[1] = "1, 1, 0, 0.66", -- yellow
+				[2] = "1, 0, 0, 0.66", -- red
+				[3] = "0, 1, 0, 0.66", -- green
+				[4] = "0, 0, 1, 0.66", -- blue
+				[5] = "1, 0, 1, 0.66", -- violet
+				[6] = "0.4, 1, 0.4, 0.4", -- Buffs: green
+				[7] = "1, 0.4, 0.9, 0.4", -- Debuffs: violet
 			},
 		},
 
-		["showWereWolf"] 		= false,
+		["showWereWolf"] = false,
 
 		-- ["CombatLog"] = {
 		-- 	["Filters"] = {
@@ -219,29 +227,35 @@ local svdefaults = {
 		["pos_x"] = 700,
 		["pos_y"] = 500,
 
-		["enabled"] 		= true,
-		["locked"] 			= false,
-		["layout"]			="Compact",
-		["scale"]			= zo_roundToNearest(1 / GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE), 0.1),
-		["bgalpha"]			= 95,
-		["alignmentleft"] 	= false,
-		["damageOut"] 		= true,	-- TODO: Capitalize first letter 
+		["enabled"] = true,
+		["locked"] = false,
+		["layout"] = "Compact",
+		["scale"] = zo_roundToNearest(1 / GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE), 0.1),
+		["bgalpha"] = 95,
+		["alignmentleft"] = false,
+		["damageOut"] = true, -- TODO: Capitalize first letter
 		["damageOutSingle"] = false,
-		["healOut"] 		= true,
-		["damageIn"] 		= true,
-		["healIn"] 			= true,
-		["time"] 			= true,
-		["healOutAbsolute"]	= false,
+		["healOut"] = true,
+		["damageIn"] = true,
+		["healIn"] = true,
+		["time"] = true,
+		["healOutAbsolute"] = false,
 	},
 }
 
 local function loadSV()
+	---@class CMXsettings
 	CMXint.settings = ZO_SavedVars:NewAccountWide("CombatMetrics_Save", 6, "Settings", svdefaults)
-	if not CMXint.settings.accountwide then CMXint.settings = ZO_SavedVars:NewCharacterIdSettings("CombatMetrics_Save", 6, "Settings", svdefaults) end
+	if not CMXint.settings.accountwide then
+		---@class CMXsettings
+		CMXint.settings = ZO_SavedVars:NewCharacterIdSettings("CombatMetrics_Save", 6, "Settings", svdefaults)
+	end
 end
 
 local function Initialize(eventId, addon)
-	if addon ~= CMX.name then return end
+	if addon ~= CMX.name then
+		return
+	end
 
 	loadSV()
 
@@ -254,6 +268,11 @@ local function Initialize(eventId, addon)
 	-- assert(CMXint.InitMenu(svdefaults), "Initialization of settings menu failed")
 
 	EVENT_MANAGER:UnregisterForEvent("CombatMetrics_Initialize", EVENT_ADD_ON_LOADED)
+
+	-- TODO: Remove eventually
+	if CMX_TestData then
+		CMXint.fightData:AddFight(fightData)
+	end
 end
 
 EVENT_MANAGER:RegisterForEvent("CombatMetrics_Initialize", EVENT_ADD_ON_LOADED, Initialize)
