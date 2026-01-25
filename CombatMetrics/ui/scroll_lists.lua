@@ -15,7 +15,9 @@ local ui = CMXint.ui
 -- https://github.com/esoui/esoui/blob/live/esoui/libraries/zo_sortheadergroup/zo_sortheadergroup.lua
 -- https://github.com/esoui/esoui/blob/live/esoui/libraries/zo_sortfilterlist/zo_sortfilterlist.lua
 
+---Custom variant of ZO_SortFilterList
 ---@class SortFilterList: ZO_SortFilterList
+---@field New fun(control: Control, rowTemplate: string, rowHeight: number): SortFilterList
 local SortFilterList = ZO_SortFilterList:Subclass()
 SortFilterList.UpdateRow = SortFilterList:MUST_IMPLEMENT()
 SortFilterList.BuildMasterList = SortFilterList:MUST_IMPLEMENT()
@@ -38,6 +40,9 @@ local function onRowControlReset(self, pool)
 	ZO_ObjectPool_DefaultResetControl(self)
 end
 
+---@param control Control
+---@param rowTemplate string
+---@param rowHeight number
 function SortFilterList:Initialize(control, rowTemplate, rowHeight) -- TODO: is rowHeight neccessary ?
 	ZO_SortFilterList.Initialize(self, control)
 
@@ -45,6 +50,7 @@ function SortFilterList:Initialize(control, rowTemplate, rowHeight) -- TODO: is 
 		self:UpdateRow(...)
 	end
 
+	---@type Control
 	local listControl = self.list
 	self.sortFunction = function(listEntry1, listEntry2)
 		return self:CompareItems(listEntry1, listEntry2)
@@ -108,7 +114,6 @@ function SortFilterList:SortScrollList(...)
 	self:RefreshVisible()
 end
 
----comment
 ---@param control Control
 ---@param key string
 ---@param initialDirection boolean

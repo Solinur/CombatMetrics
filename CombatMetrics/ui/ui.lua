@@ -108,7 +108,6 @@ function util.adjustRowSize(row, header)
 	end
 end
 
----comment
 ---@param control Control
 ---@param tooltipControl TooltipControl
 ---@param tooltip string
@@ -166,88 +165,8 @@ function CMXint.SetLabelColor(control, setcolor)
 	end
 end
 
--- function CMXint.ClearSelections()
--- 	local category = CMXint.settings.fightReport.category or "damageOut"
--- 	local selections = ui.selections
-
--- 	selections.ability[category] = nil
--- 	selections.unit[category] = nil
--- 	selections.buff.buff = nil
--- 	selections.resource.resource = nil
--- end
-
--- function CMX.AddSelection( self, button, upInside, ctrlkey, alt, shiftkey )
--- 	local id = self.id
--- 	local dataId = self.dataId
--- 	local selecttype = self.type
-
--- 	if button ~= MOUSE_BUTTON_INDEX_LEFT and button ~= MOUSE_BUTTON_INDEX_MIDDLE then return end
-
--- 	local category = selecttype == "buff" and "buff" or selecttype == "resource" and "resource" or CMXint.settings.fightReport.category
-
--- 	local selections = ui.selections
--- 	local lastSelections = CMXint.lastSelections
--- 	local sel = selections[selecttype][category] -- can be nil so this is not always a reference
--- 	local lastsel = lastSelections[selecttype][category]
--- 	local bars = self.panel.bars
-
--- 	if button == MOUSE_BUTTON_INDEX_MIDDLE then
--- 		selections[selecttype][category] = nil
--- 		lastSelections[selecttype][category] = nil
--- 		CombatMetricsReport:Update(currentFight)
-
--- 		return
--- 	end
-
--- 	if sel == nil then	-- if nothing is selected yet, just select this, disregarding all modifiers.
--- 		sel = {[dataId] = id}
--- 		lastsel = id
--- 	elseif shiftkey and not ctrlkey and lastsel ~= nil then 	-- select everything between this and the previous sel if shiftkey is pressed
--- 		local istart = zo_min(lastsel, id)
--- 		local iend = zo_max(lastsel, id)
-
--- 		sel = {} 	-- forget/disregard other selections
-
--- 		for i=istart, iend do
--- 			local irowcontrol = bars[i]
--- 			sel[irowcontrol.dataId] = i
--- 		end
--- 	elseif ctrlkey and not shiftkey then	-- toggle additional sel if ctrlkey is pressed
--- 		if sel[dataId] ~= nil then
--- 			lastsel = nil
--- 			sel[dataId] = nil
--- 		else
--- 			lastsel = id
--- 			sel[dataId] = id
--- 		end
-
--- 	elseif shiftkey and ctrlkey and lastsel ~= nil then  -- additionally select everything between this and the previous sel if ctrlkey + shift key is pressed
--- 		local istart = zo_min(lastsel, id)
--- 		local iend = zo_max(lastsel, id)
-
--- 		for i=istart, iend do
--- 			local irowcontrol = bars[i]
--- 			sel[irowcontrol.dataId] = i
--- 		end
-
--- 	elseif not shiftkey and not ctrlkey then -- normal LMB click
--- 		if lastsel == id and sel[dataId] ~= nil then -- remove sel if this was pressed just before
--- 			lastsel = nil
--- 			sel = nil
--- 		else
--- 			lastsel = id
--- 			sel = {[dataId] = id}
--- 		end
--- 	end
-
--- 	lastSelections[selecttype][category] = lastsel
--- 	selections[selecttype][category] = sel
--- 	CombatMetricsReport:Update(currentFight)
--- end
-
 local lastResize
 
----comment
 ---@param control Control
 ---@param resizing bool
 function CMXint.Resizing(control, resizing)
@@ -315,6 +234,7 @@ function CMXint.NewSize(control, newLeft, newTop, newRight, newBottom, oldLeft, 
 end
 
 ---@class Panel
+---@field New fun(control: Control, name: str): Panel
 local PanelObject = ZO_InitializingObject:Subclass()
 CMXint.PanelObject = PanelObject
 
@@ -330,6 +250,8 @@ local function onHide(control)
 	control.panel:Release()
 end
 
+---@param control Control
+---@param name string
 function PanelObject:Initialize(control, name)
 	if ui.panels[name] then
 		logger:Error("Cannot create %s panel. A panel with this name already exists.", name)
@@ -348,13 +270,18 @@ function PanelObject:Initialize(control, name)
 	ui.panels[name] = self
 end
 
+---@param controlType integer
+---@return LabelControl|LineControl|TextureControl
 function PanelObject:AcquireSharedControl(controlType)
 	local control
 	if controlType == CT_LABEL then
+		---@type LabelControl
 		control, _ = ui.sharedLabels:AcquireObject()
 	elseif controlType == CT_TEXTURE then
+		---@type TextureControl
 		control, _ = ui.sharedTextures:AcquireObject()
 	elseif controlType == CT_LINE then
+		---@type LineControl
 		control, _ = ui.sharedSeparators:AcquireObject()
 	else
 		logger:Error("Attempt to acquire unsupported control type: %d", controlType)
@@ -364,11 +291,13 @@ function PanelObject:AcquireSharedControl(controlType)
 	return control
 end
 
+---@param control Control
 function PanelObject.OnShow(control)
 	logger:Info("OnShow, Panel: %s", control.panel.name)
 	return control.panel:Recover()
 end
 
+---@param control Control
 function PanelObject:OnHide(control)
 	return control.panel:Release()
 end
@@ -418,6 +347,7 @@ function PanelObject:ResetBars(panel) -- TODO: Probably can be removed when Scro
 	end
 end
 
+---@param hide bool
 function PanelObject:SetHidden(hide)
 	return self.control:SetHidden(hide)
 end
@@ -442,6 +372,7 @@ function ui:GetPanel(name)
 	logger:Error("Attempt to access unknown panel: %s", name)
 end
 
+---@param name string
 function ui:UpdatePanel(name)
 	return self:GetPanel(name):Update()
 end

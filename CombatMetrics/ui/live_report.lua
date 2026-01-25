@@ -210,7 +210,6 @@ function LiveReportControl:Refresh(anchorControl)
 	self.last = self
 end
 
----comment
 ---@param self TopLevelWindow
 local function InitLiveReport(self)
 	local settings = CMXint.settings.liveReport

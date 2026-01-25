@@ -279,6 +279,8 @@ function util.buffSortFunction(data, a, b)
 	return ishigher
 end
 
+---@param panel Panel
+---@return SortFilterList
 local function InitBuffsList(panel)
 	local dataList = ui.SortFilterList:New(panel.control, "CombatMetrics_BuffsPanelRowTemplate")
 	panel.dataList = dataList
@@ -316,6 +318,7 @@ local function InitBuffsList(panel)
 	local expandButtonPool = ZO_ObjectPool:New(CreateExpandButton, ZO_ObjectPool_DefaultResetControl)
 	-- TODO: Use ZO_ControlPool  here insted ?
 
+	---@param rowControl Control
 	function dataList:RecoverRow(rowControl)
 		local panel = self.panel
 		local rowHeight = self:GetHeight()
@@ -354,8 +357,10 @@ local function InitBuffsList(panel)
 		rowControl.indent = 0
 	end
 
+	---@param rowControl Control
+	---@param data table
+	---@param scrollList Object
 	function dataList:UpdateRow(rowControl, data, scrollList)
-		ROW_CONTROL = rowControl
 		local panel = self.panel
 
 		if rowControl.recovered ~= true then

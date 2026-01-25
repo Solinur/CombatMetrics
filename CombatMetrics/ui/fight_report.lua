@@ -77,6 +77,7 @@ end
 
 local function InitializeFightReport()
 	---@class FightReport: TopLevelWindow
+	---@field currentFight Fight?
 	FightReport = CombatMetricsReport
 	util.storeOrigLayout(FightReport)
 
@@ -121,8 +122,11 @@ local function InitializeFightReport()
 		end
 		logger:Debug("Updating Fight Report")
 
-		if CMXint.fightData.currentIndex == nil then
+		self.currentFight = CMXint.fightData.GetFightData()
+
+		if self.currentFight == nil then
 			FightReport:Clear()
+			return
 		end
 
 		for _, panel in pairs(ui.panels) do
