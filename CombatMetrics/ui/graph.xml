@@ -1,4 +1,4 @@
-    <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
     <Controls>
         <Line name="CombatMetrics_GraphTickY" color="FF444444" inherits="CombatMetrics_Line_Thin" virtual="true">
             <Controls>

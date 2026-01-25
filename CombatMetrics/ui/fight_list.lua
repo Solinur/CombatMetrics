@@ -17,22 +17,24 @@ local dx = ui.dx
 
 function CMXint.InitializeFightListPanel(control)
 	local FightListPanel = CMX.internal.PanelObject:New(control, "fightList")
-	
+
 	function FightListPanel:Update()
 		logger:Debug("Updating Ability Panel")
 
 		local control = self.control
-		if control:IsHidden() then return end
+		if control:IsHidden() then
+			return
+		end
 
 		local settings = self.settings
 		local category = settings.category
-		
+
 		local recentPanel = control:GetNamedChild("Recent")
 		local savedPanel = control:GetNamedChild("Saved")
-		
+
 		self:ResetBars(recentPanel)
 		self:ResetBars(savedPanel)
-		
+
 		local label
 
 		if category == "healingOut" or category == "healingIn" then
@@ -47,11 +49,11 @@ function CMXint.InitializeFightListPanel(control)
 		self:UpdateSubPanel(false)
 		self:UpdateSubPanel(true)
 	end
-	
+
 	function FightListPanel:UpdateSubPanel(issaved)
-			local stringId = issaved and "updateFightListPanelSaved" or "updateFightListPanelRecent"
-			em:UnregisterForUpdate(stringId)
-			
+		local stringId = issaved and "updateFightListPanelSaved" or "updateFightListPanelRecent"
+		em:UnregisterForUpdate(stringId)
+
 		local name, data
 		if issaved then
 			name = "Saved"
@@ -65,16 +67,18 @@ function CMXint.InitializeFightListPanel(control)
 		local category = self.settings.category
 
 		local scrollchild = GetControl(panel, "PanelScrollChild")
-		local currentanchor = {TOPLEFT, scrollchild, TOPLEFT, 0, 1}
+		local currentanchor = { TOPLEFT, scrollchild, TOPLEFT, 0, 1 }
 		local rowBaseName = scrollchild:GetName() .. "Row"
 		local DPSKey = DPSstrings[category]
 
 		if #data > panel.numItems then
-			for i = panel.numItems+1, #data do
+			for i = panel.numItems + 1, #data do
 				CreateControlFromVirtual(rowBaseName, scrollchild, "CombatMetrics_FightlistRowTemplate", i)
 				panel.numItems = i
 				if GetGameTimeSeconds() - GetFrameTimeSeconds() > 0.015 then
-					em:RegisterForUpdate(stringId, 50, function() self:UpdateSubPanel(issaved) end)
+					em:RegisterForUpdate(stringId, 50, function()
+						self:UpdateSubPanel(issaved)
+					end)
 					panel:GetNamedChild("LoadingLabel"):SetHidden(false)
 					return
 				end
@@ -90,11 +94,13 @@ function CMXint.InitializeFightListPanel(control)
 				local subzone = fight.subzone or ""
 
 				local zonestring = subzone ~= "" and string.format("%s, %s", subzone, zone) or nil
-				local datestring = type(fight.date) == "number" and GetDateStringFromTimestamp(fight.date) or fight.date or ""
+				local datestring = type(fight.date) == "number" and GetDateStringFromTimestamp(fight.date)
+					or fight.date
+					or ""
 				local timestring = string.format("%s, %s", datestring, fight.time or "")
 
 				local fightlog = issaved and fight.stringlog or fight.log
-				local logState = fightlog and (fightlog == true or #fightlog>0)
+				local logState = fightlog and (fightlog == true or #fightlog > 0)
 				local activetime = 1
 
 				if category == "healingOut" or category == "healingIn" then
@@ -103,7 +109,7 @@ function CMXint.InitializeFightListPanel(control)
 					activetime = zo_roundToNearest(fight.dpstime or 1, 0.1)
 				end
 
-				local durationstring = string.format("%d:%04.1f", activetime/60, activetime%60)		
+				local durationstring = string.format("%d:%04.1f", activetime / 60, activetime % 60)
 				local dps = zo_round(fight.calculated and fight.calculated[DPSKey] or fight[DPSKey] or 0)
 
 				-- CMX.Log(LOG_LEVEL_INFO, "Getting row: %s%d", rowBaseName, id)
@@ -135,9 +141,9 @@ function CMXint.InitializeFightListPanel(control)
 
 				local buttonControl = row:GetNamedChild("Buttons")
 				local deleteLogControl = buttonControl:GetNamedChild("DeleteLog")
-				deleteLogControl:SetState( logState and BSTATE_NORMAL or BSTATE_DISABLED )
+				deleteLogControl:SetState(logState and BSTATE_NORMAL or BSTATE_DISABLED)
 
-				currentanchor = {TOPLEFT, row, BOTTOMLEFT, 0, dx}
+				currentanchor = { TOPLEFT, row, BOTTOMLEFT, 0, dx }
 
 				panel.bars[id] = row
 
@@ -146,7 +152,6 @@ function CMXint.InitializeFightListPanel(control)
 			end
 		end
 	end
-
 
 	function FightListPanel:Toggle(show)
 		local control = self.control
@@ -171,14 +176,18 @@ function CMXint.LoadItem(listitem)
 	if issaved and savedFight then
 		-- returns false if nothing is found else it returns the id
 		isLoaded, loadId = searchtable(lastfights, "date", savedFight["date"])
-		if isLoaded then isLoaded = lastfights[loadId]["time"] == savedFight["time"] end		-- ensures old fights load correctly
+		if isLoaded then
+			isLoaded = lastfights[loadId]["time"] == savedFight["time"]
+		end -- ensures old fights load correctly
 	end
 
 	ui:UpdatePanel("fightList")
 
 	if issaved and isLoaded == false then
 		local loadedfight = CMXint.SVHandler.Load(id)
-		if loadedfight.log then CMX.AddFightCalculationFunctions(loadedfight) end
+		if loadedfight.log then
+			CMX.AddFightCalculationFunctions(loadedfight)
+		end
 		table.insert(lastfights, loadedfight)
 
 		CombatMetricsReport:Update(#CMX.lastfights)
@@ -199,12 +208,15 @@ function CMXint.DeleteItem(control)
 		CombatMetricsReport:Update()
 	else
 		table.remove(CMX.lastfights, id)
-		if #CMX.lastfights == 0 then CombatMetricsReport:Update() else CombatMetricsReport:Update(zo_min(currentFight, #CMX.lastfights)) end
+		if #CMX.lastfights == 0 then
+			CombatMetricsReport:Update()
+		else
+			CombatMetricsReport:Update(zo_min(currentFight, #CMX.lastfights))
+		end
 	end
 
 	ui:UpdatePanel("fightList")
 end
-
 
 function CMXint.DeleteItemLog(control)
 	local row = control:GetParent():GetParent()
@@ -214,7 +226,7 @@ function CMXint.DeleteItemLog(control)
 	if issaved then
 		CMXint.SVHandler.DeleteLog(id)
 	else
-		CMX.lastfights[id]["log"]={}
+		CMX.lastfights[id]["log"] = {}
 	end
 
 	ui:UpdatePanel("fightList")
@@ -222,7 +234,9 @@ end
 
 local isFileInitialized = false
 function CMXint.InitializeFightList()
-	if isFileInitialized == true then return false end
+	if isFileInitialized == true then
+		return false
+	end
 	logger = util.initSublogger("FightList")
 
 	isFileInitialized = true

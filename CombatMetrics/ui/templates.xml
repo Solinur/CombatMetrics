@@ -366,7 +366,7 @@
 
             <Controls>
                 <Backdrop name="$(parent)HighLight" inherits="CombatMetrics_Highlight" />
-                
+
                 <Control name="$(parent)Indicator">
                     <Anchor point="LEFT" offsetX="0" offsetY="0" />
                     <Dimensions x="10" y="10" />
@@ -375,7 +375,7 @@
                 <Button name="$(parent)IndicatorSwitch" hidden="true">
                     <Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Indicator" offsetX="-2" offsetY="0" />
                     <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Indicator" offsetX="0" offsetY="0" />
-					<OnClicked> CMX.CollapseButton( self, upInside ) </OnClicked>
+                    <OnClicked> CMX.CollapseButton( self, upInside ) </OnClicked>
                     <Textures
                         normal="esoui/art/buttons/dropbox_arrow_normal.dds"
                         mouseOver="esoui/art/buttons/dropbox_arrow_mouseover.dds"
@@ -451,7 +451,7 @@
                     <Dimensions x="50" y="20" />
                 </Label>
             </Controls>
-            
+
             <OnMouseUp> CMX.AddSelection( self, button, upInside, ctrl, alt, shift ) </OnMouseUp>
         </Control>
 
@@ -541,7 +541,7 @@
                     <Dimensions x="50" y="20" />
                 </Label>
             </Controls>
-            
+
             <OnMouseUp> CMX.AddSelection( self, button, upInside, ctrl, alt, shift ) </OnMouseUp>
         </Control>
 
@@ -601,9 +601,9 @@
                             <Anchor point="TOPRIGHT" relativePoint="TOP" offsetX="-4" />
                             <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOM" offsetX="-4" />
                             <Dimensions x="20" />
-							<ButtonState state="NORMAL" />
-							<OnInitialized>self.tooltip = SI_COMBAT_METRICS_DELETE_COMBAT_LOG</OnInitialized>
-							<OnMouseUp>CombatMetrics.internal.DeleteItemLog(self)</OnMouseUp>
+                            <ButtonState state="NORMAL" />
+                            <OnInitialized>self.tooltip = SI_COMBAT_METRICS_DELETE_COMBAT_LOG</OnInitialized>
+                            <OnMouseUp>CombatMetrics.internal.DeleteItemLog(self)</OnMouseUp>
                             <Textures
                                 normal="CombatMetrics/icons/deletelogiconup.dds"
                                 pressed="CombatMetrics/icons/deletelogicondown.dds"
@@ -616,9 +616,9 @@
                             <Anchor point="TOPLEFT" relativePoint="TOP" offsetX="4" />
                             <Anchor point="BOTTOMLEFT" relativePoint="BOTTOM" offsetX="4" />
                             <Dimensions x="20" />
-							<ButtonState state="NORMAL" />
-							<OnInitialized>self.tooltip = SI_COMBAT_METRICS_DELETE_FIGHT</OnInitialized>
-							<OnMouseUp>CombatMetrics.internal.DeleteItem(self)</OnMouseUp>
+                            <ButtonState state="NORMAL" />
+                            <OnInitialized>self.tooltip = SI_COMBAT_METRICS_DELETE_FIGHT</OnInitialized>
+                            <OnMouseUp>CombatMetrics.internal.DeleteItem(self)</OnMouseUp>
                             <Textures
                                 normal="CombatMetrics/icons/deleteicon2up.dds"
                                 pressed="CombatMetrics/icons/deleteicon2down.dds"
@@ -631,7 +631,7 @@
             </Controls>
         </Control>
 
-        <Line name="CombatMetrics_PlotLine" color="AAFFFF00" inherits="CombatMetrics_Line_Graph" layer="CONTROLS" level="2" virtual="true"/>
+        <Line name="CombatMetrics_PlotLine" color="AAFFFF00" inherits="CombatMetrics_Line_Graph" layer="CONTROLS" level="2" virtual="true" />
 
         <Backdrop name="CombatMetrics_PlotBar" edgeColor="00000000" centerColor="66CCCCFF" layer="CONTROLS" level="2" virtual="true">
         </Backdrop>
@@ -665,7 +665,7 @@
             </OnFocusLost>
         </EditBox>
 
-        <Control name="CombatMetrics_PlaceHolder" inherits="CombatMetrics_ControlFramed" virtual="true" >
+        <Control name="CombatMetrics_PlaceHolder" inherits="CombatMetrics_ControlFramed" virtual="true">
             <AnchorFill />
             <Controls>
                 <Label name="$(parent)Text" text="Coming Soon" font="ZoFontGameSmall">
@@ -674,11 +674,13 @@
             </Controls>
         </Control>
 
-        <Texture name="CombatMetrics_MenuButton" mouseEnabled="true" inherits="CombatMetrics_TextureTooltip" layer="CONTROLS" virtual="true" >
+        <Texture name="CombatMetrics_MenuButton" mouseEnabled="true" inherits="CombatMetrics_TextureTooltip" layer="CONTROLS"
+            virtual="true">
             <Dimensions x="32" y="32" />
         </Texture>
-        
-        <Button name="CombatMetrics_FightNavigationButton" mouseEnabled="true" inherits="CombatMetrics_ButtonTooltip" layer="CONTROLS" virtual="true">
+
+        <Button name="CombatMetrics_FightNavigationButton" mouseEnabled="true" inherits="CombatMetrics_ButtonTooltip" layer="CONTROLS"
+            virtual="true">
             <Dimensions x="32" y="32" />
             <ButtonState state="DISABLED" />
         </Button>
@@ -687,18 +689,19 @@
 
         <Texture name="CombatMetrics_SharedTexture" virtual="true" />
 
-        <Line name="CombatMetrics_SharedSeparator" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin" virtual="true"/>
+        <Line name="CombatMetrics_SharedSeparator" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin" virtual="true" />
 
-        <Control name="CombatMetrics_RowTemplate" virtual="true"/>
+        <Control name="CombatMetrics_RowTemplate" virtual="true" />
 
         <Control name="CombatMetrics_SortHeader" virtual="true" mouseEnabled="true">
-            <Dimensions y="20"/>
+            <Dimensions y="20" />
             <OnMouseUp>
                 ZO_SortHeader_OnMouseUp(self, upInside)
             </OnMouseUp>
 
             <Controls>
-                <Label name="$(parent)Name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL" inherits="CombatMetrics_ValueFontControl" horizontalAlignment="CENTER" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
+                <Label name="$(parent)Name" color="INTERFACE_COLOR_TYPE_TEXT_COLORS:INTERFACE_TEXT_COLOR_NORMAL"
+                    inherits="CombatMetrics_ValueFontControl" horizontalAlignment="CENTER" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
                     <AnchorFill />
                 </Label>
             </Controls>

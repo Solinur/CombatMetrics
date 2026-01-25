@@ -16,22 +16,32 @@ local _
 local em = GetEventManager()
 
 local function ResizeControl(control, scale)
-	if control.sizes == nil and control.anchors == nil then return end
+	if control.sizes == nil and control.anchors == nil then
+		return
+	end
 	local width, height = unpack(control.sizes)
 	local maxwidth, maxheight = GuiRoot:GetDimensions()
 
 	scale = zo_min(zo_max(scale or 1, 0.5), 3, maxwidth / width, maxheight / height)
 
-	if width and control:GetResizeToFitDescendents() == false then control:SetWidth(width * scale) end
-	if height and control:GetResizeToFitDescendents() == false then control:SetHeight(height * scale) end
+	if width and control:GetResizeToFitDescendents() == false then
+		control:SetWidth(width * scale)
+	end
+	if height and control:GetResizeToFitDescendents() == false then
+		control:SetHeight(height * scale)
+	end
 
 	local anchors = {}
 	local oldanchors = control.anchors
-	if oldanchors then ZO_DeepTableCopy(control.anchors, anchors) end
+	if oldanchors then
+		ZO_DeepTableCopy(control.anchors, anchors)
+	end
 
 	local anchor1 = anchors[1]
 	local anchor2 = anchors[2]
-	if anchor1 or anchor2 then control:ClearAnchors() end
+	if anchor1 or anchor2 then
+		control:ClearAnchors()
+	end
 
 	if anchor1 ~= nil then
 		anchor1[4] = anchor1[4] * scale
@@ -51,16 +61,19 @@ local function ResizeControl(control, scale)
 
 	if fontcontrol ~= nil then
 		local font, size, style = unpack(fontcontrol.font)
-		if size then size = tonumber(size) * (scale + 0.2) / 1.2 end -- Don't Scale fonts as much
+		if size then
+			size = tonumber(size) * (scale + 0.2) / 1.2
+		end -- Don't Scale fonts as much
 		control:SetFont(string.format("%s|%s|%s", font, size, style))
 	end
 
 	for i = 1, control:GetNumChildren() do
 		local child = control:GetChild(i)
-		if child then ResizeControl(child, scale) end
+		if child then
+			ResizeControl(child, scale)
+		end
 	end
 end
-
 
 local function InitializeFightReport()
 	---@class FightReport: TopLevelWindow
@@ -72,7 +85,7 @@ local function InitializeFightReport()
 	local pos_y = settings.pos_y
 	FightReport:ClearAnchors()
 	FightReport:SetAnchor(CENTER, nil, TOPLEFT, pos_x, pos_y)
-	
+
 	FightReport.settings = settings
 
 	local fragment = ZO_HUDFadeSceneFragment:New(FightReport)
@@ -103,10 +116,14 @@ local function InitializeFightReport()
 	end
 
 	function FightReport:Update()
-		if FightReport:IsHidden() then return end
+		if FightReport:IsHidden() then
+			return
+		end
 		logger:Debug("Updating Fight Report")
 
-		if CMXint.fightData.currentIndex == nil then FightReport:Clear() end
+		if CMXint.fightData.currentIndex == nil then
+			FightReport:Clear()
+		end
 
 		for _, panel in pairs(ui.panels) do
 			panel:Update()
@@ -129,7 +146,9 @@ end
 
 local isFileInitialized = false
 function CMXint.InitializeFightReport()
-	if isFileInitialized == true then return false end
+	if isFileInitialized == true then
+		return false
+	end
 	logger = util.initSublogger("FightReport")
 
 	CMXint.fightReport = InitializeFightReport()

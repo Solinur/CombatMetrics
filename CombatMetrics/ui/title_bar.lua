@@ -49,7 +49,9 @@ function CMXint.InitializeTitlePanel(control)
 		label:SetText(newtext)
 
 		local fightData = CMXint.fightData.data
-		if fightData then fightData.fightlabel = newtext end
+		if fightData then
+			fightData.fightlabel = newtext
+		end
 	end
 
 	fightTitleControl:SetHandler("OnMouseDoubleClick", OnEditTitleStart, "CMX")
@@ -61,7 +63,7 @@ function CMXint.InitializeTitlePanel(control)
 		local charInfo = control:GetNamedChild("CharacterInfo")
 		local charData = {}
 		local fightlabel
-		local account 
+		local account
 
 		if fightData == nil then
 			account = GetDisplayName()
@@ -79,7 +81,7 @@ function CMXint.InitializeTitlePanel(control)
 			fightlabel = zo_strgsub(fightData.fightlabel, ".+%:%d%d %- ([A-Z])", "%1") or ""
 			account = fightData.info.accountname
 		end
-		
+
 		label:SetText(fightlabel)
 
 		-- Custom Icon
@@ -95,7 +97,7 @@ function CMXint.InitializeTitlePanel(control)
 		-- Char Name
 
 		local charName = charInfo:GetNamedChild("Charname")
-		
+
 		local customName = LibCustomNames and LibCustomNames.Get(account, true)
 		local name = customName or charData.name
 
@@ -150,7 +152,7 @@ function CMXint.InitializeTitlePanel(control)
 		-- Subclass Icons:
 
 		local subClassingLines = SKILLS_DATA_MANAGER.activeClassSkillLineDataList
-		for i = 1,3 do
+		for i = 1, 3 do
 			local lineData = subClassingLines[i]
 			local iconControl = classInfo:GetNamedChild("SubClassIcon" .. i)
 			---@cast iconControl TextureControl
@@ -164,7 +166,9 @@ end
 
 local isFileInitialized = false
 function CMXint.InitializeTitle()
-	if isFileInitialized == true then return false end
+	if isFileInitialized == true then
+		return false
+	end
 	logger = util.initSublogger("TitlePanel")
 	isFileInitialized = true
 	return true

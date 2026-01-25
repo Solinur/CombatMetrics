@@ -30,7 +30,9 @@ end
 
 local isFileInitialized = false
 function CMXint.InitializeSelectionsHandler()
-	if isFileInitialized == true then return false end
+	if isFileInitialized == true then
+		return false
+	end
 	logger = util.initSublogger("Selections")
 
 	isFileInitialized = true

@@ -13,8 +13,7 @@ local GetFormattedAbilityIcon = util.GetFormattedAbilityIcon
 local GetFormattedAbilityName = util.GetFormattedAbilityName
 local GetFoodDrinkItemLinkFromAbilityId = CMXint.LibCombat2.GetFoodDrinkItemLinkFromAbilityId
 
-
-local function valueOrder(t,a,b)
+local function valueOrder(t, a, b)
 	return t[a] < t[b]
 end
 
@@ -61,16 +60,18 @@ function CMXint.InitializeConsumablesPanel(control)
 					label = key
 					texture = GetItemLinkIcon(key)
 				end
-				control:GetNamedChild("Name"..num):SetText(label)
-				control:GetNamedChild("Icon"..num):SetTexture(texture)
-				if num >= 2 then break end
+				control:GetNamedChild("Name" .. num):SetText(label)
+				control:GetNamedChild("Icon" .. num):SetTexture(texture)
+				if num >= 2 then
+					break
+				end
 			end
 
 			local icon1 = control:GetNamedChild("Icon1")
 			local iconSize = control:GetNamedChild("Icon2"):GetWidth()
 			icon1:ClearAnchors()
 			if numItems == 1 then
-				icon1:SetDimensions(1.3*iconSize, 1.3*iconSize)
+				icon1:SetDimensions(1.3 * iconSize, 1.3 * iconSize)
 				icon1:SetAnchor(LEFT)
 				control:GetNamedChild("Name2"):SetHidden(true)
 				control:GetNamedChild("Icon2"):SetHidden(true)
@@ -87,7 +88,9 @@ end
 
 local isFileInitialized = false
 function CMXint.InitializeConsumables()
-	if isFileInitialized == true then return false end
+	if isFileInitialized == true then
+		return false
+	end
 	logger = util.initSublogger("Consumables")
 
 	isFileInitialized = true
