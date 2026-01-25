@@ -10,7 +10,6 @@ local logger
 local ui = CMXint.ui
 
 CMXint.scenes = {}
-local FightReport
 local _
 
 local em = GetEventManager()
@@ -78,7 +77,8 @@ end
 local function InitializeFightReport()
 	---@class FightReport: TopLevelWindow
 	---@field currentFight Fight?
-	FightReport = CombatMetricsReport
+	local FightReport = CombatMetricsReport
+	CMXint.fightReport = FightReport
 	util.storeOrigLayout(FightReport)
 
 	local settings = CMXint.settings.fightReport
@@ -122,7 +122,7 @@ local function InitializeFightReport()
 		end
 		logger:Debug("Updating Fight Report")
 
-		self.currentFight = CMXint.fightData.GetFightData()
+		self.currentFight = CMXint.FightData.GetCurrentFight()
 
 		if self.currentFight == nil then
 			FightReport:Clear()
@@ -155,7 +155,7 @@ function CMXint.InitializeFightReport()
 	end
 	logger = util.initSublogger("FightReport")
 
-	CMXint.fightReport = InitializeFightReport()
+	InitializeFightReport()
 
 	isFileInitialized = true
 	return true

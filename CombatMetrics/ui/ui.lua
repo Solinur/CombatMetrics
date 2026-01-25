@@ -302,6 +302,10 @@ function PanelObject:OnHide(control)
 	return control.panel:Release()
 end
 
+function PanelObject:GetCurrentFightData()
+	return CMXint.fightReport.currentFight
+end
+
 function PanelObject:Release()
 	self:ReleaseSharedControls()
 end
@@ -329,7 +333,7 @@ end
 function PanelObject:GetParentControl()
 	local parentControl = self.control:GetParent()
 	if parentControl then
-		return parentControl.panel
+		return parentControl.panel --- TODO: This appears nonsensical ?
 	end
 end
 

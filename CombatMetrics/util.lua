@@ -317,7 +317,7 @@ function util.PostBuffUptime(fight, buffname, unitType)
 end
 
 function util.PosttoChat(mode, fight, UnitContextMenuUnitId)
-	local data = fight and CMX.lastfights[fight] or CMXint.fightData:GetFightData()
+	local data = fight and CMX.lastfights[fight] or CMXint.FightData:GetCurrentFight()
 	if data == nil then
 		return
 	end

@@ -48,7 +48,7 @@ function CMXint.InitializeTitlePanel(control)
 
 		label:SetText(newtext)
 
-		local fightData = CMXint.fightData.data
+		local fightData = CMXint.FightData.data
 		if fightData then
 			fightData.fightlabel = newtext
 		end

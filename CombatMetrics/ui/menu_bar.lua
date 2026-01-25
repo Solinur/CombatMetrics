@@ -385,15 +385,15 @@ local function initFightNavButtons(MenuPanel)
 	local anchorControl = MenuPanel.notificationButton
 
 	local function SelectPreviousFight()
-		CMXint.fightData:SelectPreviousFight()
+		CMXint.FightData:SelectPreviousFight()
 	end
 
 	local function SelectNextFight()
-		CMXint.fightData:SelectNextFight()
+		CMXint.FightData:SelectNextFight()
 	end
 
 	local function SelectMostRecentFight()
-		CMXint.fightData:SelectMostRecentFight()
+		CMXint.FightData:SelectMostRecentFight()
 	end
 
 	local function LoadFight()
@@ -401,11 +401,11 @@ local function initFightNavButtons(MenuPanel)
 	end
 
 	local function SaveFight(_, _, _, _, _, shiftkey)
-		CMXint.fightData:SaveFight(shiftkey)
+		CMXint.FightData:SaveFight(shiftkey)
 	end
 
 	local function DeleteFight()
-		CMXint.fightData:RemoveCurrentFight()
+		CMXint.FightData:RemoveCurrentFight()
 	end
 
 	local function initNavButton(name, texture, tooltip, func)
@@ -476,7 +476,7 @@ function CMXint.InitializeMenuPanel(control)
 	end
 
 	function MenuPanel:UpdateButtonStates()
-		local fightData = CMXint.fightData
+		local fightData = CMXint.FightData
 		local currentIndex = fightData.currentIndex or 0
 		local maxIndex = fightData:GetNumFights()
 		local navButtons = MenuPanel.navButtons

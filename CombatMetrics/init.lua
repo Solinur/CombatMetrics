@@ -271,7 +271,7 @@ local function Initialize(eventId, addon)
 
 	-- TODO: Remove eventually
 	if CMX_TestData then
-		CMXint.fightData:AddFight(fightData)
+		CMXint.FightData:AddFight(CMX_TestData)
 	end
 end
 

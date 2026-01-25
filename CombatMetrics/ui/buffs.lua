@@ -213,7 +213,7 @@ local function GetBuffData(fightData, category)
 	end
 
 	for i, unitId in ipairs(unitIds) do
-		-- TODO: replace with info stored in unit table
+		-- TODO: replace unit time with info stored in unit table
 		local startTime = math.huge
 		local endTime = 0
 
@@ -316,7 +316,6 @@ local function InitBuffsList(panel)
 	end
 
 	local expandButtonPool = ZO_ObjectPool:New(CreateExpandButton, ZO_ObjectPool_DefaultResetControl)
-	-- TODO: Use ZO_ControlPool  here insted ?
 
 	---@param rowControl Control
 	function dataList:RecoverRow(rowControl)
@@ -442,7 +441,7 @@ local function InitBuffsList(panel)
 			return
 		end
 
-		local hasStacks = data.stacks and (data.iconId == 126597 or data.maxStacks > 1) -- TODO: implement stack info !
+		local hasStacks = data.stacks and (data.iconId == 126597 or data.maxStacks > 1)
 		local selected = false -- selectedbuffs ~= nil and (selectedbuffs[buffName] ~= nil) or false -- TODO: Selections
 
 		local name = GetFormattedAbilityName(abilityId)
@@ -542,7 +541,7 @@ local function InitBuffsList(panel)
 	end
 
 	function dataList:BuildMasterList()
-		local fightData = self.panel.fightData
+		local fightData = self.panel.GetCurrentFightData()
 		local category = self.panel.category
 		local effectData, totalUnitTime = GetBuffData(fightData, category)
 
@@ -657,10 +656,9 @@ function CMXint.InitializeBuffsPanel(control)
 	InitBuffsList(BuffPanel)
 	BuffPanel.selections = {}
 
-	function BuffPanel:Update(fightData)
+	function BuffPanel:Update()
 		logger:Debug("Updating Buff Panel")
 
-		self.fightData = fightData
 		self.dataList:UpdateRowHeight()
 		self.dataList:RefreshData()
 	end

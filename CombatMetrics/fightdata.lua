@@ -28,7 +28,7 @@ end
 local FightDataManager = ZO_InitializingObject:Subclass()
 
 function FightDataManager:Initialize()
-	if CMXint.fightData then
+	if CMXint.FightData then
 		logger:Error("Cannot create another FightDataManager when one already exists.")
 		return
 	end
@@ -38,7 +38,7 @@ function FightDataManager:Initialize()
 	self.currentIndex = nil
 end
 
-function FightDataManager:GetFightData()
+function FightDataManager:GetCurrentFight()
 	return self.data
 end
 
@@ -132,7 +132,7 @@ function CMXint.InitializeFightDataHandler()
 	end
 	logger = util.initSublogger("Fights")
 
-	CMXint.fightData = FightDataManager:New()
+	CMXint.FightData = FightDataManager:New()
 
 	isFileInitialized = true
 	return true
