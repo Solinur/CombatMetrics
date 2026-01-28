@@ -1,6 +1,6 @@
 ﻿local strings = {
 
--- Colors
+	-- Colors
 
 	SI_COMBAT_METRICS_SEP_COLOR = "FFAAAAAA",
 	SI_COMBAT_METRICS_HEALTH_COLOR = "FFDE6531",
@@ -8,21 +8,21 @@
 	SI_COMBAT_METRICS_STAMINA_COLOR = "FFA6D852",
 	SI_COMBAT_METRICS_ULTIMATE_COLOR = "FFffe785",
 
--- URLs (Feedback Menu)
+	-- URLs (Feedback Menu)
 
 	SI_COMBAT_METRICS_FEEDBACK_ESOUIURL = "https://www.esoui.com/downloads/info1360-CombatMetrics.html",
 	SI_COMBAT_METRICS_FEEDBACK_GITHUBURL = "https://github.com/Solinur/CombatMetrics",
 	SI_COMBAT_METRICS_FEEDBACK_DISCORDURL = "https://discord.gg/2eqYt2n5M5",
 	SI_COMBAT_METRICS_DONATE_ESOUIURL = "https://www.esoui.com/downloads/info1360-CombatMetrics.html#donate",
 
--- Localization Start
+	-- Localization Start
 
--- Functionality
+	-- Functionality
 
 	SI_COMBAT_METRICS_LANG = "en",
 	SI_COMBAT_METRICS_ENCHANTMENT_TRIM = " Enchantment", -- this will be removed from the items enchantment string to show the rest in the info panel, e.g. "Spell Damage Enchantment" is reduced to "Spell Damage".
 
--- Fonts
+	-- Fonts
 
 	SI_COMBAT_METRICS_STD_FONT = "$(MEDIUM_FONT)",
 	SI_COMBAT_METRICS_BOLD_FONT = "$(BOLD_FONT)",
@@ -31,7 +31,7 @@
 	SI_COMBAT_METRICS_FONT_SIZE = "15",
 	SI_COMBAT_METRICS_FONT_SIZE_TITLE = "20",
 
--- Main UI
+	-- Main UI
 
 	SI_COMBAT_METRICS_CALC = "Calculating...",
 	SI_COMBAT_METRICS_LOADING = "Loading...",
@@ -154,9 +154,9 @@
 	SI_COMBAT_METRICS_DONATE_CROWNS_TEXT = "If you wish to gift something from the crown store, I'd be happy to receive some crown crates or consumable items. \nYou can also contact me if you wish to gift something else.",
 	SI_COMBAT_METRICS_DONATE_CROWNS_ACCOUNT = "My account:",
 	SI_COMBAT_METRICS_DONATE_ESOUI = "Donation Page",
-	
+
 	SI_COMBAT_METRICS_OK = "OK",
-	
+
 	SI_COMBAT_METRICS_SAVEDFIGHTS_FULL = "You're exceeding the maximum number of saved fights. Delete <<1[a fight/a fight/$d fights]>> or increase the allowed number in the settings!",
 	SI_COMBAT_METRICS_CONVERT_DB_TITLE = "COMBAT METRICS",
 	SI_COMBAT_METRICS_CONVERT_DB_TEXT = "This version features a new way to store fights. It takes up less space and reduces UI loading times, even with much more fights saved. \n\nTo benefit from this and allow new fights to be saved, all stored fights need to be converted. \n\nThis process may take a up to a few minutes.",
@@ -208,21 +208,21 @@
 	SI_COMBAT_METRICS_OVERHEAL = "Overheal: ", -- as in overheal
 
 	SI_COMBAT_METRICS_HITS = "Hits",
-	SI_COMBAT_METRICS_NORM = "Norm",  -- Normal, short
-	SI_COMBAT_METRICS_OH = "OH",  -- Overheal, short
+	SI_COMBAT_METRICS_NORM = "Norm", -- Normal, short
+	SI_COMBAT_METRICS_OH = "OH", -- Overheal, short
 
 	SI_COMBAT_METRICS_RESOURCES = "Resources",
 
 	SI_COMBAT_METRICS_STATS = "Stats",
-	SI_COMBAT_METRICS_AVE = "Avg",  -- Average, short
-	SI_COMBAT_METRICS_AVE_N = "Avg N",  -- Average Normal, short
-	SI_COMBAT_METRICS_AVE_C = "Avg C",  -- Average Crit, short
-	SI_COMBAT_METRICS_AVE_B = "Avg B",  -- Average Blocked, short
+	SI_COMBAT_METRICS_AVE = "Avg", -- Average, short
+	SI_COMBAT_METRICS_AVE_N = "Avg N", -- Average Normal, short
+	SI_COMBAT_METRICS_AVE_C = "Avg C", -- Average Crit, short
+	SI_COMBAT_METRICS_AVE_B = "Avg B", -- Average Blocked, short
 	SI_COMBAT_METRICS_AVERAGE = "Average",
 	SI_COMBAT_METRICS_NORMAL_HITS = "Normal Hits",
-	SI_COMBAT_METRICS_MAX = "Max",  -- Maximum
-	SI_COMBAT_METRICS_MIN = "Min",  -- Minimum
-	SI_COMBAT_METRICS_EFFECTIVE = "Effective",  -- Effective
+	SI_COMBAT_METRICS_MAX = "Max", -- Maximum
+	SI_COMBAT_METRICS_MIN = "Min", -- Minimum
+	SI_COMBAT_METRICS_EFFECTIVE = "Effective", -- Effective
 
 	SI_COMBAT_METRICS_STATS_MAGICKA1 = "Max Magicka",
 	SI_COMBAT_METRICS_STATS_MAGICKA2 = "Spell Damage",
@@ -231,24 +231,24 @@
 	SI_COMBAT_METRICS_STATS_MAGICKA4 = "Critical Damage",
 	SI_COMBAT_METRICS_STATS_MAGICKA5 = "Spell Penetration",
 	SI_COMBAT_METRICS_STATS_MAGICKA6 = "Overpenetration",
-	SI_COMBAT_METRICS_STATS_MAGICKA_FORMAT6 = "%.1f %%",-- e.g. 12.3%
+	SI_COMBAT_METRICS_STATS_MAGICKA_FORMAT6 = "%.1f %%", -- e.g. 12.3%
 	SI_COMBAT_METRICS_STATS_MAGICKA7 = "Status Effect Procs",
 
 	SI_COMBAT_METRICS_STATS_STAMINA1 = "Max Stamina",
 	SI_COMBAT_METRICS_STATS_STAMINA2 = "Weapon Damage",
 	SI_COMBAT_METRICS_STATS_STAMINA3 = "Weapon Critical",
-	SI_COMBAT_METRICS_STATS_STAMINA_FORMAT3 = "%.1f %%",-- e.g. 12.3%
+	SI_COMBAT_METRICS_STATS_STAMINA_FORMAT3 = "%.1f %%", -- e.g. 12.3%
 	SI_COMBAT_METRICS_STATS_STAMINA4 = "Critical Damage",
 	SI_COMBAT_METRICS_STATS_STAMINA5 = "Phys. Penetration",
 	SI_COMBAT_METRICS_STATS_STAMINA6 = "Overpenetration",
-	SI_COMBAT_METRICS_STATS_STAMINA_FORMAT6 = "%.1f %%",-- e.g. 12.3%
+	SI_COMBAT_METRICS_STATS_STAMINA_FORMAT6 = "%.1f %%", -- e.g. 12.3%
 	SI_COMBAT_METRICS_STATS_STAMINA7 = "Status Effect Procs",
 
 	SI_COMBAT_METRICS_STATS_HEALTH1 = "Max Health",
 	SI_COMBAT_METRICS_STATS_HEALTH2 = "Physical Resist.",
 	SI_COMBAT_METRICS_STATS_HEALTH3 = "Spell Resistance",
 	SI_COMBAT_METRICS_STATS_HEALTH4 = "Critical Resist.",
-	SI_COMBAT_METRICS_STATS_HEALTH_FORMAT4 = "%.1f %%",-- e.g. 12.3%
+	SI_COMBAT_METRICS_STATS_HEALTH_FORMAT4 = "%.1f %%", -- e.g. 12.3%
 
 	SI_COMBAT_METRICS_PERFORMANCE = "Performance",
 	SI_COMBAT_METRICS_PERFORMANCE_FPSAVG = "Average FPS",
@@ -342,11 +342,11 @@
 
 	SI_COMBAT_METRICS_SAVED_DATA = "Saved Data",
 
--- Live report window
+	-- Live report window
 
 	SI_COMBAT_METRICS_SHOW_XPS = "<<1>> / <<2>> (<<3>>%)", -- Format to show DPS/HPS. <<1>> = own value, <<2>> = group value, <<3>> = percentage
 
--- Settings Menu
+	-- Settings Menu
 
 	SI_COMBAT_METRICS_MENU_PROFILES = "Profiles",
 
@@ -460,7 +460,7 @@
 	SI_COMBAT_METRICS_MENU_CHAT_SIH_NAME = "Show Incoming heal",
 	SI_COMBAT_METRICS_MENU_CHAT_SIH_TOOLTIP = "Show heals you receive in chat stream",
 
--- Live Report Tooltips
+	-- Live Report Tooltips
 
 	SI_COMBAT_METRICS_LIVEREPORT_GROUP_TOOLTIP = "Player / Group",
 	SI_COMBAT_METRICS_LIVEREPORT_DPSSINGLE_TOOLTIP = "Single Target DPS",
@@ -472,7 +472,7 @@
 	SI_COMBAT_METRICS_LIVEREPORT_HPSINC_TOOLTIP = "Incoming HPS",
 	SI_COMBAT_METRICS_LIVEREPORT_TIME_TOOLTIP = "Combat duration",
 
--- make a label for keybinding
+	-- make a label for keybinding
 
 	SI_BINDING_NAME_CMX_REPORT_TOGGLE = "Toggle Fight Report",
 	SI_BINDING_NAME_CMX_LIVEREPORT_TOGGLE = "Toggle Live Report",
@@ -482,15 +482,14 @@
 	SI_BINDING_NAME_CMX_POST_DPS = "Post Single + Multi Target DPS",
 	SI_BINDING_NAME_CMX_POST_HPS = "Post Heal to Chat",
 	SI_BINDING_NAME_CMX_RESET_FIGHT = "Manually Reset the Fight",
-
 }
 
 -- Ingame (Use ZOS Tranlations, change only for languages which are not supported)
 
-strings["SI_COMBAT_METRICS_HEALTH"] = GetString(SI_COMBATMECHANICFLAGS32)  -- Health
-strings["SI_COMBAT_METRICS_MAGICKA"] = GetString(SI_COMBATMECHANICFLAGS1)  -- Magicka
-strings["SI_COMBAT_METRICS_STAMINA"] = GetString(SI_COMBATMECHANICFLAGS4)  -- Stamina
-strings["SI_COMBAT_METRICS_ULTIMATE"] = GetString(SI_COMBATMECHANICFLAGS8)  -- Ultimate
+strings["SI_COMBAT_METRICS_HEALTH"] = GetString(SI_COMBATMECHANICFLAGS32) -- Health
+strings["SI_COMBAT_METRICS_MAGICKA"] = GetString(SI_COMBATMECHANICFLAGS1) -- Magicka
+strings["SI_COMBAT_METRICS_STAMINA"] = GetString(SI_COMBATMECHANICFLAGS4) -- Stamina
+strings["SI_COMBAT_METRICS_ULTIMATE"] = GetString(SI_COMBATMECHANICFLAGS8) -- Ultimate
 
 -- Localization End
 

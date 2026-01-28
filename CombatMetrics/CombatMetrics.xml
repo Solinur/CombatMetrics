@@ -6,7 +6,7 @@
 			<Controls>
 				<Control name="$(parent)Font">
 					<Anchor point="TOPLEFT" />
-					<Dimensions x="0" y="0"/>
+					<Dimensions x="0" y="0" />
 					<OnInitialized>
 						self.font = {GetString(SI_COMBAT_METRICS_BOLD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE), "soft-shadow-thin"}
 						self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
@@ -21,7 +21,7 @@
 			<Controls>
 				<Control name="$(parent)Font">
 					<Anchor point="TOPLEFT" />
-					<Dimensions x="0" y="0"/>
+					<Dimensions x="0" y="0" />
 					<OnInitialized>
 						self.font = {GetString(SI_COMBAT_METRICS_BOLD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE), "soft-shadow-thin"}
 						self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
@@ -36,7 +36,7 @@
 			<Controls>
 				<Control name="$(parent)Font">
 					<Anchor point="TOPLEFT" />
-					<Dimensions x="0" y="0"/>
+					<Dimensions x="0" y="0" />
 					<OnInitialized>
 						self.font = {GetString(SI_COMBAT_METRICS_STD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE), "soft-shadow-thin"}
 						self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
@@ -51,7 +51,7 @@
 			<Controls>
 				<Control name="$(parent)Font">
 					<Anchor point="TOPLEFT" />
-					<Dimensions x="0" y="0"/>
+					<Dimensions x="0" y="0" />
 					<OnInitialized>
 						self.font = {GetString(SI_COMBAT_METRICS_STD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE_SMALL), "soft-shadow-thin"}
 						self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
@@ -66,7 +66,7 @@
 			<Controls>
 				<Control name="$(parent)Font">
 					<Anchor point="TOPLEFT" />
-					<Dimensions x="0" y="0"/>
+					<Dimensions x="0" y="0" />
 					<OnInitialized>
 						self.font = {GetString(SI_COMBAT_METRICS_STD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE_TITLE), "soft-shadow-thin"}
 						self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
@@ -81,7 +81,7 @@
 			<Controls>
 				<Control name="$(parent)Font">
 					<Anchor point="TOPLEFT" />
-					<Dimensions x="0" y="0"/>
+					<Dimensions x="0" y="0" />
 					<OnInitialized>
 						self.font = {GetString(SI_COMBAT_METRICS_BOLD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE_TITLE), "soft-shadow-thin"}
 						self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
@@ -345,7 +345,8 @@
 
 		<Control name="CombatMetrics_InfoAbilityBlock" virtual="true">
 			<Controls>
-				<Label name="$(parent)Title" inherits="CombatMetrics_LabelFontControl" text="SI_COMBAT_METRICS_BAR" horizontalAlignment="LEFT">
+				<Label name="$(parent)Title" inherits="CombatMetrics_LabelFontControl" text="SI_COMBAT_METRICS_BAR"
+					horizontalAlignment="LEFT">
 					<Anchor point="TOPLEFT" offsetX="4" offsetY="4" />
 					<Dimensions x="60" y="20" />
 				</Label>
@@ -401,7 +402,7 @@
 				<Control name="$(parent)Header">
 
 					<Anchor point="TOPLEFT" relativeTo="$(parent)Title" relativePoint="BOTTOMLEFT" offsetX="-4" offsetY="4" />
-					<Anchor point="TOPRIGHT" offsetY="6" constrains="X"/>
+					<Anchor point="TOPRIGHT" offsetY="6" constrains="X" />
 
 					<Dimensions y="18" />
 
@@ -460,7 +461,7 @@
 
 				<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
 
-					<Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="3" offsetX="-1"/>
+					<Anchor point="TOPLEFT" relativeTo="$(parent)Header" relativePoint="BOTTOMLEFT" offsetY="3" offsetX="-1" />
 					<Anchor point="TOPRIGHT" relativeTo="$(parent)Header" relativePoint="BOTTOMRIGHT" offsetY="3" />
 
 				</Line>
@@ -515,14 +516,14 @@
 
 				<Line name="$(parent)Sep2" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
 
-					<Anchor point="TOPLEFT" relativeTo="$(parent)Ultimate" relativePoint="BOTTOMLEFT" offsetY="6" offsetX="-1"/>
+					<Anchor point="TOPLEFT" relativeTo="$(parent)Ultimate" relativePoint="BOTTOMLEFT" offsetY="6" offsetX="-1" />
 					<Anchor point="TOPRIGHT" relativeTo="$(parent)Ultimate" relativePoint="BOTTOMRIGHT" offsetY="6" />
 
 				</Line>
 
 				<Control name="$(parent)Stats2">
 
-					<Anchor point="TOPLEFT" relativeTo="$(parent)Sep2" relativePoint="BOTTOMLEFT" offsetY="2"/>
+					<Anchor point="TOPLEFT" relativeTo="$(parent)Sep2" relativePoint="BOTTOMLEFT" offsetY="2" />
 					<Dimensions x="300" y="20" />
 
 					<Controls>
@@ -602,15 +603,16 @@
 		</Control>
 
 		<Control name="Misc_Setup_Item" virtual="true" mouseEnabled="true">
-			<Dimensions x="202"/>
+			<Dimensions x="202" />
 			<Controls>
 				<Texture name="$(parent)Icon1" textureFile="EsoUI/Art/CharacterWindow/gearSlot_head.dds">
-					<Anchor point="TOPLEFT" offsetX="2"/>
+					<Anchor point="TOPLEFT" offsetX="2" />
 					<Dimensions x="20" y="20" />
 				</Texture>
 
-				<Label name="$(parent)Name1" text="Name" inherits="CombatMetrics_LabelFontControl" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
-					<Anchor point="LEFT" relativeTo="$(parent)Icon1" relativePoint="RIGHT" offsetX="4" offsetY="0"/>
+				<Label name="$(parent)Name1" text="Name" inherits="CombatMetrics_LabelFontControl" verticalAlignment="CENTER"
+					wrapMode="ELLIPSIS">
+					<Anchor point="LEFT" relativeTo="$(parent)Icon1" relativePoint="RIGHT" offsetX="4" offsetY="0" />
 					<Dimensions x="170" y="20" />
 
 					<OnMouseEnter> CMX.BuildInfo_OnMouseEnter(self) </OnMouseEnter>
@@ -618,12 +620,13 @@
 				</Label>
 
 				<Texture name="$(parent)Icon2" textureFile="EsoUI/Art/CharacterWindow/gearSlot_head.dds">
-					<Anchor point="BOTTOMLEFT" offsetX="0"/>
+					<Anchor point="BOTTOMLEFT" offsetX="0" />
 					<Dimensions x="20" y="20" />
 				</Texture>
 
-				<Label name="$(parent)Name2" text="Name" inherits="CombatMetrics_LabelFontControl" verticalAlignment="CENTER" wrapMode="ELLIPSIS">
-					<Anchor point="LEFT" relativeTo="$(parent)Icon2" relativePoint="RIGHT" offsetX="4" offsetY="0"/>
+				<Label name="$(parent)Name2" text="Name" inherits="CombatMetrics_LabelFontControl" verticalAlignment="CENTER"
+					wrapMode="ELLIPSIS">
+					<Anchor point="LEFT" relativeTo="$(parent)Icon2" relativePoint="RIGHT" offsetX="4" offsetY="0" />
 					<Dimensions x="170" y="20" />
 
 					<OnMouseEnter> CMX.BuildInfo_OnMouseEnter(self) </OnMouseEnter>
@@ -632,7 +635,6 @@
 			</Controls>
 		</Control>
 
-		
 
 		<Control name="CombatMetrics_StarRow" virtual="true" mouseEnabled="true">
 
@@ -781,23 +783,23 @@
 			</Controls>
 		</Control>
 
-		<Control name="CombatMetrics_ScribedSkillScriptControl"  virtual="true">
-			<Dimensions x="154" y="16" /> 
+		<Control name="CombatMetrics_ScribedSkillScriptControl" virtual="true">
+			<Dimensions x="154" y="16" />
 			<Controls>
 				<Texture name="$(parent)Icon" textureFile="EsoUI/Art/crafting/gamepad/crafting_alchemy_trait_unknown.dds">
 					<Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="0" />
-					<Dimensions x="16" y="16"/>
+					<Dimensions x="16" y="16" />
 				</Texture>
 
 				<Label name="$(parent)Name" text="Script" inherits="CombatMetrics_ValueFontSmallControl">
 					<Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="2" offsetY="0" />
-					<Anchor point="TOPRIGHT"/>
+					<Anchor point="TOPRIGHT" />
 				</Label>
 			</Controls>
 		</Control>
 
 		<Control name="CombatMetrics_ScribedSkillControl" virtual="true" mouseEnabled="true">
-			<Dimensions x="330" y="35" /> 
+			<Dimensions x="330" y="35" />
 			<OnMouseEnter> CMX.ScribedSkillTooltip_OnMouseEnter(self) </OnMouseEnter>
 			<OnMouseExit> CMX.ScribedSkillTooltip_OnMouseExit(self) </OnMouseExit>
 			<Controls>
@@ -2759,7 +2761,8 @@
 									<OnInitialized>CMX.InitCombatLog(self)</OnInitialized>
 								</Control>
 
-								<EditBox name="$(parent)CopyPasteBox" layer="TEXT" editEnabled="false" hidden="true" maxInputCharacters="29903" newLineEnabled="true" inherits="ZO_DefaultEditMultiLine">
+								<EditBox name="$(parent)CopyPasteBox" layer="TEXT" editEnabled="false" hidden="true"
+									maxInputCharacters="29903" newLineEnabled="true" inherits="ZO_DefaultEditMultiLine">
 									<Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Sep" offsetX="0" offsetY="2" />
 									<Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4" />
 
@@ -2769,10 +2772,10 @@
 										self:SetText("Test 123 CopyPasteBox CopyPasteBox CopyPasteBox CopyPasteBox \n CopyPasteBox CopyPasteBox 123")
 									</OnInitialized>
 								</EditBox>
-							</Controls>	
+							</Controls>
 						</Control>
 
-						<Control name="$(parent)Graph" inherits="CombatMetrics_ControlFramed" hidden="true" mouseEnabled="true" >
+						<Control name="$(parent)Graph" inherits="CombatMetrics_ControlFramed" hidden="true" mouseEnabled="true">
 
 							<Anchor point="TOPLEFT" relativeTo="$(parent)_MainPanel" />
 							<Anchor point="BOTTOMRIGHT" relativeTo="$(parent)_MainPanel" />
@@ -3366,8 +3369,9 @@
 											<Dimensions x="20" y="20" />
 
 											<Controls>
-												<Texture name="$(parent)Texture" textureFile="esoui/art/miscellaneous/eso_icon_warning.dds" layer="CONTROLS" inherits="CombatMetrics_TextureTooltip" color="FFFF8800">
-													<AnchorFill/>
+												<Texture name="$(parent)Texture" textureFile="esoui/art/miscellaneous/eso_icon_warning.dds"
+													layer="CONTROLS" inherits="CombatMetrics_TextureTooltip" color="FFFF8800">
+													<AnchorFill />
 													<OnInitialized>
 														self.tooltip = {SI_COMBAT_METRICS_SIGIL_WARNING}
 													</OnInitialized>
@@ -3778,12 +3782,14 @@
 								<Control name="$(parent)ScribedSkills" resizeToFitDescendents="true">
 									<Anchor point="TOPLEFT" offsetX="0" offsetY="0" />
 									<Anchor point="TOPRIGHT" offsetX="0" offsetY="0" />
-									<DimensionConstraints minY="0"/>
+									<DimensionConstraints minY="0" />
 								</Control>
 
 								<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
-									<Anchor point="TOPLEFT" relativeTo="$(parent)ScribedSkills" relativePoint="BOTTOMLEFT" offsetX="2" offsetY="6" />
-									<Anchor point="TOPRIGHT" relativeTo="$(parent)ScribedSkills" relativePoint="BOTTOMRIGHT" offsetX="-2" offsetY="6" />
+									<Anchor point="TOPLEFT" relativeTo="$(parent)ScribedSkills" relativePoint="BOTTOMLEFT" offsetX="2"
+										offsetY="6" />
+									<Anchor point="TOPRIGHT" relativeTo="$(parent)ScribedSkills" relativePoint="BOTTOMRIGHT" offsetX="-2"
+										offsetY="6" />
 								</Line>
 
 								<Control name="$(parent)Panel" inherits="ZO_ScrollContainer">
@@ -3923,28 +3929,28 @@
 
 							<Controls>
 								<Control name="$(parent)Mundus" inherits="Misc_Setup_Item">
-									<Anchor point="TOPLEFT"/>
-									<Anchor point="BOTTOMLEFT"/>
+									<Anchor point="TOPLEFT" />
+									<Anchor point="BOTTOMLEFT" />
 								</Control>
 
 								<Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
-									<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Mundus" offsetX="2"/>
-									<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Mundus" offsetX="2"/>
+									<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Mundus" offsetX="2" />
+									<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Mundus" offsetX="2" />
 								</Line>
 
 								<Control name="$(parent)DrinkFood" inherits="Misc_Setup_Item">
-									<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Mundus" offsetX="5"/>
-									<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Mundus" offsetX="5"/>
+									<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)Mundus" offsetX="5" />
+									<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Mundus" offsetX="5" />
 								</Control>
 
 								<Line name="$(parent)Sep2" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
-									<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)DrinkFood" offsetX="2"/>
-									<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)DrinkFood" offsetX="2"/>
+									<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)DrinkFood" offsetX="2" />
+									<Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)DrinkFood" offsetX="2" />
 								</Line>
 
 								<Control name="$(parent)Potions" inherits="Misc_Setup_Item">
-									<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)DrinkFood" offsetX="5"/>
-									<Anchor point="BOTTOMRIGHT"/>
+									<Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)DrinkFood" offsetX="5" />
+									<Anchor point="BOTTOMRIGHT" />
 								</Control>
 
 							</Controls>
