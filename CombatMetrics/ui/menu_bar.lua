@@ -142,7 +142,7 @@ local function initSettingsButton(MenuPanel)
 	end
 
 	local function toggleOverhealMode()
-		CMX.showOverHeal = not CMX.showOverHeal
+		CMXint.settings.showOverHeal = not CMXint.settings.showOverHeal
 		CombatMetricsReport:Update()
 	end
 
@@ -179,10 +179,12 @@ local function initSettingsButton(MenuPanel)
 			return
 		end
 		local selections = ui.selections
+		local settings = CMXint.settings.fightReport
 
-		local showIdString = CMXint.settings.showDebugIds and SI_COMBAT_METRICS_HIDEIDS or SI_COMBAT_METRICS_SHOWIDS
-		local showOverhealString = CMX.showOverHeal and SI_COMBAT_METRICS_HIDEOVERHEAL or SI_COMBAT_METRICS_SHOWOVERHEAL
-		local showPetString = CMXint.settings.fightReport.showPets and SI_COMBAT_METRICS_MENU_HIDEPETS
+		local showIdString = settings.showDebugIds and SI_COMBAT_METRICS_HIDEIDS or SI_COMBAT_METRICS_SHOWIDS
+		local showOverhealString = settings.showOverHeal and SI_COMBAT_METRICS_HIDEOVERHEAL
+			or SI_COMBAT_METRICS_SHOWOVERHEAL
+		local showPetString = settings.showPets and SI_COMBAT_METRICS_MENU_HIDEPETS
 			or SI_COMBAT_METRICS_MENU_SHOWPETS_NAME
 
 		-- local postoptions = {}
@@ -492,7 +494,9 @@ function CMXint.InitializeMenuPanel(control)
 		local load = SVHandler ~= nil and SVHandler.GetNumFights() > 0
 		navButtons.load:SetState(load and BSTATE_NORMAL or BSTATE_DISABLED, not load)
 
-		local save = fight ~= nil and not util.searchtable(SVHandler.GetFights(), "date", fight.date) -- TODO: Make function of SVHandler to check for already saved fights
+		local save = fight ~= nil
+			and SVHandler ~= nil
+			and not util.searchtable(SVHandler.GetFights(), "date", fight.date) -- TODO: Make function of SVHandler to check for already saved fights
 		navButtons.save:SetState(save and BSTATE_NORMAL or BSTATE_DISABLED, not save)
 
 		local delete = fight ~= nil

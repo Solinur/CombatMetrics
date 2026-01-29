@@ -9,9 +9,6 @@ local logger
 ---@class CMXui
 local ui = CMXint.ui
 
-local CountStrings = CMXint.CountStrings
-local DPSstrings = CMXint.DPSstrings
-
 local ROW_KEY_FORMAT = "<<1>>Row<<2>>Value"
 local higlightColor = ZO_ColorDef:New("FFFFFFCC")
 local DPSLabelText = GetString(SI_COMBAT_METRICS_DPS) .. ":"
@@ -20,7 +17,57 @@ local ZERO = "0"
 local ZERO_SECONDS = "0.000 s"
 local ZERO_PER_CENT = "0.0 %"
 
+local VALUE_FORMAT = "%.0f"
+local PERCENT_FORMAT = "%.1f%%"
+
+local FightDataFieldPerCategory = {
+	["damageOut"] = "damageDone",
+	["damageIn"] = "damageReceived",
+	["healingOut"] = "healingDone",
+	["healingIn"] = "healingReceived",
+}
+
+local DAMAGE_KEYS = {
+	"total",
+	"normal",
+	"critical",
+	"blocked",
+	"absorbed",
+}
+
+local AMOUNT_DAMAGE_KEYS = {}
+for i, key in ipairs(DAMAGE_KEYS) do
+	AMOUNT_DAMAGE_KEYS[i] = key .. "Amount"
+end
+
+local COUNT_DAMAGE_KEYS = {}
+for i, key in ipairs(DAMAGE_KEYS) do
+	COUNT_DAMAGE_KEYS[i] = key .. "Count"
+end
+
+local HEALING_KEYS = {
+	"total",
+	"normal",
+	"critical",
+	"overflow",
+	"absorbed",
+}
+
+local AMOUNT_HEALING_KEYS = {}
+for i, key in ipairs(HEALING_KEYS) do
+	AMOUNT_HEALING_KEYS[i] = key .. "Amount"
+end
+
+local COUNT_HEALING_KEYS = {}
+for i, key in ipairs(HEALING_KEYS) do
+	COUNT_HEALING_KEYS[i] = key .. "Count"
+end
+
+---@param unitIds [integer]
+local function GetHealData(unitIds) end
+
 function CMXint.InitializeCombatStatsPanel(control)
+	---@class CombatStatsPanel: Panel
 	CombatStatsPanel = CMX.internal.PanelObject:New(control, "combatStats")
 
 	function CombatStatsPanel:Recover()
@@ -131,10 +178,16 @@ function CMXint.InitializeCombatStatsPanel(control)
 		self:UpdateLabels()
 	end
 
-	function CombatStatsPanel:Clear()
-		self:UpdateLabels()
+	function CombatStatsPanel:ClearTimeStats()
 		self.activeTimeValue:SetText(ZERO_SECONDS)
 		self.combatTimeValue:SetText(ZERO_SECONDS)
+	end
+
+	function CombatStatsPanel:ClearDPSStats()
+		self.dpsValue1:SetText(ZERO)
+		self.dpsValue2:SetText(ZERO)
+		self.dpsValue3:SetText(ZERO_PER_CENT)
+
 		self.dpsValue1:SetText(ZERO)
 		self.dpsValue2:SetText(ZERO)
 		self.dpsValue3:SetText(ZERO_PER_CENT)
@@ -144,12 +197,19 @@ function CMXint.InitializeCombatStatsPanel(control)
 			local count_key = ZO_CachedStrFormat(ROW_KEY_FORMAT, "count", rowId)
 
 			self[amount_key .. "2"]:SetText(ZERO)
-			self[count_key .. "2"]:SetText(ZERO)
 			self[amount_key .. "3"]:SetText(ZERO)
-			self[count_key .. "3"]:SetText(ZERO)
 			self[amount_key .. "4"]:SetText(ZERO_PER_CENT)
+
+			self[count_key .. "2"]:SetText(ZERO)
+			self[count_key .. "3"]:SetText(ZERO)
 			self[count_key .. "4"]:SetText(ZERO_PER_CENT)
 		end
+	end
+
+	function CombatStatsPanel:Clear()
+		self:UpdateLabels()
+		self:ClearTimeStats()
+		self:ClearDPSStats()
 	end
 
 	function CombatStatsPanel:GetLabelStrings()
@@ -187,8 +247,6 @@ function CMXint.InitializeCombatStatsPanel(control)
 	end
 
 	function CombatStatsPanel:UpdateLabels()
-		local category = self.settings.category
-
 		self.activeTimeLabel:SetText(GetString(SI_COMBAT_METRICS_ACTIVE_TIME))
 		self.combatTimeLabel:SetText(GetString(SI_COMBAT_METRICS_IN_COMBAT))
 
@@ -202,7 +260,7 @@ function CMXint.InitializeCombatStatsPanel(control)
 		self.dpsHeader2:SetText(GetString(SecondaryColumnHeader))
 		self.dpsHeader3:SetText("%")
 
-		local amountLabel, countLabel, labelList = CombatStatsPanel:GetLabelStrings()
+		local amountLabel, countLabel, labelList = self:GetLabelStrings()
 
 		self.amountLabel:SetText(GetString(amountLabel))
 		self.countLabel:SetText(GetString(countLabel))
@@ -216,159 +274,134 @@ function CMXint.InitializeCombatStatsPanel(control)
 		end
 	end
 
-	-- function CombatStatsPanel:Update(fightData)
+	---@return UnitDamageData|UnitHealData
+	function CombatStatsPanel:GetCurrentCategoryCombatData()
+		local category = self.settings.category
+		local fightData = self:GetCurrentFightData()
+		local categoryKey = FightDataFieldPerCategory[category]
+		local categoryData = fightData[categoryKey]
 
-	-- 	local data = fightData and fightData.calculated or {}
-	-- 	local settings = self.settings
-	-- 	local category = settings.category
+		if categoryData == nil then
+			logger:Error("No data for category: %s", category)
+			return nil
+		end
 
-	-- 	local selectedabilities = ui.selections["ability"][category]
-	-- 	local selectedunits = ui.selections["unit"][category]
-	-- 	local noselection = selectedunits == nil and selectedabilities == nil
+		return categoryData
+	end
 
-	-- 	local header2 = control:GetNamedChild("StatHeaderLabel2")
-	-- 	local headerstring = noselection and SI_COMBAT_METRICS_GROUP or SI_COMBAT_METRICS_SELECTION
-	-- 	header2:SetText(GetString(headerstring))
+	function CombatStatsPanel:UpdateTimeStats()
+		local fightData = self:GetCurrentFightData()
+		local categoryData = self:GetCurrentCategoryCombatData()
 
-	-- 	local label1, label2, label3, rowList, labelList
-	-- 	local activetime
-	-- 	local showOverHeal = category == "healingOut" and CMX.showOverHeal
+		local playerId = fightData.unitIds.player
+		local playerData = categoryData[playerId]
 
-	-- 	if category == "healingOut" or category == "healingIn" then
-	-- 		label1 = GetString(showOverHeal and SI_COMBAT_METRICS_HPSA or SI_COMBAT_METRICS_HPS)
-	-- 		label2 = GetString(SI_COMBAT_METRICS_HEALING)
-	-- 		label3 = GetString(SI_COMBAT_METRICS_HEALS)
+		if playerData == nil then
+			self:ClearTimeStats()
+			return
+		end
 
-	-- 		rowList = { "Total", "Normal", "Critical", "Overflow", "Absolute" }
-	-- 		labelList = { SI_COMBAT_METRICS_TOTALC, SI_COMBAT_METRICS_NORMAL, SI_COMBAT_METRICS_CRITICAL,
-	-- 			SI_COMBAT_METRICS_OVERHEAL, SI_COMBAT_METRICS_ABSOLUTEC }
+		local activetime = zo_round(playerData.endTime - playerData.startTime) / 1000
+		local activetimestring = string.format("%d:%06.3f", activetime / 60, activetime % 60)
+		self.activeTimeValue:SetText(activetimestring)
 
-	-- 		activetime = fightData and fightData.hpstime or 1
-	-- 	else
-	-- 		label1 = GetString(SI_COMBAT_METRICS_DPS)
-	-- 		label2 = GetString(SI_COMBAT_METRICS_DAMAGE)
-	-- 		label3 = GetString(SI_COMBAT_METRICS_HIT)
+		local fightInfoData = fightData.info
+		local combattime = zo_round(fightInfoData.combatEnd - fightInfoData.combatStart) / 1000
+		local combattimestring = string.format("%d:%06.3f", combattime / 60, combattime % 60)
+		self.combatTimeValue:SetText(combattimestring)
+	end
 
-	-- 		rowList = { "Total", "Normal", "Critical", "Blocked", "Shielded" }
-	-- 		labelList = { SI_COMBAT_METRICS_TOTALC, SI_COMBAT_METRICS_NORMAL, SI_COMBAT_METRICS_CRITICAL,
-	-- 			SI_COMBAT_METRICS_BLOCKED, SI_COMBAT_METRICS_SHIELDED }
+	function CombatStatsPanel:UpdateCombatStatValues()
+		local category = self.settings.category
+		local fightData = self:GetCurrentFightData()
+		local categoryData = self:GetCurrentCategoryCombatData()
 
-	-- 		activetime = fightData and fightData.dpstime or 1
-	-- 	end
+		local playerId = fightData.unitIds.player
+		local playerData = categoryData[playerId]
 
-	-- 	activetime = zo_roundToNearest(activetime, 0.01)
-	-- 	local activetimestring = string.format("%d:%05.2f", activetime / 60, activetime % 60)
-	-- 	local dpsRow = control:GetNamedChild("StatRowAPS")
+		if playerData == nil then
+			self:ClearDPSStats()
+			return
+		end
 
-	-- 	dpsRow:GetNamedChild("Label"):SetText(label1)                             -- DPS or HPS
-	-- 	control:GetNamedChild("StatTitleAmount"):GetNamedChild("Label"):SetText(label2) -- Damage or Healing
-	-- 	control:GetNamedChild("StatTitleCount"):GetNamedChild("Label"):SetText(label3) -- Hits or Heals
+		local aps1, aps2, apsratio, amountValueKeys, countValueKeys
+		if category == "healingOut" then
+			playerData = LibCombat2.GetPlayerHealingDoneToUnits(fightData)
+			groupData = LibCombat2.GetAllHealingDoneToUnits(fightData)
+			amountValueKeys = AMOUNT_HEALING_KEYS
+			countValueKeys = COUNT_HEALING_KEYS
+		elseif category == "healingIn" then
+			playerData = LibCombat2.GetPlayerHealingReceivedByUnits(fightData)
+			groupData = LibCombat2.GetAllHealingReceivedByUnits(fightData)
+			amountValueKeys = AMOUNT_HEALING_KEYS
+			countValueKeys = COUNT_HEALING_KEYS
+		elseif category == "damageOut" then
+			playerData = LibCombat2.GetPlayerDamageDoneToUnits(fightData)
+			groupData = LibCombat2.GetAllDamageDoneToUnits(fightData)
+			amountValueKeys = AMOUNT_DAMAGE_KEYS
+			countValueKeys = COUNT_DAMAGE_KEYS
+		elseif category == "damageIn" then
+			playerData = LibCombat2.GetPlayerDamageReceivedByUnits(fightData)
+			groupData = LibCombat2.GetAllDamageReceivedByUnits(fightData)
+			amountValueKeys = AMOUNT_DAMAGE_KEYS
+			countValueKeys = COUNT_DAMAGE_KEYS
+		else
+			logger:Error("unexpected value for category: %s", category)
+			return
+		end
 
-	-- 	local combattime = zo_roundToNearest(fightData and fightData.combattime or 1, 0.01)
-	-- 	local combattimestring = string.format("%d:%05.2f", combattime / 60, combattime % 60)
+		if category == "healingOut" and self.settings.includeOverheal then
+			playerValue = playerData.totalAmount + playerData.overflowAmount
+			groupValue = groupData.totalAmount + groupData.overflowAmount
+		else
+			playerValue = playerData.totalAmount
+			groupValue = groupData.totalAmount
+		end
 
-	-- 	control:GetNamedChild("ActiveTimeValue"):SetText(activetimestring)
-	-- 	control:GetNamedChild("CombatTimeValue"):SetText(combattimestring)
+		local activePlayerTime = playerData.endTime - playerData.startTime
+		local activeGroupTime = groupData.endTime - groupData.startTime
 
-	-- 	local key = showOverHeal and "HPSAOut" or DPSstrings[category]
+		aps1 = playerValue / activePlayerTime * 1000
+		aps2 = groupValue / activeGroupTime * 1000
+		apsratio = aps2 > 0 and (aps1 / aps2) * 100 or 0
 
-	-- 	local aps1 = data[key] or 0
-	-- 	local aps2, apsratio
+		self.dpsValue1:SetText(string.format("%.0f", aps1))
+		self.dpsValue2:SetText(string.format("%.0f", aps2))
+		self.dpsValue3:SetText(string.format("%.1f%%", apsratio))
 
-	-- 	local selectionData = util.GetSelectionData()
-	-- 	if not noselection or showOverHeal then
-	-- 		aps2 = selectionData and selectionData[key] or 0
-	-- 		apsratio = (aps1 == 0 and 0) or aps2 / aps1 * 100
-	-- 	else
-	-- 		local groupkey = zo_strformat("group<<C:1>>", key)
-	-- 		aps2 = data[groupkey] or 0
-	-- 		apsratio = (aps2 == 0 and 0) or aps1 / aps2 * 100
-	-- 	end
+		for rowId = 1, 5 do
+			local amount_key = ZO_CachedStrFormat(ROW_KEY_FORMAT, "amount", rowId)
+			local count_key = ZO_CachedStrFormat(ROW_KEY_FORMAT, "count", rowId)
+			local valueKey = ZO_CachedStrFormat(ROW_KEY_FORMAT, "amount", rowId)
+			local hitKey = ZO_CachedStrFormat(ROW_KEY_FORMAT, "amount", rowId)
 
-	-- 	dpsRow:GetNamedChild("Value"):SetText(string.format("%.0f", aps1))
-	-- 	dpsRow:GetNamedChild("Value2"):SetText(string.format("%.0f", aps2))
-	-- 	dpsRow:GetNamedChild("Value3"):SetText(string.format("%.1f%%", apsratio))
+			local amountValueKey = amountValueKeys[rowId]
+			local countValueKey = countValueKeys[rowId]
 
-	-- 	for k, v in ipairs(rowList) do
-	-- 		local rowcontrol1 = control:GetNamedChild("StatRowAmount" .. k)
-	-- 		local rowcontrol2 = control:GetNamedChild("StatRowCount" .. k)
+			local playerAmount = playerData[amountValueKey] or 0
+			local groupAmount = groupData[amountValueKey] or 0
+			local playerCount = playerData[countValueKey] or 0
+			local groupCount = groupData[countValueKey] or 0
+			local amountPercent = groupAmount > 0 and (playerAmount / groupAmount) * 100 or 0
+			local countPercent = groupCount > 0 and (playerCount / groupCount) * 100 or 0
 
-	-- 		local amountlabel = rowcontrol1:GetNamedChild("Label")
-	-- 		amountlabel:SetText(GetString(labelList[k]))
-	-- 		local amountcontrol1 = rowcontrol1:GetNamedChild("Value")
-	-- 		local amountcontrol2 = rowcontrol1:GetNamedChild("Value2")
-	-- 		local amountcontrol3 = rowcontrol1:GetNamedChild("Value3")
+			self[amount_key .. "2"]:SetText(string.format("%.0f", playerAmount))
+			self[amount_key .. "3"]:SetText(string.format("%.0f", groupAmount))
+			self[amount_key .. "4"]:SetText(string.format("%.1f%%", amountPercent))
 
-	-- 		local countlabel     = rowcontrol2:GetNamedChild("Label")
-	-- 		countlabel:SetText(GetString(labelList[k]))
-	-- 		local countcontrol1 = rowcontrol2:GetNamedChild("Value")
-	-- 		local countcontrol2 = rowcontrol2:GetNamedChild("Value2")
-	-- 		local countcontrol3 = rowcontrol2:GetNamedChild("Value3")
+			self[count_key .. "2"]:SetText(string.format("%.0f", playerCount))
+			self[count_key .. "3"]:SetText(string.format("%.0f", groupCount))
+			self[count_key .. "4"]:SetText(string.format("%.1f%%", countPercent))
+		end
+	end
 
-	-- 		local hide2 = false
-	-- 		local hide3 = false
-	-- 		local hide4 = false
+	function CombatStatsPanel:Update()
+		self:UpdateLabels()
+		self:UpdateTimeStats()
+		self:UpdateCombatStatValues()
+	end
 
-	-- 		if v then
-	-- 			local amountkey = category .. v
-	-- 			local countkey = CountStrings[category] .. v
-	-- 			local basekey
-
-	-- 			if v == "Overflow" or v == "Absolute" then basekey = "Absolute" else basekey = rowList[1] end
-
-	-- 			local amount1 = data[amountkey] or 0
-	-- 			local amount2 = 0
-	-- 			local amount3 = data[category .. basekey] or 0
-	-- 			local amountratio = 0
-
-	-- 			local count1 = data[countkey] or 0
-	-- 			local count2 = 0
-	-- 			local count3 = data[CountStrings[category] .. basekey] or 0
-	-- 			local countratio = 0
-
-	-- 			local groupAmountKey = zo_strformat("group<<C:1>>", category)
-
-	-- 			if k == 1 and noselection then
-	-- 				amount2 = data[groupAmountKey] or 0 -- first letter of category needs to be Capitalized
-	-- 				amountratio = (amount2 == 0 and 0) or amount1 / amount2 * 100
-	-- 				hide2 = true
-	-- 			elseif noselection and v == "Absolute" then
-	-- 				amount2 = data[groupAmountKey] or 0 -- first letter of category needs to be Capitalized
-	-- 				amountratio = (amount2 == 0 and 0) or amount1 / amount2 * 100
-	-- 				hide4 = true
-	-- 			elseif noselection then
-	-- 				hide3 = true
-	-- 				amountratio = (amount3 == 0 and 0) or amount1 / amount3 * 100
-	-- 				countratio = (count3 == 0 and 0) or count1 / count3 * 100
-	-- 			elseif noselection == false then
-	-- 				if (k ~= 1 and v ~= "Absolute") then
-	-- 					amount3 = selectionData[category .. basekey] or 0
-	-- 					count3 = selectionData[CountStrings[category] .. basekey] or 0
-	-- 				end
-
-	-- 				amount2 = selectionData[amountkey] or 0
-	-- 				amountratio = (amount3 == 0 and 0) or amount2 / amount3 * 100
-
-	-- 				count2 = selectionData[countkey] or 0
-	-- 				countratio = (count3 == 0 and 0) or count2 / count3 * 100
-	-- 			end
-
-	-- 			amountcontrol1:SetText(string.format("%.0f", amount1))
-	-- 			amountcontrol2:SetText(string.format("%.0f", amount2))
-	-- 			amountcontrol3:SetText(string.format("%.1f%%", amountratio))
-
-	-- 			countcontrol1:SetText(string.format("%.0f", count1))
-	-- 			countcontrol2:SetText(string.format("%.0f", count2))
-	-- 			countcontrol3:SetText(string.format("%.1f%%", countratio))
-	-- 		end
-
-	-- 		amountcontrol2:SetHidden(hide3 or hide4)
-	-- 		amountcontrol3:SetHidden(hide4)
-
-	-- 		countcontrol2:SetHidden(hide3 or hide2)
-	-- 		countcontrol3:SetHidden(hide2)
-	-- 	end
-	-- end
+	CMX_COMBAT_PANEL = CombatStatsPanel
 end
 
 local isFileInitialized = false

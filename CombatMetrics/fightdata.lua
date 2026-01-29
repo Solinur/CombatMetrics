@@ -20,6 +20,18 @@ function util:GetEnemyUnits(units) -- TODO: Attach this to fight_data
 	return unitIds
 end
 
+function util:GetFriendlyUnits(units) -- TODO: Attach this to fight_data
+	local unitIds = {}
+
+	for unitId, unit in pairs(units) do
+		if unit.isFriendly then
+			unitIds[#unitIds + 1] = unitId
+		end
+	end
+
+	return unitIds
+end
+
 ---@class FightDataManager
 ---@field fights table<integer,Fight>
 ---@field data Fight?
@@ -57,11 +69,7 @@ end
 function FightDataManager:SelectFightByIndex(fightIndex)
 	local fightData = self.fights[fightIndex]
 	if fightData == nil then
-		logger:Warn(
-			"Trying to load non-existent fightdata. Index: %d / %d",
-			fightIndex,
-			FightDataManager:GetNumFights()
-		)
+		logger:Warn("Trying to load non-existent fightdata. Index: %d / %d", fightIndex, self:GetNumFights())
 		return
 	end
 	self.data = fightData
@@ -72,8 +80,8 @@ function FightDataManager:SelectFightByIndex(fightIndex)
 end
 
 function FightDataManager:SelectMostRecentFight()
-	local fightIndex = FightDataManager:GetNumFights()
-	FightDataManager:SelectFightByIndex(fightIndex)
+	local fightIndex = self:GetNumFights()
+	self:SelectFightByIndex(fightIndex)
 end
 
 function FightDataManager:SelectNextFight()
@@ -81,21 +89,21 @@ function FightDataManager:SelectNextFight()
 	if currentIndex <= 1 then
 		return
 	end
-	FightDataManager:SelectFightByIndex(currentIndex + 1)
+	self:SelectFightByIndex(currentIndex + 1)
 end
 
 function FightDataManager:SelectPreviousFight()
 	local currentIndex = self.currentIndex
-	if currentIndex >= FightDataManager:GetNumFights() then
+	if currentIndex >= self:GetNumFights() then
 		return
 	end
-	FightDataManager:SelectFightByIndex(currentIndex - 1)
+	self:SelectFightByIndex(currentIndex - 1)
 end
 
 function FightDataManager:RemoveFight(fightIndex)
 	local currentIndex = self.currentIndex
 	if fightIndex == currentIndex then
-		FightDataManager:SelectFightByIndex(currentIndex - 1)
+		self:SelectFightByIndex(currentIndex - 1)
 	elseif fightIndex < currentIndex then
 		self.currentIndex = currentIndex - 1
 	end
@@ -104,7 +112,7 @@ function FightDataManager:RemoveFight(fightIndex)
 end
 
 function FightDataManager:RemoveCurrentFight()
-	FightDataManager:RemoveFight(self.currentIndex)
+	self:RemoveFight(self.currentIndex)
 end
 
 function FightDataManager:SaveFight(saveLog)

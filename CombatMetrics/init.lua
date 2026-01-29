@@ -32,7 +32,6 @@ local util = CMXint.util
 if LibDebugLogger then
 	---@type Logger
 	CMXint.logger.main = LibDebugLogger.Create(CMX.name)
-	CMXint.logger.main:Error()
 else
 	local internalLogger = {}
 	function internalLogger:Debug(...)
@@ -160,6 +159,7 @@ local svdefaults = {
 		["showDebugIds"] = false,
 		["useDisplayNames"] = false,
 		["showPets"] = true,
+		["showOverHeal"] = false,
 
 		["abilities"] = {
 			["hitCritLayout"] = {

@@ -138,7 +138,7 @@ function CMXint.InitializeAbilitiesPanel(control)
 		local minmax = abilitySettings.maxValue[category]
 
 		local isDamage = category == "damageIn" or category == "damageOut"
-		local showOverHeal = CMX.showOverHeal and category == "healingOut"
+		local showOverHeal = settings.showOverHeal and category == "healingOut"
 
 		local valueColumnLabel = isDamage and GetString(SI_COMBAT_METRICS_DAMAGE)
 			or GetString(SI_COMBAT_METRICS_HEALING)
