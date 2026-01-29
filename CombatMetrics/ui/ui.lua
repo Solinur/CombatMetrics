@@ -303,7 +303,9 @@ function PanelObject:OnHide(control)
 end
 
 function PanelObject:GetCurrentFightData()
-	return CMXint.fightReport.currentFight
+	if CMXint.fightReport then
+		return CMXint.fightReport.currentFight
+	end
 end
 
 function PanelObject:Release()

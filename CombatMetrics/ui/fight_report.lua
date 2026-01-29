@@ -122,7 +122,7 @@ local function InitializeFightReport()
 		end
 		logger:Debug("Updating Fight Report")
 
-		self.currentFight = CMXint.FightData.GetCurrentFight()
+		self.currentFight = CMXint.FightData:GetCurrentFight()
 
 		if self.currentFight == nil then
 			FightReport:Clear()

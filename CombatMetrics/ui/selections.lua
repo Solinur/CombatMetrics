@@ -9,15 +9,15 @@ local logger
 ---@class CMXui
 local ui = CMXint.ui
 
--- function CMXint.ClearSelections()
--- 	local category = CMXint.settings.fightReport.category or "damageOut"
--- 	local selections = ui.selections
+function CMXint.ClearSelections()
+	-- 	local category = CMXint.settings.fightReport.category or "damageOut"
+	-- 	local selections = ui.selections
 
--- 	selections.ability[category] = nil
--- 	selections.unit[category] = nil
--- 	selections.buff.buff = nil
--- 	selections.resource.resource = nil
--- end
+	-- 	selections.ability[category] = nil
+	-- 	selections.unit[category] = nil
+	-- 	selections.buff.buff = nil
+	-- 	selections.resource.resource = nil
+end
 
 -- function CMX.AddSelection( self, button, upInside, ctrlkey, alt, shiftkey )
 -- 	local id = self.id

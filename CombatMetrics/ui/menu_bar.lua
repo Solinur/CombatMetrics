@@ -494,7 +494,9 @@ function CMXint.InitializeMenuPanel(control)
 		local load = SVHandler ~= nil and SVHandler.GetNumFights() > 0
 		navButtons.load:SetState(load and BSTATE_NORMAL or BSTATE_DISABLED, not load)
 
-		local save = fight ~= nil and not util.searchtable(SVHandler.GetFights(), "date", fight.date) -- TODO: Make function of SVHandler to check for already saved fights
+		local save = fight ~= nil
+			and SVHandler ~= nil
+			and not util.searchtable(SVHandler.GetFights(), "date", fight.date) -- TODO: Make function of SVHandler to check for already saved fights
 		navButtons.save:SetState(save and BSTATE_NORMAL or BSTATE_DISABLED, not save)
 
 		local delete = fight ~= nil

@@ -21,10 +21,10 @@ local VALUE_FORMAT = "%.0f"
 local PERCENT_FORMAT = "%.1f%%"
 
 local FightDataFieldPerCategory = {
-	[damageOut] = "damageDone",
-	[damageIn] = "damageReceived",
-	[healingOut] = "healingDone",
-	[healingIn] = "healingReceived",
+	["damageOut"] = "damageDone",
+	["damageIn"] = "damageReceived",
+	["healingOut"] = "healingDone",
+	["healingIn"] = "healingReceived",
 }
 
 local DAMAGE_KEYS = {
@@ -178,10 +178,16 @@ function CMXint.InitializeCombatStatsPanel(control)
 		self:UpdateLabels()
 	end
 
-	function CombatStatsPanel:Clear()
-		self:UpdateLabels()
+	function CombatStatsPanel:ClearTimeStats()
 		self.activeTimeValue:SetText(ZERO_SECONDS)
 		self.combatTimeValue:SetText(ZERO_SECONDS)
+	end
+
+	function CombatStatsPanel:ClearDPSStats()
+		self.dpsValue1:SetText(ZERO)
+		self.dpsValue2:SetText(ZERO)
+		self.dpsValue3:SetText(ZERO_PER_CENT)
+
 		self.dpsValue1:SetText(ZERO)
 		self.dpsValue2:SetText(ZERO)
 		self.dpsValue3:SetText(ZERO_PER_CENT)
@@ -191,12 +197,19 @@ function CMXint.InitializeCombatStatsPanel(control)
 			local count_key = ZO_CachedStrFormat(ROW_KEY_FORMAT, "count", rowId)
 
 			self[amount_key .. "2"]:SetText(ZERO)
-			self[count_key .. "2"]:SetText(ZERO)
 			self[amount_key .. "3"]:SetText(ZERO)
-			self[count_key .. "3"]:SetText(ZERO)
 			self[amount_key .. "4"]:SetText(ZERO_PER_CENT)
+
+			self[count_key .. "2"]:SetText(ZERO)
+			self[count_key .. "3"]:SetText(ZERO)
 			self[count_key .. "4"]:SetText(ZERO_PER_CENT)
 		end
+	end
+
+	function CombatStatsPanel:Clear()
+		self:UpdateLabels()
+		self:ClearTimeStats()
+		self:ClearDPSStats()
 	end
 
 	function CombatStatsPanel:GetLabelStrings()
@@ -247,7 +260,7 @@ function CMXint.InitializeCombatStatsPanel(control)
 		self.dpsHeader2:SetText(GetString(SecondaryColumnHeader))
 		self.dpsHeader3:SetText("%")
 
-		local amountLabel, countLabel, labelList = CombatStatsPanel:GetLabelStrings()
+		local amountLabel, countLabel, labelList = self:GetLabelStrings()
 
 		self.amountLabel:SetText(GetString(amountLabel))
 		self.countLabel:SetText(GetString(countLabel))
@@ -266,18 +279,34 @@ function CMXint.InitializeCombatStatsPanel(control)
 		local category = self.settings.category
 		local fightData = self:GetCurrentFightData()
 		local categoryKey = FightDataFieldPerCategory[category]
-		return fightData[category]
+		local categoryData = fightData[categoryKey]
+
+		if categoryData == nil then
+			logger:Error("No data for category: %s", category)
+			return nil
+		end
+
+		return categoryData
 	end
 
 	function CombatStatsPanel:UpdateTimeStats()
-		local fightInfoData = self:GetCurrentFightData().info
-		local data = self:GetCurrentCategoryCombatData()
+		local fightData = self:GetCurrentFightData()
+		local categoryData = self:GetCurrentCategoryCombatData()
 
-		local activetime = zo_roundToNearest(data.endTime - data.startTime, 0.001)
+		local playerId = fightData.unitIds.player
+		local playerData = categoryData[playerId]
+
+		if playerData == nil then
+			self:ClearTimeStats()
+			return
+		end
+
+		local activetime = zo_round(playerData.endTime - playerData.startTime) / 1000
 		local activetimestring = string.format("%d:%06.3f", activetime / 60, activetime % 60)
 		self.activeTimeValue:SetText(activetimestring)
 
-		local combattime = zo_roundToNearest(fightInfoData.combatEnd - fightInfoData.combatStart, 0.001)
+		local fightInfoData = fightData.info
+		local combattime = zo_round(fightInfoData.combatEnd - fightInfoData.combatStart) / 1000
 		local combattimestring = string.format("%d:%06.3f", combattime / 60, combattime % 60)
 		self.combatTimeValue:SetText(combattimestring)
 	end
@@ -286,29 +315,34 @@ function CMXint.InitializeCombatStatsPanel(control)
 		local category = self.settings.category
 		local fightData = self:GetCurrentFightData()
 		local categoryData = self:GetCurrentCategoryCombatData()
+
 		local playerId = fightData.unitIds.player
 		local playerData = categoryData[playerId]
-		local valueKeys, hitKeys = CombatStatsPanel:GetValueKeys()
+
+		if playerData == nil then
+			self:ClearDPSStats()
+			return
+		end
 
 		local aps1, aps2, apsratio, amountValueKeys, countValueKeys
 		if category == "healingOut" then
-			playerData = LibCombat2.GetPlayerHealingDoneToUnits(fight)
-			groupData = LibCombat2.GetAllHealingDoneToUnits(fight)
+			playerData = LibCombat2.GetPlayerHealingDoneToUnits(fightData)
+			groupData = LibCombat2.GetAllHealingDoneToUnits(fightData)
 			amountValueKeys = AMOUNT_HEALING_KEYS
 			countValueKeys = COUNT_HEALING_KEYS
 		elseif category == "healingIn" then
-			playerData = LibCombat2.GetPlayerHealingReceivedByUnits(fight)
-			groupData = LibCombat2.GetAllHealingReceivedByUnits(fight)
+			playerData = LibCombat2.GetPlayerHealingReceivedByUnits(fightData)
+			groupData = LibCombat2.GetAllHealingReceivedByUnits(fightData)
 			amountValueKeys = AMOUNT_HEALING_KEYS
 			countValueKeys = COUNT_HEALING_KEYS
 		elseif category == "damageOut" then
-			playerData = LibCombat2.GetPlayerDamageDoneToUnits(fight)
-			groupData = LibCombat2.GetAllDamageDoneToUnits(fight)
+			playerData = LibCombat2.GetPlayerDamageDoneToUnits(fightData)
+			groupData = LibCombat2.GetAllDamageDoneToUnits(fightData)
 			amountValueKeys = AMOUNT_DAMAGE_KEYS
 			countValueKeys = COUNT_DAMAGE_KEYS
 		elseif category == "damageIn" then
-			playerData = LibCombat2.GetPlayerDamageReceivedByUnits(fight)
-			groupData = LibCombat2.GetAllDamageReceivedByUnits(fight)
+			playerData = LibCombat2.GetPlayerDamageReceivedByUnits(fightData)
+			groupData = LibCombat2.GetAllDamageReceivedByUnits(fightData)
 			amountValueKeys = AMOUNT_DAMAGE_KEYS
 			countValueKeys = COUNT_DAMAGE_KEYS
 		else
@@ -324,14 +358,16 @@ function CMXint.InitializeCombatStatsPanel(control)
 			groupValue = groupData.totalAmount
 		end
 
-		aps1 = playerValue / playerData.activeTime * 1000
-		aps2 = groupValue / groupData.activeTime * 1000
-		apsratio = (aps1 / aps2) * 100
+		local activePlayerTime = playerData.endTime - playerData.startTime
+		local activeGroupTime = groupData.endTime - groupData.startTime
+
+		aps1 = playerValue / activePlayerTime * 1000
+		aps2 = groupValue / activeGroupTime * 1000
+		apsratio = aps2 > 0 and (aps1 / aps2) * 100 or 0
 
 		self.dpsValue1:SetText(string.format("%.0f", aps1))
 		self.dpsValue2:SetText(string.format("%.0f", aps2))
 		self.dpsValue3:SetText(string.format("%.1f%%", apsratio))
-
 
 		for rowId = 1, 5 do
 			local amount_key = ZO_CachedStrFormat(ROW_KEY_FORMAT, "amount", rowId)
@@ -339,26 +375,33 @@ function CMXint.InitializeCombatStatsPanel(control)
 			local valueKey = ZO_CachedStrFormat(ROW_KEY_FORMAT, "amount", rowId)
 			local hitKey = ZO_CachedStrFormat(ROW_KEY_FORMAT, "amount", rowId)
 
-			local playerAmount = playerData[amountValueKeys[rowId]] or 0
-			local groupAmount = groupData[amountValueKeys[rowId]] or 0
-			local playerCount = playerData[countValueKeys[rowId]] or 0
-			local groupCount = groupData[countValueKeys[rowId]] or 0
+			local amountValueKey = amountValueKeys[rowId]
+			local countValueKey = countValueKeys[rowId]
+
+			local playerAmount = playerData[amountValueKey] or 0
+			local groupAmount = groupData[amountValueKey] or 0
+			local playerCount = playerData[countValueKey] or 0
+			local groupCount = groupData[countValueKey] or 0
 			local amountPercent = groupAmount > 0 and (playerAmount / groupAmount) * 100 or 0
 			local countPercent = groupCount > 0 and (playerCount / groupCount) * 100 or 0
 
-			self[amount_key .. "2"]:SetText(playerAmount)
-			self[count_key .. "2"]:SetText(groupAmount)
-			self[amount_key .. "3"]:SetText(playerCount)
-			self[count_key .. "3"]:SetText(groupCount)
-			self[amount_key .. "4"]:SetText(amountPercent)
-			self[count_key .. "4"]:SetText(countPercent)
+			self[amount_key .. "2"]:SetText(string.format("%.0f", playerAmount))
+			self[amount_key .. "3"]:SetText(string.format("%.0f", groupAmount))
+			self[amount_key .. "4"]:SetText(string.format("%.1f%%", amountPercent))
+
+			self[count_key .. "2"]:SetText(string.format("%.0f", playerCount))
+			self[count_key .. "3"]:SetText(string.format("%.0f", groupCount))
+			self[count_key .. "4"]:SetText(string.format("%.1f%%", countPercent))
 		end
 	end
 
 	function CombatStatsPanel:Update()
+		self:UpdateLabels()
 		self:UpdateTimeStats()
-		self:UpdateCombatStatValues
+		self:UpdateCombatStatValues()
 	end
+
+	CMX_COMBAT_PANEL = CombatStatsPanel
 end
 
 local isFileInitialized = false
