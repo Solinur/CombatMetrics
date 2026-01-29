@@ -225,7 +225,7 @@ function CMXint.InitializeScribedSkillsPanel(control)
 		local scribedSkills = fightData.charData.scribedSkills or {}
 
 		local index = 0
-		for abilityId, data in CMX.spairs(scribedSkills) do
+		for abilityId, data in util.spairs(scribedSkills) do
 			index = index + 1
 			local skillControl = control:GetNamedChild(tostring(index))
 			skillControl:SetHidden(false)

@@ -33,9 +33,8 @@ function util:GetFriendlyUnits(units) -- TODO: Attach this to fight_data
 end
 
 ---@class FightDataManager
----@field fights table<integer,Fight>
 ---@field data Fight?
----@field currentIndex integer?
+---@field currentIndex number?
 ---@field New fun(): FightDataManager
 local FightDataManager = ZO_InitializingObject:Subclass()
 
@@ -45,6 +44,7 @@ function FightDataManager:Initialize()
 		return
 	end
 
+	---@type Fight[]
 	self.fights = {}
 	self.data = nil
 	self.currentIndex = nil
@@ -116,18 +116,23 @@ function FightDataManager:RemoveCurrentFight()
 end
 
 function FightDataManager:SaveFight(saveLog)
+	local fightData = self.data
+
+	if fightData == nil then
+		return
+	end
+
 	local saveLog = saveLog or false
 	local SVHandler = CMXint.SVHandler
 	local numFights = SVHandler.GetNumFights()
 	local lastsaved = SVHandler.GetFight(numFights)
-	local fightData = self.data
 
 	--TODO: Update timestamp location in data structure
-	if lastsaved ~= nil and lastsaved.date == fightData.date then
+	if lastsaved ~= nil and lastsaved.date == fightData.info.date then
 		return
 	end -- bail out if fight is already saved
 
-	local spaceLeft = CMXint.settings.maxSavedFights - numFights
+	local spaceLeft = CMXint.settings.fights.maxSavedFights - numFights
 	assert(spaceLeft > 0, zo_strformat(SI_COMBAT_METRICS_SAVEDFIGHTS_FULL, 1 - spaceLeft))
 
 	SVHandler.Save(fightData, saveLog)

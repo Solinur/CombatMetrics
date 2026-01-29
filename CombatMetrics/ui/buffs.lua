@@ -109,7 +109,7 @@ do -- Handling Buffs Context Menu
 		abilityId = bufflistitem.dataId
 		local settings = CMXint.settings.fightReport
 		favs = settings.buffs.favourites
-		currentFight = CMXint.currentFight
+		currentFight = CMXint.FightData:GetCurrentFight()
 		local func, text
 
 		if favs[abilityId] == nil then
@@ -173,7 +173,7 @@ local function CombineEffects(source, dest)
 	dest.effectType = dest.effectType + source.effectType
 	dest.maxStacks = dest.maxStacks + source.maxStacks
 	local destStacks = dest.stacks
-	for stacks, stackData in pairs(source[stacks]) do
+	for stacks, stackData in pairs(source.stacks) do
 		if destStacks[stacks] == nil then
 			destStacks[stacks] = ZO_ShallowTableCopy(stackData)
 		else
@@ -282,6 +282,7 @@ end
 ---@param panel BuffPanel
 ---@return SortFilterList
 local function InitBuffsList(panel)
+	---@class BuffDataList: SortFilterList
 	local dataList = ui.SortFilterList:New(panel.control, "CombatMetrics_BuffsPanelRowTemplate")
 	panel.dataList = dataList
 	dataList.panel = panel
@@ -306,7 +307,10 @@ local function InitBuffsList(panel)
 	end
 
 	local function CreateExpandButton(pool, objectKey)
+		---@class ExpandButton: ButtonControl
 		local newControl = ZO_ObjectPool_CreateControl("CombatMetrics_BuffsPanelExpandButton", pool, panel.control)
+
+		---@diagnostic disable-next-line: missing-parameter
 		newControl:SetHandler("OnMouseDown", ToggleBuffDetails)
 		newControl.key = objectKey
 
@@ -317,7 +321,14 @@ local function InitBuffsList(panel)
 
 	local expandButtonPool = ZO_ObjectPool:New(CreateExpandButton, ZO_ObjectPool_DefaultResetControl)
 
-	---@param rowControl Control
+	---@class RowControl: Control
+	---@field dataEntry table
+	---@field controls table
+	---@field indent number
+	---@field expandButton ExpandButton
+	---@field recovered boolean
+
+	---@param rowControl RowControl
 	function dataList:RecoverRow(rowControl)
 		local panel = self.panel
 		local rowHeight = self:GetHeight()
@@ -342,7 +353,7 @@ local function InitBuffsList(panel)
 		bar_group:ApplyPosition(rowControl, 38, 0, 174, rowHeight)
 		bar_group:SetTexture("esoui/art/unitframes/progressbar_raidhealth.dds")
 
-		---@type LabelControl
+		---@type LabelControl|SharedControl
 		local count = panel:AcquireSharedControl(CT_LABEL)
 		count:ApplyPosition(rowControl, 216, 0, 58)
 		count:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
@@ -356,9 +367,9 @@ local function InitBuffsList(panel)
 		rowControl.indent = 0
 	end
 
-	---@param rowControl Control
+	---@param rowControl RowControl
 	---@param data table
-	---@param scrollList Object
+	---@param scrollList object
 	function dataList:UpdateRow(rowControl, data, scrollList)
 		local panel = self.panel
 
@@ -374,7 +385,7 @@ local function InitBuffsList(panel)
 		local deltaIndent = (data.indent - rowControl.indent) * rowHeight / 2
 		rowControl.indent = data.indent
 
-		local textcolor = panel.favs[abilityId] and BUFF_LABEL_COLOR_FAV or BUFF_LABEL_COLOR_DEFAULT
+		local textcolor = panel.favs[data.abilityId] and BUFF_LABEL_COLOR_FAV or BUFF_LABEL_COLOR_DEFAULT
 		local font = ui.GetFont(ui.fontSize, false)
 
 		local expandButton = rowControl.expandButton
@@ -383,7 +394,7 @@ local function InitBuffsList(panel)
 			if expandButton == nil then
 				local scale = self.panel.settings.scale
 				expandButton = expandButtonPool:AcquireObject()
-				expandButton:SetHidden(False)
+				expandButton:SetHidden(false)
 				expandButton:SetParent(rowControl)
 				expandButton:SetAnchor(TOPLEFT, rowControl, TOPLEFT, -2 * scale, scale)
 				expandButton:SetDimensions(rowHeight, rowHeight)
@@ -453,7 +464,7 @@ local function InitBuffsList(panel)
 		if hasStacks then
 			labelText = ZO_CachedStrFormat(BUFF_NAME_FORMAT_STACKS, name, data.maxStacks)
 			if hasOtherId then
-				logger:Warning("Ability %s (%d) has stacks as well as another Id: %d", name, abilityId, mainAbilityId)
+				logger:Warn("Ability %s (%d) has stacks as well as another Id: %d", name, abilityId, mainAbilityId)
 			end
 		end
 
@@ -541,7 +552,7 @@ local function InitBuffsList(panel)
 	end
 
 	function dataList:BuildMasterList()
-		local fightData = self.panel.GetCurrentFightData()
+		local fightData = self.panel:GetCurrentFightData()
 		local category = self.panel.category
 		local effectData, totalUnitTime = GetBuffData(fightData, category)
 
@@ -649,6 +660,7 @@ function CMXint.InitializeBuffsPanel(control)
 	local searchBar = control:GetNamedChild("SearchBar")
 	for i = 1, searchBar:GetNumChildren() do
 		local child = searchBar:GetChild(i)
+		---@diagnostic disable-next-line: undefined-field
 		if child.buffCategory then
 			BuffPanel.radioButtons:Add(child)
 		end

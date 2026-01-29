@@ -73,7 +73,7 @@ function CMXint.InitializeChampionPointsPanel(control)
 
 				title:SetText(ZO_CachedStrFormat("<<1>> (<<2>>)", disciplineName, discipline.total))
 
-				for starId, starData in CMX.spairs(discipline.stars, starOrder) do
+				for starId, starData in util.spairs(discipline.stars, starOrder) do
 					local points, state = unpack(starData)
 
 					if state == LIBCOMBAT_CPTYPE_SLOTTED then -- slotted

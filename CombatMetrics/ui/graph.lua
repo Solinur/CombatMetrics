@@ -1,3 +1,6 @@
+-- TODO: enable diagnostics after finishing refactoring
+---@diagnostic disable
+
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint
@@ -667,7 +670,7 @@ local function UpdatePlotBuffSelection()
 		return
 	end
 
-	for buffName, buff in CMX.spairs(buffData.buffs, util.buffSortFunction) do
+	for buffName, buff in util.spairs(buffData.buffs, util.buffSortFunction) do
 		if selectedbuffs and selectedbuffs[buffName] ~= nil then
 			PlotBuffSelection[#PlotBuffSelection + 1] = buffName
 		end
@@ -810,7 +813,7 @@ do
 		local tooltipText = string.format("|cddddddTime: %d:%02d", cursorTime / 60, zo_floor(cursorTime % 60))
 		util.AddTooltipLine(plotWindow, InformationTooltip, tooltipText)
 
-		for plotId, data in CMX.spairs(dataAtCursorTime) do
+		for plotId, data in util.spairs(dataAtCursorTime) do
 			local r, g, b = unpack(CMXint.settings.fightReport.PlotColors[plotId])
 			local formatter = data[2] and "|c%.2x%.2x%.2x%s: %d (%.1f%%)|r" or "|c%.2x%.2x%.2x%s: %d|r"
 			local label = plotWindow.plots[plotId].label

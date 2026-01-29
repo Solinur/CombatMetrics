@@ -20,7 +20,7 @@ local function UpdateResourceBars(panel, currentanchor, data, totalRate, selecte
 	local scrollchild = GetControl(panel, "PanelScrollChild")
 
 	for abilityId, ability in
-		CMX.spairs(data, function(t, a, b)
+		util.spairs(data, function(t, a, b)
 			return t[a].value > t[b].value
 		end)
 	do

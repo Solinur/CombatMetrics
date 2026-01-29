@@ -1,7 +1,4 @@
----@diagnostic disable: lowercase-global
----@diagnostic disable: unknown-symbol
----@diagnostic disable: exp-in-action
----@diagnostic disable: miss-symbol
+---@diagnostic disable: lowercase-global, unknown-symbol, exp-in-action, miss-symbol
 
 ---@class CMX
 local CMX = CombatMetrics
@@ -17,10 +14,13 @@ local logger
 ---@field typeId number;
 ---@field categoryId number;
 ---@field data table;
-
+---@diagnostic disable-next-line: undefined-global
 hstructure DataEntryStruct
+	---@diagnostic disable-next-line: undefined-global
 	typeId: number;
+	---@diagnostic disable-next-line: undefined-global
 	categoryId: number;
+	---@diagnostic disable-next-line: undefined-global
 	data: table;
 end
 
@@ -30,6 +30,7 @@ end
 ---@return DataEntryStruct
 function util.CreateDataEntry(typeId, categoryId, data)
 	---@type DataEntryStruct
+	---@diagnostic disable-next-line: undefined-global
 	local entry = hmake DataEntryStruct
 	{
 		typeId = typeId,

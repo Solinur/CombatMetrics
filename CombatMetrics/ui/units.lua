@@ -110,7 +110,7 @@ function CMXint.InitializeUnitsPanel(control)
 		local showids = settings.showDebugIds
 
 		for unitId, unit in
-			CMX.spairs(data.units, function(t, a, b)
+			util.spairs(data.units, function(t, a, b)
 				return t[a][totalAmountKey] > t[b][totalAmountKey]
 			end)
 		do -- i.e. for damageOut sort by damageOutTotal

@@ -22,11 +22,11 @@ local util = CMXint.util
 
 -- Logger
 ---@class Logger
----@field Debug fun(self: Logger, format: string?, message: string):
----@field Warn fun(self: Logger, format: string?, message: string):
----@field Info fun(self: Logger, format: string?, message: string):
----@field Error fun(self: Logger, format: string?, message: string):
----@field Verbose fun(self: Logger, format: string?, message: string):
+---@field Debug fun(self: Logger, ...: string): nil
+---@field Warn fun(self: Logger, ...: string): nil
+---@field Info fun(self: Logger, ...: string): nil
+---@field Error fun(self: Logger, ...: string): nil
+---@field Verbose fun(self: Logger, ...: string): nil
 ---@field Create fun(self: Logger, tag: string): Logger
 
 if LibDebugLogger then
@@ -122,7 +122,7 @@ local svdefaults = {
 		["enablePvP"] = "light",
 	},
 
-	["autoSelectChatChannel"] = true,
+	autoSelectChatChannel = true,
 
 	["fights"] = {
 		["maxLiveFights"] = 25,
@@ -150,16 +150,16 @@ local svdefaults = {
 	},
 
 	["fightReport"] = {
-		["pos_x"] = GuiRoot:GetWidth() / 2,
-		["pos_y"] = GuiRoot:GetHeight() / 2 - 75,
+		pos_x = GuiRoot:GetWidth() / 2,
+		pos_y = GuiRoot:GetHeight() / 2 - 75,
 
-		["scale"] = zo_roundToNearest(1 / GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE), 0.1),
-		["category"] = "damageOut",
+		scale = zo_roundToNearest(1 / GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE), 0.1),
+		category = "damageOut",
 
-		["showDebugIds"] = false,
-		["useDisplayNames"] = false,
-		["showPets"] = true,
-		["showOverHeal"] = false,
+		showDebugIds = false,
+		useDisplayNames = false,
+		showPets = true,
+		showOverHeal = false,
 
 		["abilities"] = {
 			["hitCritLayout"] = {
@@ -185,15 +185,15 @@ local svdefaults = {
 		},
 
 		["buffs"] = {
-			["favourites"] = {},
-			["showstacks"] = true,
+			favourites = {},
+			showStacks = true,
 		},
 
 		["graph"] = {
-			["SmoothWindow"] = 5,
-			["Cursor"] = true,
-			["showGroupBuffs"] = true,
-			["PlotColors"] = {
+			smoothWindow = 5,
+			cursor = true,
+			showGroupBuffs = true,
+			plotColors = {
 				[1] = "1, 1, 0, 0.66", -- yellow
 				[2] = "1, 0, 0, 0.66", -- red
 				[3] = "0, 1, 0, 0.66", -- green
@@ -204,7 +204,7 @@ local svdefaults = {
 			},
 		},
 
-		["showWereWolf"] = false,
+		showWereWolf = false,
 
 		-- ["CombatLog"] = {
 		-- 	["Filters"] = {

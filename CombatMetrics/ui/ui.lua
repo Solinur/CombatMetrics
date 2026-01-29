@@ -234,7 +234,7 @@ function CMXint.NewSize(control, newLeft, newTop, newRight, newBottom, oldLeft, 
 end
 
 ---@class Panel
----@field New fun(control: Control, name: str): Panel
+---@field New fun(self: Panel, control: Control, name: string): Panel
 local PanelObject = ZO_InitializingObject:Subclass()
 CMXint.PanelObject = PanelObject
 
@@ -250,7 +250,12 @@ local function onHide(control)
 	control.panel:Release()
 end
 
----@param control Control
+---@class PanelControl: Control
+---@field panel Panel
+---@field sharedControls Control[]
+---@field dataList SortFilterList?
+
+---@param control PanelControl
 ---@param name string
 function PanelObject:Initialize(control, name)
 	if ui.panels[name] then
@@ -271,7 +276,7 @@ function PanelObject:Initialize(control, name)
 end
 
 ---@param controlType integer
----@return LabelControl|LineControl|TextureControl
+---@return LabelControl|LineControl|TextureControl|SharedControl
 function PanelObject:AcquireSharedControl(controlType)
 	local control
 	if controlType == CT_LABEL then
@@ -291,13 +296,13 @@ function PanelObject:AcquireSharedControl(controlType)
 	return control
 end
 
----@param control Control
+---@param control PanelControl
 function PanelObject.OnShow(control)
 	logger:Info("OnShow, Panel: %s", control.panel.name)
 	return control.panel:Recover()
 end
 
----@param control Control
+---@param control PanelControl
 function PanelObject:OnHide(control)
 	return control.panel:Release()
 end
@@ -333,10 +338,7 @@ function PanelObject:Recover()
 end
 
 function PanelObject:GetParentControl()
-	local parentControl = self.control:GetParent()
-	if parentControl then
-		return parentControl.panel --- TODO: This appears nonsensical ?
-	end
+	return self.control:GetParent()
 end
 
 function PanelObject:ResetBars(panel) -- TODO: Probably can be removed when ScrollList implementation is done
@@ -353,7 +355,7 @@ function PanelObject:ResetBars(panel) -- TODO: Probably can be removed when Scro
 	end
 end
 
----@param hide bool
+---@param hide boolean
 function PanelObject:SetHidden(hide)
 	return self.control:SetHidden(hide)
 end

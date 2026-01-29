@@ -47,7 +47,7 @@ function CMXint.InitializeConsumablesPanel(control)
 			control:SetHidden(true)
 		else
 			local num = 0
-			for key, _ in CMX.spairs(data, valueOrder) do
+			for key, _ in util.spairs(data, valueOrder) do
 				num = num + 1
 				local label, texture
 				if name == "Mundus" then

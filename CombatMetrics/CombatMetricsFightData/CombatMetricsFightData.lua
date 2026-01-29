@@ -5,7 +5,7 @@ local sv
 local LOG_LEVEL_VERBOSE = "V"
 local LOG_LEVEL_DEBUG = "D"
 local LOG_LEVEL_INFO = "I"
-local LOG_LEVEL_WARNING ="W"
+local LOG_LEVEL_WARNING = "W"
 local LOG_LEVEL_ERROR = "E"
 
 if LibDebugLogger then
@@ -17,11 +17,11 @@ if LibDebugLogger then
 end
 
 local function Log(...)
-	if not CMX then 
+	if not CombatMetrics then
 		d("[CombatMetricsFightData]: CMX not found!")
 		return
 	end
-	return CMX.Log("save", ...)
+	return CombatMetrics.internal.logger.Log("save", ...)
 end
 
 ---@class CombatMetricsFightData
@@ -158,11 +158,15 @@ local lastid = 0
 
 local function GetChar(value, logstringdata, length)
 	local char = chars[zo_floor(value) % 64]
-	if char == nil then return true end
+	if char == nil then
+		return true
+	end
 	table.insert(logstringdata, char)
 
 	local newvalue = zo_floor(value / 64)
-	if length > 1 then GetChar(newvalue, logstringdata, length - 1) end
+	if length > 1 then
+		GetChar(newvalue, logstringdata, length - 1)
+	end
 end
 
 local function Encode(line, layout)
@@ -170,8 +174,16 @@ local function Encode(line, layout)
 	for i, size in ipairs(layout) do
 		if line[i] then
 			local error = GetChar(line[i], logstringdata, size)
-			if error then Log("save", LOG_LEVEL_WARNING,
-					"Invalid value during log encoding: %s (type: %d, value %d) ", tostring(line[i]), line[1], i) end
+			if error then
+				Log(
+					"save",
+					LOG_LEVEL_WARNING,
+					"Invalid value during log encoding: %s (type: %d, value %d) ",
+					tostring(line[i]),
+					line[1],
+					i
+				)
+			end
 		end
 	end
 
@@ -181,10 +193,14 @@ end
 
 local function GetValue(value, logstring, length, offset)
 	local newchar = string.sub(logstring, offset, offset)
-	if newchar == "" or newchar == nil then return end
+	if newchar == "" or newchar == nil then
+		return
+	end
 	value = value * 64 + values[newchar]
 	offset = offset - 1
-	if length > 1 then offset, value = GetValue(value, logstring, length - 1, offset) end
+	if length > 1 then
+		offset, value = GetValue(value, logstring, length - 1, offset)
+	end
 	return offset, value
 end
 
@@ -237,10 +253,10 @@ end
 
 CombatMechnicFlagTableLoadLegacy = {
 	[-2] = COMBAT_MECHANIC_FLAGS_HEALTH,
-	[0]  = COMBAT_MECHANIC_FLAGS_MAGICKA,
-	[6]  = COMBAT_MECHANIC_FLAGS_STAMINA,
+	[0] = COMBAT_MECHANIC_FLAGS_MAGICKA,
+	[6] = COMBAT_MECHANIC_FLAGS_STAMINA,
 	[10] = COMBAT_MECHANIC_FLAGS_ULTIMATE,
-	[1]  = COMBAT_MECHANIC_FLAGS_WEREWOLF,
+	[1] = COMBAT_MECHANIC_FLAGS_WEREWOLF,
 	[13] = COMBAT_MECHANIC_FLAGS_DAEDRIC,
 	[11] = COMBAT_MECHANIC_FLAGS_MOUNT_STAMINA,
 }
@@ -289,17 +305,17 @@ local logTypeToLayout = {
 }
 
 local layouts = {
-	[LAYOUT_COMBAT] = { 1, 4, 1, 2, 2, 3, 4, 1, 4 }, 				-- (23) type, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType, overflow
-	[LAYOUT_EVENT] = { 1, 4, 2, 3, 1, 1, 1, 1, 4, 3 }, 	-- (23) type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, slot, hitValue
-	[LAYOUT_STATS] = { 1, 4, 4, 4, 1 },											-- (15) type, timems, statchange, newvalue, statId
-	[LAYOUT_STATS_ADV] = { 1, 4, 4, 4, 2 },										-- (16) type, timems, statchange, newvalue, statId
-	[LAYOUT_POWER] = { 1, 4, 3, 3, 1, 3 },									-- (16) type, timems, abilityId, powerValueChange, powerType, powerValue
-	[LAYOUT_MESSAGE] = { 1, 4, 1, 1 },												--  (8) type, timems, messageId (e.g. "weapon swap"), bar
-	[LAYOUT_DEATH] = { 1, 4, 1, 2, 3 },											--  (8) type, timems, state, unitId, abilityId/unitId
-	[LAYOUT_SKILL] = { 1, 4, 1, 3, 1, 2 },									-- (13) type, timems, reducedslot, abilityId, status, skillDelay
+	[LAYOUT_COMBAT] = { 1, 4, 1, 2, 2, 3, 4, 1, 4 }, -- (23) type, timems, result, sourceUnitId, targetUnitId, abilityId, hitValue, damageType, overflow
+	[LAYOUT_EVENT] = { 1, 4, 2, 3, 1, 1, 1, 1, 4, 3 }, -- (23) type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, slot, hitValue
+	[LAYOUT_STATS] = { 1, 4, 4, 4, 1 }, -- (15) type, timems, statchange, newvalue, statId
+	[LAYOUT_STATS_ADV] = { 1, 4, 4, 4, 2 }, -- (16) type, timems, statchange, newvalue, statId
+	[LAYOUT_POWER] = { 1, 4, 3, 3, 1, 3 }, -- (16) type, timems, abilityId, powerValueChange, powerType, powerValue
+	[LAYOUT_MESSAGE] = { 1, 4, 1, 1 }, --  (8) type, timems, messageId (e.g. "weapon swap"), bar
+	[LAYOUT_DEATH] = { 1, 4, 1, 2, 3 }, --  (8) type, timems, state, unitId, abilityId/unitId
+	[LAYOUT_SKILL] = { 1, 4, 1, 3, 1, 2 }, -- (13) type, timems, reducedslot, abilityId, status, skillDelay
 	-- [LAYOUT_BOSSHP] = { 1, 4, 1, 5, 5 },											-- (17) type, timems, bossId, currenthp, maxhp
-	[LAYOUT_PERFORMANCE] = { 1, 4, 2, 2, 2, 2 },  							-- (14) type, timems, avg, min, max, ping
-	[LAYOUT_QUICKSLOT] = { 1, 4, 3 },  															--  (9) type, timems, abilityId
+	[LAYOUT_PERFORMANCE] = { 1, 4, 2, 2, 2, 2 }, -- (14) type, timems, avg, min, max, ping
+	[LAYOUT_QUICKSLOT] = { 1, 4, 3 }, --  (9) type, timems, abilityId
 }
 
 local layoutsize = {} -- get total sizes of layouts
@@ -325,18 +341,18 @@ local function encodeCombatLogLine(line, fight)
 	elseif layoutId == LAYOUT_EVENT then -- type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType, slot
 		line[3] = unitConversion[line[3]] or 0
 		line[8] = line[8] or 0
-	elseif layoutId == LAYOUT_STATS then  -- type, timems, statchange, newvalue, statname
-		if line[5] == LIBCOMBAT_STAT_STATUS_EFFECT_CHANCE then 
+	elseif layoutId == LAYOUT_STATS then -- type, timems, statchange, newvalue, statname
+		if line[5] == LIBCOMBAT_STAT_STATUS_EFFECT_CHANCE then
 			line[3] = line[3] * 100
 			line[4] = line[4] * 100
 		end
-		line[3] = zo_round(line[3]) + 8388608  -- avoid negative numbers
-	elseif layoutId == LAYOUT_STATS_ADV then  -- type, timems, statchange, newvalue, statname
+		line[3] = zo_round(line[3]) + 8388608 -- avoid negative numbers
+	elseif layoutId == LAYOUT_STATS_ADV then -- type, timems, statchange, newvalue, statname
 		line[3] = zo_round(10 * (line[3] + 838860)) -- avoid negative/float numbers
 		line[4] = zo_round(line[4] * 10)
 	elseif layoutId == LAYOUT_POWER then -- type, timems, abilityId, powerValueChange, powerType
 		line[3] = line[3] or -3
-		line[4] = line[4] + 131072  -- avoid negative numbers
+		line[4] = line[4] + 131072 -- avoid negative numbers
 		line[5] = CombatMechnicFlagTableSave[line[5]]
 		line[6] = line[6] or 0
 	elseif layoutId == LAYOUT_MESSAGE and type(line[3]) ~= "number" then -- type, timems, messageId
@@ -352,14 +368,16 @@ local function encodeCombatLogLine(line, fight)
 		end
 	elseif layoutId == LAYOUT_SKILL then -- type, timems, reducedslot, abilityId, status, skillDelay
 		line[6] = line[6] or 0
-		if line[3] > 64 then line[3] = line[3] - 40 end
+		if line[3] > 64 then
+			line[3] = line[3] - 40
+		end
 	elseif layoutId == LAYOUT_PERFORMANCE then -- type, timems, avg, min, max, ping
 		line[3] = zo_floor(line[3])
 		line[4] = zo_floor(line[4])
 		line[5] = zo_floor(line[5])
 		line[6] = zo_floor(line[6])
 	elseif layoutId ~= LAYOUT_SKILL then
-	-- elseif layoutId ~= LAYOUT_SKILL and layoutId ~= LAYOUT_BOSSHP then
+		-- elseif layoutId ~= LAYOUT_SKILL and layoutId ~= LAYOUT_BOSSHP then
 		return
 	end
 
@@ -373,7 +391,9 @@ end
 local function decodeCombatLogLine(line, fight)
 	local linetype = values[string.sub(line, 1, 1)]
 	local layoutId = logTypeToLayout[linetype]
-	if layoutId == nil then return end
+	if layoutId == nil then
+		return
+	end
 	local layout = layouts[layoutId]
 	local logdata = Decode(line, layout)
 
@@ -381,16 +401,20 @@ local function decodeCombatLogLine(line, fight)
 		logdata[3] = CombatResultTableLoad[logdata[3]]
 		logdata[8] = logdata[8] or 0
 	elseif layoutId == LAYOUT_EVENT then -- type, timems, unitId, abilityId, changeType, effectType, stacks, sourceType
-		if logdata[3] == 0 then logdata[3] = nil end
+		if logdata[3] == 0 then
+			logdata[3] = nil
+		end
 	elseif layoutId == LAYOUT_STATS or layoutId == LAYOUT_STATS_ADV then -- type, timems, statchange, newvalue, statname
-		if fight.svversion < 5 then logdata[5] = statTableConvert[logdata[5]] end
-		logdata[3] = logdata[3] - 8388608  -- recover negative numbers		
-		if logdata[5] == LIBCOMBAT_STAT_STATUS_EFFECT_CHANCE then 
+		if fight.svversion < 5 then
+			logdata[5] = statTableConvert[logdata[5]]
+		end
+		logdata[3] = logdata[3] - 8388608 -- recover negative numbers
+		if logdata[5] == LIBCOMBAT_STAT_STATUS_EFFECT_CHANCE then
 			logdata[3] = logdata[3] / 100
 			logdata[4] = logdata[4] / 100
 		end
-	elseif layoutId == LAYOUT_STATS_ADV then  -- type, timems, statchange, newvalue, statname
-		line[3] = (line[3] / 10) - 838860  -- avoid negative/float numbers
+	elseif layoutId == LAYOUT_STATS_ADV then -- type, timems, statchange, newvalue, statname
+		line[3] = (line[3] / 10) - 838860 -- avoid negative/float numbers
 		line[4] = (line[4] / 10)
 	elseif layoutId == LAYOUT_POWER then -- type, timems, abilityId, powerValueChange, powerType
 		if logdata[3] == 262141 then
@@ -412,15 +436,23 @@ local function decodeCombatLogLine(line, fight)
 			end
 		end
 
-		if logdata[6] == 0 then logdata[6] = nil end
+		if logdata[6] == 0 then
+			logdata[6] = nil
+		end
 	elseif layoutId == LAYOUT_MESSAGE then
 		logdata[4] = logdata[4] or 0
 	elseif layoutId == LAYOUT_DEATH then
-		if logdata[5] == 0 then logdata[5] = nil end
+		if logdata[5] == 0 then
+			logdata[5] = nil
+		end
 	elseif layoutId == LAYOUT_SKILL then
-		if logdata[6] == 0 then logdata[6] = nil end
-		if logdata[3] > 30 then logdata[3] = logdata[3] + 40 end
-	elseif layoutId ~= LAYOUT_PERFORMANCE and layoutId ~= LAYOUT_BOSSHP then -- type, timems, message (e.g. "weapon swap")
+		if logdata[6] == 0 then
+			logdata[6] = nil
+		end
+		if logdata[3] > 30 then
+			logdata[3] = logdata[3] + 40
+		end
+	elseif layoutId ~= LAYOUT_PERFORMANCE then -- and layoutId ~= LAYOUT_BOSSHP then -- type, timems, message (e.g. "weapon swap")
 		return
 	end
 
@@ -492,7 +524,9 @@ end
 local function recoverCombatLog(loadedFight)
 	local strings = loadedFight.stringlog
 	local timeOffset = 0
-	if loadedFight.svversion >= 3 then timeOffset = 1000 end
+	if loadedFight.svversion >= 3 then
+		timeOffset = 1000
+	end
 	if loadedFight.svversion < 12 and loadedFight.APIversion == nil then
 		if loadedFight.ESOversion ~= nil then
 			local _, _, ESOMainVersion = string.find(loadedFight.ESOversion, "eso%.%w+%.(%d+)")
@@ -516,7 +550,9 @@ local function recoverCombatLog(loadedFight)
 		loadedFight.calculated.resources = resources
 	end
 
-	if strings == nil or #strings == 0 then return end
+	if strings == nil or #strings == 0 then
+		return
+	end
 
 	local combatlog = {}
 	local starttime = loadedFight.starttime - timeOffset
@@ -540,7 +576,9 @@ local function recoverCombatLog(loadedFight)
 end
 
 local function reduceUnitIds(fight)
-	if fight.units == nil then fight.units = {} end
+	if fight.units == nil then
+		fight.units = {}
+	end
 	local newUnits = {}
 	local newCalcUnits = {}
 	local unitConversion = {}
@@ -558,11 +596,15 @@ local function reduceUnitIds(fight)
 		newCalcUnits[newId] = calcUnits[id]
 		unitConversion[id] = newId
 
-		if unit.unitType == 1 then fight.playerid = newId end
+		if unit.unitType == 1 then
+			fight.playerid = newId
+		end
 		newId = newId + 1
 	end
 
-	if fight.bosses == nil then fight.bosses = {} end
+	if fight.bosses == nil then
+		fight.bosses = {}
+	end
 	local bosses = fight.bosses
 	for bossid, unitId in pairs(bosses) do
 		bosses[bossid] = unitConversion[unitId]
@@ -572,7 +614,6 @@ local function reduceUnitIds(fight)
 	fight.unitConversion = unitConversion
 	calcData.units = newCalcUnits
 end
-
 
 local function getSavedVariableSize(sv)
 	local copy = {}
@@ -594,11 +635,13 @@ local function checkSavedVariable(data)
 end
 
 local function copyFightMetaData(sourceFight, destFight)
-	if destFight == nil then destFight = {} end
+	if destFight == nil then
+		destFight = {}
+	end
 
 	destFight.fightlabel = sourceFight.fightlabel
 	local charName = sourceFight.charData and sourceFight.charData.name or sourceFight.char or ""
-	destFight.charData = {name = charName}
+	destFight.charData = { name = charName }
 	destFight.zone = sourceFight.zone
 	destFight.subzone = sourceFight.subzone
 	destFight.date = sourceFight.date
@@ -608,14 +651,12 @@ local function copyFightMetaData(sourceFight, destFight)
 		DPSIn = sourceFight.calculated.DPSIn,
 		HPSOut = sourceFight.calculated.HPSOut,
 		HPSIn = sourceFight.calculated.HPSIn,
-
 	}
 	destFight.hpstime = sourceFight.hpstime
 	destFight.dpstime = sourceFight.dpstime
 
 	return destFight
 end
-
 
 local function saveFight(fight, filters)
 	local fightCopy = ZO_DeepTableCopy(fight)
@@ -653,7 +694,9 @@ local function deleteLog(id)
 end
 
 local function getNumFights()
-	if sv == nil then return 0 end
+	if sv == nil then
+		return 0
+	end
 	return #sv
 end
 
@@ -754,7 +797,9 @@ local function StartEncodingSavedFights()
 	local fightlabel = CombatMetricsReport_TitleFightTitleName
 	fightlabel:SetText(zo_strformat(SI_COMBAT_METRICS_CONVERSION_TITLE_TEXT, 1, #oldSV))
 
-	if SCENE_MANAGER:IsShowing("CMX_REPORT_SCENE") == false then CombatMetricsReport.Toggle() end
+	if SCENE_MANAGER:IsShowing("CMX_REPORT_SCENE") == false then
+		CombatMetricsReport.Toggle()
+	end
 	zo_callLater(EncodeNextFight, 100)
 end
 
@@ -767,11 +812,11 @@ local function InitConversionDialog()
 		buttons = {
 			[1] = {
 				text = SI_COMBAT_METRICS_CONVERT_DB_BUTTON1_TEXT,
-				callback = StartEncodingSavedFights
+				callback = StartEncodingSavedFights,
 			},
 			[2] = {
 				text = SI_COMBAT_METRICS_CONVERT_DB_BUTTON2_TEXT,
-				callback = function() end
+				callback = function() end,
 			},
 		},
 	}
@@ -794,7 +839,9 @@ local function ConvertSV()
 		ZO_Dialogs_ShowDialog("CMX_ConvertSV_Dialog")
 	end
 
-	if converted then Log(LOG_LEVEL_INFO, "Conversion Finished!") end
+	if converted then
+		Log(LOG_LEVEL_INFO, "Conversion Finished!")
+	end
 end
 
 CombatMetricsFightData.Check = checkSavedVariable
@@ -832,4 +879,3 @@ function InitializeCMXFightData()
 	Log(LOG_LEVEL_INFO, "Init of fight data complete.")
 	_G["InitializeCMXFightData"] = nil
 end
-

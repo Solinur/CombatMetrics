@@ -12,7 +12,7 @@ local function PrefillMail()
 		GetString(isDonation and SI_COMBAT_METRICS_DONATE_GOLD_HEADER or SI_COMBAT_METRICS_FEEDBACK_MAIL_HEADER)
 
 	ZO_MailSendToField:SetText("@Solinur")
-	ZO_MailSendSubjectField:SetText(string.format(headerString, CMXint.version))
+	ZO_MailSendSubjectField:SetText(string.format(headerString, CMX.version))
 	ZO_MailSendBodyField:TakeFocus()
 
 	if sendGold and sendGold > 0 then
@@ -94,7 +94,7 @@ function CMXint.InitMenu(svdefaults)
 		name = "Combat Metrics",
 		displayName = "Combat Metrics",
 		author = "Solinur",
-		version = "" .. CMXint.version,
+		version = "" .. CMX.version,
 		registerForRefresh = true,
 		registerForDefaults = true,
 		website = "https://www.esoui.com/downloads/info1360-CombatMetrics.html",
@@ -135,12 +135,12 @@ function CMXint.InitMenu(svdefaults)
 			min = 1,
 			max = 40,
 			step = 1,
-			default = def.fighthistory,
+			default = def.fights.maxLiveFights,
 			getFunc = function()
-				return settings.fighthistory
+				return settings.fights.maxLiveFights
 			end,
 			setFunc = function(value)
-				settings.fighthistory = value
+				settings.fights.maxLiveFights = value
 			end,
 		},
 		{
@@ -151,148 +151,149 @@ function CMXint.InitMenu(svdefaults)
 			min = 20,
 			max = 250,
 			step = 10,
-			default = def.maxSavedFights,
+			default = def.fights.maxSavedFights,
 			getFunc = function()
-				return settings.maxSavedFights
+				return settings.fights.maxSavedFights
 			end,
 			setFunc = function(value)
-				settings.maxSavedFights = value
+				settings.fights.maxSavedFights = value
 			end,
 		},
 		{
 			type = "checkbox",
 			name = GetString(SI_COMBAT_METRICS_MENU_BOSSFIGHTS_NAME),
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_BOSSFIGHTS_TOOLTIP),
-			default = def.keepbossfights,
+			default = def.fights.keepBossFights,
 			getFunc = function()
-				return settings.keepbossfights
+				return settings.fights.keepBossFights
 			end,
 			setFunc = function(value)
-				settings.keepbossfights = value
+				settings.fights.keepBossFights = value
 			end,
 		},
 		{
 			type = "checkbox",
 			name = GetString(SI_COMBAT_METRICS_MENU_MG_NAME),
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_MG_TOOLTIP),
-			default = def.recordgrp,
+			default = def.group.enableGroupData,
 			getFunc = function()
-				return settings.recordgrp
+				return settings.group.enableGroupData
 			end,
 			setFunc = function(value)
-				settings.recordgrp = value
-				CMXint.UpdateEvents()
+				settings.group.enableGroupData = value
+				-- CMXint.UpdateEvents() -- TODO: check if still needed
 			end,
 		},
 		{
 			type = "checkbox",
 			name = GetString(SI_COMBAT_METRICS_MENU_GL_NAME),
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_GL_TOOLTIP),
-			default = def.recordgrpinlarge,
+			default = def.group.enableLargeGroupData,
 			getFunc = function()
-				return settings.recordgrpinlarge
+				return settings.group.enableLargeGroupData
 			end,
 			setFunc = function(value)
-				settings.recordgrpinlarge = value
+				settings.group.enableLargeGroupData = value
 			end,
-			disabled = not settings.recordgrp,
+			disabled = not settings.group.enableGroupData,
 		},
 		{
 			type = "checkbox",
 			name = GetString(SI_COMBAT_METRICS_MENU_STACKS_NAME),
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_STACKS_TOOLTIP),
-			default = def.showstacks,
+			default = def.fightReport.buffs.showstacks,
 			getFunc = function()
-				return settings.showstacks
+				return settings.fightReport.buffs.showStacks
 			end,
 			setFunc = function(value)
-				settings.showstacks = value
+				settings.fightReport.buffs.showStacks = value
 			end,
 		},
 		{
 			type = "checkbox",
 			name = GetString(SI_COMBAT_METRICS_MENU_LM_NAME),
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_LM_TOOLTIP),
-			default = def.lightmode,
+			default = def.modes.lightmode,
 			getFunc = function()
-				return settings.lightmode
+				return settings.modes.lightmode
 			end,
 			setFunc = function(value)
-				settings.lightmode = value
-				CMXint.UpdateEvents()
+				settings.modes.lightmode = value
+				-- CMXint.UpdateEvents() -- TODO: check if still needed
 			end,
 		},
 		{
 			type = "checkbox",
 			name = GetString(SI_COMBAT_METRICS_MENU_NOPVP_NAME),
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_NOPVP_TOOLTIP),
-			default = def.offincyrodil,
+			default = def.modes.enablePvP,
 			getFunc = function()
-				return settings.offincyrodil
+				return settings.modes.enablePvP
 			end,
 			setFunc = function(value)
-				settings.offincyrodil = value
-				CMXint.UpdateEvents()
+				settings.modes.enablePvP = value
+				-- CMXint.UpdateEvents() -- TODO: check if still needed
 			end,
 		},
 		{
 			type = "checkbox",
 			name = GetString(SI_COMBAT_METRICS_MENU_LMPVP_NAME),
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_LMPVP_TOOLTIP),
-			default = def.lightmodeincyrodil,
+			default = def.modes.lightmodeInCyrodil,
 			getFunc = function()
-				return settings.lightmodeincyrodil
+				return settings.modes.lightmodeInCyrodil
 			end,
 			setFunc = function(value)
-				settings.lightmodeincyrodil = value
-				CMXint.UpdateEvents()
+				settings.modes.lightmodeInCyrodil = value
+				-- CMXint.UpdateEvents() -- TODO: check if still needed
 			end,
 			disabled = function()
-				return (settings.offincyrodil or settings.lightmode)
+				return (settings.modes.enablePvP or settings.modes.lightmode)
 			end,
 		},
 		{
 			type = "checkbox",
 			name = GetString(SI_COMBAT_METRICS_MENU_ASCC_NAME),
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_ASCC_TOOLTIP),
-			default = def.autoselectchatchannel,
+			default = def.autoSelectChatChannel,
 			getFunc = function()
-				return settings.autoselectchatchannel
+				return settings.autoSelectChatChannel
 			end,
 			setFunc = function(value)
-				settings.autoselectchatchannel = value
+				settings.autoSelectChatChannel = value
 			end,
 		},
-		{
-			type = "checkbox",
-			name = GetString(SI_COMBAT_METRICS_MENU_AS_NAME),
-			tooltip = GetString(SI_COMBAT_METRICS_MENU_AS_TOOLTIP),
-			default = def.autoscreenshot,
-			getFunc = function()
-				return settings.autoscreenshot
-			end,
-			setFunc = function(value)
-				settings.autoscreenshot = value
-			end,
-		},
-		{
-			type = "slider",
-			name = GetString(SI_COMBAT_METRICS_MENU_ML_NAME),
-			tooltip = GetString(SI_COMBAT_METRICS_MENU_ML_TOOLTIP),
-			min = 1,
-			max = 120,
-			step = 1,
-			disabled = function()
-				return not settings.autoscreenshot
-			end,
-			default = def.autoscreenshotmintime,
-			getFunc = function()
-				return settings.autoscreenshotmintime
-			end,
-			setFunc = function(value)
-				settings.autoscreenshotmintime = value
-			end,
-		},
+		-- TODO: check if still needed
+		-- {
+		-- 	type = "checkbox",
+		-- 	name = GetString(SI_COMBAT_METRICS_MENU_AS_NAME),
+		-- 	tooltip = GetString(SI_COMBAT_METRICS_MENU_AS_TOOLTIP),
+		-- 	default = def.autoscreenshot,
+		-- 	getFunc = function()
+		-- 		return settings.autoscreenshot
+		-- 	end,
+		-- 	setFunc = function(value)
+		-- 		settings.autoscreenshot = value
+		-- 	end,
+		-- },
+		-- {
+		-- 	type = "slider",
+		-- 	name = GetString(SI_COMBAT_METRICS_MENU_ML_NAME),
+		-- 	tooltip = GetString(SI_COMBAT_METRICS_MENU_ML_TOOLTIP),
+		-- 	min = 1,
+		-- 	max = 120,
+		-- 	step = 1,
+		-- 	disabled = function()
+		-- 		return not settings.autoscreenshot
+		-- 	end,
+		-- 	default = def.autoscreenshotmintime,
+		-- 	getFunc = function()
+		-- 		return settings.autoscreenshotmintime
+		-- 	end,
+		-- 	setFunc = function(value)
+		-- 		settings.autoscreenshotmintime = value
+		-- 	end,
+		-- },
 		{
 			type = "slider",
 			name = GetString(SI_COMBAT_METRICS_MENU_SF_NAME),
@@ -359,14 +360,14 @@ function CMXint.InitMenu(svdefaults)
 			type = "editbox",
 			name = GetString(SI_COMBAT_METRICS_MENU_CRUSHER),
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_CRUSHER_TOOLTIP),
-			default = def.crusherValue,
+			default = def.stats.crusherValue,
 			getFunc = function()
-				return settings.crusherValue
+				return settings.stats.crusherValue
 			end,
 			setFunc = function(value)
 				if value then
-					local number = zo_round(tonumber(value) or def.crusherValue)
-					CMXint.SetPenetrationDebuffValue("crusherValue", number)
+					local number = zo_round(tonumber(value) or def.stats.crusherValue)
+					-- CMXint.SetPenetrationDebuffValue("crusherValue", number) -- TODO: check if still needed
 				end
 			end,
 		},
@@ -374,14 +375,14 @@ function CMXint.InitMenu(svdefaults)
 			type = "editbox",
 			name = GetString(SI_COMBAT_METRICS_MENU_ALKOSH),
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_ALKOSH_TOOLTIP),
-			default = def.alkoshValue,
+			default = def.stats.alkoshValue,
 			getFunc = function()
-				return settings.alkoshValue
+				return settings.stats.alkoshValue
 			end,
 			setFunc = function(value)
 				if value then
-					local number = zo_round(tonumber(value) or def.alkoshValue)
-					CMXint.SetPenetrationDebuffValue("alkoshValue", number)
+					local number = zo_round(tonumber(value) or def.stats.alkoshValue)
+					-- CMXint.SetPenetrationDebuffValue("alkoshValue", number) -- TODO: check if still needed
 				end
 			end,
 		},
@@ -389,14 +390,14 @@ function CMXint.InitMenu(svdefaults)
 			type = "editbox",
 			name = GetString(SI_COMBAT_METRICS_MENU_TREMORSCALE),
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_TREMORSCALE_TOOLTIP),
-			default = def.tremorscaleValue,
+			default = def.stats.tremorscaleValue,
 			getFunc = function()
-				return settings.tremorscaleValue
+				return settings.stats.tremorscaleValue
 			end,
 			setFunc = function(value)
 				if value then
-					local number = zo_round(tonumber(value) or def.tremorscaleValue)
-					CMXint.SetPenetrationDebuffValue("tremorscaleValue", number)
+					local number = zo_round(tonumber(value) or def.stats.tremorscaleValue)
+					-- CMXint.SetPenetrationDebuffValue("tremorscaleValue", number) -- TODO: check if still needed
 				end
 			end,
 		},
@@ -404,14 +405,14 @@ function CMXint.InitMenu(svdefaults)
 			type = "editbox",
 			name = GetString(SI_COMBAT_METRICS_MENU_MOBRESISTANCE),
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_MOBRESISTANCE_TOOLTIP),
-			default = def.unitresistance,
+			default = def.stats.unitresistance,
 			getFunc = function()
-				return settings.unitresistance
+				return settings.stats.unitresistance
 			end,
 			setFunc = function(value)
 				if value then
-					local number = zo_round(tonumber(value) or def.unitresistance)
-					settings.unitresistance = number
+					local number = zo_round(tonumber(value) or def.stats.unitresistance)
+					settings.stats.unitresistance = number
 				end
 			end,
 		},
@@ -641,129 +642,29 @@ function CMXint.InitMenu(svdefaults)
 			type = "custom",
 		},
 		{
-			type = "header",
-			name = GetString(SI_COMBAT_METRICS_MENU_CHAT_TITLE),
-		},
-		{
-			type = "checkbox",
-			name = GetString(SI_COMBAT_METRICS_MENU_ENABLE_NAME),
-			tooltip = GetString(SI_COMBAT_METRICS_MENU_CHAT_DH_TOOLTIP),
-			default = def.chatLog.enabled,
-			warning = GetString(SI_COMBAT_METRICS_MENU_CHAT_WARNING),
-			getFunc = function()
-				return settings.chatLog.enabled
-			end,
-			setFunc = function(value)
-				if value then
-					CMXint.InitializeChat()
-				else
-					CMXint.RemoveCombatLog()
-				end
-				settings.chatLog.enabled = value
-			end,
-		},
-		{
-			type = "editbox",
-			name = GetString(SI_COMBAT_METRICS_MENU_CHAT_TITLE_NAME),
-			tooltip = GetString(SI_COMBAT_METRICS_MENU_CHAT_TITLE_TOOLTIP),
-			default = def.chatLog.name,
-			getFunc = function()
-				return settings.chatLog.name
-			end,
-			setFunc = function(value)
-				if value then
-					CMXint.ChangeCombatLogLabel(value)
-				end
-				settings.chatLog.name = value
-			end,
-			disabled = function()
-				return not settings.chatLog.enabled
-			end,
-		},
-		{
-			type = "checkbox",
-			name = GetString(SI_COMBAT_METRICS_MENU_CHAT_SD_NAME),
-			tooltip = GetString(SI_COMBAT_METRICS_MENU_CHAT_SD_TOOLTIP),
-			default = def.chatLog.damageOut,
-			getFunc = function()
-				return settings.chatLog.damageOut
-			end,
-			setFunc = function(value)
-				settings.chatLog.damageOut = value
-			end,
-			disabled = function()
-				return not settings.chatLog.enabled
-			end,
-		},
-		{
-			type = "checkbox",
-			name = GetString(SI_COMBAT_METRICS_MENU_CHAT_SH_NAME),
-			tooltip = GetString(SI_COMBAT_METRICS_MENU_CHAT_SH_TOOLTIP),
-			default = def.chatLog.healingOut,
-			getFunc = function()
-				return settings.chatLog.healingOut
-			end,
-			setFunc = function(value)
-				settings.chatLog.healingOut = value
-			end,
-			disabled = function()
-				return not settings.chatLog.enabled
-			end,
-		},
-		{
-			type = "checkbox",
-			name = GetString(SI_COMBAT_METRICS_MENU_CHAT_SID_NAME),
-			tooltip = GetString(SI_COMBAT_METRICS_MENU_CHAT_SID_TOOLTIP),
-			default = def.chatLog.damageIn,
-			getFunc = function()
-				return settings.chatLog.damageIn
-			end,
-			setFunc = function(value)
-				settings.chatLog.damageIn = value
-			end,
-			disabled = function()
-				return not settings.chatLog.enabled
-			end,
-		},
-		{
-			type = "checkbox",
-			name = GetString(SI_COMBAT_METRICS_MENU_CHAT_SIH_NAME),
-			tooltip = GetString(SI_COMBAT_METRICS_MENU_CHAT_SIH_TOOLTIP),
-			default = def.chatLog.healingIn,
-			getFunc = function()
-				return settings.chatLog.healingIn
-			end,
-			setFunc = function(value)
-				settings.chatLog.healingIn = value
-			end,
-			disabled = function()
-				return not settings.chatLog.enabled
-			end,
-		},
-		{
 			type = "custom",
 		},
 	}
 
-	if GetDisplayName() == "@Solinur" then
-		options[#options + 1] = {
-			type = "custom",
-		}
+	-- if GetDisplayName() == "@Solinur" then
+	-- 	options[#options + 1] = {
+	-- 		type = "custom",
+	-- 	}
 
-		options[#options + 1] = {
+	-- 	options[#options + 1] = {
 
-			type = "checkbox",
-			name = "Force Notification",
-			tooltip = "Force Notification",
-			default = def.ForceNotification,
-			getFunc = function()
-				return settings.ForceNotification
-			end,
-			setFunc = function(value)
-				settings.ForceNotification = value
-			end,
-		}
-	end
+	-- 		type = "checkbox",
+	-- 		name = "Force Notification",
+	-- 		tooltip = "Force Notification",
+	-- 		default = def.ForceNotification,
+	-- 		getFunc = function()
+	-- 			return settings.ForceNotification
+	-- 		end,
+	-- 		setFunc = function(value)
+	-- 			settings.ForceNotification = value
+	-- 		end,
+	-- 	}
+	-- end
 
 	local panel = menu:RegisterAddonPanel("CMX_Options", panelData)
 	menu:RegisterOptionControls("CMX_Options", options)

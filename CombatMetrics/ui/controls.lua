@@ -62,6 +62,7 @@ end
 
 local function CreateSharedControlType(template)
 	local function CreateControl(pool, objectKey)
+		---@class SharedControl: Control
 		local newControl = ZO_ObjectPool_CreateControl(template, pool, CombatMetricsReport)
 		InitializeSharedControl(newControl, pool, objectKey)
 
