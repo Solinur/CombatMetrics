@@ -128,7 +128,7 @@ function CMXint.InitializeCombatStatsPanel(control)
 		self[key .. "Label"] = header
 		self:NewLine()
 
-		---@type LineControl
+		---@type LineControl|SharedControl
 		local separator = self:AcquireSharedControl(CT_LINE)
 		separator:ApplyPosition(control, self.xOffset, self.yOffset, 336, 0)
 		self:NewLine()
@@ -169,11 +169,6 @@ function CMXint.InitializeCombatStatsPanel(control)
 		self.yOffset = self.yOffset + self.maxHeight + 4
 		self.maxHeight = 0
 		self.xOffset = 4
-	end
-
-	function CombatStatsPanel:Update(fightData)
-		logger:Debug("Updating Combat Stats Panel")
-		self:UpdateLabels()
 	end
 
 	function CombatStatsPanel:ClearTimeStats()

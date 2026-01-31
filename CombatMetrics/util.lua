@@ -21,14 +21,14 @@ CMX_POSTTOCHAT_MODE_SELECTED_UNITNAME = 9
 local function slashCommandFunction(extra)
 	if extra == "reset" then
 		LibCombat2.ResetFight()
-	elseif extra == "dps" then
-		util.PosttoChat(CMX_POSTTOCHAT_MODE_SMART)
-	elseif extra == "totdps" then
-		util.PosttoChat(CMX_POSTTOCHAT_MODE_MULTI)
-	elseif extra == "alldps" then
-		util.PosttoChat(CMX_POSTTOCHAT_MODE_SINGLEANDMULTI)
-	elseif extra == "hps" then
-		util.PosttoChat(CMX_POSTTOCHAT_MODE_HEALING)
+	-- elseif extra == "dps" then
+	-- 	util.PosttoChat(CMX_POSTTOCHAT_MODE_SMART)
+	-- elseif extra == "totdps" then
+	-- 	util.PosttoChat(CMX_POSTTOCHAT_MODE_MULTI)
+	-- elseif extra == "alldps" then
+	-- 	util.PosttoChat(CMX_POSTTOCHAT_MODE_SINGLEANDMULTI)
+	-- elseif extra == "hps" then
+	-- 	util.PosttoChat(CMX_POSTTOCHAT_MODE_HEALING)
 	else
 		CombatMetricsReport:Toggle()
 	end
@@ -206,7 +206,7 @@ end
 
 local function GetBuffDataAndUnits(unitType, fightData)
 	local buffData
-	local buffTypeSelection = CMXint.selection.buffTypeSelection
+	local buffTypeSelection = CMXint.ui.selections.buffTypeSelection
 	local units = 0
 	local unitName = ""
 	local settings = CMXint.settings.fightReport
@@ -215,11 +215,12 @@ local function GetBuffDataAndUnits(unitType, fightData)
 		local category = settings.category
 		local tempSelections = {}
 
-		ZO_DeepTableCopy(ui.selections, tempSelections)
+		ZO_DeepTableCopy(CMXint.ui.selections, tempSelections)
 		if unitType then
 			tempSelections.unit[category] = GetUnitsByType(unitType)
 		end
-		buffData = CMX.GenerateSelectionStats(fightData, category, tempSelections) -- yeah, yeah I'm lazy.
+		-- TODO: refactor
+		-- buffData = CMX.GenerateSelectionStats(fightData, category, tempSelections) -- yeah, yeah I'm lazy.
 
 		for unitId, _ in pairs(tempSelections.unit[category] or fightData.units) do
 			local unit = fightData.calculated.units[unitId]
@@ -249,7 +250,7 @@ local function GetBuffDataAndUnits(unitType, fightData)
 end
 
 function util.PostBuffUptime(fight, buffname, unitType)
-	local data = fight and CMX.lastfights[fight]
+	local data -- = fight and CMX.lastfights[fight] -- TODO: refactor
 	if not data then
 		return
 	end
@@ -307,7 +308,7 @@ function util.PostBuffUptime(fight, buffname, unitType)
 	end
 
 	-- Determine appropriate channel
-	local channel = CMXint.settings.autoselectchatchannel == true
+	local channel = CMXint.settings.autoSelectChatChannel == true
 			and (IsUnitGrouped("player") and CHAT_CHANNEL_PARTY or CHAT_CHANNEL_SAY)
 		or nil
 	-- Log output to chat

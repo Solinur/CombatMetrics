@@ -75,7 +75,7 @@ function util.adjustRowSize(row, header)
 	if row == nil or row.scale == settings.scale then
 		return
 	end -- if sizes are good already, bail out.
-	row.scale = settings.scale
+	row["scale"] = settings.scale
 
 	for i = 1, header:GetNumChildren() do
 		local child = header:GetChild(i)
@@ -92,10 +92,12 @@ function util.adjustRowSize(row, header)
 
 			if valid1 and valid2 then
 				rowchild:ClearAnchors()
+				---@diagnostic disable-next-line: missing-parameter
 				rowchild:SetAnchor(point, relativeTo, relativePoint, x, y)
 			end
 
 			if rowchild:GetType() == CT_LABEL then
+				---@cast rowchild LabelControl
 				local font = string.format(
 					"%s|%s|%s",
 					GetString(SI_COMBAT_METRICS_STD_FONT),
@@ -135,7 +137,7 @@ util.AddTooltipLine = AddTooltipLine
 ---@param control Control
 function CMXint.OnMouseEnter(control) --copy from ZO_Options_OnMouseEnter but modified to support multiple tooltip lines
 	---@type table | string
-	local tooltipText = control.tooltip
+	local tooltipText = control["tooltip"]
 	if tooltipText == nil then
 		return
 	end
@@ -153,22 +155,23 @@ end
 ---@param control Control
 ---@param setcolor any can be hex or rgba, ZO_ColorDef takes care of this
 function CMXint.SetLabelColor(control, setcolor)
-	for i = 1, control:GetNumChildren(control) do
+	for i = 1, control:GetNumChildren() do
 		local child = control:GetChild(i)
 		local color = ZO_ColorDef:New(setcolor)
 
-		if child:GetType() == CT_LABEL and child.nocolor ~= true then
+		if child:GetType() == CT_LABEL and child["nocolor"] ~= true then
+			---@cast child LabelControl
 			child:SetColor(color.r, color.g, color.b, color.a)
-		elseif child:GetType() == CT_CONTROL and child.nocolor ~= true then
-			CMX.SetLabelColor(child, setcolor)
+		elseif child:GetType() == CT_CONTROL and child["nocolor"] ~= true then
+			CMXint.SetLabelColor(child, setcolor)
 		end
 	end
 end
 
 local lastResize
 
----@param control Control
----@param resizing bool
+---@param control BackdropControl
+---@param resizing boolean
 function CMXint.Resizing(control, resizing)
 	if control:IsHidden() then
 		return
@@ -192,7 +195,9 @@ function CMXint.Resizing(control, resizing)
 		CMXint.settings[parent:GetName()] = newpos -- todo: reroute the settings update!
 
 		parent:ClearAnchors()
+		---@diagnostic disable-next-line: missing-parameter, param-type-mismatch
 		parent:SetAnchor(CENTER, nil, TOPLEFT, newpos.x, newpos.y)
+		---@diagnostic disable-next-line: undefined-field
 		parent:Resize(scale)
 	end
 end
@@ -235,6 +240,8 @@ end
 
 ---@class Panel
 ---@field New fun(self: Panel, control: Control, name: string): Panel
+---@field MUST_IMPLEMENT fun()
+---@field dataList SortFilterList?
 local PanelObject = ZO_InitializingObject:Subclass()
 CMXint.PanelObject = PanelObject
 
@@ -269,7 +276,9 @@ function PanelObject:Initialize(control, name)
 
 	control.panel = self
 
+	---@diagnostic disable-next-line: missing-parameter
 	control:SetHandler("OnEffectivelyShown", onShow)
+	---@diagnostic disable-next-line: missing-parameter
 	control:SetHandler("OnEffectivelyHidden", onHide)
 
 	ui.panels[name] = self
@@ -377,6 +386,7 @@ function ui:GetPanel(name)
 	if panel then
 		return panels[name]
 	end
+	---@diagnostic disable-next-line: missing-return
 	logger:Error("Attempt to access unknown panel: %s", name)
 end
 

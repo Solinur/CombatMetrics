@@ -18,6 +18,7 @@ local function valueOrder(t, a, b)
 end
 
 function CMXint.InitializeConsumablesPanel(control)
+	---@class ConsumablesPanel: Panel
 	local ConsumablesPanel = CMX.internal.PanelObject:New(control, "consumables")
 
 	function ConsumablesPanel:Update(fightData)
@@ -60,8 +61,13 @@ function CMXint.InitializeConsumablesPanel(control)
 					label = key
 					texture = GetItemLinkIcon(key)
 				end
-				control:GetNamedChild("Name" .. num):SetText(label)
-				control:GetNamedChild("Icon" .. num):SetTexture(texture)
+
+				local nameControl = control:GetNamedChild("Name" .. num) --[[@as LabelControl]]
+				nameControl:SetText(label)
+
+				local iconControl = control:GetNamedChild("Icon" .. num) --[[@as TextureControl]]
+				iconControl:SetTexture(texture)
+
 				if num >= 2 then
 					break
 				end
@@ -72,11 +78,13 @@ function CMXint.InitializeConsumablesPanel(control)
 			icon1:ClearAnchors()
 			if numItems == 1 then
 				icon1:SetDimensions(1.3 * iconSize, 1.3 * iconSize)
+				---@diagnostic disable-next-line: missing-parameter
 				icon1:SetAnchor(LEFT)
 				control:GetNamedChild("Name2"):SetHidden(true)
 				control:GetNamedChild("Icon2"):SetHidden(true)
 			else
 				icon1:SetDimensions(iconSize, iconSize)
+				---@diagnostic disable-next-line: missing-parameter
 				icon1:SetAnchor(TOPLEFT)
 				control:GetNamedChild("Name2"):SetHidden(false)
 				control:GetNamedChild("Icon2"):SetHidden(false)

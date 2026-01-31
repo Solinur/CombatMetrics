@@ -52,6 +52,7 @@ local function ApplyIndent(control, indent)
 	local indent = indent * scale
 
 	local _, point, relTo, relPoint, offsX, offsY, _ = control:GetAnchor(0)
+	---@diagnostic disable-next-line: missing-parameter
 	control:SetAnchor(point, relTo, relPoint, offsX + indent, offsY)
 	control:SetWidth(control:GetWidth() - indent)
 end
@@ -63,6 +64,9 @@ end
 local function CreateSharedControlType(template)
 	local function CreateControl(pool, objectKey)
 		---@class SharedControl: Control
+		---@field pool object
+		---@field objectKey integer
+		---@field shared true
 		local newControl = ZO_ObjectPool_CreateControl(template, pool, CombatMetricsReport)
 		InitializeSharedControl(newControl, pool, objectKey)
 

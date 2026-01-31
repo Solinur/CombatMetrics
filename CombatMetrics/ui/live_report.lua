@@ -1,3 +1,6 @@
+---@diagnostic disable
+--- TODO: enable diagnostic when code is used
+
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint

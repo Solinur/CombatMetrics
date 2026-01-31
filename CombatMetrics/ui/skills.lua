@@ -207,15 +207,16 @@ function CMXint.InitializeSkillsPanel(control)
 	label4.tooltip = SI_COMBAT_METRICS_TOTALSKILLS_TT
 end
 
----@param setHidden boolean
-function ScribedSkillsPanel:Hide(setHidden)
-	local panel = self.control
-	panel:SetHidden(setHidden)
-	panel:GetParent():GetNamedChild("Sep"):SetHidden(setHidden)
-end
-
 function CMXint.InitializeScribedSkillsPanel(control)
+	---@class ScribedSkillsPanel:Panel
 	ScribedSkillsPanel = CMXint.PanelObject:New(control, "scribedSkills")
+
+	---@param setHidden boolean
+	function ScribedSkillsPanel:Hide(setHidden)
+		local panel = self.control
+		panel:SetHidden(setHidden)
+		panel:GetParent():GetNamedChild("Sep"):SetHidden(setHidden)
+	end
 
 	function ScribedSkillsPanel:Update(fightData)
 		if fightData == nil then
@@ -232,9 +233,11 @@ function CMXint.InitializeScribedSkillsPanel(control)
 			local abilityName = GetFormattedAbilityName(abilityId)
 			local iconTexture = GetFormattedAbilityIcon(abilityId)
 
-			skillControl:GetNamedChild("Name"):SetText(abilityName)
-			skillControl.abilityId = abilityId
-			skillControl.scriptIds = data
+			local nameControl = skillControl:GetNamedChild("Name") --[[@as LabelControl]]
+			nameControl:SetText(abilityName)
+
+			skillControl["abilityId"] = abilityId
+			skillControl["scriptIds"] = data
 			GetControl(skillControl, "IconTexture"):SetTexture(iconTexture)
 
 			for i = 1, 3 do
@@ -243,8 +246,10 @@ function CMXint.InitializeScribedSkillsPanel(control)
 				local scriptName = GetFormattedAbilityName(scriptId, true)
 				local iconTexture = GetFormattedAbilityIcon(scriptId, true)
 
-				scriptControl:GetNamedChild("Name"):SetText(scriptName)
-				scriptControl:GetNamedChild("Icon"):SetTexture(iconTexture)
+				local nameControl = scriptControl:GetNamedChild("Name") --[[@as LabelControl]]
+				nameControl:SetText(scriptName)
+				local iconControl = scriptControl:GetNamedChild("Icon") --[[@as TextureControl]]
+				iconControl:SetTexture(iconTexture)
 			end
 			if index == 10 then
 				break
@@ -265,8 +270,10 @@ function CMXint.InitializeScribedSkillsPanel(control)
 		-- scribedSkillControl:SetHidden(false)
 
 		if i == 1 then
+			---@diagnostic disable-next-line: missing-parameter
 			scribedSkillControl:SetAnchor(TOPLEFT, control, TOPLEFT, 0, 4)
 		else
+			---@diagnostic disable-next-line: missing-parameter
 			scribedSkillControl:SetAnchor(TOPLEFT, anchor, BOTTOMLEFT, 0, 4)
 			scribedSkillControl:SetHidden(true)
 		end

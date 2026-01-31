@@ -1,3 +1,4 @@
+---@diagnostic disable: inject-field
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint
@@ -50,13 +51,13 @@ local function GetEnchantQuality(itemLink) -- From Enchanted Quality (Rhyono, vo
 		end -- For non-crafted sets, the "built-in" enchantment has the same quality as the item itself
 	end
 
-	if enchantSub > 0 then
+	if enchantSub and enchantSub > 0 then
 		local quality = subIdToQuality[enchantSub]
 		if not quality then
 			-- Create a fake itemLink to get the quality from built-in function
 			local itemLink =
 				string.format("|H1:item:%i:%i:50:0:0:0:0:0:0:0:0:0:0:0:0:1:1:0:0:10000:0|h|h", itemId, enchantSub)
-			quality = GetItemLinkQuality(itemLink)
+			quality = GetItemLinkFunctionalQuality(itemLink)
 			subIdToQuality[enchantSub] = quality
 		end
 
@@ -89,11 +90,11 @@ function CMXint.InitializeEquipmentPanel(control)
 			local texture = slotData[2]
 
 			local equipline = control:GetNamedChild("EquipLine" .. i)
-			local label = equipline:GetNamedChild("ItemLink")
-			local icon = equipline:GetNamedChild("Icon")
-			local icon2 = equipline:GetNamedChild("Icon2") -- textures are added twice since icons are so low in contrast
-			local trait = equipline:GetNamedChild("Trait")
-			local enchant = equipline:GetNamedChild("Enchant")
+			local label = equipline:GetNamedChild("ItemLink") --[[@as LabelControl]]
+			local icon = equipline:GetNamedChild("Icon") --[[@as TextureControl]]
+			local icon2 = equipline:GetNamedChild("Icon2") --[[@as TextureControl]] -- textures are added twice since icons are so low in contrast
+			local trait = equipline:GetNamedChild("Trait") --[[@as LabelControl]]
+			local enchant = equipline:GetNamedChild("Enchant") --[[@as LabelControl]]
 
 			local item = equipdata[slot] or ""
 
@@ -102,7 +103,6 @@ function CMXint.InitializeEquipmentPanel(control)
 			local color2 = item:len() > 0 and { 1, 1, 1, 1 } or { 0.5, 0.5, 0.5, 1 }
 
 			label:SetText(item)
-
 			label.itemLink = item == "" and nil or item
 
 			icon:SetTexture(texture)
