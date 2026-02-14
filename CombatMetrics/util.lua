@@ -20,15 +20,15 @@ CMX_POSTTOCHAT_MODE_SELECTED_UNITNAME = 9
 
 local function slashCommandFunction(extra)
 	if extra == "reset" then
-		CMX.ResetFight()
-	elseif extra == "dps" then
-		util.PosttoChat(CMX_POSTTOCHAT_MODE_SMART)
-	elseif extra == "totdps" then
-		util.PosttoChat(CMX_POSTTOCHAT_MODE_MULTI)
-	elseif extra == "alldps" then
-		util.PosttoChat(CMX_POSTTOCHAT_MODE_SINGLEANDMULTI)
-	elseif extra == "hps" then
-		util.PosttoChat(CMX_POSTTOCHAT_MODE_HEALING)
+		LibCombat2.ResetFight()
+	-- elseif extra == "dps" then
+	-- 	util.PosttoChat(CMX_POSTTOCHAT_MODE_SMART)
+	-- elseif extra == "totdps" then
+	-- 	util.PosttoChat(CMX_POSTTOCHAT_MODE_MULTI)
+	-- elseif extra == "alldps" then
+	-- 	util.PosttoChat(CMX_POSTTOCHAT_MODE_SINGLEANDMULTI)
+	-- elseif extra == "hps" then
+	-- 	util.PosttoChat(CMX_POSTTOCHAT_MODE_HEALING)
 	else
 		CombatMetricsReport:Toggle()
 	end
@@ -206,7 +206,7 @@ end
 
 local function GetBuffDataAndUnits(unitType, fightData)
 	local buffData
-	local buffTypeSelection = CMXint.selection.buffTypeSelection
+	local buffTypeSelection = CMXint.ui.selections.buffTypeSelection
 	local units = 0
 	local unitName = ""
 	local settings = CMXint.settings.fightReport
@@ -215,11 +215,12 @@ local function GetBuffDataAndUnits(unitType, fightData)
 		local category = settings.category
 		local tempSelections = {}
 
-		ZO_DeepTableCopy(ui.selections, tempSelections)
+		ZO_DeepTableCopy(CMXint.ui.selections, tempSelections)
 		if unitType then
 			tempSelections.unit[category] = GetUnitsByType(unitType)
 		end
-		buffData = CMX.GenerateSelectionStats(fightData, category, tempSelections) -- yeah, yeah I'm lazy.
+		-- TODO: refactor
+		-- buffData = CMX.GenerateSelectionStats(fightData, category, tempSelections) -- yeah, yeah I'm lazy.
 
 		for unitId, _ in pairs(tempSelections.unit[category] or fightData.units) do
 			local unit = fightData.calculated.units[unitId]
@@ -249,7 +250,7 @@ local function GetBuffDataAndUnits(unitType, fightData)
 end
 
 function util.PostBuffUptime(fight, buffname, unitType)
-	local data = fight and CMX.lastfights[fight]
+	local data -- = fight and CMX.lastfights[fight] -- TODO: refactor
 	if not data then
 		return
 	end
@@ -307,183 +308,190 @@ function util.PostBuffUptime(fight, buffname, unitType)
 	end
 
 	-- Determine appropriate channel
-	local channel = CMXint.settings.autoselectchatchannel == true
+	local channel = CMXint.settings.autoSelectChatChannel == true
 			and (IsUnitGrouped("player") and CHAT_CHANNEL_PARTY or CHAT_CHANNEL_SAY)
 		or nil
 	-- Log output to chat
 
 	local outputtext = string.format("%s%s", timedata, output)
+
 	StartChatInput(outputtext, channel)
 end
 
-function util.PosttoChat(mode, fight, UnitContextMenuUnitId)
-	local data = fight and CMX.lastfights[fight] or CMXint.FightData:GetCurrentFight()
-	if data == nil then
-		return
-	end
+-- TODO: reimplement
 
-	local date = data.date
-	local datestring = type(date) == "number" and GetDateStringFromTimestamp(date) or date
-	local timedata = string.format("[%s, %s] ", datestring, data.time)
+-- function util.PosttoChat(mode, fight, UnitContextMenuUnitId)
+-- 	local data = fight and CMX.lastfights[fight] or CMXint.FightData:GetCurrentFight()
+-- 	if data == nil then
+-- 		return
+-- 	end
 
-	local output = ""
-	local unitSelection = mode == CMX_POSTTOCHAT_MODE_SELECTION and selections.unit["damageOut"]
-		or mode == CMX_POSTTOCHAT_MODE_SELECTED_UNIT and { [UnitContextMenuUnitId] = true }
-		or mode == CMX_POSTTOCHAT_MODE_SELECTED_UNITNAME and GetUnitsByName(data, UnitContextMenuUnitId)
+-- 	local date = data.date
+-- 	local datestring = type(date) == "number" and GetDateStringFromTimestamp(date) or date
+-- 	local timedata = string.format("[%s, %s] ", datestring, data.time)
 
-	local units, damage, name, dpstime = GetSelectionDamage(data, unitSelection)
-	local bossUnits, bossDamage, _, bossName, bossTime = GetBossTargetDamage(data)
-	local singleDamage, _, _, singleTime = GetSingleTargetDamage(data)
+-- 	local output = ""
+-- 	local unitSelection = mode == CMX_POSTTOCHAT_MODE_SELECTION and selections.unit["damageOut"]
+-- 		or mode == CMX_POSTTOCHAT_MODE_SELECTED_UNIT and { [UnitContextMenuUnitId] = true }
+-- 		or mode == CMX_POSTTOCHAT_MODE_SELECTED_UNITNAME and GetUnitsByName(data, UnitContextMenuUnitId)
 
-	dpstime = zo_roundToNearest(dpstime, 0.1)
-	singleTime = zo_roundToNearest(singleTime, 0.1)
+-- 	local units, damage, name, dpstime = GetSelectionDamage(data, unitSelection)
+-- 	local bossUnits, bossDamage, _, bossName, bossTime = GetBossTargetDamage(data)
+-- 	local singleDamage, _, _, singleTime = GetSingleTargetDamage(data)
 
-	name = zo_strformat(SI_UNIT_NAME, (not unitSelection) and bossName or name)
+-- 	dpstime = zo_roundToNearest(dpstime, 0.1)
+-- 	singleTime = zo_roundToNearest(singleTime, 0.1)
 
-	local bossDamage = data.bossfight and bossDamage or singleDamage
-	local bossTime = zo_roundToNearest(data.bossfight and bossTime or singleTime, 0.1)
+-- 	name = zo_strformat(SI_UNIT_NAME, (not unitSelection) and bossName or name)
 
-	if mode == CMX_POSTTOCHAT_MODE_HEALING then
-		local hpstime = zo_roundToNearest(data.hpstime, 0.01)
-		local timeString = string.format("%d:%04.1f", hpstime / 60, hpstime % 60)
-		local totalHPSString = ZO_CommaDelimitNumber(data.HPSOut)
-		local totalHealingString = ZO_CommaDelimitNumber(data.healingOutTotal)
+-- 	local bossDamage = data.bossfight and bossDamage or singleDamage
+-- 	local bossTime = zo_roundToNearest(data.bossfight and bossTime or singleTime, 0.1)
 
-		output = zo_strformat(
-			GetString(SI_COMBAT_METRICS_POSTHPS_FORMAT),
-			name,
-			totalHPSString,
-			totalHealingString,
-			timeString
-		)
-	elseif mode == CMX_POSTTOCHAT_MODE_SELECTION_HEALING then
-		local units, healing, healTime = GetSelectionHeal(data, selections.unit["healingOut"])
-		healTime = zo_roundToNearest(healTime, 0.1)
+-- 	if mode == CMX_POSTTOCHAT_MODE_HEALING then
+-- 		local hpstime = zo_roundToNearest(data.hpstime, 0.01)
+-- 		local timeString = string.format("%d:%04.1f", hpstime / 60, hpstime % 60)
+-- 		local totalHPSString = ZO_CommaDelimitNumber(data.HPSOut)
+-- 		local totalHealingString = ZO_CommaDelimitNumber(data.healingOutTotal)
 
-		local timeString = string.format("%d:%04.1f", healTime / 60, healTime % 60)
-		local totalHealingString = ZO_CommaDelimitNumber(healing)
-		local totalHPSString = ZO_CommaDelimitNumber(zo_floor(healing / healTime))
+-- 		output = zo_strformat(
+-- 			GetString(SI_COMBAT_METRICS_POSTHPS_FORMAT),
+-- 			name,
+-- 			totalHPSString,
+-- 			totalHealingString,
+-- 			timeString
+-- 		)
+-- 	elseif mode == CMX_POSTTOCHAT_MODE_SELECTION_HEALING then
+-- 		local units, healing, healTime = GetSelectionHeal(data, selections.unit["healingOut"])
+-- 		healTime = zo_roundToNearest(healTime, 0.1)
 
-		output = zo_strformat(
-			GetString(SI_COMBAT_METRICS_POSTSELECTIONHPS_FORMAT),
-			name,
-			units,
-			totalHPSString,
-			totalHealingString,
-			timeString
-		)
-	elseif units == 1 or mode == CMX_POSTTOCHAT_MODE_SINGLE then
-		local damage = mode == CMX_POSTTOCHAT_MODE_SELECTED_UNIT and damage or singleDamage
-		local damageTime = mode == CMX_POSTTOCHAT_MODE_SELECTED_UNIT and dpstime or singleTime
+-- 		local timeString = string.format("%d:%04.1f", healTime / 60, healTime % 60)
+-- 		local totalHealingString = ZO_CommaDelimitNumber(healing)
+-- 		local totalHPSString = ZO_CommaDelimitNumber(zo_floor(healing / healTime))
 
-		local singleDPSString = ZO_CommaDelimitNumber(zo_floor(damage / damageTime))
-		local singleDamageString = ZO_CommaDelimitNumber(damage)
-		local timeString = string.format("%d:%04.1f", damageTime / 60, damageTime % 60)
+-- 		output = zo_strformat(
+-- 			GetString(SI_COMBAT_METRICS_POSTSELECTIONHPS_FORMAT),
+-- 			name,
+-- 			units,
+-- 			totalHPSString,
+-- 			totalHealingString,
+-- 			timeString
+-- 		)
+-- 	elseif units == 1 or mode == CMX_POSTTOCHAT_MODE_SINGLE then
+-- 		local damage = mode == CMX_POSTTOCHAT_MODE_SELECTED_UNIT and damage or singleDamage
+-- 		local damageTime = mode == CMX_POSTTOCHAT_MODE_SELECTED_UNIT and dpstime or singleTime
 
-		output = zo_strformat(
-			GetString(SI_COMBAT_METRICS_POSTDPS_FORMAT),
-			name,
-			singleDPSString,
-			singleDamageString,
-			timeString
-		)
-	elseif bossUnits > 0 and mode == CMX_POSTTOCHAT_MODE_SMART then
-		local bosses = bossUnits > 1 and string.format(" (+%d)", (bossUnits - 1)) or ""
-		local bossTimeString = string.format("%d:%04.1f", bossTime / 60, bossTime % 60)
+-- 		local singleDPSString = ZO_CommaDelimitNumber(zo_floor(damage / damageTime))
+-- 		local singleDamageString = ZO_CommaDelimitNumber(damage)
+-- 		local timeString = string.format("%d:%04.1f", damageTime / 60, damageTime % 60)
 
-		local bossDPSString = ZO_CommaDelimitNumber(zo_floor(bossDamage / bossTime))
-		local bossDamageString = ZO_CommaDelimitNumber(bossDamage)
+-- 		output = zo_strformat(
+-- 			GetString(SI_COMBAT_METRICS_POSTDPS_FORMAT),
+-- 			name,
+-- 			singleDPSString,
+-- 			singleDamageString,
+-- 			timeString
+-- 		)
+-- 	elseif bossUnits > 0 and mode == CMX_POSTTOCHAT_MODE_SMART then
+-- 		local bosses = bossUnits > 1 and string.format(" (+%d)", (bossUnits - 1)) or ""
+-- 		local bossTimeString = string.format("%d:%04.1f", bossTime / 60, bossTime % 60)
 
-		output = zo_strformat(
-			GetString(SI_COMBAT_METRICS_POSTSMARTDPS_FORMAT),
-			name,
-			bosses,
-			bossDPSString,
-			bossDamageString,
-			bossTimeString
-		)
-	elseif units > 1 and (mode == CMX_POSTTOCHAT_MODE_MULTI or mode == CMX_POSTTOCHAT_MODE_SMART) then
-		local timeString = string.format("%d:%04.1f", dpstime / 60, dpstime % 60)
+-- 		local bossDPSString = ZO_CommaDelimitNumber(zo_floor(bossDamage / bossTime))
+-- 		local bossDamageString = ZO_CommaDelimitNumber(bossDamage)
 
-		local totalDPSString = ZO_CommaDelimitNumber(zo_floor(data.DPSOut))
-		local totalDamageString = ZO_CommaDelimitNumber(damage)
+-- 		output = zo_strformat(
+-- 			GetString(SI_COMBAT_METRICS_POSTSMARTDPS_FORMAT),
+-- 			name,
+-- 			bosses,
+-- 			bossDPSString,
+-- 			bossDamageString,
+-- 			bossTimeString
+-- 		)
+-- 	elseif units > 1 and (mode == CMX_POSTTOCHAT_MODE_MULTI or mode == CMX_POSTTOCHAT_MODE_SMART) then
+-- 		local timeString = string.format("%d:%04.1f", dpstime / 60, dpstime % 60)
 
-		output = zo_strformat(
-			GetString(SI_COMBAT_METRICS_POSTMULTIDPS_FORMAT),
-			name,
-			units - 1,
-			totalDPSString,
-			totalDamageString,
-			timeString
-		)
-	elseif mode == CMX_POSTTOCHAT_MODE_SINGLEANDMULTI then
-		local bossString = bossUnits > 1
-				and string.format("%s (+%d)", GetString(SI_COMBAT_METRICS_BOSS_DPS), bossUnits - 1)
-			or bossUnits == 1 and GetString(SI_COMBAT_METRICS_BOSS_DPS)
-			or GetString(SI_COMBAT_METRICS_DPS)
-		local timeString = string.format("%d:%04.1f", dpstime / 60, dpstime % 60)
-		local bossTimeString = string.format("%d:%04.1f", bossTime / 60, bossTime % 60)
+-- 		local totalDPSString = ZO_CommaDelimitNumber(zo_floor(data.DPSOut))
+-- 		local totalDamageString = ZO_CommaDelimitNumber(damage)
 
-		local bossDPSString = ZO_CommaDelimitNumber(zo_floor(bossDamage / bossTime))
-		local bossDamageString = ZO_CommaDelimitNumber(bossDamage)
+-- 		output = zo_strformat(
+-- 			GetString(SI_COMBAT_METRICS_POSTMULTIDPS_FORMAT),
+-- 			name,
+-- 			units - 1,
+-- 			totalDPSString,
+-- 			totalDamageString,
+-- 			timeString
+-- 		)
+-- 	elseif mode == CMX_POSTTOCHAT_MODE_SINGLEANDMULTI then
+-- 		local bossString = bossUnits > 1
+-- 				and string.format("%s (+%d)", GetString(SI_COMBAT_METRICS_BOSS_DPS), bossUnits - 1)
+-- 			or bossUnits == 1 and GetString(SI_COMBAT_METRICS_BOSS_DPS)
+-- 			or GetString(SI_COMBAT_METRICS_DPS)
+-- 		local timeString = string.format("%d:%04.1f", dpstime / 60, dpstime % 60)
+-- 		local bossTimeString = string.format("%d:%04.1f", bossTime / 60, bossTime % 60)
 
-		local totalDPSString = ZO_CommaDelimitNumber(zo_floor(data.DPSOut))
-		local totalDamageString = ZO_CommaDelimitNumber(damage)
+-- 		local bossDPSString = ZO_CommaDelimitNumber(zo_floor(bossDamage / bossTime))
+-- 		local bossDamageString = ZO_CommaDelimitNumber(bossDamage)
 
-		local stringA = zo_strformat(
-			GetString(SI_COMBAT_METRICS_POSTALLDPS_FORMAT_A),
-			name,
-			units - 1,
-			totalDPSString,
-			totalDamageString,
-			timeString
-		)
-		local stringB = zo_strformat(
-			GetString(SI_COMBAT_METRICS_POSTALLDPS_FORMAT_B),
-			bossString,
-			bossDPSString,
-			bossDamageString,
-			bossTimeString
-		)
+-- 		local totalDPSString = ZO_CommaDelimitNumber(zo_floor(data.DPSOut))
+-- 		local totalDamageString = ZO_CommaDelimitNumber(damage)
 
-		output = string.format("%s, %s", stringA, stringB)
-	elseif mode == CMX_POSTTOCHAT_MODE_SELECTION or mode == CMX_POSTTOCHAT_MODE_SELECTED_UNITNAME then
-		if not unitSelection then
-			return
-		end
+-- 		local stringA = zo_strformat(
+-- 			GetString(SI_COMBAT_METRICS_POSTALLDPS_FORMAT_A),
+-- 			name,
+-- 			units - 1,
+-- 			totalDPSString,
+-- 			totalDamageString,
+-- 			timeString
+-- 		)
+-- 		local stringB = zo_strformat(
+-- 			GetString(SI_COMBAT_METRICS_POSTALLDPS_FORMAT_B),
+-- 			bossString,
+-- 			bossDPSString,
+-- 			bossDamageString,
+-- 			bossTimeString
+-- 		)
 
-		local extraUnits = units > 1
-				and mode == CMX_POSTTOCHAT_MODE_SELECTED_UNITNAME
-				and string.format(" (x%d)", units)
-			or units > 1 and string.format(" (+%d)", (units - 1))
-			or ""
+-- 		output = string.format("%s, %s", stringA, stringB)
+-- 	elseif mode == CMX_POSTTOCHAT_MODE_SELECTION or mode == CMX_POSTTOCHAT_MODE_SELECTED_UNITNAME then
+-- 		if not unitSelection then
+-- 			return
+-- 		end
 
-		local DPSString = ZO_CommaDelimitNumber(zo_floor(damage / dpstime))
-		local DamageString = ZO_CommaDelimitNumber(damage)
-		local timeString = string.format("%d:%04.1f", dpstime / 60, dpstime % 60)
+-- 		local extraUnits = units > 1
+-- 				and mode == CMX_POSTTOCHAT_MODE_SELECTED_UNITNAME
+-- 				and string.format(" (x%d)", units)
+-- 			or units > 1 and string.format(" (+%d)", (units - 1))
+-- 			or ""
 
-		output = zo_strformat(
-			GetString(SI_COMBAT_METRICS_POSTSELECTIONDPS_FORMAT),
-			name,
-			extraUnits,
-			DPSString,
-			DamageString,
-			timeString
-		)
-	end
+-- 		local DPSString = ZO_CommaDelimitNumber(zo_floor(damage / dpstime))
+-- 		local DamageString = ZO_CommaDelimitNumber(damage)
+-- 		local timeString = string.format("%d:%04.1f", dpstime / 60, dpstime % 60)
 
-	-- Determine appropriate channel
-	local channel = CMXint.settings.autoselectchatchannel == false and ""
-		or IsUnitGrouped("player") and "/p "
-		or "/say "
+-- 		output = zo_strformat(
+-- 			GetString(SI_COMBAT_METRICS_POSTSELECTIONDPS_FORMAT),
+-- 			name,
+-- 			extraUnits,
+-- 			DPSString,
+-- 			DamageString,
+-- 			timeString
+-- 		)
+-- 	end
 
-	-- Log output to chat
-	local outputtext = string.format("%s%s", timedata, output)
+-- 	-- Determine appropriate channel
+-- 	local channel = CMXint.settings.autoselectchatchannel == false and ""
+-- 		or IsUnitGrouped("player") and "/p "
+-- 		or "/say "
 
-	CHAT_SYSTEM.textEntry:SetText(channel .. outputtext)
-	CHAT_SYSTEM:Maximize()
-	CHAT_SYSTEM.textEntry:Open()
-	CHAT_SYSTEM.textEntry:FadeIn()
+-- 	-- Log output to chat
+-- 	local outputtext = string.format("%s%s", timedata, output)
+
+-- 	CHAT_SYSTEM.textEntry:SetText(channel .. outputtext)
+-- 	CHAT_SYSTEM:Maximize()
+-- 	CHAT_SYSTEM.textEntry:Open()
+-- 	CHAT_SYSTEM.textEntry:FadeIn()
+-- end
+
+function util.GetSelectionData()
+	logger:Warn("util.GetSelectionData is dnot implemented yet.")
 end
 
 local isFileInitialized = false

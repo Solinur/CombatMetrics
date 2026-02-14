@@ -27,14 +27,15 @@ function CMXint.InitializeTitlePanel(control)
 
 	---@cast control Control
 	local fightTitleControl = control:GetNamedChild("FightTitle")
-	local label = fightTitleControl:GetNamedChild("Name")
-	local editbox = fightTitleControl:GetNamedChild("Edit")
-	fightTitleControl.tooltip = SI_COMBAT_METRICS_EDIT_TITLE
+	local label = fightTitleControl:GetNamedChild("Name") --[[@as LabelControl]]
+	local editbox = fightTitleControl:GetNamedChild("Edit") --[[@as EditControl]]
+	fightTitleControl["tooltip"] = SI_COMBAT_METRICS_EDIT_TITLE
 
 	local function OnEditTitleStart()
 		label:SetHidden(true)
 		editbox:SetHidden(false)
 
+		---@diagnostic disable-next-line: missing-parameter
 		editbox:SetText(label:GetText())
 		editbox:SelectAll()
 		editbox:TakeFocus()
@@ -50,11 +51,13 @@ function CMXint.InitializeTitlePanel(control)
 
 		local fightData = CMXint.FightData.data
 		if fightData then
-			fightData.fightlabel = newtext
+			fightData["fightlabel"] = newtext
 		end
 	end
 
+	---@diagnostic disable-next-line: missing-parameter
 	fightTitleControl:SetHandler("OnMouseDoubleClick", OnEditTitleStart, "CMX")
+	---@diagnostic disable-next-line: missing-parameter
 	editbox:SetHandler("OnFocusLost", OnEditTitleEnd, "CMX")
 
 	function TitlePanel:Update(fightData)
@@ -86,7 +89,7 @@ function CMXint.InitializeTitlePanel(control)
 
 		-- Custom Icon
 
-		local customIconControl = charInfo:GetNamedChild("CustomIcon")
+		local customIconControl = charInfo:GetNamedChild("CustomIcon") --[[@as TextureControl]]
 		local customIcon = LibCustomIcons and LibCustomIcons.GetStatic(account)
 
 		customIconControl:SetHidden(customIcon == nil)
@@ -96,7 +99,7 @@ function CMXint.InitializeTitlePanel(control)
 
 		-- Char Name
 
-		local charName = charInfo:GetNamedChild("Charname")
+		local charName = charInfo:GetNamedChild("Charname") --[[@as LabelControl]]
 
 		local customName = LibCustomNames and LibCustomNames.Get(account, true)
 		local name = customName or charData.name
@@ -106,7 +109,7 @@ function CMXint.InitializeTitlePanel(control)
 		-- CPValue
 
 		local CPIcon = charInfo:GetNamedChild("CPIcon")
-		local CPValue = charInfo:GetNamedChild("CPValue")
+		local CPValue = charInfo:GetNamedChild("CPValue")--[[@as LabelControl]]
 
 		local level = charData.level
 		local CP = charData.CPtotal
@@ -117,18 +120,18 @@ function CMXint.InitializeTitlePanel(control)
 		elseif level < 50 then
 			CPIcon:SetHidden(true)
 			CPValue:SetHidden(false)
-			CPValue:SetText(level)
+			CPValue:SetText(tostring(level))
 		else
 			CPIcon:SetHidden(false)
 			CPValue:SetHidden(false)
-			CPValue:SetText(CP)
+			CPValue:SetText(tostring(CP))
 		end
 
 		local classInfo = control:GetNamedChild("ClassInfo")
 
 		-- Race Icon
 
-		local raceIcon = classInfo:GetNamedChild("RaceIcon")
+		local raceIcon = classInfo:GetNamedChild("RaceIcon") --[[@as TextureControl]]
 		local raceId = charData.raceId
 		local gender = charData.gender
 
@@ -136,17 +139,17 @@ function CMXint.InitializeTitlePanel(control)
 		raceIcon:SetTexture(racetextures[raceId])
 
 		local race = GetRaceName(gender, raceId)
-		raceIcon.tooltip = race
+		raceIcon["tooltip"] = race
 
 		-- Class Icon
 
-		local classIcon = classInfo:GetNamedChild("ClassIcon")
+		local classIcon = classInfo:GetNamedChild("ClassIcon") --[[@as TextureControl]]
 		local classId = charData.classId
 		local class = GetClassName(gender, classId)
 		local texture = ZO_GetGamepadClassIcon(classId)
 
 		classIcon:SetTexture(texture)
-		classIcon.tooltip = class
+		classIcon["tooltip"] = class
 		classIcon:SetHidden(false)
 
 		-- Subclass Icons:
@@ -156,7 +159,7 @@ function CMXint.InitializeTitlePanel(control)
 			local lineData = subClassingLines[i]
 			local iconControl = classInfo:GetNamedChild("SubClassIcon" .. i)
 			---@cast iconControl TextureControl
-			iconControl.tooltip = ZO_CachedStrFormat(SI_SKILLS_ENTRY_LINE_NAME_FORMAT, lineData:GetName())
+			iconControl["tooltip"] = ZO_CachedStrFormat(SI_SKILLS_ENTRY_LINE_NAME_FORMAT, lineData:GetName())
 
 			local texture = lineData:GetSkillDataByIndex(3):GetProgressionData(0).icon
 			iconControl:SetTexture(texture)

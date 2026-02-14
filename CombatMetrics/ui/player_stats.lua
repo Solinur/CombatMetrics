@@ -197,7 +197,7 @@ function CMXint.InitializePlayerStatsPanel(control)
 						table.insert(tooltiplines, GetString(SI_COMBAT_METRICS_CRITBONUS_TT))
 
 						local sumdamage = 0
-						for crit, damage in CMX.spairs(trimmedCritValues) do
+						for crit, damage in util.spairs(trimmedCritValues) do
 							sumdamage = sumdamage + damage
 
 							local sumdamageRatio = 100 * (sumdamage / totalDamage)
@@ -275,7 +275,7 @@ function CMXint.InitializePlayerStatsPanel(control)
 
 			local sumdamage = 0
 
-			for penetration, damage in CMX.spairs(trimmedResistvalues) do
+			for penetration, damage in util.spairs(trimmedResistvalues) do
 				sumdamage = sumdamage + damage
 
 				local sumdamageRatio = 100 * (sumdamage / totalDamage)

@@ -94,7 +94,6 @@ function CMXint.InitializeCombatStatsPanel(control)
 		self.combatTimeValue = self:AddLabel(76, true)
 		self:NewLine()
 
-		---@type LineControl
 		local separator = self:AcquireSharedControl(CT_LINE)
 		separator:ApplyPosition(control, self.xOffset, self.yOffset, 336, 0)
 		self:NewLine()
@@ -111,7 +110,6 @@ function CMXint.InitializeCombatStatsPanel(control)
 		self:NewLine()
 
 		self.xOffset = 120
-		---@type LineControl
 		local separator = self:AcquireSharedControl(CT_LINE)
 		separator:ApplyPosition(control, self.xOffset, self.yOffset, 216, 0)
 		self:NewLine()
@@ -130,7 +128,7 @@ function CMXint.InitializeCombatStatsPanel(control)
 		self[key .. "Label"] = header
 		self:NewLine()
 
-		---@type LineControl
+		---@type LineControl|SharedControl
 		local separator = self:AcquireSharedControl(CT_LINE)
 		separator:ApplyPosition(control, self.xOffset, self.yOffset, 336, 0)
 		self:NewLine()
@@ -152,7 +150,7 @@ function CMXint.InitializeCombatStatsPanel(control)
 	end
 
 	function CombatStatsPanel:AddLabel(width, bold)
-		---@type LabelControl
+		---@type LabelControl|SharedControl
 		local label = self:AcquireSharedControl(CT_LABEL)
 		label:ApplyPosition(control, self.xOffset, self.yOffset, width, nil)
 
@@ -171,11 +169,6 @@ function CMXint.InitializeCombatStatsPanel(control)
 		self.yOffset = self.yOffset + self.maxHeight + 4
 		self.maxHeight = 0
 		self.xOffset = 4
-	end
-
-	function CombatStatsPanel:Update(fightData)
-		logger:Debug("Updating Combat Stats Panel")
-		self:UpdateLabels()
 	end
 
 	function CombatStatsPanel:ClearTimeStats()
@@ -262,8 +255,8 @@ function CMXint.InitializeCombatStatsPanel(control)
 
 		local amountLabel, countLabel, labelList = self:GetLabelStrings()
 
-		self.amountLabel:SetText(GetString(amountLabel))
-		self.countLabel:SetText(GetString(countLabel))
+		self["amountLabel"]:SetText(GetString(amountLabel))
+		self["countLabel"]:SetText(GetString(countLabel))
 
 		for rowId = 1, 5 do
 			local amount_key = ZO_CachedStrFormat(ROW_KEY_FORMAT, "amount", rowId)
@@ -283,7 +276,6 @@ function CMXint.InitializeCombatStatsPanel(control)
 
 		if categoryData == nil then
 			logger:Error("No data for category: %s", category)
-			return nil
 		end
 
 		return categoryData
@@ -301,30 +293,29 @@ function CMXint.InitializeCombatStatsPanel(control)
 			return
 		end
 
-		local activetime = zo_round(playerData.endTime - playerData.startTime) / 1000
-		local activetimestring = string.format("%d:%06.3f", activetime / 60, activetime % 60)
-		self.activeTimeValue:SetText(activetimestring)
-
 		local fightInfoData = fightData.info
-		local combattime = zo_round(fightInfoData.combatEnd - fightInfoData.combatStart) / 1000
-		local combattimestring = string.format("%d:%06.3f", combattime / 60, combattime % 60)
-		self.combatTimeValue:SetText(combattimestring)
+		local activeTime = zo_round(playerData.endTime - playerData.startTime) / 1000
+		local combatTime = zo_round(fightInfoData.combatEnd - fightInfoData.combatStart) / 1000
+
+		local activeTimeString, combatTimeString
+		if activeTime < 60 and combatTime < 60 then
+			combatTimeString = string.format("%.3f s", combatTime % 60)
+			activeTimeString = string.format("%.3f s", activeTime % 60)
+		else
+			activeTimeString = string.format("%d:%06.3f", activeTime / 60, activeTime % 60)
+			combatTimeString = string.format("%d:%06.3f", combatTime / 60, combatTime % 60)
+		end
+
+		self.activeTimeValue:SetText(activeTimeString)
+		self.combatTimeValue:SetText(combatTimeString)
 	end
 
 	function CombatStatsPanel:UpdateCombatStatValues()
 		local category = self.settings.category
 		local fightData = self:GetCurrentFightData()
-		local categoryData = self:GetCurrentCategoryCombatData()
-
-		local playerId = fightData.unitIds.player
-		local playerData = categoryData[playerId]
-
-		if playerData == nil then
-			self:ClearDPSStats()
-			return
-		end
 
 		local aps1, aps2, apsratio, amountValueKeys, countValueKeys
+		local playerData, groupData, playerValue, groupValue
 		if category == "healingOut" then
 			playerData = LibCombat2.GetPlayerHealingDoneToUnits(fightData)
 			groupData = LibCombat2.GetAllHealingDoneToUnits(fightData)
@@ -350,15 +341,19 @@ function CMXint.InitializeCombatStatsPanel(control)
 			return
 		end
 
+		if groupData == nil then
+			return
+		end
+
 		if category == "healingOut" and self.settings.includeOverheal then
-			playerValue = playerData.totalAmount + playerData.overflowAmount
+			playerValue = playerData and (playerData.totalAmount + playerData.overflowAmount) or 0
 			groupValue = groupData.totalAmount + groupData.overflowAmount
 		else
-			playerValue = playerData.totalAmount
+			playerValue = playerData and playerData.totalAmount or 0
 			groupValue = groupData.totalAmount
 		end
 
-		local activePlayerTime = playerData.endTime - playerData.startTime
+		local activePlayerTime = playerData and (playerData.endTime - playerData.startTime) or 0
 		local activeGroupTime = groupData.endTime - groupData.startTime
 
 		aps1 = playerValue / activePlayerTime * 1000
@@ -372,15 +367,13 @@ function CMXint.InitializeCombatStatsPanel(control)
 		for rowId = 1, 5 do
 			local amount_key = ZO_CachedStrFormat(ROW_KEY_FORMAT, "amount", rowId)
 			local count_key = ZO_CachedStrFormat(ROW_KEY_FORMAT, "count", rowId)
-			local valueKey = ZO_CachedStrFormat(ROW_KEY_FORMAT, "amount", rowId)
-			local hitKey = ZO_CachedStrFormat(ROW_KEY_FORMAT, "amount", rowId)
 
 			local amountValueKey = amountValueKeys[rowId]
 			local countValueKey = countValueKeys[rowId]
 
-			local playerAmount = playerData[amountValueKey] or 0
+			local playerAmount = playerData and playerData[amountValueKey] or 0
 			local groupAmount = groupData[amountValueKey] or 0
-			local playerCount = playerData[countValueKey] or 0
+			local playerCount = playerData and playerData[countValueKey] or 0
 			local groupCount = groupData[countValueKey] or 0
 			local amountPercent = groupAmount > 0 and (playerAmount / groupAmount) * 100 or 0
 			local countPercent = groupCount > 0 and (playerCount / groupCount) * 100 or 0

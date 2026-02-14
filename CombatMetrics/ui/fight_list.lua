@@ -1,3 +1,6 @@
+-- TODO: enable diagnostics after finishing refactoring
+---@diagnostic disable
+
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint

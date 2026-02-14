@@ -14,6 +14,11 @@ local _
 
 local em = GetEventManager()
 
+---@class Control
+---@field sizes number[]
+---@field anchors table[]
+---@field font string?
+
 local function ResizeControl(control, scale)
 	if control.sizes == nil and control.anchors == nil then
 		return
@@ -63,6 +68,7 @@ local function ResizeControl(control, scale)
 		if size then
 			size = tonumber(size) * (scale + 0.2) / 1.2
 		end -- Don't Scale fonts as much
+		---@cast control LabelControl
 		control:SetFont(string.format("%s|%s|%s", font, size, style))
 	end
 
@@ -85,6 +91,7 @@ local function InitializeFightReport()
 	local pos_x = settings.pos_x
 	local pos_y = settings.pos_y
 	FightReport:ClearAnchors()
+	---@diagnostic disable-next-line: missing-parameter, param-type-mismatch
 	FightReport:SetAnchor(CENTER, nil, TOPLEFT, pos_x, pos_y)
 
 	FightReport.settings = settings
@@ -103,7 +110,9 @@ local function InitializeFightReport()
 		SCENE_MANAGER:SetInUIMode(true)
 	end
 
+	---@diagnostic disable-next-line: missing-parameter
 	FightReport:SetHandler("OnMoveStop", savePos)
+	---@diagnostic disable-next-line: missing-parameter
 	FightReport:SetHandler("OnShow", onShow)
 
 	function FightReport:Resize(scale)

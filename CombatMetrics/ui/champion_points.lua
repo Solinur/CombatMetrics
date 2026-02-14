@@ -1,3 +1,6 @@
+---@diagnostic disable
+--- TODO: enable diagnostic when code is used
+
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint
@@ -8,6 +11,7 @@ local util = CMXint.util
 local logger
 ---@class CMXui
 local ui = CMXint.ui
+local dx = ui.dx
 
 local labelcolors = {
 	[CHAMPION_DISCIPLINE_TYPE_COMBAT] = GetString(SI_COMBAT_METRICS_MAGICKA_COLOR),
@@ -73,15 +77,15 @@ function CMXint.InitializeChampionPointsPanel(control)
 
 				title:SetText(ZO_CachedStrFormat("<<1>> (<<2>>)", disciplineName, discipline.total))
 
-				for starId, starData in CMX.spairs(discipline.stars, starOrder) do
+				for starId, starData in util.spairs(discipline.stars, starOrder) do
 					local points, state = unpack(starData)
 
 					if state == LIBCOMBAT_CPTYPE_SLOTTED then -- slotted
 						local starControl = constellationControl:GetNamedChild("StarControl" .. itemNo)
 						starControl:GetNamedChild("Icon"):SetHidden(false)
-						starControl
-							:GetNamedChild("Ring")
-							:SetTexture("/esoui/art/champion/actionbar/champion_bar_slot_frame.dds")
+
+						local ring = starControl:GetNamedChild("Ring")
+						ring:SetTexture("/esoui/art/champion/actionbar/champion_bar_slot_frame.dds")
 
 						local nameControl = starControl:GetNamedChild("Name")
 						local valueControl = starControl:GetNamedChild("Value")

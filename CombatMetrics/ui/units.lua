@@ -15,49 +15,49 @@ local adjustRowSize = util.adjustRowSize
 
 do -- Handling Unit Context Menu
 	local UnitContextMenuUnitId
-	local function postUnitDPS()
-		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SELECTED_UNIT, currentFight, UnitContextMenuUnitId)
-	end
+	-- local function postUnitDPS()
+	-- 	CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SELECTED_UNIT, currentFight, UnitContextMenuUnitId)
+	-- end
 
-	local function postUnitNameDPS()
-		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SELECTED_UNITNAME, currentFight, UnitContextMenuUnitId)
-	end
+	-- local function postUnitNameDPS()
+	-- 	CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SELECTED_UNITNAME, currentFight, UnitContextMenuUnitId)
+	-- end
 
-	local function postSelectionDPS()
-		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SELECTION, currentFight)
-	end
+	-- local function postSelectionDPS()
+	-- 	CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SELECTION, currentFight)
+	-- end
 
-	local function postSelectionHPS()
-		CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SELECTION_HEALING, currentFight)
-	end
+	-- local function postSelectionHPS()
+	-- 	CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SELECTION_HEALING, currentFight)
+	-- end
 
-	function CMX.UnitContextMenu(unitItem, upInside)
-		local category = CMXint.settings.fightReport.category
-		if not (upInside or category == "damageOut" or category == "healingOut") then
-			return
-		end
-		local dataId = unitItem.dataId
-		local selections = ui.selections
+	-- function CMX.UnitContextMenu(unitItem, upInside)
+	-- 	local category = CMXint.settings.fightReport.category
+	-- 	if not (upInside or category == "damageOut" or category == "healingOut") then
+	-- 		return
+	-- 	end
+	-- 	local dataId = unitItem.dataId
+	-- 	local selections = ui.selections
 
-		ClearMenu()
+	-- 	ClearMenu()
 
-		if category == "damageOut" then
-			UnitContextMenuUnitId = dataId
+	-- 	if category == "damageOut" then
+	-- 		UnitContextMenuUnitId = dataId
 
-			local unitName = fightData.units[dataId].name
+	-- 		local unitName = fightData.units[dataId].name
 
-			AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTUNITDPS), postUnitDPS)
-			AddCustomMenuItem(zo_strformat(GetString(SI_COMBAT_METRICS_POSTUNITNAMEDPS), unitName, 2), postUnitNameDPS)
+	-- 		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTUNITDPS), postUnitDPS)
+	-- 		AddCustomMenuItem(zo_strformat(GetString(SI_COMBAT_METRICS_POSTUNITNAMEDPS), unitName, 2), postUnitNameDPS)
 
-			if selections.unit[category] then
-				AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTSELECTIONDPS), postSelectionDPS)
-			end
-		elseif category == "healingOut" and selections.unit[category] then
-			AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTSELECTIONHPS), postSelectionHPS)
-		end
+	-- 		if selections.unit[category] then
+	-- 			AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTSELECTIONDPS), postSelectionDPS)
+	-- 		end
+	-- 	elseif category == "healingOut" and selections.unit[category] then
+	-- 		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTSELECTIONHPS), postSelectionHPS)
+	-- 	end
 
-		ShowMenu(unitItem)
-	end
+	-- 	ShowMenu(unitItem)
+	-- end
 end
 
 local function GetShortFormattedNumber(number)
@@ -110,7 +110,7 @@ function CMXint.InitializeUnitsPanel(control)
 		local showids = settings.showDebugIds
 
 		for unitId, unit in
-			CMX.spairs(data.units, function(t, a, b)
+			util.spairs(data.units, function(t, a, b)
 				return t[a][totalAmountKey] > t[b][totalAmountKey]
 			end)
 		do -- i.e. for damageOut sort by damageOutTotal
@@ -162,7 +162,7 @@ function CMXint.InitializeUnitsPanel(control)
 				local highlightControl = row:GetNamedChild("HighLight")
 				highlightControl:SetHidden(not highlight)
 
-				local nameControl = row:GetNamedChild("Name")
+				local nameControl = row:GetNamedChild("Name")--[[@as LabelControl]]
 				nameControl:SetText(name)
 				--nameControl:SetFont(font)
 				nameControl:SetColor(unpack(namecolor))
@@ -172,23 +172,23 @@ function CMXint.InitializeUnitsPanel(control)
 				local barControl = row:GetNamedChild("Bar")
 				barControl:SetWidth(maxwidth * ratio)
 
-				local rateControl = row:GetNamedChild("PerSecond")
+				local rateControl = row:GetNamedChild("PerSecond")--[[@as LabelControl]]
 				rateControl:SetText(string.format("%.0f", dps))
 
-				local amountControl = row:GetNamedChild("Total")
+				local amountControl = row:GetNamedChild("Total")--[[@as LabelControl]]
 				amountControl:SetText(GetShortFormattedNumber(damage))
 
-				local fractionControl = row:GetNamedChild("Fraction")
+				local fractionControl = row:GetNamedChild("Fraction")--[[@as LabelControl]]
 				fractionControl:SetText(string.format("%.1f%%", 100 * ratio))
 
 				currentanchor = { TOPLEFT, row, BOTTOMLEFT, 0, dx }
 
 				control.bars[rowId] = row
 
-				row.dataId = unitId
-				row.type = "unit"
-				row.id = rowId
-				row.self = control
+				row["dataId"] = unitId
+				row["type"] = "unit"
+				row["id"] = rowId
+				row["self"] = control
 			end
 		end
 	end

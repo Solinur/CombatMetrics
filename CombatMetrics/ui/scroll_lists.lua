@@ -17,7 +17,7 @@ local ui = CMXint.ui
 
 ---Custom variant of ZO_SortFilterList
 ---@class SortFilterList: ZO_SortFilterList
----@field New fun(control: Control, rowTemplate: string, rowHeight: number): SortFilterList
+---@field New fun(self:SortFilterList, control: Control, rowTemplate: string, rowHeight: number?): SortFilterList
 local SortFilterList = ZO_SortFilterList:Subclass()
 SortFilterList.UpdateRow = SortFilterList:MUST_IMPLEMENT()
 SortFilterList.BuildMasterList = SortFilterList:MUST_IMPLEMENT()
