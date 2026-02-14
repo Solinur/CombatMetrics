@@ -9,10 +9,6 @@ local logger
 ---@class CMXui
 local ui = CMXint.ui
 
-local dx = ui.dx
-local DPSstrings = CMXint.DPSstrings
-local adjustRowSize = util.adjustRowSize
-
 do -- Handling Unit Context Menu
 	local UnitContextMenuUnitId
 	-- local function postUnitDPS()
@@ -68,28 +64,129 @@ local function GetShortFormattedNumber(number)
 	return shortNumber
 end
 
+---@param panel UnitsPanel
+---@return UnitDataList
+local function InitUnitsList(panel)
+	---@class UnitDataList: SortFilterList
+	local dataList = ui.SortFilterList:New(panel.control, "CombatMetrics_RowTemplate")
+	panel.dataList = dataList
+	dataList.panel = panel
+	dataList.masterList = {}
+
+	---@param rowControl RowControl
+	function dataList:RecoverRow(rowControl)
+		local panel = self.panel
+		local rowHeight = self:GetHeight()
+
+		local icon = panel:AcquireSharedControl(CT_TEXTURE)
+		icon:ApplyPosition(rowControl, 2, 0, rowHeight, rowHeight)
+
+		local label = panel:AcquireSharedControl(CT_LABEL)
+		label:ApplyPosition(rowControl, 28, 0, 172)
+		label:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
+
+		local bar = panel:AcquireSharedControl(CT_TEXTURE)
+		bar:ApplyPosition(rowControl, 26, 0, 176, rowHeight)
+		bar:SetTexture("esoui/art/unitframes/progressbar_raidhealth.dds")
+
+		local perSecond = panel:AcquireSharedControl(CT_LABEL)
+		perSecond:ApplyPosition(rowControl, 204, 0, 46)
+		perSecond:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+
+		local total = panel:AcquireSharedControl(CT_LABEL)
+		total:ApplyPosition(rowControl, 252, 0, 58)
+		total:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+
+		local perCent = panel:AcquireSharedControl(CT_LABEL)
+		perCent:ApplyPosition(rowControl, 312, 0, 46)
+		perCent:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+
+		rowControl.controls = { icon, label, bar, perSecond, total, perCent }
+		rowControl.recovered = true
+	end
+
+	---@param rowControl RowControl
+	---@param data table
+	---@param scrollList object
+	function dataList:UpdateRow(rowControl, data, scrollList)
+		local panel = self.panel
+
+		if rowControl.recovered ~= true then
+			self:RecoverRow(rowControl)
+		end
+		local icon, label, bar, perSecond, total, perCent = unpack(rowControl.controls)
+
+		-- TODO: Implement controls
+	end
+
+	function dataList:AddDataEntry(unitId, data)
+		if data.groupUptime <= 0 then
+			return
+		end
+
+		local selected = false -- selectedbuffs ~= nil and (selectedbuffs[buffName] ~= nil) or false -- TODO: Selections
+
+		local rowData = {
+			selected = selected,
+		}
+
+		table.insert(self.masterList, ZO_ScrollList_CreateDataEntry(1, rowData))
+	end
+
+	function dataList:BuildMasterList()
+		local fightData = self.panel:GetCurrentFightData()
+		local category = self.panel.settings.category
+		-- local categoryData = util.GetPlayerCategoryData(fightData, category) --TODO: Needs to get the table
+
+		ZO_ClearTable(self.masterList)
+
+		for unitId, unitData in pairs(categoryData) do
+			self:AddDataEntry(unitId, unitData)
+		end
+	end
+
+	function dataList:FilterScrollList() end
+
+	dataList.sortHeaderGroup:SelectHeaderByKey("") -- TODO; pick initial sort key
+
+	return dataList
+end
+
 function CMXint.InitializeUnitsPanel(control)
+	---@class UnitsPanel: Panel
 	UnitsPanel = CMXint.PanelObject:New(control, "units")
+
+	UnitsPanel.dataList = InitUnitsList(UnitsPanel)
+
+	function UnitsPanel:UpdateHeaderLabels()
+		local isDamage = util.IsDamageCategory(self.settings.category)
+
+		local headers = self.control:GetNamedChild("Headers")
+		local nameControl = headers:GetNamedChild("Name") --[[@as LabelControl]]
+		local perSecondControl = headers:GetNamedChild("PerSecond") --[[@as LabelControl]]
+		local totalControl = headers:GetNamedChild("Total") --[[@as LabelControl]]
+
+		local label1 = isDamage and GetString(SI_COMBAT_METRICS_TARGET) or GetString(SI_COMBAT_METRICS_SOURCE)
+		nameControl:SetText(label1)
+		local label2 = isDamage and GetString(SI_COMBAT_METRICS_DPS) or GetString(SI_COMBAT_METRICS_HPS)
+		perSecondControl:SetText(label2)
+		local label3 = isDamage and GetString(SI_COMBAT_METRICS_DAMAGE) or GetString(SI_COMBAT_METRICS_HEALING)
+		totalControl:SetText(label3)
+	end
 
 	function UnitsPanel:Update(fightData)
 		logger:Debug("Updating Unit Panel")
 
+		self:UpdateHeaderLabels()
+
+		self.dataList:UpdateRowHeight()
+		self.dataList:RefreshData()
+
+		if true then
+			return
+		end
+
 		self:ResetBars()
-
-		local settings = self.settings
-		local category = settings.category
-		local isdamage = (category == "damageOut" or category == "damageIn")
-
-		local label1 = ((category == "damageOut" or category == "healingOut") and GetString(SI_COMBAT_METRICS_TARGET))
-			or GetString(SI_COMBAT_METRICS_SOURCE)
-		local label2 = (isdamage and GetString(SI_COMBAT_METRICS_DPS)) or GetString(SI_COMBAT_METRICS_HPS)
-		local label3 = (isdamage and GetString(SI_COMBAT_METRICS_DAMAGE)) or GetString(SI_COMBAT_METRICS_HEALING)
-
-		local header = control:GetNamedChild("Header")
-
-		header:GetNamedChild("Name"):SetText(label1)
-		header:GetNamedChild("PerSecond"):SetText(label2)
-		header:GetNamedChild("Total"):SetText(label3)
 
 		-- prepare data
 
@@ -192,6 +289,13 @@ function CMXint.InitializeUnitsPanel(control)
 			end
 		end
 	end
+
+	function UnitsPanel:Clear()
+		logger:Debug("Clearing Units Panel")
+		self.dataList:Clear()
+	end
+
+	function UnitsPanel:Recover() end
 end
 
 local isFileInitialized = false
@@ -199,7 +303,7 @@ function CMXint.InitializeUnits()
 	if isFileInitialized == true then
 		return false
 	end
-	logger = util.initSublogger("UnitPanel")
+	logger = util.initSublogger("UnitsPanel")
 
 	isFileInitialized = true
 	return true

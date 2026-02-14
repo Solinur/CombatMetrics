@@ -29,19 +29,19 @@ function ui.GetFont(base_size, bold)
 	return string.format("$(%s)|%s|%s", base_font, size, "soft-shadow-thin")
 end
 
-CMXint.DPSstrings = {
-	["damageOut"] = "DPSOut",
-	["damageIn"] = "DPSIn",
-	["healingOut"] = "HPSOut",
-	["healingIn"] = "HPSIn",
-}
+-- CMXint.DPSstrings = {
+-- 	["damageOut"] = "DPSOut",
+-- 	["damageIn"] = "DPSIn",
+-- 	["healingOut"] = "HPSOut",
+-- 	["healingIn"] = "HPSIn",
+-- }
 
-CMXint.CountStrings = {
-	["damageOut"] = "hitsOut",
-	["damageIn"] = "hitsIn",
-	["healingOut"] = "healsOut",
-	["healingIn"] = "healsIn",
-}
+-- CMXint.CountStrings = {
+-- 	["damageOut"] = "hitsOut",
+-- 	["damageIn"] = "hitsIn",
+-- 	["healingOut"] = "healsOut",
+-- 	["healingIn"] = "healsIn",
+-- }
 
 ---@param control Control
 local function storeOrigLayout(control)
@@ -322,6 +322,19 @@ function PanelObject:GetCurrentFightData()
 	end
 end
 
+---@return UnitDamageData|UnitHealData
+function PanelObject:GetCurrentCategoryCombatData()
+	local category = self.settings.category
+	local fightData = self:GetCurrentFightData()
+	local categoryData = fightData[category]
+
+	if categoryData == nil then
+		logger:Error("No data for category: %s", category)
+	end
+
+	return categoryData
+end
+
 function PanelObject:Release()
 	self:ReleaseSharedControls()
 end
@@ -334,7 +347,7 @@ function PanelObject:ReleaseSharedControls()
 	ZO_ClearTable(self.sharedControls)
 
 	if self.dataList then
-		self.dataList:Release()
+		self.dataList:Clear()
 	end
 end
 

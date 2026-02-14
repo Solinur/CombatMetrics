@@ -228,6 +228,7 @@
                                     </OnInitialized>
                                 </Control>
 
+                                <!-- Change to new Naming Scheme -->
                                 <Control name="$(parent)DamageOut"
                                     inherits="CombatMetrics_ControlTooltip CombatMetrics_CombatLogButtonTemplate">
                                     <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)GroupBuffsOut"

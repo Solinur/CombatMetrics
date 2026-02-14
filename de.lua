@@ -1,4 +1,3 @@
-
 -- Functionality
 
 SafeAddString(SI_COMBAT_METRICS_LANG, "de", 1)
@@ -41,7 +40,7 @@ SafeAddString(SI_COMBAT_METRICS_INCOMING_HPS, "Erhaltene HPS", 1)
 
 SafeAddString(SI_COMBAT_METRICS_EDIT_TITLE, "Doppelklick um zu editieren", 1)
 
-SafeAddString(SI_COMBAT_METRICS_DAMAGE_CAUSED, "Verursachter Schaden", 1)
+SafeAddString(SI_COMBAT_METRICS_DAMAGE_DONE, "Verursachter Schaden", 1)
 SafeAddString(SI_COMBAT_METRICS_DAMAGE_RECEIVED, "Erhaltener Schaden", 1)
 SafeAddString(SI_COMBAT_METRICS_HEALING_DONE, "Gewirkte Heilung", 1)
 SafeAddString(SI_COMBAT_METRICS_HEALING_RECEIVED, "Erhaltene Heilung", 1)
@@ -91,7 +90,11 @@ SafeAddString(SI_COMBAT_METRICS_POSTBUFF, "Buff Uptime posten", 1)
 SafeAddString(SI_COMBAT_METRICS_POSTBUFF_BOSS, "Buff Uptime an Bossen posten", 1)
 SafeAddString(SI_COMBAT_METRICS_POSTBUFF_GROUP, "Buff Uptime an Gruppenmitgliedern posten", 1)
 SafeAddString(SI_COMBAT_METRICS_POSTBUFF_FORMAT, "<<1>> - HPS: <<2>> (<<3>><<4[/ auf $d/ auf $d Einheiten]>>)", 1) -- (<<1>> = buff name, <<2>> = relative uptime, <<3>> = uptime, <<4>> = time) e.g. Major Intellect - Uptime: 93.2% (9:26 in 10:07)
-SafeAddString(SI_COMBAT_METRICS_POSTBUFF_FORMAT_GROUP, "<<1>> - Uptime: <<2>>/<<5>> (<<3>>/<<6>><<4[/ auf $d/ auf $d Einheiten]>>)", 1) -- (<<1>> = buff name, <<2>> = relative uptime, <<3>> = uptime, <<4>> = units, <<5>> = relative group uptime, <<6>> = group uptime) e.g. Minor Sorcery - Uptime: 55.4%/100.6% (5:36/10:11 in 10:07)
+SafeAddString(
+	SI_COMBAT_METRICS_POSTBUFF_FORMAT_GROUP,
+	"<<1>> - Uptime: <<2>>/<<5>> (<<3>>/<<6>><<4[/ auf $d/ auf $d Einheiten]>>)",
+	1
+) -- (<<1>> = buff name, <<2>> = relative uptime, <<3>> = uptime, <<4>> = units, <<5>> = relative group uptime, <<6>> = group uptime) e.g. Minor Sorcery - Uptime: 55.4%/100.6% (5:36/10:11 in 10:07)
 
 SafeAddString(SI_COMBAT_METRICS_SETTINGS, "Einstellungen", 1)
 SafeAddString(SI_COMBAT_METRICS_FEEDBACK, "Feedback / Spenden senden", 1)
@@ -118,9 +121,17 @@ SafeAddString(SI_COMBAT_METRICS_FEEDBACK_GOLD, "5000g spenden", 1)
 SafeAddString(SI_COMBAT_METRICS_FEEDBACK_GOLD2, "25000g spenden", 1)
 SafeAddString(SI_COMBAT_METRICS_FEEDBACK_ESOUI, "Webseite (ESOUI)", 1)
 SafeAddString(SI_COMBAT_METRICS_FEEDBACK_GITHUB, "GitHub", 1)
-SafeAddString(SI_COMBAT_METRICS_FEEDBACK_TEXT, "\nFalls du einen Bug melden willst, einen Vorschlag oder eine Frage hast, sende eine Nachricht, erstelle eine Meldung auf Github oder schreibe in die Kommentare auf ESOUI. \n\nSpenden werden gern entgegen genommen, werden aber nicht dringend gebraucht. \nFalls du mir nen Kaffee oder ein Bier ausgeben möchtest kannst du auf der ESOUI-Seite über Paypal spenden.", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_FEEDBACK_TEXT,
+	"\nFalls du einen Bug melden willst, einen Vorschlag oder eine Frage hast, sende eine Nachricht, erstelle eine Meldung auf Github oder schreibe in die Kommentare auf ESOUI. \n\nSpenden werden gern entgegen genommen, werden aber nicht dringend gebraucht. \nFalls du mir nen Kaffee oder ein Bier ausgeben möchtest kannst du auf der ESOUI-Seite über Paypal spenden.",
+	1
+)
 
-SafeAddString(SI_COMBAT_METRICS_STORAGE_FULL, "Der Datenspeicher ist voll. Der Kampf, den du speichern möchtest benötigt <<1>> MB. Lösche einen Kampf oder Kampflog, um Platz zu schaffen oder erhöhe die erlaubte Größe des Speichers in den Einstellungen.", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_STORAGE_FULL,
+	"Der Datenspeicher ist voll. Der Kampf, den du speichern möchtest benötigt <<1>> MB. Lösche einen Kampf oder Kampflog, um Platz zu schaffen oder erhöhe die erlaubte Größe des Speichers in den Einstellungen.",
+	1
+)
 
 -- Fight Control Button Tooltips
 
@@ -244,7 +255,11 @@ SafeAddString(SI_COMBAT_METRICS_CONSUMPTION, "Verbrauch", 1)
 SafeAddString(SI_COMBAT_METRICS_PM_SEC, "±/s", 1)
 SafeAddString(SI_COMBAT_METRICS_TARGET, "Ziel", 1)
 SafeAddString(SI_COMBAT_METRICS_PERCENT, "%", 1)
-SafeAddString(SI_COMBAT_METRICS_UNITDPS_TT, "Reale DPS, also der Schaden pro Sekunde zwischen dem ersten und letzten Treffer auf das Ziel", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_UNITDPS_TT,
+	"Reale DPS, also der Schaden pro Sekunde zwischen dem ersten und letzten Treffer auf das Ziel",
+	1
+)
 
 SafeAddString(SI_COMBAT_METRICS_ABILITY, "Fähigkeit", 1)
 SafeAddString(SI_COMBAT_METRICS_PER_HITS, "/Treffer", 1)
@@ -262,9 +277,21 @@ SafeAddString(SI_COMBAT_METRICS_SKILLTIME_LABEL2, "< W / F", 1) -- as in "Weapon
 SafeAddString(SI_COMBAT_METRICS_SKILLTIME_LABEL3, "W / F >", 1)
 
 SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT1, "Anzahl der Nutzungen", 1)
-SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT2, "Zeit zwischen der letzten Aktivierung von Waffe/Fertigkeit und dieser Fertigkeit.", 1)
-SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT3, "Zeit zwischen der letzten Aktivierung dieser Fertigkeit und dem folgenden Einsatz von einer Waffe/Fertigkeit.", 1)
-SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT4, "Durchschnittliche Zeit zwischen zwei Aktivierungen dieser Fertigkeit", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_SKILLTIME_TT2,
+	"Zeit zwischen der letzten Aktivierung von Waffe/Fertigkeit und dieser Fertigkeit.",
+	1
+)
+SafeAddString(
+	SI_COMBAT_METRICS_SKILLTIME_TT3,
+	"Zeit zwischen der letzten Aktivierung dieser Fertigkeit und dem folgenden Einsatz von einer Waffe/Fertigkeit.",
+	1
+)
+SafeAddString(
+	SI_COMBAT_METRICS_SKILLTIME_TT4,
+	"Durchschnittliche Zeit zwischen zwei Aktivierungen dieser Fertigkeit",
+	1
+)
 
 SafeAddString(SI_COMBAT_METRICS_SAVED_DATA, "Gespeicherte Daten", 1)
 
@@ -277,7 +304,11 @@ SafeAddString(SI_COMBAT_METRICS_SHOW_XPS, "<<1>> / <<2>> (<<3>>%)", 1) -- Format
 SafeAddString(SI_COMBAT_METRICS_MENU_PROFILES, "Profile", 1)
 
 SafeAddString(SI_COMBAT_METRICS_MENU_AC_NAME, "Konto-weite Einstellungen", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_AC_TOOLTIP, "Wenn aktiviert, teilen alle Charaktere eines Kontos die Einstellungen", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_AC_TOOLTIP,
+	"Wenn aktiviert, teilen alle Charaktere eines Kontos die Einstellungen",
+	1
+)
 
 SafeAddString(SI_COMBAT_METRICS_MENU_GS_NAME, "Allgemeine Einstellungen", 1)
 
@@ -286,10 +317,18 @@ SafeAddString(SI_COMBAT_METRICS_MENU_FH_TOOLTIP, "Anzahl der letzen Kämpfe, die
 
 SafeAddString(SI_COMBAT_METRICS_MENU_SVSIZE_NAME, "Datenspeicher für Kämpfe", 1)
 SafeAddString(SI_COMBAT_METRICS_MENU_SVSIZE_TOOLTIP, "Maximale Größe des Datenspeichers für Kämpfe in MB", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_SVSIZE_WARNING, "Mit Vorsicht benutzen! Viele gespeicherte Daten führen zu deutlich längeren Ladezeiten beim einloggen. In Extremfällen kann das Spiel dabei sogar abstürzen.", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_SVSIZE_WARNING,
+	"Mit Vorsicht benutzen! Viele gespeicherte Daten führen zu deutlich längeren Ladezeiten beim einloggen. In Extremfällen kann das Spiel dabei sogar abstürzen.",
+	1
+)
 
 SafeAddString(SI_COMBAT_METRICS_MENU_BOSSFIGHTS_NAME, "Bosskämpfe erhalten", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_BOSSFIGHTS_TOOLTIP, "Bosskämpfe im Verlauf bevorzugt behalten wenn die maximale Zahl an Kämpfen im Verlauf erreicht ist.", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_BOSSFIGHTS_TOOLTIP,
+	"Bosskämpfe im Verlauf bevorzugt behalten wenn die maximale Zahl an Kämpfen im Verlauf erreicht ist.",
+	1
+)
 
 SafeAddString(SI_COMBAT_METRICS_MENU_MG_NAME, "Schaden der Gruppe ermitteln", 1)
 --SafeAddString(SI_COMBAT_METRICS_MENU_MG_TOOLTIP, "Monitor the events of the whole group", 1)
@@ -378,4 +417,3 @@ SafeAddString(SI_COMBAT_METRICS_MENU_MG_NAME, "Schaden der Gruppe ermitteln", 1)
 --SafeAddString(SI_BINDING_NAME_CMX_POST_DPS, "Post Single + Multi Target DPS", 1)
 --SafeAddString(SI_BINDING_NAME_CMX_POST_HPS, "Post Heal to Chat", 1)
 --SafeAddString(SI_BINDING_NAME_CMX_RESET_FIGHT, "Manually Reset the Fight", 1)
-

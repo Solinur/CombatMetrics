@@ -11,6 +11,7 @@ local util = CMXint.util
 local logger
 ---@class CMXui
 local ui = CMXint.ui
+local cat = util.MainCategories
 
 local fightData
 local enlargedGraph = false
@@ -974,10 +975,10 @@ local MainCategoryFunctions = {
 }
 
 local CategoryStrings = {
-	[1] = { label = SI_COMBAT_METRICS_DPS, category = "damageOut" },
-	[2] = { label = SI_COMBAT_METRICS_HPS, category = "healingOut" },
-	[3] = { label = SI_COMBAT_METRICS_INCOMING_DPS, category = "damageIn" },
-	[4] = { label = SI_COMBAT_METRICS_INCOMING_HPS, category = "healingIn" },
+	[1] = { label = SI_COMBAT_METRICS_DPS, category = cat.CMX_CATEGORY_DAMAGE_DONE },
+	[2] = { label = SI_COMBAT_METRICS_HPS, category = cat.CMX_CATEGORY_HEALING_DONE },
+	[3] = { label = SI_COMBAT_METRICS_INCOMING_DPS, category = cat.CMX_CATEGORY_DAMAGE_RECEIVED },
+	[4] = { label = SI_COMBAT_METRICS_INCOMING_HPS, category = cat.CMX_CATEGORY_HEALING_RECEIVED },
 }
 
 local ResourceStrings = {

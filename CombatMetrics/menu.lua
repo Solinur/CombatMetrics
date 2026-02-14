@@ -520,7 +520,7 @@ function CMXint.InitMenu(svdefaults)
 			name = GetString(SI_COMBAT_METRICS_MENU_SHOW_DPS_NAME),
 			width = "half",
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_SHOW_DPS_TOOLTIP),
-			default = def.liveReport.damageOut,
+			default = def.liveReport.damageOut, -- TODO: Rename Variable
 			getFunc = function()
 				return settings.liveReport.damageOut
 			end,

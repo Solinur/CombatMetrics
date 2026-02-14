@@ -18,6 +18,8 @@ local ui = CMXint.ui
 ---Custom variant of ZO_SortFilterList
 ---@class SortFilterList: ZO_SortFilterList
 ---@field New fun(self:SortFilterList, control: Control, rowTemplate: string, rowHeight: number?): SortFilterList
+---@field panel Panel
+---@field MUST_IMPLEMENT fun()
 local SortFilterList = ZO_SortFilterList:Subclass()
 SortFilterList.UpdateRow = SortFilterList:MUST_IMPLEMENT()
 SortFilterList.BuildMasterList = SortFilterList:MUST_IMPLEMENT()
@@ -39,6 +41,11 @@ local function onRowControlReset(self, pool)
 
 	ZO_ObjectPool_DefaultResetControl(self)
 end
+
+---@class RowControl: Control
+---@field dataEntry table
+---@field controls table
+---@field recovered boolean
 
 ---@param control Control
 ---@param rowTemplate string
@@ -64,7 +71,7 @@ function SortFilterList:Initialize(control, rowTemplate, rowHeight) -- TODO: is 
 	ZO_ScrollList_EnableHighlight(listControl, "ZO_ThinListHighlight")
 end
 
-function SortFilterList:Release()
+function SortFilterList:Clear()
 	local listControl = self.list
 	ZO_ScrollList_Clear(listControl)
 	ZO_ScrollList_Commit(listControl)
@@ -119,9 +126,9 @@ end
 ---@param initialDirection boolean
 ---@param highlightTemplate string
 function CMX_SortHeader_Initialize(control, key, initialDirection, highlightTemplate)
-	control.key = key
-	control.initialDirection = initialDirection or ZO_SORT_ORDER_DOWN
-	control.usesArrow = true
-	control.highlightTemplate = highlightTemplate -- TODO: Find highlight template
+	control["key"] = key
+	control["initialDirection"] = initialDirection or ZO_SORT_ORDER_DOWN
+	control["usesArrow"] = true
+	control["highlightTemplate"] = highlightTemplate -- TODO: Find highlight template
 	control:SetMouseEnabled(true)
 end

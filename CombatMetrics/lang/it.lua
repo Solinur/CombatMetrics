@@ -33,7 +33,7 @@ SafeAddString(SI_COMBAT_METRICS_INCOMING_HPS, "HPS in arrivo", 1)
 
 SafeAddString(SI_COMBAT_METRICS_EDIT_TITLE, "Clicca due volte per modificare il nome dello scontro", 1)
 
-SafeAddString(SI_COMBAT_METRICS_DAMAGE_CAUSED, "Danno Inflitto", 1)
+SafeAddString(SI_COMBAT_METRICS_DAMAGE_DONE, "Danno Inflitto", 1)
 SafeAddString(SI_COMBAT_METRICS_DAMAGE_RECEIVED, "Danno Ricevuto", 1)
 SafeAddString(SI_COMBAT_METRICS_HEALING_DONE, "Cure Fatte", 1)
 SafeAddString(SI_COMBAT_METRICS_HEALING_RECEIVED, "Cure Ricevute", 1)
@@ -44,12 +44,16 @@ SafeAddString(SI_COMBAT_METRICS_TOGGLE_GRAPH, "Grafico", 1)
 SafeAddString(SI_COMBAT_METRICS_TOGGLE_INFO, "Informazioni", 1)
 SafeAddString(SI_COMBAT_METRICS_TOGGLE_SETTINGS, "Opzioni", 1)
 
-SafeAddString(SI_COMBAT_METRICS_NOTIFICATION, "Il mio Raid |cffff00Beyond Infinity|r sta cercando MagDK/Necro für vCR+3 (Greifenherz).", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_NOTIFICATION,
+	"Il mio Raid |cffff00Beyond Infinity|r sta cercando MagDK/Necro für vCR+3 (Greifenherz).",
+	1
+)
 SafeAddString(SI_COMBAT_METRICS_NOTIFICATION_GUILD, "Info: |cffff00Beyond Infinity|r", 1)
 SafeAddString(SI_COMBAT_METRICS_NOTIFICATION_ACCEPT, "Messaggio letto", 1)
 SafeAddString(SI_COMBAT_METRICS_NOTIFICATION_DISCARD, "Disattiva le notifiche", 1)
 
-	-- Options Menu Strings
+-- Options Menu Strings
 
 SafeAddString(SI_COMBAT_METRICS_SHOWIDS, "Mostra ID", 1) -- (for units, buffs and abilities)
 SafeAddString(SI_COMBAT_METRICS_HIDEIDS, "Nascondi ID", 1) -- (for units, buffs and abilities)
@@ -68,7 +72,7 @@ SafeAddString(SI_COMBAT_METRICS_POSTUNITNAMEDPS, "Invia DPS a '<<tm:1>>' gruppi"
 SafeAddString(SI_COMBAT_METRICS_POSTSELECTIONDPS, "Invia DPS ai gruppi selezionati", 1)
 SafeAddString(SI_COMBAT_METRICS_POSTSELECTIONHPS, "Invia HPS ai gruppi selezionati", 1)
 
-	-- Format Strings for DPS posting
+-- Format Strings for DPS posting
 
 SafeAddString(SI_COMBAT_METRICS_BOSS_DPS, "Boss DPS", 1)
 
@@ -85,14 +89,22 @@ SafeAddString(SI_COMBAT_METRICS_POSTBUFF, "Invia Durata del Bonus", 1)
 SafeAddString(SI_COMBAT_METRICS_POSTBUFF_BOSS, "Invia Durata del Bonus sui Boss", 1)
 SafeAddString(SI_COMBAT_METRICS_POSTBUFF_GROUP, "Invia Durata del Bonus sui membri del gruppo", 1)
 SafeAddString(SI_COMBAT_METRICS_POSTBUFF_FORMAT, "<<1>> - Durata: <<2>> (<<3>><<4[/ su $d/ su $d gruppi]>>)", 1) -- (<<1>> = buff name, <<2>> = relative uptime, <<3>> = uptime, <<4>> = time) e.g. Major Intellect - Uptime: 93.2% (9:26 in 10:07)
-SafeAddString(SI_COMBAT_METRICS_POSTBUFF_FORMAT_GROUP, "<<1>> - Durata: <<2>>/<<5>> (<<3>>/<<6>><<4[/ su $d/ su $d gruppi]>>)", 1) -- (<<1>> = buff name, <<2>> = relative uptime, <<3>> = uptime, <<4>> = units, <<5>> = relative group uptime, <<6>> = group uptime) e.g. Minor Sorcery - Uptime: 55.4%/100.6% (5:36/10:11 in 10:07)
+SafeAddString(
+	SI_COMBAT_METRICS_POSTBUFF_FORMAT_GROUP,
+	"<<1>> - Durata: <<2>>/<<5>> (<<3>>/<<6>><<4[/ su $d/ su $d gruppi]>>)",
+	1
+) -- (<<1>> = buff name, <<2>> = relative uptime, <<3>> = uptime, <<4>> = units, <<5>> = relative group uptime, <<6>> = group uptime) e.g. Minor Sorcery - Uptime: 55.4%/100.6% (5:36/10:11 in 10:07)
 
 SafeAddString(SI_COMBAT_METRICS_SETTINGS, "Impostazioni Addon", 1)
 
-	-- Graph
+-- Graph
 
 SafeAddString(SI_COMBAT_METRICS_TOGGLE_CURSOR, "Attiva/Disattiva per mostrare il cursore e i suggerimenti", 1)
-SafeAddString(SI_COMBAT_METRICS_GRAPH_BUFF_GROUP_SELECTOR, "Attiva/Disattiva per mostrare il tempo di attività del gruppo", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_GRAPH_BUFF_GROUP_SELECTOR,
+	"Attiva/Disattiva per mostrare il tempo di attività del gruppo",
+	1
+)
 
 SafeAddString(SI_COMBAT_METRICS_RECALCULATE, "Rielabora lo Scontro ", 1)
 SafeAddString(SI_COMBAT_METRICS_SMOOTHED, "Smoothed", 1)
@@ -104,7 +116,7 @@ SafeAddString(SI_COMBAT_METRICS_BOSS_HP, "HP Boss", 1)
 SafeAddString(SI_COMBAT_METRICS_ENLARGE, "Ingrandito", 1)
 SafeAddString(SI_COMBAT_METRICS_SHRINK, "Ristretto", 1)
 
-	-- Feedback
+-- Feedback
 
 SafeAddString(SI_COMBAT_METRICS_FEEDBACK, "Riscontro", 1)
 
@@ -122,15 +134,23 @@ SafeAddString(SI_COMBAT_METRICS_DONATE, "Dona", 1)
 SafeAddString(SI_COMBAT_METRICS_DONATE_GOLD, "Oro", 1)
 SafeAddString(SI_COMBAT_METRICS_DONATE_GOLD_HEADER, "Donazione: Combat Metrics %s", 1)
 SafeAddString(SI_COMBAT_METRICS_DONATE_CROWNS, "Crown", 1)
-SafeAddString(SI_COMBAT_METRICS_DONATE_CROWNS_TEXT, "Se vuoi regalare qualcosa dal negozio delle corone, sarei felice di ricevere qualche cassa della corona o oggetti consumabili.\nPuoi anche contattarmi se desideri regalare qualcos'altro.", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_DONATE_CROWNS_TEXT,
+	"Se vuoi regalare qualcosa dal negozio delle corone, sarei felice di ricevere qualche cassa della corona o oggetti consumabili.\nPuoi anche contattarmi se desideri regalare qualcos'altro.",
+	1
+)
 SafeAddString(SI_COMBAT_METRICS_DONATE_CROWNS_ACCOUNT, "Il Mio Account:", 1)
 SafeAddString(SI_COMBAT_METRICS_DONATE_ESOUI, "Pagina della Donazione", 1)
 
 SafeAddString(SI_COMBAT_METRICS_OK, "OK", 1)
 
-SafeAddString(SI_COMBAT_METRICS_STORAGE_FULL, "Il file di archiviazione è pieno. Lo scontro che vuoi salvare ha bisogno di <<1>> MB. Elimina uno scontro per liberare un po' di spazio o aumenta lo spazio consentito nelle impostazioni!", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_STORAGE_FULL,
+	"Il file di archiviazione è pieno. Lo scontro che vuoi salvare ha bisogno di <<1>> MB. Elimina uno scontro per liberare un po' di spazio o aumenta lo spazio consentito nelle impostazioni!",
+	1
+)
 
-	-- Fight Control Button Tooltips
+-- Fight Control Button Tooltips
 
 SafeAddString(SI_COMBAT_METRICS_PREVIOUS_FIGHT, "Scontro Precedente", 1)
 SafeAddString(SI_COMBAT_METRICS_NEXT_FIGHT, "Scontro Successivo", 1)
@@ -141,7 +161,7 @@ SafeAddString(SI_COMBAT_METRICS_SAVE_FIGHT2, "Shift+Click: Salva lo scontro e il
 SafeAddString(SI_COMBAT_METRICS_DELETE_COMBAT_LOG, "Cancella il registro del combattimento", 1)
 SafeAddString(SI_COMBAT_METRICS_DELETE_FIGHT, "Cancella Scontro", 1)
 
-	-- Fight List
+-- Fight List
 
 SafeAddString(SI_COMBAT_METRICS_RECENT_FIGHT, "Scontri Recenti", 1)
 SafeAddString(SI_COMBAT_METRICS_DURATION, "Durata", 1)
@@ -156,7 +176,7 @@ SafeAddString(SI_COMBAT_METRICS_DELETE, "Cancella", 1)
 
 SafeAddString(SI_COMBAT_METRICS_SAVED_FIGHTS, "Scontri Salvati", 1)
 
-	-- More UI Strings
+-- More UI Strings
 
 SafeAddString(SI_COMBAT_METRICS_ACTIVE_TIME, "Tempo Attivo: ", 1)
 SafeAddString(SI_COMBAT_METRICS_ZERO_SEC, "0 s", 1)
@@ -173,21 +193,21 @@ SafeAddString(SI_COMBAT_METRICS_ABSOLUTEC, "Assoluto: ", 1)
 SafeAddString(SI_COMBAT_METRICS_OVERHEAL, "Cure eccessive: ", 1) -- as in overheal
 
 SafeAddString(SI_COMBAT_METRICS_HITS, "Colpi", 1)
-SafeAddString(SI_COMBAT_METRICS_NORM, "Norm", 1)  -- Normal, short
-SafeAddString(SI_COMBAT_METRICS_OH, "CE", 1)  -- Overheal, short
+SafeAddString(SI_COMBAT_METRICS_NORM, "Norm", 1) -- Normal, short
+SafeAddString(SI_COMBAT_METRICS_OH, "CE", 1) -- Overheal, short
 
 SafeAddString(SI_COMBAT_METRICS_RESOURCES, "Risorse", 1)
 
 SafeAddString(SI_COMBAT_METRICS_STATS, "Statistiche", 1)
-SafeAddString(SI_COMBAT_METRICS_AVE, "Media", 1)  -- Average, short
-SafeAddString(SI_COMBAT_METRICS_AVE_N, "Media N", 1)  -- Average Normal, short
-SafeAddString(SI_COMBAT_METRICS_AVE_C, "Media C", 1)  -- Average Crit, short
-SafeAddString(SI_COMBAT_METRICS_AVE_B, "Media B", 1)  -- Average Blocked, short
+SafeAddString(SI_COMBAT_METRICS_AVE, "Media", 1) -- Average, short
+SafeAddString(SI_COMBAT_METRICS_AVE_N, "Media N", 1) -- Average Normal, short
+SafeAddString(SI_COMBAT_METRICS_AVE_C, "Media C", 1) -- Average Crit, short
+SafeAddString(SI_COMBAT_METRICS_AVE_B, "Media B", 1) -- Average Blocked, short
 SafeAddString(SI_COMBAT_METRICS_AVERAGE, "Media", 1)
 SafeAddString(SI_COMBAT_METRICS_NORMAL_HITS, "Colpi normali", 1)
-SafeAddString(SI_COMBAT_METRICS_MAX, "Max", 1)  -- Maximum
-SafeAddString(SI_COMBAT_METRICS_MIN, "Min", 1)  -- Minimum
-SafeAddString(SI_COMBAT_METRICS_EFFECTIVE, "Effettivo", 1)  -- Effective
+SafeAddString(SI_COMBAT_METRICS_MAX, "Max", 1) -- Maximum
+SafeAddString(SI_COMBAT_METRICS_MIN, "Min", 1) -- Minimum
+SafeAddString(SI_COMBAT_METRICS_EFFECTIVE, "Effettivo", 1) -- Effective
 
 SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA1, "Magicka Massima", 1)
 SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA2, "Danno Incantesimo", 1)
@@ -196,22 +216,22 @@ SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA_FORMAT3, "%.1f %%", 1) -- e.g. 12.
 SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA4, "Danno Critico", 1)
 SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA5, "Penetr. Incantesimo", 1)
 SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA6, "Penetr. Eccessiva", 1)
-SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA_FORMAT6, "%.1f %%", 1)-- e.g. 12.3%
+SafeAddString(SI_COMBAT_METRICS_STATS_MAGICKA_FORMAT6, "%.1f %%", 1) -- e.g. 12.3%
 
 SafeAddString(SI_COMBAT_METRICS_STATS_STAMINA1, "Stamina Massima", 1)
 SafeAddString(SI_COMBAT_METRICS_STATS_STAMINA2, "Danno Arma", 1)
 SafeAddString(SI_COMBAT_METRICS_STATS_STAMINA3, "Arma Critico", 1)
-SafeAddString(SI_COMBAT_METRICS_STATS_STAMINA_FORMAT3, "%.1f %%", 1)-- e.g. 12.3%
+SafeAddString(SI_COMBAT_METRICS_STATS_STAMINA_FORMAT3, "%.1f %%", 1) -- e.g. 12.3%
 SafeAddString(SI_COMBAT_METRICS_STATS_STAMINA4, "Danno Critico", 1)
 SafeAddString(SI_COMBAT_METRICS_STATS_STAMINA5, "Penetr. Fisica", 1)
 SafeAddString(SI_COMBAT_METRICS_STATS_STAMINA6, "Penetr. Eccessiva", 1)
-SafeAddString(SI_COMBAT_METRICS_STATS_STAMINA_FORMAT6, "%.1f %%", 1)-- e.g. 12.3%
+SafeAddString(SI_COMBAT_METRICS_STATS_STAMINA_FORMAT6, "%.1f %%", 1) -- e.g. 12.3%
 
 SafeAddString(SI_COMBAT_METRICS_STATS_HEALTH1, "Salute Massima", 1)
 SafeAddString(SI_COMBAT_METRICS_STATS_HEALTH2, "Resistenza Fisica", 1)
 SafeAddString(SI_COMBAT_METRICS_STATS_HEALTH3, "Resistenza Incantesimi", 1)
 SafeAddString(SI_COMBAT_METRICS_STATS_HEALTH4, "Resistenza Critico", 1)
-SafeAddString(SI_COMBAT_METRICS_STATS_HEALTH_FORMAT4, "%.1f %%", 1)-- e.g. 12.3%
+SafeAddString(SI_COMBAT_METRICS_STATS_HEALTH_FORMAT4, "%.1f %%", 1) -- e.g. 12.3%
 
 SafeAddString(SI_COMBAT_METRICS_PERFORMANCE, "Prestazioni", 1)
 SafeAddString(SI_COMBAT_METRICS_PERFORMANCE_FPSAVG, "FPS Media", 1)
@@ -240,11 +260,15 @@ SafeAddString(SI_COMBAT_METRICS_TOGGLE_GROUPBUFFIN_EVENTS, "Attiva/Disattiva eve
 SafeAddString(SI_COMBAT_METRICS_TOGGLE_GROUPBUFFOUT_EVENTS, "Attiva/Disattiva eventi dei bonus di gruppo inviati", 1)
 SafeAddString(SI_COMBAT_METRICS_TOGGLE_RESOURCE_EVENTS, "Attiva/Disattiva eventi risorse", 1)
 SafeAddString(SI_COMBAT_METRICS_TOGGLE_STATS_CHANGE_EVENTS, "Attiva/Disattiva statistiche cambio eventi", 1)
-SafeAddString(SI_COMBAT_METRICS_TOGGLE_MESSAGE_CHANGE_EVENTS, "Attiva/Disattiva eventi di informazione (e.g. cambio arma)", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_TOGGLE_MESSAGE_CHANGE_EVENTS,
+	"Attiva/Disattiva eventi di informazione (e.g. cambio arma)",
+	1
+)
 SafeAddString(SI_COMBAT_METRICS_TOGGLE_SKILL_USE_EVENTS, "Attiva/Disattiva eventi delle abilità usate", 1)
 SafeAddString(SI_COMBAT_METRICS_TOGGLE_PERFORMANCE_EVENTS, "Attiva/Disattiva informazioni sulle prestazioni", 1)
 
-	-- \n = new line
+-- \n = new line
 
 SafeAddString(SI_COMBAT_METRICS_DEBUFF_IN, "(Malus)Bonus\nIn", 1)
 SafeAddString(SI_COMBAT_METRICS_DEBUFF_OUT, "(Malus)Bonus\nOut", 1)
@@ -265,7 +289,11 @@ SafeAddString(SI_COMBAT_METRICS_CONSUMPTION, "Consumo", 1)
 SafeAddString(SI_COMBAT_METRICS_PM_SEC, "±/s", 1)
 SafeAddString(SI_COMBAT_METRICS_TARGET, "Bersaglio", 1)
 SafeAddString(SI_COMBAT_METRICS_PERCENT, "%", 1)
-SafeAddString(SI_COMBAT_METRICS_UNITDPS_TT, "DPS Reale, e.g. il danno al secondo tra il tuo primo e il tuo ultimo colpo a quel bersaglio", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_UNITDPS_TT,
+	"DPS Reale, e.g. il danno al secondo tra il tuo primo e il tuo ultimo colpo a quel bersaglio",
+	1
+)
 
 SafeAddString(SI_COMBAT_METRICS_ABILITY, "Abilità", 1)
 SafeAddString(SI_COMBAT_METRICS_PER_HITS, "/Colpi", 1)
@@ -286,8 +314,16 @@ SafeAddString(SI_COMBAT_METRICS_SKILLTIME_LABEL2, "tess", 1) -- weaving time
 SafeAddString(SI_COMBAT_METRICS_SKILLTIME_LABEL3, "persi", 1) -- errors
 
 SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT1, "Numero di lanci di questa abilità", 1)
-SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT2, "Tempo Combinazione\n\nIl tempo medio sprecato prima del lancio della abilità successiva.", 1)
-SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT3, "Errori Combinazione\n\nNumero di volte in cui l'attivazione di abilità non è stata seguita dopo un attacco d'arma o viceversa", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_SKILLTIME_TT2,
+	"Tempo Combinazione\n\nIl tempo medio sprecato prima del lancio della abilità successiva.",
+	1
+)
+SafeAddString(
+	SI_COMBAT_METRICS_SKILLTIME_TT3,
+	"Errori Combinazione\n\nNumero di volte in cui l'attivazione di abilità non è stata seguita dopo un attacco d'arma o viceversa",
+	1
+)
 SafeAddString(SI_COMBAT_METRICS_SKILLTIME_TT4, "Tempo medio tra le successive attivazioni di questa abilità", 1)
 
 SafeAddString(SI_COMBAT_METRICS_SKILLTIME_WEAVING, "Media Combinazione: ", 1)
@@ -311,7 +347,11 @@ SafeAddString(SI_COMBAT_METRICS_SHOW_XPS, "<<1>> / <<2>> (<<3>>%)", 1) -- Format
 SafeAddString(SI_COMBAT_METRICS_MENU_PROFILES, "Profili", 1)
 
 SafeAddString(SI_COMBAT_METRICS_MENU_AC_NAME, "Utilizzare Impostazioni Intero Account", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_AC_TOOLTIP, "Se abilitato, tutti i personaggi di un account condivideranno le impostazioni", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_AC_TOOLTIP,
+	"Se abilitato, tutti i personaggi di un account condivideranno le impostazioni",
+	1
+)
 
 SafeAddString(SI_COMBAT_METRICS_MENU_GS_NAME, "Impostazioni Generali", 1)
 
@@ -320,10 +360,18 @@ SafeAddString(SI_COMBAT_METRICS_MENU_FH_TOOLTIP, "Numero degli scontri recenti d
 
 SafeAddString(SI_COMBAT_METRICS_MENU_SVSIZE_NAME, "Memoria degli Scontri Salvati", 1)
 SafeAddString(SI_COMBAT_METRICS_MENU_SVSIZE_TOOLTIP, "Dimensione massima della memoria per gli salvati in MB", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_SVSIZE_WARNING, "Da usare con cautela! Molti dati salvati aumentano significativamente i tempi di caricamento. Se il file diventa troppo grande, il client potrebbe bloccarsi nel tentativo di caricarlo.", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_SVSIZE_WARNING,
+	"Da usare con cautela! Molti dati salvati aumentano significativamente i tempi di caricamento. Se il file diventa troppo grande, il client potrebbe bloccarsi nel tentativo di caricarlo.",
+	1
+)
 
 SafeAddString(SI_COMBAT_METRICS_MENU_BOSSFIGHTS_NAME, "Mantieni gli Scontri dei Boss", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_BOSSFIGHTS_TOOLTIP, "Cancella gli altri scontri prima di cancellare gli scontri con i boss quando viene raggiunto il limite degli scontri.", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_BOSSFIGHTS_TOOLTIP,
+	"Cancella gli altri scontri prima di cancellare gli scontri con i boss quando viene raggiunto il limite degli scontri.",
+	1
+)
 
 SafeAddString(SI_COMBAT_METRICS_MENU_MG_NAME, "Monitoraggio Danni di Gruppo", 1)
 SafeAddString(SI_COMBAT_METRICS_MENU_MG_TOOLTIP, "Controlla gli eventi di tutto il gruppo", 1)
@@ -335,51 +383,111 @@ SafeAddString(SI_COMBAT_METRICS_MENU_GL_NAME, "Monitoraggio Danni per Grandi Gru
 SafeAddString(SI_COMBAT_METRICS_MENU_GL_TOOLTIP, "Monitora i danni per grandi gruppi (più di 4 membri)", 1)
 
 SafeAddString(SI_COMBAT_METRICS_MENU_LM_NAME, "Modalità Leggera", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_LM_TOOLTIP, "Quando è in modalità leggera, la metrica degli scontri calcolerà solo i DPS/HPS nella finestra del registro in tempo reale. Non verrà calcolata alcuna statistica e la finestra del registro del combattimento sarà disabilitata", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_LM_TOOLTIP,
+	"Quando è in modalità leggera, la metrica degli scontri calcolerà solo i DPS/HPS nella finestra del registro in tempo reale. Non verrà calcolata alcuna statistica e la finestra del registro del combattimento sarà disabilitata",
+	1
+)
 
 SafeAddString(SI_COMBAT_METRICS_MENU_NOPVP_NAME, "Disattiva in PvP", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_NOPVP_TOOLTIP, "Disattiva la registrazione degli scontri a Cyrodil e nei Campi di Battaglia", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_NOPVP_TOOLTIP,
+	"Disattiva la registrazione degli scontri a Cyrodil e nei Campi di Battaglia",
+	1
+)
 
 SafeAddString(SI_COMBAT_METRICS_MENU_LMPVP_NAME, "Modalità Leggera in PvP", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_LMPVP_TOOLTIP, "Passa alla modalità leggera a Cyrodil e nei Campi di Battaglia. Quando è in modalità leggera, Combat Metrics calcolerà solo i DPS/HPS nella finestra del registro in tempo reale. Non verrà calcolata alcuna statistica e la finestra del registro degli scontri sarà disabilitata", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_LMPVP_TOOLTIP,
+	"Passa alla modalità leggera a Cyrodil e nei Campi di Battaglia. Quando è in modalità leggera, Combat Metrics calcolerà solo i DPS/HPS nella finestra del registro in tempo reale. Non verrà calcolata alcuna statistica e la finestra del registro degli scontri sarà disabilitata",
+	1
+)
 
 SafeAddString(SI_COMBAT_METRICS_MENU_ASCC_NAME, "Selezione Automatica del Canale", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_ASCC_TOOLTIP, "Seleziona automaticamente il canale quando si inviano DPS/HPS nella chat. Quando si è in gruppo usa /group nella chat altrimenti usa /say.", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_ASCC_TOOLTIP,
+	"Seleziona automaticamente il canale quando si inviano DPS/HPS nella chat. Quando si è in gruppo usa /group nella chat altrimenti usa /say.",
+	1
+)
 SafeAddString(SI_COMBAT_METRICS_MENU_AS_NAME, "Schermata Automatica", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_AS_TOOLTIP, "Scatta automaticamente un'immagine quando si apre la finestra del registro degli scontri", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_AS_TOOLTIP,
+	"Scatta automaticamente un'immagine quando si apre la finestra del registro degli scontri",
+	1
+)
 SafeAddString(SI_COMBAT_METRICS_MENU_ML_NAME, "Lunghezza minima dello scontro per la schermata", 1)
 SafeAddString(SI_COMBAT_METRICS_MENU_ML_TOOLTIP, "Lunghezza minima dello scontro in s per lo schermata automatica", 1)
 SafeAddString(SI_COMBAT_METRICS_MENU_SF_NAME, "Adatta la finestra del registro degli scontri", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_SF_TOOLTIP, "Regola la dimensione di tutti gli elementi della finestra del registro degli scontri", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_SF_TOOLTIP,
+	"Regola la dimensione di tutti gli elementi della finestra del registro degli scontri",
+	1
+)
 
 SafeAddString(SI_COMBAT_METRICS_MENU_DISPLAYNAMES_NAME, "Mostra Nomi Account", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_DISPLAYNAMES_TOOLTIP, "Mostra i nomi degli account (@Nome) invece dei nomi dei personaggi per i membri del gruppo", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_DISPLAYNAMES_TOOLTIP,
+	"Mostra i nomi degli account (@Nome) invece dei nomi dei personaggi per i membri del gruppo",
+	1
+)
 
 SafeAddString(SI_COMBAT_METRICS_MENU_SHOWPETS_NAME, "Mostra Animali Domestici", 1)
 SafeAddString(SI_COMBAT_METRICS_MENU_HIDEPETS, "Nascondi Animali Domestici", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_SHOWPETS_TOOLTIP, "Mostra gli animali domestici nella finestra del registro degli scontri", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_SHOWPETS_TOOLTIP,
+	"Mostra gli animali domestici nella finestra del registro degli scontri",
+	1
+)
 
 SafeAddString(SI_COMBAT_METRICS_MENU_NOTIFICATIONS, "Consenti Notifiche", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_NOTIFICATIONS_TOOLTIP, "Ogni tanto, potrei aggiungere una notifica alla finestra dei registri, per raccogliere dati o per reclutare persone nei miei raid (per risparmiare tempo che preferirei dedicare agli addon). Disattivalo, se non lo vuoi.", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_NOTIFICATIONS_TOOLTIP,
+	"Ogni tanto, potrei aggiungere una notifica alla finestra dei registri, per raccogliere dati o per reclutare persone nei miei raid (per risparmiare tempo che preferirei dedicare agli addon). Disattivalo, se non lo vuoi.",
+	1
+)
 
 SafeAddString(SI_COMBAT_METRICS_MENU_RESPEN_NAME, "Resistenza e Penetrazione", 1)
 SafeAddString(SI_COMBAT_METRICS_MENU_CRUSHER, "Frantumatore", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_CRUSHER_TOOLTIP, "Riduzione della resistenza dovuta al malus del glifo Frantumatore. Per il glifo d'oro di livello massimo: standard: 1622, infuso: 2108, infuso + Torug: 2740", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_CRUSHER_TOOLTIP,
+	"Riduzione della resistenza dovuta al malus del glifo Frantumatore. Per il glifo d'oro di livello massimo: standard: 1622, infuso: 2108, infuso + Torug: 2740",
+	1
+)
 SafeAddString(SI_COMBAT_METRICS_MENU_MOBRESISTANCE, "Resistenza del bersaglio", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_MOBRESISTANCE_TOOLTIP, "Resistenza del bersaglio,immaginata, per il calcolo della sovrappenetrazione", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_MOBRESISTANCE_TOOLTIP,
+	"Resistenza del bersaglio,immaginata, per il calcolo della sovrappenetrazione",
+	1
+)
 
 SafeAddString(SI_COMBAT_METRICS_MENU_LR_NAME, "Finestra Registro in Tempo Reale", 1)
 SafeAddString(SI_COMBAT_METRICS_MENU_ENABLE_NAME, "Abilita", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_ENABLE_TOOLTIP, "Abilita la finestra del registro in tempo reale che mostra DPS e HPS durante il combattimento", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_ENABLE_TOOLTIP,
+	"Abilita la finestra del registro in tempo reale che mostra DPS e HPS durante il combattimento",
+	1
+)
 
 SafeAddString(SI_COMBAT_METRICS_MENU_LR_LOCK, "Blocca", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_LR_LOCK_TOOLTIP, "Bloccare la finestra del registro in tempo reale, in modo che non possa essere spostata", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_LR_LOCK_TOOLTIP,
+	"Bloccare la finestra del registro in tempo reale, in modo che non possa essere spostata",
+	1
+)
 
 SafeAddString(SI_COMBAT_METRICS_MENU_LR_ALIGNMENT, "Usa numeri allineati a sinistra", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_LR_ALIGNMENT_TOOLTIP, "Imposta il posizionamento dei numeri di Danni/Cure/ecc. per la finestra del registro in tempo reale con l'allineato a sinistra", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_LR_ALIGNMENT_TOOLTIP,
+	"Imposta il posizionamento dei numeri di Danni/Cure/ecc. per la finestra del registro in tempo reale con l'allineato a sinistra",
+	1
+)
 
 SafeAddString(SI_COMBAT_METRICS_MENU_LAYOUT_NAME, "Disposizione", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_LAYOUT_TOOLTIP, "Seleziona la disposizione della finestra del registro in tempo reale", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_LAYOUT_TOOLTIP,
+	"Seleziona la disposizione della finestra del registro in tempo reale",
+	1
+)
 SafeAddString(SI_COMBAT_METRICS_MENU_SCALE_NAME, "Adatta", 1)
 SafeAddString(SI_COMBAT_METRICS_MENU_SCALE_TOOLTIP, "Adatta la finestra del registro in tempo reale.", 1)
 
@@ -387,24 +495,60 @@ SafeAddString(SI_COMBAT_METRICS_MENU_BGALPHA_NAME, "Trasparenza Sfondo", 1)
 SafeAddString(SI_COMBAT_METRICS_MENU_BGALPHA_TOOLTIP, "Impostare la Trasparenza dello Sfondo", 1)
 
 SafeAddString(SI_COMBAT_METRICS_MENU_SHOW_DPS_NAME, "Mostra DPS", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_SHOW_DPS_TOOLTIP, "Mostra i DPS inflitti nella finestra del registro in tempo reale", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_SHOW_DPS_TOOLTIP,
+	"Mostra i DPS inflitti nella finestra del registro in tempo reale",
+	1
+)
 SafeAddString(SI_COMBAT_METRICS_MENU_SHOW_SDPS_NAME, "Mostra DPS Bersaglio Singolo", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_SHOW_SDPS_TOOLTIP, "Mostra i DPS inflitti su singolo bersaglio nella finestra del registro in tempo reale", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_SHOW_SDPS_TOOLTIP,
+	"Mostra i DPS inflitti su singolo bersaglio nella finestra del registro in tempo reale",
+	1
+)
 SafeAddString(SI_COMBAT_METRICS_MENU_SHOW_HPS_NAME, "Mostra HPS", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_SHOW_HPS_TOOLTIP, "Mostra HPS dei tuoi lanci nella finestra del registro in tempo reale", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_SHOW_HPS_TOOLTIP,
+	"Mostra HPS dei tuoi lanci nella finestra del registro in tempo reale",
+	1
+)
 SafeAddString(SI_COMBAT_METRICS_MENU_SHOW_HPSA_NAME, "Mostra HPS + Cure Eccesso", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_SHOW_HPSA_TOOLTIP, "Mostra HPS incluso l'eccesso di cure lanciate nella finestra del registro in tempo reale", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_SHOW_HPSA_TOOLTIP,
+	"Mostra HPS incluso l'eccesso di cure lanciate nella finestra del registro in tempo reale",
+	1
+)
 SafeAddString(SI_COMBAT_METRICS_MENU_SHOW_INC_DPS_NAME, "Mostra DPS Ricevuti", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_SHOW_INC_DPS_TOOLTIP, "Mostra i DPS ricevuti nella finestra del registro in tempo reale", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_SHOW_INC_DPS_TOOLTIP,
+	"Mostra i DPS ricevuti nella finestra del registro in tempo reale",
+	1
+)
 SafeAddString(SI_COMBAT_METRICS_MENU_SHOW_INC_HPS_NAME, "Mostra HPS Ricevuti", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_SHOW_INC_HPS_TOOLTIP, "Mostra gli HPS ricevuti nella finestra del registro in tempo reale", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_SHOW_INC_HPS_TOOLTIP,
+	"Mostra gli HPS ricevuti nella finestra del registro in tempo reale",
+	1
+)
 SafeAddString(SI_COMBAT_METRICS_MENU_SHOW_TIME_NAME, "Mostra il Tempo", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_SHOW_TIME_TOOLTIP, "Mostra il tempo in cui hai inflitto danni nella finestra del registro in tempo reale", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_SHOW_TIME_TOOLTIP,
+	"Mostra il tempo in cui hai inflitto danni nella finestra del registro in tempo reale",
+	1
+)
 
 SafeAddString(SI_COMBAT_METRICS_MENU_CHAT_TITLE, "Trasmetti Registro del Combattimento nella chat", 1)
-SafeAddString(SI_COMBAT_METRICS_MENU_CHAT_WARNING, "Usare con cautela! La creazione di linee di testo richiede molto lavoro da parte della CPU. È meglio disabilitarlo se si prevedono scontri pesanti (trial, cyrodil)", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_CHAT_WARNING,
+	"Usare con cautela! La creazione di linee di testo richiede molto lavoro da parte della CPU. È meglio disabilitarlo se si prevedono scontri pesanti (trial, cyrodil)",
+	1
+)
 
-SafeAddString(SI_COMBAT_METRICS_MENU_CHAT_DH_TOOLTIP, "Trasmette gli eventi di danno e guarigione alla finestra della chat", 1)
+SafeAddString(
+	SI_COMBAT_METRICS_MENU_CHAT_DH_TOOLTIP,
+	"Trasmette gli eventi di danno e guarigione alla finestra della chat",
+	1
+)
 SafeAddString(SI_COMBAT_METRICS_MENU_CHAT_TITLE_NAME, "Titolo Registro della chat", 1)
 SafeAddString(SI_COMBAT_METRICS_MENU_CHAT_TITLE_TOOLTIP, "Mostra i danni inflitti nella chat", 1)
 SafeAddString(SI_COMBAT_METRICS_MENU_CHAT_SD_NAME, "Mostra Danni", 1)

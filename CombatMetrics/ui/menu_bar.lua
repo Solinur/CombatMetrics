@@ -8,6 +8,7 @@ local util = CMXint.util
 local logger
 ---@class CMXui
 local ui = CMXint.ui
+local cat = util.MainCategories
 
 local ValidRaids = {}
 
@@ -48,26 +49,26 @@ local function initCategoryButtons(MenuPanel)
 
 	-- initCategoryButton("damageOut", "/esoui/art/icons/heraldrycrests_weapon_axe_02.dds", "FFFFCCCC",
 	initCategoryButton(
-		"damageOut",
+		cat.CMX_CATEGORY_DAMAGE_DONE,
 		"/EsoUI/Art/LFG/Gamepad/LFG_roleIcon_dps.dds",
 		"FFFFCCCC",
-		SI_COMBAT_METRICS_DAMAGE_CAUSED
+		SI_COMBAT_METRICS_DAMAGE_DONE
 	)
 	initCategoryButton(
-		"healingOut",
+		cat.CMX_CATEGORY_HEALING_DONE,
 		"/EsoUI/Art/LFG/Gamepad/LFG_roleIcon_healer.dds",
 		"FFCCFFCC",
 		SI_COMBAT_METRICS_HEALING_DONE
 	)
 	-- initCategoryButton("damageIn", "/esoui/art/icons/heraldrycrests_weapon_shield_01.dds", "FFCCCCFF",
 	initCategoryButton(
-		"damageIn",
+		cat.CMX_CATEGORY_DAMAGE_RECEIVED,
 		"/EsoUI/Art/LFG/Gamepad/LFG_roleIcon_tank.dds",
 		"FFCCCCFF",
-		SI_COMBAT_METRICS_DAMAGE_CAUSED
+		SI_COMBAT_METRICS_DAMAGE_RECEIVED
 	)
 	initCategoryButton(
-		"healingIn",
+		cat.CMX_CATEGORY_HEALING_RECEIVED,
 		"/esoui/art/hud/gamepad/gp_radialicon_invitegroup_down.dds",
 		"FFFFFFCC",
 		SI_COMBAT_METRICS_HEALING_RECEIVED
@@ -563,7 +564,7 @@ function CMXint.InitializeMenu()
 	MenuPanel = ui:GetPanel("menu") --[[@as MenuPanel]]
 
 	MenuPanel:SelectScene(MenuPanel.sceneButtons.fightStats)
-	MenuPanel:SelectCategory(MenuPanel.categoryButtons.damageOut)
+	MenuPanel:SelectCategory(MenuPanel.categoryButtons[cat.CMX_CATEGORY_DAMAGE_DONE])
 
 	isFileInitialized = true
 	return true

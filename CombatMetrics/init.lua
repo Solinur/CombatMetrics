@@ -154,7 +154,7 @@ local svdefaults = {
 		pos_y = GuiRoot:GetHeight() / 2 - 75,
 
 		scale = zo_roundToNearest(1 / GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE), 0.1),
-		category = "damageOut",
+		category = "damageDone",
 
 		showDebugIds = false,
 		useDisplayNames = false,
@@ -163,24 +163,24 @@ local svdefaults = {
 
 		["abilities"] = {
 			["hitCritLayout"] = {
-				damageOut = 1,
-				damageIn = 1,
-				healingOut = 1,
-				healingIn = 1,
+				damageDone = 1,
+				damageReceived = 1,
+				healingDone = 1,
+				healingReceived = 1,
 			},
 
 			["averageLayout"] = {
-				damageOut = 1,
-				damageIn = 1,
-				healingOut = 1,
-				healingIn = 1,
+				damageDone = 1,
+				damageReceived = 1,
+				healingDone = 1,
+				healingReceived = 1,
 			},
 
 			["maxValue"] = {
-				damageOut = true,
-				damageIn = true,
-				healingOut = true,
-				healingIn = true,
+				damageDone = true,
+				damageReceived = true,
+				healingDone = true,
+				healingReceived = true,
 			},
 		},
 

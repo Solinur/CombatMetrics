@@ -7,6 +7,54 @@ local util = CMXint.util
 ---@type Logger
 local logger
 
+util.MainCategories = {
+	CMX_CATEGORY_DAMAGE_DONE = "damageDone",
+	CMX_CATEGORY_DAMAGE_RECEIVED = "damageReceived",
+	CMX_CATEGORY_HEALING_DONE = "healingDone",
+	CMX_CATEGORY_HEALING_RECEIVED = "healingReceived",
+}
+local cat = util.MainCategories
+
+---@param category string
+---@return boolean
+function util.IsDamageCategory(category)
+	return category == cat.CMX_CATEGORY_DAMAGE_DONE or category == cat.CMX_CATEGORY_DAMAGE_RECEIVED
+end
+
+---@param category string
+---@return boolean
+function util.IsHealingCategory(category)
+	return category == cat.CMX_CATEGORY_HEALING_DONE or category == cat.CMX_CATEGORY_HEALING_RECEIVED
+end
+
+function util.GetPlayerCategoryData(fightData, category)
+	if category == cat.CMX_CATEGORY_DAMAGE_DONE then
+		return LibCombat2.GetPlayerDamageDoneToUnits(fightData)
+	elseif category == cat.CMX_CATEGORY_DAMAGE_RECEIVED then
+		return LibCombat2.GetPlayerDamageReceivedByUnits(fightData)
+	elseif category == cat.CMX_CATEGORY_HEALING_DONE then
+		return LibCombat2.GetPlayerHealingDoneToUnits(fightData)
+	elseif category == cat.CMX_CATEGORY_HEALING_RECEIVED then
+		return LibCombat2.GetPlayerHealingReceivedByUnits(fightData)
+	else
+		logger:Error("unexpected value for category: %s", category)
+	end
+end
+
+function util.GetGroupCategoryData(fightData, category)
+	if category == cat.CMX_CATEGORY_DAMAGE_DONE then
+		return LibCombat2.GetAllDamageDoneToUnits(fightData)
+	elseif category == cat.CMX_CATEGORY_DAMAGE_RECEIVED then
+		return LibCombat2.GetAllDamageReceivedByUnits(fightData)
+	elseif category == cat.CMX_CATEGORY_HEALING_DONE then
+		return LibCombat2.GetAllHealingDoneToUnits(fightData)
+	elseif category == cat.CMX_CATEGORY_HEALING_RECEIVED then
+		return LibCombat2.GetAllHealingReceivedByUnits(fightData)
+	else
+		logger:Error("unexpected value for category: %s", category)
+	end
+end
+
 CMX_POSTTOCHAT_MODE_NONE = 0
 CMX_POSTTOCHAT_MODE_SINGLE = 1
 CMX_POSTTOCHAT_MODE_MULTI = 2
@@ -231,7 +279,7 @@ local function GetBuffDataAndUnits(unitType, fightData)
 			local isEnemy = unitData.unitType ~= COMBAT_UNIT_TYPE_GROUP
 				and unitData.unitType ~= COMBAT_UNIT_TYPE_PLAYER_PET
 				and unitData.unitType ~= COMBAT_UNIT_TYPE_PLAYER
-			local isDamageCategory = category == "damageIn" or category == "damageOut"
+			local isDamageCategory = util.IsDamageCategory(category)
 
 			if isNotEmpty and (isEnemy == isDamageCategory) then
 				units = units + 1
@@ -255,7 +303,7 @@ function util.PostBuffUptime(fight, buffname, unitType)
 		return
 	end
 
-	local category = CMXint.settings.fightReport.category or "damageOut"
+	local category = CMXint.settings.fightReport.category or cat.CMX_CATEGORY_DAMAGE_DONE
 	local date = data.date
 	local datestring = type(date) == "number" and GetDateStringFromTimestamp(date) or date
 	local timedata = string.format("[%s, %s] ", datestring, data.time)

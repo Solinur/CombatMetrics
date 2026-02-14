@@ -16,7 +16,7 @@ local fontSize = ui.fontSize
 local GetFormattedAbilityName = util.GetFormattedAbilityName
 
 local logtypeCategories = {
-	[LIBCOMBAT_EVENT_DAMAGE_OUT] = "damageOut",
+	[LIBCOMBAT_EVENT_DAMAGE_OUT] = "damageOut", -- TODO: Change to constants
 	[LIBCOMBAT_EVENT_DAMAGE_IN] = "damageIn",
 	[LIBCOMBAT_EVENT_DAMAGE_SELF] = "damageSelf",
 	[LIBCOMBAT_EVENT_HEAL_OUT] = "healingOut",

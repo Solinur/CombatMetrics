@@ -126,10 +126,10 @@ do -- Handling Buffs Context Menu
 
 		local category = settings.category
 
-		if (category == "damageOut" or category == "damageIn") and settings.rightpanel == "buffsout" then
+		if util.IsDamageCategory(category) and settings.rightpanel == "buffsout" then
 			unitType = "boss"
 			AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTBUFF_BOSS), postSelectionBuffUptime)
-		elseif (category == "healingOut" or category == "healingIn") and settings.rightpanel == "buffsout" then
+		elseif util.IsHealingCategory(category) and settings.rightpanel == "buffsout" then
 			unitType = "group"
 			AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTBUFF_GROUP), postSelectionBuffUptime)
 		end
@@ -280,10 +280,10 @@ function util.buffSortFunction(data, a, b)
 end
 
 ---@param panel BuffPanel
----@return SortFilterList
+---@return BuffDataList
 local function InitBuffsList(panel)
 	---@class BuffDataList: SortFilterList
-	local dataList = ui.SortFilterList:New(panel.control, "CombatMetrics_BuffsPanelRowTemplate")
+	local dataList = ui.SortFilterList:New(panel.control, "CombatMetrics_RowTemplate")
 	panel.dataList = dataList
 	dataList.panel = panel
 	dataList.groupList = {}
@@ -321,22 +321,14 @@ local function InitBuffsList(panel)
 
 	local expandButtonPool = ZO_ObjectPool:New(CreateExpandButton, ZO_ObjectPool_DefaultResetControl)
 
-	---@class RowControl: Control
-	---@field dataEntry table
-	---@field controls table
+	---@class BuffRowControl: RowControl
 	---@field indent number
 	---@field expandButton ExpandButton
-	---@field recovered boolean
 
-	---@param rowControl RowControl
+	---@param rowControl BuffRowControl
 	function dataList:RecoverRow(rowControl)
 		local panel = self.panel
 		local rowHeight = self:GetHeight()
-		local rowHeightHalf = rowHeight / 2
-
-		-- local expandButton = panel:AcquireSharedControl(CT_TEXTURE)
-		-- expandButton:ApplyPosition(rowControl, 2, rowHeightHalf/2, rowHeightHalf, rowHeightHalf)
-		-- expandButton:SetTexture("esoui/art/buttons/dropbox_arrow_normal.dds")
 
 		local icon = panel:AcquireSharedControl(CT_TEXTURE)
 		icon:ApplyPosition(rowControl, 14, 0, rowHeight, rowHeight)
@@ -353,7 +345,6 @@ local function InitBuffsList(panel)
 		bar_group:ApplyPosition(rowControl, 38, 0, 174, rowHeight)
 		bar_group:SetTexture("esoui/art/unitframes/progressbar_raidhealth.dds")
 
-		---@type LabelControl|SharedControl
 		local count = panel:AcquireSharedControl(CT_LABEL)
 		count:ApplyPosition(rowControl, 216, 0, 58)
 		count:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
@@ -367,7 +358,7 @@ local function InitBuffsList(panel)
 		rowControl.indent = 0
 	end
 
-	---@param rowControl RowControl
+	---@param rowControl BuffRowControl
 	---@param data table
 	---@param scrollList object
 	function dataList:UpdateRow(rowControl, data, scrollList)
@@ -553,7 +544,7 @@ local function InitBuffsList(panel)
 
 	function dataList:BuildMasterList()
 		local fightData = self.panel:GetCurrentFightData()
-		local category = self.panel.category
+		local category = self.panel.buffCategory
 		local effectData, totalUnitTime = GetBuffData(fightData, category)
 
 		self:UpdateAbilityNames(effectData)
@@ -651,7 +642,7 @@ function CMXint.InitializeBuffsPanel(control)
 	BuffPanel.radioButtons = ZO_RadioButtonGroup:New(false)
 
 	local function onBuffCategoryClicked(control, buttonId, ignoreCallback)
-		BuffPanel.category = control.buffCategory
+		BuffPanel.buffCategory = control.buffCategory
 		BuffPanel.dataList:RefreshData()
 	end
 
@@ -675,6 +666,13 @@ function CMXint.InitializeBuffsPanel(control)
 		self.dataList:UpdateRowHeight()
 		self.dataList:RefreshData()
 	end
+
+	function BuffPanel:Clear()
+		logger:Debug("Clearing Buff Panel")
+		self.dataList:Clear()
+	end
+
+	function BuffPanel:Recover() end
 
 	BuffPanel.radioButtons:SetClickedButton(searchBar:GetNamedChild("Player"))
 end
