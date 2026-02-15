@@ -27,7 +27,9 @@ function util.IsHealingCategory(category)
 	return category == cat.CMX_CATEGORY_HEALING_DONE or category == cat.CMX_CATEGORY_HEALING_RECEIVED
 end
 
-function util.GetPlayerCategoryData(fightData, category)
+---@param fightData Fight
+---@param category string
+function util.GetCombinedPlayerCategoryData(fightData, category)
 	if category == cat.CMX_CATEGORY_DAMAGE_DONE then
 		return LibCombat2.GetPlayerDamageDoneToUnits(fightData)
 	elseif category == cat.CMX_CATEGORY_DAMAGE_RECEIVED then
@@ -41,15 +43,34 @@ function util.GetPlayerCategoryData(fightData, category)
 	end
 end
 
-function util.GetGroupCategoryData(fightData, category)
+---@param fightData Fight
+---@param category string
+function util.GetCombinedGroupCategoryData(fightData, category)
 	if category == cat.CMX_CATEGORY_DAMAGE_DONE then
-		return LibCombat2.GetAllDamageDoneToUnits(fightData)
+		return LibCombat2.GetDamageDoneToUnits(fightData)
 	elseif category == cat.CMX_CATEGORY_DAMAGE_RECEIVED then
-		return LibCombat2.GetAllDamageReceivedByUnits(fightData)
+		return LibCombat2.GetDamageReceivedByUnits(fightData)
 	elseif category == cat.CMX_CATEGORY_HEALING_DONE then
-		return LibCombat2.GetAllHealingDoneToUnits(fightData)
+		return LibCombat2.GetHealingDoneToUnits(fightData)
 	elseif category == cat.CMX_CATEGORY_HEALING_RECEIVED then
-		return LibCombat2.GetAllHealingReceivedByUnits(fightData)
+		return LibCombat2.GetHealingReceivedByUnits(fightData)
+	else
+		logger:Error("unexpected value for category: %s", category)
+	end
+end
+
+---@param fightData Fight
+---@param category string
+---@param unitId integer
+function util.GetUnitCategoryData(fightData, category, unitId)
+	if category == cat.CMX_CATEGORY_DAMAGE_DONE then
+		return LibCombat2.GetUnitDamageDone(fightData, unitId)
+	elseif category == cat.CMX_CATEGORY_DAMAGE_RECEIVED then
+		return LibCombat2.GetUnitDamageReceived(fightData, unitId)
+	elseif category == cat.CMX_CATEGORY_HEALING_DONE then
+		return LibCombat2.GetUnitHealingDone(fightData, unitId)
+	elseif category == cat.CMX_CATEGORY_HEALING_RECEIVED then
+		return LibCombat2.GetUnitHealingReceived(fightData, unitId)
 	else
 		logger:Error("unexpected value for category: %s", category)
 	end

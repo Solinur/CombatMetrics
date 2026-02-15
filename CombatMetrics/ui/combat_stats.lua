@@ -296,8 +296,8 @@ function CMXint.InitializeCombatStatsPanel(control)
 
 		local aps1, aps2, apsratio, amountValueKeys, countValueKeys
 
-		local playerData = util.GetPlayerCategoryData(fightData, category)
-		local groupData = util.GetGroupCategoryData(fightData, category)
+		local playerData = util.GetCombinedPlayerCategoryData(fightData, category)
+		local groupData = util.GetCombinedGroupCategoryData(fightData, category)
 
 		if groupData == nil then
 			return

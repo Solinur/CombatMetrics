@@ -9,6 +9,14 @@ local logger
 ---@class CMXui
 local ui = CMXint.ui
 
+local cat = util.MainCategories
+local UnitOppositionCategory = {
+	[cat.CMX_CATEGORY_DAMAGE_DONE] = cat.CMX_CATEGORY_DAMAGE_RECEIVED,
+	[cat.CMX_CATEGORY_DAMAGE_RECEIVED] = cat.CMX_CATEGORY_DAMAGE_DONE,
+	[cat.CMX_CATEGORY_HEALING_DONE] = cat.CMX_CATEGORY_HEALING_RECEIVED,
+	[cat.CMX_CATEGORY_HEALING_RECEIVED] = cat.CMX_CATEGORY_HEALING_DONE,
+}
+
 do -- Handling Unit Context Menu
 	local UnitContextMenuUnitId
 	-- local function postUnitDPS()
@@ -119,15 +127,35 @@ local function InitUnitsList(panel)
 		-- TODO: Implement controls
 	end
 
-	function dataList:AddDataEntry(unitId, data)
-		if data.groupUptime <= 0 then
+	---comment
+	---@param unitData UnitData
+	---@param playerData UnitDamageData|UnitHealData
+	---@param groupData UnitDamageData|UnitHealData
+	---@param durationMs integer
+	function dataList:AddDataEntry(unitData, playerData, groupData, durationMs)
+		if playerData.totalAmount <= 0 then
 			return
 		end
 
-		local selected = false -- selectedbuffs ~= nil and (selectedbuffs[buffName] ~= nil) or false -- TODO: Selections
+		local selected = false -- selectedunits ~= nil and (selectedunits[unitId] ~= nil) or false -- TODO: Selections
+
+		local category = self.panel.settings.category
+		local playerAmount = category == "healingOut"
+				and self.panel.settings.includeOverheal
+				and playerData.overflowAmount
+			or playerData.totalAmount
+
+		local groupAmount = category == "healingOut"
+				and self.panel.settings.includeOverheal
+				and groupData.overflowAmount
+			or groupData.totalAmount
 
 		local rowData = {
+			unitData = unitData,
 			selected = selected,
+			playerAmount = playerAmount,
+			durationMs = durationMs,
+			totalAmount = groupAmount,
 		}
 
 		table.insert(self.masterList, ZO_ScrollList_CreateDataEntry(1, rowData))
@@ -136,18 +164,24 @@ local function InitUnitsList(panel)
 	function dataList:BuildMasterList()
 		local fightData = self.panel:GetCurrentFightData()
 		local category = self.panel.settings.category
-		-- local categoryData = util.GetPlayerCategoryData(fightData, category) --TODO: Needs to get the table
+		local playerId = fightData.unitIds.player
+		local categoryData = util.GetUnitCategoryData(fightData, category, playerId)
 
 		ZO_ClearTable(self.masterList)
 
-		for unitId, unitData in pairs(categoryData) do
-			self:AddDataEntry(unitId, unitData)
+		local durationMs = categoryData.endTime - categoryData.startTime
+		local oppositionCategory = UnitOppositionCategory[category]
+
+		for unitId, playerUnitData in pairs(categoryData) do
+			local groupData = util.GetUnitCategoryData(fightData, oppositionCategory, unitId)
+			local unitInfo = fightData.units[unitId]
+			self:AddDataEntry(unitInfo, playerUnitData, groupData, durationMs)
 		end
 	end
 
 	function dataList:FilterScrollList() end
 
-	dataList.sortHeaderGroup:SelectHeaderByKey("") -- TODO; pick initial sort key
+	dataList.sortHeaderGroup:SelectHeaderByKey("Total")
 
 	return dataList
 end
@@ -177,117 +211,117 @@ function CMXint.InitializeUnitsPanel(control)
 	function UnitsPanel:Update(fightData)
 		logger:Debug("Updating Unit Panel")
 
-		self:UpdateHeaderLabels()
+		-- self:UpdateHeaderLabels()
 
-		self.dataList:UpdateRowHeight()
-		self.dataList:RefreshData()
+		-- self.dataList:UpdateRowHeight()
+		-- self.dataList:RefreshData()
 
-		if true then
-			return
-		end
+		-- if true then
+		-- 	return
+		-- end
 
-		self:ResetBars()
+		-- self:ResetBars()
 
-		-- prepare data
+		-- -- prepare data
 
-		if fightData == nil then
-			return
-		end
-		local data = fightData.calculated
-		local selectedunits = ui.selections.unit[category]
+		-- if fightData == nil then
+		-- 	return
+		-- end
+		-- local data = fightData.calculated
+		-- local selectedunits = ui.selections.unit[category]
 
-		local totalAmountKey = category .. "Total"
-		local totalAmount = data[totalAmountKey] -- i.e. damageOutTotal
-		local APSKey = DPSstrings[category]
+		-- local totalAmountKey = category .. "Total"
+		-- local totalAmount = data[totalAmountKey] -- i.e. damageOutTotal
+		-- local APSKey = DPSstrings[category]
 
-		local scrollchild = GetControl(control, "PanelScrollChild")
-		local currentanchor = { TOPLEFT, scrollchild, TOPLEFT, 0, 1 }
+		-- local scrollchild = GetControl(control, "PanelScrollChild")
+		-- local currentanchor = { TOPLEFT, scrollchild, TOPLEFT, 0, 1 }
 
-		local rightpanel = settings.rightpanel
-		local showids = settings.showDebugIds
+		-- local rightpanel = settings.rightpanel
+		-- local showids = settings.showDebugIds
 
-		for unitId, unit in
-			util.spairs(data.units, function(t, a, b)
-				return t[a][totalAmountKey] > t[b][totalAmountKey]
-			end)
-		do -- i.e. for damageOut sort by damageOutTotal
-			local totalUnitAmount = unit[totalAmountKey]
-			local unitData = fightData.units[unitId]
+		-- for unitId, unit in
+		-- 	util.spairs(data.units, function(t, a, b)
+		-- 		return t[a][totalAmountKey] > t[b][totalAmountKey]
+		-- 	end)
+		-- do -- i.e. for damageOut sort by damageOutTotal
+		-- 	local totalUnitAmount = unit[totalAmountKey]
+		-- 	local unitData = fightData.units[unitId]
 
-			if
-				(
-					totalUnitAmount > 0
-					or (
-						rightpanel == "buffsout"
-							and NonContiguousCount(unit.buffs) > 0
-							and (unitData.isFriendly == false and isdamage)
-						or (unitData.isFriendly and not isdamage)
-					)
-				) and not (unitData.unitType == 2 and settings.showPets == false)
-			then
-				local highlight = false
-				if selectedunits ~= nil then
-					highlight = selectedunits[unitId] ~= nil
-				end
+		-- 	if
+		-- 		(
+		-- 			totalUnitAmount > 0
+		-- 			or (
+		-- 				rightpanel == "buffsout"
+		-- 					and NonContiguousCount(unit.buffs) > 0
+		-- 					and (unitData.isFriendly == false and isdamage)
+		-- 				or (unitData.isFriendly and not isdamage)
+		-- 			)
+		-- 		) and not (unitData.unitType == 2 and settings.showPets == false)
+		-- 	then
+		-- 		local highlight = false
+		-- 		if selectedunits ~= nil then
+		-- 			highlight = selectedunits[unitId] ~= nil
+		-- 		end
 
-				local dbug = showids and string.format("(%d) ", unitId) or ""
+		-- 		local dbug = showids and string.format("(%d) ", unitId) or ""
 
-				local name = dbug .. (settings.useDisplayNames and unitData.displayname or unitData.name)
+		-- 		local name = dbug .. (settings.useDisplayNames and unitData.displayname or unitData.name)
 
-				local isboss = unitData.bossId
-				local namecolor = (isboss and { 1, 0.8, 0.3, 1 }) or { 1, 1, 1, 1 }
+		-- 		local isboss = unitData.bossId
+		-- 		local namecolor = (isboss and { 1, 0.8, 0.3, 1 }) or { 1, 1, 1, 1 }
 
-				local unitTime = unitData.dpsend
-						and unitData.dpsstart
-						and zo_max((unitData.dpsend - unitData.dpsstart) / 1000, 1)
-					or 1
-				local dps = unitTime and totalUnitAmount / unitTime or unit[APSKey]
-				local damage = totalUnitAmount
-				local ratio = damage / totalAmount
+		-- 		local unitTime = unitData.dpsend
+		-- 				and unitData.dpsstart
+		-- 				and zo_max((unitData.dpsend - unitData.dpsstart) / 1000, 1)
+		-- 			or 1
+		-- 		local dps = unitTime and totalUnitAmount / unitTime or unit[APSKey]
+		-- 		local damage = totalUnitAmount
+		-- 		local ratio = damage / totalAmount
 
-				local rowId = #control.bars + 1
+		-- 		local rowId = #control.bars + 1
 
-				local rowName = scrollchild:GetName() .. "Row" .. rowId
-				local row = _G[rowName]
-					or CreateControlFromVirtual(rowName, scrollchild, "CombatMetrics_UnitRowTemplate")
-				row:SetAnchor(unpack(currentanchor))
-				row:SetHidden(false)
+		-- 		local rowName = scrollchild:GetName() .. "Row" .. rowId
+		-- 		local row = _G[rowName]
+		-- 			or CreateControlFromVirtual(rowName, scrollchild, "CombatMetrics_UnitRowTemplate")
+		-- 		row:SetAnchor(unpack(currentanchor))
+		-- 		row:SetHidden(false)
 
-				local header = control:GetNamedChild("Header")
-				adjustRowSize(row, header)
+		-- 		local header = control:GetNamedChild("Header")
+		-- 		adjustRowSize(row, header)
 
-				local highlightControl = row:GetNamedChild("HighLight")
-				highlightControl:SetHidden(not highlight)
+		-- 		local highlightControl = row:GetNamedChild("HighLight")
+		-- 		highlightControl:SetHidden(not highlight)
 
-				local nameControl = row:GetNamedChild("Name")--[[@as LabelControl]]
-				nameControl:SetText(name)
-				--nameControl:SetFont(font)
-				nameControl:SetColor(unpack(namecolor))
+		-- 		local nameControl = row:GetNamedChild("Name")--[[@as LabelControl]]
+		-- 		nameControl:SetText(name)
+		-- 		--nameControl:SetFont(font)
+		-- 		nameControl:SetColor(unpack(namecolor))
 
-				local maxwidth = nameControl:GetWidth()
+		-- 		local maxwidth = nameControl:GetWidth()
 
-				local barControl = row:GetNamedChild("Bar")
-				barControl:SetWidth(maxwidth * ratio)
+		-- 		local barControl = row:GetNamedChild("Bar")
+		-- 		barControl:SetWidth(maxwidth * ratio)
 
-				local rateControl = row:GetNamedChild("PerSecond")--[[@as LabelControl]]
-				rateControl:SetText(string.format("%.0f", dps))
+		-- 		local rateControl = row:GetNamedChild("PerSecond")--[[@as LabelControl]]
+		-- 		rateControl:SetText(string.format("%.0f", dps))
 
-				local amountControl = row:GetNamedChild("Total")--[[@as LabelControl]]
-				amountControl:SetText(GetShortFormattedNumber(damage))
+		-- 		local amountControl = row:GetNamedChild("Total")--[[@as LabelControl]]
+		-- 		amountControl:SetText(GetShortFormattedNumber(damage))
 
-				local fractionControl = row:GetNamedChild("Fraction")--[[@as LabelControl]]
-				fractionControl:SetText(string.format("%.1f%%", 100 * ratio))
+		-- 		local fractionControl = row:GetNamedChild("Fraction")--[[@as LabelControl]]
+		-- 		fractionControl:SetText(string.format("%.1f%%", 100 * ratio))
 
-				currentanchor = { TOPLEFT, row, BOTTOMLEFT, 0, dx }
+		-- 		currentanchor = { TOPLEFT, row, BOTTOMLEFT, 0, dx }
 
-				control.bars[rowId] = row
+		-- 		control.bars[rowId] = row
 
-				row["dataId"] = unitId
-				row["type"] = "unit"
-				row["id"] = rowId
-				row["self"] = control
-			end
-		end
+		-- 		row["dataId"] = unitId
+		-- 		row["type"] = "unit"
+		-- 		row["id"] = rowId
+		-- 		row["self"] = control
+		-- 	end
+		-- end
 	end
 
 	function UnitsPanel:Clear()
