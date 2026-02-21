@@ -1090,7 +1090,68 @@ do -- Handling Unit Context Menu
 	end
 end
 
+local function getCommaSeparatedListFromKeys(t)
+	local list = {}
+	for key, _ in pairs(t) do
+		table.insert(list, key)
+	end
+
+	return table.concat(list, ",")
+end
+
 do
+	local function exportBuild()
+		if fightData == nil or fightData.calculated == nil then
+			return
+		end
+
+		--[[
+		Another addon dude requested import/export, and this is the structure we use for him:
+		classId;RaceIds;combatRoleId;stamina:magicka:health;curse;mundusId;skillLine1Id,skillLine2Id,skillLine3Id;bar1skills;bar2skills;passives;slottedCp;passiveCp;gear;FoodIds;Potions;
+
+		Details:
+		Class id is esoui class id
+		Race ids is a comma separated list of ids
+		Combat role is based on ui constants from the dungeon finder
+		Attributes are stam, mag, health separated by :
+		curse: 0 = none, 1 = vamp, 2 = ww
+		Mundus is ingame id of the buff, is usually one, but can be comma separated list of two in case of twice born star
+		Skill lines are the ids of the selected skill lines, comma separated
+		Skills on the bars are a comma separated list, 0 for empty slot. Scribed skills will be skillId:script1id:script2id:script3id
+		Passives are a comma separated list of passives
+		Slotted cp is a comma separated list, 0 if a slot is empty, starting with green, then blue, then red
+		Passive cp is a comma separated list of starId:spentPoints
+		Gear is a comma separated list of equipslot:itemType:setid:traitid:glyphid, poisons are equipslot:itemId:combinationId
+		Foods are a comma separated list of item ids
+		Potions are a comma separated list of itemId:combinationId unless its a non craftable pot, then just itemid
+		--]]
+
+		-- fightData
+
+		local charData = fightData.charData or {}
+		local classId = charData.classId or ""
+		local raceId = charData.raceId or ""
+		local roleId = charData.roleId or GetSelectedLFGRole() or ""
+
+		local APHealth = charData.APHealth or 0
+		local APMagicka = charData.APMagicka or 0
+		local APStam = charData.APStam or 0
+		local attributes = table.concat({ APStam, APMagicka, APHealth }, ":")
+
+		local curse = charData.Curse or 0
+
+		local stats = fightData.calculated.stats or {}
+
+		local buildInfo = fightData.calculated.buildInfo
+
+		local mundus = getCommaSeparatedListFromKeys(buildInfo.mundus)
+		local foods = getCommaSeparatedListFromKeys(buildInfo.drinkFood)
+		local potions = getCommaSeparatedListFromKeys(buildInfo.potions)
+
+		local buildData = { classId, raceId, roleId, attributes, curse, mundus }
+		local buildDataStr = table.concat(buildData, ";")
+	end
+
 	local function toggleShowIds()
 		db.showDebugIds = not db.showDebugIds
 		CombatMetrics_Report:Update()
@@ -3242,14 +3303,30 @@ local function updateCombatLog(panel)
 				local abilityId = logline[6]
 
 				condition2 = (
-unitSelCat == nil or (unitSelCat[targetUnitId] ~= nil and (logtype == LIBCOMBAT_EVENT_HEAL_OUT or logtype == LIBCOMBAT_EVENT_DAMAGE_OUT)) or (unitSelCat[sourceUnitId] ~= nil and (logtype == LIBCOMBAT_EVENT_HEAL_IN or logtype == LIBCOMBAT_EVENT_DAMAGE_IN))) and (abilitySelection[category] == nil or abilitySelection[category][abilityId] ~= nil)
+					unitSelCat == nil
+					or (unitSelCat[targetUnitId] ~= nil and (logtype == LIBCOMBAT_EVENT_HEAL_OUT or logtype == LIBCOMBAT_EVENT_DAMAGE_OUT))
+					or (
+						unitSelCat[sourceUnitId] ~= nil
+						and (logtype == LIBCOMBAT_EVENT_HEAL_IN or logtype == LIBCOMBAT_EVENT_DAMAGE_IN)
+					)
+				) and (abilitySelection[category] == nil or abilitySelection[category][abilityId] ~= nil)
 			elseif logtype == LIBCOMBAT_EVENT_HEAL_SELF then
 				local sourceUnitId = logline[4]
 				local targetUnitId = logline[5]
 				local abilityId = logline[6]
 
 				condition2 = (
-(unitSelection.healingIn == nil and CLSelection[LIBCOMBAT_EVENT_HEAL_IN]) or (unitSelection.healingIn ~= nil and unitSelection.healingIn[sourceUnitId] ~= nil) or (unitSelection.healingOut == nil and CLSelection[LIBCOMBAT_EVENT_HEAL_OUT]) or (unitSelection.healingOut ~= nil and unitSelection.healingOut[targetUnitId] ~= nil)) and ((abilitySelection.healingIn == nil and CLSelection[LIBCOMBAT_EVENT_HEAL_IN]) or (abilitySelection.healingIn ~= nil and abilitySelection.healingIn[abilityId] ~= nil) or (abilitySelection.healingOut == nil and CLSelection[LIBCOMBAT_EVENT_HEAL_OUT]) or (abilitySelection.healingOut ~= nil and abilitySelection.healingOut[abilityId] ~= nil))
+					(unitSelection.healingIn == nil and CLSelection[LIBCOMBAT_EVENT_HEAL_IN])
+					or (unitSelection.healingIn ~= nil and unitSelection.healingIn[sourceUnitId] ~= nil)
+					or (unitSelection.healingOut == nil and CLSelection[LIBCOMBAT_EVENT_HEAL_OUT])
+					or (unitSelection.healingOut ~= nil and unitSelection.healingOut[targetUnitId] ~= nil)
+				)
+					and (
+						(abilitySelection.healingIn == nil and CLSelection[LIBCOMBAT_EVENT_HEAL_IN])
+						or (abilitySelection.healingIn ~= nil and abilitySelection.healingIn[abilityId] ~= nil)
+						or (abilitySelection.healingOut == nil and CLSelection[LIBCOMBAT_EVENT_HEAL_OUT])
+						or (abilitySelection.healingOut ~= nil and abilitySelection.healingOut[abilityId] ~= nil)
+					)
 			elseif
 				logtype == LIBCOMBAT_EVENT_EFFECTS_IN
 				or logtype == LIBCOMBAT_EVENT_EFFECTS_OUT
@@ -3291,7 +3368,8 @@ unitSelCat == nil or (unitSelCat[targetUnitId] ~= nil and (logtype == LIBCOMBAT_
 				writtenlines = writtenlines + 1
 				if isCopyPasteMode then
 					if
-						writtenlines >= (page - 1) * 1000 + firstLine and writtenlines <= (page - 1) * 1000 + lastLine
+						writtenlines >= (page - 1) * 1000 + firstLine
+						and writtenlines <= (page - 1) * 1000 + lastLine
 					then
 						local text, color = CMX.GetCombatLogString(fightData, logline, fontsize)
 						copyPasteText[#copyPasteText + 1] = text:gsub("|c......", ""):gsub("|r", ""):gsub("|t.-|t ", "")
@@ -3410,8 +3488,10 @@ local function DrawLine(plot, coords, id)
 
 	local maxX, maxY = plot:GetDimensions()
 
-	local outOfRange = 
-(x1 < minX and x2 < minX) or (x1 > maxX and x2 > maxX) or (y1 < minY and y2 < minY) or (y1 > maxY and y2 > maxY)
+	local outOfRange = (x1 < minX and x2 < minX)
+		or (x1 > maxX and x2 > maxX)
+		or (y1 < minY and y2 < minY)
+		or (y1 > maxY and y2 > maxY)
 
 	if outOfRange then -- line is completely out of drawing area
 		line:SetHidden(false)
