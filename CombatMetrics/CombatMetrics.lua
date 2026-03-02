@@ -1644,7 +1644,7 @@ ProcessLog[LIBCOMBAT_EVENT_PERFORMANCE] = ProcessPerformanceStats
 
 local function ProcessQuickslotEvents(fight, logline)
 	local itemLink = logline[3]
-	Log("debug", LOG_LEVEL_INFO, unpack(logline))
+	-- Log("debug", LOG_LEVEL_INFO, unpack(logline))
 	-- Log("debug", LOG_LEVEL_INFO, "%s, %d, %d, %s", itemLink, GetItemLinkItemType(itemLink), tostring(GetItemLinkItemType(itemLink) ~= ITEMTYPE_POTION))
 	if GetItemLinkItemType(itemLink) ~= ITEMTYPE_POTION then
 		return
@@ -1743,7 +1743,8 @@ local function FinalizeUnitBuffs(fight)
 					local uptime = (sumStackUptime + (minStackDuration and ((minStacks - 1) * minStackDuration) or 0))
 						/ maxStacks
 					local groupUptime = (
-						sumStackGroupUptime + (minStackDurationGroup and ((minStacks - 1) * minStackDurationGroup) or 0)
+						sumStackGroupUptime
+						+ (minStackDurationGroup and ((minStacks - 1) * minStackDurationGroup) or 0)
 					) / maxStacks
 
 					instance.uptime = uptime
