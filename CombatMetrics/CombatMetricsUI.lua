@@ -1181,6 +1181,15 @@ do
 		return classLines
 	end
 
+	local function GetBaseAbilityId(abilityId)
+		abilityId = abilityId or 0
+		local skillData = SKILLS_DATA_MANAGER.abilityIdToProgressionDataMap[abilityId]
+		if skillData then
+			return skillData.abilityId
+		end
+		return 0
+	end
+
 	local function GetSkillsString()
 		local bars = {}
 
@@ -1202,7 +1211,7 @@ do
 
 						table.insert(skills, table.concat(scribeData, ":"))
 					else
-						table.insert(skills, abilityId or 0)
+						table.insert(skills, GetBaseAbilityId(abilityId))
 					end
 				end
 				table.insert(bars, table.concat(skills, ","))
@@ -1270,8 +1279,7 @@ do
 
 				local setId = select(6, GetItemLinkSetInfo(itemLink, false))
 				local traitId = GetItemLinkTraitInfo(itemLink)
-				local glyphId = GetItemLinkAppliedEnchantId(itemLink)
-				local id = GetItemLinkItemId(itemLink)
+				local glyphId = GetItemLinkFinalEnchantId(itemLink)
 
 				local itemStr = table.concat({ slotId, equipType, setId, traitId, glyphId }, ":")
 				table.insert(gear, itemStr)
@@ -1332,6 +1340,19 @@ do
 		return table.concat(potions, ",")
 	end
 
+	local supportedLang = {
+		["en"] = true,
+		["de"] = true,
+		["fr"] = true,
+		["ru"] = true,
+		["es"] = true,
+	}
+
+	local function GetLanguage()
+		local lang = GetCVar("language.2")
+		return supportedLang[lang] and lang or "en"
+	end
+
 	local function exportBuild()
 		if fightData == nil or fightData.calculated == nil then
 			return
@@ -1381,7 +1402,12 @@ do
 			potions,
 			"",
 		}
-		local buildDataStr = "https://www.solinur.de/" .. table.concat(buildData, ";")
+
+		local buildDataStr = string.format(
+			"https://eso-hub.com/%s/build-editor?addondata=%s",
+			GetLanguage(),
+			table.concat(buildData, ";")
+		)
 		RequestOpenUnsafeURL(buildDataStr)
 	end
 
