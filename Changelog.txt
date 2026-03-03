@@ -719,3 +719,8 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Fixed layouting of the live report window involving the overheal display (Thx Nahkrinbah for reporting).
 [*] Fixed an error ocurring when reverting to default settings (Thx Nahkrinbah for reporting).
 [*] Fixed scale of UI elements when reverting to default settings
+
+1.7.7 6,979,398 (03.03.2026) 14:03
+[*] Added an option to export your build to ESO-Hub. This can be accessed via the cogwheel and by clicking Export Build. 
+[*] Note 1: While this option is available for saved fights too, the data for the exported build will be incomplete, i.e. missing the role, passives and attribute points. 
+[*] Note 2: Alternative skill bars (e.g. Werewolf) are not supported yet.
