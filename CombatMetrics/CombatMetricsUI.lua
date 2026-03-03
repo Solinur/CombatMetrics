@@ -1165,20 +1165,27 @@ do
 		if fightData and fightData.charData and fightData.charData.skillBars then
 			local skillBars = fightData.charData.skillBars
 
-			for _, bar in ipairs(skillBars) do
-				for _, abilityId in ipairs(bar) do
+			for i = 1, 2 do
+				local barData = skillBars[i] or {}
+				for _, abilityId in ipairs(barData) do
 					local abilityData = abilityMap[abilityId]
 					if abilityData and abilityData.skillData and abilityData.skillData.skillLineData then
 						local lineData = abilityData.skillData.skillLineData
-						if lineData.isPlayerClassSkillLine then
-							table.insert(lineData.id)
+						if lineData.skillTypeData.skillType == SKILL_TYPE_CLASS then
+							classLines[lineData.id] = true
 						end
 					end
 				end
 			end
 		end
 
-		return classLines
+		local classLinesOut = {}
+
+		for lineId, _ in pairs(classLines) do
+			table.insert(classLinesOut, lineId)
+		end
+
+		return classLinesOut
 	end
 
 	local function GetBaseAbilityId(abilityId)
@@ -1197,10 +1204,12 @@ do
 			local skillBars = fightData.charData.skillBars
 			local scribedSkills = fightData.charData.scribedSkills
 
-			for _, bar in ipairs(skillBars) do
+			for i = 1, 2 do
 				local skills = {}
+				local barData = skillBars[i] or {}
 				for slotId = 3, 8 do
-					local abilityId = bar[slotId]
+					local abilityId = barData[slotId]
+
 					if scribedSkills[abilityId] then
 						local scribedSkill = scribedSkills[abilityId]
 
