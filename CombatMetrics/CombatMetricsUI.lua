@@ -43,6 +43,66 @@ end
 local _
 local db
 
+local equipslots = {
+
+	{ EQUIP_SLOT_MAIN_HAND, "EsoUI/Art/CharacterWindow/gearslot_mainhand.dds" },
+	{ EQUIP_SLOT_OFF_HAND, "EsoUI/Art/CharacterWindow/gearslot_offhand.dds" },
+	{ EQUIP_SLOT_BACKUP_MAIN, "EsoUI/Art/CharacterWindow/gearslot_mainhand.dds" },
+	{ EQUIP_SLOT_BACKUP_OFF, "EsoUI/Art/CharacterWindow/gearslot_offhand.dds" },
+	{ EQUIP_SLOT_HEAD, "EsoUI/Art/CharacterWindow/gearslot_head.dds" },
+	{ EQUIP_SLOT_SHOULDERS, "EsoUI/Art/CharacterWindow/gearslot_shoulders.dds" },
+	{ EQUIP_SLOT_CHEST, "EsoUI/Art/CharacterWindow/gearslot_chest.dds" },
+	{ EQUIP_SLOT_HAND, "EsoUI/Art/CharacterWindow/gearslot_hands.dds" },
+	{ EQUIP_SLOT_WAIST, "EsoUI/Art/CharacterWindow/gearslot_belt.dds" },
+	{ EQUIP_SLOT_LEGS, "EsoUI/Art/CharacterWindow/gearslot_legs.dds" },
+	{ EQUIP_SLOT_FEET, "EsoUI/Art/CharacterWindow/gearslot_feet.dds" },
+	{ EQUIP_SLOT_NECK, "EsoUI/Art/CharacterWindow/gearslot_neck.dds" },
+	{ EQUIP_SLOT_RING1, "EsoUI/Art/CharacterWindow/gearslot_ring.dds" },
+	{ EQUIP_SLOT_RING2, "EsoUI/Art/CharacterWindow/gearslot_ring.dds" },
+}
+
+local subIdToQuality = {}
+
+local function GetEnchantQuality(itemLink) -- From Enchanted Quality (Rhyono, votan)
+	local itemId, itemIdSub, enchantSub = itemLink:match("|H[^:]+:item:([^:]+):([^:]+):[^:]+:[^:]+:([^:]+):")
+	if not itemId then
+		return 0
+	end
+
+	enchantSub = tonumber(enchantSub) or 0
+
+	if enchantSub == 0 and not IsItemLinkCrafted(itemLink) then
+		local hasSet = GetItemLinkSetInfo(itemLink, false)
+		if hasSet then
+			enchantSub = tonumber(itemIdSub) or 0
+		end -- For non-crafted sets, the "built-in" enchantment has the same quality as the item itself
+	end
+
+	if enchantSub > 0 then
+		local quality = subIdToQuality[enchantSub]
+
+		if not quality then
+			-- Create a fake itemLink to get the quality from built-in function
+			local itemLink =
+				string.format("|H1:item:%i:%i:50:0:0:0:0:0:0:0:0:0:0:0:0:1:1:0:0:10000:0|h|h", itemId, enchantSub)
+			quality = GetItemLinkDisplayQuality(itemLink)
+			subIdToQuality[enchantSub] = quality
+		end
+
+		return quality
+	end
+
+	return 0
+end
+
+local armorcolors = {
+
+	[ARMORTYPE_NONE] = { 1, 1, 1, 1 },
+	[ARMORTYPE_HEAVY] = { 1, 0.3, 0.3, 1 },
+	[ARMORTYPE_MEDIUM] = { 0.3, 1, 0.3, 1 },
+	[ARMORTYPE_LIGHT] = { 0.3, 0.3, 1, 1 },
+}
+
 function CMX.GetAbilityStats()
 	local isSelection = selections.unit.damageOut ~= nil
 	return abilitystats, abilitystatsversion, isSelection
@@ -1090,7 +1150,276 @@ do -- Handling Unit Context Menu
 	end
 end
 
+function TestEnchant(itemLink)
+	local enchantId = GetItemLinkDefaultEnchantId(itemLink)
+	local itemId = GetItemLinkItemId(itemLink)
+	local itemName = GetItemLinkName(itemLink)
+	df("%s (%d): EnchantID = %d", itemName, itemId, enchantId)
+end
+
 do
+	local function DiscoverSkillLines()
+		local classLines = {}
+		local abilityMap = SKILLS_DATA_MANAGER.abilityIdToProgressionDataMap or {}
+
+		if fightData and fightData.charData and fightData.charData.skillBars then
+			local skillBars = fightData.charData.skillBars
+
+			for i = 1, 2 do
+				local barData = skillBars[i] or {}
+				for _, abilityId in ipairs(barData) do
+					local abilityData = abilityMap[abilityId]
+					if abilityData and abilityData.skillData and abilityData.skillData.skillLineData then
+						local lineData = abilityData.skillData.skillLineData
+						if lineData.skillTypeData.skillType == SKILL_TYPE_CLASS then
+							classLines[lineData.id] = true
+						end
+					end
+				end
+			end
+		end
+
+		local classLinesOut = {}
+
+		for lineId, _ in pairs(classLines) do
+			table.insert(classLinesOut, lineId)
+		end
+
+		return classLinesOut
+	end
+
+	local function GetBaseAbilityId(abilityId)
+		abilityId = abilityId or 0
+		local skillData = SKILLS_DATA_MANAGER.abilityIdToProgressionDataMap[abilityId]
+		if skillData then
+			return skillData.abilityId
+		end
+		return 0
+	end
+
+	local function GetSkillsString()
+		local bars = {}
+
+		if fightData and fightData.charData and fightData.charData.skillBars then
+			local skillBars = fightData.charData.skillBars
+			local scribedSkills = fightData.charData.scribedSkills
+
+			for i = 1, 2 do
+				local skills = {}
+				local barData = skillBars[i] or {}
+				for slotId = 3, 8 do
+					local abilityId = barData[slotId]
+
+					if scribedSkills[abilityId] then
+						local scribedSkill = scribedSkills[abilityId]
+
+						local scribeData = { abilityId }
+						for i = 1, 3 do
+							table.insert(scribeData, scribedSkill[i])
+						end
+
+						table.insert(skills, table.concat(scribeData, ":"))
+					else
+						table.insert(skills, GetBaseAbilityId(abilityId))
+					end
+				end
+				table.insert(bars, table.concat(skills, ","))
+			end
+		end
+
+		return table.concat(bars, ";")
+	end
+
+	local function GetCPString()
+		local slotted = {}
+		local stars = {}
+
+		if fightData == nil or fightData.CP == nil then
+			return
+		end
+
+		for discipline, data in ipairs(fightData.CP) do
+			local slottedStars = data.slotted
+			local i_start = 1
+
+			for id, _ in pairs(slottedStars) do
+				table.insert(slotted, id)
+				i_start = i_start + 1
+			end
+
+			for i = i_start, 4 do
+				table.insert(slotted, 0)
+			end
+
+			for id, starData in pairs(data.stars) do
+				local points, starType = unpack(starData)
+				if starType ~= LIBCOMBAT_CPTYPE_UNSLOTTED then
+					table.insert(stars, ZO_CachedStrFormat("<<1>>:<<2>>", id, points))
+				end
+			end
+		end
+
+		local slottedStr = table.concat(slotted, ",")
+		local starsStr = table.concat(stars, ",")
+
+		return slottedStr, starsStr
+	end
+
+	local function GetGearStr()
+		if fightData == nil or fightData.charData == nil or fightData.charData.equip == nil then
+			return ""
+		end
+
+		local gear = {}
+		local gearData = fightData.charData.equip
+
+		for _, slotInfo in ipairs(equipslots) do
+			local slotId = slotInfo[1]
+			local itemLink = gearData[slotId]
+
+			if itemLink ~= "" then
+				local itemType = GetItemLinkItemType(itemLink)
+				local equipType = ""
+				if itemType == ITEMTYPE_ARMOR then
+					equipType = GetItemLinkArmorType(itemLink)
+				elseif itemType == ITEMTYPE_WEAPON then
+					equipType = GetItemLinkWeaponType(itemLink)
+				end
+
+				local setId = select(6, GetItemLinkSetInfo(itemLink, false))
+				local traitId = GetItemLinkTraitInfo(itemLink)
+				local glyphId = GetItemLinkFinalEnchantId(itemLink)
+
+				local itemStr = table.concat({ slotId, equipType, setId, traitId, glyphId }, ":")
+				table.insert(gear, itemStr)
+			end
+		end
+
+		local poison1 = gearData[EQUIP_SLOT_POISON]
+		if poison1 ~= "" then
+			local itemId = GetItemLinkItemId(poison1)
+			local _, _, craftEffects = string.find(poison1, "|H%d:item:.*:(%d+)|h|h")
+			craftEffects = tonumber(craftEffects)
+
+			if craftEffects and craftEffects > 0 then
+				table.insert(gear, ZO_CachedStrFormat("<<1>>:<<2>>:<<3>>", EQUIP_SLOT_POISON, itemId, craftEffects))
+			else
+				table.insert(gear, ZO_CachedStrFormat("<<1>>:<<2>>", EQUIP_SLOT_POISON, itemId))
+			end
+		end
+
+		local poison2 = gearData[EQUIP_SLOT_BACKUP_POISON]
+		if poison2 ~= "" then
+			local itemId = GetItemLinkItemId(poison2)
+			local _, _, craftEffects = string.find(poison2, "|H%d:item:.*:(%d+)|h|h")
+			craftEffects = tonumber(craftEffects)
+
+			if craftEffects and craftEffects > 0 then
+				table.insert(gear, ZO_CachedStrFormat("<<1>>:<<2>>:<<3>>", EQUIP_SLOT_POISON, itemId, craftEffects))
+			else
+				table.insert(gear, ZO_CachedStrFormat("<<1>>:<<2>>", EQUIP_SLOT_POISON, itemId))
+			end
+		end
+
+		return table.concat(gear, ",")
+	end
+
+	local function GetCommaSeparatedListFromKeys(t)
+		local list = {}
+		for key, _ in pairs(t) do
+			table.insert(list, key)
+		end
+
+		return table.concat(list, ",")
+	end
+	local function GetPotionString(t)
+		local potions = {}
+		for itemLink, _ in pairs(t) do
+			local itemId = GetItemLinkItemId(itemLink)
+			local _, _, craftEffects = string.find(itemLink, "|H%d:item:.*:(%d+)|h|h")
+			craftEffects = tonumber(craftEffects)
+
+			if craftEffects and craftEffects > 0 then
+				table.insert(potions, ZO_CachedStrFormat("<<1>>:<<2>>", itemId, craftEffects))
+			else
+				table.insert(potions, itemId)
+			end
+		end
+
+		return table.concat(potions, ",")
+	end
+
+	local supportedLang = {
+		["en"] = true,
+		["de"] = true,
+		["fr"] = true,
+		["ru"] = true,
+		["es"] = true,
+	}
+
+	local function GetLanguage()
+		local lang = GetCVar("language.2")
+		return supportedLang[lang] and lang or "en"
+	end
+
+	local function exportBuild()
+		if fightData == nil or fightData.calculated == nil then
+			return
+		end
+
+		-- classId;RaceIds;combatRoleId;stamina:magicka:health;curse;mundusId;skillLine1Id,skillLine2Id,skillLine3Id;bar1skills;bar2skills;passives;slottedCp;passiveCp;gear;FoodIds;Potions;
+
+		local charData = fightData.charData or {}
+		local classId = charData.classId or ""
+		local raceId = charData.raceId or ""
+		local roleId = charData.roleId or GetSelectedLFGRole() or ""
+
+		local APHealth = charData.APHealth or 0
+		local APMagicka = charData.APMagicka or 0
+		local APStam = charData.APStam or 0
+		local attributes = table.concat({ APStam, APMagicka, APHealth }, ":")
+
+		local curse = charData.Curse or 0
+		local skillLines = table.concat(charData.SkillLines or DiscoverSkillLines(), ",")
+		local skills = GetSkillsString()
+		local passives = table.concat(charData.passiveSkills or {}, ",")
+
+		local slottedCP, passiveCP = GetCPString()
+
+		local gear = GetGearStr()
+
+		local buildInfo = fightData.calculated.buildInfo
+
+		local mundus = GetCommaSeparatedListFromKeys(buildInfo.mundus)
+		local foods = GetCommaSeparatedListFromKeys(buildInfo.drinkFood)
+		local potions = GetPotionString(buildInfo.potions)
+
+		local buildData = {
+			classId,
+			raceId,
+			roleId,
+			attributes,
+			curse,
+			mundus,
+			skillLines,
+			skills,
+			passives,
+			slottedCP,
+			passiveCP,
+			gear,
+			foods,
+			potions,
+			"",
+		}
+
+		local buildDataStr = string.format(
+			"https://eso-hub.com/%s/build-editor?addondata=%s",
+			GetLanguage(),
+			table.concat(buildData, ";")
+		)
+		RequestOpenUnsafeURL(buildDataStr)
+	end
+
 	local function toggleShowIds()
 		db.showDebugIds = not db.showDebugIds
 		CombatMetrics_Report:Update()
@@ -1180,6 +1509,7 @@ do
 		AddCustomMenuItem(GetString(showIdString), toggleShowIds)
 		AddCustomMenuItem(GetString(showOverhealString), toggleOverhealMode)
 		AddCustomMenuItem(GetString(showPetString), toggleShowPets)
+		AddCustomMenuItem("ExportBuild", exportBuild)
 		AddCustomSubMenuItem(GetString(SI_COMBAT_METRICS_POSTDPS), postoptions)
 		AddCustomMenuItem(GetString(SI_COMBAT_METRICS_SETTINGS), CMX.OpenSettings)
 
@@ -3242,14 +3572,30 @@ local function updateCombatLog(panel)
 				local abilityId = logline[6]
 
 				condition2 = (
-unitSelCat == nil or (unitSelCat[targetUnitId] ~= nil and (logtype == LIBCOMBAT_EVENT_HEAL_OUT or logtype == LIBCOMBAT_EVENT_DAMAGE_OUT)) or (unitSelCat[sourceUnitId] ~= nil and (logtype == LIBCOMBAT_EVENT_HEAL_IN or logtype == LIBCOMBAT_EVENT_DAMAGE_IN))) and (abilitySelection[category] == nil or abilitySelection[category][abilityId] ~= nil)
+					unitSelCat == nil
+					or (unitSelCat[targetUnitId] ~= nil and (logtype == LIBCOMBAT_EVENT_HEAL_OUT or logtype == LIBCOMBAT_EVENT_DAMAGE_OUT))
+					or (
+						unitSelCat[sourceUnitId] ~= nil
+						and (logtype == LIBCOMBAT_EVENT_HEAL_IN or logtype == LIBCOMBAT_EVENT_DAMAGE_IN)
+					)
+				) and (abilitySelection[category] == nil or abilitySelection[category][abilityId] ~= nil)
 			elseif logtype == LIBCOMBAT_EVENT_HEAL_SELF then
 				local sourceUnitId = logline[4]
 				local targetUnitId = logline[5]
 				local abilityId = logline[6]
 
 				condition2 = (
-(unitSelection.healingIn == nil and CLSelection[LIBCOMBAT_EVENT_HEAL_IN]) or (unitSelection.healingIn ~= nil and unitSelection.healingIn[sourceUnitId] ~= nil) or (unitSelection.healingOut == nil and CLSelection[LIBCOMBAT_EVENT_HEAL_OUT]) or (unitSelection.healingOut ~= nil and unitSelection.healingOut[targetUnitId] ~= nil)) and ((abilitySelection.healingIn == nil and CLSelection[LIBCOMBAT_EVENT_HEAL_IN]) or (abilitySelection.healingIn ~= nil and abilitySelection.healingIn[abilityId] ~= nil) or (abilitySelection.healingOut == nil and CLSelection[LIBCOMBAT_EVENT_HEAL_OUT]) or (abilitySelection.healingOut ~= nil and abilitySelection.healingOut[abilityId] ~= nil))
+					(unitSelection.healingIn == nil and CLSelection[LIBCOMBAT_EVENT_HEAL_IN])
+					or (unitSelection.healingIn ~= nil and unitSelection.healingIn[sourceUnitId] ~= nil)
+					or (unitSelection.healingOut == nil and CLSelection[LIBCOMBAT_EVENT_HEAL_OUT])
+					or (unitSelection.healingOut ~= nil and unitSelection.healingOut[targetUnitId] ~= nil)
+				)
+					and (
+						(abilitySelection.healingIn == nil and CLSelection[LIBCOMBAT_EVENT_HEAL_IN])
+						or (abilitySelection.healingIn ~= nil and abilitySelection.healingIn[abilityId] ~= nil)
+						or (abilitySelection.healingOut == nil and CLSelection[LIBCOMBAT_EVENT_HEAL_OUT])
+						or (abilitySelection.healingOut ~= nil and abilitySelection.healingOut[abilityId] ~= nil)
+					)
 			elseif
 				logtype == LIBCOMBAT_EVENT_EFFECTS_IN
 				or logtype == LIBCOMBAT_EVENT_EFFECTS_OUT
@@ -3291,7 +3637,8 @@ unitSelCat == nil or (unitSelCat[targetUnitId] ~= nil and (logtype == LIBCOMBAT_
 				writtenlines = writtenlines + 1
 				if isCopyPasteMode then
 					if
-						writtenlines >= (page - 1) * 1000 + firstLine and writtenlines <= (page - 1) * 1000 + lastLine
+						writtenlines >= (page - 1) * 1000 + firstLine
+						and writtenlines <= (page - 1) * 1000 + lastLine
 					then
 						local text, color = CMX.GetCombatLogString(fightData, logline, fontsize)
 						copyPasteText[#copyPasteText + 1] = text:gsub("|c......", ""):gsub("|r", ""):gsub("|t.-|t ", "")
@@ -3410,8 +3757,10 @@ local function DrawLine(plot, coords, id)
 
 	local maxX, maxY = plot:GetDimensions()
 
-	local outOfRange = 
-(x1 < minX and x2 < minX) or (x1 > maxX and x2 > maxX) or (y1 < minY and y2 < minY) or (y1 > maxY and y2 > maxY)
+	local outOfRange = (x1 < minX and x2 < minX)
+		or (x1 > maxX and x2 > maxX)
+		or (y1 < minY and y2 < minY)
+		or (y1 > maxY and y2 > maxY)
 
 	if outOfRange then -- line is completely out of drawing area
 		line:SetHidden(false)
@@ -5099,32 +5448,6 @@ function CMX.ItemTooltip_OnMouseExit(control)
 	ClearTooltip(SkillTooltip)
 end
 
-local equipslots = {
-
-	{ EQUIP_SLOT_MAIN_HAND, "EsoUI/Art/CharacterWindow/gearslot_mainhand.dds" },
-	{ EQUIP_SLOT_OFF_HAND, "EsoUI/Art/CharacterWindow/gearslot_offhand.dds" },
-	{ EQUIP_SLOT_BACKUP_MAIN, "EsoUI/Art/CharacterWindow/gearslot_mainhand.dds" },
-	{ EQUIP_SLOT_BACKUP_OFF, "EsoUI/Art/CharacterWindow/gearslot_offhand.dds" },
-	{ EQUIP_SLOT_HEAD, "EsoUI/Art/CharacterWindow/gearslot_head.dds" },
-	{ EQUIP_SLOT_SHOULDERS, "EsoUI/Art/CharacterWindow/gearslot_shoulders.dds" },
-	{ EQUIP_SLOT_CHEST, "EsoUI/Art/CharacterWindow/gearslot_chest.dds" },
-	{ EQUIP_SLOT_HAND, "EsoUI/Art/CharacterWindow/gearslot_hands.dds" },
-	{ EQUIP_SLOT_WAIST, "EsoUI/Art/CharacterWindow/gearslot_belt.dds" },
-	{ EQUIP_SLOT_LEGS, "EsoUI/Art/CharacterWindow/gearslot_legs.dds" },
-	{ EQUIP_SLOT_FEET, "EsoUI/Art/CharacterWindow/gearslot_feet.dds" },
-	{ EQUIP_SLOT_NECK, "EsoUI/Art/CharacterWindow/gearslot_neck.dds" },
-	{ EQUIP_SLOT_RING1, "EsoUI/Art/CharacterWindow/gearslot_ring.dds" },
-	{ EQUIP_SLOT_RING2, "EsoUI/Art/CharacterWindow/gearslot_ring.dds" },
-}
-
-local armorcolors = {
-
-	[ARMORTYPE_NONE] = { 1, 1, 1, 1 },
-	[ARMORTYPE_HEAVY] = { 1, 0.3, 0.3, 1 },
-	[ARMORTYPE_MEDIUM] = { 0.3, 1, 0.3, 1 },
-	[ARMORTYPE_LIGHT] = { 0.3, 0.3, 1, 1 },
-}
-
 local SkillBarItems =
 	{ "LightAttack", "HeavyAttack", "Ability1", "Ability2", "Ability3", "Ability4", "Ability5", "Ultimate" }
 
@@ -5529,40 +5852,6 @@ local function updateRightInfoPanel(panel)
 			end
 		end
 	end
-end
-
-local subIdToQuality = {}
-
-local function GetEnchantQuality(itemLink) -- From Enchanted Quality (Rhyono, votan)
-	local itemId, itemIdSub, enchantSub = itemLink:match("|H[^:]+:item:([^:]+):([^:]+):[^:]+:[^:]+:([^:]+):")
-	if not itemId then
-		return 0
-	end
-
-	enchantSub = tonumber(enchantSub)
-
-	if enchantSub == 0 and not IsItemLinkCrafted(itemLink) then
-		local hasSet = GetItemLinkSetInfo(itemLink, false)
-		if hasSet then
-			enchantSub = tonumber(itemIdSub)
-		end -- For non-crafted sets, the "built-in" enchantment has the same quality as the item itself
-	end
-
-	if enchantSub > 0 then
-		local quality = subIdToQuality[enchantSub]
-
-		if not quality then
-			-- Create a fake itemLink to get the quality from built-in function
-			local itemLink =
-				string.format("|H1:item:%i:%i:50:0:0:0:0:0:0:0:0:0:0:0:0:1:1:0:0:10000:0|h|h", itemId, enchantSub)
-			quality = GetItemLinkQuality(itemLink)
-			subIdToQuality[enchantSub] = quality
-		end
-
-		return quality
-	end
-
-	return 0
 end
 
 local function updateBottomInfoPanel(panel)
