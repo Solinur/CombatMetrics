@@ -11,7 +11,7 @@ local util = CMXint.util
 local logger
 ---@class CMXui
 local ui = CMXint.ui
-
+local LC = LibCombat2
 local db
 
 -- Update the mini DPS meter
@@ -26,10 +26,42 @@ local db
 ---@field panelSize number
 ---@field iconSize number
 ---@field labelSize number
+---@field updateFunc fun(panel: LiveReportPanel)
 
-local function UpdateSingleTargetDamage(self) end
-local function UpdateMultiTargetDamage(self) end
-local function UpdateHealingDone(self) end
+---@param panel LiveReportPanel
+local function UpdateSingleTargetDamage(panel)
+	local panelControl = panel.control
+	local iconControl = panelControl:GetNamedChild("Icon")
+	local tooltipControl = panelControl:GetNamedChild("Tooltip")
+	local layout = panel.layout
+
+	if LC.IsCurrentFightBossFight() then
+		iconControl:SetTexture(layout.iconTextureBoss)
+		tooltipControl.tooltip[1] = layout.tooltipBoss
+	else
+		iconControl:SetTexture(layout.iconTexture)
+		tooltipControl.tooltip[1] = layout.tooltip
+	end
+
+	local playerTime, playerDamage, totalTime, totalDamage = LC.GetCurrentMainTargetDamageDone()
+
+	local playerDPS = zo_roundToZero(util.GetPerSecondValue(playerDamage, playerTime), 0.01)
+	local totalDPS = zo_roundToZero(util.GetPerSecondValue(totalDamage, totalTime), 0.01)
+
+	if playerDamage > totalDamage then
+		logger:Warn("Player damage larger than total damage: %d > %d", playerDamage, totalDamage)
+	end
+	local ratio = zo_roundToZero(playerDamage / totalDamage * 100)
+
+	SDPSString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), playerDPS, totalDPS, sdpsratio)
+end
+
+local function UpdateMultiTargetDamage(panel) end
+local function UpdateHealingDone(panel) end
+local function UpdateAbsoluteHealingDone(panel) end
+local function UpdateDamageReceived(panel) end
+local function UpdateHealingReceived(panel) end
+local function UpdateCombatTime(panel) end
 
 ---@type LiveReportPanelData[]
 local PANEL_DATA = {
@@ -63,7 +95,7 @@ local PANEL_DATA = {
 		panelSize = 150,
 		iconSize = 24,
 		labelSize = 120,
-		updateFunc = UpdateHealing,
+		updateFunc = UpdateHealingDone,
 	},
 	{
 		name = "hpsOutRaw",
@@ -73,7 +105,7 @@ local PANEL_DATA = {
 		panelSize = 85,
 		iconSize = 55,
 		labelSize = 20,
-		updateFunc = Update,
+		updateFunc = UpdateAbsoluteHealingDone,
 	},
 	{
 		name = "dpsIn",
@@ -83,7 +115,7 @@ local PANEL_DATA = {
 		panelSize = 150,
 		iconSize = 24,
 		labelSize = 120,
-		updateFunc = Update,
+		updateFunc = UpdateDamageReceived,
 	},
 	{
 		name = "hpsIn",
@@ -93,7 +125,7 @@ local PANEL_DATA = {
 		panelSize = 85,
 		iconSize = 55,
 		labelSize = 20,
-		updateFunc = Update,
+		updateFunc = UpdateHealingReceived,
 	},
 	{
 		name = "time",
@@ -103,7 +135,7 @@ local PANEL_DATA = {
 		panelSize = 65,
 		iconSize = 38,
 		labelSize = 20,
-		updateFunc = Update,
+		updateFunc = UpdateCombatTime,
 	},
 }
 
@@ -269,6 +301,8 @@ function LiveReportPanel:InitLayout(control)
 	local labelControl = control:GetNamedChild("Label")
 	labelControl:SetWidth(layout.labelSize)
 	util.storeOrigLayout(self.control)
+
+	self.Update = layout.updateFunc
 end
 
 function LiveReportPanel:Refresh()
@@ -300,6 +334,10 @@ function LiveReportPanel:RefreshAnchor(anchorData)
 
 	control:ClearAnchors()
 	control:SetAnchor(anchorData[1], anchorData[2], anchorData[3], anchorData[4] * scale, anchorData[5] * scale)
+end
+
+function LiveReportPanel:Update()
+	-- placeholder
 end
 
 local anchorSchemes = {
