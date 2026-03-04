@@ -9,9 +9,24 @@ local logger
 ---@class CMXui
 local ui = CMXint.ui
 
-local dx = ui.dx
-local DPSstrings = CMXint.DPSstrings
-local adjustRowSize = util.adjustRowSize
+local cat = util.MainCategories
+local UnitOppositionCategory = {
+	[cat.CMX_CATEGORY_DAMAGE_DONE] = cat.CMX_CATEGORY_DAMAGE_RECEIVED,
+	[cat.CMX_CATEGORY_DAMAGE_RECEIVED] = cat.CMX_CATEGORY_DAMAGE_DONE,
+	[cat.CMX_CATEGORY_HEALING_DONE] = cat.CMX_CATEGORY_HEALING_RECEIVED,
+	[cat.CMX_CATEGORY_HEALING_RECEIVED] = cat.CMX_CATEGORY_HEALING_DONE,
+}
+
+local UNIT_NAME_FORMAT_ID = "(<<2>>) <<1>>"
+local UNIT_NAME_FORMAT_DEFAULT = "<<1>>"
+
+local UNIT_COLOR_DEFAULT = ZO_ColorDef:New("FFFFFFFF")
+local UNIT_COLOR_BOSS = ZO_ColorDef:New("FFFF5555")
+local UNIT_COLOR_GROUP = ZO_ColorDef:New("FF99FF99")
+local UNIT_COLOR_PLAYER = ZO_ColorDef:New("FFFFFFAA")
+
+local UNIT_BAR_COLOR_DAMAGE = ZO_ColorDef:New("99CC0000")
+local UNIT_BAR_COLOR_HEAL = ZO_ColorDef:New("9900CC00")
 
 do -- Handling Unit Context Menu
 	local UnitContextMenuUnitId
@@ -60,6 +75,29 @@ do -- Handling Unit Context Menu
 	-- end
 end
 
+---@param unitData UnitData
+---@return string?
+local function GetUnitIcon(unitData)
+	if unitData.isBoss then
+		return "esoui/art/icons/poi/poi_groupboss_complete.dds"
+	elseif unitData.unitType == COMBAT_UNIT_TYPE_GROUP then
+		return "esoui/art/journal/gamepad/gp_questtypeicon_group.dds"
+	end
+end
+
+---@param unitData UnitData
+---@return ZO_ColorDef
+local function GetUnitColor(unitData)
+	if unitData.unitType == COMBAT_UNIT_TYPE_PLAYER then
+		return UNIT_COLOR_PLAYER
+	elseif unitData.isBoss then
+		return UNIT_COLOR_BOSS
+	elseif unitData.unitType == COMBAT_UNIT_TYPE_GROUP then
+		return UNIT_COLOR_GROUP
+	end
+	return UNIT_COLOR_DEFAULT
+end
+
 local function GetShortFormattedNumber(number)
 	local exponent = zo_floor(math.log(number) / math.log(10))
 	local loweredNumber = zo_roundToNearest(number, zo_pow(10, exponent - 2))
@@ -68,130 +106,217 @@ local function GetShortFormattedNumber(number)
 	return shortNumber
 end
 
-function CMXint.InitializeUnitsPanel(control)
-	UnitsPanel = CMXint.PanelObject:New(control, "units")
+---@param panel UnitsPanel
+---@return UnitDataList
+local function InitUnitsList(panel)
+	---@class UnitDataList: SortFilterList
+	local dataList = ui.SortFilterList:New(panel.control, "CombatMetrics_RowTemplate")
+	panel.dataList = dataList
+	dataList.panel = panel
+	dataList.masterList = {}
 
-	function UnitsPanel:Update(fightData)
-		logger:Debug("Updating Unit Panel")
+	---@param rowControl RowControl
+	function dataList:RecoverRow(rowControl)
+		local panel = self.panel
+		local rowHeight = self:GetHeight()
 
-		self:ResetBars()
+		local icon = panel:AcquireSharedControl(CT_TEXTURE)
+		icon:ApplyPosition(rowControl, 2, 0, rowHeight, rowHeight)
 
-		local settings = self.settings
-		local category = settings.category
-		local isdamage = (category == "damageOut" or category == "damageIn")
+		local label = panel:AcquireSharedControl(CT_LABEL)
+		label:ApplyPosition(rowControl, 33, 0, 167)
+		label:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
 
-		local label1 = ((category == "damageOut" or category == "healingOut") and GetString(SI_COMBAT_METRICS_TARGET))
-			or GetString(SI_COMBAT_METRICS_SOURCE)
-		local label2 = (isdamage and GetString(SI_COMBAT_METRICS_DPS)) or GetString(SI_COMBAT_METRICS_HPS)
-		local label3 = (isdamage and GetString(SI_COMBAT_METRICS_DAMAGE)) or GetString(SI_COMBAT_METRICS_HEALING)
+		local bar = panel:AcquireSharedControl(CT_TEXTURE)
+		bar:ApplyPosition(rowControl, 31, 0, 171, rowHeight)
+		bar:SetTexture("esoui/art/unitframes/progressbar_raidhealth.dds")
 
-		local header = control:GetNamedChild("Header")
+		local perSecond = panel:AcquireSharedControl(CT_LABEL)
+		perSecond:ApplyPosition(rowControl, 204, 0, 46)
+		perSecond:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
 
-		header:GetNamedChild("Name"):SetText(label1)
-		header:GetNamedChild("PerSecond"):SetText(label2)
-		header:GetNamedChild("Total"):SetText(label3)
+		local total = panel:AcquireSharedControl(CT_LABEL)
+		total:ApplyPosition(rowControl, 252, 0, 58)
+		total:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
 
-		-- prepare data
+		local perCent = panel:AcquireSharedControl(CT_LABEL)
+		perCent:ApplyPosition(rowControl, 312, 0, 46)
+		perCent:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
 
-		if fightData == nil then
+		rowControl.controls = { icon, label, bar, perSecond, total, perCent }
+		rowControl.recovered = true
+	end
+
+	---@param rowControl RowControl
+	---@param data UnitRowData
+	---@param scrollList object
+	function dataList:UpdateRow(rowControl, data, scrollList)
+		local panel = self.panel
+
+		if rowControl.recovered ~= true then
+			self:RecoverRow(rowControl)
+		end
+
+		local unitData = data.unitData
+		local icon, label, bar, perSecond, total, perCent = unpack(rowControl.controls)
+
+		---@cast icon TextureControl
+		local iconTexture = GetUnitIcon(unitData)
+		icon:SetHidden(iconTexture == nil)
+		if iconTexture then
+			icon:SetTexture(iconTexture)
+		end
+
+		---@cast label LabelControl
+		local labelFormat = panel:ShowIds() and unitData.unitId and UNIT_NAME_FORMAT_ID or UNIT_NAME_FORMAT_DEFAULT
+		local labelText = ZO_CachedStrFormat(labelFormat, unitData.name, unitData.unitId)
+		local namecolor = GetUnitColor(unitData)
+		local font = ui.GetFont(ui.fontSize, false)
+		label:SetText(labelText)
+		label:SetColor(namecolor:UnpackRGBA())
+		label:SetFont(font)
+
+		local playerAmount = data.playerAmount
+		local perSecondValue = playerAmount / (data.durationMs / 1000)
+		local ratio = data.playerAmount / self.playerAmountSum
+
+		-- local highlightControl = row:GetNamedChild("HighLight")
+		-- highlightControl:SetHidden(not highlight)
+
+		---@cast bar TextureControl
+		local barColor = util.IsDamageCategory(panel.settings.category) and UNIT_BAR_COLOR_DAMAGE or UNIT_BAR_COLOR_HEAL
+		local maxwidth = label:GetWidth()
+		bar:SetWidth(maxwidth * ratio)
+		bar:SetColor(barColor:UnpackRGBA())
+
+		perSecond:SetText(string.format("%.0f", perSecondValue))
+		perSecond:SetFont(font)
+
+		total:SetText(GetShortFormattedNumber(playerAmount))
+		total:SetFont(font)
+
+		perCent:SetText(string.format("%.1f%%", 100 * ratio))
+		perCent:SetFont(font)
+	end
+
+	---@param unitData UnitData
+	---@param playerData UnitDamageData|UnitHealData
+	---@param groupData UnitDamageData|UnitHealData
+	---@param durationMs integer
+	function dataList:AddDataEntry(unitData, playerData, groupData, durationMs)
+		if playerData.totalAmount <= 0 then
 			return
 		end
-		local data = fightData.calculated
-		local selectedunits = ui.selections.unit[category]
 
-		local totalAmountKey = category .. "Total"
-		local totalAmount = data[totalAmountKey] -- i.e. damageOutTotal
-		local APSKey = DPSstrings[category]
+		local selected = false -- selectedunits ~= nil and (selectedunits[unitId] ~= nil) or false -- TODO: Selections
 
-		local scrollchild = GetControl(control, "PanelScrollChild")
-		local currentanchor = { TOPLEFT, scrollchild, TOPLEFT, 0, 1 }
+		local category = self.panel.settings.category
+		local playerAmount = category == "healingOut"
+				and self.panel.settings.includeOverheal
+				and playerData.overflowAmount
+			or playerData.totalAmount
 
-		local rightpanel = settings.rightpanel
-		local showids = settings.showDebugIds
+		local groupAmount = category == "healingOut"
+				and self.panel.settings.includeOverheal
+				and groupData.overflowAmount
+			or groupData.totalAmount
 
-		for unitId, unit in
-			util.spairs(data.units, function(t, a, b)
-				return t[a][totalAmountKey] > t[b][totalAmountKey]
-			end)
-		do -- i.e. for damageOut sort by damageOutTotal
-			local totalUnitAmount = unit[totalAmountKey]
-			local unitData = fightData.units[unitId]
+		---@class UnitRowData
+		local rowData = {
+			unitData = unitData,
+			selected = selected,
+			playerAmount = playerAmount,
+			durationMs = durationMs,
+			groupAmount = groupAmount,
+		}
 
-			if
-				(
-					totalUnitAmount > 0
-					or (
-						rightpanel == "buffsout"
-							and NonContiguousCount(unit.buffs) > 0
-							and (unitData.isFriendly == false and isdamage)
-						or (unitData.isFriendly and not isdamage)
-					)
-				) and not (unitData.unitType == 2 and settings.showPets == false)
-			then
-				local highlight = false
-				if selectedunits ~= nil then
-					highlight = selectedunits[unitId] ~= nil
-				end
+		dataList.playerAmountSum = dataList.playerAmountSum + playerAmount
+		dataList.groupAmountSum = dataList.groupAmountSum + groupAmount
 
-				local dbug = showids and string.format("(%d) ", unitId) or ""
+		table.insert(self.masterList, ZO_ScrollList_CreateDataEntry(1, rowData))
+	end
 
-				local name = dbug .. (settings.useDisplayNames and unitData.displayname or unitData.name)
+	function dataList:BuildMasterList()
+		local fightData = self.panel:GetCurrentFightData()
+		local category = self.panel.settings.category
+		local playerId = fightData.unitIds.player
+		local categoryData = util.GetUnitCategoryData(fightData, category, playerId)
 
-				local isboss = unitData.bossId
-				local namecolor = (isboss and { 1, 0.8, 0.3, 1 }) or { 1, 1, 1, 1 }
+		if categoryData == nil then
+			return
+		end
 
-				local unitTime = unitData.dpsend
-						and unitData.dpsstart
-						and zo_max((unitData.dpsend - unitData.dpsstart) / 1000, 1)
-					or 1
-				local dps = unitTime and totalUnitAmount / unitTime or unit[APSKey]
-				local damage = totalUnitAmount
-				local ratio = damage / totalAmount
+		CMX_CATEGORY_DATA = categoryData
 
-				local rowId = #control.bars + 1
+		ZO_ClearTable(self.masterList)
 
-				local rowName = scrollchild:GetName() .. "Row" .. rowId
-				local row = _G[rowName]
-					or CreateControlFromVirtual(rowName, scrollchild, "CombatMetrics_UnitRowTemplate")
-				row:SetAnchor(unpack(currentanchor))
-				row:SetHidden(false)
+		local durationMs = categoryData.endTime - categoryData.startTime
+		local oppositionCategory = UnitOppositionCategory[category]
 
-				local header = control:GetNamedChild("Header")
-				adjustRowSize(row, header)
+		dataList.playerAmountSum = 0
+		dataList.groupAmountSum = 0
 
-				local highlightControl = row:GetNamedChild("HighLight")
-				highlightControl:SetHidden(not highlight)
-
-				local nameControl = row:GetNamedChild("Name")--[[@as LabelControl]]
-				nameControl:SetText(name)
-				--nameControl:SetFont(font)
-				nameControl:SetColor(unpack(namecolor))
-
-				local maxwidth = nameControl:GetWidth()
-
-				local barControl = row:GetNamedChild("Bar")
-				barControl:SetWidth(maxwidth * ratio)
-
-				local rateControl = row:GetNamedChild("PerSecond")--[[@as LabelControl]]
-				rateControl:SetText(string.format("%.0f", dps))
-
-				local amountControl = row:GetNamedChild("Total")--[[@as LabelControl]]
-				amountControl:SetText(GetShortFormattedNumber(damage))
-
-				local fractionControl = row:GetNamedChild("Fraction")--[[@as LabelControl]]
-				fractionControl:SetText(string.format("%.1f%%", 100 * ratio))
-
-				currentanchor = { TOPLEFT, row, BOTTOMLEFT, 0, dx }
-
-				control.bars[rowId] = row
-
-				row["dataId"] = unitId
-				row["type"] = "unit"
-				row["id"] = rowId
-				row["self"] = control
+		for unitId, playerUnitData in pairs(categoryData) do
+			if type(playerUnitData) == "table" then
+				local groupData = util.GetUnitCategoryData(fightData, oppositionCategory, unitId)
+				local unitInfo = fightData.units[unitId]
+				self:AddDataEntry(unitInfo, playerUnitData, groupData, durationMs)
 			end
 		end
+
+		local scrollData = ZO_ScrollList_GetDataList(self.list)
+		ZO_ScrollList_Clear(self.list)
+
+		for i, data in ipairs(self.masterList) do
+			scrollData[#scrollData + 1] = data
+		end
 	end
+
+	function dataList:FilterScrollList() end
+
+	dataList.sortHeaderGroup:SelectHeaderByKey("Total")
+
+	return dataList
+end
+
+function CMXint.InitializeUnitsPanel(control)
+	---@class UnitsPanel: Panel
+	UnitsPanel = CMXint.PanelObject:New(control, "units")
+
+	UnitsPanel.dataList = InitUnitsList(UnitsPanel)
+	UnitsPanel.selections = {}
+
+	function UnitsPanel:UpdateHeaderLabels()
+		local isDamage = util.IsDamageCategory(self.settings.category)
+
+		local headers = self.control:GetNamedChild("Headers")
+		local nameControl = headers:GetNamedChild("Name"):GetNamedChild("Name") --[[@as LabelControl]]
+		local perSecondControl = headers:GetNamedChild("PerSecond"):GetNamedChild("Name") --[[@as LabelControl]]
+		local totalControl = headers:GetNamedChild("Total"):GetNamedChild("Name") --[[@as LabelControl]]
+
+		local label1 = isDamage and GetString(SI_COMBAT_METRICS_TARGET) or GetString(SI_COMBAT_METRICS_SOURCE)
+		nameControl:SetText(label1)
+		local label2 = isDamage and GetString(SI_COMBAT_METRICS_DPS) or GetString(SI_COMBAT_METRICS_HPS)
+		perSecondControl:SetText(label2)
+		local label3 = isDamage and GetString(SI_COMBAT_METRICS_DAMAGE) or GetString(SI_COMBAT_METRICS_HEALING)
+		totalControl:SetText(label3)
+	end
+
+	function UnitsPanel:Update(fightData)
+		logger:Info("Updating Unit Panel")
+
+		self:UpdateHeaderLabels()
+
+		self.dataList:UpdateRowHeight()
+		self.dataList:RefreshData()
+	end
+
+	function UnitsPanel:Clear()
+		logger:Debug("Clearing Units Panel")
+		self.dataList:Clear()
+	end
+
+	function UnitsPanel:Recover() end
 end
 
 local isFileInitialized = false
@@ -199,7 +324,7 @@ function CMXint.InitializeUnits()
 	if isFileInitialized == true then
 		return false
 	end
-	logger = util.initSublogger("UnitPanel")
+	logger = util.initSublogger("UnitsPanel")
 
 	isFileInitialized = true
 	return true

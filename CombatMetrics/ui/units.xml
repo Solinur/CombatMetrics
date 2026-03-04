@@ -1,52 +1,64 @@
 <GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
     <Controls>
         <Control name="CombatMetrics_UnitsPanel" inherits="CombatMetrics_ControlFramed" virtual="true">
-            <OnInitialized>
-                local scrollList = GetControl(self, "PanelScrollChild")
-                scrollList:SetResizeToFitPadding(0, 20)
-            </OnInitialized>
-
             <Controls>
-                <Control name="$(parent)Header">
-                    <Anchor point="TOPLEFT" offsetX="4" />
-                    <Anchor point="TOPRIGHT" offsetX="-4" />
+                <Control name="$(parent)Headers">
+                    <Anchor point="TOPLEFT" offsetY="2" />
+                    <Anchor point="TOPRIGHT" offsetY="2" />
                     <Dimensions y="20" />
                     <Controls>
-                        <Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_TARGET"
-                            horizontalAlignment="LEFT">
-                            <Anchor point="BOTTOMLEFT" offsetX="1" offsetY="0" />
-                            <Dimensions x="152" y="20" />
-                        </Label>
 
-                        <Label name="$(parent)PerSecond" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"
-                            text="SI_COMBAT_METRICS_DPS" horizontalAlignment="RIGHT">
+                        <Control name="$(parent)Type" inherits="CombatMetrics_SortHeader">
+                            <Anchor point="LEFT" relativePoint="LEFT" relativeTo="$(parent)" offsetX="2" offsetY="0" />
+                            <Dimensions x="25" />
+                            <OnInitialized>
+                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_TYPE), "type", ZO_SORT_ORDER_UP, TEXT_ALIGN_CENTER)
+                            </OnInitialized>
+                        </Control>
+
+                        <Control name="$(parent)Name" inherits="CombatMetrics_SortHeader">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Type" offsetX="6" offsetY="0" />
+                            <Dimensions x="165" />
+                            <OnInitialized>
+                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_TARGET), "name", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT)
+                            </OnInitialized>
+                        </Control>
+
+                        <Control name="$(parent)PerSecond" inherits="CombatMetrics_ControlTooltip CombatMetrics_SortHeader">
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="4" offsetY="0" />
-                            <Dimensions x="70" y="20" />
-                            <OnInitialized>self.tooltip = SI_COMBAT_METRICS_UNITDPS_TT</OnInitialized>
-                        </Label>
+                            <Dimensions x="58" />
+                            <OnInitialized>
+                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_DPS), "persecond", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_CENTER)
+                                self.tooltip = SI_COMBAT_METRICS_UNITDPS_TT
+                            </OnInitialized>
+                        </Control>
 
-                        <Label name="$(parent)Total" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"
-                            text="SI_COMBAT_METRICS_DAMAGE" horizontalAlignment="RIGHT">
-                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)PerSecond" offsetX="4" offsetY="0" />
-                            <Dimensions x="58" y="20" />
-                        </Label>
+                        <Control name="$(parent)Total" inherits="CombatMetrics_ControlTooltip CombatMetrics_SortHeader">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)PerSecond" offsetX="2" offsetY="0" />
+                            <Dimensions x="58" />
+                            <OnInitialized>
+                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_DAMAGE),"total", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_CENTER)
+                            </OnInitialized>
+                        </Control>
 
-                        <Label name="$(parent)Fraction" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip"
-                            text="SI_COMBAT_METRICS_PERCENT" horizontalAlignment="CENTER">
-                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Total" offsetX="4" offsetY="0" />
-                            <Dimensions x="45" y="20" />
-                        </Label>
+                        <Control name="$(parent)PerCent" inherits="CombatMetrics_ControlTooltip CombatMetrics_SortHeader">
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Total" offsetX="2" offsetY="0" />
+                            <Dimensions x="36" />
+                            <OnInitialized>
+                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_PERCENT),"percent", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_CENTER)
+                            </OnInitialized>
+                        </Control>
                     </Controls>
                 </Control>
 
                 <Line name="$(parent)Sep" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin">
-                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Header" offsetY="2" />
-                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Header" offsetY="2" />
+                    <Anchor point="BOTTOMLEFT" relativeTo="$(parent)Headers" offsetY="2" />
+                    <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)Headers" offsetY="2" />
                 </Line>
 
-                <Control name="$(parent)Panel" inherits="ZO_ScrollContainer">
-                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Sep" offsetX="0" offsetY="2" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4" />
+                <Control name="$(parent)List" inherits="ZO_ScrollList">
+                    <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Sep" offsetY="2" />
+                    <Anchor point="BOTTOMRIGHT" />
                 </Control>
             </Controls>
         </Control>

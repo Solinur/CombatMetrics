@@ -49,8 +49,6 @@
             </Controls>
         </Control>
 
-        <Control name="CombatMetrics_BuffsPanelRowTemplate" virtual="true"></Control>
-
         <Button name="CombatMetrics_BuffsPanelExpandButton" virtual="true" inherits="ZO_TreeButtonArrow" />
 
         <Control name="CombatMetrics_BuffsPanel" inherits="CombatMetrics_ControlFramed" virtual="true">

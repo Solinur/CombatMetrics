@@ -60,7 +60,7 @@
 
 	SI_COMBAT_METRICS_EDIT_TITLE = "Double click to edit fight name",
 
-	SI_COMBAT_METRICS_DAMAGE_CAUSED = "Damage Caused",
+	SI_COMBAT_METRICS_DAMAGE_DONE = "Damage Caused",
 	SI_COMBAT_METRICS_DAMAGE_RECEIVED = "Damage Received",
 	SI_COMBAT_METRICS_HEALING_DONE = "Healing Done",
 	SI_COMBAT_METRICS_HEALING_RECEIVED = "Healing Received",
@@ -173,6 +173,7 @@
 	SI_COMBAT_METRICS_CONSUMPTION = "Consumption",
 	SI_COMBAT_METRICS_PM_SEC = "±/s",
 	SI_COMBAT_METRICS_TARGET = "Target",
+	SI_COMBAT_METRICS_TYPE = "T",
 	SI_COMBAT_METRICS_PERCENT = "%",
 	SI_COMBAT_METRICS_UNITDPS_TT = "Real DPS, e.g. the damage per second between your first and your last hit to that target",
 
