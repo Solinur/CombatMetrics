@@ -16,8 +16,108 @@ local db
 
 -- Update the mini DPS meter
 
+---@class LiveReportPanelData
+---@field name string
+---@field tooltip string
+---@field tooltipBoss string?
+---@field iconTexture string
+---@field iconTextureBoss string?
+---@field blockSize number
+---@field panelSize number
+---@field iconSize number
+---@field labelSize number
+
+local function UpdateSingleTargetDamage(self) end
+local function UpdateMultiTargetDamage(self) end
+local function UpdateHealingDone(self) end
+
+---@type LiveReportPanelData[]
+local PANEL_DATA = {
+	{
+		name = "dpsSingle",
+		tooltip = GetString(SI_COMBAT_METRICS_LIVEREPORT_DPSSINGLE_TOOLTIP),
+		iconTexture = "/esoui/art/icons/mapkey/mapkey_fightersguild.dds",
+		blockSize = 1,
+		panelSize = 150,
+		iconSize = 24,
+		labelSize = 120,
+		iconTextureBoss = "esoui/art/tutorial/poi_groupboss_complete.dds",
+		tooltipBoss = GetString(SI_COMBAT_METRICS_LIVEREPORT_DPSBOSS_TOOLTIP),
+		updateFunc = UpdateSingleTargetDamage,
+	},
+	{
+		name = "dpsMulti",
+		tooltip = GetString(SI_COMBAT_METRICS_LIVEREPORT_DPSMULTI_TOOLTIP),
+		iconTexture = "/EsoUI/Art/LFG/Gamepad/LFG_roleIcon_dps.dds",
+		blockSize = 1,
+		panelSize = 150,
+		iconSize = 24,
+		labelSize = 120,
+		updateFunc = UpdateMultiTargetDamage,
+	},
+	{
+		name = "hpsOut",
+		tooltip = GetString(SI_COMBAT_METRICS_LIVEREPORT_HPSOUT_TOOLTIP),
+		iconTexture = "/EsoUI/Art/LFG/Gamepad/LFG_roleIcon_healer.dds",
+		blockSize = 1,
+		panelSize = 150,
+		iconSize = 24,
+		labelSize = 120,
+		updateFunc = UpdateHealing,
+	},
+	{
+		name = "hpsOutRaw",
+		tooltip = GetString(SI_COMBAT_METRICS_LIVEREPORT_HPSRAW_TOOLTIP),
+		iconTexture = "/esoui/art/buttons/gamepad/pointsplus_up.dds",
+		blockSize = 0.57,
+		panelSize = 85,
+		iconSize = 55,
+		labelSize = 20,
+		updateFunc = Update,
+	},
+	{
+		name = "dpsIn",
+		tooltip = GetString(SI_COMBAT_METRICS_LIVEREPORT_DPSINC_TOOLTIP),
+		iconTexture = "/EsoUI/Art/LFG/Gamepad/LFG_roleIcon_tank.dds",
+		blockSize = 1,
+		panelSize = 150,
+		iconSize = 24,
+		labelSize = 120,
+		updateFunc = Update,
+	},
+	{
+		name = "hpsIn",
+		tooltip = GetString(SI_COMBAT_METRICS_LIVEREPORT_HPSINC_TOOLTIP),
+		iconTexture = "/esoui/art/hud/gamepad/gp_radialicon_invitegroup_down.dds",
+		blockSize = 0.57,
+		panelSize = 85,
+		iconSize = 55,
+		labelSize = 20,
+		updateFunc = Update,
+	},
+	{
+		name = "time",
+		tooltip = GetString(SI_COMBAT_METRICS_LIVEREPORT_TIME_TOOLTIP),
+		iconTexture = "/esoui/art/tutorial/timer_icon.dds",
+		blockSize = 0.43,
+		panelSize = 65,
+		iconSize = 38,
+		labelSize = 20,
+		updateFunc = Update,
+	},
+}
+
+---@type table<string, LiveReportPanelData>
+local PANEL_DATA_BY_NAME = {}
+
+for i, layout in ipairs(PANEL_DATA) do
+	PANEL_DATA_BY_NAME[layout.name] = layout
+end
+
+local PANEL_HEIGHT = 26
+
 local function updateLiveReport(self, data)
-	if data == nil then
+	if data == nil or IsUnitInCombat("player") == false then
 		return
 	end
 
@@ -136,61 +236,42 @@ local function resize(control, scale)
 	end
 end
 
----@class LiveReportControl
-local LiveReportControl = ZO_Object:Subclass() -- holds all recent events + info to send on death
+---@class LiveReportPanel
+local LiveReportPanel = ZO_InitializingObject:Subclass() -- holds all recent events + info to send on death
 
-local LiveReportControlSizes = {
-	["DamageOutSingle"] = 1,
-	["DamageOut"] = 1,
-	["HealOut"] = 1,
-	["HealOutAbsolute"] = 0.57,
-	["DamageIn"] = 1,
-	["HealIn"] = 0.57,
-	["Time"] = 0.43,
-}
+function LiveReportPanel:Initialize(name)
+	assert(PANEL_DATA_BY_NAME[name], string.format("Missing layout data for live report panel: %s", name))
 
-local LiveReportControls = {
-	"DamageOutSingle",
-	"DamageOut",
-	"HealOut",
-	"HealOutAbsolute",
-	"DamageIn",
-	"HealIn",
-	"Time",
-}
-
----@diagnostic disable-next-line: duplicate-set-field
-function LiveReportControl:New(name)
-	assert(LiveReportControlSizes[name], "Invalid module name for LiveReportControl!")
-	local object = ZO_Object.New(self)
-	object:Initialize(name)
-	return object
-end
-
-function LiveReportControl:Initialize(name)
-	local LiveReport = CombatMetrics_LiveReport
 	local templateName = "CombatMetrics_LiveReport_" .. name
-
-	local control = CreateControlFromVirtual(templateName, LiveReport, templateName)
-	util.storeOrigLayout(control)
-
+	local LiveReport = CombatMetrics_LiveReport
+	local control = CreateControlFromVirtual(templateName, LiveReport, CombatMetrics_LiveReport_Panel)
 	self.name = name
+	self.InitLayout(control)
+
 	self.control = control
 	self.active = true
-	self.size = LiveReportControlSizes[name]
 	self.parent = LiveReport
 	LiveReport.modules[name] = self
 end
 
-local anchorSchemes = {
-	["First"] = { TOPLEFT, nil, TOPLEFT, 0, 0 },
-	["Horizontal"] = { LEFT, nil, RIGHT, 0, 0 },
-	["Vertical"] = { TOPLEFT, nil, BOTTOMLEFT, 0, 0 },
-	["Compact"] = { LEFT, nil, RIGHT, 0, 0 },
-	["CompactRow2"] = { TOPLEFT, nil, BOTTOMLEFT, 0, 0 },
-}
+function LiveReportPanel:InitLayout(control)
+	local layout = PANEL_DATA_BY_NAME[self.name]
 
-function LiveReportControl:Refresh(anchorControl)
+	self.layout = layout
+	self.size = layout.blockSize
+	control:SetWidth(layout.panelSize)
+
+	local iconControl = control:GetNamedChild("Icon")
+	iconControl:SetWidth(layout.iconSize)
+	iconControl:SetHeight(layout.iconSize)
+	iconControl:SetTexture(layout.iconTexture)
+
+	local labelControl = control:GetNamedChild("Label")
+	labelControl:SetWidth(layout.labelSize)
+	util.storeOrigLayout(self.control)
+end
+
+function LiveReportPanel:Refresh()
 	---@type Control
 	local control = self.control
 	local parent = self.parent
@@ -201,7 +282,6 @@ function LiveReportControl:Refresh(anchorControl)
 
 	local width, height = unpack(control.sizes)
 	control:SetDimensions(width * scale, height * scale)
-	control:SetAnchor(anchor[1], anchorControl, anchor[2], anchor[3] * scale, anchor[4] * scale)
 
 	local label = self:GetNamedChild("Label")
 	local alignment = settings.alignmentleft and TEXT_ALIGN_LEFT or TEXT_ALIGN_RIGHT
@@ -213,6 +293,23 @@ function LiveReportControl:Refresh(anchorControl)
 	self.last = self
 end
 
+function LiveReportPanel:RefreshAnchor(anchorData)
+	---@type Control
+	local control = self.control
+	local scale = self.parent.settings.scale
+
+	control:ClearAnchors()
+	control:SetAnchor(anchorData[1], anchorData[2], anchorData[3], anchorData[4] * scale, anchorData[5] * scale)
+end
+
+local anchorSchemes = {
+	["First"] = { TOPLEFT, nil, TOPLEFT, 0, 0 },
+	["Horizontal"] = { LEFT, nil, RIGHT, 0, 0 },
+	["Vertical"] = { TOPLEFT, nil, BOTTOMLEFT, 0, 0 },
+	["Compact"] = { LEFT, nil, RIGHT, 0, 0 },
+	["CompactRow2"] = { TOPLEFT, nil, BOTTOMLEFT, 0, 0 },
+}
+
 ---@param self TopLevelWindow
 local function InitLiveReport(self)
 	local settings = CMXint.settings.liveReport
@@ -220,13 +317,15 @@ local function InitLiveReport(self)
 		return
 	end
 
-	self.initilazed = true
+	self.initialized = true
 	self.settings = settings
+
+	---@type table<string, LiveReportPanel>
 	self.modules = {}
 
-	for _, name in ipairs(LiveReportControls) do
-		if settings[name] == true then
-			LiveReportControl:New(name)
+	for _, layout in ipairs(PANEL_DATA) do
+		if settings[layout.name] == true then
+			LiveReportPanel:New(name)
 		end
 	end
 
@@ -269,7 +368,7 @@ local function InitLiveReport(self)
 		end
 	end
 
-	function self:RefreshBG()
+	function self:RefreshBg()
 		local newwidth, newheight = self:GetDimensions()
 
 		local bg = self:GetNamedChild("BG")
@@ -294,7 +393,7 @@ local function InitLiveReport(self)
 		local totalBlocks = 0
 		for _, module in pairs(self.modules) do
 			if module.active then
-				totalBlocks = totalBlocks + module.blocksize
+				totalBlocks = totalBlocks + module.blockSize
 			end
 		end
 		return totalBlocks
@@ -312,9 +411,15 @@ local function InitLiveReport(self)
 		local anchorControl = self
 		local modules = self.modules
 
-		for _, name in ipairs(LiveReportControls) do
+		for i, layout in ipairs(PANEL_DATA) do
+			local name = layout.name
 			local module = modules[name]
-			if module and module.active then
+
+			if settings[name] then
+				if module == nil then
+					module = LiveReportPanel:New(name)
+				end
+
 				local newSize = currentSize + module.size
 				local anchor
 
@@ -332,14 +437,22 @@ local function InitLiveReport(self)
 					anchor = anchorSchemes.CompactRow2
 				end
 
-				LiveReportControl:Refresh(anchor)
+				module:Refresh()
+				module:RefreshAnchor(anchor)
+
 				currentSize = newSize
 				anchorControl = module.control
+			elseif module then
+				module.active = false
+				module.control:SetHidden(true)
 			end
 		end
-		zo_callLater(function()
-			self:RefreshBG()
-		end, 1)
+
+		local function refreshBgDelayed()
+			self:RefreshBg()
+		end
+
+		zo_callLater(refreshBgDelayed, 1)
 	end
 
 	function self:Resize(scale)

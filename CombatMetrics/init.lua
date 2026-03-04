@@ -233,13 +233,14 @@ local svdefaults = {
 		["scale"] = zo_roundToNearest(1 / GetSetting(SETTING_TYPE_UI, UI_SETTING_CUSTOM_SCALE), 0.1),
 		["bgalpha"] = 95,
 		["alignmentleft"] = false,
-		["damageOut"] = true, -- TODO: Capitalize first letter
-		["damageOutSingle"] = false,
-		["healOut"] = true,
-		["damageIn"] = true,
-		["healIn"] = true,
+
+		["dpsSingle"] = true, -- TODO: Capitalize first letter
+		["dpsMulti"] = false,
+		["hpsOut"] = true,
+		["hpsOutRaw"] = false,
+		["dpsIn"] = true,
+		["hpsIn"] = true,
 		["time"] = true,
-		["healOutAbsolute"] = false,
 	},
 }
 
