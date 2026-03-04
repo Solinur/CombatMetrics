@@ -33,6 +33,9 @@ local function onRowControlReset(self, pool)
 	local controls = self.controls
 
 	for k, control in pairs(controls) do
+		if control:GetType() == CT_LABEL or control:GetType() == CT_TEXTURE then
+			control:SetColor(1, 1, 1, 1)
+		end
 		if control.shared then
 			control:Release()
 		end

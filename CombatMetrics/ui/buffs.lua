@@ -687,8 +687,6 @@ function CMXint.InitializeBuffs()
 	BuffPanel.favs = CMXint.settings.fightReport.buffs.favourites
 	BuffPanel.uncollapsedBuffs = uncollapsedBuffs
 
-	CMX_BUFF_PANEL = BuffPanel
-
 	isFileInitialized = true
 	return true
 end

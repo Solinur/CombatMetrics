@@ -60,11 +60,11 @@
                     <OnInitialized>CombatMetrics.internal.InitializeBuffsPanel(self)</OnInitialized>
                 </Control>
 
-                <Control name="$(parent)_UnitsPanel" inherits="CombatMetrics_PlaceHolder"> <!-- CombatMetrics_UnitsPanel -->
+                <Control name="$(parent)_UnitsPanel" inherits="CombatMetrics_UnitsPanel">
                     <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)_CombatStats" offsetY="4" constrains="Y" />
                     <Anchor point="BOTTOMLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)_InfoRow" offsetY="-4" />
                     <Dimensions x="360" />
-                    <!-- <OnInitialized>CombatMetrics.internal.InitializeUnitsPanel(self)</OnInitialized> -->
+                    <OnInitialized>CombatMetrics.internal.InitializeUnitsPanel(self)</OnInitialized>
                 </Control>
 
                 <Control name="$(parent)_AbilitiesPanel" inherits="CombatMetrics_PlaceHolder"> <!-- CombatMetrics_AbilitiesPanel -->

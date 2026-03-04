@@ -80,7 +80,7 @@ end
 local function initSceneButtons(MenuPanel)
 	local sceneButtons = {}
 	local i = 1
-	local anchorControl = MenuPanel.categoryButtons.healingIn
+	local anchorControl = MenuPanel.categoryButtons.healingReceived
 
 	local function onMouseUp(button)
 		MenuPanel:SelectScene(button)
@@ -344,11 +344,12 @@ local function initFeedbackButton(MenuPanel)
 end
 
 local function initNotificationButton(MenuPanel)
-	-- local button = CreateControlFromVirtual(
-	-- 	"CombatMetricsReport_MenuNotificationButton",
-	-- 	MenuPanel.control,
-	-- 	"CombatMetrics_MenuButton"
-	-- )
+	local button = CreateControlFromVirtual(
+		"CombatMetricsReport_MenuNotificationButton",
+		MenuPanel.control,
+		"CombatMetrics_MenuButton"
+	)
+	button:SetHidden(true)
 	-- ---@cast button TextureControl
 
 	-- local function ShowGuildInfo()
@@ -384,18 +385,18 @@ local function initNotificationButton(MenuPanel)
 
 	-- button:SetTexture("esoui/art/mainmenu/menubar_notifications_down.dds")
 	-- button:SetColor(ZO_ColorDef.HexToFloats("FFFFFFFF"))
-	-- button:SetAnchor(TOP, MenuPanel.feedbackButton, BOTTOM, nil, 8)
+	button:SetAnchor(TOP, MenuPanel.feedbackButton, BOTTOM, nil, 8)
 	-- button.tooltip = SI_COMBAT_METRICS_NOTIFICATION
 	-- button:SetHandler("OnMouseUp", onMouseUp, "CMX")
 
-	-- return button
+	return button
 end
 
 local function initFightNavButtons(MenuPanel)
 	local navButtons = {}
 	local i = 1
 	---@type Control
-	local anchorControl = MenuPanel.feedbackButton
+	local anchorControl = MenuPanel.notificationButton
 
 	local function SelectPreviousFight()
 		CMXint.FightData:SelectPreviousFight()
@@ -486,8 +487,6 @@ function CMXint.InitializeMenuPanel(control)
 			or isMe
 			or (isGerman and isEUServer and isNotificationAllowed and isVeteranRaid and isWithinAllowedTime)
 
-		control:GetNamedChild("NotificationButton"):SetHidden(not show)
-
 		self:UpdateButtonStates()
 	end
 
@@ -550,7 +549,7 @@ function CMXint.InitializeMenuPanel(control)
 	MenuPanel.sceneButtons = initSceneButtons(MenuPanel)
 	MenuPanel.settingsButton = initSettingsButton(MenuPanel)
 	MenuPanel.feedbackButton = initFeedbackButton(MenuPanel)
-	-- MenuPanel.notificationButton = initNotificationButton(MenuPanel)
+	MenuPanel.notificationButton = initNotificationButton(MenuPanel)
 	MenuPanel.navButtons = initFightNavButtons(MenuPanel)
 end
 

@@ -45,8 +45,8 @@ ui/combat_stats.xml
 ; ui/player_stats.xml
 ui/buffs.lua
 ui/buffs.xml
-; ui/units.lua
-; ui/units.xml
+ui/units.lua
+ui/units.xml
 ; ui/abilities.lua
 ; ui/abilities.xml
 ; 

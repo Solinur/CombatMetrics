@@ -129,7 +129,7 @@ local function InitializeFightReport()
 		if FightReport:IsHidden() then
 			return
 		end
-		logger:Debug("Updating Fight Report")
+		logger:Info("Updating Fight Report")
 
 		self.currentFight = CMXint.FightData:GetCurrentFight()
 

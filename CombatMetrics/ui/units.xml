@@ -9,16 +9,16 @@
                     <Controls>
 
                         <Control name="$(parent)Type" inherits="CombatMetrics_SortHeader">
-                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)" offsetX="2" offsetY="0" />
-                            <Dimensions x="20" />
+                            <Anchor point="LEFT" relativePoint="LEFT" relativeTo="$(parent)" offsetX="2" offsetY="0" />
+                            <Dimensions x="25" />
                             <OnInitialized>
                                 ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_TYPE), "type", ZO_SORT_ORDER_UP, TEXT_ALIGN_CENTER)
                             </OnInitialized>
                         </Control>
 
                         <Control name="$(parent)Name" inherits="CombatMetrics_SortHeader">
-                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="6" offsetY="0" />
-                            <Dimensions x="170" />
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Type" offsetX="6" offsetY="0" />
+                            <Dimensions x="165" />
                             <OnInitialized>
                                 ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_TARGET), "name", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT)
                             </OnInitialized>
@@ -34,7 +34,7 @@
                         </Control>
 
                         <Control name="$(parent)Total" inherits="CombatMetrics_ControlTooltip CombatMetrics_SortHeader">
-                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Count" offsetX="2" offsetY="0" />
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)PerSecond" offsetX="2" offsetY="0" />
                             <Dimensions x="58" />
                             <OnInitialized>
                                 ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_DAMAGE),"total", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_CENTER)
@@ -42,7 +42,7 @@
                         </Control>
 
                         <Control name="$(parent)PerCent" inherits="CombatMetrics_ControlTooltip CombatMetrics_SortHeader">
-                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Uptime" offsetX="2" offsetY="0" />
+                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Total" offsetX="2" offsetY="0" />
                             <Dimensions x="36" />
                             <OnInitialized>
                                 ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_PERCENT),"percent", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_CENTER)
