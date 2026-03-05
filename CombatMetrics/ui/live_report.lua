@@ -607,6 +607,10 @@ function LiveReport:Resize(scale)
 end
 
 function LiveReport:Update()
+	if self:IsEnabled() == false or IsUnitInCombat("player") == false then
+		return
+	end
+
 	for _, panel in pairs(self.panels) do
 		if panel.active then
 			panel:Update()
@@ -622,6 +626,12 @@ function CMXint.InitializeLiveReport()
 	logger = util.initSublogger("LiveReport")
 
 	ui.LiveReport = LiveReport:New(CombatMetrics_LiveReport) -- TODO: Directly pass init function.
+
+	local function LiveReportUpdate()
+		ui.LiveReport:Update()
+	end
+
+	GetEventManager():RegisterForUpdate("CombatMetrics_LiveReport_Update", 500, LiveReportUpdate)
 
 	isFileInitialized = true
 	return true
