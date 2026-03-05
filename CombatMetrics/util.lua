@@ -76,14 +76,14 @@ function util.GetUnitCategoryData(fightData, category, unitId)
 	end
 end
 
----@param amount number
----@param timeS number
+---@param x number
+---@param y number
 ---@return number
-function util.GetPerSecondValue(amount, timeS)
-	if timeS <= 0 then
-		return amount
+function util.SafeDivide(x, y)
+	if y == 0 then
+		return x
 	end
-	return zo_round(amount / timeS)
+	return zo_round(x / y)
 end
 
 CMX_POSTTOCHAT_MODE_NONE = 0

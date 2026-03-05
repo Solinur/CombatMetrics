@@ -71,7 +71,7 @@ ui/units.xml
 
 ui/fight_report.lua
 ui/fight_report.xml
-; ui/live_report.lua
-; ui/live_report.xml
+ui/live_report.lua
+ui/live_report.xml
 
 test/test.lua

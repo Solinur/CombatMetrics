@@ -1,5 +1,3 @@
---- TODO: enable diagnostic when code is used
-
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint
@@ -46,16 +44,18 @@ local function UpdateSingleTargetDamage(panel)
 	end
 
 	local playerTime, playerDamage, totalTime, totalDamage = LC.GetCurrentMainTargetDamageDone()
-	local playerDPS = zo_roundToZero(util.GetPerSecondValue(playerDamage, playerTime), 0.01)
-	local totalDPS = zo_roundToZero(util.GetPerSecondValue(totalDamage, totalTime), 0.01)
+	local playerDPS = zo_roundToZero(util.SafeDivide(playerDamage, playerTime), 0.01)
+	local totalDPS = zo_roundToZero(util.SafeDivide(totalDamage, totalTime), 0.01)
 
 	if playerDamage > totalDamage then
 		logger:Warn("Player amount is larger than total amount: %d > %d", playerDamage, totalDamage)
 	end
-	local ratio = zo_roundToZero(playerDamage / totalDamage * 100)
+	local ratio = zo_roundToZero(util.SafeDivide(playerDamage, totalDamage) * 100)
 
 	local labelText = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), playerDPS, totalDPS, ratio)
 	labelControl:SetText(labelText)
+
+	logger:Info("ST damage", labelText, playerTime, playerDamage, totalTime, totalDamage)
 end
 
 ---@param panel LiveReportPanel
@@ -65,13 +65,13 @@ local function UpdateMultiTargetDamage(panel)
 	---@cast labelControl LabelControl
 
 	local playerTime, playerDamage, totalTime, totalDamage = LC.GetCurrentTotalDamageDone()
-	local playerDPS = zo_roundToZero(util.GetPerSecondValue(playerDamage, playerTime), 0.01)
-	local totalDPS = zo_roundToZero(util.GetPerSecondValue(totalDamage, totalTime), 0.01)
+	local playerDPS = zo_roundToZero(util.SafeDivide(playerDamage, playerTime), 0.01)
+	local totalDPS = zo_roundToZero(util.SafeDivide(totalDamage, totalTime), 0.01)
 
 	if playerDamage > totalDamage then
 		logger:Warn("Player amount is larger than total amount: %d > %d", playerDamage, totalDamage)
 	end
-	local ratio = zo_roundToZero(playerDamage / totalDamage * 100)
+	local ratio = zo_roundToZero(util.SafeDivide(playerDamage, totalDamage) * 100)
 
 	local labelText = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), playerDPS, totalDPS, ratio)
 	labelControl:SetText(labelText)
@@ -83,13 +83,13 @@ local function UpdateHealingDone(panel)
 	---@cast labelControl LabelControl
 
 	local playerTime, playerHealing, totalTime, totalHealing = LC.GetCurrentHealingDone(false)
-	local playerHPS = zo_roundToZero(util.GetPerSecondValue(playerHealing, playerTime), 0.01)
-	local totalHPS = zo_roundToZero(util.GetPerSecondValue(totalHealing, totalTime), 0.01)
+	local playerHPS = zo_roundToZero(util.SafeDivide(playerHealing, playerTime), 0.01)
+	local totalHPS = zo_roundToZero(util.SafeDivide(totalHealing, totalTime), 0.01)
 
 	if playerHealing > totalHealing then
 		logger:Warn("Player amount is larger than total amount: %d > %d", playerHealing, totalHealing)
 	end
-	local ratio = zo_roundToZero(playerHealing / totalHealing * 100)
+	local ratio = zo_roundToZero(util.SafeDivide(playerHealing, totalHealing) * 100)
 
 	local labelText = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), playerHPS, totalHPS, ratio)
 	labelControl:SetText(labelText)
@@ -101,7 +101,7 @@ local function UpdateAbsoluteHealingDone(panel)
 	---@cast labelControl LabelControl
 
 	local playerTime, playerHealing, _, _ = LC.GetCurrentHealingDone(true)
-	local playerHPS = zo_roundToZero(util.GetPerSecondValue(playerHealing, playerTime), 0.01)
+	local playerHPS = zo_roundToZero(util.SafeDivide(playerHealing, playerTime), 0.01)
 
 	labelControl:SetText(playerHPS)
 end
@@ -113,13 +113,13 @@ local function UpdateDamageReceived(panel)
 	---@cast labelControl LabelControl
 
 	local playerTime, playerDamage, totalTime, totalDamage = LC.GetCurrentTotalDamageReceived()
-	local playerDPS = zo_roundToZero(util.GetPerSecondValue(playerDamage, playerTime), 0.01)
-	local totalDPS = zo_roundToZero(util.GetPerSecondValue(totalDamage, totalTime), 0.01)
+	local playerDPS = zo_roundToZero(util.SafeDivide(playerDamage, playerTime), 0.01)
+	local totalDPS = zo_roundToZero(util.SafeDivide(totalDamage, totalTime), 0.01)
 
 	if playerDamage > totalDamage then
 		logger:Warn("Player amount is larger than total amount: %d > %d", playerDamage, totalDamage)
 	end
-	local ratio = zo_roundToZero(playerDamage / totalDamage * 100)
+	local ratio = zo_roundToZero(util.SafeDivide(playerDamage, totalDamage) * 100)
 
 	local labelText = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), playerDPS, totalDPS, ratio)
 	labelControl:SetText(labelText)
@@ -131,7 +131,7 @@ local function UpdateHealingReceived(panel)
 	---@cast labelControl LabelControl
 
 	local playerTime, playerHealing = LC.GetCurrentPlayerHealingReceived()
-	local playerHPS = zo_roundToZero(util.GetPerSecondValue(playerHealing, playerTime), 0.01)
+	local playerHPS = zo_roundToZero(util.SafeDivide(playerHealing, playerTime), 0.01)
 
 	labelControl:SetText(playerHPS)
 end
@@ -187,8 +187,8 @@ local PANEL_DATA = {
 		iconTexture = "/esoui/art/buttons/gamepad/pointsplus_up.dds",
 		blockSize = 0.57,
 		panelSize = 85,
-		iconSize = 55,
-		labelSize = 20,
+		iconSize = 24,
+		labelSize = 55,
 		updateFunc = UpdateAbsoluteHealingDone,
 	},
 	{
@@ -207,8 +207,8 @@ local PANEL_DATA = {
 		iconTexture = "/esoui/art/hud/gamepad/gp_radialicon_invitegroup_down.dds",
 		blockSize = 0.57,
 		panelSize = 85,
-		iconSize = 55,
-		labelSize = 20,
+		iconSize = 24,
+		labelSize = 55,
 		updateFunc = UpdateHealingReceived,
 	},
 	{
@@ -217,14 +217,15 @@ local PANEL_DATA = {
 		iconTexture = "/esoui/art/tutorial/timer_icon.dds",
 		blockSize = 0.43,
 		panelSize = 65,
-		iconSize = 38,
-		labelSize = 20,
+		iconSize = 20,
+		labelSize = 38,
 		updateFunc = UpdateCombatTime,
 	},
 }
 
 ---@type table<string, LiveReportPanelData>
 local PANEL_DATA_BY_NAME = {}
+ui.PANEL_DATA_BY_NAME = PANEL_DATA_BY_NAME
 
 for i, layout in ipairs(PANEL_DATA) do
 	PANEL_DATA_BY_NAME[layout.name] = layout
@@ -351,22 +352,23 @@ local function resize(control, scale)
 end
 
 ---@class LiveReportPanel
----@field New fun(self: LiveReportPanel, name: string): LiveReportPanel
+---@field New fun(self: LiveReportPanel, name: string, parent: LiveReport): LiveReportPanel
 local LiveReportPanel = ZO_InitializingObject:Subclass() -- holds all recent events + info to send on death
 
-function LiveReportPanel:Initialize(name)
+---@param name string
+---@param parent LiveReport
+function LiveReportPanel:Initialize(name, parent)
 	assert(PANEL_DATA_BY_NAME[name], string.format("Missing layout data for live report panel: %s", name))
 
 	local templateName = "CombatMetrics_LiveReport_" .. name
-	local LiveReport = CombatMetrics_LiveReport
-	local control = CreateControlFromVirtual(templateName, LiveReport, "CombatMetrics_LiveReport_Panel")
+	local control = CreateControlFromVirtual(templateName, parent.control, "CombatMetrics_LiveReport_Panel")
 	self.name = name
+	self.control = control
 	self:InitLayout(control)
 
-	self.control = control
 	self.active = true
-	self.parent = LiveReport
-	LiveReport.modules[name] = self
+	self.parent = parent
+	parent.panels[name] = self
 end
 
 function LiveReportPanel:InitLayout(control)
@@ -445,7 +447,7 @@ function LiveReport:Initialize(control)
 	self.control.object = self
 
 	local function OnMoveStop()
-		control:SavePosition()
+		self:SavePosition()
 	end
 
 	control:ClearAnchors()
@@ -465,7 +467,7 @@ function LiveReport:Initialize(control)
 	self.panels = {}
 
 	self:Toggle(settings.enabled)
-	self:Resize(settings.scale)
+	self:Resize(settings.scale) -- TODO: Fix live report resizing!
 end
 
 ---@return boolean
@@ -529,9 +531,9 @@ end
 
 function LiveReport:GetTotalSize()
 	local totalBlocks = 0
-	for _, module in pairs(self.panels) do
-		if module.active then
-			totalBlocks = totalBlocks + module.size
+	for panelName, data in pairs(PANEL_DATA_BY_NAME) do
+		if self.settings[panelName] then
+			totalBlocks = totalBlocks + data.blockSize
 		end
 	end
 	return totalBlocks
@@ -539,52 +541,60 @@ end
 
 function LiveReport:Refresh()
 	local settings = self.settings
-
-	local totalWidth = self:GetTotalSize()
 	local layout = settings.layout or "Compact"
+	local isSecondRow = false
+	local totalWidth = self:GetTotalSize()
+	local compactWidth
 
 	if layout == "Compact" then
-		totalWidth = zo_min(zo_round(zo_ceil(totalWidth) / 2), totalWidth - zo_floor(totalWidth / 2))
+		compactWidth = zo_min(zo_round(zo_ceil(totalWidth) / 2), totalWidth - zo_floor(totalWidth / 2))
 	end
 
 	local currentSize = 0
 	local anchorControl = self.control
-	local modules = self.panels
+	local panels = self.panels
 
-	for i, layout in ipairs(PANEL_DATA) do
-		local name = layout.name
-		local module = modules[name]
+	for i, panelLayout in ipairs(PANEL_DATA) do
+		local name = panelLayout.name
+		local panel = panels[name]
 
 		if settings[name] then
-			if module == nil then
-				module = LiveReportPanel:New(name)
+			if panel == nil then
+				panel = LiveReportPanel:New(name, self)
 			end
 
-			local newSize = currentSize + module.size
+			local newSize = currentSize + panel.size
 			local anchor
 
 			if currentSize == 0 then
 				anchor = anchorSchemes.First
 				anchor[2] = anchorControl
 				if layout == "Compact" then
-					anchorSchemes.CompactRow2[2] = module.control
+					anchorSchemes.CompactRow2[2] = panel.control
 				end
-			elseif newSize < totalWidth then
+			elseif layout == "Compact" then
+				if newSize <= compactWidth or isSecondRow then
+					anchor = anchorSchemes[layout]
+					anchor[2] = anchorControl
+				else
+					anchor = anchorSchemes.CompactRow2
+					isSecondRow = true
+				end
+			elseif newSize <= totalWidth then
 				anchor = anchorSchemes[layout]
 				anchor[2] = anchorControl
 			else
-				assert(layout == "Compact", "Unexpceted value during LiveReport refresh!")
-				anchor = anchorSchemes.CompactRow2
+				assert(layout == "Compact", "Unexpected value during LiveReport refresh!")
 			end
 
-			module:Refresh()
-			module:RefreshAnchor(anchor)
+			panel:Refresh()
+			panel:RefreshAnchor(anchor)
 
 			currentSize = newSize
-			anchorControl = module.control
-		elseif module then
-			module.active = false
-			module.control:SetHidden(true)
+			anchorControl = panel.control
+		elseif panel then
+			panel.active = false
+			panel.control:SetHidden(true)
 		end
 	end
 
@@ -625,7 +635,7 @@ function CMXint.InitializeLiveReport()
 	end
 	logger = util.initSublogger("LiveReport")
 
-	ui.LiveReport = LiveReport:New(CombatMetrics_LiveReport) -- TODO: Directly pass init function.
+	ui.LiveReport = LiveReport:New(CombatMetrics_LiveReport)
 
 	local function LiveReportUpdate()
 		ui.LiveReport:Update()

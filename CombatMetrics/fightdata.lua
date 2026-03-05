@@ -138,6 +138,11 @@ function FightDataManager:SaveFight(saveLog)
 	SVHandler.Save(fightData, saveLog)
 end
 
+---@param fight Fight
+local function OnFightSummary(_, fight)
+	CMXint.FightData:AddFight(fight)
+end
+
 local isFileInitialized = false
 function CMXint.InitializeFightDataHandler()
 	if isFileInitialized == true then
@@ -146,6 +151,8 @@ function CMXint.InitializeFightDataHandler()
 	logger = util.initSublogger("Fights")
 
 	CMXint.FightData = FightDataManager:New()
+
+	LibCombat2:RegisterCallbackType(LIBCOMBAT_EVENT_FIGHTSUMMARY, OnFightSummary, CMX.name)
 
 	isFileInitialized = true
 	return true

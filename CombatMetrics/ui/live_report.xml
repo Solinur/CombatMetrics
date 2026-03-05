@@ -24,34 +24,6 @@
             </Controls>
         </Control>
 
-        <Control name="CombatMetrics_LiveReport_DamageOutSingle" inherits="CombatMetrics_LiveReport_Panel" virtual="true">
-            <OnInitialized>CombatMetrics.internal.InitializeCombatStatsPanel(self, "dpsSingle")</OnInitialized>
-        </Control>
-
-        <Control name="CombatMetrics_LiveReport_DamageOut" inherits="CombatMetrics_LiveReport_Panel" virtual="true">
-            <OnInitialized>CombatMetrics.internal.InitializeCombatStatsPanel(self, "dpsMulti")</OnInitialized>
-        </Control>
-
-        <Control name="CombatMetrics_LiveReport_HealOut" inherits="CombatMetrics_LiveReport_Panel" virtual="true">
-            <OnInitialized>CombatMetrics.internal.InitializeCombatStatsPanel(self, "hpsOut")</OnInitialized>
-        </Control>
-
-        <Control name="CombatMetrics_LiveReport_HealOutAbsolute" inherits="CombatMetrics_LiveReport_Panel" virtual="true">
-            <OnInitialized>CombatMetrics.internal.InitializeCombatStatsPanel(self, "hpsOutRaw")</OnInitialized>
-        </Control>
-
-        <Control name="CombatMetrics_LiveReport_DamageIn" inherits="CombatMetrics_LiveReport_Panel" virtual="true">
-            <OnInitialized>CombatMetrics.internal.InitializeCombatStatsPanel(self, "dpsIn")</OnInitialized>
-        </Control>
-
-        <Control name="CombatMetrics_LiveReport_HealIn" inherits="CombatMetrics_LiveReport_Panel" virtual="true">
-            <OnInitialized>CombatMetrics.internal.InitializeCombatStatsPanel(self, "hpsIn")</OnInitialized>
-        </Control>
-
-        <Control name="CombatMetrics_LiveReport_Time" inherits="CombatMetrics_LiveReport_Panel" virtual="true">
-            <OnInitialized>CombatMetrics.internal.InitializeCombatStatsPanel(self, "time")</OnInitialized>
-        </Control>
-
         <TopLevelControl name="CombatMetrics_LiveReport" clampedToScreen="true" movable="true" resizeToFitDescendents="true" hidden="true">
             <Anchor point="BOTTOM" relativePoint="BOTTOM" offsetY="-150" />
             <DimensionConstraints minX="150" maxX="900" minY="26" maxY="156" />
