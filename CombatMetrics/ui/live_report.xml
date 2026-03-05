@@ -55,7 +55,6 @@
         <TopLevelControl name="CombatMetrics_LiveReport" clampedToScreen="true" movable="true" resizeToFitDescendents="true" hidden="true">
             <Anchor point="BOTTOM" relativePoint="BOTTOM" offsetY="-150" />
             <DimensionConstraints minX="150" maxX="900" minY="26" maxY="156" />
-            <OnInitialized>CombatMetrics.internal.LiveReport = self</OnInitialized>
             <Controls>
                 <Backdrop name="$(parent)BG" excludeFromResizeToFitExtents="true" inherits="CombatMetrics_BackgroundFramed_Solid"
                     edgeColor="FF000000" centerColor="FF000000">

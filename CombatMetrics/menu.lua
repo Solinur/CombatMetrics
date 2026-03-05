@@ -430,7 +430,7 @@ function CMXint.InitMenu(svdefaults)
 			end,
 			setFunc = function(value)
 				settings.liveReport.enabled = value
-				CombatMetrics_LiveReport:Toggle(value)
+				CMXint.ui.LiveReport:Toggle(value)
 			end,
 		},
 		{
@@ -458,7 +458,7 @@ function CMXint.InitMenu(svdefaults)
 			end,
 			setFunc = function(value)
 				settings.liveReport.layout = value
-				CombatMetrics_LiveReport:Refresh()
+				CMXint.ui.LiveReport:Refresh()
 			end,
 			disabled = function()
 				return not settings.liveReport.enabled
@@ -477,7 +477,7 @@ function CMXint.InitMenu(svdefaults)
 			end,
 			setFunc = function(value)
 				settings.liveReport.scale = value / 100
-				CombatMetrics_LiveReport:Resize(value / 100)
+				CMXint.ui.LiveReport:Resize(value / 100)
 			end,
 			disabled = function()
 				return not settings.liveReport.enabled
@@ -512,7 +512,7 @@ function CMXint.InitMenu(svdefaults)
 			end,
 			setFunc = function(value)
 				settings.liveReport.alignmentleft = value
-				CombatMetrics_LiveReport:Refresh()
+				CMXint.ui.LiveReport:Refresh()
 			end,
 		},
 		{
@@ -526,7 +526,7 @@ function CMXint.InitMenu(svdefaults)
 			end,
 			setFunc = function(value)
 				settings.liveReport.dpsSingle = value
-				CombatMetrics_LiveReport:Refresh()
+				CMXint.ui.LiveReport:Refresh()
 			end,
 			disabled = function()
 				return not settings.liveReport.enabled
@@ -543,7 +543,7 @@ function CMXint.InitMenu(svdefaults)
 			end,
 			setFunc = function(value)
 				settings.liveReport.dpsMulti = value
-				CombatMetrics_LiveReport:Refresh()
+				CMXint.ui.LiveReport:Refresh()
 			end,
 			disabled = function()
 				return not settings.liveReport.enabled
@@ -560,7 +560,7 @@ function CMXint.InitMenu(svdefaults)
 			end,
 			setFunc = function(value)
 				settings.liveReport.hpsOut = value
-				CombatMetrics_LiveReport:Refresh()
+				CMXint.ui.LiveReport:Refresh()
 			end,
 			disabled = function()
 				return not settings.liveReport.enabled
@@ -577,7 +577,7 @@ function CMXint.InitMenu(svdefaults)
 			end,
 			setFunc = function(value)
 				settings.liveReport.hpsOutRaw = value
-				CombatMetrics_LiveReport:Refresh()
+				CMXint.ui.LiveReport:Refresh()
 			end,
 			disabled = function()
 				return not settings.liveReport.enabled
@@ -594,7 +594,7 @@ function CMXint.InitMenu(svdefaults)
 			end,
 			setFunc = function(value)
 				settings.liveReport.dpsIn = value
-				CombatMetrics_LiveReport:Refresh()
+				CMXint.ui.LiveReport:Refresh()
 			end,
 			disabled = function()
 				return not settings.liveReport.enabled
@@ -611,7 +611,7 @@ function CMXint.InitMenu(svdefaults)
 			end,
 			setFunc = function(value)
 				settings.liveReport.hpsIn = value
-				CombatMetrics_LiveReport:Refresh()
+				CMXint.ui.LiveReport:Refresh()
 			end,
 			disabled = function()
 				return not settings.liveReport.enabled
@@ -628,7 +628,7 @@ function CMXint.InitMenu(svdefaults)
 			end,
 			setFunc = function(value)
 				settings.liveReport.time = value
-				CombatMetrics_LiveReport:Refresh()
+				CMXint.ui.LiveReport:Refresh()
 			end,
 			disabled = function()
 				return not settings.liveReport.enabled
