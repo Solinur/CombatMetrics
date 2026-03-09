@@ -86,7 +86,7 @@ end
 
 function FightDataManager:SelectNextFight()
 	local currentIndex = self.currentIndex
-	if currentIndex <= 1 then
+	if currentIndex >= self:GetNumFights() then
 		return
 	end
 	self:SelectFightByIndex(currentIndex + 1)
@@ -94,7 +94,7 @@ end
 
 function FightDataManager:SelectPreviousFight()
 	local currentIndex = self.currentIndex
-	if currentIndex >= self:GetNumFights() then
+	if currentIndex <= 1 then
 		return
 	end
 	self:SelectFightByIndex(currentIndex - 1)
