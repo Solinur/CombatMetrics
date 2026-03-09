@@ -51,7 +51,7 @@ local BUFF_BAR_GROUP_COLORS = {
 	[BUFF_EFFECT_TYPE_NOT_AN_EFFECT] = { 0.6, 0.6, 0.6, 0.3 },
 }
 
-BUfF_LIST_SORT_KEYS = {
+BUFF_LIST_SORT_KEYS = {
 	["name"] = { tiebreaker = "abilityId" },
 	["count"] = { tiebreaker = "groupCount", isNumeric = true },
 	["uptime"] = { tiebreaker = "groupUptime", isNumeric = true },
@@ -607,7 +607,7 @@ local function InitBuffsList(panel)
 			scrollData[#scrollData + 1] = data
 		end
 
-		table.sort(scrollData, self.sortFunction)
+		table.sort(scrollData, self.sortFunction) -- TODO: include sorting favourites
 
 		local groupList = self.groupList
 

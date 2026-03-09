@@ -182,16 +182,6 @@ local PANEL_DATA = {
 		updateFunc = UpdateHealingDone,
 	},
 	{
-		name = "hpsOutRaw",
-		tooltip = GetString(SI_COMBAT_METRICS_LIVEREPORT_HPSRAW_TOOLTIP),
-		iconTexture = "/esoui/art/buttons/gamepad/pointsplus_up.dds",
-		blockSize = 0.57,
-		panelSize = 85,
-		iconSize = 24,
-		labelSize = 55,
-		updateFunc = UpdateAbsoluteHealingDone,
-	},
-	{
 		name = "dpsIn",
 		tooltip = GetString(SI_COMBAT_METRICS_LIVEREPORT_DPSINC_TOOLTIP),
 		iconTexture = "/EsoUI/Art/LFG/Gamepad/LFG_roleIcon_tank.dds",
@@ -200,6 +190,16 @@ local PANEL_DATA = {
 		iconSize = 24,
 		labelSize = 120,
 		updateFunc = UpdateDamageReceived,
+	},
+	{
+		name = "hpsOutRaw",
+		tooltip = GetString(SI_COMBAT_METRICS_LIVEREPORT_HPSRAW_TOOLTIP),
+		iconTexture = "/esoui/art/buttons/gamepad/pointsplus_up.dds",
+		blockSize = 0.57,
+		panelSize = 85,
+		iconSize = 24,
+		labelSize = 55,
+		updateFunc = UpdateAbsoluteHealingDone,
 	},
 	{
 		name = "hpsIn",
@@ -229,92 +229,6 @@ ui.PANEL_DATA_BY_NAME = PANEL_DATA_BY_NAME
 
 for i, layout in ipairs(PANEL_DATA) do
 	PANEL_DATA_BY_NAME[layout.name] = layout
-end
-
-local function updateLiveReport(self, data)
-	if data == nil or IsUnitInCombat("player") == false then
-		return
-	end
-
-	local livereport = self
-	local DPSOut = data.DPSOut
-	local DPSIn = data.DPSIn
-	local HPSOut = data.HPSOut
-	local HPSAOut = data.OHPSOut
-	local HPSIn = data.HPSIn
-	local dpstime = data.dpstime
-	local hpstime = data.hpstime
-	local groupDPSOut = data.groupDPSOut
-	local groupDPSIn = data.groupDPSIn
-	local groupHPSOut = data.groupHPSOut
-
-	-- Bail out if there is no damage to report
-	if (DPSOut == 0 and HPSOut == 0 and DPSIn == 0) or livereport:IsHidden() then
-		return
-	end
-
-	local SDPS = 0
-	local groupSDPS = 0
-
-	if CMXint.settings.liveReport.damageOutSingle then
-		local iconControl = livereport:GetNamedChild("DamageOutSingle"):GetNamedChild("Icon")
-		local tooltipControl = livereport:GetNamedChild("DamageOutSingle"):GetNamedChild("Tooltip")
-		local texture = "/esoui/art/icons/mapkey/mapkey_fightersguild.dds"
-		local tooltip = SI_COMBAT_METRICS_LIVEREPORT_DPSSINGLE_TOOLTIP
-
-		if data.bossfight then
-			iconControl:SetTexture("esoui/art/tutorial/poi_groupboss_complete.dds")
-			tooltip = SI_COMBAT_METRICS_LIVEREPORT_DPSBOSS_TOOLTIP
-		end
-
-		iconControl:SetTexture(texture)
-		tooltipControl.tooltip[1] = tooltip
-		SDPS = data.bossDPSOut
-		groupSDPS = data.bossDPSOutGroup
-	end
-
-	local DPSString
-	local HPSString
-	local DPSInString
-	local SDPSString
-	local maxtime = zo_roundToNearest(zo_max(dpstime, hpstime), 0.1)
-	local timeString = string.format("%d:%04.1f", maxtime / 60, maxtime % 60)
-
-	-- maybe add data from group
-	if CMXint.settings.group.enableGroupData == true and (groupDPSOut > 0 or groupDPSIn > 0 or groupHPSOut > 0) then
-		local dpsratio, hpsratio, idpsratio, sdpsratio = 0, 0, 0, 0
-		if groupDPSOut > 0 then
-			dpsratio = (zo_floor(DPSOut / groupDPSOut * 1000) / 10)
-		end
-		if groupDPSIn > 0 then
-			idpsratio = (zo_floor(DPSIn / groupDPSIn * 1000) / 10)
-		end
-		if groupSDPS > 0 then
-			sdpsratio = (zo_floor(SDPS / groupSDPS * 1000) / 10)
-		end
-		if groupHPSOut > 0 then
-			hpsratio = (zo_floor(HPSOut / groupHPSOut * 1000) / 10)
-		end
-
-		DPSString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), DPSOut, groupDPSOut, dpsratio)
-		DPSInString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), DPSIn, groupDPSIn, idpsratio)
-		HPSString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), HPSOut, groupHPSOut, hpsratio)
-		SDPSString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), SDPS, groupSDPS, sdpsratio)
-	else
-		DPSString = DPSOut
-		DPSInString = DPSIn
-		HPSString = HPSOut
-		SDPSString = SDPS
-	end
-
-	-- Update the values
-	livereport:GetNamedChild("DamageOutSingle"):GetNamedChild("Label"):SetText(SDPSString)
-	livereport:GetNamedChild("DamageOut"):GetNamedChild("Label"):SetText(DPSString)
-	livereport:GetNamedChild("HealOut"):GetNamedChild("Label"):SetText(HPSString)
-	livereport:GetNamedChild("HealOutAbsolute"):GetNamedChild("Label"):SetText(HPSAOut)
-	livereport:GetNamedChild("DamageIn"):GetNamedChild("Label"):SetText(DPSInString)
-	livereport:GetNamedChild("HealIn"):GetNamedChild("Label"):SetText(HPSIn)
-	livereport:GetNamedChild("Time"):GetNamedChild("Label"):SetText(timeString)
 end
 
 local function resize(control, scale)
