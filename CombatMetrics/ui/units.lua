@@ -157,27 +157,24 @@ local function InitUnitsList(panel)
 			self:RecoverRow(rowControl)
 		end
 
-		local unitData = data.unitData
 		local icon, label, bar, perSecond, total, perCent = unpack(rowControl.controls)
 
 		---@cast icon TextureControl
-		local iconTexture = GetUnitIcon(unitData)
+		local iconTexture = data.icon
 		icon:SetHidden(iconTexture == nil)
 		if iconTexture then
 			icon:SetTexture(iconTexture)
 		end
 
 		---@cast label LabelControl
-		local labelFormat = panel:ShowIds() and unitData.unitId and UNIT_NAME_FORMAT_ID or UNIT_NAME_FORMAT_DEFAULT
-		local labelText = ZO_CachedStrFormat(labelFormat, unitData.name, unitData.unitId)
-		local namecolor = GetUnitColor(unitData)
+		local namecolor = data.color
 		local font = ui.GetFont(ui.fontSize, false)
-		label:SetText(labelText)
+		label:SetText(data.name)
 		label:SetColor(namecolor:UnpackRGBA())
 		label:SetFont(font)
 
 		local playerAmount = data.playerAmount
-		local perSecondValue = playerAmount / (data.durationMs / 1000)
+		local perSecondValue = data.perSecondValue
 		local ratio = data.playerAmount / self.playerAmountSum
 
 		-- local highlightControl = row:GetNamedChild("HighLight")
@@ -195,7 +192,7 @@ local function InitUnitsList(panel)
 		total:SetText(GetShortFormattedNumber(playerAmount))
 		total:SetFont(font)
 
-		perCent:SetText(string.format("%.1f%%", 100 * ratio))
+		perCent:SetText(string.format("%.0f%%", 100 * ratio))
 		perCent:SetFont(font)
 	end
 
@@ -221,12 +218,17 @@ local function InitUnitsList(panel)
 				and groupData.overflowAmount
 			or groupData.totalAmount
 
+		local labelFormat = panel:ShowIds() and unitData.unitId and UNIT_NAME_FORMAT_ID or UNIT_NAME_FORMAT_DEFAULT
+		local name = ZO_CachedStrFormat(labelFormat, unitData.name, unitData.unitId)
+
 		---@class UnitRowData
 		local rowData = {
-			unitData = unitData,
+			name = name,
+			icon = GetUnitIcon(unitData),
+			color = GetUnitColor(unitData),
+			perSecondValue = playerAmount / (durationMs / 1000),
 			selected = selected,
 			playerAmount = playerAmount,
-			durationMs = durationMs,
 			groupAmount = groupAmount,
 		}
 
