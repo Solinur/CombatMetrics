@@ -6,13 +6,13 @@
 
             <Controls>
                 <Texture name="$(parent)Icon" textureFile="/esoui/art/icons/mapkey/mapkey_fightersguild.dds">
-                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="12" />
+                    <Anchor point="CENTER" relativePoint="LEFT" offsetX="14" />
                     <Dimensions x="24" y="24" />
                 </Texture>
 
                 <Label name="$(parent)Label" inherits="CombatMetrics_ValueFontSmallControl" text="0" horizontalAlignment="RIGHT"
                     verticalAlignment="CENTER">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" />
+                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="2" />
                     <Dimensions x="120" y="24" />
                 </Label>
 

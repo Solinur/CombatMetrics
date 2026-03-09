@@ -54,8 +54,6 @@ local function UpdateSingleTargetDamage(panel)
 
 	local labelText = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), playerDPS, totalDPS, ratio)
 	labelControl:SetText(labelText)
-
-	logger:Info("ST damage", labelText, playerTime, playerDamage, totalTime, totalDamage)
 end
 
 ---@param panel LiveReportPanel
@@ -314,10 +312,12 @@ function LiveReportPanel:Refresh()
 	local settings = parent.settings
 	local scale = settings.scale
 
-	control:ClearAnchors()
+	resize(control, scale)
 
-	local width, height = unpack(control.sizes)
-	control:SetDimensions(width * scale, height * scale)
+	-- local width, height = unpack(control.sizes)
+	-- control:SetDimensions(width * scale, height * scale)
+
+	logger:Info("Refresh LR Panel %s: WxH = %d x %d", self.name, control:GetDimensions())
 
 	local label = control:GetNamedChild("Label")
 	---@cast label LabelControl
@@ -381,7 +381,7 @@ function LiveReport:Initialize(control)
 	self.panels = {}
 
 	self:Toggle(settings.enabled)
-	self:Resize(settings.scale) -- TODO: Fix live report resizing!
+	self:Refresh() -- TODO: Fix live report resizing!
 end
 
 ---@return boolean
@@ -519,17 +519,6 @@ function LiveReport:Refresh()
 	zo_callLater(refreshBgDelayed, 1)
 end
 
-function LiveReport:Resize(scale)
-	local control = self.control
-	for i = 1, control:GetNumChildren() do -- dont resize liveReport!
-		local child = control:GetChild(i)
-		if child then
-			resize(child, scale)
-		end
-	end
-	self:Refresh()
-end
-
 function LiveReport:Update()
 	if not self:IsEnabled() then -- TODO: bail when not in combat
 		return
@@ -550,6 +539,7 @@ function CMXint.InitializeLiveReport()
 	logger = util.initSublogger("LiveReport")
 
 	ui.LiveReport = LiveReport:New(CombatMetrics_LiveReport)
+	ui.LiveReport:Refresh()
 
 	local function LiveReportUpdate()
 		ui.LiveReport:Update()
