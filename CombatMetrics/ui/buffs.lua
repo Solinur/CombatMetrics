@@ -8,6 +8,7 @@ local util = CMXint.util
 local logger
 ---@class CMXui
 local ui = CMXint.ui
+local LC = LibCombat2
 
 local uncollapsedBuffs = {}
 local BuffPanel
@@ -209,7 +210,7 @@ local function GetBuffData(fightData, category)
 			unitIds[#unitIds + 1] = fightData.unitIds.player
 		end
 	elseif category == BUFF_CATEGORY_ENEMY then
-		ZO_ShallowTableCopy(util:GetEnemyUnits(fightData.units), unitIds)
+		ZO_ShallowTableCopy(LC.GetEnemyUnits(fightData), unitIds)
 	end
 
 	for i, unitId in ipairs(unitIds) do

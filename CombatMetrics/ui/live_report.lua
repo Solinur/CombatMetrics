@@ -33,7 +33,7 @@ local function UpdateSingleTargetDamage(panel)
 	---@cast labelControl LabelControl
 	local layout = panel.layout
 
-	if LC.IsCurrentFightBossFight() then
+	if LC.IsLatestFightBossFight() then
 		iconControl:SetTexture(layout.iconTextureBoss)
 		---@diagnostic disable-next-line: undefined-field
 		tooltipControl.tooltip[1] = layout.tooltipBoss
@@ -43,7 +43,7 @@ local function UpdateSingleTargetDamage(panel)
 		tooltipControl.tooltip[1] = layout.tooltip
 	end
 
-	local playerTime, playerDamage, totalTime, totalDamage = LC.GetCurrentMainTargetDamageDone()
+	local playerTime, playerDamage, totalTime, totalDamage = LC.GetLatestMainTargetDamageDone()
 	local playerDPS = zo_roundToZero(util.SafeDivide(playerDamage, playerTime), 0.01)
 	local totalDPS = zo_roundToZero(util.SafeDivide(totalDamage, totalTime), 0.01)
 
@@ -64,7 +64,7 @@ local function UpdateMultiTargetDamage(panel)
 	local labelControl = panelControl:GetNamedChild("Label")
 	---@cast labelControl LabelControl
 
-	local playerTime, playerDamage, totalTime, totalDamage = LC.GetCurrentTotalDamageDone()
+	local playerTime, playerDamage, totalTime, totalDamage = LC.GetLatestTotalDamageDone()
 	local playerDPS = zo_roundToZero(util.SafeDivide(playerDamage, playerTime), 0.01)
 	local totalDPS = zo_roundToZero(util.SafeDivide(totalDamage, totalTime), 0.01)
 
@@ -82,7 +82,7 @@ local function UpdateHealingDone(panel)
 	local labelControl = panelControl:GetNamedChild("Label")
 	---@cast labelControl LabelControl
 
-	local playerTime, playerHealing, totalTime, totalHealing = LC.GetCurrentHealingDone(false)
+	local playerTime, playerHealing, totalTime, totalHealing = LC.GetLatestHealingDone(false)
 	local playerHPS = zo_roundToZero(util.SafeDivide(playerHealing, playerTime), 0.01)
 	local totalHPS = zo_roundToZero(util.SafeDivide(totalHealing, totalTime), 0.01)
 
@@ -100,7 +100,7 @@ local function UpdateAbsoluteHealingDone(panel)
 	local labelControl = panelControl:GetNamedChild("Label")
 	---@cast labelControl LabelControl
 
-	local playerTime, playerHealing, _, _ = LC.GetCurrentHealingDone(true)
+	local playerTime, playerHealing, _, _ = LC.GetLatestHealingDone(true)
 	local playerHPS = zo_roundToZero(util.SafeDivide(playerHealing, playerTime), 0.01)
 
 	labelControl:SetText(playerHPS)
@@ -112,7 +112,7 @@ local function UpdateDamageReceived(panel)
 	local labelControl = panelControl:GetNamedChild("Label")
 	---@cast labelControl LabelControl
 
-	local playerTime, playerDamage, totalTime, totalDamage = LC.GetCurrentTotalDamageReceived()
+	local playerTime, playerDamage, totalTime, totalDamage = LC.GetLatestTotalDamageReceived()
 	local playerDPS = zo_roundToZero(util.SafeDivide(playerDamage, playerTime), 0.01)
 	local totalDPS = zo_roundToZero(util.SafeDivide(totalDamage, totalTime), 0.01)
 
@@ -130,7 +130,7 @@ local function UpdateHealingReceived(panel)
 	local labelControl = panelControl:GetNamedChild("Label")
 	---@cast labelControl LabelControl
 
-	local playerTime, playerHealing = LC.GetCurrentPlayerHealingReceived()
+	local playerTime, playerHealing = LC.GetLatestPlayerHealingReceived()
 	local playerHPS = zo_roundToZero(util.SafeDivide(playerHealing, playerTime), 0.01)
 
 	labelControl:SetText(playerHPS)
@@ -141,7 +141,7 @@ local function UpdateCombatTime(panel)
 	local labelControl = panelControl:GetNamedChild("Label")
 	---@cast labelControl LabelControl
 
-	local time = LC.GetCurrentFightDuration()
+	local time = LC.GetLatestFightDuration()
 	local timeString = string.format("%d:%04.1f", time / 60, time % 60)
 
 	labelControl:SetText(timeString)
@@ -531,7 +531,7 @@ function LiveReport:Resize(scale)
 end
 
 function LiveReport:Update()
-	if self:IsEnabled() == false or IsUnitInCombat("player") == false then
+	if not self:IsEnabled() then -- TODO: bail when not in combat
 		return
 	end
 

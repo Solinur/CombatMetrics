@@ -8,30 +8,6 @@ local util = CMXint.util
 local logger
 local SVHandler
 
-function util:GetEnemyUnits(units) -- TODO: Attach this to fight_data
-	local unitIds = {}
-
-	for unitId, unit in pairs(units) do
-		if not unit.isFriendly then
-			unitIds[#unitIds + 1] = unitId
-		end
-	end
-
-	return unitIds
-end
-
-function util:GetFriendlyUnits(units) -- TODO: Attach this to fight_data
-	local unitIds = {}
-
-	for unitId, unit in pairs(units) do
-		if unit.isFriendly then
-			unitIds[#unitIds + 1] = unitId
-		end
-	end
-
-	return unitIds
-end
-
 ---@class FightDataManager
 ---@field data Fight?
 ---@field currentIndex number?
