@@ -7,7 +7,6 @@
                     <Anchor point="TOPRIGHT" offsetY="2" />
                     <Dimensions y="20" />
                     <Controls>
-
                         <Control name="$(parent)Type" inherits="CombatMetrics_SortHeader">
                             <Anchor point="LEFT" relativePoint="LEFT" relativeTo="$(parent)" offsetX="2" offsetY="0" />
                             <Dimensions x="25" />
