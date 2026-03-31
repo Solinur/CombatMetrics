@@ -520,7 +520,7 @@ local function InitBuffsList(panel)
 			local keys = {}
 			local stackDataTable = data.stacks
 
-			--  TODO: Check if still n neccessary
+			--  TODO: Check if still neccessary
 			for stacks, data in pairs(stackDataTable) do
 				if type(stacks) == "number" then
 					keys[#keys + 1] = stacks
