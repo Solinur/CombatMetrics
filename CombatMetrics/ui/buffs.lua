@@ -245,13 +245,15 @@ local function GetBuffData(fightData, category)
 
 		if endTime > startTime then
 			totalUnitTime = totalUnitTime + (endTime - startTime)
-
 			local unitEffectData = fightData.effects[unitId]
-			for abilityId, data in pairs(unitEffectData) do
-				if effectData[abilityId] == nil then
-					effectData[abilityId] = ZO_ShallowTableCopy(data)
-				else
-					CombineEffects(data, effectData[abilityId])
+
+			if unitEffectData then
+				for abilityId, data in pairs(unitEffectData) do
+					if effectData[abilityId] == nil then
+						effectData[abilityId] = ZO_ShallowTableCopy(data)
+					else
+						CombineEffects(data, effectData[abilityId])
+					end
 				end
 			end
 		end
