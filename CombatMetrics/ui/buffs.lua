@@ -158,6 +158,8 @@ function CMX.CollapseButton(button, upInside)
 	CombatMetricsReport:GetNamedChild("_BuffPanel"):GetNamedChild("BuffList"):Update()
 end
 
+---@param source EffectData
+---@param dest EffectData
 local function CombineEffects(source, dest)
 	assert(
 		dest.name == source.name,
@@ -171,8 +173,13 @@ local function CombineEffects(source, dest)
 	dest.count = dest.count + source.count
 	dest.groupUptime = dest.groupUptime + source.groupUptime
 	dest.groupCount = dest.groupCount + source.groupCount
-	dest.effectType = dest.effectType + source.effectType
-	dest.maxStacks = dest.maxStacks + source.maxStacks
+
+	if dest.effectType and dest.effectType == source.effectType then
+		logger:Error("Mismatching effect types.")
+	end
+	dest.effectType = source.effectType
+	dest.maxStacks = zo_max(dest.maxStacks, source.maxStacks)
+
 	local destStacks = dest.stacks
 	for stacks, stackData in pairs(source.stacks) do
 		if destStacks[stacks] == nil then
@@ -187,12 +194,18 @@ local function CombineEffects(source, dest)
 	end
 end
 
+---@type EffectData
 local effectData = {}
 local unitIds = {}
+
+---comment
+---@param fightData Fight
+---@param category buffCategory
+---@return EffectData
+---@return integer
 local function GetBuffData(fightData, category)
 	local totalUnitTime = 0
 
-	CMX_EFFECT_DATA = { fightData, category, effectData, unitIds }
 	ZO_ClearTable(unitIds)
 	ZO_ClearTable(effectData)
 
@@ -253,6 +266,12 @@ local buffCategoryTextures = {
 	[BUFF_CATEGORY_PLAYER] = "esoui/art/mainmenu/menubar_character",
 }
 
+---@alias buffCategory "Enemy" | "Group" | "Player"
+---@class BuffCategoryButton: ButtonControl
+---@field buffCategory buffCategory
+
+---@param control BuffCategoryButton
+---@param buffCategory "Enemy" | "Group" | "Player"
 function CMXint.InitializeBuffCategoryButton(control, buffCategory)
 	local baseTexture = buffCategoryTextures[buffCategory]
 
@@ -360,7 +379,7 @@ local function InitBuffsList(panel)
 	end
 
 	---@param rowControl BuffRowControl
-	---@param data table
+	---@param data BuffRowData
 	---@param scrollList object
 	function dataList:UpdateRow(rowControl, data, scrollList)
 		local panel = self.panel
@@ -439,6 +458,10 @@ local function InitBuffsList(panel)
 		end
 	end
 
+	---comment
+	---@param abilityId integer
+	---@param data EffectData
+	---@param totalUnitTime integer
 	function dataList:AddDataEntry(abilityId, data, totalUnitTime)
 		if data.groupUptime <= 0 then
 			return
@@ -460,6 +483,7 @@ local function InitBuffsList(panel)
 			end
 		end
 
+		---@class BuffRowData
 		local rowData = {
 			indent = 0,
 			selected = selected,
@@ -521,6 +545,7 @@ local function InitBuffsList(panel)
 				local stackData = stackDataTable[stacks]
 				local labeltext = ZO_CachedStrFormat(BUFF_NAME_FORMAT_STACKS, name, stacks)
 
+				---@type BuffRowData
 				local rowData = {
 					indent = 1,
 					selected = false,
