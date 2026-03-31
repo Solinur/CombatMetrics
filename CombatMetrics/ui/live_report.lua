@@ -360,6 +360,10 @@ function LiveReport:Initialize(control)
 	self.control = control
 	self.control.object = self
 
+	function self.control:Resize(scale)
+		self.object:Resize(scale)
+	end
+
 	local function OnMoveStop()
 		self:SavePosition()
 	end
@@ -381,7 +385,7 @@ function LiveReport:Initialize(control)
 	self.panels = {}
 
 	self:Toggle(settings.enabled)
-	self:Refresh() -- TODO: Fix live report resizing!
+	self:Refresh()
 end
 
 ---@return boolean
@@ -517,6 +521,11 @@ function LiveReport:Refresh()
 	end
 
 	zo_callLater(refreshBgDelayed, 1)
+end
+
+function LiveReport:Resize(newScale)
+	self.settings.scale = newScale
+	self:Refresh()
 end
 
 function LiveReport:Update()
