@@ -98,14 +98,6 @@ local function GetUnitColor(unitData)
 	return UNIT_COLOR_DEFAULT
 end
 
-local function GetShortFormattedNumber(number)
-	local exponent = zo_floor(math.log(number) / math.log(10))
-	local loweredNumber = zo_roundToNearest(number, zo_pow(10, exponent - 2))
-	local shortNumber = ZO_AbbreviateNumber(loweredNumber, 2, exponent >= 6)
-
-	return shortNumber
-end
-
 ---@param panel UnitsPanel
 ---@return UnitDataList
 local function InitUnitsList(panel)
@@ -157,27 +149,24 @@ local function InitUnitsList(panel)
 			self:RecoverRow(rowControl)
 		end
 
-		local unitData = data.unitData
 		local icon, label, bar, perSecond, total, perCent = unpack(rowControl.controls)
 
 		---@cast icon TextureControl
-		local iconTexture = GetUnitIcon(unitData)
+		local iconTexture = data.icon
 		icon:SetHidden(iconTexture == nil)
 		if iconTexture then
 			icon:SetTexture(iconTexture)
 		end
 
 		---@cast label LabelControl
-		local labelFormat = panel:ShowIds() and unitData.unitId and UNIT_NAME_FORMAT_ID or UNIT_NAME_FORMAT_DEFAULT
-		local labelText = ZO_CachedStrFormat(labelFormat, unitData.name, unitData.unitId)
-		local namecolor = GetUnitColor(unitData)
+		local namecolor = data.color
 		local font = ui.GetFont(ui.fontSize, false)
-		label:SetText(labelText)
+		label:SetText(data.name)
 		label:SetColor(namecolor:UnpackRGBA())
 		label:SetFont(font)
 
 		local playerAmount = data.playerAmount
-		local perSecondValue = playerAmount / (data.durationMs / 1000)
+		local perSecondValue = data.perSecondValue
 		local ratio = data.playerAmount / self.playerAmountSum
 
 		-- local highlightControl = row:GetNamedChild("HighLight")
@@ -192,10 +181,10 @@ local function InitUnitsList(panel)
 		perSecond:SetText(string.format("%.0f", perSecondValue))
 		perSecond:SetFont(font)
 
-		total:SetText(GetShortFormattedNumber(playerAmount))
+		total:SetText(util.GetShortFormattedNumber(playerAmount))
 		total:SetFont(font)
 
-		perCent:SetText(string.format("%.1f%%", 100 * ratio))
+		perCent:SetText(string.format("%.0f%%", 100 * ratio))
 		perCent:SetFont(font)
 	end
 
@@ -210,23 +199,27 @@ local function InitUnitsList(panel)
 
 		local selected = false -- selectedunits ~= nil and (selectedunits[unitId] ~= nil) or false -- TODO: Selections
 
-		local category = self.panel.settings.category
-		local playerAmount = category == "healingOut"
-				and self.panel.settings.includeOverheal
-				and playerData.overflowAmount
-			or playerData.totalAmount
+		local panelSettings = self.panel.settings
+		local category = panelSettings.category
+		local isOverheal = category == cat.CMX_CATEGORY_HEALING_DONE and panelSettings.showOverHeal
+		local playerAmount = isOverheal and playerData.overflowAmount or playerData.totalAmount
 
-		local groupAmount = category == "healingOut"
-				and self.panel.settings.includeOverheal
-				and groupData.overflowAmount
-			or groupData.totalAmount
+		local groupAmount = playerAmount
+		if groupData then
+			groupAmount = isOverheal and groupData.overflowAmount or groupData.totalAmount
+		end
+
+		local labelFormat = panel:ShowIds() and unitData.unitId and UNIT_NAME_FORMAT_ID or UNIT_NAME_FORMAT_DEFAULT
+		local name = ZO_CachedStrFormat(labelFormat, unitData.name, unitData.unitId)
 
 		---@class UnitRowData
 		local rowData = {
-			unitData = unitData,
+			name = name,
+			icon = GetUnitIcon(unitData),
+			color = GetUnitColor(unitData),
+			perSecondValue = playerAmount / (durationMs / 1000),
 			selected = selected,
 			playerAmount = playerAmount,
-			durationMs = durationMs,
 			groupAmount = groupAmount,
 		}
 
@@ -260,7 +253,9 @@ local function InitUnitsList(panel)
 			if type(playerUnitData) == "table" then
 				local groupData = util.GetUnitCategoryData(fightData, oppositionCategory, unitId)
 				local unitInfo = fightData.units[unitId]
-				self:AddDataEntry(unitInfo, playerUnitData, groupData, durationMs)
+				if unitInfo then -- TODO: check why this can be nil
+					self:AddDataEntry(unitInfo, playerUnitData, groupData, durationMs)
+				end
 			end
 		end
 
@@ -294,15 +289,15 @@ function CMXint.InitializeUnitsPanel(control)
 		local perSecondControl = headers:GetNamedChild("PerSecond"):GetNamedChild("Name") --[[@as LabelControl]]
 		local totalControl = headers:GetNamedChild("Total"):GetNamedChild("Name") --[[@as LabelControl]]
 
-		local label1 = isDamage and GetString(SI_COMBAT_METRICS_TARGET) or GetString(SI_COMBAT_METRICS_SOURCE)
-		nameControl:SetText(label1)
-		local label2 = isDamage and GetString(SI_COMBAT_METRICS_DPS) or GetString(SI_COMBAT_METRICS_HPS)
-		perSecondControl:SetText(label2)
-		local label3 = isDamage and GetString(SI_COMBAT_METRICS_DAMAGE) or GetString(SI_COMBAT_METRICS_HEALING)
-		totalControl:SetText(label3)
+		local unitLabel = isDamage and GetString(SI_COMBAT_METRICS_TARGET) or GetString(SI_COMBAT_METRICS_SOURCE)
+		nameControl:SetText(unitLabel)
+		local perSecondLabel = isDamage and GetString(SI_COMBAT_METRICS_DPS) or GetString(SI_COMBAT_METRICS_HPS)
+		perSecondControl:SetText(perSecondLabel)
+		local totalLabel = isDamage and GetString(SI_COMBAT_METRICS_DAMAGE) or GetString(SI_COMBAT_METRICS_HEALING)
+		totalControl:SetText(totalLabel)
 	end
 
-	function UnitsPanel:Update(fightData)
+	function UnitsPanel:Update()
 		logger:Info("Updating Unit Panel")
 
 		self:UpdateHeaderLabels()

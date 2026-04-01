@@ -21,10 +21,10 @@
 			</Action>
 			<Action name="CMX_RESET_FIGHT">
 				<Up>CMX.ResetFight()</Up>
-			</Action>
+			</Action>-->
 			<Action name="CMX_LIVEREPORT_TOGGLE">
-				<Up>CombatMetrics_LiveReport:Toggle()</Up>
-			</Action> -->
+				<Up>CombatMetrics.internal.ui.LiveReport:Toggle()</Up>
+			</Action>
 		</Category>
 	</Layer>
 </Bindings>

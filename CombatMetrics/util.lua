@@ -76,6 +76,30 @@ function util.GetUnitCategoryData(fightData, category, unitId)
 	end
 end
 
+---@param x number
+---@param y number
+---@return number
+function util.SafeDivide(x, y)
+	if y == 0 then
+		return x
+	end
+	return zo_round(x / y)
+end
+
+---@param number number
+---@return string
+function util.GetShortFormattedNumber(number)
+	if number == nil or number == 0 then
+		return "0"
+	end
+
+	local exponent = zo_floor(math.log(zo_abs(number)) / math.log(10))
+	local loweredNumber = zo_roundToNearest(number, zo_pow(10, exponent - 2))
+	local shortNumber = ZO_AbbreviateNumber(loweredNumber, 2, exponent >= 6)
+
+	return shortNumber
+end
+
 CMX_POSTTOCHAT_MODE_NONE = 0
 CMX_POSTTOCHAT_MODE_SINGLE = 1
 CMX_POSTTOCHAT_MODE_MULTI = 2

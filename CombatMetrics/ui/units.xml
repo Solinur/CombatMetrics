@@ -7,7 +7,6 @@
                     <Anchor point="TOPRIGHT" offsetY="2" />
                     <Dimensions y="20" />
                     <Controls>
-
                         <Control name="$(parent)Type" inherits="CombatMetrics_SortHeader">
                             <Anchor point="LEFT" relativePoint="LEFT" relativeTo="$(parent)" offsetX="2" offsetY="0" />
                             <Dimensions x="25" />
@@ -28,7 +27,7 @@
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="4" offsetY="0" />
                             <Dimensions x="58" />
                             <OnInitialized>
-                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_DPS), "persecond", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_CENTER)
+                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_DPS), "perSecondValue", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_CENTER)
                                 self.tooltip = SI_COMBAT_METRICS_UNITDPS_TT
                             </OnInitialized>
                         </Control>
@@ -37,17 +36,15 @@
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)PerSecond" offsetX="2" offsetY="0" />
                             <Dimensions x="58" />
                             <OnInitialized>
-                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_DAMAGE),"total", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_CENTER)
+                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_DAMAGE), "playerAmount", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_CENTER)
                             </OnInitialized>
                         </Control>
 
-                        <Control name="$(parent)PerCent" inherits="CombatMetrics_ControlTooltip CombatMetrics_SortHeader">
+                        <Label name="$(parent)PerCent" inherits="CombatMetrics_ControlTooltip CombatMetrics_SortHeader"
+                            text="SI_COMBAT_METRICS_PERCENT">
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Total" offsetX="2" offsetY="0" />
                             <Dimensions x="36" />
-                            <OnInitialized>
-                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_PERCENT),"percent", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_CENTER)
-                            </OnInitialized>
-                        </Control>
+                        </Label>
                     </Controls>
                 </Control>
 

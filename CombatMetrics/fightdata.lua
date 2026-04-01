@@ -8,30 +8,6 @@ local util = CMXint.util
 local logger
 local SVHandler
 
-function util:GetEnemyUnits(units) -- TODO: Attach this to fight_data
-	local unitIds = {}
-
-	for unitId, unit in pairs(units) do
-		if not unit.isFriendly then
-			unitIds[#unitIds + 1] = unitId
-		end
-	end
-
-	return unitIds
-end
-
-function util:GetFriendlyUnits(units) -- TODO: Attach this to fight_data
-	local unitIds = {}
-
-	for unitId, unit in pairs(units) do
-		if unit.isFriendly then
-			unitIds[#unitIds + 1] = unitId
-		end
-	end
-
-	return unitIds
-end
-
 ---@class FightDataManager
 ---@field data Fight?
 ---@field currentIndex number?
@@ -86,7 +62,7 @@ end
 
 function FightDataManager:SelectNextFight()
 	local currentIndex = self.currentIndex
-	if currentIndex <= 1 then
+	if currentIndex == nil or currentIndex >= self:GetNumFights() then
 		return
 	end
 	self:SelectFightByIndex(currentIndex + 1)
@@ -94,7 +70,7 @@ end
 
 function FightDataManager:SelectPreviousFight()
 	local currentIndex = self.currentIndex
-	if currentIndex >= self:GetNumFights() then
+	if currentIndex == nil or currentIndex <= 1 then
 		return
 	end
 	self:SelectFightByIndex(currentIndex - 1)
@@ -138,6 +114,11 @@ function FightDataManager:SaveFight(saveLog)
 	SVHandler.Save(fightData, saveLog)
 end
 
+---@param fight Fight
+local function OnFightSummary(_, fight)
+	CMXint.FightData:AddFight(fight)
+end
+
 local isFileInitialized = false
 function CMXint.InitializeFightDataHandler()
 	if isFileInitialized == true then
@@ -146,6 +127,8 @@ function CMXint.InitializeFightDataHandler()
 	logger = util.initSublogger("Fights")
 
 	CMXint.FightData = FightDataManager:New()
+
+	LibCombat2:RegisterCallbackType(LIBCOMBAT_EVENT_FIGHTSUMMARY, OnFightSummary, CMX.name)
 
 	isFileInitialized = true
 	return true

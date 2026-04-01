@@ -1,6 +1,3 @@
----@diagnostic disable
---- TODO: enable diagnostic when code is used
-
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint
@@ -11,95 +8,208 @@ local util = CMXint.util
 local logger
 ---@class CMXui
 local ui = CMXint.ui
-
-local db
-
+local LC = LibCombat2
 -- Update the mini DPS meter
 
-local function updateLiveReport(self, data)
-	if data == nil then
-		return
+---@class LiveReportPanelData
+---@field name string
+---@field tooltip string
+---@field tooltipBoss string?
+---@field iconTexture string
+---@field iconTextureBoss string?
+---@field blockSize number
+---@field panelSize number
+---@field iconSize number
+---@field labelSize number
+---@field updateFunc fun(panel: LiveReportPanel)
+
+---@param playerTime number
+---@param playerAmount integer
+---@param totalTime number
+---@param totalAmount integer
+---@return string XPSString
+local function FormatXPSLabel(playerTime, playerAmount, totalTime, totalAmount)
+	local playerXPS = zo_roundToZero(util.SafeDivide(playerAmount, playerTime), 0.01)
+	local totalXPS = zo_roundToZero(util.SafeDivide(totalAmount, totalTime), 0.01)
+	if playerAmount > totalAmount then
+		logger:Warn("Player amount is larger than total amount: %d > %d", playerAmount, totalAmount)
 	end
+	local ratio = zo_roundToZero(util.SafeDivide(playerAmount, totalAmount) * 100)
+	return zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), playerXPS, totalXPS, ratio)
+end
 
-	local livereport = self
-	local DPSOut = data.DPSOut
-	local DPSIn = data.DPSIn
-	local HPSOut = data.HPSOut
-	local HPSAOut = data.OHPSOut
-	local HPSIn = data.HPSIn
-	local dpstime = data.dpstime
-	local hpstime = data.hpstime
-	local groupDPSOut = data.groupDPSOut
-	local groupDPSIn = data.groupDPSIn
-	local groupHPSOut = data.groupHPSOut
+---@param panel LiveReportPanel
+local function UpdateSingleTargetDamage(panel)
+	local panelControl = panel.control
+	local iconControl = panelControl:GetNamedChild("Icon")
+	---@cast iconControl TextureControl
+	local tooltipControl = panelControl:GetNamedChild("Tooltip")
+	local labelControl = panelControl:GetNamedChild("Label")
+	---@cast labelControl LabelControl
+	local layout = panel.layout
 
-	-- Bail out if there is no damage to report
-	if (DPSOut == 0 and HPSOut == 0 and DPSIn == 0) or livereport:IsHidden() then
-		return
-	end
-
-	local SDPS = 0
-	local groupSDPS = 0
-
-	if db.liveReport.damageOutSingle then
-		local iconControl = livereport:GetNamedChild("DamageOutSingle"):GetNamedChild("Icon")
-		local tooltipControl = livereport:GetNamedChild("DamageOutSingle"):GetNamedChild("Tooltip")
-		local texture = "/esoui/art/icons/mapkey/mapkey_fightersguild.dds"
-		local tooltip = SI_COMBAT_METRICS_LIVEREPORT_DPSSINGLE_TOOLTIP
-
-		if data.bossfight then
-			iconControl:SetTexture("esoui/art/tutorial/poi_groupboss_complete.dds")
-			tooltip = SI_COMBAT_METRICS_LIVEREPORT_DPSBOSS_TOOLTIP
-		end
-
-		iconControl:SetTexture(texture)
-		tooltipControl.tooltip[1] = tooltip
-		SDPS = data.bossDPSOut
-		groupSDPS = data.bossDPSOutGroup
-	end
-
-	local DPSString
-	local HPSString
-	local DPSInString
-	local SDPSString
-	local maxtime = zo_roundToNearest(zo_max(dpstime, hpstime), 0.1)
-	local timeString = string.format("%d:%04.1f", maxtime / 60, maxtime % 60)
-
-	-- maybe add data from group
-	if db.recordgrp == true and (groupDPSOut > 0 or groupDPSIn > 0 or groupHPSOut > 0) then
-		local dpsratio, hpsratio, idpsratio, sdpsratio = 0, 0, 0, 0
-		if groupDPSOut > 0 then
-			dpsratio = (zo_floor(DPSOut / groupDPSOut * 1000) / 10)
-		end
-		if groupDPSIn > 0 then
-			idpsratio = (zo_floor(DPSIn / groupDPSIn * 1000) / 10)
-		end
-		if groupSDPS > 0 then
-			sdpsratio = (zo_floor(SDPS / groupSDPS * 1000) / 10)
-		end
-		if groupHPSOut > 0 then
-			hpsratio = (zo_floor(HPSOut / groupHPSOut * 1000) / 10)
-		end
-
-		DPSString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), DPSOut, groupDPSOut, dpsratio)
-		DPSInString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), DPSIn, groupDPSIn, idpsratio)
-		HPSString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), HPSOut, groupHPSOut, hpsratio)
-		SDPSString = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), SDPS, groupSDPS, sdpsratio)
+	if LC.IsLatestFightBossFight() then
+		iconControl:SetTexture(layout.iconTextureBoss)
+		---@diagnostic disable-next-line: undefined-field
+		tooltipControl.tooltip[1] = layout.tooltipBoss
 	else
-		DPSString = DPSOut
-		DPSInString = DPSIn
-		HPSString = HPSOut
-		SDPSString = SDPS
+		iconControl:SetTexture(layout.iconTexture)
+		---@diagnostic disable-next-line: undefined-field
+		tooltipControl.tooltip[1] = layout.tooltip
 	end
 
-	-- Update the values
-	livereport:GetNamedChild("DamageOutSingle"):GetNamedChild("Label"):SetText(SDPSString)
-	livereport:GetNamedChild("DamageOut"):GetNamedChild("Label"):SetText(DPSString)
-	livereport:GetNamedChild("HealOut"):GetNamedChild("Label"):SetText(HPSString)
-	livereport:GetNamedChild("HealOutAbsolute"):GetNamedChild("Label"):SetText(HPSAOut)
-	livereport:GetNamedChild("DamageIn"):GetNamedChild("Label"):SetText(DPSInString)
-	livereport:GetNamedChild("HealIn"):GetNamedChild("Label"):SetText(HPSIn)
-	livereport:GetNamedChild("Time"):GetNamedChild("Label"):SetText(timeString)
+	local playerTime, playerDamage, totalTime, totalDamage = LC.GetLatestMainTargetDamageDone()
+	local labelText = FormatXPSLabel(playerTime, playerDamage, totalTime, totalDamage)
+	labelControl:SetText(labelText)
+end
+
+---@param panel LiveReportPanel
+local function UpdateMultiTargetDamage(panel)
+	local panelControl = panel.control
+	local labelControl = panelControl:GetNamedChild("Label")
+	---@cast labelControl LabelControl
+
+	local playerTime, playerDamage, totalTime, totalDamage = LC.GetLatestTotalDamageDone()
+	local labelText = FormatXPSLabel(playerTime, playerDamage, totalTime, totalDamage)
+	labelControl:SetText(labelText)
+end
+
+local function UpdateHealingDone(panel)
+	local panelControl = panel.control
+	local labelControl = panelControl:GetNamedChild("Label")
+	---@cast labelControl LabelControl
+
+	local playerTime, playerHealing, totalTime, totalHealing = LC.GetLatestHealingDone(false)
+	local labelText = FormatXPSLabel(playerTime, playerHealing, totalTime, totalHealing)
+	labelControl:SetText(labelText)
+end
+
+local function UpdateAbsoluteHealingDone(panel)
+	local panelControl = panel.control
+	local labelControl = panelControl:GetNamedChild("Label")
+	---@cast labelControl LabelControl
+
+	local playerTime, playerHealing, _, _ = LC.GetLatestHealingDone(true)
+	local playerHPS = zo_roundToZero(util.SafeDivide(playerHealing, playerTime), 0.01)
+
+	labelControl:SetText(playerHPS)
+end
+
+---@param panel LiveReportPanel
+local function UpdateDamageReceived(panel)
+	local panelControl = panel.control
+	local labelControl = panelControl:GetNamedChild("Label")
+	---@cast labelControl LabelControl
+
+	local playerTime, playerDamage, totalTime, totalDamage = LC.GetLatestTotalDamageReceived()
+	local labelText = FormatXPSLabel(playerTime, playerDamage, totalTime, totalDamage)
+	labelControl:SetText(labelText)
+end
+
+local function UpdateHealingReceived(panel)
+	local panelControl = panel.control
+	local labelControl = panelControl:GetNamedChild("Label")
+	---@cast labelControl LabelControl
+
+	local playerTime, playerHealing = LC.GetLatestPlayerHealingReceived()
+	local playerHPS = zo_roundToZero(util.SafeDivide(playerHealing, playerTime), 0.01)
+
+	labelControl:SetText(playerHPS)
+end
+
+local function UpdateCombatTime(panel)
+	local panelControl = panel.control
+	local labelControl = panelControl:GetNamedChild("Label")
+	---@cast labelControl LabelControl
+
+	local time = LC.GetLatestFightDuration()
+	local timeString = string.format("%d:%04.1f", time / 60, time % 60)
+
+	labelControl:SetText(timeString)
+end
+
+---@type LiveReportPanelData[]
+local PANEL_DATA = {
+	{
+		name = "dpsSingle",
+		tooltip = GetString(SI_COMBAT_METRICS_LIVEREPORT_DPSSINGLE_TOOLTIP),
+		iconTexture = "/esoui/art/icons/mapkey/mapkey_fightersguild.dds",
+		blockSize = 1,
+		panelSize = 150,
+		iconSize = 24,
+		labelSize = 120,
+		iconTextureBoss = "esoui/art/tutorial/poi_groupboss_complete.dds",
+		tooltipBoss = GetString(SI_COMBAT_METRICS_LIVEREPORT_DPSBOSS_TOOLTIP),
+		updateFunc = UpdateSingleTargetDamage,
+	},
+	{
+		name = "dpsMulti",
+		tooltip = GetString(SI_COMBAT_METRICS_LIVEREPORT_DPSMULTI_TOOLTIP),
+		iconTexture = "/EsoUI/Art/LFG/Gamepad/LFG_roleIcon_dps.dds",
+		blockSize = 1,
+		panelSize = 150,
+		iconSize = 24,
+		labelSize = 120,
+		updateFunc = UpdateMultiTargetDamage,
+	},
+	{
+		name = "hpsOut",
+		tooltip = GetString(SI_COMBAT_METRICS_LIVEREPORT_HPSOUT_TOOLTIP),
+		iconTexture = "/EsoUI/Art/LFG/Gamepad/LFG_roleIcon_healer.dds",
+		blockSize = 1,
+		panelSize = 150,
+		iconSize = 24,
+		labelSize = 120,
+		updateFunc = UpdateHealingDone,
+	},
+	{
+		name = "dpsIn",
+		tooltip = GetString(SI_COMBAT_METRICS_LIVEREPORT_DPSINC_TOOLTIP),
+		iconTexture = "/EsoUI/Art/LFG/Gamepad/LFG_roleIcon_tank.dds",
+		blockSize = 1,
+		panelSize = 150,
+		iconSize = 24,
+		labelSize = 120,
+		updateFunc = UpdateDamageReceived,
+	},
+	{
+		name = "hpsOutRaw",
+		tooltip = GetString(SI_COMBAT_METRICS_LIVEREPORT_HPSRAW_TOOLTIP),
+		iconTexture = "/esoui/art/buttons/gamepad/pointsplus_up.dds",
+		blockSize = 0.57,
+		panelSize = 85,
+		iconSize = 24,
+		labelSize = 55,
+		updateFunc = UpdateAbsoluteHealingDone,
+	},
+	{
+		name = "hpsIn",
+		tooltip = GetString(SI_COMBAT_METRICS_LIVEREPORT_HPSINC_TOOLTIP),
+		iconTexture = "/esoui/art/hud/gamepad/gp_radialicon_invitegroup_down.dds",
+		blockSize = 0.57,
+		panelSize = 85,
+		iconSize = 24,
+		labelSize = 55,
+		updateFunc = UpdateHealingReceived,
+	},
+	{
+		name = "time",
+		tooltip = GetString(SI_COMBAT_METRICS_LIVEREPORT_TIME_TOOLTIP),
+		iconTexture = "/esoui/art/tutorial/timer_icon.dds",
+		blockSize = 0.43,
+		panelSize = 65,
+		iconSize = 20,
+		labelSize = 38,
+		updateFunc = UpdateCombatTime,
+	},
+}
+
+---@type table<string, LiveReportPanelData>
+local PANEL_DATA_BY_NAME = {}
+ui.PANEL_DATA_BY_NAME = PANEL_DATA_BY_NAME
+
+for i, layout in ipairs(PANEL_DATA) do
+	PANEL_DATA_BY_NAME[layout.name] = layout
 end
 
 local function resize(control, scale)
@@ -110,7 +220,7 @@ local function resize(control, scale)
 	local maxwidth, maxheight = GuiRoot:GetDimensions()
 
 	scale = zo_min(zo_max(scale or 1, 0.5), 3, maxwidth / width, maxheight / height)
-	db.liveReport.scale = scale
+	CMXint.settings.liveReport.scale = scale
 
 	if width then
 		control:SetWidth(width * scale)
@@ -136,50 +246,83 @@ local function resize(control, scale)
 	end
 end
 
----@class LiveReportControl
-local LiveReportControl = ZO_Object:Subclass() -- holds all recent events + info to send on death
+---@class LiveReportPanel
+---@field New fun(self: LiveReportPanel, name: string, parent: LiveReport): LiveReportPanel
+local LiveReportPanel = ZO_InitializingObject:Subclass() -- holds all recent events + info to send on death
 
-local LiveReportControlSizes = {
-	["DamageOutSingle"] = 1,
-	["DamageOut"] = 1,
-	["HealOut"] = 1,
-	["HealOutAbsolute"] = 0.57,
-	["DamageIn"] = 1,
-	["HealIn"] = 0.57,
-	["Time"] = 0.43,
-}
+---@param name string
+---@param parent LiveReport
+function LiveReportPanel:Initialize(name, parent)
+	assert(PANEL_DATA_BY_NAME[name], string.format("Missing layout data for live report panel: %s", name))
 
-local LiveReportControls = {
-	"DamageOutSingle",
-	"DamageOut",
-	"HealOut",
-	"HealOutAbsolute",
-	"DamageIn",
-	"HealIn",
-	"Time",
-}
-
----@diagnostic disable-next-line: duplicate-set-field
-function LiveReportControl:New(name)
-	assert(LiveReportControlSizes[name], "Invalid module name for LiveReportControl!")
-	local object = ZO_Object.New(self)
-	object:Initialize(name)
-	return object
-end
-
-function LiveReportControl:Initialize(name)
-	local LiveReport = CombatMetrics_LiveReport
 	local templateName = "CombatMetrics_LiveReport_" .. name
-
-	local control = CreateControlFromVirtual(templateName, LiveReport, templateName)
-	util.storeOrigLayout(control)
-
+	local control = CreateControlFromVirtual(templateName, parent.control, "CombatMetrics_LiveReport_Panel")
 	self.name = name
 	self.control = control
+	self:InitLayout(control)
+
 	self.active = true
-	self.size = LiveReportControlSizes[name]
-	self.parent = LiveReport
-	LiveReport.modules[name] = self
+	self.parent = parent
+	parent.panels[name] = self
+end
+
+function LiveReportPanel:InitLayout(control)
+	local layout = PANEL_DATA_BY_NAME[self.name]
+
+	self.layout = layout
+	self.size = layout.blockSize
+	control:SetWidth(layout.panelSize)
+
+	local iconControl = control:GetNamedChild("Icon")
+	iconControl:SetWidth(layout.iconSize)
+	iconControl:SetHeight(layout.iconSize)
+	iconControl:SetTexture(layout.iconTexture)
+
+	local labelControl = control:GetNamedChild("Label")
+	labelControl:SetWidth(layout.labelSize)
+	util.storeOrigLayout(self.control)
+
+	local tooltipControl = control:GetNamedChild("Tooltip")
+	tooltipControl.tooltip = { layout.tooltip }
+
+	self.Update = layout.updateFunc
+end
+
+function LiveReportPanel:Refresh()
+	---@type Control
+	local control = self.control
+	local parent = self.parent
+	local settings = parent.settings
+	local scale = settings.scale
+
+	resize(control, scale)
+
+	-- local width, height = unpack(control.sizes)
+	-- control:SetDimensions(width * scale, height * scale)
+
+	logger:Info("Refresh LR Panel %s: WxH = %d x %d", self.name, control:GetDimensions())
+
+	local label = control:GetNamedChild("Label")
+	---@cast label LabelControl
+	local alignment = settings.alignmentleft and TEXT_ALIGN_LEFT or TEXT_ALIGN_RIGHT
+	label:SetHorizontalAlignment(alignment)
+
+	local showGroupTooltip = CMXint.settings.group.enableGroupData == true
+	---@diagnostic disable-next-line: undefined-field
+	control:GetNamedChild("Tooltip").tooltip[2] = showGroupTooltip and SI_COMBAT_METRICS_LIVEREPORT_GROUP_TOOLTIP or nil
+end
+
+function LiveReportPanel:RefreshAnchor(anchorData)
+	---@type Control
+	local control = self.control
+	local scale = self.parent.settings.scale
+
+	control:ClearAnchors()
+	control:SetAnchor(anchorData[1], anchorData[2], anchorData[3], anchorData[4] * scale, anchorData[5] * scale)
+end
+
+function LiveReportPanel:Update()
+	-- placeholder
 end
 
 local anchorSchemes = {
@@ -190,185 +333,220 @@ local anchorSchemes = {
 	["CompactRow2"] = { TOPLEFT, nil, BOTTOMLEFT, 0, 0 },
 }
 
-function LiveReportControl:Refresh(anchorControl)
-	---@type Control
-	local control = self.control
-	local parent = self.parent
-	local settings = parent.settings
-	local scale = settings.scale
+---@class LiveReport
+---@field New fun(self: LiveReport, control: Control): LiveReport
+local LiveReport = ZO_InitializingObject:Subclass()
+
+function LiveReport:Initialize(control)
+	local settings = CMXint.settings.liveReport
+
+	self.control = control
+	self.control.object = self
 
 	control:ClearAnchors()
+	control:SetAnchor(CENTER, nil, TOPLEFT, settings.pos_x, settings.pos_y)
 
-	local width, height = unpack(control.sizes)
-	control:SetDimensions(width * scale, height * scale)
-	control:SetAnchor(anchor[1], anchorControl, anchor[2], anchor[3] * scale, anchor[4] * scale)
+	function self.control:Resize(scale)
+		self.object:Resize(scale)
+	end
 
-	local label = self:GetNamedChild("Label")
-	local alignment = settings.alignmentleft and TEXT_ALIGN_LEFT or TEXT_ALIGN_RIGHT
-	label:SetHorizontalAlignment(alignment)
+	local function OnMoveStop()
+		self:SavePosition()
+	end
 
-	local showGroupTooltip = db.recordgrp == true
-	self:GetNamedChild("Tooltip").tooltip[2] = showGroupTooltip and SI_COMBAT_METRICS_LIVEREPORT_GROUP_TOOLTIP or nil
+	control:SetHandler("OnMoveStop", OnMoveStop)
+	control:GetNamedChild("ResizeFrame"):SetMouseEnabled(not settings.locked)
+	control:SetMovable(not settings.locked)
+	control:GetNamedChild("BG"):SetAlpha(settings.bgalpha / 100)
 
-	self.last = self
+	util.storeOrigLayout(self.control)
+
+	self.settings = settings
+	self.initialized = true
+	self.fragment = ZO_HUDFadeSceneFragment:New(control)
+
+	---@type table<string, LiveReportPanel>
+	self.panels = {}
+
+	self:Toggle(settings.enabled)
+	self:Refresh()
 end
 
----@param self TopLevelWindow
-local function InitLiveReport(self)
-	local settings = CMXint.settings.liveReport
-	if settings.enabled == false then
-		return
+---@return boolean
+function LiveReport:IsEnabled()
+	return self.settings.enabled
+end
+
+function LiveReport:SavePosition()
+	local x, y = self.control:GetCenter()
+	self.settings.pos_x = x
+	self.settings.pos_y = y
+end
+
+function LiveReport:Toggle(value)
+	local control = self.control
+	if value == nil then
+		value = not self.settings.enabled
 	end
+	self.settings.enabled = value
 
-	self.initilazed = true
-	self.settings = settings
-	self.modules = {}
+	local fragment = self.fragment
+	if value == true and SCENE_MANAGER and self.settings.enabled then
+		SCENE_MANAGER:GetScene("hud"):AddFragment(fragment)
+		SCENE_MANAGER:GetScene("hudui"):AddFragment(fragment)
+		SCENE_MANAGER:GetScene("siegeBar"):AddFragment(fragment)
 
-	for _, name in ipairs(LiveReportControls) do
-		if settings[name] == true then
-			LiveReportControl:New(name)
+		local currentScene = SCENE_MANAGER.currentScene and SCENE_MANAGER.currentScene.name or ""
+		local isShownForCurrentScene = currentScene == "hud" or currentScene == "hudui" or currentScene == "siegeBar"
+		control:SetHidden(not isShownForCurrentScene)
+	else
+		SCENE_MANAGER:GetScene("hud"):RemoveFragment(fragment)
+		SCENE_MANAGER:GetScene("hudui"):RemoveFragment(fragment)
+		SCENE_MANAGER:GetScene("siegeBar"):RemoveFragment(fragment)
+
+		control:SetHidden(true)
+	end
+end
+
+function LiveReport:RefreshBg()
+	local control = self.control
+	local settings = self.settings
+
+	local newwidth, newheight = control:GetDimensions()
+
+	local bg = control:GetNamedChild("BG")
+	local resizeFrame = control:GetNamedChild("ResizeFrame")
+
+	bg:SetDimensions(newwidth, newheight)
+	resizeFrame:SetDimensions(newwidth, newheight)
+	resizeFrame:SetAnchorFill(control)
+
+	control.sizes = { newwidth / settings.scale, newheight / settings.scale }
+	bg.sizes = { newwidth / settings.scale, newheight / settings.scale }
+	resizeFrame.sizes = { newwidth / settings.scale, newheight / settings.scale }
+	resizeFrame:SetDimensionConstraints(
+		newwidth / settings.scale * 0.5,
+		newheight / settings.scale * 0.5,
+		newwidth / settings.scale * 3,
+		newheight / settings.scale * 3
+	)
+end
+
+function LiveReport:GetTotalSize()
+	local totalBlocks = 0
+	for panelName, data in pairs(PANEL_DATA_BY_NAME) do
+		if self.settings[panelName] then
+			totalBlocks = totalBlocks + data.blockSize
 		end
 	end
+	return totalBlocks
+end
 
-	function self:SavePosition()
-		local x, y = self:GetCenter()
-		self.settings.pos_x = x
-		self.settings.pos_y = y
+function LiveReport:Refresh()
+	local settings = self.settings
+	local layout = settings.layout or "Compact"
+	local isSecondRow = false
+	local totalWidth = self:GetTotalSize()
+	local compactWidth
+
+	local control = self.control
+	control:GetNamedChild("ResizeFrame"):SetMouseEnabled(not settings.locked)
+	control:SetMovable(not settings.locked)
+	control:GetNamedChild("BG"):SetAlpha(settings.bgalpha / 100)
+
+	if layout == "Compact" then
+		compactWidth = zo_min(zo_round(zo_ceil(totalWidth) / 2), totalWidth - zo_floor(totalWidth / 2))
 	end
 
-	self:ClearAnchors()
-	self:SetAnchor(CENTER, nil, TOPLEFT, settings.pos_x, settings.pos_y)
-	self:SetHandler("OnMoveStop", function()
-		self:SavePosition()
-	end)
+	local currentSize = 0
+	local anchorControl = self.control
+	local panels = self.panels
 
-	util.storeOrigLayout(self)
-	self.fragment = ZO_HUDFadeSceneFragment:New(self)
+	for i, panelLayout in ipairs(PANEL_DATA) do
+		local name = panelLayout.name
+		local panel = panels[name]
 
-	function self:Toggle(value)
-		if value == nil then
-			value = self:IsHidden()
-		end
-		local fragment = self.fragment
-		if value == true and SCENE_MANAGER then
-			SCENE_MANAGER:GetScene("hud"):AddFragment(fragment)
-			SCENE_MANAGER:GetScene("hudui"):AddFragment(fragment)
-			SCENE_MANAGER:GetScene("siegeBar"):AddFragment(fragment)
-
-			local currentScene = SCENE_MANAGER.currentScene and SCENE_MANAGER.currentScene.name or ""
-			local isShownForCurrentScene = currentScene == "hud"
-				or currentScene == "hudui"
-				or currentScene == "siegeBar"
-			self:SetHidden(not isShownForCurrentScene)
-		else
-			SCENE_MANAGER:GetScene("hud"):RemoveFragment(fragment)
-			SCENE_MANAGER:GetScene("hudui"):RemoveFragment(fragment)
-			SCENE_MANAGER:GetScene("siegeBar"):RemoveFragment(fragment)
-
-			self:SetHidden(true)
-		end
-	end
-
-	function self:RefreshBG()
-		local newwidth, newheight = self:GetDimensions()
-
-		local bg = self:GetNamedChild("BG")
-		local resizeFrame = self:GetNamedChild("ResizeFrame")
-
-		bg:SetDimensions(newwidth, newheight)
-		resizeFrame:SetDimensions(newwidth, newheight)
-		resizeFrame:SetAnchorFill(self)
-
-		self.sizes = { newwidth / settings.scale, newheight / settings.scale }
-		bg.sizes = { newwidth / settings.scale, newheight / settings.scale }
-		resizeFrame.sizes = { newwidth / settings.scale, newheight / settings.scale }
-		resizeFrame:SetDimensionConstraints(
-			newwidth / settings.scale * 0.5,
-			newheight / settings.scale * 0.5,
-			newwidth / settings.scale * 3,
-			newheight / settings.scale * 3
-		)
-	end
-
-	function self:GetTotalSize()
-		local totalBlocks = 0
-		for _, module in pairs(self.modules) do
-			if module.active then
-				totalBlocks = totalBlocks + module.blocksize
+		if settings[name] then
+			if panel == nil then
+				panel = LiveReportPanel:New(name, self)
 			end
-		end
-		return totalBlocks
-	end
 
-	function self:Refresh()
-		local totalWidth = self:GetTotalSize()
-		local layout = settings.layout or "Compact"
+			panel.active = true
+			panel.control:SetHidden(false)
 
-		if layout == "Compact" then
-			totalWidth = zo_min(zo_round(zo_ceil(totalWidth) / 2), totalWidth - zo_floor(totalWidth / 2))
-		end
+			local newSize = currentSize + panel.size
+			local anchor
 
-		local currentSize = 0
-		local anchorControl = self
-		local modules = self.modules
-
-		for _, name in ipairs(LiveReportControls) do
-			local module = modules[name]
-			if module and module.active then
-				local newSize = currentSize + module.size
-				local anchor
-
-				if currentSize == 0 then
-					anchor = anchorSchemes.First
-					anchor[2] = anchorControl
-					if layout == "Compact" then
-						anchorSchemes.CompactRow2[2] = module.control
-					end
-				elseif newSize < totalWidth then
+			if currentSize == 0 then
+				anchor = anchorSchemes.First
+				anchor[2] = anchorControl
+				if layout == "Compact" then
+					anchorSchemes.CompactRow2[2] = panel.control
+				end
+			elseif layout == "Compact" then
+				if newSize <= compactWidth or isSecondRow then
 					anchor = anchorSchemes[layout]
 					anchor[2] = anchorControl
 				else
-					assert(layout == "Compact", "Unexpceted value during LiveReport refresh!")
 					anchor = anchorSchemes.CompactRow2
+					isSecondRow = true
 				end
-
-				LiveReportControl:Refresh(anchor)
-				currentSize = newSize
-				anchorControl = module.control
+			elseif newSize <= totalWidth then
+				anchor = anchorSchemes[layout]
+				anchor[2] = anchorControl
 			end
+
+			panel:Refresh()
+			panel:RefreshAnchor(anchor)
+
+			currentSize = newSize
+			anchorControl = panel.control
+		elseif panel then
+			panel.active = false
+			panel.control:SetHidden(true)
 		end
-		zo_callLater(function()
-			self:RefreshBG()
-		end, 1)
 	end
 
-	function self:Resize(scale)
-		for i = 1, self:GetNumChildren() do -- dont resize liveReport!
-			local child = self:GetChild(i)
-			if child then
-				resize(child, scale)
-			end
-		end
-		self:Refresh()
+	local function refreshBgDelayed()
+		self:RefreshBg()
 	end
 
-	self.Update = updateLiveReport
-	self:Toggle(settings.enabled)
-	self:Resize(settings.scale)
-	self:GetNamedChild("ResizeFrame"):SetMouseEnabled(not settings.locked)
-	self:SetMovable(not settings.locked)
-	self:GetNamedChild("BG"):SetAlpha(settings.bgalpha / 100)
+	zo_callLater(refreshBgDelayed, 1)
+end
+
+function LiveReport:Resize(newScale)
+	self.settings.scale = newScale
+	self:Refresh()
+	self:SavePosition()
+end
+
+function LiveReport:Update()
+	if not self:IsEnabled() then -- TODO: bail when not in combat
+		LiveReport:Toggle(false)
+		return
+	end
+
+	for _, panel in pairs(self.panels) do
+		if panel.active then
+			panel:Update()
+		end
+	end
 end
 
 local isFileInitialized = false
 function CMXint.InitializeLiveReport()
 	if isFileInitialized == true then
-		return false
+		return true
 	end
 	logger = util.initSublogger("LiveReport")
-	db = CMX.db
 
-	InitLiveReport(CMX.internal.LiveReport) -- TODO: Directly pass init function.
+	ui.LiveReport = LiveReport:New(CombatMetrics_LiveReport)
+
+	local function LiveReportUpdate()
+		ui.LiveReport:Update()
+	end
+
+	GetEventManager():RegisterForUpdate("CombatMetrics_LiveReport_Update", 500, LiveReportUpdate)
 
 	isFileInitialized = true
 	return true

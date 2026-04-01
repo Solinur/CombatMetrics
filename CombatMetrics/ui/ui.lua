@@ -191,8 +191,7 @@ function CMXint.Resizing(control, resizing)
 
 		local scale, newpos = unpack(lastResize)
 		local parent = control:GetParent()
-
-		CMXint.settings[parent:GetName()] = newpos -- todo: reroute the settings update!
+		logger:Info("Resizing: %s", parent:GetName())
 
 		parent:ClearAnchors()
 		---@diagnostic disable-next-line: missing-parameter, param-type-mismatch
@@ -430,7 +429,7 @@ function CMXint.InitializeUI()
 	assert(CMXint.InitializeControlHandler(), "Initialization of control handler failed")
 	assert(CMXint.InitializeSelectionsHandler(), "Initialization of selections handler failed")
 	assert(CMXint.InitializeFightReport(), "Initialization of fight report UI failed")
-	-- assert(CMXint.InitializeLiveReport(), "Initialization of live report failed")
+	assert(CMXint.InitializeLiveReport(), "Initialization of live report failed")
 
 	PanelObject.fightReport = CMXint.fightReport
 	PanelObject.settings = CMXint.fightReport.settings

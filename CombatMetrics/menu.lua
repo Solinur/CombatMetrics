@@ -430,7 +430,7 @@ function CMXint.InitMenu(svdefaults)
 			end,
 			setFunc = function(value)
 				settings.liveReport.enabled = value
-				CombatMetrics_LiveReport:Toggle(value)
+				CMXint.ui.LiveReport:Toggle(value)
 			end,
 		},
 		{
@@ -458,7 +458,7 @@ function CMXint.InitMenu(svdefaults)
 			end,
 			setFunc = function(value)
 				settings.liveReport.layout = value
-				CombatMetrics_LiveReport:Refresh()
+				CMXint.ui.LiveReport:Refresh()
 			end,
 			disabled = function()
 				return not settings.liveReport.enabled
@@ -477,7 +477,7 @@ function CMXint.InitMenu(svdefaults)
 			end,
 			setFunc = function(value)
 				settings.liveReport.scale = value / 100
-				CombatMetrics_LiveReport:Resize(value / 100)
+				CMXint.ui.LiveReport:Resize(value / 100)
 			end,
 			disabled = function()
 				return not settings.liveReport.enabled
@@ -512,24 +512,7 @@ function CMXint.InitMenu(svdefaults)
 			end,
 			setFunc = function(value)
 				settings.liveReport.alignmentleft = value
-				CombatMetrics_LiveReport:Refresh()
-			end,
-		},
-		{
-			type = "checkbox",
-			name = GetString(SI_COMBAT_METRICS_MENU_SHOW_DPS_NAME),
-			width = "half",
-			tooltip = GetString(SI_COMBAT_METRICS_MENU_SHOW_DPS_TOOLTIP),
-			default = def.liveReport.damageOut, -- TODO: Rename Variable
-			getFunc = function()
-				return settings.liveReport.damageOut
-			end,
-			setFunc = function(value)
-				settings.liveReport.damageOut = value
-				CombatMetrics_LiveReport:Refresh()
-			end,
-			disabled = function()
-				return not settings.liveReport.enabled
+				CMXint.ui.LiveReport:Refresh()
 			end,
 		},
 		{
@@ -537,13 +520,13 @@ function CMXint.InitMenu(svdefaults)
 			name = GetString(SI_COMBAT_METRICS_MENU_SHOW_SDPS_NAME),
 			width = "half",
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_SHOW_SDPS_TOOLTIP),
-			default = def.liveReport.damageOutSingle,
+			default = def.liveReport.dpsSingle,
 			getFunc = function()
-				return settings.liveReport.damageOutSingle
+				return settings.liveReport.dpsSingle
 			end,
 			setFunc = function(value)
-				settings.liveReport.damageOutSingle = value
-				CombatMetrics_LiveReport:Refresh()
+				settings.liveReport.dpsSingle = value
+				CMXint.ui.LiveReport:Refresh()
 			end,
 			disabled = function()
 				return not settings.liveReport.enabled
@@ -551,16 +534,16 @@ function CMXint.InitMenu(svdefaults)
 		},
 		{
 			type = "checkbox",
-			name = GetString(SI_COMBAT_METRICS_MENU_SHOW_HPSA_NAME),
+			name = GetString(SI_COMBAT_METRICS_MENU_SHOW_DPS_NAME),
 			width = "half",
-			tooltip = GetString(SI_COMBAT_METRICS_MENU_SHOW_HPSA_TOOLTIP),
-			default = def.liveReport.healOutAbsolute,
+			tooltip = GetString(SI_COMBAT_METRICS_MENU_SHOW_DPS_TOOLTIP),
+			default = def.liveReport.dpsMulti, -- TODO: Rename Variable
 			getFunc = function()
-				return settings.liveReport.healOutAbsolute
+				return settings.liveReport.dpsMulti
 			end,
 			setFunc = function(value)
-				settings.liveReport.healOutAbsolute = value
-				CombatMetrics_LiveReport:Refresh()
+				settings.liveReport.dpsMulti = value
+				CMXint.ui.LiveReport:Refresh()
 			end,
 			disabled = function()
 				return not settings.liveReport.enabled
@@ -571,13 +554,30 @@ function CMXint.InitMenu(svdefaults)
 			name = GetString(SI_COMBAT_METRICS_MENU_SHOW_HPS_NAME),
 			width = "half",
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_SHOW_HPS_TOOLTIP),
-			default = def.liveReport.healOut,
+			default = def.liveReport.hpsOut,
 			getFunc = function()
-				return settings.liveReport.healOut
+				return settings.liveReport.hpsOut
 			end,
 			setFunc = function(value)
-				settings.liveReport.healOut = value
-				CombatMetrics_LiveReport:Refresh()
+				settings.liveReport.hpsOut = value
+				CMXint.ui.LiveReport:Refresh()
+			end,
+			disabled = function()
+				return not settings.liveReport.enabled
+			end,
+		},
+		{
+			type = "checkbox",
+			name = GetString(SI_COMBAT_METRICS_MENU_SHOW_HPSA_NAME),
+			width = "half",
+			tooltip = GetString(SI_COMBAT_METRICS_MENU_SHOW_HPSA_TOOLTIP),
+			default = def.liveReport.hpsOutRaw,
+			getFunc = function()
+				return settings.liveReport.hpsOutRaw
+			end,
+			setFunc = function(value)
+				settings.liveReport.hpsOutRaw = value
+				CMXint.ui.LiveReport:Refresh()
 			end,
 			disabled = function()
 				return not settings.liveReport.enabled
@@ -588,13 +588,13 @@ function CMXint.InitMenu(svdefaults)
 			name = GetString(SI_COMBAT_METRICS_MENU_SHOW_INC_DPS_NAME),
 			width = "half",
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_SHOW_INC_DPS_TOOLTIP),
-			default = def.liveReport.damageIn,
+			default = def.liveReport.dpsIn,
 			getFunc = function()
-				return settings.liveReport.damageIn
+				return settings.liveReport.dpsIn
 			end,
 			setFunc = function(value)
-				settings.liveReport.damageIn = value
-				CombatMetrics_LiveReport:Refresh()
+				settings.liveReport.dpsIn = value
+				CMXint.ui.LiveReport:Refresh()
 			end,
 			disabled = function()
 				return not settings.liveReport.enabled
@@ -605,13 +605,13 @@ function CMXint.InitMenu(svdefaults)
 			name = GetString(SI_COMBAT_METRICS_MENU_SHOW_INC_HPS_NAME),
 			width = "half",
 			tooltip = GetString(SI_COMBAT_METRICS_MENU_SHOW_INC_HPS_TOOLTIP),
-			default = def.liveReport.healIn,
+			default = def.liveReport.hpsIn,
 			getFunc = function()
-				return settings.liveReport.healIn
+				return settings.liveReport.hpsIn
 			end,
 			setFunc = function(value)
-				settings.liveReport.healIn = value
-				CombatMetrics_LiveReport:Refresh()
+				settings.liveReport.hpsIn = value
+				CMXint.ui.LiveReport:Refresh()
 			end,
 			disabled = function()
 				return not settings.liveReport.enabled
@@ -628,7 +628,7 @@ function CMXint.InitMenu(svdefaults)
 			end,
 			setFunc = function(value)
 				settings.liveReport.time = value
-				CombatMetrics_LiveReport:Refresh()
+				CMXint.ui.LiveReport:Refresh()
 			end,
 			disabled = function()
 				return not settings.liveReport.enabled
