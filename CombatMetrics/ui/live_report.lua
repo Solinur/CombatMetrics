@@ -377,6 +377,12 @@ function LiveReport:Initialize(control)
 
 	util.storeOrigLayout(self.control)
 
+	local pos_x = settings.pos_x
+	local pos_y = settings.pos_y
+	self.control:ClearAnchors()
+	---@diagnostic disable-next-line: missing-parameter, param-type-mismatch
+	self.control:SetAnchor(CENTER, nil, TOPLEFT, pos_x, pos_y)
+
 	self.settings = settings
 	self.initialized = true
 	self.fragment = ZO_HUDFadeSceneFragment:New(control)
@@ -526,6 +532,7 @@ end
 function LiveReport:Resize(newScale)
 	self.settings.scale = newScale
 	self:Refresh()
+	LiveReport:SavePosition()
 end
 
 function LiveReport:Update()

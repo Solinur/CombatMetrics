@@ -80,7 +80,7 @@ local function ResizeControl(control, scale)
 	end
 end
 
-local function InitializeFightReport()
+local function InitializeFightReport() -- TODO: Decide on a common TLW/Object scheme
 	---@class FightReport: TopLevelWindow
 	---@field currentFight Fight?
 	local FightReport = CombatMetricsReport
@@ -119,6 +119,7 @@ local function InitializeFightReport()
 		ResizeControl(FightReport, scale)
 		settings.scale = scale
 		FightReport:Update()
+		savePos()
 	end
 
 	function FightReport:Toggle()
