@@ -23,6 +23,21 @@ local LC = LibCombat2
 ---@field labelSize number
 ---@field updateFunc fun(panel: LiveReportPanel)
 
+---@param playerTime number
+---@param playerAmount integer
+---@param totalTime number
+---@param totalAmount integer
+---@return string XPSString
+local function FormatXPSLabel(playerTime, playerAmount, totalTime, totalAmount)
+	local playerXPS = zo_roundToZero(util.SafeDivide(playerAmount, playerTime), 0.01)
+	local totalXPS = zo_roundToZero(util.SafeDivide(totalAmount, totalTime), 0.01)
+	if playerAmount > totalAmount then
+		logger:Warn("Player amount is larger than total amount: %d > %d", playerAmount, totalAmount)
+	end
+	local ratio = zo_roundToZero(util.SafeDivide(playerAmount, totalAmount) * 100)
+	return zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), playerXPS, totalXPS, ratio)
+end
+
 ---@param panel LiveReportPanel
 local function UpdateSingleTargetDamage(panel)
 	local panelControl = panel.control
@@ -44,15 +59,7 @@ local function UpdateSingleTargetDamage(panel)
 	end
 
 	local playerTime, playerDamage, totalTime, totalDamage = LC.GetLatestMainTargetDamageDone()
-	local playerDPS = zo_roundToZero(util.SafeDivide(playerDamage, playerTime), 0.01)
-	local totalDPS = zo_roundToZero(util.SafeDivide(totalDamage, totalTime), 0.01)
-
-	if playerDamage > totalDamage then
-		logger:Warn("Player amount is larger than total amount: %d > %d", playerDamage, totalDamage)
-	end
-	local ratio = zo_roundToZero(util.SafeDivide(playerDamage, totalDamage) * 100)
-
-	local labelText = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), playerDPS, totalDPS, ratio)
+	local labelText = FormatXPSLabel(playerTime, playerDamage, totalTime, totalDamage)
 	labelControl:SetText(labelText)
 end
 
@@ -63,15 +70,7 @@ local function UpdateMultiTargetDamage(panel)
 	---@cast labelControl LabelControl
 
 	local playerTime, playerDamage, totalTime, totalDamage = LC.GetLatestTotalDamageDone()
-	local playerDPS = zo_roundToZero(util.SafeDivide(playerDamage, playerTime), 0.01)
-	local totalDPS = zo_roundToZero(util.SafeDivide(totalDamage, totalTime), 0.01)
-
-	if playerDamage > totalDamage then
-		logger:Warn("Player amount is larger than total amount: %d > %d", playerDamage, totalDamage)
-	end
-	local ratio = zo_roundToZero(util.SafeDivide(playerDamage, totalDamage) * 100)
-
-	local labelText = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), playerDPS, totalDPS, ratio)
+	local labelText = FormatXPSLabel(playerTime, playerDamage, totalTime, totalDamage)
 	labelControl:SetText(labelText)
 end
 
@@ -81,15 +80,7 @@ local function UpdateHealingDone(panel)
 	---@cast labelControl LabelControl
 
 	local playerTime, playerHealing, totalTime, totalHealing = LC.GetLatestHealingDone(false)
-	local playerHPS = zo_roundToZero(util.SafeDivide(playerHealing, playerTime), 0.01)
-	local totalHPS = zo_roundToZero(util.SafeDivide(totalHealing, totalTime), 0.01)
-
-	if playerHealing > totalHealing then
-		logger:Warn("Player amount is larger than total amount: %d > %d", playerHealing, totalHealing)
-	end
-	local ratio = zo_roundToZero(util.SafeDivide(playerHealing, totalHealing) * 100)
-
-	local labelText = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), playerHPS, totalHPS, ratio)
+	local labelText = FormatXPSLabel(playerTime, playerHealing, totalTime, totalHealing)
 	labelControl:SetText(labelText)
 end
 
@@ -111,15 +102,7 @@ local function UpdateDamageReceived(panel)
 	---@cast labelControl LabelControl
 
 	local playerTime, playerDamage, totalTime, totalDamage = LC.GetLatestTotalDamageReceived()
-	local playerDPS = zo_roundToZero(util.SafeDivide(playerDamage, playerTime), 0.01)
-	local totalDPS = zo_roundToZero(util.SafeDivide(totalDamage, totalTime), 0.01)
-
-	if playerDamage > totalDamage then
-		logger:Warn("Player amount is larger than total amount: %d > %d", playerDamage, totalDamage)
-	end
-	local ratio = zo_roundToZero(util.SafeDivide(playerDamage, totalDamage) * 100)
-
-	local labelText = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), playerDPS, totalDPS, ratio)
+	local labelText = FormatXPSLabel(playerTime, playerDamage, totalTime, totalDamage)
 	labelControl:SetText(labelText)
 end
 
@@ -360,6 +343,9 @@ function LiveReport:Initialize(control)
 	self.control = control
 	self.control.object = self
 
+	control:ClearAnchors()
+	control:SetAnchor(CENTER, nil, TOPLEFT, settings.pos_x, settings.pos_y)
+
 	function self.control:Resize(scale)
 		self.object:Resize(scale)
 	end
@@ -368,8 +354,6 @@ function LiveReport:Initialize(control)
 		self:SavePosition()
 	end
 
-	control:ClearAnchors()
-	control:SetAnchor(CENTER, nil, TOPLEFT, settings.posx, settings.pos_y)
 	control:SetHandler("OnMoveStop", OnMoveStop)
 	control:GetNamedChild("ResizeFrame"):SetMouseEnabled(not settings.locked)
 	control:SetMovable(not settings.locked)
@@ -402,11 +386,12 @@ end
 function LiveReport:Toggle(value)
 	local control = self.control
 	if value == nil then
-		value = control:IsHidden()
+		value = not self.settings.enabled
 	end
+	self.settings.enabled = value
 
 	local fragment = self.fragment
-	if value == true and SCENE_MANAGER then
+	if value == true and SCENE_MANAGER and self.settings.enabled then
 		SCENE_MANAGER:GetScene("hud"):AddFragment(fragment)
 		SCENE_MANAGER:GetScene("hudui"):AddFragment(fragment)
 		SCENE_MANAGER:GetScene("siegeBar"):AddFragment(fragment)
@@ -464,6 +449,11 @@ function LiveReport:Refresh()
 	local totalWidth = self:GetTotalSize()
 	local compactWidth
 
+	local control = self.control
+	control:GetNamedChild("ResizeFrame"):SetMouseEnabled(not settings.locked)
+	control:SetMovable(not settings.locked)
+	control:GetNamedChild("BG"):SetAlpha(settings.bgalpha / 100)
+
 	if layout == "Compact" then
 		compactWidth = zo_min(zo_round(zo_ceil(totalWidth) / 2), totalWidth - zo_floor(totalWidth / 2))
 	end
@@ -480,6 +470,9 @@ function LiveReport:Refresh()
 			if panel == nil then
 				panel = LiveReportPanel:New(name, self)
 			end
+
+			panel.active = true
+			panel.control:SetHidden(false)
 
 			local newSize = currentSize + panel.size
 			local anchor
@@ -501,8 +494,6 @@ function LiveReport:Refresh()
 			elseif newSize <= totalWidth then
 				anchor = anchorSchemes[layout]
 				anchor[2] = anchorControl
-			else
-				assert(layout == "Compact", "Unexpected value during LiveReport refresh!")
 			end
 
 			panel:Refresh()
@@ -526,10 +517,12 @@ end
 function LiveReport:Resize(newScale)
 	self.settings.scale = newScale
 	self:Refresh()
+	self:SavePosition()
 end
 
 function LiveReport:Update()
 	if not self:IsEnabled() then -- TODO: bail when not in combat
+		LiveReport:Toggle(false)
 		return
 	end
 
@@ -543,12 +536,11 @@ end
 local isFileInitialized = false
 function CMXint.InitializeLiveReport()
 	if isFileInitialized == true then
-		return false
+		return true
 	end
 	logger = util.initSublogger("LiveReport")
 
 	ui.LiveReport = LiveReport:New(CombatMetrics_LiveReport)
-	ui.LiveReport:Refresh()
 
 	local function LiveReportUpdate()
 		ui.LiveReport:Update()

@@ -40,10 +40,11 @@
                             </OnInitialized>
                         </Control>
 
-                        <Control name="$(parent)PerCent" inherits="CombatMetrics_ControlTooltip CombatMetrics_SortHeader">
+                        <Label name="$(parent)PerCent" inherits="CombatMetrics_ControlTooltip CombatMetrics_SortHeader"
+                            text="SI_COMBAT_METRICS_PERCENT">
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Total" offsetX="2" offsetY="0" />
                             <Dimensions x="36" />
-                        </Control>
+                        </Label>
                     </Controls>
                 </Control>
 

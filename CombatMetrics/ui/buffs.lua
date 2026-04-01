@@ -174,14 +174,24 @@ local function CombineEffects(source, dest)
 	dest.groupUptime = dest.groupUptime + source.groupUptime
 	dest.groupCount = dest.groupCount + source.groupCount
 
-	if dest.effectType and dest.effectType == source.effectType then
+	if dest.effectType and dest.effectType ~= source.effectType then
 		logger:Error("Mismatching effect types.")
 	end
 	dest.effectType = source.effectType
 	dest.maxStacks = zo_max(dest.maxStacks, source.maxStacks)
 
+	local sourceStacks = source.stacks
+	if sourceStacks == nil then
+		return
+	end
+
 	local destStacks = dest.stacks
-	for stacks, stackData in pairs(source.stacks) do
+	if destStacks == nil then
+		destStacks = {}
+		dest.stacks = destStacks
+	end
+
+	for stacks, stackData in pairs(sourceStacks) do
 		if destStacks[stacks] == nil then
 			destStacks[stacks] = ZO_ShallowTableCopy(stackData)
 		else
@@ -250,7 +260,14 @@ local function GetBuffData(fightData, category)
 			if unitEffectData then
 				for abilityId, data in pairs(unitEffectData) do
 					if effectData[abilityId] == nil then
-						effectData[abilityId] = ZO_ShallowTableCopy(data)
+						local effectCopy = ZO_ShallowTableCopy(data) -- TODO: Review this code
+						if data.stacks then
+							effectCopy.stacks = {}
+							for stacks, stackData in pairs(data.stacks) do
+								effectCopy.stacks[stacks] = ZO_ShallowTableCopy(stackData)
+							end
+						end
+						effectData[abilityId] = effectCopy
 					else
 						CombineEffects(data, effectData[abilityId])
 					end
@@ -520,7 +537,7 @@ local function InitBuffsList(panel)
 			local keys = {}
 			local stackDataTable = data.stacks
 
-			--  TODO: Check if still neccessary
+			--  TODO: Check if still necessary
 			for stacks, data in pairs(stackDataTable) do
 				if type(stacks) == "number" then
 					keys[#keys + 1] = stacks
