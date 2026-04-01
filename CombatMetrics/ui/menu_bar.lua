@@ -385,7 +385,7 @@ local function initNotificationButton(MenuPanel)
 
 	-- button:SetTexture("esoui/art/mainmenu/menubar_notifications_down.dds")
 	-- button:SetColor(ZO_ColorDef.HexToFloats("FFFFFFFF"))
-	button:SetAnchor(TOP, MenuPanel.feedbackButton, BOTTOM, nil, 8, nil)
+	button:SetAnchor(TOP, MenuPanel.feedbackButton, BOTTOM, nil, 8)
 	-- button.tooltip = SI_COMBAT_METRICS_NOTIFICATION
 	-- button:SetHandler("OnMouseUp", onMouseUp, "CMX")
 
