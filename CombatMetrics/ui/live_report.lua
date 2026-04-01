@@ -505,8 +505,6 @@ function LiveReport:Refresh()
 			elseif newSize <= totalWidth then
 				anchor = anchorSchemes[layout]
 				anchor[2] = anchorControl
-			else
-				assert(layout == "Compact", "Unexpected value during LiveReport refresh!")
 			end
 
 			panel:Refresh()
@@ -530,7 +528,7 @@ end
 function LiveReport:Resize(newScale)
 	self.settings.scale = newScale
 	self:Refresh()
-	LiveReport:SavePosition()
+	self:SavePosition()
 end
 
 function LiveReport:Update()
