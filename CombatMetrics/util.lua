@@ -89,7 +89,11 @@ end
 ---@param number number
 ---@return string
 function util.GetShortFormattedNumber(number)
-	local exponent = zo_floor(math.log(number) / math.log(10))
+	if number == nil or number == 0 then
+		return "0"
+	end
+
+	local exponent = zo_floor(math.log(zo_abs(number)) / math.log(10))
 	local loweredNumber = zo_roundToNearest(number, zo_pow(10, exponent - 2))
 	local shortNumber = ZO_AbbreviateNumber(loweredNumber, 2, exponent >= 6)
 
