@@ -250,7 +250,14 @@ local function GetBuffData(fightData, category)
 			if unitEffectData then
 				for abilityId, data in pairs(unitEffectData) do
 					if effectData[abilityId] == nil then
-						effectData[abilityId] = ZO_ShallowTableCopy(data)
+						local effectCopy = ZO_ShallowTableCopy(data) -- TODO: Review this code
+						if data.stacks then
+							effectCopy.stacks = {}
+							for stacks, stackData in pairs(data.stacks) do
+								effectCopy.stacks[stacks] = ZO_ShallowTableCopy(stackData)
+							end
+						end
+						effectData[abilityId] = effectCopy
 					else
 						CombineEffects(data, effectData[abilityId])
 					end
