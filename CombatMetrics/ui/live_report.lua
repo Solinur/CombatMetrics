@@ -390,7 +390,7 @@ function LiveReport:Toggle(value)
 	end
 
 	local fragment = self.fragment
-	if value == true and SCENE_MANAGER then
+	if value == true and SCENE_MANAGER and self.settings.enabled then
 		SCENE_MANAGER:GetScene("hud"):AddFragment(fragment)
 		SCENE_MANAGER:GetScene("hudui"):AddFragment(fragment)
 		SCENE_MANAGER:GetScene("siegeBar"):AddFragment(fragment)
@@ -447,6 +447,11 @@ function LiveReport:Refresh()
 	local isSecondRow = false
 	local totalWidth = self:GetTotalSize()
 	local compactWidth
+
+	local control = self.control
+	control:GetNamedChild("ResizeFrame"):SetMouseEnabled(not settings.locked)
+	control:SetMovable(not settings.locked)
+	control:GetNamedChild("BG"):SetAlpha(settings.bgalpha / 100)
 
 	if layout == "Compact" then
 		compactWidth = zo_min(zo_round(zo_ceil(totalWidth) / 2), totalWidth - zo_floor(totalWidth / 2))
@@ -516,6 +521,7 @@ end
 
 function LiveReport:Update()
 	if not self:IsEnabled() then -- TODO: bail when not in combat
+		LiveReport:Toggle(false)
 		return
 	end
 
