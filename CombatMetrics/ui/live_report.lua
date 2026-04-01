@@ -23,6 +23,21 @@ local LC = LibCombat2
 ---@field labelSize number
 ---@field updateFunc fun(panel: LiveReportPanel)
 
+---@param playerAmount any
+---@param playerTime any
+---@param totalAmount any
+---@param totalTime any
+---@return string xpsString
+local function FormatXPSLabel(playerTime, playerAmount, totalTime, totalAmount)
+	local playerXPS = zo_roundToZero(util.SafeDivide(playerAmount, playerTime), 0.01)
+	local totalXPS = zo_roundToZero(util.SafeDivide(totalAmount, totalTime), 0.01)
+	if playerAmount > totalAmount then
+		logger:Warn("Player amount is larger than total amount: %d > %d", playerAmount, totalAmount)
+	end
+	local ratio = zo_roundToZero(util.SafeDivide(playerAmount, totalAmount) * 100)
+	return zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), playerXPS, totalXPS, ratio)
+end
+
 ---@param panel LiveReportPanel
 local function UpdateSingleTargetDamage(panel)
 	local panelControl = panel.control
@@ -44,15 +59,7 @@ local function UpdateSingleTargetDamage(panel)
 	end
 
 	local playerTime, playerDamage, totalTime, totalDamage = LC.GetLatestMainTargetDamageDone()
-	local playerDPS = zo_roundToZero(util.SafeDivide(playerDamage, playerTime), 0.01)
-	local totalDPS = zo_roundToZero(util.SafeDivide(totalDamage, totalTime), 0.01)
-
-	if playerDamage > totalDamage then
-		logger:Warn("Player amount is larger than total amount: %d > %d", playerDamage, totalDamage)
-	end
-	local ratio = zo_roundToZero(util.SafeDivide(playerDamage, totalDamage) * 100)
-
-	local labelText = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), playerDPS, totalDPS, ratio)
+	local labelText = FormatXPSLabel(playerTime, playerDamage, totalTime, totalDamage)
 	labelControl:SetText(labelText)
 end
 
@@ -63,15 +70,7 @@ local function UpdateMultiTargetDamage(panel)
 	---@cast labelControl LabelControl
 
 	local playerTime, playerDamage, totalTime, totalDamage = LC.GetLatestTotalDamageDone()
-	local playerDPS = zo_roundToZero(util.SafeDivide(playerDamage, playerTime), 0.01)
-	local totalDPS = zo_roundToZero(util.SafeDivide(totalDamage, totalTime), 0.01)
-
-	if playerDamage > totalDamage then
-		logger:Warn("Player amount is larger than total amount: %d > %d", playerDamage, totalDamage)
-	end
-	local ratio = zo_roundToZero(util.SafeDivide(playerDamage, totalDamage) * 100)
-
-	local labelText = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), playerDPS, totalDPS, ratio)
+	local labelText = FormatXPSLabel(playerTime, playerDamage, totalTime, totalDamage)
 	labelControl:SetText(labelText)
 end
 
@@ -81,15 +80,7 @@ local function UpdateHealingDone(panel)
 	---@cast labelControl LabelControl
 
 	local playerTime, playerHealing, totalTime, totalHealing = LC.GetLatestHealingDone(false)
-	local playerHPS = zo_roundToZero(util.SafeDivide(playerHealing, playerTime), 0.01)
-	local totalHPS = zo_roundToZero(util.SafeDivide(totalHealing, totalTime), 0.01)
-
-	if playerHealing > totalHealing then
-		logger:Warn("Player amount is larger than total amount: %d > %d", playerHealing, totalHealing)
-	end
-	local ratio = zo_roundToZero(util.SafeDivide(playerHealing, totalHealing) * 100)
-
-	local labelText = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), playerHPS, totalHPS, ratio)
+	local labelText = FormatXPSLabel(playerTime, playerHealing, totalTime, totalHealing)
 	labelControl:SetText(labelText)
 end
 
@@ -111,15 +102,7 @@ local function UpdateDamageReceived(panel)
 	---@cast labelControl LabelControl
 
 	local playerTime, playerDamage, totalTime, totalDamage = LC.GetLatestTotalDamageReceived()
-	local playerDPS = zo_roundToZero(util.SafeDivide(playerDamage, playerTime), 0.01)
-	local totalDPS = zo_roundToZero(util.SafeDivide(totalDamage, totalTime), 0.01)
-
-	if playerDamage > totalDamage then
-		logger:Warn("Player amount is larger than total amount: %d > %d", playerDamage, totalDamage)
-	end
-	local ratio = zo_roundToZero(util.SafeDivide(playerDamage, totalDamage) * 100)
-
-	local labelText = zo_strformat(GetString(SI_COMBAT_METRICS_SHOW_XPS), playerDPS, totalDPS, ratio)
+	local labelText = FormatXPSLabel(playerTime, playerDamage, totalTime, totalDamage)
 	labelControl:SetText(labelText)
 end
 
@@ -546,7 +529,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeLiveReport()
 	if isFileInitialized == true then
-		return false
+		return true
 	end
 	logger = util.initSublogger("LiveReport")
 
