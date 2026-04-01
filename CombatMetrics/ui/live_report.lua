@@ -386,8 +386,9 @@ end
 function LiveReport:Toggle(value)
 	local control = self.control
 	if value == nil then
-		value = control:IsHidden()
+		value = not self.settings.enabled
 	end
+	self.settings.enabled = value
 
 	local fragment = self.fragment
 	if value == true and SCENE_MANAGER and self.settings.enabled then
@@ -540,7 +541,6 @@ function CMXint.InitializeLiveReport()
 	logger = util.initSublogger("LiveReport")
 
 	ui.LiveReport = LiveReport:New(CombatMetrics_LiveReport)
-	ui.LiveReport:Refresh()
 
 	local function LiveReportUpdate()
 		ui.LiveReport:Update()
