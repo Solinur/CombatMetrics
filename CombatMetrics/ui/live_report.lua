@@ -360,6 +360,9 @@ function LiveReport:Initialize(control)
 	self.control = control
 	self.control.object = self
 
+	control:ClearAnchors()
+	control:SetAnchor(CENTER, nil, TOPLEFT, settings.pos_x, settings.pos_y)
+
 	function self.control:Resize(scale)
 		self.object:Resize(scale)
 	end
@@ -368,20 +371,12 @@ function LiveReport:Initialize(control)
 		self:SavePosition()
 	end
 
-	control:ClearAnchors()
-	control:SetAnchor(CENTER, nil, TOPLEFT, settings.posx, settings.pos_y)
 	control:SetHandler("OnMoveStop", OnMoveStop)
 	control:GetNamedChild("ResizeFrame"):SetMouseEnabled(not settings.locked)
 	control:SetMovable(not settings.locked)
 	control:GetNamedChild("BG"):SetAlpha(settings.bgalpha / 100)
 
 	util.storeOrigLayout(self.control)
-
-	local pos_x = settings.pos_x
-	local pos_y = settings.pos_y
-	self.control:ClearAnchors()
-	---@diagnostic disable-next-line: missing-parameter, param-type-mismatch
-	self.control:SetAnchor(CENTER, nil, TOPLEFT, pos_x, pos_y)
 
 	self.settings = settings
 	self.initialized = true
@@ -486,6 +481,9 @@ function LiveReport:Refresh()
 			if panel == nil then
 				panel = LiveReportPanel:New(name, self)
 			end
+
+			panel.active = true
+			panel.control:SetHidden(false)
 
 			local newSize = currentSize + panel.size
 			local anchor
