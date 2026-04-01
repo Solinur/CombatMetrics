@@ -193,8 +193,6 @@ function CMXint.Resizing(control, resizing)
 		local parent = control:GetParent()
 		logger:Info("Resizing: %s", parent:GetName())
 
-		CMXint.settings[parent:GetName()] = newpos -- TODO: reroute the settings update!
-
 		parent:ClearAnchors()
 		---@diagnostic disable-next-line: missing-parameter, param-type-mismatch
 		parent:SetAnchor(CENTER, nil, TOPLEFT, newpos.x, newpos.y)
