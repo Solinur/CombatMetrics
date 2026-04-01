@@ -23,11 +23,11 @@ local LC = LibCombat2
 ---@field labelSize number
 ---@field updateFunc fun(panel: LiveReportPanel)
 
----@param playerAmount any
----@param playerTime any
----@param totalAmount any
----@param totalTime any
----@return string xpsString
+---@param playerTime number
+---@param playerAmount integer
+---@param totalTime number
+---@param totalAmount integer
+---@return string XPSString
 local function FormatXPSLabel(playerTime, playerAmount, totalTime, totalAmount)
 	local playerXPS = zo_roundToZero(util.SafeDivide(playerAmount, playerTime), 0.01)
 	local totalXPS = zo_roundToZero(util.SafeDivide(totalAmount, totalTime), 0.01)
