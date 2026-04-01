@@ -199,8 +199,9 @@ local function InitUnitsList(panel)
 
 		local selected = false -- selectedunits ~= nil and (selectedunits[unitId] ~= nil) or false -- TODO: Selections
 
-		local category = self.panel.settings.category
-		local isOverheal = category == "healingOut" and self.panel.settings.includeOverheal
+		local panelSettings = self.panel.settings
+		local category = panelSettings.category
+		local isOverheal = category == cat.CMX_CATEGORY_HEALING_DONE and panelSettings.showOverHeal
 		local playerAmount = isOverheal and playerData.overflowAmount or playerData.totalAmount
 
 		local groupAmount = playerAmount
