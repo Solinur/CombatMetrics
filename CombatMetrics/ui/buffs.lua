@@ -180,8 +180,18 @@ local function CombineEffects(source, dest)
 	dest.effectType = source.effectType
 	dest.maxStacks = zo_max(dest.maxStacks, source.maxStacks)
 
+	local sourceStacks = source.stacks
+	if sourceStacks == nil then
+		return
+	end
+
 	local destStacks = dest.stacks
-	for stacks, stackData in pairs(source.stacks) do
+	if destStacks == nil then
+		destStacks = {}
+		dest.stacks = destStacks
+	end
+
+	for stacks, stackData in pairs(sourceStacks) do
 		if destStacks[stacks] == nil then
 			destStacks[stacks] = ZO_ShallowTableCopy(stackData)
 		else
