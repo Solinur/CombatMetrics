@@ -174,7 +174,7 @@ local function CombineEffects(source, dest)
 	dest.groupUptime = dest.groupUptime + source.groupUptime
 	dest.groupCount = dest.groupCount + source.groupCount
 
-	if dest.effectType and dest.effectType == source.effectType then
+	if dest.effectType and dest.effectType ~= source.effectType then
 		logger:Error("Mismatching effect types.")
 	end
 	dest.effectType = source.effectType
