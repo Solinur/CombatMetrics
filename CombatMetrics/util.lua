@@ -320,7 +320,7 @@ local function GetBuffDataAndUnits(unitType, fightData)
 			local unitData = fightData.units[unitId]
 			local unitTotalValue = unit[category .. "Total"]
 
-			local isNotEmpty = unitTotalValue > 0 or NonContiguousCount(unit.buffs) > 0
+			local isNotEmpty = unitTotalValue > 0 or not ZO_IsTableEmpty(unit.buffs)
 			local isEnemy = unitData.unitType ~= COMBAT_UNIT_TYPE_GROUP
 				and unitData.unitType ~= COMBAT_UNIT_TYPE_PLAYER_PET
 				and unitData.unitType ~= COMBAT_UNIT_TYPE_PLAYER
