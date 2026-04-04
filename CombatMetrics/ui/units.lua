@@ -10,12 +10,7 @@ local logger
 local ui = CMXint.ui
 
 local cat = util.MainCategories
-local UnitOppositionCategory = {
-	[cat.CMX_CATEGORY_DAMAGE_DONE] = cat.CMX_CATEGORY_DAMAGE_RECEIVED,
-	[cat.CMX_CATEGORY_DAMAGE_RECEIVED] = cat.CMX_CATEGORY_DAMAGE_DONE,
-	[cat.CMX_CATEGORY_HEALING_DONE] = cat.CMX_CATEGORY_HEALING_RECEIVED,
-	[cat.CMX_CATEGORY_HEALING_RECEIVED] = cat.CMX_CATEGORY_HEALING_DONE,
-}
+local cat_opp = util.OppositionCategory
 
 local UNIT_NAME_FORMAT_ID = "(<<2>>) <<1>>"
 local UNIT_NAME_FORMAT_DEFAULT = "<<1>>"
@@ -239,12 +234,10 @@ local function InitUnitsList(panel)
 			return
 		end
 
-		CMX_CATEGORY_DATA = categoryData
-
 		ZO_ClearTable(self.masterList)
 
 		local durationMs = categoryData.endTime - categoryData.startTime
-		local oppositionCategory = UnitOppositionCategory[category]
+		local oppositionCategory = cat_opp[category]
 
 		dataList.playerAmountSum = 0
 		dataList.groupAmountSum = 0
@@ -255,6 +248,8 @@ local function InitUnitsList(panel)
 				local unitInfo = fightData.units[unitId]
 				if unitInfo then -- TODO: check why this can be nil
 					self:AddDataEntry(unitInfo, playerUnitData, groupData, durationMs)
+				else
+					logger:Error("Unit info not found for unit ID: %s", unitId)
 				end
 			end
 		end

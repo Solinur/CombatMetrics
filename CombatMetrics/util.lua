@@ -15,6 +15,13 @@ util.MainCategories = {
 }
 local cat = util.MainCategories
 
+util.OppositionCategory = {
+	[cat.CMX_CATEGORY_DAMAGE_DONE] = cat.CMX_CATEGORY_DAMAGE_RECEIVED,
+	[cat.CMX_CATEGORY_DAMAGE_RECEIVED] = cat.CMX_CATEGORY_DAMAGE_DONE,
+	[cat.CMX_CATEGORY_HEALING_DONE] = cat.CMX_CATEGORY_HEALING_RECEIVED,
+	[cat.CMX_CATEGORY_HEALING_RECEIVED] = cat.CMX_CATEGORY_HEALING_DONE,
+}
+
 ---@param category string
 ---@return boolean
 function util.IsDamageCategory(category)
