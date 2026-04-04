@@ -36,15 +36,34 @@ end
 
 ---@param fightData Fight
 ---@param category string
-function util.GetCombinedPlayerCategoryData(fightData, category)
+---@param unitIds? integer[]
+---@param abilityIds? table<integer, boolean>
+function util.GetCombinedPlayerCategoryData(fightData, category, unitIds, abilityIds)
 	if category == cat.CMX_CATEGORY_DAMAGE_DONE then
-		return LibCombat2.GetPlayerDamageDoneToUnits(fightData)
+		return LibCombat2.GetPlayerDamageDoneToUnits(fightData, unitIds, abilityIds)
 	elseif category == cat.CMX_CATEGORY_DAMAGE_RECEIVED then
-		return LibCombat2.GetPlayerDamageReceivedByUnits(fightData)
+		return LibCombat2.GetPlayerDamageReceivedByUnits(fightData, unitIds, abilityIds)
 	elseif category == cat.CMX_CATEGORY_HEALING_DONE then
-		return LibCombat2.GetPlayerHealingDoneToUnits(fightData)
+		return LibCombat2.GetPlayerHealingDoneToUnits(fightData, unitIds, abilityIds)
 	elseif category == cat.CMX_CATEGORY_HEALING_RECEIVED then
-		return LibCombat2.GetPlayerHealingReceivedByUnits(fightData)
+		return LibCombat2.GetPlayerHealingReceivedByUnits(fightData, unitIds, abilityIds)
+	else
+		logger:Error("unexpected value for category: %s", category)
+	end
+end
+
+---@param fightData Fight
+---@param category string
+---@param unitIds? integer[]
+function util.GetCombinedPlayerCategoryDataByAbility(fightData, category, unitIds)
+	if category == cat.CMX_CATEGORY_DAMAGE_DONE then
+		return LibCombat2.GetPlayerDamageDoneToUnitsByAbility(fightData, unitIds)
+	elseif category == cat.CMX_CATEGORY_DAMAGE_RECEIVED then
+		return LibCombat2.GetPlayerDamageReceivedByUnitsByAbility(fightData, unitIds)
+	elseif category == cat.CMX_CATEGORY_HEALING_DONE then
+		return LibCombat2.GetPlayerHealingDoneToUnitsByAbility(fightData, unitIds)
+	elseif category == cat.CMX_CATEGORY_HEALING_RECEIVED then
+		return LibCombat2.GetPlayerHealingReceivedByUnitsByAbility(fightData, unitIds)
 	else
 		logger:Error("unexpected value for category: %s", category)
 	end

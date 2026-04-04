@@ -9,9 +9,16 @@ local logger
 ---@class CMXui
 local ui = CMXint.ui
 
+local cat = util.MainCategories
+local cat_opp = util.OppositionCategory
+
 local GetFormattedAbilityIcon = util.GetFormattedAbilityIcon
 local GetFormattedAbilityName = util.GetFormattedAbilityName
+local GetDamageColor = util.GetDamageColor
 local adjustRowSize = util.adjustRowSize
+
+local ABILITY_NAME_FORMAT_ID = "(<<2>>) <<1>>"
+local ABILITY_NAME_FORMAT_DEFAULT = "<<1>>"
 
 local AbilityPanel
 
@@ -175,7 +182,7 @@ local function InitAbilitiesList(panel)
 	end
 
 	---@param rowControl RowControl
-	---@param data UnitRowData
+	---@param data AbilityRowData
 	---@param scrollList object
 	function dataList:UpdateRow(rowControl, data, scrollList)
 		local panel = self.panel
@@ -186,49 +193,16 @@ local function InitAbilitiesList(panel)
 
 		local icon, label, bar, perSecond, total, crits, hits, critRatio, averageHit, minMax =
 			unpack(rowControl.controls)
-	end
 
-	function dataList:AddDataEntry()
-		if playerData.totalAmount <= 0 then
-			return
-		end
-
-		local selected = false -- selectedunits ~= nil and (selectedunits[unitId] ~= nil) or false -- TODO: Selections
-
-		local category = self.panel.settings.category
-		local isOverheal = category == "healingOut" and self.panel.settings.includeOverheal
-		local playerAmount = isOverheal and playerData.overflowAmount or playerData.totalAmount
-
-		local groupAmount = playerAmount
-		if groupData then
-			groupAmount = isOverheal and groupData.overflowAmount or groupData.totalAmount
-		end
-
-		local labelFormat = panel:ShowIds() and unitData.unitId and UNIT_NAME_FORMAT_ID or UNIT_NAME_FORMAT_DEFAULT
-		local name = ZO_CachedStrFormat(labelFormat, unitData.name, unitData.unitId)
-
-		---@class UnitRowData
-		local rowData = {
-			name = name,
-			icon = GetUnitIcon(unitData),
-			color = GetUnitColor(unitData),
-			perSecondValue = playerAmount / (durationMs / 1000),
-			selected = selected,
-			playerAmount = playerAmount,
-			groupAmount = groupAmount,
-		}
-
-		dataList.playerAmountSum = dataList.playerAmountSum + playerAmount
-		dataList.groupAmountSum = dataList.groupAmountSum + groupAmount
-
-		table.insert(self.masterList, ZO_ScrollList_CreateDataEntry(1, rowData))
+		-- TODO: Implement
 	end
 
 	function dataList:BuildMasterList()
 		local fightData = self.panel:GetCurrentFightData()
 		local category = self.panel.settings.category
+		local categoryData = util.GetCombinedPlayerCategoryDataByAbility(fightData, category) -- Add selected units
 		local playerId = fightData.unitIds.player
-		local categoryData = util.GetUnitCategoryData(fightData, category, playerId)
+		local playerData = util.GetUnitCategoryData(fightData, category, playerId)
 
 		if categoryData == nil then
 			return
@@ -238,17 +212,12 @@ local function InitAbilitiesList(panel)
 
 		ZO_ClearTable(self.masterList)
 
-		local durationMs = categoryData.endTime - categoryData.startTime
-		local oppositionCategory = UnitOppositionCategory[category]
+		local durationMs = playerData.endTime - playerData.startTime
+		local totalAmount = playerData.totalAmount
 
-		dataList.playerAmountSum = 0
-		dataList.groupAmountSum = 0
-
-		for unitId, playerUnitData in pairs(categoryData) do
-			if type(playerUnitData) == "table" then
-				local groupData = util.GetUnitCategoryData(fightData, oppositionCategory, unitId)
-				local unitInfo = fightData.units[unitId]
-				self:AddDataEntry(unitInfo, playerUnitData, groupData, durationMs)
+		for abilityId, abilityData in pairs(categoryData) do
+			if type(abilityId) == "number" and type(abilityData) == "table" then
+				self:UpdateDataEntry(abilityId, abilityData, durationMs, totalAmount)
 			end
 		end
 
@@ -258,6 +227,39 @@ local function InitAbilitiesList(panel)
 		for i, data in ipairs(self.masterList) do
 			scrollData[#scrollData + 1] = data
 		end
+	end
+
+	---comment
+	---@param abilityId number
+	---@param abilityData DamageAbilityData|HealAbilityData
+	---@param durationMs number
+	---@param totalAmount number
+	function dataList:UpdateDataEntry(abilityId, abilityData, durationMs, totalAmount)
+		if abilityData.totalAmount <= 0 then
+			return
+		end
+
+		local selected = false -- selectedunits ~= nil and (selectedunits[unitId] ~= nil) or false -- TODO: Selections
+
+		local category = self.panel.settings.category
+		local isOverheal = category == "healingOut" and self.panel.settings.includeOverheal
+		local amount = isOverheal and abilityData.overflowAmount or abilityData.totalAmount
+
+		local labelFormat = panel:ShowIds() and abilityId and ABILITY_NAME_FORMAT_ID or ABILITY_NAME_FORMAT_DEFAULT
+		local name = ZO_CachedStrFormat(labelFormat, GetFormattedAbilityName(abilityId, false), abilityId)
+
+		---@class AbilityRowData
+		local rowData = {
+			name = name,
+			icon = GetFormattedAbilityIcon(abilityId, false),
+			color = GetDamageColor(abilityData),
+			perSecondValue = amount / (durationMs / 1000),
+			selected = selected,
+			amount = amount,
+			-- TODO: add crit, min, max and so on
+		}
+
+		table.insert(self.masterList, ZO_ScrollList_CreateDataEntry(1, rowData))
 	end
 
 	function dataList:FilterScrollList() end
