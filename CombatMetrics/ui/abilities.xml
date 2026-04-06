@@ -32,7 +32,7 @@
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Fraction" offsetX="2" offsetY="0" />
                             <Dimensions x="50" />
                             <OnInitialized>
-                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_DPS), "perSecond", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_RIGHT)
+                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_DPS), "perSecond", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_CENTER)
                             </OnInitialized>
                         </Control>
 
@@ -40,7 +40,7 @@
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)PerSecond" offsetX="2" offsetY="0" />
                             <Dimensions x="73" />
                             <OnInitialized>
-                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_DAMAGE), "total", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_RIGHT)
+                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_DAMAGE), "total", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_CENTER)
                             </OnInitialized>
                         </Control>
 
@@ -49,7 +49,7 @@
                             <Dimensions x="42" />
                             <!-- <OnMouseUp> CMX.HitCritContextMenu(self, button)</OnMouseUp> TODO: integrate with sortheader -->
                             <OnInitialized>
-                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_DAMAGE), "crits", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_RIGHT)
+                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_CRITS), "crits", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_RIGHT)
                             </OnInitialized>
                         </Control>
 
@@ -57,7 +57,7 @@
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Crits" offsetX="0" offsetY="0" />
                             <Dimensions x="42" />
                             <OnInitialized>
-                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_PER_HITS), "hits", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_RIGHT)
+                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_PER_HITS), "hits", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_LEFT)
                             </OnInitialized>
                         </Control>
 
@@ -65,7 +65,7 @@
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Hits" offsetX="2" offsetY="0" />
                             <Dimensions x="35" />
                             <OnInitialized>
-                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_CRITS_PER), "critRatio", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_RIGHT)
+                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_CRITS_PER), "critRatio", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_CENTER)
                             </OnInitialized>
                         </Control>
 
@@ -74,7 +74,7 @@
                             <Dimensions x="50" />
                             <!-- <OnMouseUp> CMX.AverageContextMenu(self, button, "hitcrit")</OnMouseUp> TODO: integrate with sortheader-->
                             <OnInitialized>
-                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_AVE), "averageHit", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_RIGHT)
+                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_AVE), "averageHit", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_CENTER)
                             </OnInitialized>
                         </Control>
 
@@ -83,7 +83,7 @@
                             <Dimensions x="50" />
                             <!-- <OnMouseUp> CMX.MinMaxContextMenu(self, button, "hitcrit")</OnMouseUp> TODO: integrate with sortheader -->
                             <OnInitialized>
-                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_MAX), "minmax", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_RIGHT)
+                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_MAX), "minmax", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_CENTER)
                             </OnInitialized>
                         </Control>
                     </Controls>

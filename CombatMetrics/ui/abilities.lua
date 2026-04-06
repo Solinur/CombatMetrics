@@ -22,14 +22,80 @@ local ABILITY_NAME_FORMAT_DEFAULT = "<<1>>"
 
 local AbilityPanel
 
--- local hitCritLayoutTable = {
--- 	[1] = { "Critical", "Total", GetString(SI_COMBAT_METRICS_CRITS), GetString(SI_COMBAT_METRICS_HITS) },
--- 	[2] = { "Total", "Critical", GetString(SI_COMBAT_METRICS_HITS), GetString(SI_COMBAT_METRICS_CRITS) },
--- 	[3] = { "Normal", "Critical", GetString(SI_COMBAT_METRICS_NORM), GetString(SI_COMBAT_METRICS_CRITS) },
--- 	[4] = { "Blocked", "Total", GetString(SI_COMBAT_METRICS_BLOCKS), GetString(SI_COMBAT_METRICS_HITS) },
--- 	[5] = { "Total", "Blocked", GetString(SI_COMBAT_METRICS_HITS), GetString(SI_COMBAT_METRICS_BLOCKS) },
--- 	[6] = { "Normal", "Blocked", GetString(SI_COMBAT_METRICS_NORM), GetString(SI_COMBAT_METRICS_BLOCKS) },
--- }
+local CRIT_LAYOUT_RATIO = 1
+local CRIT_LAYOUT_REVERSED = 2
+local CRIT_LAYOUT_NORMAL_RATIO = 3
+
+local critLayoutTable = {
+	[CRIT_LAYOUT_RATIO] = {
+		"Critical",
+		"Total",
+		GetString(SI_COMBAT_METRICS_CRITS),
+		GetString(SI_COMBAT_METRICS_HITS),
+	},
+	[CRIT_LAYOUT_REVERSED] = {
+		"Total",
+		"Critical",
+		GetString(SI_COMBAT_METRICS_HITS),
+		GetString(SI_COMBAT_METRICS_CRITS),
+	},
+	[CRIT_LAYOUT_NORMAL_RATIO] = {
+		"Normal",
+		"Critical",
+		GetString(SI_COMBAT_METRICS_NORM),
+		GetString(SI_COMBAT_METRICS_CRITS),
+	},
+}
+
+local BLOCKED_LAYOUT_RATIO = 1
+local BLOCKED_LAYOUT_REVERSED = 2
+local BLOCKED_LAYOUT_NORMAL_RATIO = 3
+
+local blockedLayoutTable = {
+	[BLOCKED_LAYOUT_RATIO] = {
+		"Blocked",
+		"Total",
+		GetString(SI_COMBAT_METRICS_BLOCKS),
+		GetString(SI_COMBAT_METRICS_HITS),
+	},
+	[BLOCKED_LAYOUT_REVERSED] = {
+		"Total",
+		"Blocked",
+		GetString(SI_COMBAT_METRICS_HITS),
+		GetString(SI_COMBAT_METRICS_BLOCKS),
+	},
+	[BLOCKED_LAYOUT_NORMAL_RATIO] = {
+		"Normal",
+		"Blocked",
+		GetString(SI_COMBAT_METRICS_NORM),
+		GetString(SI_COMBAT_METRICS_BLOCKS),
+	},
+}
+
+local AVERAGE_LAYOUT_TOTAL = 1
+local AVERAGE_LAYOUT_NORMAL = 2
+local AVERAGE_LAYOUT_CRITICAL = 3
+local AVERAGE_LAYOUT_BLOCKED = 3
+
+local averageLayoutTable = {
+	[AVERAGE_LAYOUT_TOTAL] = { "Total", GetString(SI_COMBAT_METRICS_AVE), GetString(SI_COMBAT_METRICS_HITS) },
+	[AVERAGE_LAYOUT_NORMAL] = {
+		"Normal",
+		GetString(SI_COMBAT_METRICS_AVE_N),
+		GetString(SI_COMBAT_METRICS_NORMAL_HITS),
+	},
+	[AVERAGE_LAYOUT_CRITICAL] = { "Critical", GetString(SI_COMBAT_METRICS_AVE_C), GetString(SI_COMBAT_METRICS_CRITS) },
+}
+
+local averageBlockedLayoutTable = {
+	[AVERAGE_LAYOUT_TOTAL] = { "Total", GetString(SI_COMBAT_METRICS_AVE), GetString(SI_COMBAT_METRICS_HITS) },
+	[AVERAGE_LAYOUT_NORMAL] = {
+		"Normal",
+		GetString(SI_COMBAT_METRICS_AVE_N),
+		GetString(SI_COMBAT_METRICS_NORMAL_HITS),
+	},
+	[AVERAGE_LAYOUT_BLOCKED] = { "Blocked", GetString(SI_COMBAT_METRICS_AVE_B), GetString(SI_COMBAT_METRICS_BLOCKS) },
+}
 
 -- do -- Context Menu for hit/crit column on ability panel
 -- 	local function getMenuData(id)
@@ -61,13 +127,6 @@ local AbilityPanel
 -- 		ShowMenu(control)
 -- 	end
 -- end
-
--- local averageLayoutTable = {
--- 	[1] = { "Total", GetString(SI_COMBAT_METRICS_AVE), GetString(SI_COMBAT_METRICS_HITS) },
--- 	[2] = { "Normal", GetString(SI_COMBAT_METRICS_AVE_N), GetString(SI_COMBAT_METRICS_NORMAL_HITS) },
--- 	[3] = { "Critical", GetString(SI_COMBAT_METRICS_AVE_C), GetString(SI_COMBAT_METRICS_CRITS) },
--- 	[4] = { "Blocked", GetString(SI_COMBAT_METRICS_AVE_B), GetString(SI_COMBAT_METRICS_BLOCKS) },
--- }
 
 -- do -- Context Menu for average column on ability panel
 -- 	local function getMenuData(id)
@@ -244,19 +303,28 @@ local function InitAbilitiesList(panel)
 		local category = self.panel.settings.category
 		local isOverheal = category == "healingOut" and self.panel.settings.includeOverheal
 		local amount = isOverheal and abilityData.overflowAmount or abilityData.totalAmount
+		local crit = util.IsDefenseCategory() and abilityData.blockedCount or abilityData.criticalCount
+		local hits = abilityData.normalCount
+		local totalHits = abilityData.totalCount
+		local critRatio = crit / hits * 100
 
 		local labelFormat = panel:ShowIds() and abilityId and ABILITY_NAME_FORMAT_ID or ABILITY_NAME_FORMAT_DEFAULT
 		local name = ZO_CachedStrFormat(labelFormat, GetFormattedAbilityName(abilityId, false), abilityId)
 
 		---@class AbilityRowData
 		local rowData = {
-			name = name,
 			icon = GetFormattedAbilityIcon(abilityId, false),
+			name = name,
 			color = GetDamageColor(abilityData),
+			fraction = amount / totalAmount,
 			perSecondValue = amount / (durationMs / 1000),
-			selected = selected,
 			amount = amount,
+			crit = crit,
+			hits = hits,
+			totalHits = totalHits,
+			critRatio = critRatio,
 			-- TODO: add crit, min, max and so on
+			selected = selected,
 		}
 
 		table.insert(self.masterList, ZO_ScrollList_CreateDataEntry(1, rowData))
@@ -275,17 +343,65 @@ function CMXint.InitializeAbilitiesPanel(control)
 	AbilitiesPanel.dataList = InitAbilitiesList(AbilitiesPanel)
 	AbilitiesPanel.selections = {}
 
+	function AbilitiesPanel:GetRatioLayout()
+		local settings = self.settings
+		local category = settings.category
+		local layoutKey = settings.abilities.hitCritLayout[category]
+
+		local ratioLayoutTable = util.IsDefenseCategory() and blockedLayoutTable or critLayoutTable
+
+		return ratioLayoutTable[layoutKey]
+	end
+
+	function AbilitiesPanel:GetAverageLayout()
+		local settings = self.settings
+		local category = settings.category
+		local layoutKey = settings.abilities.averageLayout[category]
+
+		local avgLayoutTable = util.IsDefenseCategory() and averageBlockedLayoutTable or averageLayoutTable
+
+		return avgLayoutTable[layoutKey]
+	end
+
+	function AbilitiesPanel:GetMinMaxLayout()
+		local settings = self.settings
+		local category = settings.category
+		local isMax = settings.abilities.maxValue[category]
+
+		return isMax and GetString(SI_COMBAT_METRICS_MAX) or GetString(SI_COMBAT_METRICS_MIN)
+	end
+
 	function AbilitiesPanel:UpdateHeaderLabels()
-		local isDamage = util.IsDamageCategory(self.settings.category)
-
+		local isDamage = util.IsDamageCategory()
+		local isDefense = util.IsDefenseCategory()
 		local headers = self.control:GetNamedChild("Headers")
-		local perSecondControl = headers:GetNamedChild("PerSecond"):GetNamedChild("Name") --[[@as LabelControl]]
-		local totalControl = headers:GetNamedChild("Total"):GetNamedChild("Name") --[[@as LabelControl]]
 
+		local perSecondControl = headers:GetNamedChild("PerSecond"):GetNamedChild("Name") --[[@as LabelControl]]
 		local perSecondLabel = isDamage and GetString(SI_COMBAT_METRICS_DPS) or GetString(SI_COMBAT_METRICS_HPS)
 		perSecondControl:SetText(perSecondLabel)
+
+		local totalControl = headers:GetNamedChild("Total"):GetNamedChild("Name") --[[@as LabelControl]]
 		local totalLabel = isDamage and GetString(SI_COMBAT_METRICS_DAMAGE) or GetString(SI_COMBAT_METRICS_HEALING)
 		totalControl:SetText(totalLabel)
+
+		local critRatioControl1 = headers:GetNamedChild("Crits"):GetNamedChild("Name") --[[@as LabelControl]]
+		local critRatioControl2 = headers:GetNamedChild("Hits"):GetNamedChild("Name") --[[@as LabelControl]]
+		local ratioLayoutTable = self:GetRatioLayout()
+		critRatioControl1:SetText(ratioLayoutTable[3])
+		critRatioControl2:SetText(ratioLayoutTable[4])
+
+		local critPercentControl = headers:GetNamedChild("CritRatio"):GetNamedChild("Name") --[[@as LabelControl]]
+		local critPercentString = isDefense and SI_COMBAT_METRICS_BLOCKS_PER or SI_COMBAT_METRICS_CRITS_PER
+		critPercentControl:SetText(GetString(critPercentString))
+
+		local avgControl = headers:GetNamedChild("Total"):GetNamedChild("Average") --[[@as LabelControl | TooltipControl]]
+		local avgLayoutTable = self:GetAverageLayout()
+		avgControl:SetText(avgLayoutTable[2])
+		avgControl.tooltip = avgLayoutTable[3]
+
+		local minControl = headers:GetNamedChild("Total"):GetNamedChild("Average") --[[@as LabelControl | TooltipControl]]
+		local minMaxLayout = self:GetMinMaxLayout()
+		minControl:SetText(minMaxLayout)
 	end
 
 	function AbilitiesPanel:Update()
