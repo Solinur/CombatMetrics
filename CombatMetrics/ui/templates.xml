@@ -685,7 +685,7 @@
             <ButtonState state="DISABLED" />
         </Button>
 
-        <Label name="CombatMetrics_SharedLabel" virtual="true" />
+        <Label name="CombatMetrics_SharedLabel" virtual="true" wrapMode="TRUNCATE" maxLineCount="1" />
 
         <Texture name="CombatMetrics_SharedTexture" virtual="true" />
 
