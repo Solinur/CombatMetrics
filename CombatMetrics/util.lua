@@ -356,7 +356,7 @@ local function GetBuffDataAndUnits(unitType, fightData)
 			local isEnemy = unitData.unitType ~= COMBAT_UNIT_TYPE_GROUP
 				and unitData.unitType ~= COMBAT_UNIT_TYPE_PLAYER_PET
 				and unitData.unitType ~= COMBAT_UNIT_TYPE_PLAYER
-			local isDamageCategory = util.IsDamageCategory(category)
+			local isDamageCategory = util.IsDamageCategory()
 
 			if isNotEmpty and (isEnemy == isDamageCategory) then
 				units = units + 1
