@@ -88,13 +88,14 @@ local averageLayoutTable = {
 }
 
 local averageBlockedLayoutTable = {
-	[AVERAGE_LAYOUT_TOTAL] = { "Total", GetString(SI_COMBAT_METRICS_AVE), GetString(SI_COMBAT_METRICS_HITS) },
-	[AVERAGE_LAYOUT_NORMAL] = {
-		"Normal",
-		GetString(SI_COMBAT_METRICS_AVE_N),
-		GetString(SI_COMBAT_METRICS_NORMAL_HITS),
-	},
+	[AVERAGE_LAYOUT_TOTAL] = averageLayoutTable[AVERAGE_LAYOUT_TOTAL],
+	[AVERAGE_LAYOUT_NORMAL] = averageLayoutTable[AVERAGE_LAYOUT_NORMAL],
 	[AVERAGE_LAYOUT_BLOCKED] = { "Blocked", GetString(SI_COMBAT_METRICS_AVE_B), GetString(SI_COMBAT_METRICS_BLOCKS) },
+}
+
+local minMaxLayoutTable = {
+	[true] = { "max", GetString(SI_COMBAT_METRICS_MAX) },
+	[false] = { "min", GetString(SI_COMBAT_METRICS_MIN) },
 }
 
 -- do -- Context Menu for hit/crit column on ability panel
@@ -253,12 +254,51 @@ local function InitAbilitiesList(panel)
 		local icon, label, bar, perSecond, total, crits, hits, critRatio, averageHit, minMax =
 			unpack(rowControl.controls)
 
+		---@cast icon TextureControl
+		local iconTexture = data.icon
+		icon:SetHidden(iconTexture == nil)
+		if iconTexture then
+			icon:SetTexture(iconTexture)
+		end
+
+		---@cast label LabelControl
+		local font = ui.GetFont(ui.fontSize, false)
+		label:SetText(data.name)
+		label:SetFont(font)
+
+		---@cast bar TextureControl
+		local maxwidth = label:GetWidth()
+		bar:SetWidth(maxwidth * data.fraction)
+		bar:SetColor(data.color:UnpackRGBA())
+
+		perSecond:SetText(string.format("%.0f", data.perSecond))
+		perSecond:SetFont(font)
+
+		total:SetText(data.amount)
+		total:SetFont(font)
+
+		crits:SetText(data.ratio1)
+		crits:SetFont(font)
+
+		hits:SetText(string.format("/%d", data.ratio2))
+		hits:SetFont(font)
+
+		critRatio:SetText(string.format("%.0f%%", 100 * data.critRatio))
+		critRatio:SetFont(font)
+
+		averageHit:SetText(string.format("%.0f", data.average))
+		averageHit:SetFont(font)
+
+		---@cast minMax LabelControl
+		minMax:SetText(data.minmax)
+		minMax:SetFont(font)
+
 		-- TODO: Implement
 	end
 
 	function dataList:BuildMasterList()
-		local fightData = self.panel:GetCurrentFightData()
-		local category = self.panel.settings.category
+		local fightData = panel:GetCurrentFightData()
+		local category = panel.settings.category
 		local categoryData = util.GetCombinedPlayerCategoryDataByAbility(fightData, category) -- Add selected units
 		local playerId = fightData.unitIds.player
 		local playerData = util.GetUnitCategoryData(fightData, category, playerId)
@@ -298,18 +338,30 @@ local function InitAbilitiesList(panel)
 			return
 		end
 
+		local settings = panel.settings
 		local selected = false -- selectedunits ~= nil and (selectedunits[unitId] ~= nil) or false -- TODO: Selections
 
-		local category = self.panel.settings.category
-		local isOverheal = category == "healingOut" and self.panel.settings.includeOverheal
+		local category = settings.category
+		local isOverheal = category == "healingOut" and settings.includeOverheal
 		local amount = isOverheal and abilityData.overflowAmount or abilityData.totalAmount
-		local crit = util.IsDefenseCategory() and abilityData.blockedCount or abilityData.criticalCount
-		local hits = abilityData.normalCount
+
+		local critLayout = panel:GetRatioLayout()
+		local ratio1 = abilityData[ZO_CachedStrFormat("<<c:1>>Count", critLayout[1])]
+		local ratio2 = abilityData[ZO_CachedStrFormat("<<c:1>>Count", critLayout[2])]
+		local crits = abilityData.criticalCount
 		local totalHits = abilityData.totalCount
-		local critRatio = crit / hits * 100
+		local critRatio = crits / totalHits * 100
 
 		local labelFormat = panel:ShowIds() and abilityId and ABILITY_NAME_FORMAT_ID or ABILITY_NAME_FORMAT_DEFAULT
 		local name = ZO_CachedStrFormat(labelFormat, GetFormattedAbilityName(abilityId, false), abilityId)
+
+		local averageLayout = self.panel:GetAverageLayout()
+		local averageCount = abilityData[ZO_CachedStrFormat("<<c:1>>Count", averageLayout[1])]
+		local averageAmount = abilityData[ZO_CachedStrFormat("<<c:1>>Amount", averageLayout[1])]
+		local average = util.SafeDivide(averageAmount, averageCount)
+
+		local minMaxLayout = panel:GetMinMaxLayout()
+		local minmax = abilityData[ZO_CachedStrFormat("<<c:1>>", minMaxLayout[1])]
 
 		---@class AbilityRowData
 		local rowData = {
@@ -317,12 +369,13 @@ local function InitAbilitiesList(panel)
 			name = name,
 			color = GetDamageColor(abilityData),
 			fraction = amount / totalAmount,
-			perSecondValue = amount / (durationMs / 1000),
+			perSecond = amount / (durationMs / 1000),
 			amount = amount,
-			crit = crit,
-			hits = hits,
-			totalHits = totalHits,
+			ratio1 = ratio1,
+			ratio2 = ratio2,
 			critRatio = critRatio,
+			average = average,
+			minmax = minmax,
 			-- TODO: add crit, min, max and so on
 			selected = selected,
 		}
@@ -368,7 +421,7 @@ function CMXint.InitializeAbilitiesPanel(control)
 		local category = settings.category
 		local isMax = settings.abilities.maxValue[category]
 
-		return isMax and GetString(SI_COMBAT_METRICS_MAX) or GetString(SI_COMBAT_METRICS_MIN)
+		return minMaxLayoutTable[isMax]
 	end
 
 	function AbilitiesPanel:UpdateHeaderLabels()
@@ -401,18 +454,11 @@ function CMXint.InitializeAbilitiesPanel(control)
 
 		local minControl = headers:GetNamedChild("Total"):GetNamedChild("Average") --[[@as LabelControl | TooltipControl]]
 		local minMaxLayout = self:GetMinMaxLayout()
-		minControl:SetText(minMaxLayout)
+		minControl:SetText(minMaxLayout[2])
 	end
 
 	function AbilitiesPanel:Update()
 		logger:Debug("Updating Ability Panel")
-
-		if true then
-			logger:Warn("Abilities panel update is not implemented yet.")
-			return
-		end
-
-		logger:Info("Updating Unit Panel")
 
 		self:UpdateHeaderLabels()
 
@@ -421,7 +467,7 @@ function CMXint.InitializeAbilitiesPanel(control)
 	end
 
 	function AbilitiesPanel:Clear()
-		logger:Debug("Clearing Units Panel")
+		logger:Debug("Clearing Ability Panel")
 		self.dataList:Clear()
 	end
 
