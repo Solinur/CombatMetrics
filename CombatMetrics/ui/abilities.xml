@@ -8,7 +8,7 @@
                     <Dimensions y="20" />
                     <Controls>
                         <Control name="$(parent)Icon">
-                            <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Indicator" offsetX="2" />
+                            <Anchor point="LEFT" relativePoint="LEFT" relativeTo="$(parent)" offsetX="2" />
                             <Dimensions x="20" y="20" />
                         </Control>
 
@@ -49,7 +49,7 @@
                             <Dimensions x="42" />
                             <!-- <OnMouseUp> CMX.HitCritContextMenu(self, button)</OnMouseUp> TODO: integrate with sortheader -->
                             <OnInitialized>
-                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_CRITS), "crits", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_RIGHT)
+                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_CRITS) .. "/", "crits", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_RIGHT)
                             </OnInitialized>
                         </Control>
 
@@ -78,7 +78,7 @@
                             </OnInitialized>
                         </Control>
 
-                        <Control name="$(parent)MinMax" inherits="CombatMetrics_ValueFontControl CombatMetrics_LabelTooltip">
+                        <Control name="$(parent)MinMax" inherits="CombatMetrics_SortHeader">
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Average" offsetX="2" offsetY="0" />
                             <Dimensions x="50" />
                             <!-- <OnMouseUp> CMX.MinMaxContextMenu(self, button, "hitcrit")</OnMouseUp> TODO: integrate with sortheader -->
