@@ -302,7 +302,7 @@ function CMXint.InitializeUnitsPanel(control)
 	end
 
 	function UnitsPanel:Clear()
-		logger:Debug("Clearing Units Panel")
+		logger:Info("Clearing Units Panel")
 		self.dataList:Clear()
 	end
 
