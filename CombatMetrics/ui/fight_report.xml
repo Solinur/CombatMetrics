@@ -67,10 +67,10 @@
                     <OnInitialized>CombatMetrics.internal.InitializeUnitsPanel(self)</OnInitialized>
                 </Control>
 
-                <Control name="$(parent)_AbilitiesPanel" inherits="CombatMetrics_PlaceHolder"> <!-- CombatMetrics_AbilitiesPanel -->
+                <Control name="$(parent)_AbilitiesPanel" inherits="CombatMetrics_AbilitiesPanel">
                     <Anchor point="TOPRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)_BuffsPanel" offsetY="4" />
                     <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)_UnitsPanel" offsetX="4" />
-                    <!-- <OnInitialized>CombatMetrics.internal.InitializeAbilitiesPanel(self)</OnInitialized> -->
+                    <OnInitialized>CombatMetrics.internal.InitializeAbilitiesPanel(self)</OnInitialized>
                 </Control>
 
                 <Control name="$(parent)_CombatLog" hidden="true" inherits="CombatMetrics_PlaceHolder"> <!-- CombatMetrics_CombatLog -->

@@ -47,8 +47,8 @@ ui/buffs.lua
 ui/buffs.xml
 ui/units.lua
 ui/units.xml
-; ui/abilities.lua
-; ui/abilities.xml
+ui/abilities.lua
+ui/abilities.xml
 ; 
 ; ui/skills.lua
 ; ui/skills.xml
