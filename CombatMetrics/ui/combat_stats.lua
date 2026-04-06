@@ -151,7 +151,8 @@ function CMXint.InitializeCombatStatsPanel(control)
 		label:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
 		self.xOffset = self.xOffset + 4 + width
-		self.maxHeight = zo_max(self.maxHeight, label:GetHeight() / self.settings.scale)
+		local scale = self.settings.scale > 0 and self.settings.scale or 1
+		self.maxHeight = zo_max(self.maxHeight, label:GetHeight() / scale)
 
 		return label
 	end
@@ -213,7 +214,7 @@ function CMXint.InitializeCombatStatsPanel(control)
 			return amountLabel, countLabel, labelList
 		end
 
-		if util.IsHealingCategory(category) then
+		if util.IsHealingCategory() then
 			local amountLabel = SI_COMBAT_METRICS_HEALING
 			local countLabel = SI_COMBAT_METRICS_HEALS
 
@@ -323,9 +324,9 @@ function CMXint.InitializeCombatStatsPanel(control)
 		local activePlayerTime = playerData and (playerData.endTime - playerData.startTime) or 0
 		local activeGroupTime = groupData.endTime - groupData.startTime
 
-		aps1 = playerValue / activePlayerTime * 1000
-		aps2 = groupValue / activeGroupTime * 1000
-		apsratio = aps2 > 0 and (aps1 / aps2) * 100 or 0
+		aps1 = util.SafeDivide(playerValue, activePlayerTime) * 1000
+		aps2 = util.SafeDivide(groupValue, activeGroupTime) * 1000
+		apsratio = util.SafeDivide(aps1, aps2) * 100
 
 		self.dpsValue1:SetText(string.format(VALUE_FORMAT, aps1))
 		self.dpsValue2:SetText(string.format(VALUE_FORMAT, aps2))

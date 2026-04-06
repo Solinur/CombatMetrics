@@ -26,7 +26,7 @@ local function ResizeControl(control, scale)
 	local width, height = unpack(control.sizes)
 	local maxwidth, maxheight = GuiRoot:GetDimensions()
 
-	scale = zo_min(zo_max(scale or 1, 0.5), 3, maxwidth / width, maxheight / height)
+	scale = zo_min(zo_max(scale or 1, 0.5), 3, util.SafeDivide(maxwidth, width), util.SafeDivide(maxheight, height))
 
 	if width and control:GetResizeToFitDescendents() == false then
 		control:SetWidth(width * scale)
