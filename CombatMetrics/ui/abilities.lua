@@ -30,19 +30,19 @@ local critLayoutTable = {
 	[CRIT_LAYOUT_RATIO] = {
 		"Critical",
 		"Total",
-		GetString(SI_COMBAT_METRICS_CRITS),
+		GetString(SI_COMBAT_METRICS_CRITS) .. "/",
 		GetString(SI_COMBAT_METRICS_HITS),
 	},
 	[CRIT_LAYOUT_REVERSED] = {
 		"Total",
 		"Critical",
-		GetString(SI_COMBAT_METRICS_HITS),
+		GetString(SI_COMBAT_METRICS_HITS) .. "/",
 		GetString(SI_COMBAT_METRICS_CRITS),
 	},
 	[CRIT_LAYOUT_NORMAL_RATIO] = {
 		"Normal",
 		"Critical",
-		GetString(SI_COMBAT_METRICS_NORM),
+		GetString(SI_COMBAT_METRICS_NORM) .. "/",
 		GetString(SI_COMBAT_METRICS_CRITS),
 	},
 }
@@ -55,19 +55,19 @@ local blockedLayoutTable = {
 	[BLOCKED_LAYOUT_RATIO] = {
 		"Blocked",
 		"Total",
-		GetString(SI_COMBAT_METRICS_BLOCKS),
+		GetString(SI_COMBAT_METRICS_BLOCKS) .. "/",
 		GetString(SI_COMBAT_METRICS_HITS),
 	},
 	[BLOCKED_LAYOUT_REVERSED] = {
 		"Total",
 		"Blocked",
-		GetString(SI_COMBAT_METRICS_HITS),
+		GetString(SI_COMBAT_METRICS_HITS) .. "/",
 		GetString(SI_COMBAT_METRICS_BLOCKS),
 	},
 	[BLOCKED_LAYOUT_NORMAL_RATIO] = {
 		"Normal",
 		"Blocked",
-		GetString(SI_COMBAT_METRICS_NORM),
+		GetString(SI_COMBAT_METRICS_NORM) .. "/",
 		GetString(SI_COMBAT_METRICS_BLOCKS),
 	},
 }
@@ -209,35 +209,40 @@ local function InitAbilitiesList(panel)
 		bar:ApplyPosition(rowControl, 26, 0, 182, rowHeight)
 		bar:SetTexture("esoui/art/unitframes/progressbar_raidhealth.dds")
 
+		local fraction = panel:AcquireSharedControl(CT_LABEL)
+		fraction:ApplyPosition(rowControl, 210, 0, 38)
+		fraction:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
+
 		local perSecond = panel:AcquireSharedControl(CT_LABEL)
-		perSecond:ApplyPosition(rowControl, 210, 0, 50)
-		perSecond:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+		perSecond:ApplyPosition(rowControl, 240, 0, 50)
+		perSecond:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
 		local total = panel:AcquireSharedControl(CT_LABEL)
-		total:ApplyPosition(rowControl, 262, 0, 73)
-		total:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+		total:ApplyPosition(rowControl, 292, 0, 73)
+		total:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
 		local crits = panel:AcquireSharedControl(CT_LABEL)
-		crits:ApplyPosition(rowControl, 337, 0, 42)
-		crits:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+		crits:ApplyPosition(rowControl, 367, 0, 42)
+		crits:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
 		local hits = panel:AcquireSharedControl(CT_LABEL)
-		hits:ApplyPosition(rowControl, 381, 0, 42)
-		hits:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+		hits:ApplyPosition(rowControl, 411, 0, 42)
+		hits:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
 
 		local critRatio = panel:AcquireSharedControl(CT_LABEL)
-		critRatio:ApplyPosition(rowControl, 425, 0, 35)
-		critRatio:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+		critRatio:ApplyPosition(rowControl, 455, 0, 35)
+		critRatio:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
 		local averageHit = panel:AcquireSharedControl(CT_LABEL)
-		averageHit:ApplyPosition(rowControl, 462, 0, 50)
-		averageHit:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+		averageHit:ApplyPosition(rowControl, 492, 0, 50)
+		averageHit:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
 		local minMax = panel:AcquireSharedControl(CT_LABEL)
-		minMax:ApplyPosition(rowControl, 514, 0, 50)
-		minMax:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+		minMax:ApplyPosition(rowControl, 544, 0, 50)
+		minMax:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
-		rowControl.controls = { icon, label, bar, perSecond, total, crits, hits, critRatio, averageHit, minMax }
+		rowControl.controls =
+			{ icon, label, bar, fraction, perSecond, total, crits, hits, critRatio, averageHit, minMax }
 		rowControl.recovered = true
 	end
 
@@ -251,7 +256,7 @@ local function InitAbilitiesList(panel)
 			self:RecoverRow(rowControl)
 		end
 
-		local icon, label, bar, perSecond, total, crits, hits, critRatio, averageHit, minMax =
+		local icon, label, bar, fraction, perSecond, total, crits, hits, critRatio, averageHit, minMax =
 			unpack(rowControl.controls)
 
 		---@cast icon TextureControl
@@ -271,6 +276,9 @@ local function InitAbilitiesList(panel)
 		bar:SetWidth(maxwidth * data.fraction)
 		bar:SetColor(data.color:UnpackRGBA())
 
+		fraction:SetText(string.format("%.0f%%", data.fraction * 100))
+		fraction:SetFont(font)
+
 		perSecond:SetText(string.format("%.0f", data.perSecond))
 		perSecond:SetFont(font)
 
@@ -286,6 +294,7 @@ local function InitAbilitiesList(panel)
 		critRatio:SetText(string.format("%.0f%%", 100 * data.critRatio))
 		critRatio:SetFont(font)
 
+		---@cast averageHit LabelControl
 		averageHit:SetText(string.format("%.0f", data.average))
 		averageHit:SetFont(font)
 
@@ -293,7 +302,7 @@ local function InitAbilitiesList(panel)
 		minMax:SetText(data.minmax)
 		minMax:SetFont(font)
 
-		-- TODO: Implement
+		-- TODO: Fix misalignment!
 	end
 
 	function dataList:BuildMasterList()
@@ -303,11 +312,12 @@ local function InitAbilitiesList(panel)
 		local playerId = fightData.unitIds.player
 		local playerData = util.GetUnitCategoryData(fightData, category, playerId)
 
+		CMX_ABILITY_PANEL = panel
+		CMX_ABILITY_DATA = categoryData
+
 		if categoryData == nil then
 			return
 		end
-
-		CMX_CATEGORY_DATA = categoryData
 
 		ZO_ClearTable(self.masterList)
 
@@ -316,7 +326,7 @@ local function InitAbilitiesList(panel)
 
 		for abilityId, abilityData in pairs(categoryData) do
 			if type(abilityId) == "number" and type(abilityData) == "table" then
-				self:UpdateDataEntry(abilityId, abilityData, durationMs, totalAmount)
+				self:AddDataEntry(abilityId, abilityData, durationMs, totalAmount)
 			end
 		end
 
@@ -333,7 +343,7 @@ local function InitAbilitiesList(panel)
 	---@param abilityData DamageAbilityData|HealAbilityData
 	---@param durationMs number
 	---@param totalAmount number
-	function dataList:UpdateDataEntry(abilityId, abilityData, durationMs, totalAmount)
+	function dataList:AddDataEntry(abilityId, abilityData, durationMs, totalAmount)
 		if abilityData.totalAmount <= 0 then
 			return
 		end
@@ -344,16 +354,27 @@ local function InitAbilitiesList(panel)
 		local category = settings.category
 		local isOverheal = category == "healingOut" and settings.includeOverheal
 		local amount = isOverheal and abilityData.overflowAmount or abilityData.totalAmount
+		local abilityType = util.IsHealingCategory() and abilityData.powerType or abilityData.damageType
 
 		local critLayout = panel:GetRatioLayout()
 		local ratio1 = abilityData[ZO_CachedStrFormat("<<c:1>>Count", critLayout[1])]
 		local ratio2 = abilityData[ZO_CachedStrFormat("<<c:1>>Count", critLayout[2])]
 		local crits = abilityData.criticalCount
 		local totalHits = abilityData.totalCount
-		local critRatio = crits / totalHits * 100
+		local critRatio = crits / totalHits
 
 		local labelFormat = panel:ShowIds() and abilityId and ABILITY_NAME_FORMAT_ID or ABILITY_NAME_FORMAT_DEFAULT
 		local name = ZO_CachedStrFormat(labelFormat, GetFormattedAbilityName(abilityId, false), abilityId)
+		local color = GetDamageColor(abilityType)
+
+		if color == nil then
+			logger:Warn(
+				"No color for damage type %s. Ability: %s (%d)",
+				abilityData.damageType or "Unknown",
+				GetFormattedAbilityName(abilityId, false),
+				abilityId
+			)
+		end
 
 		local averageLayout = self.panel:GetAverageLayout()
 		local averageCount = abilityData[ZO_CachedStrFormat("<<c:1>>Count", averageLayout[1])]
@@ -367,7 +388,7 @@ local function InitAbilitiesList(panel)
 		local rowData = {
 			icon = GetFormattedAbilityIcon(abilityId, false),
 			name = name,
-			color = GetDamageColor(abilityData),
+			color = color,
 			fraction = amount / totalAmount,
 			perSecond = amount / (durationMs / 1000),
 			amount = amount,
@@ -376,7 +397,6 @@ local function InitAbilitiesList(panel)
 			critRatio = critRatio,
 			average = average,
 			minmax = minmax,
-			-- TODO: add crit, min, max and so on
 			selected = selected,
 		}
 
@@ -385,7 +405,7 @@ local function InitAbilitiesList(panel)
 
 	function dataList:FilterScrollList() end
 
-	dataList.sortHeaderGroup:SelectHeaderByKey("Total")
+	dataList.sortHeaderGroup:SelectHeaderByKey("amount")
 
 	return dataList
 end
@@ -447,18 +467,18 @@ function CMXint.InitializeAbilitiesPanel(control)
 		local critPercentString = isDefense and SI_COMBAT_METRICS_BLOCKS_PER or SI_COMBAT_METRICS_CRITS_PER
 		critPercentControl:SetText(GetString(critPercentString))
 
-		local avgControl = headers:GetNamedChild("Total"):GetNamedChild("Average") --[[@as LabelControl | TooltipControl]]
+		local avgControl = headers:GetNamedChild("Average"):GetNamedChild("Name") --[[@as LabelControl | TooltipControl]]
 		local avgLayoutTable = self:GetAverageLayout()
 		avgControl:SetText(avgLayoutTable[2])
 		avgControl.tooltip = avgLayoutTable[3]
 
-		local minControl = headers:GetNamedChild("Total"):GetNamedChild("Average") --[[@as LabelControl | TooltipControl]]
+		local minControl = headers:GetNamedChild("MinMax"):GetNamedChild("Name") --[[@as LabelControl | TooltipControl]]
 		local minMaxLayout = self:GetMinMaxLayout()
 		minControl:SetText(minMaxLayout[2])
 	end
 
 	function AbilitiesPanel:Update()
-		logger:Debug("Updating Ability Panel")
+		logger:Info("Updating Ability Panel")
 
 		self:UpdateHeaderLabels()
 
@@ -467,7 +487,7 @@ function CMXint.InitializeAbilitiesPanel(control)
 	end
 
 	function AbilitiesPanel:Clear()
-		logger:Debug("Clearing Ability Panel")
+		logger:Info("Clearing Ability Panel")
 		self.dataList:Clear()
 	end
 
