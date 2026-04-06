@@ -447,7 +447,7 @@ function CMXint.InitializeUI()
 	assert(CMXint.InitializeBuffs(), "Initialization of buffs UI failed")
 
 	assert(CMXint.InitializeUnits(), "Initialization of units UI failed")
-	-- assert(CMXint.InitializeAbilities(), "Initialization of abilities UI failed")
+	assert(CMXint.InitializeAbilities(), "Initialization of abilities UI failed")
 
 	-- assert(CMXint.InitializeSkills(), "Initialization of skills UI failed")
 	-- assert(CMXint.InitializeEquipment(), "Initialization of equipment UI failed")
