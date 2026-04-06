@@ -127,10 +127,10 @@ do -- Handling Buffs Context Menu
 
 		local category = settings.category
 
-		if util.IsDamageCategory(category) and settings.rightpanel == "buffsout" then
+		if util.IsDamageCategory() and settings.rightpanel == "buffsout" then
 			unitType = "boss"
 			AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTBUFF_BOSS), postSelectionBuffUptime)
-		elseif util.IsHealingCategory(category) and settings.rightpanel == "buffsout" then
+		elseif util.IsHealingCategory() and settings.rightpanel == "buffsout" then
 			unitType = "group"
 			AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTBUFF_GROUP), postSelectionBuffUptime)
 		end

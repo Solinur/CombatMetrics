@@ -168,7 +168,7 @@ local function InitUnitsList(panel)
 		-- highlightControl:SetHidden(not highlight)
 
 		---@cast bar TextureControl
-		local barColor = util.IsDamageCategory(panel.settings.category) and UNIT_BAR_COLOR_DAMAGE or UNIT_BAR_COLOR_HEAL
+		local barColor = util.IsDamageCategory() and UNIT_BAR_COLOR_DAMAGE or UNIT_BAR_COLOR_HEAL
 		local maxwidth = label:GetWidth()
 		bar:SetWidth(maxwidth * ratio)
 		bar:SetColor(barColor:UnpackRGBA())
@@ -277,7 +277,7 @@ function CMXint.InitializeUnitsPanel(control)
 	UnitsPanel.selections = {}
 
 	function UnitsPanel:UpdateHeaderLabels()
-		local isDamage = util.IsDamageCategory(self.settings.category)
+		local isDamage = util.IsDamageCategory()
 
 		local headers = self.control:GetNamedChild("Headers")
 		local nameControl = headers:GetNamedChild("Name"):GetNamedChild("Name") --[[@as LabelControl]]

@@ -57,9 +57,6 @@ for i, key in ipairs(HEALING_KEYS) do
 	COUNT_HEALING_KEYS[i] = key .. "Count"
 end
 
----@param unitIds [integer]
-local function GetHealData(unitIds) end
-
 function CMXint.InitializeCombatStatsPanel(control)
 	---@class CombatStatsPanel: Panel
 	CombatStatsPanel = CMX.internal.PanelObject:New(control, "combatStats")
@@ -202,7 +199,7 @@ function CMXint.InitializeCombatStatsPanel(control)
 	function CombatStatsPanel:GetLabelStrings()
 		local category = self.settings.category
 
-		if util.IsDamageCategory(category) then
+		if util.IsDamageCategory() then
 			local amountLabel = SI_COMBAT_METRICS_DAMAGE
 			local countLabel = SI_COMBAT_METRICS_HIT
 
@@ -303,10 +300,10 @@ function CMXint.InitializeCombatStatsPanel(control)
 			return
 		end
 
-		if util.IsDamageCategory(category) then
+		if util.IsDamageCategory() then
 			amountValueKeys = AMOUNT_DAMAGE_KEYS
 			countValueKeys = COUNT_DAMAGE_KEYS
-		elseif util.IsHealingCategory(category) then
+		elseif util.IsHealingCategory() then
 			amountValueKeys = AMOUNT_HEALING_KEYS
 			countValueKeys = COUNT_HEALING_KEYS
 		else

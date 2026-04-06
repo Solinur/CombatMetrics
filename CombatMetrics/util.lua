@@ -22,16 +22,22 @@ util.OppositionCategory = {
 	[cat.CMX_CATEGORY_HEALING_RECEIVED] = cat.CMX_CATEGORY_HEALING_DONE,
 }
 
----@param category string
 ---@return boolean
-function util.IsDamageCategory(category)
+function util.IsDamageCategory()
+	local category = CMXint.settings.fightReport.category
 	return category == cat.CMX_CATEGORY_DAMAGE_DONE or category == cat.CMX_CATEGORY_DAMAGE_RECEIVED
 end
 
----@param category string
 ---@return boolean
-function util.IsHealingCategory(category)
+function util.IsHealingCategory()
+	local category = CMXint.settings.fightReport.category
 	return category == cat.CMX_CATEGORY_HEALING_DONE or category == cat.CMX_CATEGORY_HEALING_RECEIVED
+end
+
+---@return boolean
+function util.IsDefenseCategory()
+	local category = CMXint.settings.fightReport.category
+	return category == cat.CMX_CATEGORY_DAMAGE_RECEIVED
 end
 
 ---@param fightData Fight
