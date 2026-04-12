@@ -223,8 +223,7 @@ local function resize(control, scale)
 		logger:Error("Invalid default dimensions for %s: %s, %s", control:GetName(), width, height)
 	end
 
-	scale = zo_max(scale or 1, util.SafeDivide(maxwidth, width), util.SafeDivide(maxheight, height))
-	scale = zo_clamp(scale, 0.5, 3)
+	scale = zo_clamp(scale or 1, 0.5, zo_min(scale or 1, maxwidth / width, maxheight / height, 3))
 	CMXint.settings.liveReport.scale = scale
 
 	if width then
