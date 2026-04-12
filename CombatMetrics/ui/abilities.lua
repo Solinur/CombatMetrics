@@ -360,7 +360,7 @@ local function InitAbilitiesList(panel)
 		local selected = false -- selectedunits ~= nil and (selectedunits[unitId] ~= nil) or false -- TODO: Selections
 
 		local category = settings.category
-		local isOverheal = category == "healingOut" and settings.includeOverheal
+		local isOverheal = category == cat.CMX_CATEGORY_HEALING_DONE and settings.includeOverheal
 		local amount = isOverheal and abilityData.overflowAmount or abilityData.totalAmount
 		local abilityType = util.IsHealingCategory() and abilityData.powerType or abilityData.damageType
 
