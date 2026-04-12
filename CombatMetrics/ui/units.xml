@@ -9,7 +9,7 @@
                     <Controls>
                         <Control name="$(parent)Type" inherits="CombatMetrics_SortHeader">
                             <Anchor point="LEFT" relativePoint="LEFT" relativeTo="$(parent)" offsetX="2" offsetY="0" />
-                            <Dimensions x="25" />
+                            <Dimensions x="24" />
                             <OnInitialized>
                                 ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_TYPE), "type", ZO_SORT_ORDER_UP, TEXT_ALIGN_CENTER)
                             </OnInitialized>
@@ -17,7 +17,7 @@
 
                         <Control name="$(parent)Name" inherits="CombatMetrics_SortHeader">
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Type" offsetX="6" offsetY="0" />
-                            <Dimensions x="165" />
+                            <Dimensions x="162" />
                             <OnInitialized>
                                 ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_TARGET), "name", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT)
                             </OnInitialized>
@@ -25,7 +25,7 @@
 
                         <Control name="$(parent)PerSecond" inherits="CombatMetrics_ControlTooltip CombatMetrics_SortHeader">
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="4" offsetY="0" />
-                            <Dimensions x="58" />
+                            <Dimensions x="46" />
                             <OnInitialized>
                                 ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_DPS), "perSecondValue", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_CENTER)
                                 self.tooltip = SI_COMBAT_METRICS_UNITDPS_TT
@@ -34,16 +34,16 @@
 
                         <Control name="$(parent)Total" inherits="CombatMetrics_ControlTooltip CombatMetrics_SortHeader">
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)PerSecond" offsetX="2" offsetY="0" />
-                            <Dimensions x="58" />
+                            <Dimensions x="60" />
                             <OnInitialized>
                                 ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_DAMAGE), "playerAmount", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_CENTER)
                             </OnInitialized>
                         </Control>
 
-                        <Label name="$(parent)PerCent" inherits="CombatMetrics_ControlTooltip CombatMetrics_SortHeader"
-                            text="SI_COMBAT_METRICS_PERCENT">
+                        <Label name="$(parent)PerCent" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_PERCENT"
+                            horizontalAlignment="CENTER">
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Total" offsetX="2" offsetY="0" />
-                            <Dimensions x="36" />
+                            <Dimensions x="32" />
                         </Label>
                     </Controls>
                 </Control>

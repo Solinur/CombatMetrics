@@ -111,24 +111,26 @@ local function InitUnitsList(panel)
 		icon:ApplyPosition(rowControl, 2, 0, rowHeight, rowHeight)
 
 		local label = panel:AcquireSharedControl(CT_LABEL)
-		label:ApplyPosition(rowControl, 33, 0, 167)
+		label:ApplyPosition(rowControl, 32, 0, 162)
 		label:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
 
 		local bar = panel:AcquireSharedControl(CT_TEXTURE)
-		bar:ApplyPosition(rowControl, 31, 0, 171, rowHeight)
+		bar:ApplyPosition(rowControl, 30, 0, 166, rowHeight)
 		bar:SetTexture("esoui/art/unitframes/progressbar_raidhealth.dds")
 
 		local perSecond = panel:AcquireSharedControl(CT_LABEL)
-		perSecond:ApplyPosition(rowControl, 204, 0, 46)
+		perSecond:ApplyPosition(rowControl, 198, 0, 48)
 		perSecond:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
 
 		local total = panel:AcquireSharedControl(CT_LABEL)
-		total:ApplyPosition(rowControl, 252, 0, 58)
+		total:ApplyPosition(rowControl, 248, 0, 60)
 		total:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
 
 		local perCent = panel:AcquireSharedControl(CT_LABEL)
-		perCent:ApplyPosition(rowControl, 312, 0, 46)
+		perCent:ApplyPosition(rowControl, 310, 0, 32)
 		perCent:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+
+		-- TODO: Fix Column widths
 
 		rowControl.controls = { icon, label, bar, perSecond, total, perCent }
 		rowControl.recovered = true
@@ -264,7 +266,7 @@ local function InitUnitsList(panel)
 
 	function dataList:FilterScrollList() end
 
-	dataList.sortHeaderGroup:SelectHeaderByKey("Total")
+	dataList.sortHeaderGroup:SelectHeaderByKey("playerAmount")
 
 	return dataList
 end

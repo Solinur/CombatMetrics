@@ -198,47 +198,55 @@ local function InitAbilitiesList(panel)
 		local panel = self.panel
 		local rowHeight = self:GetHeight()
 
+		--[[
+		TODO: consider rearranging columns: 
+			* Merge Min/Max/Avg? 
+			* Reorder % / DPS ? 
+			* Remove hit/crit and show as TT on ratio instead (format via settings)?
+			* Show tick rate ? 
+		]]
+
 		local icon = panel:AcquireSharedControl(CT_TEXTURE)
 		icon:ApplyPosition(rowControl, 2, 0, rowHeight, rowHeight)
 
 		local label = panel:AcquireSharedControl(CT_LABEL)
-		label:ApplyPosition(rowControl, 28, 0, 178)
+		label:ApplyPosition(rowControl, 28, 0, 190)
 		label:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
 
 		local bar = panel:AcquireSharedControl(CT_TEXTURE)
-		bar:ApplyPosition(rowControl, 26, 0, 182, rowHeight)
+		bar:ApplyPosition(rowControl, 26, 0, 194, rowHeight)
 		bar:SetTexture("esoui/art/unitframes/progressbar_raidhealth.dds")
 
 		local fraction = panel:AcquireSharedControl(CT_LABEL)
-		fraction:ApplyPosition(rowControl, 210, 0, 38)
+		fraction:ApplyPosition(rowControl, 220, 0, 38)
 		fraction:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
 		local perSecond = panel:AcquireSharedControl(CT_LABEL)
-		perSecond:ApplyPosition(rowControl, 240, 0, 50)
+		perSecond:ApplyPosition(rowControl, 260, 0, 50)
 		perSecond:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
 		local total = panel:AcquireSharedControl(CT_LABEL)
-		total:ApplyPosition(rowControl, 292, 0, 73)
+		total:ApplyPosition(rowControl, 312, 0, 73)
 		total:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
 		local crits = panel:AcquireSharedControl(CT_LABEL)
-		crits:ApplyPosition(rowControl, 367, 0, 42)
+		crits:ApplyPosition(rowControl, 387, 0, 46)
 		crits:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
 		local hits = panel:AcquireSharedControl(CT_LABEL)
-		hits:ApplyPosition(rowControl, 411, 0, 42)
+		hits:ApplyPosition(rowControl, 433, 0, 42)
 		hits:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
 
 		local critRatio = panel:AcquireSharedControl(CT_LABEL)
-		critRatio:ApplyPosition(rowControl, 455, 0, 35)
+		critRatio:ApplyPosition(rowControl, 477, 0, 37)
 		critRatio:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
 		local averageHit = panel:AcquireSharedControl(CT_LABEL)
-		averageHit:ApplyPosition(rowControl, 492, 0, 50)
+		averageHit:ApplyPosition(rowControl, 516, 0, 50)
 		averageHit:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
 		local minMax = panel:AcquireSharedControl(CT_LABEL)
-		minMax:ApplyPosition(rowControl, 544, 0, 50)
+		minMax:ApplyPosition(rowControl, 568, 0, 50)
 		minMax:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
 		rowControl.controls =
@@ -285,10 +293,10 @@ local function InitAbilitiesList(panel)
 		total:SetText(data.amount)
 		total:SetFont(font)
 
-		crits:SetText(data.ratio1)
+		crits:SetText(string.format("%d/", data.ratio1))
 		crits:SetFont(font)
 
-		hits:SetText(string.format("/%d", data.ratio2))
+		hits:SetText(data.ratio2)
 		hits:SetFont(font)
 
 		critRatio:SetText(string.format("%.0f%%", 100 * data.critRatio))
@@ -457,8 +465,8 @@ function CMXint.InitializeAbilitiesPanel(control)
 		local totalLabel = isDamage and GetString(SI_COMBAT_METRICS_DAMAGE) or GetString(SI_COMBAT_METRICS_HEALING)
 		totalControl:SetText(totalLabel)
 
-		local critRatioControl1 = headers:GetNamedChild("Crits"):GetNamedChild("Name") --[[@as LabelControl]]
-		local critRatioControl2 = headers:GetNamedChild("Hits"):GetNamedChild("Name") --[[@as LabelControl]]
+		local critRatioControl1 = headers:GetNamedChild("Crits") --[[@as LabelControl]]
+		local critRatioControl2 = headers:GetNamedChild("Hits") --[[@as LabelControl]]
 		local ratioLayoutTable = self:GetRatioLayout()
 		critRatioControl1:SetText(ratioLayoutTable[3])
 		critRatioControl2:SetText(ratioLayoutTable[4])

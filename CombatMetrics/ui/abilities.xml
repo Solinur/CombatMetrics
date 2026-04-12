@@ -14,9 +14,9 @@
 
                         <Control name="$(parent)Name" inherits="CombatMetrics_SortHeader">
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="6" offsetY="0" />
-                            <Dimensions x="178" />
+                            <Dimensions x="190" />
                             <OnInitialized>
-                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_TARGET), "name", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT)
+                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_ABILITY), "name", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT)
                             </OnInitialized>
                         </Control>
 
@@ -44,26 +44,22 @@
                             </OnInitialized>
                         </Control>
 
-                        <Control name="$(parent)Crits" inherits="CombatMetrics_SortHeader">
+                        <Label name="$(parent)Crits" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_CRITS"
+                            horizontalAlignment="RIGHT">
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Total" offsetX="2" offsetY="0" />
-                            <Dimensions x="42" />
+                            <Dimensions x="46" />
                             <!-- <OnMouseUp> CMX.HitCritContextMenu(self, button)</OnMouseUp> TODO: integrate with sortheader -->
-                            <OnInitialized>
-                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_CRITS) .. "/", "crits", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_RIGHT)
-                            </OnInitialized>
-                        </Control>
+                        </Label>
 
-                        <Control name="$(parent)Hits" inherits="CombatMetrics_SortHeader">
+                        <Label name="$(parent)Hits" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_PER_HITS"
+                            horizontalAlignment="LEFT">
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Crits" offsetX="0" offsetY="0" />
                             <Dimensions x="42" />
-                            <OnInitialized>
-                                ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_PER_HITS), "hits", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_LEFT)
-                            </OnInitialized>
-                        </Control>
+                        </Label>
 
                         <Control name="$(parent)CritRatio" inherits="CombatMetrics_SortHeader">
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Hits" offsetX="2" offsetY="0" />
-                            <Dimensions x="35" />
+                            <Dimensions x="37" />
                             <OnInitialized>
                                 ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_CRITS_PER), "critRatio", ZO_SORT_ORDER_DOWN, TEXT_ALIGN_CENTER)
                             </OnInitialized>

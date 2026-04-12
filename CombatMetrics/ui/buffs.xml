@@ -119,7 +119,7 @@
 
                         <Control name="$(parent)Name" inherits="CombatMetrics_SortHeader">
                             <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="6" offsetY="0" />
-                            <Dimensions x="170" />
+                            <Dimensions x="186" />
                             <OnInitialized>
                                 ZO_SortHeader_Initialize(self, GetString(SI_COMBAT_METRICS_BUFF), "name", ZO_SORT_ORDER_UP, TEXT_ALIGN_LEFT)
                             </OnInitialized>

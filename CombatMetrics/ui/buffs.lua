@@ -373,23 +373,23 @@ local function InitBuffsList(panel)
 		icon:ApplyPosition(rowControl, 14, 0, rowHeight, rowHeight)
 
 		local label = panel:AcquireSharedControl(CT_LABEL)
-		label:ApplyPosition(rowControl, 40, 0, 170)
+		label:ApplyPosition(rowControl, 40, 0, 186)
 		label:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
 
 		local bar = panel:AcquireSharedControl(CT_TEXTURE)
-		bar:ApplyPosition(rowControl, 38, 0, 174, rowHeight)
+		bar:ApplyPosition(rowControl, 38, 0, 190, rowHeight)
 		bar:SetTexture("esoui/art/unitframes/progressbar_raidhealth.dds")
 
 		local bar_group = panel:AcquireSharedControl(CT_TEXTURE)
-		bar_group:ApplyPosition(rowControl, 38, 0, 174, rowHeight)
+		bar_group:ApplyPosition(rowControl, 38, 0, 190, rowHeight)
 		bar_group:SetTexture("esoui/art/unitframes/progressbar_raidhealth.dds")
 
 		local count = panel:AcquireSharedControl(CT_LABEL)
-		count:ApplyPosition(rowControl, 216, 0, 58)
+		count:ApplyPosition(rowControl, 230, 0, 58)
 		count:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
 
 		local uptime = panel:AcquireSharedControl(CT_LABEL)
-		uptime:ApplyPosition(rowControl, 276, 0, 58)
+		uptime:ApplyPosition(rowControl, 290, 0, 58)
 		uptime:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
 
 		rowControl.controls = { icon, label, bar, bar_group, count, uptime }
