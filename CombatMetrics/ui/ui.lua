@@ -134,10 +134,13 @@ local function AddTooltipLine(control, tooltipControl, tooltip)
 end
 util.AddTooltipLine = AddTooltipLine
 
----@param control Control
+---@class TooltipControl: Control
+---@field tooltip string | string[] | nil
+
+---@param control TooltipControl
 function CMXint.OnMouseEnter(control) --copy from ZO_Options_OnMouseEnter but modified to support multiple tooltip lines
 	---@type table | string
-	local tooltipText = control["tooltip"]
+	local tooltipText = control.tooltip
 	if tooltipText == nil then
 		return
 	end
@@ -444,7 +447,7 @@ function CMXint.InitializeUI()
 	assert(CMXint.InitializeBuffs(), "Initialization of buffs UI failed")
 
 	assert(CMXint.InitializeUnits(), "Initialization of units UI failed")
-	-- assert(CMXint.InitializeAbilities(), "Initialization of abilities UI failed")
+	assert(CMXint.InitializeAbilities(), "Initialization of abilities UI failed")
 
 	-- assert(CMXint.InitializeSkills(), "Initialization of skills UI failed")
 	-- assert(CMXint.InitializeEquipment(), "Initialization of equipment UI failed")

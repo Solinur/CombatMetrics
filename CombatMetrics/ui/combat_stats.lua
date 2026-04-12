@@ -57,9 +57,6 @@ for i, key in ipairs(HEALING_KEYS) do
 	COUNT_HEALING_KEYS[i] = key .. "Count"
 end
 
----@param unitIds [integer]
-local function GetHealData(unitIds) end
-
 function CMXint.InitializeCombatStatsPanel(control)
 	---@class CombatStatsPanel: Panel
 	CombatStatsPanel = CMX.internal.PanelObject:New(control, "combatStats")
@@ -154,7 +151,8 @@ function CMXint.InitializeCombatStatsPanel(control)
 		label:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
 		self.xOffset = self.xOffset + 4 + width
-		self.maxHeight = zo_max(self.maxHeight, label:GetHeight() / self.settings.scale)
+		local scale = self.settings.scale > 0 and self.settings.scale or 1
+		self.maxHeight = zo_max(self.maxHeight, label:GetHeight() / scale)
 
 		return label
 	end
@@ -202,7 +200,7 @@ function CMXint.InitializeCombatStatsPanel(control)
 	function CombatStatsPanel:GetLabelStrings()
 		local category = self.settings.category
 
-		if util.IsDamageCategory(category) then
+		if util.IsDamageCategory() then
 			local amountLabel = SI_COMBAT_METRICS_DAMAGE
 			local countLabel = SI_COMBAT_METRICS_HIT
 
@@ -216,7 +214,7 @@ function CMXint.InitializeCombatStatsPanel(control)
 			return amountLabel, countLabel, labelList
 		end
 
-		if util.IsHealingCategory(category) then
+		if util.IsHealingCategory() then
 			local amountLabel = SI_COMBAT_METRICS_HEALING
 			local countLabel = SI_COMBAT_METRICS_HEALS
 
@@ -303,10 +301,10 @@ function CMXint.InitializeCombatStatsPanel(control)
 			return
 		end
 
-		if util.IsDamageCategory(category) then
+		if util.IsDamageCategory() then
 			amountValueKeys = AMOUNT_DAMAGE_KEYS
 			countValueKeys = COUNT_DAMAGE_KEYS
-		elseif util.IsHealingCategory(category) then
+		elseif util.IsHealingCategory() then
 			amountValueKeys = AMOUNT_HEALING_KEYS
 			countValueKeys = COUNT_HEALING_KEYS
 		else
@@ -326,9 +324,9 @@ function CMXint.InitializeCombatStatsPanel(control)
 		local activePlayerTime = playerData and (playerData.endTime - playerData.startTime) or 0
 		local activeGroupTime = groupData.endTime - groupData.startTime
 
-		aps1 = playerValue / activePlayerTime * 1000
-		aps2 = groupValue / activeGroupTime * 1000
-		apsratio = aps2 > 0 and (aps1 / aps2) * 100 or 0
+		aps1 = util.SafeDivide(playerValue, activePlayerTime / 1000)
+		aps2 = util.SafeDivide(groupValue, activeGroupTime / 1000)
+		apsratio = util.SafeDivide(aps1, aps2) * 100
 
 		self.dpsValue1:SetText(string.format(VALUE_FORMAT, aps1))
 		self.dpsValue2:SetText(string.format(VALUE_FORMAT, aps2))

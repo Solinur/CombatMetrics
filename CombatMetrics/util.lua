@@ -15,29 +15,61 @@ util.MainCategories = {
 }
 local cat = util.MainCategories
 
----@param category string
+util.OppositionCategory = {
+	[cat.CMX_CATEGORY_DAMAGE_DONE] = cat.CMX_CATEGORY_DAMAGE_RECEIVED,
+	[cat.CMX_CATEGORY_DAMAGE_RECEIVED] = cat.CMX_CATEGORY_DAMAGE_DONE,
+	[cat.CMX_CATEGORY_HEALING_DONE] = cat.CMX_CATEGORY_HEALING_RECEIVED,
+	[cat.CMX_CATEGORY_HEALING_RECEIVED] = cat.CMX_CATEGORY_HEALING_DONE,
+}
+
 ---@return boolean
-function util.IsDamageCategory(category)
+function util.IsDamageCategory()
+	local category = CMXint.settings.fightReport.category
 	return category == cat.CMX_CATEGORY_DAMAGE_DONE or category == cat.CMX_CATEGORY_DAMAGE_RECEIVED
 end
 
----@param category string
 ---@return boolean
-function util.IsHealingCategory(category)
+function util.IsHealingCategory()
+	local category = CMXint.settings.fightReport.category
 	return category == cat.CMX_CATEGORY_HEALING_DONE or category == cat.CMX_CATEGORY_HEALING_RECEIVED
+end
+
+---@return boolean
+function util.IsDefenseCategory()
+	local category = CMXint.settings.fightReport.category
+	return category == cat.CMX_CATEGORY_DAMAGE_RECEIVED
 end
 
 ---@param fightData Fight
 ---@param category string
-function util.GetCombinedPlayerCategoryData(fightData, category)
+---@param unitIds? integer[]
+---@param abilityIds? table<integer, boolean>
+function util.GetCombinedPlayerCategoryData(fightData, category, unitIds, abilityIds)
 	if category == cat.CMX_CATEGORY_DAMAGE_DONE then
-		return LibCombat2.GetPlayerDamageDoneToUnits(fightData)
+		return LibCombat2.GetPlayerDamageDoneToUnits(fightData, unitIds, abilityIds)
 	elseif category == cat.CMX_CATEGORY_DAMAGE_RECEIVED then
-		return LibCombat2.GetPlayerDamageReceivedByUnits(fightData)
+		return LibCombat2.GetPlayerDamageReceivedByUnits(fightData, unitIds, abilityIds)
 	elseif category == cat.CMX_CATEGORY_HEALING_DONE then
-		return LibCombat2.GetPlayerHealingDoneToUnits(fightData)
+		return LibCombat2.GetPlayerHealingDoneToUnits(fightData, unitIds, abilityIds)
 	elseif category == cat.CMX_CATEGORY_HEALING_RECEIVED then
-		return LibCombat2.GetPlayerHealingReceivedByUnits(fightData)
+		return LibCombat2.GetPlayerHealingReceivedByUnits(fightData, unitIds, abilityIds)
+	else
+		logger:Error("unexpected value for category: %s", category)
+	end
+end
+
+---@param fightData Fight
+---@param category string
+---@param unitIds? integer[]
+function util.GetCombinedPlayerCategoryDataByAbility(fightData, category, unitIds)
+	if category == cat.CMX_CATEGORY_DAMAGE_DONE then
+		return LibCombat2.GetPlayerDamageDoneToUnitsByAbility(fightData, unitIds)
+	elseif category == cat.CMX_CATEGORY_DAMAGE_RECEIVED then
+		return LibCombat2.GetPlayerDamageReceivedByUnitsByAbility(fightData, unitIds)
+	elseif category == cat.CMX_CATEGORY_HEALING_DONE then
+		return LibCombat2.GetPlayerHealingDoneToUnitsByAbility(fightData, unitIds)
+	elseif category == cat.CMX_CATEGORY_HEALING_RECEIVED then
+		return LibCombat2.GetPlayerHealingReceivedByUnitsByAbility(fightData, unitIds)
 	else
 		logger:Error("unexpected value for category: %s", category)
 	end
@@ -320,11 +352,11 @@ local function GetBuffDataAndUnits(unitType, fightData)
 			local unitData = fightData.units[unitId]
 			local unitTotalValue = unit[category .. "Total"]
 
-			local isNotEmpty = unitTotalValue > 0 or NonContiguousCount(unit.buffs) > 0
+			local isNotEmpty = unitTotalValue > 0 or not ZO_IsTableEmpty(unit.buffs)
 			local isEnemy = unitData.unitType ~= COMBAT_UNIT_TYPE_GROUP
 				and unitData.unitType ~= COMBAT_UNIT_TYPE_PLAYER_PET
 				and unitData.unitType ~= COMBAT_UNIT_TYPE_PLAYER
-			local isDamageCategory = util.IsDamageCategory(category)
+			local isDamageCategory = util.IsDamageCategory()
 
 			if isNotEmpty and (isEnemy == isDamageCategory) then
 				units = units + 1

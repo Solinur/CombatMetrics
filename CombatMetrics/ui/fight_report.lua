@@ -18,7 +18,6 @@ local em = GetEventManager()
 ---@field sizes number[]
 ---@field anchors table[]
 ---@field font string?
-
 local function ResizeControl(control, scale)
 	if control.sizes == nil and control.anchors == nil then
 		return
@@ -26,7 +25,12 @@ local function ResizeControl(control, scale)
 	local width, height = unpack(control.sizes)
 	local maxwidth, maxheight = GuiRoot:GetDimensions()
 
-	scale = zo_min(zo_max(scale or 1, 0.5), 3, maxwidth / width, maxheight / height)
+	if width <= 0 or height <= 0 then
+		logger:Error("Invalid default dimensions for %s: %s, %s", control:GetName(), width, height)
+	end
+
+	scale = zo_max(scale or 1, util.SafeDivide(maxwidth, width), util.SafeDivide(maxheight, height))
+	scale = zo_clamp(scale, 0.5, 3)
 
 	if width and control:GetResizeToFitDescendents() == false then
 		control:SetWidth(width * scale)
@@ -61,9 +65,10 @@ local function ResizeControl(control, scale)
 		control:SetAnchor(unpack(anchor2))
 	end
 
-	local fontcontrol = control:GetNamedChild("Font")
+	local fontcontrol = control:GetNamedChild("Font") -- TODO: replace with GetFont
 
 	if fontcontrol ~= nil then
+		---@diagnostic disable-next-line: param-type-mismatch
 		local font, size, style = unpack(fontcontrol.font)
 		if size then
 			size = tonumber(size) * (scale + 0.2) / 1.2

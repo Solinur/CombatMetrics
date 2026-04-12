@@ -73,6 +73,7 @@ end
 
 util.GetFormattedAbilityIcon = LC.GetFormattedAbilityIcon
 util.GetFormattedAbilityName = LC.GetFormattedAbilityName
+util.GetDamageColor = LC.GetDamageColor
 
 function util.spairs(t, order) -- from https://stackoverflow.com/questions/15706270/sort-a-table-in-lua
 	local keys = {}

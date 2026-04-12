@@ -10,12 +10,7 @@ local logger
 local ui = CMXint.ui
 
 local cat = util.MainCategories
-local UnitOppositionCategory = {
-	[cat.CMX_CATEGORY_DAMAGE_DONE] = cat.CMX_CATEGORY_DAMAGE_RECEIVED,
-	[cat.CMX_CATEGORY_DAMAGE_RECEIVED] = cat.CMX_CATEGORY_DAMAGE_DONE,
-	[cat.CMX_CATEGORY_HEALING_DONE] = cat.CMX_CATEGORY_HEALING_RECEIVED,
-	[cat.CMX_CATEGORY_HEALING_RECEIVED] = cat.CMX_CATEGORY_HEALING_DONE,
-}
+local cat_opp = util.OppositionCategory
 
 local UNIT_NAME_FORMAT_ID = "(<<2>>) <<1>>"
 local UNIT_NAME_FORMAT_DEFAULT = "<<1>>"
@@ -116,24 +111,26 @@ local function InitUnitsList(panel)
 		icon:ApplyPosition(rowControl, 2, 0, rowHeight, rowHeight)
 
 		local label = panel:AcquireSharedControl(CT_LABEL)
-		label:ApplyPosition(rowControl, 33, 0, 167)
+		label:ApplyPosition(rowControl, 32, 0, 162)
 		label:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
 
 		local bar = panel:AcquireSharedControl(CT_TEXTURE)
-		bar:ApplyPosition(rowControl, 31, 0, 171, rowHeight)
+		bar:ApplyPosition(rowControl, 30, 0, 166, rowHeight)
 		bar:SetTexture("esoui/art/unitframes/progressbar_raidhealth.dds")
 
 		local perSecond = panel:AcquireSharedControl(CT_LABEL)
-		perSecond:ApplyPosition(rowControl, 204, 0, 46)
+		perSecond:ApplyPosition(rowControl, 198, 0, 48)
 		perSecond:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
 
 		local total = panel:AcquireSharedControl(CT_LABEL)
-		total:ApplyPosition(rowControl, 252, 0, 58)
+		total:ApplyPosition(rowControl, 248, 0, 60)
 		total:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
 
 		local perCent = panel:AcquireSharedControl(CT_LABEL)
-		perCent:ApplyPosition(rowControl, 312, 0, 46)
+		perCent:ApplyPosition(rowControl, 310, 0, 32)
 		perCent:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+
+		-- TODO: Fix Column widths
 
 		rowControl.controls = { icon, label, bar, perSecond, total, perCent }
 		rowControl.recovered = true
@@ -173,7 +170,7 @@ local function InitUnitsList(panel)
 		-- highlightControl:SetHidden(not highlight)
 
 		---@cast bar TextureControl
-		local barColor = util.IsDamageCategory(panel.settings.category) and UNIT_BAR_COLOR_DAMAGE or UNIT_BAR_COLOR_HEAL
+		local barColor = util.IsDamageCategory() and UNIT_BAR_COLOR_DAMAGE or UNIT_BAR_COLOR_HEAL
 		local maxwidth = label:GetWidth()
 		bar:SetWidth(maxwidth * ratio)
 		bar:SetColor(barColor:UnpackRGBA())
@@ -239,12 +236,10 @@ local function InitUnitsList(panel)
 			return
 		end
 
-		CMX_CATEGORY_DATA = categoryData
-
 		ZO_ClearTable(self.masterList)
 
 		local durationMs = categoryData.endTime - categoryData.startTime
-		local oppositionCategory = UnitOppositionCategory[category]
+		local oppositionCategory = cat_opp[category]
 
 		dataList.playerAmountSum = 0
 		dataList.groupAmountSum = 0
@@ -255,6 +250,8 @@ local function InitUnitsList(panel)
 				local unitInfo = fightData.units[unitId]
 				if unitInfo then -- TODO: check why this can be nil
 					self:AddDataEntry(unitInfo, playerUnitData, groupData, durationMs)
+				else
+					logger:Error("Unit info not found for unit ID: %s", unitId)
 				end
 			end
 		end
@@ -269,7 +266,7 @@ local function InitUnitsList(panel)
 
 	function dataList:FilterScrollList() end
 
-	dataList.sortHeaderGroup:SelectHeaderByKey("Total")
+	dataList.sortHeaderGroup:SelectHeaderByKey("playerAmount")
 
 	return dataList
 end
@@ -282,7 +279,7 @@ function CMXint.InitializeUnitsPanel(control)
 	UnitsPanel.selections = {}
 
 	function UnitsPanel:UpdateHeaderLabels()
-		local isDamage = util.IsDamageCategory(self.settings.category)
+		local isDamage = util.IsDamageCategory()
 
 		local headers = self.control:GetNamedChild("Headers")
 		local nameControl = headers:GetNamedChild("Name"):GetNamedChild("Name") --[[@as LabelControl]]
@@ -307,7 +304,7 @@ function CMXint.InitializeUnitsPanel(control)
 	end
 
 	function UnitsPanel:Clear()
-		logger:Debug("Clearing Units Panel")
+		logger:Info("Clearing Units Panel")
 		self.dataList:Clear()
 	end
 
