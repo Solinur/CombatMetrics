@@ -324,8 +324,8 @@ function CMXint.InitializeCombatStatsPanel(control)
 		local activePlayerTime = playerData and (playerData.endTime - playerData.startTime) or 0
 		local activeGroupTime = groupData.endTime - groupData.startTime
 
-		aps1 = util.SafeDivide(playerValue, activePlayerTime) * 1000
-		aps2 = util.SafeDivide(groupValue, activeGroupTime) * 1000
+		aps1 = util.SafeDivide(playerValue, activePlayerTime / 1000)
+		aps2 = util.SafeDivide(groupValue, activeGroupTime / 1000)
 		apsratio = util.SafeDivide(aps1, aps2) * 100
 
 		self.dpsValue1:SetText(string.format(VALUE_FORMAT, aps1))
