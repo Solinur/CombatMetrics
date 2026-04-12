@@ -18,7 +18,6 @@ local em = GetEventManager()
 ---@field sizes number[]
 ---@field anchors table[]
 ---@field font string?
-
 local function ResizeControl(control, scale)
 	if control.sizes == nil and control.anchors == nil then
 		return
@@ -66,9 +65,10 @@ local function ResizeControl(control, scale)
 		control:SetAnchor(unpack(anchor2))
 	end
 
-	local fontcontrol = control:GetNamedChild("Font")
+	local fontcontrol = control:GetNamedChild("Font") -- TODO: replace with GetFont
 
 	if fontcontrol ~= nil then
+		---@diagnostic disable-next-line: param-type-mismatch
 		local font, size, style = unpack(fontcontrol.font)
 		if size then
 			size = tonumber(size) * (scale + 0.2) / 1.2
