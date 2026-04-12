@@ -369,7 +369,7 @@ local function InitAbilitiesList(panel)
 		local ratio2 = abilityData[ZO_CachedStrFormat("<<c:1>>Count", critLayout[2])]
 		local crits = abilityData.criticalCount
 		local totalHits = abilityData.totalCount
-		local critRatio = crits / totalHits
+		local critRatio = util.SafeDivide(crits, totalHits)
 
 		local labelFormat = panel:ShowIds() and abilityId and ABILITY_NAME_FORMAT_ID or ABILITY_NAME_FORMAT_DEFAULT
 		local name = ZO_CachedStrFormat(labelFormat, GetFormattedAbilityName(abilityId, false), abilityId)
