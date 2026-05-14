@@ -414,8 +414,8 @@ local function decodeCombatLogLine(line, fight)
 			logdata[4] = logdata[4] / 100
 		end
 	elseif layoutId == LAYOUT_STATS_ADV then -- type, timems, statchange, newvalue, statname
-		line[3] = (line[3] / 10) - 838860 -- avoid negative/float numbers
-		line[4] = (line[4] / 10)
+		logdata[3] = (logdata[3] / 10) - 838860 -- avoid negative/float numbers
+		logdata[4] = (logdata[4] / 10)
 	elseif layoutId == LAYOUT_POWER then -- type, timems, abilityId, powerValueChange, powerType
 		if logdata[3] == 262141 then
 			logdata[3] = nil
