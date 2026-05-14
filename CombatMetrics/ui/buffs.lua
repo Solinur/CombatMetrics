@@ -623,13 +623,13 @@ local function InitBuffsList(panel)
 
 			-- TODO: Check if more elaborate analysis needed (parallel buffs ?)
 		elseif groupData[1].mainAbilityId then
-			for i, groupEntry in groupData do
+			for i, groupEntry in ipairs(groupData) do
 				local groupEntryData = groupEntry.data
 				if groupEntryData.uptime > entryData.uptime then
 					entryData.uptime = groupEntryData.uptime
 					entryData.groupUptime = groupEntryData.uptime
-					entryData.count = groupEntryData.uptime
-					entryData.groupCount = groupEntryData.uptime
+					entryData.count = groupEntryData.count
+					entryData.groupCount = groupEntryData.groupCount
 				end
 			end
 		end
