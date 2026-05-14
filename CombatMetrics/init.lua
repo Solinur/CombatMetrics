@@ -37,9 +37,12 @@ else
 	function internalLogger:Debug(...)
 		df(...)
 	end
+	function internalLogger:Error(...)
+		local msg = string.format(...)
+		error(msg, 2)
+	end
 	internalLogger.Warn = internalLogger.Debug
 	internalLogger.Info = internalLogger.Debug
-	internalLogger.Error = internalLogger.Debug
 	internalLogger.Verbose = internalLogger.Debug
 	CMXint.logger.main = internalLogger
 end
