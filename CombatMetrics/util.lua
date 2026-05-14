@@ -616,7 +616,7 @@ end
 -- end
 
 function util.GetSelectionData()
-	logger:Warn("util.GetSelectionData is dnot implemented yet.")
+	logger:Warn("util.GetSelectionData is not implemented yet.")
 end
 
 local isFileInitialized = false

@@ -15,7 +15,7 @@ local function InitializeSharedControl(control, pool, objectKey)
 	control.shared = true
 end
 
-function ReleaseSharedControl(control)
+local function ReleaseSharedControl(control)
 	control:SetParent(CombatMetricsReport)
 	control.pool:ReleaseObject(control.objectKey)
 
@@ -49,7 +49,7 @@ end
 local function ApplyIndent(control, indent)
 	local scale = CMXint.settings.fightReport.scale
 
-	local indent = indent * scale
+	indent = indent * scale
 
 	local _, point, relTo, relPoint, offsX, offsY, _ = control:GetAnchor(0)
 	---@diagnostic disable-next-line: missing-parameter
