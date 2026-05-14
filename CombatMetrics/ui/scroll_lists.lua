@@ -19,13 +19,17 @@ local ui = CMXint.ui
 ---@class SortFilterList: ZO_SortFilterList
 ---@field New fun(self:SortFilterList, control: Control, rowTemplate: string, rowHeight: number?): SortFilterList
 ---@field panel Panel
+---@field selections SelectionsObject
 ---@field MUST_IMPLEMENT fun()
 local SortFilterList = ZO_SortFilterList:Subclass()
 SortFilterList.UpdateRow = SortFilterList:MUST_IMPLEMENT()
+SortFilterList.RecoverRow = SortFilterList:MUST_IMPLEMENT()
 SortFilterList.BuildMasterList = SortFilterList:MUST_IMPLEMENT()
 
 ui.SortFilterList = SortFilterList
 ui.DEFAULT_ROWHEIGHT = 20
+
+local registeredLists = {}
 
 local function onRowControlReset(self, pool)
 	self.recovered = false
@@ -56,12 +60,25 @@ end
 function SortFilterList:Initialize(control, rowTemplate, rowHeight) -- TODO: is rowHeight neccessary ?
 	ZO_SortFilterList.Initialize(self, control)
 
-	local function UpdateRow(...)
-		self:UpdateRow(...)
+	local function UpdateRow(rowControl, data, scrollList)
+		if not rowControl.recovered then
+			self:RecoverRow(rowControl)
+		end
+		self:UpdateRow(rowControl, data, scrollList)
+		local hl = rowControl:GetNamedChild("HighLight")
+		if hl then
+			if self.selections:IsSelected(data.id) then
+				hl:SetCenterColor(0.25, 0.45, 1.0, 0.45)
+			else
+				hl:SetCenterColor(1, 1, 1, 0.2)
+			end
+		end
 	end
 
 	---@type Control
 	local listControl = self.list
+	listControl.sortFilterList = self ---@diagnostic disable-line: inject-field
+
 	self.sortFunction = function(listEntry1, listEntry2)
 		return self:CompareItems(listEntry1, listEntry2)
 	end
@@ -69,6 +86,11 @@ function SortFilterList:Initialize(control, rowTemplate, rowHeight) -- TODO: is 
 
 	rowHeight = rowHeight or ui.DEFAULT_ROWHEIGHT
 	self.rowHeight = rowHeight
+
+	self.selections = ui.SelectionsObject:New()
+	self.selections.sortFilterList = self
+
+	registeredLists[#registeredLists + 1] = self
 
 	ZO_ScrollList_AddDataType(listControl, 1, rowTemplate, rowHeight, UpdateRow, nil, nil, onRowControlReset)
 	ZO_ScrollList_EnableHighlight(listControl, "ZO_ThinListHighlight")
@@ -134,4 +156,21 @@ function CMX_SortHeader_Initialize(control, key, initialDirection, highlightTemp
 	control["usesArrow"] = true
 	control["highlightTemplate"] = highlightTemplate -- TODO: Find highlight template
 	control:SetMouseEnabled(true)
+end
+
+function CMXint.IsSelectionActive()
+	for _, list in ipairs(registeredLists) do
+		if list.selections.active then
+			return true
+		end
+	end
+	return false
+end
+
+function CMXint.ClearSelections()
+	for _, list in ipairs(registeredLists) do
+		if list.selections.active then
+			list.selections:Clear()
+		end
+	end
 end

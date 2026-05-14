@@ -337,6 +337,12 @@ function PanelObject:GetCurrentCategoryCombatData()
 	return categoryData
 end
 
+---@return SelectionsObject?
+function PanelObject:GetSelections()
+	local list = self.dataList
+	return list and list.selections or nil
+end
+
 function PanelObject:Release()
 	self:ReleaseSharedControls()
 end

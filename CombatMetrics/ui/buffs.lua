@@ -403,9 +403,6 @@ local function InitBuffsList(panel)
 	function dataList:UpdateRow(rowControl, data, scrollList)
 		local panel = self.panel
 
-		if rowControl.recovered ~= true then
-			self:RecoverRow(rowControl)
-		end
 		local icon, label, bar, bar_group, count, uptime = unpack(rowControl.controls)
 
 		local labelFormat = panel:ShowIds() and data.abilityId and BUFF_NAME_FORMAT_ID or BUFF_NAME_FORMAT_DEFAULT
@@ -487,7 +484,6 @@ local function InitBuffsList(panel)
 		end
 
 		local hasStacks = data.stacks and (data.iconId == 126597 or data.maxStacks > 1)
-		local selected = false -- selectedbuffs ~= nil and (selectedbuffs[buffName] ~= nil) or false -- TODO: Selections
 
 		local name = GetFormattedAbilityName(abilityId)
 		local labelText = name
@@ -504,8 +500,8 @@ local function InitBuffsList(panel)
 
 		---@class BuffRowData
 		local rowData = {
+			id = abilityId,
 			indent = 0,
-			selected = selected,
 			hasDetails = hasStacks,
 
 			abilityId = abilityId,
@@ -567,7 +563,6 @@ local function InitBuffsList(panel)
 				---@type BuffRowData
 				local rowData = {
 					indent = 1,
-					selected = false,
 					hasDetails = false,
 
 					effectType = data.effectType,
@@ -703,11 +698,12 @@ function CMXint.InitializeBuffsPanel(control)
 	end
 
 	BuffPanel.dataList = InitBuffsList(BuffPanel)
-	BuffPanel.selections = {}
 
 	function BuffPanel:Update()
 		logger:Debug("Updating Buff Panel")
 
+		local sel = self:GetSelections()
+		if sel then sel:Clear() end
 		self.dataList:UpdateRowHeight()
 		self.dataList:RefreshData()
 	end

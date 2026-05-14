@@ -260,10 +260,6 @@ local function InitAbilitiesList(panel)
 	function dataList:UpdateRow(rowControl, data, scrollList)
 		local panel = self.panel
 
-		if rowControl.recovered ~= true then
-			self:RecoverRow(rowControl)
-		end
-
 		local icon, label, bar, fraction, perSecond, total, crits, hits, critRatio, averageHit, minMax =
 			unpack(rowControl.controls)
 
@@ -357,8 +353,6 @@ local function InitAbilitiesList(panel)
 		end
 
 		local settings = panel.settings
-		local selected = false -- selectedunits ~= nil and (selectedunits[unitId] ~= nil) or false -- TODO: Selections
-
 		local category = settings.category
 		local isOverheal = category == cat.CMX_CATEGORY_HEALING_DONE and settings.includeOverheal
 		local amount = isOverheal and abilityData.overflowAmount or abilityData.totalAmount
@@ -394,6 +388,7 @@ local function InitAbilitiesList(panel)
 
 		---@class AbilityRowData
 		local rowData = {
+			id = abilityId,
 			icon = GetFormattedAbilityIcon(abilityId, false),
 			name = name,
 			color = color,
@@ -405,7 +400,6 @@ local function InitAbilitiesList(panel)
 			critRatio = critRatio,
 			average = average,
 			minmax = minmax,
-			selected = selected,
 		}
 
 		table.insert(self.masterList, ZO_ScrollList_CreateDataEntry(1, rowData))
@@ -422,7 +416,6 @@ function CMXint.InitializeAbilitiesPanel(control)
 	---@class AbilityPanel: Panel
 	AbilitiesPanel = CMXint.PanelObject:New(control, "abilities")
 	AbilitiesPanel.dataList = InitAbilitiesList(AbilitiesPanel)
-	AbilitiesPanel.selections = {}
 
 	function AbilitiesPanel:GetRatioLayout()
 		local settings = self.settings
@@ -488,6 +481,8 @@ function CMXint.InitializeAbilitiesPanel(control)
 	function AbilitiesPanel:Update()
 		logger:Info("Updating Ability Panel")
 
+		local sel = self:GetSelections()
+		if sel then sel:Clear() end
 		self:UpdateHeaderLabels()
 
 		self.dataList:UpdateRowHeight()

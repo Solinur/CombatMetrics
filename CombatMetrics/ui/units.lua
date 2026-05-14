@@ -142,10 +142,6 @@ local function InitUnitsList(panel)
 	function dataList:UpdateRow(rowControl, data, scrollList)
 		local panel = self.panel
 
-		if rowControl.recovered ~= true then
-			self:RecoverRow(rowControl)
-		end
-
 		local icon, label, bar, perSecond, total, perCent = unpack(rowControl.controls)
 
 		---@cast icon TextureControl
@@ -194,8 +190,6 @@ local function InitUnitsList(panel)
 			return
 		end
 
-		local selected = false -- selectedunits ~= nil and (selectedunits[unitId] ~= nil) or false -- TODO: Selections
-
 		local panelSettings = self.panel.settings
 		local category = panelSettings.category
 		local isOverheal = category == cat.CMX_CATEGORY_HEALING_DONE and panelSettings.showOverHeal
@@ -211,11 +205,11 @@ local function InitUnitsList(panel)
 
 		---@class UnitRowData
 		local rowData = {
+			id = unitData.unitId,
 			name = name,
 			icon = GetUnitIcon(unitData),
 			color = GetUnitColor(unitData),
 			perSecondValue = playerAmount / (durationMs / 1000),
-			selected = selected,
 			playerAmount = playerAmount,
 			groupAmount = groupAmount,
 		}
@@ -276,7 +270,6 @@ function CMXint.InitializeUnitsPanel(control)
 	UnitsPanel = CMXint.PanelObject:New(control, "units")
 
 	UnitsPanel.dataList = InitUnitsList(UnitsPanel)
-	UnitsPanel.selections = {}
 
 	function UnitsPanel:UpdateHeaderLabels()
 		local isDamage = util.IsDamageCategory()
@@ -297,6 +290,8 @@ function CMXint.InitializeUnitsPanel(control)
 	function UnitsPanel:Update()
 		logger:Info("Updating Unit Panel")
 
+		local sel = self:GetSelections()
+		if sel then sel:Clear() end
 		self:UpdateHeaderLabels()
 
 		self.dataList:UpdateRowHeight()
