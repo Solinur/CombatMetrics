@@ -13,10 +13,10 @@ local function iterRange(scrollData, anchorId, clickedId)
 	local iStart, iEnd
 	for i = 1, #scrollData do
 		local entryId = scrollData[i].data.id
-		if entryId == anchorId then
+		if not iStart and entryId == anchorId then
 			iStart = i
 		end
-		if entryId == clickedId then
+		if not iEnd and entryId == clickedId then
 			iEnd = i
 		end
 		if iStart and iEnd then
@@ -42,14 +42,15 @@ local function iterRange(scrollData, anchorId, clickedId)
 end
 
 ---@class SelectionsObject: ZO_InitializingObject
----@field New fun(self: SelectionsObject): SelectionsObject
+---@field New fun(self: SelectionsObject, sortFilterList: SortFilterList): SelectionsObject
 ---@field sortFilterList SortFilterList
 ---@field selectedItems table<any, true>
 ---@field anchor any
 ---@field active boolean
 local SelectionsObject = ZO_InitializingObject:Subclass()
 
-function SelectionsObject:Initialize()
+function SelectionsObject:Initialize(sortFilterList)
+	self.sortFilterList = sortFilterList
 	self.selectedItems = {}
 	self.anchor = nil
 	self.active = false
@@ -58,6 +59,7 @@ end
 function SelectionsObject:SelectItem(id)
 	self.selectedItems[id] = true
 	self.anchor = id
+	self.active = true
 end
 
 function SelectionsObject:IsSelected(id)
@@ -65,14 +67,6 @@ function SelectionsObject:IsSelected(id)
 end
 
 function SelectionsObject:Count()
-	local n = 0
-	for _ in pairs(self.selectedItems) do
-		n = n + 1
-	end
-	return n
-end
-
-function SelectionsObject:Count2()
 	return NonContiguousCount(self.selectedItems)
 end
 

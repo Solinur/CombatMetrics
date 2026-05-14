@@ -87,8 +87,7 @@ function SortFilterList:Initialize(control, rowTemplate, rowHeight) -- TODO: is 
 	rowHeight = rowHeight or ui.DEFAULT_ROWHEIGHT
 	self.rowHeight = rowHeight
 
-	self.selections = ui.SelectionsObject:New()
-	self.selections.sortFilterList = self
+	self.selections = ui.SelectionsObject:New(self)
 
 	registeredLists[#registeredLists + 1] = self
 
