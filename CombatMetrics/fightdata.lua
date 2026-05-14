@@ -79,7 +79,14 @@ end
 function FightDataManager:RemoveFight(fightIndex)
 	local currentIndex = self.currentIndex
 	if fightIndex == currentIndex then
-		self:SelectFightByIndex(currentIndex - 1)
+		if currentIndex > 1 then
+			self:SelectFightByIndex(currentIndex - 1)
+		else
+			self.data = nil
+			self.currentIndex = nil
+			CMXint.ClearSelections()
+			CombatMetricsReport:Update()
+		end
 	elseif fightIndex < currentIndex then
 		self.currentIndex = currentIndex - 1
 	end
