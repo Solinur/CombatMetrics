@@ -338,7 +338,7 @@ function PanelObject:GetCurrentCategoryCombatData()
 	return categoryData
 end
 
----@return SelectionsObject?
+---@return SelectionHandler?
 function PanelObject:GetSelections()
 	local list = self.dataList
 	return list and list.selections or nil

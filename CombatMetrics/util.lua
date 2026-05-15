@@ -1,4 +1,4 @@
--- Utilities: category constants, data query helpers and DPI layout scaling.
+-- Utilities: category constants and data query helpers.
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint

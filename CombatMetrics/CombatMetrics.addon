@@ -19,55 +19,51 @@ lang/$(language).lua
 
 init.lua
 util.lua
-structs.lua
 fightdata.lua
 ; menu.lua
 
-bindings.xml
+ui/bindings.xml
 
-ui/ui.lua
-ui/scroll_lists.lua
-ui/templates.xml
-ui/controls.lua
-ui/selections.lua
+ui/base/ui.lua
+ui/base/scroll_lists.lua
+ui/base/templates.xml
+ui/base/controls.lua
 
-ui/title_bar.lua
-ui/title_bar.xml
-ui/menu_bar.lua
-ui/menu_bar.xml
-ui/info_row.lua
-ui/info_row.xml
+ui/panels/title_bar.lua
+ui/panels/title_bar.xml
+ui/panels/menu_bar.lua
+ui/panels/info_row.lua
+ui/panels/info_row.xml
 
-ui/combat_stats.lua
-ui/combat_stats.xml
-; ui/resources.lua
-; ui/player_stats.lua
-; ui/player_stats.xml
-ui/buffs.lua
-ui/buffs.xml
-ui/units.lua
-ui/units.xml
-ui/abilities.lua
-ui/abilities.xml
+ui/panels/combat_stats.lua
+; ui/panels/resources.lua
+; ui/panels/player_stats.lua
+; ui/panels/player_stats.xml
+ui/panels/buffs.lua
+ui/panels/buffs.xml
+ui/panels/units.lua
+ui/panels/units.xml
+ui/panels/abilities.lua
+ui/panels/abilities.xml
 ; 
-; ui/skills.lua
-; ui/skills.xml
-; ui/equipment.lua
-; ui/equipment.xml
-; ui/consumables.lua
-; ui/consumables.xml
-; ui/champion_points.lua
+; ui/panels/skills.lua
+; ui/panels/skills.xml
+; ui/panels/equipment.lua
+; ui/panels/equipment.xml
+; ui/panels/consumables.lua
+; ui/panels/consumables.xml
+; ui/panels/champion_points.lua
 
-; ui/combat_log.lua
-; ui/combat_log.xml
-; ui/graph.lua
-; ui/graph.xml
+; ui/panels/combat_log.lua
+; ui/panels/combat_log.xml
+; ui/panels/graph.lua
+; ui/panels/graph.xml
 
-; ui/fight_list.lua
-; ui/fight_list.xml
+; ui/panels/fight_list.lua
+; ui/panels/fight_list.xml
 
-; ui/donate.lua
-; ui/donate.xml
+; ui/panels/donate.lua
+; ui/panels/donate.xml
 
 ui/fight_report.lua
 ui/fight_report.xml
