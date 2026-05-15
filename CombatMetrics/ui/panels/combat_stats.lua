@@ -314,7 +314,7 @@ function CMXint.InitializeCombatStatsPanel(control)
 		end
 
 		local playerValue, groupValue
-		if category == "healingOut" and self.settings.includeOverheal then
+		if category == cat.CMX_CATEGORY_HEALING_DONE and self.settings.showOverHeal then
 			playerValue = playerData and (playerData.totalAmount + playerData.overflowAmount) or 0
 			groupValue = groupData.totalAmount + groupData.overflowAmount
 		else

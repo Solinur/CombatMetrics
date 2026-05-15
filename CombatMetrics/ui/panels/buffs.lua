@@ -228,8 +228,10 @@ local function GetBuffData(fightData, category)
 		unitIds[#unitIds + 1] = fightData.unitIds.player
 	elseif category == BUFF_CATEGORY_GROUP then
 		local group = fightData.unitIds.group
-		if group and #group > 0 then
-			ZO_ShallowTableCopy(fightData.unitIds, unitIds)
+		if group and next(group) then
+			for unitId in pairs(group) do
+				unitIds[#unitIds + 1] = unitId
+			end
 		else
 			unitIds[#unitIds + 1] = fightData.unitIds.player
 		end

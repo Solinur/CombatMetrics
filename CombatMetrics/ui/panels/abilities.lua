@@ -355,7 +355,7 @@ local function InitAbilitiesList(panel)
 
 		local settings = panel.settings
 		local category = settings.category
-		local isOverheal = category == cat.CMX_CATEGORY_HEALING_DONE and settings.includeOverheal
+		local isOverheal = category == cat.CMX_CATEGORY_HEALING_DONE and settings.showOverHeal
 		local amount = isOverheal and abilityData.overflowAmount or abilityData.totalAmount
 		local abilityType = util.IsHealingCategory() and abilityData.powerType or abilityData.damageType
 

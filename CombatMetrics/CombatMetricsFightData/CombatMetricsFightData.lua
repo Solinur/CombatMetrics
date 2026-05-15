@@ -404,7 +404,7 @@ local function decodeCombatLogLine(line, fight)
 		if logdata[3] == 0 then
 			logdata[3] = nil
 		end
-	elseif layoutId == LAYOUT_STATS or layoutId == LAYOUT_STATS_ADV then -- type, timems, statchange, newvalue, statname
+	elseif layoutId == LAYOUT_STATS then -- type, timems, statchange, newvalue, statname
 		if fight.svversion < 5 then
 			logdata[5] = statTableConvert[logdata[5]]
 		end

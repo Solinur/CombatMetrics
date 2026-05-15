@@ -78,6 +78,7 @@ function FightDataManager:SelectPreviousFight()
 end
 
 function FightDataManager:RemoveFight(fightIndex)
+	if fightIndex == nil then return end
 	local currentIndex = self.currentIndex
 	if fightIndex == currentIndex then
 		if currentIndex > 1 then
