@@ -61,7 +61,8 @@ function CMXint.InitializeTitlePanel(control)
 	---@diagnostic disable-next-line: missing-parameter
 	editbox:SetHandler("OnFocusLost", OnEditTitleEnd, "CMX")
 
-	function TitlePanel:Update(fightData)
+	function TitlePanel:Update()
+		local fightData = self:GetCurrentFightData()
 		logger:Debug("Updating TitlePanel")
 
 		local charInfo = control:GetNamedChild("CharacterInfo")

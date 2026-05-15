@@ -325,10 +325,13 @@ function PanelObject:GetCurrentFightData()
 	end
 end
 
----@return UnitDamageData|UnitHealData
+---@return UnitDamageData|UnitHealData|nil
 function PanelObject:GetCurrentCategoryCombatData()
 	local category = self.settings.category
 	local fightData = self:GetCurrentFightData()
+	if fightData == nil then
+		return nil
+	end
 	local categoryData = fightData[category]
 
 	if categoryData == nil then
