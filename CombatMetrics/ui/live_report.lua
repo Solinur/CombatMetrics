@@ -527,7 +527,7 @@ end
 
 function LiveReport:Update()
 	if not self:IsEnabled() then -- TODO: bail when not in combat
-		LiveReport:Toggle(false)
+		self:Toggle(false)
 		return
 	end
 

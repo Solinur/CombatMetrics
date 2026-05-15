@@ -102,7 +102,7 @@ function util.spairs(t, order) -- from https://stackoverflow.com/questions/15706
 end
 
 function util.searchtable(t, field, value)
-	if value == nil then
+	if t == nil or value == nil then
 		return false
 	end
 
@@ -268,7 +268,6 @@ local function Initialize(eventId, addon)
 
 	assert(CMXint.InitializeFightDataHandler(), "Initialization of fight data module failed")
 	assert(CMXint.InitializeUtils(), "Initialization of utils module failed")
-	assert(CMXint.InitializeStructs(), "Initialization of structs module failed")
 	assert(CMXint.InitializeUI(), "Initialization of ui module failed")
 	-- assert(CMXint.InitMenu(svdefaults), "Initialization of settings menu failed")
 
