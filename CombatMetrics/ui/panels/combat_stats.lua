@@ -327,7 +327,7 @@ function CMXint.InitializeCombatStatsPanel(control)
 
 		aps1 = util.SafeDivide(playerValue, activePlayerTime / 1000)
 		aps2 = util.SafeDivide(groupValue, activeGroupTime / 1000)
-		apsratio = util.SafeDivide(aps1, aps2) * 100
+		apsratio = groupValue > 0 and playerValue / groupValue * 100 or 0
 
 		self.dpsValue1:SetText(string.format(VALUE_FORMAT, aps1))
 		self.dpsValue2:SetText(string.format(VALUE_FORMAT, aps2))

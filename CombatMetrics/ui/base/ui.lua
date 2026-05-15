@@ -159,9 +159,9 @@ end
 ---@param control Control
 ---@param setcolor any can be hex or rgba, ZO_ColorDef takes care of this
 function CMXint.SetLabelColor(control, setcolor)
+	local color = ZO_ColorDef:New(setcolor)
 	for i = 1, control:GetNumChildren() do
 		local child = control:GetChild(i)
-		local color = ZO_ColorDef:New(setcolor)
 
 		if child:GetType() == CT_LABEL and child["nocolor"] ~= true then
 			---@cast child LabelControl
@@ -306,17 +306,6 @@ function PanelObject:AcquireSharedControl(controlType)
 
 	table.insert(self.sharedControls, control)
 	return control
-end
-
----@param control PanelControl
-function PanelObject.OnShow(control)
-	logger:Info("OnShow, Panel: %s", control.panel.name)
-	return control.panel:Recover()
-end
-
----@param control PanelControl
-function PanelObject:OnHide(control)
-	return control.panel:Release()
 end
 
 function PanelObject:GetCurrentFightData()

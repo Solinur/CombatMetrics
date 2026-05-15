@@ -128,10 +128,10 @@ do -- Handling Buffs Context Menu
 
 		local category = settings.category
 
-		if util.IsDamageCategory() and settings.rightpanel == "buffsout" then
+		if util.IsDamageCategory() and BuffPanel.buffCategory == "Enemy" then
 			unitType = "boss"
 			AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTBUFF_BOSS), postSelectionBuffUptime)
-		elseif util.IsHealingCategory() and settings.rightpanel == "buffsout" then
+		elseif util.IsHealingCategory() and BuffPanel.buffCategory == "Group" then
 			unitType = "group"
 			AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTBUFF_GROUP), postSelectionBuffUptime)
 		end
@@ -162,14 +162,12 @@ end
 ---@param source EffectData
 ---@param dest EffectData
 local function CombineEffects(source, dest)
-	assert(
-		dest.name == source.name,
-		debug.traceback(string.format("Name mismatch when combining buff data: %s ~= %s.", dest.name, source.name))
-	)
-	assert(
-		dest.iconId == source.iconId,
-		debug.traceback(string.format("ID mismatch when combining buff data: %d ~= %d.", dest.iconId, source.iconId))
-	)
+	if dest.name ~= source.name then
+		error(string.format("Name mismatch when combining buff data: %s ~= %s.", dest.name, source.name), 2)
+	end
+	if dest.iconId ~= source.iconId then
+		error(string.format("ID mismatch when combining buff data: %s ~= %s.", tostring(dest.iconId), tostring(source.iconId)), 2)
+	end
 	dest.uptime = dest.uptime + source.uptime
 	dest.count = dest.count + source.count
 	dest.groupUptime = dest.groupUptime + source.groupUptime

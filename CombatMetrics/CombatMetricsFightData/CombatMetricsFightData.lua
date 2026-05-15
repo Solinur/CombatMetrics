@@ -236,7 +236,7 @@ for key, value in pairs(CombatResultTableLoad) do
 	CombatResultTableSave[value] = key
 end
 
-CombatMechnicFlagTableLoad = {
+local CombatMechnicFlagTableLoad = {
 	[1] = COMBAT_MECHANIC_FLAGS_HEALTH,
 	[2] = COMBAT_MECHANIC_FLAGS_MAGICKA,
 	[3] = COMBAT_MECHANIC_FLAGS_STAMINA,
@@ -251,7 +251,7 @@ for key, value in pairs(CombatMechnicFlagTableLoad) do
 	CombatMechnicFlagTableSave[value] = key
 end
 
-CombatMechnicFlagTableLoadLegacy = {
+local CombatMechnicFlagTableLoadLegacy = {
 	[-2] = COMBAT_MECHANIC_FLAGS_HEALTH,
 	[0] = COMBAT_MECHANIC_FLAGS_MAGICKA,
 	[6] = COMBAT_MECHANIC_FLAGS_STAMINA,

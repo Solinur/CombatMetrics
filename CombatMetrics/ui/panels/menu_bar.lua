@@ -468,7 +468,7 @@ end
 function CMXint.InitializeMenuPanel(control)
 	---@class MenuPanel: Panel
 	local MenuPanel = CMX.internal.PanelObject:New(control, "menu")
-	SVHandler = CMXint.SVHandler
+	local SVHandler = CMXint.SVHandler
 
 	function MenuPanel:Update()
 		local notificationSettings = CMXint.settings.notification
@@ -484,6 +484,7 @@ function CMXint.InitializeMenuPanel(control)
 		local isVeteranRaid = ValidRaids[GetCurrentParticipatingRaidId()] == true
 		local isWithinAllowedTime = date >= 20200417 and date <= 20200423
 
+		-- NOTE: Leave for now, even if unused
 		local show = notificationSettings.force
 			or isMe
 			or (isGerman and isEUServer and isNotificationAllowed and isVeteranRaid and isWithinAllowedTime)
@@ -561,7 +562,7 @@ function CMXint.InitializeMenu()
 	end
 	logger = util.initSublogger("Menu")
 
-	MenuPanel = ui:GetPanel("menu") --[[@as MenuPanel]]
+	local MenuPanel = ui:GetPanel("menu") --[[@as MenuPanel]]
 
 	MenuPanel:SelectScene(MenuPanel.sceneButtons.fightStats)
 	MenuPanel:SelectCategory(MenuPanel.categoryButtons[cat.CMX_CATEGORY_DAMAGE_DONE])

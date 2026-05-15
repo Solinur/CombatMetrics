@@ -214,7 +214,7 @@ for i, layout in ipairs(PANEL_DATA) do
 end
 
 local function resize(control, scale)
-	if control:GetType() == CT_BACKDROP or control.sizes == nil and control.anchors == nil then
+	if control:GetType() == CT_BACKDROP or control.sizes == nil or control.anchors == nil then
 		return
 	end
 	local width, height = unpack(control.sizes)
