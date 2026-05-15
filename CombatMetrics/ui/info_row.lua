@@ -1,3 +1,4 @@
+-- Info row panel (status bar) at the bottom of the fight report.
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint

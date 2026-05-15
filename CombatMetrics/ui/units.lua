@@ -1,3 +1,4 @@
+-- Units panel with scroll list.
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint
@@ -291,7 +292,9 @@ function CMXint.InitializeUnitsPanel(control)
 		logger:Info("Updating Unit Panel")
 
 		local sel = self:GetSelections()
-		if sel then sel:Clear() end
+		if sel then
+			sel:Clear()
+		end
 		self:UpdateHeaderLabels()
 
 		self.dataList:UpdateRowHeight()

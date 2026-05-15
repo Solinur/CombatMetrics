@@ -1,3 +1,4 @@
+-- Shared control classes
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint

@@ -1,3 +1,4 @@
+-- Live report panel: mini DPS/HPS meter updated in real time during combat.
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint

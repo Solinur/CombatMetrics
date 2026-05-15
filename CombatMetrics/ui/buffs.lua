@@ -1,3 +1,4 @@
+-- Buffs panel with scroll list.
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint
@@ -703,7 +704,9 @@ function CMXint.InitializeBuffsPanel(control)
 		logger:Debug("Updating Buff Panel")
 
 		local sel = self:GetSelections()
-		if sel then sel:Clear() end
+		if sel then
+			sel:Clear()
+		end
 		self.dataList:UpdateRowHeight()
 		self.dataList:RefreshData()
 	end

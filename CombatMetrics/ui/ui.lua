@@ -1,3 +1,4 @@
+-- Panel base class, and scene/resize management and ui utilities.
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint

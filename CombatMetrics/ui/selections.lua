@@ -1,3 +1,4 @@
+-- SelectionsObject: Handles selection state for SortFilterList.
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint

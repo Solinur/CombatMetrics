@@ -1,3 +1,4 @@
+-- Combat stats panel: Damage and healing stats.
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint
@@ -223,7 +224,7 @@ function CMXint.InitializeCombatStatsPanel(control)
 				SI_COMBAT_METRICS_NORMAL,
 				SI_COMBAT_METRICS_CRITICAL,
 				SI_COMBAT_METRICS_OVERHEAL,
-				SI_COMBAT_METRICS_ABSOLUTEC,
+				SI_COMBAT_METRICS_ABSOLUTE,
 			}
 			return amountLabel, countLabel, labelList
 		end

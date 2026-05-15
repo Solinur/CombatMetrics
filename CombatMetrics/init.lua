@@ -1,4 +1,4 @@
--- This file contains the initialziation code
+-- CMX and CMX.internal namespace setup, logger initialization, and addon lifecycle hooks.
 
 ---@class CMX
 CombatMetrics = CombatMetrics or {}

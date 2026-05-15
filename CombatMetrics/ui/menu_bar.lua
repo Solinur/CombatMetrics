@@ -1,3 +1,4 @@
+-- Menu bar panel: Buttons baron the left for switching between fights and different data views (scenes).
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint

@@ -1,3 +1,4 @@
+-- Title bar panel: fight name display.
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint

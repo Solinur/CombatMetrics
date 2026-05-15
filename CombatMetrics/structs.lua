@@ -1,3 +1,4 @@
+-- hstructure definitions (DataEntryStruct) and special table structures (empty, read-only)
 ---@diagnostic disable: lowercase-global, unknown-symbol, exp-in-action, miss-symbol
 
 ---@class CMX

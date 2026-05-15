@@ -1,3 +1,4 @@
+-- Abilities panel with scroll list.
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint
@@ -482,7 +483,9 @@ function CMXint.InitializeAbilitiesPanel(control)
 		logger:Info("Updating Ability Panel")
 
 		local sel = self:GetSelections()
-		if sel then sel:Clear() end
+		if sel then
+			sel:Clear()
+		end
 		self:UpdateHeaderLabels()
 
 		self.dataList:UpdateRowHeight()

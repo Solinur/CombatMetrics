@@ -1,3 +1,4 @@
+-- FightDataManager: fight list storage, current selection, and save/remove via SavedVariables.
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint

@@ -1,3 +1,4 @@
+-- Fight report panel, top level window containing all other panels.
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint
@@ -19,7 +20,7 @@ local em = GetEventManager()
 ---@field anchors table[]
 ---@field font string?
 local function ResizeControl(control, scale)
-	if control.sizes == nil and control.anchors == nil then
+	if control.sizes == nil or control.anchors == nil then
 		return
 	end
 	local width, height = unpack(control.sizes)
