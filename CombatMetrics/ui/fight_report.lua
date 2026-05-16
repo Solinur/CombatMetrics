@@ -26,7 +26,7 @@ local function ResizeControl(control, scale)
 	local width, height = unpack(control.sizes)
 	local maxwidth, maxheight = GuiRoot:GetDimensions()
 
-	if width <= 0 or height <= 0 then
+	if width < 0 or height < 0 then
 		logger:Error("Invalid default dimensions for %s: %s, %s", control:GetName(), width, height)
 	end
 

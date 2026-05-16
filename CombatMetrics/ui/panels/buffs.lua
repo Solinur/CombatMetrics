@@ -166,7 +166,14 @@ local function CombineEffects(source, dest)
 		error(string.format("Name mismatch when combining buff data: %s ~= %s.", dest.name, source.name), 2)
 	end
 	if dest.iconId ~= source.iconId then
-		error(string.format("ID mismatch when combining buff data: %s ~= %s.", tostring(dest.iconId), tostring(source.iconId)), 2)
+		error(
+			string.format(
+				"ID mismatch when combining buff data: %s ~= %s.",
+				tostring(dest.iconId),
+				tostring(source.iconId)
+			),
+			2
+		)
 	end
 	dest.uptime = dest.uptime + source.uptime
 	dest.count = dest.count + source.count
@@ -368,7 +375,7 @@ local function InitBuffsList(panel)
 	---@param rowControl BuffRowControl
 	function dataList:RecoverRow(rowControl)
 		local panel = self.panel
-		local rowHeight = self:GetHeight()
+		local rowHeight = self:GetRawHeight()
 
 		local icon = panel:AcquireSharedControl(CT_TEXTURE)
 		icon:ApplyPosition(rowControl, 14, 0, rowHeight, rowHeight)

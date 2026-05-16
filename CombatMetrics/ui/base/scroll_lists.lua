@@ -82,17 +82,14 @@ function SortFilterList:Initialize(control, rowTemplate, rowHeight) -- TODO: is 
 	ZO_SortFilterList.Initialize(self, control)
 
 	local function UpdateRow(rowControl, data, scrollList)
+		rowControl:SetHeight(scrollList.dataTypes[1].height)
 		if not rowControl.recovered then
 			self:RecoverRow(rowControl)
 		end
 		self:UpdateRow(rowControl, data, scrollList)
 		local hl = rowControl:GetNamedChild("HighLight")
 		if hl then
-			if self.selections:IsSelected(data.id) then
-				hl:SetCenterColor(0.25, 0.45, 1.0, 0.45)
-			else
-				hl:SetCenterColor(1, 1, 1, 0.2)
-			end
+			hl:SetHidden(not self.selections:IsSelected(data.id))
 		end
 	end
 
@@ -120,6 +117,9 @@ function SortFilterList:Clear()
 	local listControl = self.list
 	ZO_ScrollList_Clear(listControl)
 	ZO_ScrollList_Commit(listControl)
+	if self.selections then
+		self.selections:Clear()
+	end
 end
 
 
@@ -183,7 +183,7 @@ function SortFilterList:UpdateRowHeight()
 	end
 end
 
-function SortFilterList:GetHeight()
+function SortFilterList:GetRawHeight()
 	return self.rowHeight
 end
 
@@ -274,6 +274,7 @@ function SelectionHandler:Initialize(sortFilterList)
 end
 
 function SelectionHandler:SelectItem(id)
+	logger:Info("Selecting item: %s", tostring(id))
 	self.selectedItems[id] = true
 	self.anchor = id
 	self.active = true
@@ -305,6 +306,7 @@ function SelectionHandler:Clear()
 end
 
 function SelectionHandler:HandleClick(data, button, upInside, ctrl, shift)
+	logger:Info("Selection Click: %s, %d, C:%s, S:%s", tostring(data.id), button, tostring(ctrl), tostring(shift))
 	if not upInside then
 		return
 	end
@@ -326,6 +328,7 @@ function SelectionHandler:HandleClick(data, button, upInside, ctrl, shift)
 		if self.selectedItems[id] and self:Count() == 1 then
 			return self:Clear()
 		else
+			ZO_ClearTable(self.selectedItems)
 			self:SelectItem(id)
 		end
 	elseif ctrl and not shift then
@@ -350,17 +353,14 @@ function SelectionHandler:HandleClick(data, button, upInside, ctrl, shift)
 	end
 
 	self.active = next(self.selectedItems) ~= nil
+	logger:Info("Refreshing visible items.")
 	self.sortFilterList:RefreshVisible()
 end
 
 ui.SelectionHandler = SelectionHandler
 
 function CMXint.AddSelection(rowControl, button, upInside, ctrl, _, shift)
-	local scrollListCtrl = rowControl.scrollList
-	if not scrollListCtrl then
-		return
-	end
-
+	local scrollListCtrl = rowControl:GetParent():GetParent()
 	local sortFilterList = scrollListCtrl.sortFilterList
 	if not sortFilterList then
 		logger:Warn("AddSelection: no sortFilterList on scroll control '%s'", scrollListCtrl:GetName())

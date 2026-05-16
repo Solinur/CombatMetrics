@@ -197,7 +197,7 @@ local function InitAbilitiesList(panel)
 	---@param rowControl RowControl
 	function dataList:RecoverRow(rowControl)
 		local panel = self.panel
-		local rowHeight = self:GetHeight()
+		local rowHeight = self:GetRawHeight()
 
 		--[[
 		TODO: consider rearranging columns: 

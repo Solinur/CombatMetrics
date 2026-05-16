@@ -106,7 +106,7 @@ local function InitUnitsList(panel)
 	---@param rowControl RowControl
 	function dataList:RecoverRow(rowControl)
 		local panel = self.panel
-		local rowHeight = self:GetHeight()
+		local rowHeight = self:GetRawHeight()
 
 		local icon = panel:AcquireSharedControl(CT_TEXTURE)
 		icon:ApplyPosition(rowControl, 2, 0, rowHeight, rowHeight)
@@ -194,11 +194,11 @@ local function InitUnitsList(panel)
 		local panelSettings = self.panel.settings
 		local category = panelSettings.category
 		local isOverheal = category == cat.CMX_CATEGORY_HEALING_DONE and panelSettings.showOverHeal
-		local playerAmount = isOverheal and playerData.overflowAmount or playerData.totalAmount
+		local playerAmount = isOverheal and (playerData.totalAmount + playerData.overflowAmount) or playerData.totalAmount
 
 		local groupAmount = playerAmount
 		if groupData then
-			groupAmount = isOverheal and groupData.overflowAmount or groupData.totalAmount
+			groupAmount = isOverheal and (groupData.totalAmount + groupData.overflowAmount) or groupData.totalAmount
 		end
 
 		local labelFormat = panel:ShowIds() and unitData.unitId and UNIT_NAME_FORMAT_ID or UNIT_NAME_FORMAT_DEFAULT

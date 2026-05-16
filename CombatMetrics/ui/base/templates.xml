@@ -491,6 +491,9 @@
             <OnMouseUp>
                 CombatMetrics.internal.AddSelection( self, button, upInside, ctrl, alt, shift )
             </OnMouseUp>
+            <Controls>
+                <Backdrop name="$(parent)HighLight" inherits="CombatMetrics_Highlight" />
+            </Controls>
         </Control>
 
         <Control name="CombatMetrics_SortHeader" virtual="true" mouseEnabled="true">

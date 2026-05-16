@@ -220,8 +220,8 @@ local function resize(control, scale)
 	local width, height = unpack(control.sizes)
 	local maxwidth, maxheight = GuiRoot:GetDimensions()
 
-	if width <= 0 or height <= 0 then
-		logger:Error("Invalid default dimensions for %s: %s, %s", control:GetName(), width, height)
+	if width < 0 or height < 0 then
+		error(string.format("Invalid default dimensions for %s: %s, %s", control:GetName(), width, height))
 	end
 
 	scale = zo_clamp(scale or 1, 0.5, zo_min(scale or 1, maxwidth / width, maxheight / height, 3))
