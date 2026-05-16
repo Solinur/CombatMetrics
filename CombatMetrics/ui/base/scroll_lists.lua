@@ -274,7 +274,6 @@ function SelectionHandler:Initialize(sortFilterList)
 end
 
 function SelectionHandler:SelectItem(id)
-	logger:Info("Selecting item: %s", tostring(id))
 	self.selectedItems[id] = true
 	self.anchor = id
 	self.active = true
@@ -306,7 +305,6 @@ function SelectionHandler:Clear()
 end
 
 function SelectionHandler:HandleClick(data, button, upInside, ctrl, shift)
-	logger:Info("Selection Click: %s, %d, C:%s, S:%s", tostring(data.id), button, tostring(ctrl), tostring(shift))
 	if not upInside then
 		return
 	end
@@ -353,8 +351,9 @@ function SelectionHandler:HandleClick(data, button, upInside, ctrl, shift)
 	end
 
 	self.active = next(self.selectedItems) ~= nil
-	logger:Info("Refreshing visible items.")
-	self.sortFilterList:RefreshVisible()
+	if CMXint.fightReport then
+		CMXint.fightReport:Update()
+	end
 end
 
 ui.SelectionHandler = SelectionHandler
