@@ -239,14 +239,23 @@ local function InitUnitsList(panel)
 		dataList.playerAmountSum = 0
 		dataList.groupAmountSum = 0
 
+		local abilitiesPanel = ui.panels["abilities"]
+		local abilitySel = abilitiesPanel and abilitiesPanel:GetSelections()
+		local abilityIds = (abilitySel and abilitySel.active) and abilitySel.selectedItems or nil
+
 		for unitId, playerUnitData in pairs(categoryData) do
 			if type(playerUnitData) == "table" then
-				local groupData = util.GetUnitCategoryData(fightData, oppositionCategory, unitId)
-				local unitInfo = fightData.units[unitId]
-				if unitInfo then -- TODO: check why this can be nil
-					self:AddDataEntry(unitInfo, playerUnitData, groupData, durationMs)
-				else
-					logger:Error("Unit info not found for unit ID: %s", unitId)
+				if abilityIds then
+					playerUnitData = util.GetCombinedPlayerCategoryData(fightData, category, {unitId}, abilityIds)
+				end
+				if playerUnitData ~= nil and playerUnitData.totalAmount > 0 then
+					local groupData = util.GetUnitCategoryData(fightData, oppositionCategory, unitId)
+					local unitInfo = fightData.units[unitId]
+					if unitInfo then -- TODO: check why this can be nil
+						self:AddDataEntry(unitInfo, playerUnitData, groupData, durationMs)
+					else
+						logger:Error("Unit info not found for unit ID: %s", unitId)
+					end
 				end
 			end
 		end
@@ -291,10 +300,6 @@ function CMXint.InitializeUnitsPanel(control)
 	function UnitsPanel:Update()
 		logger:Info("Updating Unit Panel")
 
-		local sel = self:GetSelections()
-		if sel then
-			sel:Clear()
-		end
 		self:UpdateHeaderLabels()
 
 		self.dataList:UpdateRowHeight()
