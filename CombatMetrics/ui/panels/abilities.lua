@@ -313,7 +313,10 @@ local function InitAbilitiesList(panel)
 	function dataList:BuildMasterList()
 		local fightData = panel:GetCurrentFightData()
 		local category = panel.settings.category
-		local categoryData = util.GetCombinedPlayerCategoryDataByAbility(fightData, category) -- Add selected units
+		local unitsPanel = ui.panels["units"]
+		local unitSel = unitsPanel and unitsPanel:GetSelections()
+		local unitIds = (unitSel and unitSel.active) and unitSel:GetAll() or nil
+		local categoryData = util.GetCombinedPlayerCategoryDataByAbility(fightData, category, unitIds)
 		local playerId = fightData.unitIds.player
 		local playerData = util.GetUnitCategoryData(fightData, category, playerId)
 
@@ -482,10 +485,6 @@ function CMXint.InitializeAbilitiesPanel(control)
 	function AbilitiesPanel:Update()
 		logger:Info("Updating Ability Panel")
 
-		local sel = self:GetSelections()
-		if sel then
-			sel:Clear()
-		end
 		self:UpdateHeaderLabels()
 
 		self.dataList:UpdateRowHeight()
