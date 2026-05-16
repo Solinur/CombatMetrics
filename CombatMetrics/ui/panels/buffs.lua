@@ -219,7 +219,7 @@ local unitIds = {}
 ---@param category buffCategory
 ---@return EffectData
 ---@return integer
-local function GetBuffData(fightData, category)
+local function GetBuffData(fightData, category, filterIds)
 	local totalUnitTime = 0
 
 	ZO_ClearTable(unitIds)
@@ -235,13 +235,19 @@ local function GetBuffData(fightData, category)
 		local group = fightData.unitIds.group
 		if group and next(group) then
 			for unitId in pairs(group) do
-				unitIds[#unitIds + 1] = unitId
+				if not filterIds or filterIds[unitId] then
+					unitIds[#unitIds + 1] = unitId
+				end
 			end
 		else
 			unitIds[#unitIds + 1] = fightData.unitIds.player
 		end
 	elseif category == BUFF_CATEGORY_ENEMY then
-		ZO_ShallowTableCopy(LC.GetEnemyUnits(fightData), unitIds)
+		for _, unitId in ipairs(LC.GetEnemyUnits(fightData)) do
+			if not filterIds or filterIds[unitId] then
+				unitIds[#unitIds + 1] = unitId
+			end
+		end
 	end
 
 	for i, unitId in ipairs(unitIds) do
@@ -592,8 +598,20 @@ local function InitBuffsList(panel)
 
 	function dataList:BuildMasterList()
 		local fightData = self.panel:GetCurrentFightData()
-		local category = self.panel.buffCategory
-		local effectData, totalUnitTime = GetBuffData(fightData, category)
+		local buffCategory = self.panel.buffCategory
+		local unitsPanel = ui.panels["units"]
+		local unitSel = unitsPanel and unitsPanel:GetSelections()
+		local filterIds = nil
+
+		if unitSel and unitSel.active then
+			local isEnemyFiltered = buffCategory == BUFF_CATEGORY_ENEMY and util.IsDamageCategory()
+			local isGroupFiltered = buffCategory == BUFF_CATEGORY_GROUP and util.IsHealingCategory()
+			if isEnemyFiltered or isGroupFiltered then
+				filterIds = unitSel.selectedItems
+			end
+		end
+
+		local effectData, totalUnitTime = GetBuffData(fightData, buffCategory, filterIds)
 
 		self:UpdateAbilityNames(effectData)
 
@@ -710,10 +728,6 @@ function CMXint.InitializeBuffsPanel(control)
 	function BuffPanel:Update()
 		logger:Debug("Updating Buff Panel")
 
-		local sel = self:GetSelections()
-		if sel then
-			sel:Clear()
-		end
 		self.dataList:UpdateRowHeight()
 		self.dataList:RefreshData()
 	end
