@@ -635,7 +635,7 @@ local function InitBuffsList(panel)
 				local groupEntryData = groupEntry.data
 				if groupEntryData.uptime > entryData.uptime then
 					entryData.uptime = groupEntryData.uptime
-					entryData.groupUptime = groupEntryData.uptime
+					entryData.groupUptime = groupEntryData.groupUptime
 					entryData.count = groupEntryData.count
 					entryData.groupCount = groupEntryData.groupCount
 				end
