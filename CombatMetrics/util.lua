@@ -116,7 +116,7 @@ function util.SafeDivide(x, y)
 	if y == 0 then
 		return x
 	end
-	return zo_round(x / y)
+	return x / y
 end
 
 ---@param number number

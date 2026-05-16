@@ -30,7 +30,9 @@ local function ResizeControl(control, scale)
 		logger:Error("Invalid default dimensions for %s: %s, %s", control:GetName(), width, height)
 	end
 
-	scale = zo_clamp(scale or 1, 0.5, zo_min(scale or 1, maxwidth / width, maxheight / height, 3))
+	local wscale = width > 0 and maxwidth / width or math.huge
+	local hscale = height > 0 and maxheight / height or math.huge
+	scale = zo_clamp(scale or 1, 0.5, zo_min(scale or 1, wscale, hscale, 3))
 
 	if width and control:GetResizeToFitDescendents() == false then
 		control:SetWidth(width * scale)

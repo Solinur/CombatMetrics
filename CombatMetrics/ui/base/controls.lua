@@ -78,6 +78,7 @@ local function CreateSharedControlType(template)
 		return newControl
 	end
 
+	---@diagnostic disable-next-line: redundant-parameter
 	local pool = ZO_ObjectPool:New(CreateControl, ZO_ObjectPool_DefaultResetControl)
 	pool:SetCustomAcquireBehavior(ShowControlOnAcquire)
 

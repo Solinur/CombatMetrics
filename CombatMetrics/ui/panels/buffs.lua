@@ -372,6 +372,7 @@ local function InitBuffsList(panel)
 		return newControl
 	end
 
+	---@diagnostic disable-next-line: redundant-parameter
 	local expandButtonPool = ZO_ObjectPool:New(CreateExpandButton, ZO_ObjectPool_DefaultResetControl)
 
 	---@class BuffRowControl: RowControl

@@ -302,6 +302,9 @@ function SelectionHandler:Clear()
 	if self.sortFilterList then
 		self.sortFilterList:RefreshVisible()
 	end
+	if CMXint.fightReport then
+		CMXint.fightReport:Update()
+	end
 end
 
 function SelectionHandler:HandleClick(data, button, upInside, ctrl, shift)
@@ -324,7 +327,8 @@ function SelectionHandler:HandleClick(data, button, upInside, ctrl, shift)
 
 	if not ctrl and not shift then
 		if self.selectedItems[id] and self:Count() == 1 then
-			return self:Clear()
+			ZO_ClearTable(self.selectedItems)
+			self.anchor = nil
 		else
 			ZO_ClearTable(self.selectedItems)
 			self:SelectItem(id)
