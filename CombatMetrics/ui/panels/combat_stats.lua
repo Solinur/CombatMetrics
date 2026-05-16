@@ -236,14 +236,14 @@ function CMXint.InitializeCombatStatsPanel(control)
 		self.activeTimeLabel:SetText(GetString(SI_COMBAT_METRICS_ACTIVE_TIME))
 		self.combatTimeLabel:SetText(GetString(SI_COMBAT_METRICS_IN_COMBAT))
 
-		local SecondaryColumnHeader = CMXint.IsSelectionActive() and SI_COMBAT_METRICS_SELECTION
-			or SI_COMBAT_METRICS_GROUP
-
 		-- Add DPS label ? If yes, consider Overheal!
 
+		local isSelectionActive = CMXint.IsSelectionActive()
 		self.dpsLabel:SetText(DPSLabelText)
-		self.dpsHeader1:SetText(GetString(SI_COMBAT_METRICS_PLAYER))
-		self.dpsHeader2:SetText(GetString(SecondaryColumnHeader))
+		self.dpsHeader1:SetText(
+			GetString(isSelectionActive and SI_COMBAT_METRICS_SELECTION or SI_COMBAT_METRICS_PLAYER)
+		)
+		self.dpsHeader2:SetText(GetString(isSelectionActive and SI_COMBAT_METRICS_TOTAL or SI_COMBAT_METRICS_GROUP))
 		self.dpsHeader3:SetText("%")
 
 		local amountLabel, countLabel, labelList = self:GetLabelStrings()
@@ -263,6 +263,11 @@ function CMXint.InitializeCombatStatsPanel(control)
 	function CombatStatsPanel:UpdateTimeStats()
 		local fightData = self:GetCurrentFightData()
 		local categoryData = self:GetCurrentCategoryCombatData()
+
+		if categoryData == nil then
+			self:ClearTimeStats()
+			return
+		end
 
 		local playerId = fightData.unitIds.player
 		local playerData = categoryData[playerId]
@@ -295,8 +300,18 @@ function CMXint.InitializeCombatStatsPanel(control)
 
 		local aps1, aps2, apsratio, amountValueKeys, countValueKeys
 
-		local playerData = util.GetCombinedPlayerCategoryData(fightData, category)
-		local groupData = util.GetCombinedGroupCategoryData(fightData, category)
+		local unitsPanel = ui.panels["units"]
+		local unitSel = unitsPanel and unitsPanel:GetSelections()
+		local unitIds = (unitSel and unitSel.active) and unitSel:GetAll() or nil
+
+		local abilitiesPanel = ui.panels["abilities"]
+		local abilitySel = abilitiesPanel and abilitiesPanel:GetSelections()
+		local abilityIds = (abilitySel and abilitySel.active) and abilitySel.selectedItems or nil
+
+		local isSelectionActive = unitIds ~= nil or abilityIds ~= nil
+		local playerData = util.GetCombinedPlayerCategoryData(fightData, category, unitIds, abilityIds)
+		local groupData = isSelectionActive and util.GetCombinedPlayerCategoryData(fightData, category)
+			or util.GetCombinedGroupCategoryData(fightData, category)
 
 		if groupData == nil then
 			return
