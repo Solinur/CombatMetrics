@@ -312,6 +312,7 @@ local function InitAbilitiesList(panel)
 
 	function dataList:BuildMasterList()
 		local fightData = panel:GetCurrentFightData()
+		if fightData == nil then error("AbilitiesPanel:BuildMasterList() called without active fight data", 2) end
 		local category = panel.settings.category
 		local unitsPanel = ui.panels["units"]
 		local unitSel = unitsPanel and unitsPanel:GetSelections()

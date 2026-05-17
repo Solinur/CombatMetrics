@@ -308,6 +308,7 @@ function PanelObject:AcquireSharedControl(controlType)
 	return control
 end
 
+---@return Fight?
 function PanelObject:GetCurrentFightData()
 	if CMXint.fightReport then
 		return CMXint.fightReport.currentFight

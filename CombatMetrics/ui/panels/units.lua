@@ -223,6 +223,7 @@ local function InitUnitsList(panel)
 
 	function dataList:BuildMasterList()
 		local fightData = self.panel:GetCurrentFightData()
+		if fightData == nil then error("UnitsPanel:BuildMasterList() called without active fight data", 2) end
 		local category = self.panel.settings.category
 		local playerId = fightData.unitIds.player
 		local categoryData = util.GetUnitCategoryData(fightData, category, playerId)

@@ -233,7 +233,7 @@ local function GetBuffData(fightData, category, filterIds)
 		unitIds[#unitIds + 1] = fightData.unitIds.player
 	elseif category == BUFF_CATEGORY_GROUP then
 		local group = fightData.unitIds.group
-		if group and next(group) then
+		if ZO_IsTableEmpty(group) == false then
 			for unitId in pairs(group) do
 				if not filterIds or filterIds[unitId] then
 					unitIds[#unitIds + 1] = unitId
@@ -599,6 +599,9 @@ local function InitBuffsList(panel)
 
 	function dataList:BuildMasterList()
 		local fightData = self.panel:GetCurrentFightData()
+		if fightData == nil then
+			error("BuffPanel:BuildMasterList() called without active fight data", 2)
+		end
 		local buffCategory = self.panel.buffCategory
 		local unitsPanel = ui.panels["units"]
 		local unitSel = unitsPanel and unitsPanel:GetSelections()
