@@ -260,8 +260,8 @@ function CMXint.InitializeCombatStatsPanel(control)
 		end
 	end
 
-	function CombatStatsPanel:UpdateTimeStats()
-		local fightData = self:GetCurrentFightData()
+	---@param fightData Fight
+	function CombatStatsPanel:UpdateTimeStats(fightData)
 		local categoryData = self:GetCurrentCategoryCombatData()
 
 		if categoryData == nil then
@@ -294,9 +294,9 @@ function CMXint.InitializeCombatStatsPanel(control)
 		self.combatTimeValue:SetText(combatTimeString)
 	end
 
-	function CombatStatsPanel:UpdateCombatStatValues()
+	---@param fightData Fight
+	function CombatStatsPanel:UpdateCombatStatValues(fightData)
 		local category = self.settings.category
-		local fightData = self:GetCurrentFightData()
 
 		local aps1, aps2, apsratio, amountValueKeys, countValueKeys
 
@@ -309,13 +309,10 @@ function CMXint.InitializeCombatStatsPanel(control)
 		local abilityIds = (abilitySel and abilitySel.active) and abilitySel.selectedItems or nil
 
 		local isSelectionActive = unitIds ~= nil or abilityIds ~= nil
-		local playerData = util.GetCombinedPlayerCategoryData(fightData, category, unitIds, abilityIds)
-		local groupData = isSelectionActive and util.GetCombinedPlayerCategoryData(fightData, category)
+		local partialData = util.GetCombinedPlayerCategoryData(fightData, category, unitIds, abilityIds)
+		local fullData = isSelectionActive and util.GetCombinedPlayerCategoryData(fightData, category)
 			or util.GetCombinedGroupCategoryData(fightData, category)
-
-		if groupData == nil then
-			return
-		end
+		---@cast fullData -nil
 
 		if util.IsDamageCategory() then
 			amountValueKeys = AMOUNT_DAMAGE_KEYS
@@ -328,21 +325,25 @@ function CMXint.InitializeCombatStatsPanel(control)
 			return
 		end
 
-		local playerValue, groupValue
+		local partialValue, fullValue
 		if category == cat.CMX_CATEGORY_HEALING_DONE and self.settings.showOverHeal then
-			playerValue = playerData and (playerData.totalAmount + playerData.overflowAmount) or 0
-			groupValue = groupData.totalAmount + groupData.overflowAmount
+			partialValue = partialData and (partialData.totalAmount + partialData.overflowAmount) or 0
+			fullValue = fullData.totalAmount + fullData.overflowAmount
 		else
-			playerValue = playerData and playerData.totalAmount or 0
-			groupValue = groupData.totalAmount
+			partialValue = partialData and partialData.totalAmount or 0
+			fullValue = fullData.totalAmount
 		end
 
-		local activePlayerTime = playerData and (playerData.endTime - playerData.startTime) or 0
-		local activeGroupTime = groupData.endTime - groupData.startTime
+		-- When a selection is active, fullData holds the unfiltered player data; use its time
+		-- range so the per-second value isn't inflated by the narrower filtered window.
+		local partialTime = isSelectionActive
+			and (fullData.endTime - fullData.startTime)
+			or (partialData and (partialData.endTime - partialData.startTime) or 0)
+		local fullTime = fullData.endTime - fullData.startTime
 
-		aps1 = util.SafeDivide(playerValue, activePlayerTime / 1000)
-		aps2 = util.SafeDivide(groupValue, activeGroupTime / 1000)
-		apsratio = groupValue > 0 and playerValue / groupValue * 100 or 0
+		aps1 = util.SafeDivide(partialValue, partialTime / 1000)
+		aps2 = util.SafeDivide(fullValue, fullTime / 1000)
+		apsratio = fullValue > 0 and partialValue / fullValue * 100 or 0
 
 		self.dpsValue1:SetText(string.format(VALUE_FORMAT, aps1))
 		self.dpsValue2:SetText(string.format(VALUE_FORMAT, aps2))
@@ -355,27 +356,29 @@ function CMXint.InitializeCombatStatsPanel(control)
 			local amountValueKey = amountValueKeys[rowId]
 			local countValueKey = countValueKeys[rowId]
 
-			local playerAmount = playerData and playerData[amountValueKey] or 0
-			local groupAmount = groupData[amountValueKey] or 0
-			local playerCount = playerData and playerData[countValueKey] or 0
-			local groupCount = groupData[countValueKey] or 0
-			local amountPercent = groupAmount > 0 and (playerAmount / groupAmount) * 100 or 0
-			local countPercent = groupCount > 0 and (playerCount / groupCount) * 100 or 0
+			local partialAmount = partialData and partialData[amountValueKey] or 0
+			local fullAmount = fullData[amountValueKey] or 0
+			local partialCount = partialData and partialData[countValueKey] or 0
+			local fullCount = fullData[countValueKey] or 0
+			local amountPercent = fullAmount > 0 and (partialAmount / fullAmount) * 100 or 0
+			local countPercent = fullCount > 0 and (partialCount / fullCount) * 100 or 0
 
-			self[amount_key .. "2"]:SetText(string.format(VALUE_FORMAT, playerAmount))
-			self[amount_key .. "3"]:SetText(string.format(VALUE_FORMAT, groupAmount))
+			self[amount_key .. "2"]:SetText(string.format(VALUE_FORMAT, partialAmount))
+			self[amount_key .. "3"]:SetText(string.format(VALUE_FORMAT, fullAmount))
 			self[amount_key .. "4"]:SetText(string.format(PERCENT_FORMAT, amountPercent))
 
-			self[count_key .. "2"]:SetText(string.format(VALUE_FORMAT, playerCount))
-			self[count_key .. "3"]:SetText(string.format(VALUE_FORMAT, groupCount))
+			self[count_key .. "2"]:SetText(string.format(VALUE_FORMAT, partialCount))
+			self[count_key .. "3"]:SetText(string.format(VALUE_FORMAT, fullCount))
 			self[count_key .. "4"]:SetText(string.format(PERCENT_FORMAT, countPercent))
 		end
 	end
 
 	function CombatStatsPanel:Update()
+		local fightData = self:GetCurrentFightData()
+		if fightData == nil then error("CombatStatsPanel:Update() called without active fight data", 2) end
 		self:UpdateLabels()
-		self:UpdateTimeStats()
-		self:UpdateCombatStatValues()
+		self:UpdateTimeStats(fightData)
+		self:UpdateCombatStatValues(fightData)
 	end
 
 	CMX_COMBAT_PANEL = CombatStatsPanel
