@@ -332,6 +332,8 @@ function util.buffSortFunction(data, a, b)
 	return ishigher
 end
 
+local isFileInitialized = false
+
 ---@param panel BuffPanel
 ---@return BuffDataList
 local function InitBuffsList(panel)
@@ -600,7 +602,8 @@ local function InitBuffsList(panel)
 	function dataList:BuildMasterList()
 		local fightData = self.panel:GetCurrentFightData()
 		if fightData == nil then
-			error("BuffPanel:BuildMasterList() called without active fight data", 2)
+			if not isFileInitialized then return end
+			error("BuffPanel:BuildMasterList() called without active fight data")
 		end
 		local buffCategory = self.panel.buffCategory
 		local unitsPanel = ui.panels["units"]
@@ -746,7 +749,6 @@ function CMXint.InitializeBuffsPanel(control)
 	BuffPanel.radioButtons:SetClickedButton(searchBar:GetNamedChild("Player"))
 end
 
-local isFileInitialized = false
 function CMXint.InitializeBuffs()
 	if isFileInitialized == true then
 		return false
