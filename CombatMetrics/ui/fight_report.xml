@@ -114,11 +114,10 @@
                     <!-- <OnInitialized>CombatMetrics.internal.InitializeConsumablesPanel(self)</OnInitialized> -->
                 </Control>
 
-                <Control name="$(parent)_EquipmentPanel" hidden="true" inherits="CombatMetrics_PlaceHolder"> <!--
-                    CombatMetrics_EquipmentPanel -->
+                <Control name="$(parent)_EquipmentPanel" hidden="true" inherits="CombatMetrics_ControlFramed">
                     <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)_SkillsPanel" offsetY="4" />
                     <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" relativeTo="$(parent)_ConsumablesPanel" offsetY="-4" />
-                    <!-- <OnInitialized>CombatMetrics.internal.InitializeEquipmentPanel(self)</OnInitialized> -->
+                    <OnInitialized>CombatMetrics.internal.InitializeEquipmentPanel(self)</OnInitialized>
                 </Control>
 
                 <Control name="$(parent)_FightList" hidden="true" inherits="CombatMetrics_PlaceHolder"> <!-- CombatMetrics_FightListPanel -->

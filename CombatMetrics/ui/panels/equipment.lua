@@ -10,22 +10,23 @@ local logger
 ---@class CMXui
 local ui = CMXint.ui
 
-local equipslots = {
+-- { slot, iconPath, gapBefore }  gapBefore=0 for the first row; larger values mark group breaks
+local equipRows = {
 
-	{ EQUIP_SLOT_MAIN_HAND, "EsoUI/Art/CharacterWindow/gearslot_mainhand.dds" },
-	{ EQUIP_SLOT_OFF_HAND, "EsoUI/Art/CharacterWindow/gearslot_offhand.dds" },
-	{ EQUIP_SLOT_BACKUP_MAIN, "EsoUI/Art/CharacterWindow/gearslot_mainhand.dds" },
-	{ EQUIP_SLOT_BACKUP_OFF, "EsoUI/Art/CharacterWindow/gearslot_offhand.dds" },
-	{ EQUIP_SLOT_HEAD, "EsoUI/Art/CharacterWindow/gearslot_head.dds" },
-	{ EQUIP_SLOT_SHOULDERS, "EsoUI/Art/CharacterWindow/gearslot_shoulders.dds" },
-	{ EQUIP_SLOT_CHEST, "EsoUI/Art/CharacterWindow/gearslot_chest.dds" },
-	{ EQUIP_SLOT_HAND, "EsoUI/Art/CharacterWindow/gearslot_hands.dds" },
-	{ EQUIP_SLOT_WAIST, "EsoUI/Art/CharacterWindow/gearslot_belt.dds" },
-	{ EQUIP_SLOT_LEGS, "EsoUI/Art/CharacterWindow/gearslot_legs.dds" },
-	{ EQUIP_SLOT_FEET, "EsoUI/Art/CharacterWindow/gearslot_feet.dds" },
-	{ EQUIP_SLOT_NECK, "EsoUI/Art/CharacterWindow/gearslot_neck.dds" },
-	{ EQUIP_SLOT_RING1, "EsoUI/Art/CharacterWindow/gearslot_ring.dds" },
-	{ EQUIP_SLOT_RING2, "EsoUI/Art/CharacterWindow/gearslot_ring.dds" },
+	{ EQUIP_SLOT_MAIN_HAND, "EsoUI/Art/CharacterWindow/gearslot_mainhand.dds", 0 },
+	{ EQUIP_SLOT_OFF_HAND, "EsoUI/Art/CharacterWindow/gearslot_offhand.dds", 2 },
+	{ EQUIP_SLOT_BACKUP_MAIN, "EsoUI/Art/CharacterWindow/gearslot_mainhand.dds", 8 },
+	{ EQUIP_SLOT_BACKUP_OFF, "EsoUI/Art/CharacterWindow/gearslot_offhand.dds", 2 },
+	{ EQUIP_SLOT_HEAD, "EsoUI/Art/CharacterWindow/gearslot_head.dds", 10 },
+	{ EQUIP_SLOT_SHOULDERS, "EsoUI/Art/CharacterWindow/gearslot_shoulders.dds", 2 },
+	{ EQUIP_SLOT_CHEST, "EsoUI/Art/CharacterWindow/gearslot_chest.dds", 2 },
+	{ EQUIP_SLOT_HAND, "EsoUI/Art/CharacterWindow/gearslot_hands.dds", 2 },
+	{ EQUIP_SLOT_WAIST, "EsoUI/Art/CharacterWindow/gearslot_belt.dds", 2 },
+	{ EQUIP_SLOT_LEGS, "EsoUI/Art/CharacterWindow/gearslot_legs.dds", 2 },
+	{ EQUIP_SLOT_FEET, "EsoUI/Art/CharacterWindow/gearslot_feet.dds", 2 },
+	{ EQUIP_SLOT_NECK, "EsoUI/Art/CharacterWindow/gearslot_neck.dds", 10 },
+	{ EQUIP_SLOT_RING1, "EsoUI/Art/CharacterWindow/gearslot_ring.dds", 2 },
+	{ EQUIP_SLOT_RING2, "EsoUI/Art/CharacterWindow/gearslot_ring.dds", 2 },
 }
 
 local armorcolors = {
@@ -35,6 +36,9 @@ local armorcolors = {
 	[ARMORTYPE_MEDIUM] = { 0.3, 1, 0.3, 1 },
 	[ARMORTYPE_LIGHT] = { 0.3, 0.3, 1, 1 },
 }
+
+local EQUIP_ROW_HEIGHT = 22
+
 local subIdToQuality = {}
 
 local function GetEnchantQuality(itemLink) -- From Enchanted Quality (Rhyono, votan)
@@ -67,8 +71,82 @@ local function GetEnchantQuality(itemLink) -- From Enchanted Quality (Rhyono, vo
 	return 0
 end
 
+local function OnLinkClicked(_, linkText, button)
+	ClearTooltip(ItemTooltip)
+	ZO_LinkHandler_OnLinkClicked(linkText, button)
+end
+
 function CMXint.InitializeEquipmentPanel(control)
 	local EquipmentPanel = CMX.internal.PanelObject:New(control, "equipment")
+
+	function EquipmentPanel:RecoverEquipLine(parent, x, y)
+		local icon = self:AcquireSharedControl(CT_TEXTURE)
+		icon:ApplyPosition(parent, x, y, EQUIP_ROW_HEIGHT, EQUIP_ROW_HEIGHT)
+
+		local icon2 = self:AcquireSharedControl(CT_TEXTURE)
+		icon2:ApplyPosition(parent, x, y, EQUIP_ROW_HEIGHT, EQUIP_ROW_HEIGHT)
+
+		local labelX = x + EQUIP_ROW_HEIGHT + 4
+		local label = self:AcquireSharedControl(CT_LABEL)
+		label:ApplyPosition(parent, labelX, y, 280, nil)
+		---@diagnostic disable-next-line: undefined-field
+		label:SetMouseEnabled(true)
+		---@diagnostic disable-next-line: undefined-field
+		label:SetLinkEnabled(true)
+		---@diagnostic disable-next-line: undefined-field, missing-parameter
+		label:SetHandler("OnMouseEnter", CMXint.ItemTooltip_OnMouseEnter)
+		---@diagnostic disable-next-line: undefined-field, missing-parameter
+		label:SetHandler("OnMouseExit", CMXint.ItemTooltip_OnMouseExit)
+		---@diagnostic disable-next-line: undefined-field, missing-parameter
+		label:SetHandler("OnLinkClicked", OnLinkClicked)
+
+		local traitX = labelX + 280 + 4
+		local trait = self:AcquireSharedControl(CT_LABEL)
+		trait:ApplyPosition(parent, traitX, y, 100, nil)
+
+		local enchantX = traitX + 100 + 10
+		local enchant = self:AcquireSharedControl(CT_LABEL)
+		enchant:ApplyPosition(parent, enchantX, y, nil, nil)
+		local scale = self.settings.scale > 0 and self.settings.scale or 1
+		---@diagnostic disable-next-line: undefined-field
+		enchant:SetAnchor(RIGHT, parent, RIGHT, -4 * scale, 0)
+		---@diagnostic disable-next-line: undefined-field
+		enchant:SetMouseEnabled(true)
+		---@diagnostic disable-next-line: undefined-field
+		enchant:SetLinkEnabled(true)
+		---@diagnostic disable-next-line: undefined-field, missing-parameter
+		enchant:SetHandler("OnMouseEnter", CMXint.ItemTooltip_OnMouseEnter)
+		---@diagnostic disable-next-line: undefined-field, missing-parameter
+		enchant:SetHandler("OnMouseExit", CMXint.ItemTooltip_OnMouseExit)
+		---@diagnostic disable-next-line: undefined-field, missing-parameter
+		enchant:SetHandler("OnLinkClicked", OnLinkClicked)
+
+		return { icon = icon, icon2 = icon2, label = label, trait = trait, enchant = enchant }
+	end
+
+	function EquipmentPanel:Recover()
+		self.equipLines = {}
+		local yOffset = 4
+
+		for i, rowData in ipairs(equipRows) do
+			if i > 1 then
+				yOffset = yOffset + EQUIP_ROW_HEIGHT + rowData[3]
+			end
+			self.equipLines[i] = self:RecoverEquipLine(self.control, 5, yOffset)
+		end
+	end
+
+	function EquipmentPanel:Clear()
+		if not self.equipLines then
+			return
+		end
+		for i = 1, #self.equipLines do
+			local line = self.equipLines[i]
+			line.label:SetText("")
+			line.trait:SetText("")
+			line.enchant:SetText("")
+		end
+	end
 
 	function EquipmentPanel:Update(fightData)
 		if fightData == nil then
@@ -79,22 +157,21 @@ function CMXint.InitializeEquipmentPanel(control)
 			return
 		end
 
-		local control = self.control
 		local equipdata = charData and charData.equip or {}
 
 		local poison1 = equipdata[EQUIP_SLOT_POISON]
 		local poison2 = equipdata[EQUIP_SLOT_BACKUP_POISON]
 
-		for i, slotData in ipairs(equipslots) do
+		for i, slotData in ipairs(equipRows) do
 			local slot = slotData[1]
 			local texture = slotData[2]
 
-			local equipline = control:GetNamedChild("EquipLine" .. i)
-			local label = equipline:GetNamedChild("ItemLink") --[[@as LabelControl]]
-			local icon = equipline:GetNamedChild("Icon") --[[@as TextureControl]]
-			local icon2 = equipline:GetNamedChild("Icon2") --[[@as TextureControl]] -- textures are added twice since icons are so low in contrast
-			local trait = equipline:GetNamedChild("Trait") --[[@as LabelControl]]
-			local enchant = equipline:GetNamedChild("Enchant") --[[@as LabelControl]]
+			local line = self.equipLines[i]
+			local label = line.label
+			local icon = line.icon
+			local icon2 = line.icon2
+			local trait = line.trait
+			local enchant = line.enchant
 
 			local item = equipdata[slot] or ""
 
@@ -130,7 +207,6 @@ function CMXint.InitializeEquipmentPanel(control)
 			else
 				_, enchantString, enchantDescription = GetItemLinkEnchantInfo(item)
 				enchantString = enchantString:gsub(GetString(SI_COMBAT_METRICS_ENCHANTMENT_TRIM), "")
-				local enchantId = GetItemLinkAppliedEnchantId(item)
 				enchant.enchantDescription = enchantDescription
 				enchant.itemLink = ""
 				local quality = GetEnchantQuality(item)
@@ -139,8 +215,6 @@ function CMXint.InitializeEquipmentPanel(control)
 
 			enchant:SetText(enchantString)
 			enchant:SetColor(unpack(enchantColor))
-			-- GetEnchantProcAbilityId(GetItemLinkAppliedEnchantId())
-			-- GetItemLinkAppliedEnchantId
 		end
 	end
 end
