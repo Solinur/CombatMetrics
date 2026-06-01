@@ -61,6 +61,7 @@ end
 function CMXint.InitializeCombatStatsPanel(control)
 	---@class CombatStatsPanel: Panel
 	CombatStatsPanel = CMX.internal.PanelObject:New(control, "combatStats")
+	CombatStatsPanel.scenes = { "fightStats" }
 
 	function CombatStatsPanel:Recover()
 		logger:Info("CombatStatsPanel:Recover")

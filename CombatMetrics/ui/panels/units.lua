@@ -279,6 +279,7 @@ end
 function CMXint.InitializeUnitsPanel(control)
 	---@class UnitsPanel: Panel
 	UnitsPanel = CMXint.PanelObject:New(control, "units")
+	UnitsPanel.scenes = { "fightStats", "combatLog" }
 
 	UnitsPanel.dataList = InitUnitsList(UnitsPanel)
 

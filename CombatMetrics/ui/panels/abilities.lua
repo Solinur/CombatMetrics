@@ -420,6 +420,7 @@ end
 function CMXint.InitializeAbilitiesPanel(control)
 	---@class AbilityPanel: Panel
 	AbilitiesPanel = CMXint.PanelObject:New(control, "abilities")
+	AbilitiesPanel.scenes = { "fightStats", "combatLog" }
 	AbilitiesPanel.dataList = InitAbilitiesList(AbilitiesPanel)
 
 	function AbilitiesPanel:GetRatioLayout()

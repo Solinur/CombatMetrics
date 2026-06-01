@@ -78,6 +78,7 @@ end
 
 function CMXint.InitializeEquipmentPanel(control)
 	local EquipmentPanel = CMX.internal.PanelObject:New(control, "equipment")
+	EquipmentPanel.scenes = { "info" }
 
 	function EquipmentPanel:RecoverEquipLine(parent, x, y)
 		local icon = self:AcquireSharedControl(CT_TEXTURE)

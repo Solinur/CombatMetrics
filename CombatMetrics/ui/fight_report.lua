@@ -107,6 +107,25 @@ local function InitializeFightReport() -- TODO: Decide on a common TLW/Object sc
 	local scene = ZO_Scene:New("CMX_REPORT_SCENE", SCENE_MANAGER)
 	scene:AddFragment(fragment)
 	CMXint.scenes.report = scene
+	CMXint.scenes.reportFragment = fragment  -- shared with view scenes in scenes.lua
+
+	-- When CMX_REPORT_SCENE becomes visible it either pushes the saved view (opening) or
+	-- bounces straight back to HUD (Escape popped the view scene back to base).
+	local openingCMX = false
+	scene:RegisterCallback("StateChange", function(_, newState)
+		if newState == SCENE_SHOWN then
+			if openingCMX then
+				openingCMX = false
+				local key = settings.scene or "fightStats"
+				local targetName = CMXint.viewSceneNames[key] or CMXint.viewSceneNames.fightStats
+				if targetName then
+					SCENE_MANAGER:Push(targetName)
+				end
+			else
+				SCENE_MANAGER:PopScenes(1)
+			end
+		end
+	end)
 
 	local function savePos()
 		settings.pos_x, settings.pos_y = FightReport:GetCenter()
@@ -130,7 +149,12 @@ local function InitializeFightReport() -- TODO: Decide on a common TLW/Object sc
 	end
 
 	function FightReport:Toggle()
-		SCENE_MANAGER:Toggle("CMX_REPORT_SCENE")
+		if SCENE_MANAGER:IsSceneOnStack("CMX_REPORT_SCENE") then
+			SCENE_MANAGER:PopScenes(2)
+		elseif not SCENE_MANAGER:IsShowing("CMX_REPORT_SCENE") then
+			openingCMX = true
+			SCENE_MANAGER:Push("CMX_REPORT_SCENE")
+		end
 	end
 
 	function FightReport:Update()
@@ -147,7 +171,9 @@ local function InitializeFightReport() -- TODO: Decide on a common TLW/Object sc
 		end
 
 		for _, panel in pairs(ui.panels) do
-			panel:Update()
+			if not panel.control:IsHidden() then
+				panel:Update()
+			end
 		end
 	end
 
@@ -157,8 +183,17 @@ local function InitializeFightReport() -- TODO: Decide on a common TLW/Object sc
 		end
 	end
 
-	function FightReport:SelectScene(newScene)
-		-- TODO: implement
+	function FightReport:SelectScene(key)
+		local targetName = CMXint.viewSceneNames[key]
+		if not targetName then return end
+		settings.scene = key
+		local isOpen = false
+		for _, s in pairs(CMXint.scenes.views) do
+			if s:IsShowing() then isOpen = true; break end
+		end
+		if isOpen then
+			SCENE_MANAGER:SwapCurrentScene(targetName)
+		end
 	end
 
 	FightReport:Resize(settings.scale)

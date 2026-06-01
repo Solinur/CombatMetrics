@@ -711,6 +711,7 @@ end
 function CMXint.InitializeBuffsPanel(control)
 	---@class BuffPanel: Panel
 	BuffPanel = CMXint.PanelObject:New(control, "buffs")
+	BuffPanel.scenes = { "fightStats", "combatLog" }
 
 	BuffPanel.radioButtons = ZO_RadioButtonGroup:New(false)
 

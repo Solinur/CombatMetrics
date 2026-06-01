@@ -433,6 +433,7 @@ function CMXint.InitializeUI()
 	assert(CMXint.InitializeScrollListHandler(), "Initialization of scroll list handler failed")
 	assert(CMXint.InitializeFightReport(), "Initialization of fight report UI failed")
 	assert(CMXint.InitializeLiveReport(), "Initialization of live report failed")
+	assert(CMXint.InitializeViewScenes(), "Initialization of view scenes failed")
 
 	PanelObject.fightReport = CMXint.fightReport
 	PanelObject.settings = CMXint.fightReport.settings
