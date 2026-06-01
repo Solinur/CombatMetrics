@@ -149,7 +149,8 @@ function CMXint.InitializeEquipmentPanel(control)
 		end
 	end
 
-	function EquipmentPanel:Update(fightData)
+	function EquipmentPanel:Update()
+		local fightData = self:GetCurrentFightData()
 		if fightData == nil then
 			return
 		end
