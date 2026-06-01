@@ -48,8 +48,8 @@ ui/panels/abilities.xml
 ; 
 ; ui/panels/skills.lua
 ; ui/panels/skills.xml
-; ui/panels/equipment.lua
-; ui/panels/equipment.xml
+ui/panels/equipment.lua
+ui/panels/equipment.xml
 ; ui/panels/consumables.lua
 ; ui/panels/consumables.xml
 ; ui/panels/champion_points.lua
