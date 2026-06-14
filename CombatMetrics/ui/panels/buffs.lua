@@ -103,7 +103,7 @@ do -- Handling Buffs Context Menu
 		CombatMetricsReport:GetNamedChild("_BuffPanel"):GetNamedChild("BuffList"):Update()
 	end
 
-	function CMX.BuffContextMenu(bufflistitem, upInside)
+	function CMXint.BuffContextMenu(bufflistitem, upInside)
 		if not upInside then
 			return
 		end
@@ -143,20 +143,6 @@ do -- Handling Buffs Context Menu
 
 		ShowMenu(bufflistitem)
 	end
-end
-
-function CMX.CollapseButton(button, upInside)
-	local buffname = button:GetParent().dataId
-
-	if buffname then
-		if uncollapsedBuffs[buffname] == true then
-			uncollapsedBuffs[buffname] = nil
-		else
-			uncollapsedBuffs[buffname] = true
-		end
-	end
-
-	CombatMetricsReport:GetNamedChild("_BuffPanel"):GetNamedChild("BuffList"):Update()
 end
 
 ---@param source EffectData
@@ -251,39 +237,26 @@ local function GetBuffData(fightData, category, filterIds)
 	end
 
 	for i, unitId in ipairs(unitIds) do
-		-- TODO: replace unit time with info stored in unit table
-		local startTime = math.huge
-		local endTime = 0
-
-		local unitData = fightData.damageDone[unitId]
-		if unitData then
-			endTime = zo_max(unitData.endTime, endTime)
-			startTime = zo_min(unitData.startTime, startTime)
-		end
-
-		local unitData2 = fightData.damageReceived[unitId]
-		if unitData2 then
-			endTime = zo_max(unitData2.endTime, endTime)
-			startTime = zo_min(unitData2.startTime, startTime)
-		end
-
-		if endTime > startTime then
-			totalUnitTime = totalUnitTime + (endTime - startTime)
-			local unitEffectData = fightData.effects[unitId]
-
-			if unitEffectData then
+		local unitEffectData = fightData.effects[unitId]
+		if unitEffectData then
+			local startTime = unitEffectData.startTime
+			local endTime = unitEffectData.endTime
+			if endTime > startTime then
+				totalUnitTime = totalUnitTime + (endTime - startTime)
 				for abilityId, data in pairs(unitEffectData) do
-					if effectData[abilityId] == nil then
-						local effectCopy = ZO_ShallowTableCopy(data) -- TODO: Review this code
-						if data.stacks then
-							effectCopy.stacks = {}
-							for stacks, stackData in pairs(data.stacks) do
-								effectCopy.stacks[stacks] = ZO_ShallowTableCopy(stackData)
+					if type(abilityId) == "number" then
+						if effectData[abilityId] == nil then
+							local effectCopy = ZO_ShallowTableCopy(data) -- TODO: Review this code
+							if data.stacks then
+								effectCopy.stacks = {}
+								for stacks, stackData in pairs(data.stacks) do
+									effectCopy.stacks[stacks] = ZO_ShallowTableCopy(stackData)
+								end
 							end
+							effectData[abilityId] = effectCopy
+						else
+							CombineEffects(data, effectData[abilityId])
 						end
-						effectData[abilityId] = effectCopy
-					else
-						CombineEffects(data, effectData[abilityId])
 					end
 				end
 			end
@@ -602,7 +575,9 @@ local function InitBuffsList(panel)
 	function dataList:BuildMasterList()
 		local fightData = self.panel:GetCurrentFightData()
 		if fightData == nil then
-			if not isFileInitialized then return end
+			if not isFileInitialized then
+				return
+			end
 			error("BuffPanel:BuildMasterList() called without active fight data")
 		end
 		local buffCategory = self.panel.buffCategory
