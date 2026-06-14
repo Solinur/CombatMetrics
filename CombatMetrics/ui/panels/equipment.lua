@@ -91,6 +91,8 @@ function CMXint.InitializeEquipmentPanel(control)
 		local label = self:AcquireSharedControl(CT_LABEL)
 		label:ApplyPosition(parent, labelX, y, 280, nil)
 		---@diagnostic disable-next-line: undefined-field
+		label:SetFont(ui.GetFont(ui.fontSize))
+		---@diagnostic disable-next-line: undefined-field
 		label:SetMouseEnabled(true)
 		---@diagnostic disable-next-line: undefined-field
 		label:SetLinkEnabled(true)
@@ -104,13 +106,22 @@ function CMXint.InitializeEquipmentPanel(control)
 		local traitX = labelX + 280 + 4
 		local trait = self:AcquireSharedControl(CT_LABEL)
 		trait:ApplyPosition(parent, traitX, y, 100, nil)
+		---@diagnostic disable-next-line: undefined-field
+		trait:SetFont(ui.GetFont(ui.fontSize))
 
+		local scale = self.settings.scale > 0 and self.settings.scale or 1
 		local enchantX = traitX + 100 + 10
 		local enchant = self:AcquireSharedControl(CT_LABEL)
-		enchant:ApplyPosition(parent, enchantX, y, nil, nil)
-		local scale = self.settings.scale > 0 and self.settings.scale or 1
 		---@diagnostic disable-next-line: undefined-field
-		enchant:SetAnchor(RIGHT, parent, RIGHT, -4 * scale, 0)
+		enchant:SetFont(ui.GetFont(ui.fontSize))
+		---@diagnostic disable-next-line: undefined-field
+		enchant:SetParent(parent)
+		---@diagnostic disable-next-line: undefined-field
+		enchant:ClearAnchors()
+		---@diagnostic disable-next-line: undefined-field
+		enchant:SetAnchor(TOPLEFT, parent, TOPLEFT, enchantX * scale, y * scale)
+		---@diagnostic disable-next-line: undefined-field
+		enchant:SetAnchor(TOPRIGHT, parent, TOPRIGHT, -4 * scale, y * scale)
 		---@diagnostic disable-next-line: undefined-field
 		enchant:SetMouseEnabled(true)
 		---@diagnostic disable-next-line: undefined-field
