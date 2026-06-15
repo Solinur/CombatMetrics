@@ -239,8 +239,8 @@ local function GetBuffData(fightData, category, filterIds)
 	for i, unitId in ipairs(unitIds) do
 		local unitEffectData = fightData.effects[unitId]
 		if unitEffectData then
-			local startTime = unitEffectData.startTime
-			local endTime = unitEffectData.endTime
+			local startTime = unitEffectData.startTime or math.huge
+			local endTime = unitEffectData.endTime or 0
 			if endTime > startTime then
 				totalUnitTime = totalUnitTime + (endTime - startTime)
 				for abilityId, data in pairs(unitEffectData) do
@@ -655,23 +655,26 @@ local function InitBuffsList(panel)
 			scrollData[#scrollData + 1] = data
 		end
 
-		table.sort(scrollData, self.sortFunction) -- TODO: include sorting favourites
-
 		local groupList = self.groupList
 
-		for i = #scrollData, 1, -1 do
-			local dataEntry = scrollData[i].data
-			local abilityId = dataEntry.abilityId
-			local groupData = groupList[abilityId]
-
+		-- Correct parent uptimes from group data before sorting
+		for i = 1, #scrollData do
+			local groupData = groupList[scrollData[i].data.abilityId]
 			if groupData then
-				dataList:ProcessGroupData(dataEntry, groupData)
+				dataList:ProcessGroupData(scrollData[i].data, groupData)
+			end
+		end
 
-				if uncollapsedBuffs[abilityId] then
-					table.sort(groupData, self.sortFunction)
-					for j = #groupData, 1, -1 do
-						table.insert(scrollData, i + 1, groupData[j])
-					end
+		table.sort(scrollData, self.sortFunction) -- TODO: include sorting favourites
+
+		-- Insert expanded children after sort
+		for i = #scrollData, 1, -1 do
+			local abilityId = scrollData[i].data.abilityId
+			local groupData = groupList[abilityId]
+			if groupData and uncollapsedBuffs[abilityId] then
+				table.sort(groupData, self.sortFunction)
+				for j = #groupData, 1, -1 do
+					table.insert(scrollData, i + 1, groupData[j])
 				end
 			end
 		end
