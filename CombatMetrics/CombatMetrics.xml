@@ -3247,7 +3247,7 @@
 						</Texture>
 
 						<Texture name="$(parent)ExportBuildButton" mouseEnabled="true"
-							textureFile="CombatMetrics/icons/share.dds" color="FFFFCC00"
+							textureFile="CombatMetrics/icons/share.dds" color="FFF8EABF"
 							inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton">
 							<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)FeedbackButton" offsetY="8" />
 							<OnInitialized>
