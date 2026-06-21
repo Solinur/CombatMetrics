@@ -1848,9 +1848,9 @@ local function updateTitlePanel(panel)
 
 		if isSubClassing == true and SKILLS_DATA_MANAGER and SKILLS_DATA_MANAGER.abilityIdToProgressionDataMap then
 			classIcon4:SetHidden(false)
-			classIcon4.tooltip = nil
 		else
 			classIcon4:SetHidden(true)
+			classIcon4.tooltip = nil
 			for _, abilityId in ipairs(charData.passiveSkills) do
 				local progressionData = SKILLS_DATA_MANAGER.abilityIdToProgressionDataMap[abilityId]
 				if progressionData.skillData.skillLineData.isClassMastery == true then
@@ -7352,6 +7352,15 @@ function CMX.InitializeUI()
 	currentFight = nil
 	currentCLPage = 1
 
-	initFightReport()
+	CombatMetrics_Report.Toggle = function(_)
+		initFightReport()
+		toggleFightReport()
+	end
+
+	CombatMetrics_Report.Resize = function(_, scale)
+		initFightReport()
+		CombatMetrics_Report:Resize(scale)
+	end
+
 	initLiveReport()
 end
