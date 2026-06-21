@@ -133,6 +133,8 @@
 	SI_COMBAT_METRICS_ENLARGE = "Enlarge",
 	SI_COMBAT_METRICS_SHRINK = "Shrink",
 
+	SI_COMBAT_METRICS_EXPORT_BUILD = "Export Build (ESO-hub.com)",
+
 	-- Feedback
 
 	SI_COMBAT_METRICS_FEEDBACK = "Feedback",

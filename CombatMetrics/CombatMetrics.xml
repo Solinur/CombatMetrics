@@ -3246,10 +3246,20 @@
 
 						</Texture>
 
+						<Texture name="$(parent)ExportBuildButton" mouseEnabled="true"
+							textureFile="CombatMetrics/icons/share.dds" color="FFFFCC00"
+							inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton">
+							<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)FeedbackButton" offsetY="8" />
+							<OnInitialized>
+								self.tooltip = {SI_COMBAT_METRICS_EXPORT_BUILD}
+								self.isExportButton = true
+							</OnInitialized>
+						</Texture>
+
 						<Texture name="$(parent)NotificationButton" mouseEnabled="true"
 							textureFile="esoui/art/mainmenu/menubar_notifications_down.dds" color="FFFFFFFF"
 							inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton" hidden="true">
-							<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)FeedbackButton" offsetY="8" />
+							<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)ExportBuildButton" offsetY="8" />
 							<OnInitialized>
 								self.tooltip = {SI_COMBAT_METRICS_NOTIFICATION}
 								self.category = "Notification"

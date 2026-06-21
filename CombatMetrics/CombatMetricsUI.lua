@@ -12,6 +12,7 @@ local currentCLPage
 local selections, lastSelections
 local savedFights
 local SVHandler
+local exportBuild
 local enlargedGraph = false
 local maxXYPlots = 5
 local maxBarPlots = 8
@@ -410,6 +411,13 @@ local function updateSelectorButtons(selectorButtons)
 	)--]]
 
 	selectorButtons:GetNamedChild("NotificationButton"):SetHidden(not show)
+
+	local exportBtn = selectorButtons:GetNamedChild("ExportBuildButton")
+	if exportBtn then
+		local enabled = fightData ~= nil and fightData.calculated ~= nil
+		exportBtn:SetAlpha(enabled and 1.0 or 0.2)
+		exportBtn:SetMouseEnabled(enabled)
+	end
 end
 
 local function initSelectorButtons(selectorButtons)
@@ -423,6 +431,12 @@ local function initSelectorButtons(selectorButtons)
 			end
 		elseif child and child.isSecondaryCategory then
 			child:SetHandler("OnMouseUp", selectMainPanel)
+		elseif child and child.isExportButton then
+			child:SetHandler("OnMouseUp", function(ctrl, upInside)
+				if upInside then
+					exportBuild()
+				end
+			end)
 		end
 
 		selectMainPanel(selectorButtons:GetNamedChild("FightStatsButton"))
@@ -1362,7 +1376,7 @@ do
 		return supportedLang[lang] and lang or "en"
 	end
 
-	local function exportBuild()
+	function exportBuild()
 		if fightData == nil or fightData.calculated == nil then
 			return
 		end
