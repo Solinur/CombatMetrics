@@ -2288,8 +2288,8 @@ local function updateFightStatsPanelRight(panel)
 					local sum = 0
 					local effectiveSum = 0
 					local totalDamage = 0
-					local maxCritBonus = 125
-					local trimmedCritValues = { [125] = 0 }
+					local maxCritBonus = fightData.special.CritBonusMastery and 155 or 125
+					local trimmedCritValues = { [maxCritBonus] = 0 }
 					local stepsize = 10
 
 					for crit, damage in pairs(critvalues) do
@@ -2297,7 +2297,7 @@ local function updateFightStatsPanelRight(panel)
 						effectiveSum = effectiveSum + zo_min(crit, maxCritBonus) * damage
 						totalDamage = totalDamage + damage
 
-						if crit < 130 and crit >= 120 then
+						if crit < maxCritBonus + 5 and crit >= maxCritBonus - 5 then
 							stepsize = 5
 						end
 
@@ -2314,7 +2314,7 @@ local function updateFightStatsPanelRight(panel)
 
 						local sumdamageRatio = 100 * (sumdamage / totalDamage)
 						local damageRatio = 100 * damage / totalDamage
-						local color = crit == 125 and "|cffbb88" or damageRatio > 5 and "|cffffff" or ""
+						local color = crit == maxCritBonus and "|cffbb88" or damageRatio > 5 and "|cffffff" or ""
 						local newline = string.format("<%s%2d%%: %5.1f%%", color, crit, sumdamageRatio)
 						table.insert(tooltiplines, newline)
 					end
