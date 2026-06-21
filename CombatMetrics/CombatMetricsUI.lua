@@ -1807,7 +1807,8 @@ local function updateTitlePanel(panel)
 
 	-- ClassIcon
 
-	local classIcon = charInfo:GetNamedChild("ClassIcon")
+	local classIconBar = charInfo:GetNamedChild("ClassIcons")
+	local classIcon = classIconBar:GetNamedChild("ClassIcon")
 	local classId = charData.classId
 
 	for i = 1, GetNumClasses() do
@@ -1826,6 +1827,45 @@ local function updateTitlePanel(panel)
 		classIcon:SetHidden(true)
 	end
 
+	local classIcon4 = classIconBar:GetNamedChild("ClassIcon4")
+	local isSubClassing = false
+
+	local skillLines = charData.SkillLines
+	if skillLines then
+		for i, skillLineId in ipairs(skillLines) do
+			local lineData = SKILLS_DATA_MANAGER:GetSkillLineDataById(skillLineId)
+			local texture = lineData:GetSkillDataByIndex(3):GetProgressionData(0).icon
+			local iconControl = classIconBar:GetNamedChild("ClassIcon" .. i + 1)
+			iconControl:SetTexture(texture)
+			iconControl.tooltip = lineData:GetFormattedName()
+
+			if lineData.classId ~= charData.classId then
+				isSubClassing = true
+			end
+		end
+
+		local nextIcon = 2
+
+		if isSubClassing == true and SKILLS_DATA_MANAGER and SKILLS_DATA_MANAGER.abilityIdToProgressionDataMap then
+			classIcon4:SetHidden(false)
+			classIcon4.tooltip = nil
+		else
+			classIcon4:SetHidden(true)
+			for _, abilityId in ipairs(charData.passiveSkills) do
+				local progressionData = SKILLS_DATA_MANAGER.abilityIdToProgressionDataMap[abilityId]
+				if progressionData.skillData.skillLineData.isClassMastery == true then
+					local iconControl = classIconBar:GetNamedChild("ClassIcon" .. nextIcon)
+					iconControl:SetTexture(progressionData.icon)
+					iconControl.tooltip = progressionData:GetDetailedName()
+					if nextIcon == 3 then
+						break
+					end
+					nextIcon = nextIcon + 1
+				end
+			end
+		end
+	end
+
 	-- charName
 
 	local charName = charInfo:GetNamedChild("Charname")
@@ -1835,24 +1875,24 @@ local function updateTitlePanel(panel)
 
 	-- CPValue
 
-	local CPIcon = charInfo:GetNamedChild("CPIcon")
-	local CPValue = charInfo:GetNamedChild("CPValue")
+	-- local CPIcon = charInfo:GetNamedChild("CPIcon")
+	-- local CPValue = charInfo:GetNamedChild("CPValue")
 
-	local level = charData.level
-	local CP = charData.CPtotal
+	-- local level = charData.level
+	-- local CP = charData.CPtotal
 
-	if level == nil or level == 0 then
-		CPIcon:SetHidden(true)
-		CPValue:SetHidden(true)
-	elseif level < 50 then
-		CPIcon:SetHidden(true)
-		CPValue:SetHidden(false)
-		CPValue:SetText(level)
-	else
-		CPIcon:SetHidden(false)
-		CPValue:SetHidden(false)
-		CPValue:SetText(CP)
-	end
+	-- if level == nil or level == 0 then
+	-- 	CPIcon:SetHidden(true)
+	-- 	CPValue:SetHidden(true)
+	-- elseif level < 50 then
+	-- 	CPIcon:SetHidden(true)
+	-- 	CPValue:SetHidden(false)
+	-- 	CPValue:SetText("L" .. level)
+	-- else
+	-- 	CPIcon:SetHidden(false)
+	-- 	CPValue:SetHidden(false)
+	-- 	CPValue:SetText(CP)
+	-- end
 
 	-- Fight Title
 
@@ -6028,10 +6068,21 @@ local function updateInfoRowPanel(panel)
 	local date = data.date
 	local account = data.account
 
-	local accountstring = account and string.format("%s, ", account) or ""
+	local accountstring = account or ""
+	local levelString = "?"
+
+	local level = fightData and fightData.charData and fightData.charData.level or nil
+
+	if level == nil or level == 0 then
+	elseif level < 50 then
+		levelString = ZO_CachedStrFormat("L<<1>>", level)
+	else
+		levelString =
+			zo_iconTextFormat("esoui/art/champion/champion_icon.dds", "auto", "auto", fightData.charData.CPtotal)
+	end
 
 	local datestring = type(date) == "number" and GetDateStringFromTimestamp(date) or date
-	local timestring = string.format("%s%s, %s", accountstring, datestring, data.time)
+	local timestring = string.format("%s %s, %s, %s", accountstring, levelString, datestring, data.time)
 	local versionstring =
 		string.format("%s / CMX %s / LC %s", data.ESOversion or "<= 3.2", CMX.version, tostring(LC.version))
 
