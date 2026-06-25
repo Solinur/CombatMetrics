@@ -2465,7 +2465,8 @@ local function adjustRowSize(row, header) -- this function resizes the row eleme
 		return
 	end -- if sizes are good already, bail out.
 
-	row.scale = db.FightReport.scale
+	local scale = db.FightReport.scale
+	row.scale = scale
 
 	for i = 1, header:GetNumChildren() do
 		local child = header:GetChild(i)
@@ -2476,15 +2477,20 @@ local function adjustRowSize(row, header) -- this function resizes the row eleme
 		local rowchild = row:GetNamedChild(childname)
 
 		if template and rowchild then
-			local x, y = template:GetDimensions()
+			-- Derive dimensions from the stored original layout (set by storeOrigLayout) times the
+			-- current scale. Reading the live header via GetDimensions()/GetAnchor() is unreliable on
+			-- first show: ESO hasn't applied the scale layout pass yet, so it returns unscaled values
+			-- and the rows lock in the wrong size until a manual resize forces a re-adjust.
+			local x = template.sizes and template.sizes[1] * scale or ({ template:GetDimensions() })[1]
+			local y = template.sizes and template.sizes[2] * scale or ({ template:GetDimensions() })[2]
 			rowchild:SetDimensions(x, y)
 
-			local valid1, _, _, _, x, y, _ = template:GetAnchor(0)
+			local templateAnchor = template.anchors and template.anchors[1]
 			local valid2, point, relativeTo, relativePoint, _, _, _ = rowchild:GetAnchor(0)
 
-			if valid1 and valid2 then
+			if templateAnchor and valid2 then
 				rowchild:ClearAnchors()
-				rowchild:SetAnchor(point, relativeTo, relativePoint, x, y)
+				rowchild:SetAnchor(point, relativeTo, relativePoint, templateAnchor[4] * scale, templateAnchor[5] * scale)
 			end
 
 			if rowchild:GetType() == CT_LABEL then
