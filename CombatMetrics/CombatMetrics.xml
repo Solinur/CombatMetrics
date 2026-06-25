@@ -1767,13 +1767,13 @@
 										</Texture>
 
 										<Texture name="$(parent)ClassIcon2" textureFile="esoui/art/champion/champion_icon.dds"
-											inherits="CombatMetrics_TextureTooltip">
+											inherits="CombatMetrics_TextureTooltip" hidden="true">
 											<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ClassIcon" offsetX="2" />
 											<Dimensions x="20" y="20" />
 										</Texture>
 
 										<Texture name="$(parent)ClassIcon3" textureFile="esoui/art/champion/champion_icon.dds"
-											inherits="CombatMetrics_TextureTooltip">
+											inherits="CombatMetrics_TextureTooltip" hidden="true">
 											<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ClassIcon2" offsetX="2" />
 											<Dimensions x="20" y="20" />
 										</Texture>

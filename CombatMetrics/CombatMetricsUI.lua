@@ -1844,6 +1844,13 @@ local function updateTitlePanel(panel)
 	local classIcon4 = classIconBar:GetNamedChild("ClassIcon4")
 	local isSubClassing = false
 
+	-- hide all secondary icons up front; they are shown again only when populated below
+	for i = 2, 4 do
+		local iconControl = classIconBar:GetNamedChild("ClassIcon" .. i)
+		iconControl:SetHidden(true)
+		iconControl.tooltip = nil
+	end
+
 	local skillLines = charData.SkillLines
 	if skillLines then
 		for i, skillLineId in ipairs(skillLines) do
@@ -1852,6 +1859,7 @@ local function updateTitlePanel(panel)
 			local iconControl = classIconBar:GetNamedChild("ClassIcon" .. i + 1)
 			iconControl:SetTexture(texture)
 			iconControl.tooltip = lineData:GetFormattedName()
+			iconControl:SetHidden(false)
 
 			if lineData.classId ~= charData.classId then
 				isSubClassing = true
@@ -1863,14 +1871,17 @@ local function updateTitlePanel(panel)
 		if isSubClassing == true and SKILLS_DATA_MANAGER and SKILLS_DATA_MANAGER.abilityIdToProgressionDataMap then
 			classIcon4:SetHidden(false)
 		else
+			-- not subclassing: replace the skill-line icons with class mastery passives
 			classIcon4:SetHidden(true)
-			classIcon4.tooltip = nil
-			for _, abilityId in ipairs(charData.passiveSkills) do
+			classIconBar:GetNamedChild("ClassIcon2"):SetHidden(true)
+			classIconBar:GetNamedChild("ClassIcon3"):SetHidden(true)
+			for _, abilityId in ipairs(charData.passiveSkills or {}) do
 				local progressionData = SKILLS_DATA_MANAGER.abilityIdToProgressionDataMap[abilityId]
-				if progressionData.skillData.skillLineData.isClassMastery == true then
+				if progressionData and progressionData.skillData.skillLineData.isClassMastery == true then
 					local iconControl = classIconBar:GetNamedChild("ClassIcon" .. nextIcon)
 					iconControl:SetTexture(progressionData.icon)
 					iconControl.tooltip = progressionData:GetDetailedName()
+					iconControl:SetHidden(false)
 					if nextIcon == 3 then
 						break
 					end
@@ -6936,7 +6947,14 @@ end
 
 local scene = ZO_Scene:New("CMX_REPORT_SCENE", SCENE_MANAGER)
 
+local fightReportInitialized = false
+
 local function initFightReport()
+	if fightReportInitialized then
+		return
+	end
+	fightReportInitialized = true
+
 	local fightReport = CombatMetrics_Report
 	storeOrigLayout(fightReport)
 
