@@ -6959,6 +6959,7 @@ local scene = ZO_Scene:New("CMX_REPORT_SCENE", SCENE_MANAGER)
 
 local function initFightReport()
 	local fightReport = CombatMetrics_Report
+	storeOrigLayout(fightReport)
 
 	local pos = db[fightReport:GetName()]
 
@@ -7040,8 +7041,12 @@ local function initFightReport()
 	function fightReport:Resize(scale)
 		resize(fightReport, scale)
 
+		-- resize() rewrites anchor-derived dimensions; the row sizing in Update reads them back, so
+		-- it must wait a frame for ESO's layout pass to resolve the new values.
 		if not fightReport:IsHidden() then
-			fightReport:Update()
+			zo_callLater(function()
+				fightReport:Update()
+			end, 1)
 		end
 	end
 
@@ -7120,36 +7125,14 @@ local function initFightReport()
 	selectorButtons.Update = updateSelectorButtons
 	initSelectorButtons(selectorButtons)
 
-end
+	fightReport:Resize(db.FightReport.scale)
 
--- Deferred capture sequence. ESO resolves anchor-computed dimensions once per frame, so each step
--- below must run on its own frame: storeOrigLayout needs resolved dims to capture, and both the
--- left-overflow check and the row sizing in toggleFightReport's Update need Resize's new anchors
--- to be readable first. This runs only once, on the first Toggle/Resize, before initFightReport's
--- plain toggleFightReport/Resize replacements take over.
-
-local function finishFightReportInit(show)
-	local fightReport = CombatMetrics_Report
-	local selectorButtons = fightReport:GetNamedChild("_SelectorRow")
 	local left = selectorButtons:GetLeft()
 
 	if left < 0 then
-		local pos = db[fightReport:GetName()]
 		fightReport:ClearAnchors()
 		fightReport:SetAnchor(CENTER, nil, TOPLEFT, pos.x - left, pos.y)
 	end
-
-	if show then
-		toggleFightReport()
-	end
-end
-
-local function captureFightReport(show)
-	storeOrigLayout(CombatMetrics_Report)
-	CombatMetrics_Report:Resize(db.FightReport.scale)
-	zo_callLater(function()
-		finishFightReportInit(show)
-	end, 1)
 end
 
 local function initLiveReport()
@@ -7389,19 +7372,12 @@ function CMX.InitializeUI()
 
 	CombatMetrics_Report.Toggle = function(_)
 		initFightReport()
-		zo_callLater(function()
-			captureFightReport(true)
-		end, 1)
+		zo_callLater(toggleFightReport, 1)
 	end
 
 	CombatMetrics_Report.Resize = function(_, scale)
-		if scale then
-			db.FightReport.scale = scale
-		end
 		initFightReport()
-		zo_callLater(function()
-			captureFightReport(false)
-		end, 1)
+		CombatMetrics_Report:Resize(scale)
 	end
 
 	initLiveReport()
