@@ -1887,27 +1887,6 @@ local function updateTitlePanel(panel)
 
 	charName:SetText(name)
 
-	-- CPValue
-
-	-- local CPIcon = charInfo:GetNamedChild("CPIcon")
-	-- local CPValue = charInfo:GetNamedChild("CPValue")
-
-	-- local level = charData.level
-	-- local CP = charData.CPtotal
-
-	-- if level == nil or level == 0 then
-	-- 	CPIcon:SetHidden(true)
-	-- 	CPValue:SetHidden(true)
-	-- elseif level < 50 then
-	-- 	CPIcon:SetHidden(true)
-	-- 	CPValue:SetHidden(false)
-	-- 	CPValue:SetText("L" .. level)
-	-- else
-	-- 	CPIcon:SetHidden(false)
-	-- 	CPValue:SetHidden(false)
-	-- 	CPValue:SetText(CP)
-	-- end
-
 	-- Fight Title
 
 	local fightTitle = panel:GetNamedChild("FightTitle"):GetNamedChild("Name")
