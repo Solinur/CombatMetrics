@@ -161,7 +161,7 @@
 			</OnMouseExit>
 		</Label>
 
-		<Texture name="CombatMetrics_TextureTooltip" mouseEnabled="true" virtual="true">
+		<Texture name="CombatMetrics_TextureTooltip" mouseEnabled="true" layer="CONTROLS" virtual="true">
 			<OnMouseEnter>
                 CMX.OnMouseEnter(self)
             </OnMouseEnter>
@@ -1757,23 +1757,37 @@
 									<Dimensions x="34" y="34" />
 								</Texture>
 
-								<Texture name="$(parent)ClassIcon" textureFile="esoui/art/champion/champion_icon.dds"
-									inherits="CombatMetrics_TextureTooltip">
+								<Control name="$(parent)ClassIcons" resizeToFitDescendents="true">
 									<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)RaceIcon" offsetX="-2" />
-									<Dimensions x="34" y="34" />
-								</Texture>
+									<Controls>
+										<Texture name="$(parent)ClassIcon" textureFile="esoui/art/champion/champion_icon.dds"
+											inherits="CombatMetrics_TextureTooltip">
+											<Anchor point="LEFT" offsetX="0" />
+											<Dimensions x="34" y="34" />
+										</Texture>
+
+										<Texture name="$(parent)ClassIcon2" textureFile="esoui/art/champion/champion_icon.dds"
+											inherits="CombatMetrics_TextureTooltip" hidden="true">
+											<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ClassIcon" offsetX="2" />
+											<Dimensions x="20" y="20" />
+										</Texture>
+
+										<Texture name="$(parent)ClassIcon3" textureFile="esoui/art/champion/champion_icon.dds"
+											inherits="CombatMetrics_TextureTooltip" hidden="true">
+											<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ClassIcon2" offsetX="2" />
+											<Dimensions x="20" y="20" />
+										</Texture>
+
+										<Texture name="$(parent)ClassIcon4" textureFile="esoui/art/champion/champion_icon.dds"
+											inherits="CombatMetrics_TextureTooltip" hidden="true">
+											<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ClassIcon3" offsetX="2" />
+											<Dimensions x="20" y="20" />
+										</Texture>
+									</Controls>
+								</Control>
 
 								<Label name="$(parent)Charname" inherits="CombatMetrics_InfoFontControl">
-									<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ClassIcon" offsetX="4" />
-								</Label>
-
-								<Texture name="$(parent)CPIcon" textureFile="esoui/art/champion/champion_icon.dds">
-									<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Charname" offsetX="10" />
-									<Dimensions x="20" y="20" />
-								</Texture>
-
-								<Label name="$(parent)CPValue" inherits="CombatMetrics_InfoFontControl">
-									<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)CPIcon" offsetX="4" />
+									<Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)ClassIcons" offsetX="6" />
 								</Label>
 
 							</Controls>
@@ -3232,10 +3246,20 @@
 
 						</Texture>
 
+						<Texture name="$(parent)ExportBuildButton" mouseEnabled="true"
+							textureFile="CombatMetrics/icons/share.dds" color="FFF8EABF"
+							inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton">
+							<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)FeedbackButton" offsetY="8" />
+							<OnInitialized>
+								self.tooltip = {SI_COMBAT_METRICS_EXPORT_BUILD}
+								self.isExportButton = true
+							</OnInitialized>
+						</Texture>
+
 						<Texture name="$(parent)NotificationButton" mouseEnabled="true"
 							textureFile="esoui/art/mainmenu/menubar_notifications_down.dds" color="FFFFFFFF"
 							inherits="CombatMetrics_TextureTooltip CombatMetrics_SelectorButton" hidden="true">
-							<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)FeedbackButton" offsetY="8" />
+							<Anchor point="TOP" relativePoint="BOTTOM" relativeTo="$(parent)ExportBuildButton" offsetY="8" />
 							<OnInitialized>
 								self.tooltip = {SI_COMBAT_METRICS_NOTIFICATION}
 								self.category = "Notification"

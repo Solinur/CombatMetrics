@@ -12,6 +12,7 @@ local currentCLPage
 local selections, lastSelections
 local savedFights
 local SVHandler
+local exportBuild
 local enlargedGraph = false
 local maxXYPlots = 5
 local maxBarPlots = 8
@@ -410,6 +411,13 @@ local function updateSelectorButtons(selectorButtons)
 	)--]]
 
 	selectorButtons:GetNamedChild("NotificationButton"):SetHidden(not show)
+
+	local exportBtn = selectorButtons:GetNamedChild("ExportBuildButton")
+	if exportBtn then
+		local enabled = fightData ~= nil and fightData.calculated ~= nil
+		exportBtn:SetAlpha(enabled and 1.0 or 0.2)
+		exportBtn:SetMouseEnabled(enabled)
+	end
 end
 
 local function initSelectorButtons(selectorButtons)
@@ -423,6 +431,12 @@ local function initSelectorButtons(selectorButtons)
 			end
 		elseif child and child.isSecondaryCategory then
 			child:SetHandler("OnMouseUp", selectMainPanel)
+		elseif child and child.isExportButton then
+			child:SetHandler("OnMouseUp", function(ctrl, upInside)
+				if upInside then
+					exportBuild()
+				end
+			end)
 		end
 
 		selectMainPanel(selectorButtons:GetNamedChild("FightStatsButton"))
@@ -1362,7 +1376,7 @@ do
 		return supportedLang[lang] and lang or "en"
 	end
 
-	local function exportBuild()
+	function exportBuild()
 		if fightData == nil or fightData.calculated == nil then
 			return
 		end
@@ -1807,7 +1821,8 @@ local function updateTitlePanel(panel)
 
 	-- ClassIcon
 
-	local classIcon = charInfo:GetNamedChild("ClassIcon")
+	local classIconBar = charInfo:GetNamedChild("ClassIcons")
+	local classIcon = classIconBar:GetNamedChild("ClassIcon")
 	local classId = charData.classId
 
 	for i = 1, GetNumClasses() do
@@ -1826,33 +1841,62 @@ local function updateTitlePanel(panel)
 		classIcon:SetHidden(true)
 	end
 
+	local classIcon4 = classIconBar:GetNamedChild("ClassIcon4")
+	local isSubClassing = false
+
+	-- hide all secondary icons up front; they are shown again only when populated below
+	for i = 2, 4 do
+		local iconControl = classIconBar:GetNamedChild("ClassIcon" .. i)
+		iconControl:SetHidden(true)
+		iconControl.tooltip = nil
+	end
+
+	local skillLines = charData.SkillLines
+	if skillLines then
+		for i, skillLineId in ipairs(skillLines) do
+			local lineData = SKILLS_DATA_MANAGER:GetSkillLineDataById(skillLineId)
+			local texture = lineData:GetSkillDataByIndex(3):GetProgressionData(0).icon
+			local iconControl = classIconBar:GetNamedChild("ClassIcon" .. i + 1)
+			iconControl:SetTexture(texture)
+			iconControl.tooltip = lineData:GetFormattedName()
+			iconControl:SetHidden(false)
+
+			if lineData.classId ~= charData.classId then
+				isSubClassing = true
+			end
+		end
+
+		local nextIcon = 2
+
+		if isSubClassing == true and SKILLS_DATA_MANAGER and SKILLS_DATA_MANAGER.abilityIdToProgressionDataMap then
+			classIcon4:SetHidden(false)
+		else
+			-- not subclassing: replace the skill-line icons with class mastery passives
+			classIcon4:SetHidden(true)
+			classIconBar:GetNamedChild("ClassIcon2"):SetHidden(true)
+			classIconBar:GetNamedChild("ClassIcon3"):SetHidden(true)
+			for _, abilityId in ipairs(charData.passiveSkills or {}) do
+				local progressionData = SKILLS_DATA_MANAGER.abilityIdToProgressionDataMap[abilityId]
+				if progressionData and progressionData.skillData.skillLineData.isClassMastery == true then
+					local iconControl = classIconBar:GetNamedChild("ClassIcon" .. nextIcon)
+					iconControl:SetTexture(progressionData.icon)
+					iconControl.tooltip = progressionData:GetDetailedName()
+					iconControl:SetHidden(false)
+					if nextIcon == 3 then
+						break
+					end
+					nextIcon = nextIcon + 1
+				end
+			end
+		end
+	end
+
 	-- charName
 
 	local charName = charInfo:GetNamedChild("Charname")
 	local name = charData.name
 
 	charName:SetText(name)
-
-	-- CPValue
-
-	local CPIcon = charInfo:GetNamedChild("CPIcon")
-	local CPValue = charInfo:GetNamedChild("CPValue")
-
-	local level = charData.level
-	local CP = charData.CPtotal
-
-	if level == nil or level == 0 then
-		CPIcon:SetHidden(true)
-		CPValue:SetHidden(true)
-	elseif level < 50 then
-		CPIcon:SetHidden(true)
-		CPValue:SetHidden(false)
-		CPValue:SetText(level)
-	else
-		CPIcon:SetHidden(false)
-		CPValue:SetHidden(false)
-		CPValue:SetText(CP)
-	end
 
 	-- Fight Title
 
@@ -2234,8 +2278,8 @@ local function updateFightStatsPanelRight(panel)
 					local sum = 0
 					local effectiveSum = 0
 					local totalDamage = 0
-					local maxCritBonus = 125
-					local trimmedCritValues = { [125] = 0 }
+					local maxCritBonus = fightData.special.CritBonusMastery and 155 or 125
+					local trimmedCritValues = { [maxCritBonus] = 0 }
 					local stepsize = 10
 
 					for crit, damage in pairs(critvalues) do
@@ -2243,7 +2287,7 @@ local function updateFightStatsPanelRight(panel)
 						effectiveSum = effectiveSum + zo_min(crit, maxCritBonus) * damage
 						totalDamage = totalDamage + damage
 
-						if crit < 130 and crit >= 120 then
+						if crit < maxCritBonus + 5 and crit >= maxCritBonus - 5 then
 							stepsize = 5
 						end
 
@@ -2260,7 +2304,7 @@ local function updateFightStatsPanelRight(panel)
 
 						local sumdamageRatio = 100 * (sumdamage / totalDamage)
 						local damageRatio = 100 * damage / totalDamage
-						local color = crit == 125 and "|cffbb88" or damageRatio > 5 and "|cffffff" or ""
+						local color = crit == maxCritBonus and "|cffbb88" or damageRatio > 5 and "|cffffff" or ""
 						local newline = string.format("<%s%2d%%: %5.1f%%", color, crit, sumdamageRatio)
 						table.insert(tooltiplines, newline)
 					end
@@ -2421,7 +2465,8 @@ local function adjustRowSize(row, header) -- this function resizes the row eleme
 		return
 	end -- if sizes are good already, bail out.
 
-	row.scale = db.FightReport.scale
+	local scale = db.FightReport.scale
+	row.scale = scale
 
 	for i = 1, header:GetNumChildren() do
 		local child = header:GetChild(i)
@@ -2432,15 +2477,20 @@ local function adjustRowSize(row, header) -- this function resizes the row eleme
 		local rowchild = row:GetNamedChild(childname)
 
 		if template and rowchild then
-			local x, y = template:GetDimensions()
+			-- Derive dimensions from the stored original layout (set by storeOrigLayout) times the
+			-- current scale. Reading the live header via GetDimensions()/GetAnchor() is unreliable on
+			-- first show: ESO hasn't applied the scale layout pass yet, so it returns unscaled values
+			-- and the rows lock in the wrong size until a manual resize forces a re-adjust.
+			local x = template.sizes and template.sizes[1] * scale or ({ template:GetDimensions() })[1]
+			local y = template.sizes and template.sizes[2] * scale or ({ template:GetDimensions() })[2]
 			rowchild:SetDimensions(x, y)
 
-			local valid1, _, _, _, x, y, _ = template:GetAnchor(0)
+			local templateAnchor = template.anchors and template.anchors[1]
 			local valid2, point, relativeTo, relativePoint, _, _, _ = rowchild:GetAnchor(0)
 
-			if valid1 and valid2 then
+			if templateAnchor and valid2 then
 				rowchild:ClearAnchors()
-				rowchild:SetAnchor(point, relativeTo, relativePoint, x, y)
+				rowchild:SetAnchor(point, relativeTo, relativePoint, templateAnchor[4] * scale, templateAnchor[5] * scale)
 			end
 
 			if rowchild:GetType() == CT_LABEL then
@@ -6028,10 +6078,21 @@ local function updateInfoRowPanel(panel)
 	local date = data.date
 	local account = data.account
 
-	local accountstring = account and string.format("%s, ", account) or ""
+	local accountstring = account or ""
+	local levelString = "?"
+
+	local level = fightData and fightData.charData and fightData.charData.level or nil
+
+	if level == nil or level == 0 then
+	elseif level < 50 then
+		levelString = ZO_CachedStrFormat("L<<1>>", level)
+	else
+		levelString =
+			zo_iconTextFormat("esoui/art/champion/champion_icon.dds", "auto", "auto", fightData.charData.CPtotal)
+	end
 
 	local datestring = type(date) == "number" and GetDateStringFromTimestamp(date) or date
-	local timestring = string.format("%s%s, %s", accountstring, datestring, data.time)
+	local timestring = string.format("%s %s, %s, %s", accountstring, levelString, datestring, data.time)
 	local versionstring =
 		string.format("%s / CMX %s / LC %s", data.ESOversion or "<= 3.2", CMX.version, tostring(LC.version))
 
@@ -6892,7 +6953,14 @@ end
 
 local scene = ZO_Scene:New("CMX_REPORT_SCENE", SCENE_MANAGER)
 
+local fightReportInitialized = false
+
 local function initFightReport()
+	if fightReportInitialized then
+		return
+	end
+	fightReportInitialized = true
+
 	local fightReport = CombatMetrics_Report
 	storeOrigLayout(fightReport)
 
@@ -6976,8 +7044,12 @@ local function initFightReport()
 	function fightReport:Resize(scale)
 		resize(fightReport, scale)
 
+		-- resize() rewrites anchor-derived dimensions; the row sizing in Update reads them back, so
+		-- it must wait a frame for ESO's layout pass to resolve the new values.
 		if not fightReport:IsHidden() then
-			fightReport:Update()
+			zo_callLater(function()
+				fightReport:Update()
+			end, 1)
 		end
 	end
 
@@ -7301,6 +7373,15 @@ function CMX.InitializeUI()
 	currentFight = nil
 	currentCLPage = 1
 
-	initFightReport()
+	CombatMetrics_Report.Toggle = function(_)
+		initFightReport()
+		zo_callLater(toggleFightReport, 1)
+	end
+
+	CombatMetrics_Report.Resize = function(_, scale)
+		initFightReport()
+		CombatMetrics_Report:Resize(scale)
+	end
+
 	initLiveReport()
 end
