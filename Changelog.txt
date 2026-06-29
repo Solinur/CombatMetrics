@@ -724,3 +724,10 @@ Version 0.5.10 6,774 (02.07.2016, 1:12)
 [*] Added an option to export your build to ESO-Hub. This can be accessed via the cogwheel and by clicking Export Build. 
 [*] Note 1: While this option is available for saved fights too, the data for the exported build will be incomplete, i.e. missing the role, passives and attribute points. 
 [*] Note 2: Alternative skill bars (e.g. Werewolf) are not supported yet.
+
+1.7.8 7,094,585 (29.06.2026) 22:33
+[*] Added display of subclassed skill lines (uses second skill icon) or class mastery passive next to the class icon.
+[*] Critical Damage Bonus calculation now accounts for the higher cap granted by Nightblade Class Mastery.
+[*] Improved load times by deferring initialization of the main report window and several startup steps until they are needed. (Thx atharti and code65536 for the suggestion)
+[*] Added a dedicated button for build export. (Let me know if you need an option to hide it)
+
