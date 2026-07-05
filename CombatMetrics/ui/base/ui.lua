@@ -444,13 +444,13 @@ function CMXint.InitializeUI()
 
 	assert(CMXint.InitializeCombatStats(), "Initialization of combat stats UI failed")
 	-- -- assert(CMXint.InitializeResource(), "Initialization of resource UI failed")
-	-- assert(CMXint.InitializePlayerStats(), "Initialization of player stats UI failed")
+	assert(CMXint.InitializePlayerStats(), "Initialization of player stats UI failed")
 	assert(CMXint.InitializeBuffs(), "Initialization of buffs UI failed")
 
 	assert(CMXint.InitializeUnits(), "Initialization of units UI failed")
 	assert(CMXint.InitializeAbilities(), "Initialization of abilities UI failed")
 
-	-- assert(CMXint.InitializeSkills(), "Initialization of skills UI failed")
+	assert(CMXint.InitializeSkills(), "Initialization of skills UI failed")
 	assert(CMXint.InitializeEquipment(), "Initialization of equipment UI failed")
 	-- assert(CMXint.InitializeChampionPoints(), "Initialization of champion points UI failed")
 	-- assert(CMXint.InitializeConsumables(), "Initialization of consumables UI failed")

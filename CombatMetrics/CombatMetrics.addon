@@ -38,7 +38,7 @@ ui/panels/info_row.xml
 
 ui/panels/combat_stats.lua
 ; ui/panels/resources.lua
-; ui/panels/player_stats.lua
+ui/panels/player_stats.lua
 ; ui/panels/player_stats.xml
 ui/panels/buffs.lua
 ui/panels/buffs.xml
@@ -46,9 +46,8 @@ ui/panels/units.lua
 ui/panels/units.xml
 ui/panels/abilities.lua
 ui/panels/abilities.xml
-; 
-; ui/panels/skills.lua
-; ui/panels/skills.xml
+ui/panels/skills.lua
+ui/panels/skills.xml
 ui/panels/equipment.lua
 ui/panels/equipment.xml
 ; ui/panels/consumables.lua

@@ -27,6 +27,12 @@ local function ReleaseSharedControl(control)
 		control:SetTexture("")
 		control:SetColor(1, 1, 1, 1)
 		control:SetBlendMode(TEX_BLEND_MODE_ALPHA)
+		control:SetMouseEnabled(false)
+		control:SetHandler("OnMouseEnter", nil)
+		control:SetHandler("OnMouseExit", nil)
+		control:SetHandler("OnMouseUp", nil)
+		control.abilityId = nil
+		control.scriptIds = nil
 	elseif controlType == CT_LABEL then
 		control:SetText("")
 		control:SetColor(1, 1, 1, 1)

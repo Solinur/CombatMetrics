@@ -64,9 +64,18 @@ local statFormat = { -- {label, format, convert}
 }
 
 function CMXint.InitializePlayerStatsPanel(control)
+	---@class PlayerStatsPanel: Panel
 	PlayerStatsPanel = CMX.internal.PanelObject:New(control, "playerStats")
+	PlayerStatsPanel.scenes = { "fightStats" }
 
-	function PlayerStatsPanel:Update(fightData)
+	-- Standin: the panel currently shows the static "Coming Soon" placeholder and only
+	-- participates in scene management (same scenes as combat stats). The full stats
+	-- implementation below (UpdateLegacy) awaits the v2 data pipeline and is not wired up.
+	function PlayerStatsPanel:Recover() end
+	function PlayerStatsPanel:Clear() end
+	function PlayerStatsPanel:Update() end
+
+	function PlayerStatsPanel:UpdateLegacy(fightData)
 		logger:Debug("Updating CombatStatsPanel")
 
 		local data = fightData or {}
