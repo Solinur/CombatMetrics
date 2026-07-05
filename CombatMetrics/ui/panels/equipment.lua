@@ -155,11 +155,8 @@ function CMXint.InitializeEquipmentPanel(control)
 		for i = 1, #self.equipLines do
 			local line = self.equipLines[i]
 			line.label:SetText("")
-			line.label.itemLink = nil
 			line.trait:SetText("")
 			line.enchant:SetText("")
-			line.enchant.itemLink = nil
-			line.enchant.enchantDescription = nil
 		end
 	end
 

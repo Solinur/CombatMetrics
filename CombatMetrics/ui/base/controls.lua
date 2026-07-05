@@ -20,8 +20,24 @@ local function ReleaseSharedControl(control)
 	control:SetParent(CombatMetricsReport)
 	control.pool:ReleaseObject(control.objectKey)
 
-	if control:GetType() == CT_TEXTURE then
+	-- Reset each pooled control to a neutral default so a panel reusing it doesn't
+	-- inherit stale color/blend/alignment/interaction state from the previous owner.
+	local controlType = control:GetType()
+	if controlType == CT_TEXTURE then
 		control:SetTexture("")
+		control:SetColor(1, 1, 1, 1)
+		control:SetBlendMode(TEX_BLEND_MODE_ALPHA)
+	elseif controlType == CT_LABEL then
+		control:SetText("")
+		control:SetColor(1, 1, 1, 1)
+		control:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
+		control:SetMouseEnabled(false)
+		control:SetLinkEnabled(false)
+		control:SetHandler("OnMouseEnter", nil)
+		control:SetHandler("OnMouseExit", nil)
+		control:SetHandler("OnLinkClicked", nil)
+		control.itemLink = nil
+		control.enchantDescription = nil
 	end
 end
 
