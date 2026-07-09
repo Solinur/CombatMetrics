@@ -9,8 +9,6 @@ local logger
 ---@class CMXui
 local ui = CMXint.ui
 
-local CountStrings = CMXint.CountStrings
-
 local powerTypeLabels = {
 	[POWERTYPE_MAGICKA] = "_MAGICKA",
 	[POWERTYPE_STAMINA] = "_STAMINA",
@@ -76,7 +74,14 @@ function CMXint.InitializePlayerStatsPanel(control)
 	function PlayerStatsPanel:Update() end
 
 	function PlayerStatsPanel:UpdateLegacy(fightData)
-		logger:Debug("Updating CombatStatsPanel")
+		logger:Debug("Updating PlayerStatsPanel")
+
+		if true then
+			return
+		end
+
+		---@diagnostic disable-next-line: undefined-field
+		local CountStrings = CMXint.CountStrings
 
 		local data = fightData or {}
 		local settings = self.settings
@@ -169,12 +174,21 @@ function CMXint.InitializePlayerStatsPanel(control)
 					local backstabberTT
 					local CP = data.CP
 
-					if CP and CP.version ~= nil and CP.version >= 2 then
-						local backstabber = CP[1] and CP[1].stars and CP[1].stars[31] -- Backstabber CP
+					if CP and CP.maxSlotIndex then
+						local discipline = CP[1]
 
-						if backstabber and backstabber[1] >= 10 and backstabber[2] == LIBCOMBAT_CPTYPE_SLOTTED then
-							text = ZO_CachedStrFormat("<<1>>*:", GetString(stringKey, i))
-							backstabberTT = GetString(SI_COMBAT_METRICS_BACKSTABBER_TT)
+						-- The champion bar slots lead each discipline array, so position implies
+						-- "slotted". The fight records how far that slot region reaches.
+						for slotEntry = 1, CP.maxSlotIndex - 1, 2 do
+							if
+								discipline
+								and discipline[slotEntry] == 31 -- Backstabber CP
+								and discipline[slotEntry + 1] >= 10
+							then
+								text = ZO_CachedStrFormat("<<1>>*:", GetString(stringKey, i))
+								backstabberTT = GetString(SI_COMBAT_METRICS_BACKSTABBER_TT)
+								break
+							end
 						end
 					end
 

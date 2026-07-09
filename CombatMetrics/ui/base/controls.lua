@@ -33,6 +33,9 @@ local function ReleaseSharedControl(control)
 		control:SetHandler("OnMouseUp", nil)
 		control.abilityId = nil
 		control.scriptIds = nil
+		control.starId = nil
+		control.points = nil
+		control.slotted = nil
 	elseif controlType == CT_LABEL then
 		control:SetText("")
 		control:SetColor(1, 1, 1, 1)
@@ -44,6 +47,10 @@ local function ReleaseSharedControl(control)
 		control:SetHandler("OnLinkClicked", nil)
 		control.itemLink = nil
 		control.enchantDescription = nil
+		control.abilityId = nil
+		control.starId = nil
+		control.points = nil
+		control.slotted = nil
 	end
 end
 

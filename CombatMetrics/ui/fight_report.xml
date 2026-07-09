@@ -99,10 +99,10 @@
                     <OnInitialized>CombatMetrics.internal.InitializeScribedSkillsPanel(self)</OnInitialized>
                 </Control>
 
-                <Control name="$(parent)_ChampionPointsPanel" hidden="true" inherits="CombatMetrics_PlaceHolder"> <!-- ZO_ScrollContainer -->
+                <Control name="$(parent)_ChampionPointsPanel" hidden="true" inherits="CombatMetrics_ChampionPointsPanel">
                     <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)_ScribedSkillsPanel" offsetY="4" />
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)_AbilitiesPanel" offsetY="-2" />
-                    <!-- <OnInitialized>CombatMetrics.internal.InitializeChampionPointsPanel(self)</OnInitialized> -->
+                    <OnInitialized>CombatMetrics.internal.InitializeChampionPointsPanel(self)</OnInitialized>
                 </Control>
 
                 <Control name="$(parent)_ConsumablesPanel" hidden="true" inherits="CombatMetrics_PlaceHolder"> <!--

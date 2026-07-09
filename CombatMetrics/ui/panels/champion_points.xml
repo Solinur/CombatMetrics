@@ -1,0 +1,14 @@
+<GuiXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sir.insidi.at/or/schema/esoui.xsd">
+    <Controls>
+        <!-- The star rows are built from pooled shared controls in champion_points.lua and
+             parented to the scroll child, which is taller than the panel for most builds. -->
+        <Control name="CombatMetrics_ChampionPointsPanel" virtual="true" inherits="CombatMetrics_ControlFramed">
+            <Controls>
+                <Control name="$(parent)Container" inherits="ZO_ScrollContainer">
+                    <Anchor point="TOPLEFT" offsetX="2" offsetY="2" />
+                    <Anchor point="BOTTOMRIGHT" offsetX="-2" offsetY="-2" />
+                </Control>
+            </Controls>
+        </Control>
+    </Controls>
+</GuiXml>

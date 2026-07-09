@@ -52,7 +52,8 @@ ui/panels/equipment.lua
 ui/panels/equipment.xml
 ; ui/panels/consumables.lua
 ; ui/panels/consumables.xml
-; ui/panels/champion_points.lua
+ui/panels/champion_points.lua
+ui/panels/champion_points.xml
 
 ; ui/panels/combat_log.lua
 ; ui/panels/combat_log.xml

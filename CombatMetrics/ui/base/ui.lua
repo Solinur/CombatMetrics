@@ -452,7 +452,7 @@ function CMXint.InitializeUI()
 
 	assert(CMXint.InitializeSkills(), "Initialization of skills UI failed")
 	assert(CMXint.InitializeEquipment(), "Initialization of equipment UI failed")
-	-- assert(CMXint.InitializeChampionPoints(), "Initialization of champion points UI failed")
+	assert(CMXint.InitializeChampionPoints(), "Initialization of champion points UI failed")
 	-- assert(CMXint.InitializeConsumables(), "Initialization of consumables UI failed")
 
 	-- assert(CMXint.InitializeCombatLog(), "Initialization of combat log UI failed")
