@@ -207,46 +207,46 @@ local function InitAbilitiesList(panel)
 			* Show tick rate ? 
 		]]
 
-		local icon = panel:AcquireSharedControl(CT_TEXTURE)
+		local icon = panel:AcquireRowSharedControl(CT_TEXTURE)
 		icon:ApplyPosition(rowControl, 2, 0, rowHeight, rowHeight)
 
-		local label = panel:AcquireSharedControl(CT_LABEL)
+		local label = panel:AcquireRowSharedControl(CT_LABEL)
 		label:ApplyPosition(rowControl, 28, 0, 190)
 		label:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
 
-		local bar = panel:AcquireSharedControl(CT_TEXTURE)
+		local bar = panel:AcquireRowSharedControl(CT_TEXTURE)
 		bar:ApplyPosition(rowControl, 26, 0, 194, rowHeight)
 		bar:SetTexture("esoui/art/unitframes/progressbar_raidhealth.dds")
 
-		local fraction = panel:AcquireSharedControl(CT_LABEL)
+		local fraction = panel:AcquireRowSharedControl(CT_LABEL)
 		fraction:ApplyPosition(rowControl, 220, 0, 38)
 		fraction:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
-		local perSecond = panel:AcquireSharedControl(CT_LABEL)
+		local perSecond = panel:AcquireRowSharedControl(CT_LABEL)
 		perSecond:ApplyPosition(rowControl, 260, 0, 50)
 		perSecond:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
-		local total = panel:AcquireSharedControl(CT_LABEL)
+		local total = panel:AcquireRowSharedControl(CT_LABEL)
 		total:ApplyPosition(rowControl, 312, 0, 73)
 		total:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
-		local crits = panel:AcquireSharedControl(CT_LABEL)
+		local crits = panel:AcquireRowSharedControl(CT_LABEL)
 		crits:ApplyPosition(rowControl, 387, 0, 46)
 		crits:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
-		local hits = panel:AcquireSharedControl(CT_LABEL)
+		local hits = panel:AcquireRowSharedControl(CT_LABEL)
 		hits:ApplyPosition(rowControl, 433, 0, 42)
 		hits:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
 
-		local critRatio = panel:AcquireSharedControl(CT_LABEL)
+		local critRatio = panel:AcquireRowSharedControl(CT_LABEL)
 		critRatio:ApplyPosition(rowControl, 477, 0, 37)
 		critRatio:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
-		local averageHit = panel:AcquireSharedControl(CT_LABEL)
+		local averageHit = panel:AcquireRowSharedControl(CT_LABEL)
 		averageHit:ApplyPosition(rowControl, 516, 0, 50)
 		averageHit:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
-		local minMax = panel:AcquireSharedControl(CT_LABEL)
+		local minMax = panel:AcquireRowSharedControl(CT_LABEL)
 		minMax:ApplyPosition(rowControl, 568, 0, 50)
 		minMax:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 

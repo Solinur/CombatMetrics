@@ -359,26 +359,26 @@ local function InitBuffsList(panel)
 		local panel = self.panel
 		local rowHeight = self:GetRawHeight()
 
-		local icon = panel:AcquireSharedControl(CT_TEXTURE)
+		local icon = panel:AcquireRowSharedControl(CT_TEXTURE)
 		icon:ApplyPosition(rowControl, 14, 0, rowHeight, rowHeight)
 
-		local label = panel:AcquireSharedControl(CT_LABEL)
+		local label = panel:AcquireRowSharedControl(CT_LABEL)
 		label:ApplyPosition(rowControl, 40, 0, 186)
 		label:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
 
-		local bar = panel:AcquireSharedControl(CT_TEXTURE)
+		local bar = panel:AcquireRowSharedControl(CT_TEXTURE)
 		bar:ApplyPosition(rowControl, 38, 0, 190, rowHeight)
 		bar:SetTexture("esoui/art/unitframes/progressbar_raidhealth.dds")
 
-		local bar_group = panel:AcquireSharedControl(CT_TEXTURE)
+		local bar_group = panel:AcquireRowSharedControl(CT_TEXTURE)
 		bar_group:ApplyPosition(rowControl, 38, 0, 190, rowHeight)
 		bar_group:SetTexture("esoui/art/unitframes/progressbar_raidhealth.dds")
 
-		local count = panel:AcquireSharedControl(CT_LABEL)
+		local count = panel:AcquireRowSharedControl(CT_LABEL)
 		count:ApplyPosition(rowControl, 230, 0, 58)
 		count:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
 
-		local uptime = panel:AcquireSharedControl(CT_LABEL)
+		local uptime = panel:AcquireRowSharedControl(CT_LABEL)
 		uptime:ApplyPosition(rowControl, 290, 0, 58)
 		uptime:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
 

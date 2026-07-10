@@ -52,27 +52,39 @@ SortFilterList.BuildMasterList = SortFilterList:MUST_IMPLEMENT()
 ui.SortFilterList = SortFilterList
 ui.DEFAULT_ROWHEIGHT = 20
 
-local function onRowControlReset(self, pool)
-	self.recovered = false
-
-	local controls = self.controls
+-- A row owns the shared controls it acquires (via PanelObject:AcquireRowSharedControl) for its
+-- entire lifetime: nothing else tracks or releases them, so this must run whenever the row is
+-- rebuilt or handed back to its object pool.
+local function ReleaseRowControls(rowControl)
+	local controls = rowControl.controls
+	if controls == nil then
+		return
+	end
 
 	for k, control in pairs(controls) do
 		if control:GetType() == CT_LABEL or control:GetType() == CT_TEXTURE then
 			control:SetColor(1, 1, 1, 1)
 		end
-		if control.shared then
+		-- Only give back what the row still owns. It may have already been released once (see
+		-- SortFilterList:Clear's deferred-commit fallback), in which case another panel could own
+		-- it by now and must not be robbed of it.
+		if control.shared and control.owner == rowControl.panel then
 			control:Release()
 		end
 		controls[k] = nil
 	end
+end
 
+local function onRowControlReset(self, pool)
+	self.recovered = false
+	ReleaseRowControls(self)
 	ZO_ObjectPool_DefaultResetControl(self)
 end
 
 ---@class RowControl: Control
 ---@field dataEntry table
 ---@field controls table
+---@field panel Panel
 ---@field recovered boolean
 
 ---@param control Control
@@ -84,6 +96,7 @@ function SortFilterList:Initialize(control, rowTemplate, rowHeight) -- TODO: is 
 	local function UpdateRow(rowControl, data, scrollList)
 		rowControl:SetHeight(scrollList.dataTypes[1].height)
 		if not rowControl.recovered then
+			rowControl.panel = self.panel
 			self:RecoverRow(rowControl)
 		end
 		self:UpdateRow(rowControl, data, scrollList)
@@ -117,6 +130,14 @@ function SortFilterList:Clear()
 	local listControl = self.list
 	ZO_ScrollList_Clear(listControl)
 	ZO_ScrollList_Commit(listControl)
+
+	-- Commit defers when the list has no height yet, so its rows stay active and would otherwise
+	-- keep holding their shared controls. Release them and force the rows to be rebuilt.
+	for _, rowControl in ipairs(listControl.activeControls) do
+		rowControl.recovered = false
+		ReleaseRowControls(rowControl)
+	end
+
 	if self.selections then
 		self.selections:Clear()
 	end

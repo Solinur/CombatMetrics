@@ -17,6 +17,24 @@ local function InitializeSharedControl(control, pool, objectKey)
 end
 
 local function ReleaseSharedControl(control)
+	-- A control reaches this twice: the row control pool releases the controls of a recycled row,
+	-- and the panel that acquired them releases them again when it is hidden. Without this guard
+	-- the second release hands a control that another panel has meanwhile acquired back to the
+	-- pool, so two panels end up owning it.
+	if control.owner == nil then
+		if ui.debugSharedControls then
+			logger:Debug("Release: %s was already free (positioned by %s)", control:GetName(), control.positionedBy)
+		end
+		return
+	end
+
+	if ui.debugSharedControls then
+		logger:Debug("Release: %s from %s", control:GetName(), control.owner.name)
+	end
+	control.owner.sharedControls[control] = nil
+	control.owner = nil
+	control.positionedBy = nil
+
 	control:SetParent(CombatMetricsReport)
 	control.pool:ReleaseObject(control.objectKey)
 
@@ -25,6 +43,7 @@ local function ReleaseSharedControl(control)
 	local controlType = control:GetType()
 	if controlType == CT_TEXTURE then
 		control:SetTexture("")
+		control:SetTextureCoords(0, 0, 1, 1)
 		control:SetColor(1, 1, 1, 1)
 		control:SetBlendMode(TEX_BLEND_MODE_ALPHA)
 		control:SetMouseEnabled(false)
@@ -55,6 +74,17 @@ local function ReleaseSharedControl(control)
 end
 
 local function ApplyPosition(control, parent, offsetX, offsetY, width, height)
+	if ui.debugSharedControls then
+		if control.owner == nil then
+			logger:Error(
+				"ApplyPosition: %s is not owned by any panel; positioning into %s",
+				control:GetName(),
+				parent:GetName()
+			)
+		end
+		control.positionedBy = parent:GetName()
+	end
+
 	local scale = CMXint.settings.fightReport.scale
 	control:SetParent(parent)
 	control:SetAnchor(TOPLEFT, parent, TOPLEFT, offsetX * scale, offsetY * scale)
@@ -96,6 +126,8 @@ local function CreateSharedControlType(template)
 		---@class SharedControl: Control
 		---@field pool object
 		---@field objectKey integer
+		---@field owner Panel?
+		---@field positionedBy string?
 		---@field shared true
 		local newControl = ZO_ObjectPool_CreateControl(template, pool, CombatMetricsReport)
 		InitializeSharedControl(newControl, pool, objectKey)
@@ -120,6 +152,10 @@ function CMXint.InitializeControlHandler()
 		return false
 	end
 	logger = util.initSublogger("Controls")
+
+	-- Traces shared control ownership: double releases, foreign acquires, positioning of
+	-- released controls. Toggle with /cmxdebugcontrols.
+	ui.debugSharedControls = false
 
 	ui.sharedTextures = CreateSharedControlType("CombatMetrics_SharedTexture")
 	ui.sharedLabels = CreateSharedControlType("CombatMetrics_SharedLabel")

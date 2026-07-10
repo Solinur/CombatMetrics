@@ -108,26 +108,26 @@ local function InitUnitsList(panel)
 		local panel = self.panel
 		local rowHeight = self:GetRawHeight()
 
-		local icon = panel:AcquireSharedControl(CT_TEXTURE)
+		local icon = panel:AcquireRowSharedControl(CT_TEXTURE)
 		icon:ApplyPosition(rowControl, 2, 0, rowHeight, rowHeight)
 
-		local label = panel:AcquireSharedControl(CT_LABEL)
+		local label = panel:AcquireRowSharedControl(CT_LABEL)
 		label:ApplyPosition(rowControl, 32, 0, 162)
 		label:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
 
-		local bar = panel:AcquireSharedControl(CT_TEXTURE)
+		local bar = panel:AcquireRowSharedControl(CT_TEXTURE)
 		bar:ApplyPosition(rowControl, 30, 0, 166, rowHeight)
 		bar:SetTexture("esoui/art/unitframes/progressbar_raidhealth.dds")
 
-		local perSecond = panel:AcquireSharedControl(CT_LABEL)
+		local perSecond = panel:AcquireRowSharedControl(CT_LABEL)
 		perSecond:ApplyPosition(rowControl, 198, 0, 48)
 		perSecond:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
 
-		local total = panel:AcquireSharedControl(CT_LABEL)
+		local total = panel:AcquireRowSharedControl(CT_LABEL)
 		total:ApplyPosition(rowControl, 248, 0, 60)
 		total:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
 
-		local perCent = panel:AcquireSharedControl(CT_LABEL)
+		local perCent = panel:AcquireRowSharedControl(CT_LABEL)
 		perCent:ApplyPosition(rowControl, 310, 0, 32)
 		perCent:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
 

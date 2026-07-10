@@ -158,7 +158,7 @@ local function InitializeFightReport() -- TODO: Decide on a common TLW/Object sc
 	end
 
 	function FightReport:Update()
-		if FightReport:IsHidden() then
+		if FightReport:IsHidden() or ui.sceneTransitioning then
 			return
 		end
 		logger:Info("Updating Fight Report")
@@ -171,6 +171,9 @@ local function InitializeFightReport() -- TODO: Decide on a common TLW/Object sc
 		end
 
 		for _, panel in pairs(ui.panels) do
+			if ui.debugSharedControls then
+				panel:VerifySharedControls()
+			end
 			if not panel.control:IsHidden() then
 				panel:Update()
 			end
@@ -178,8 +181,12 @@ local function InitializeFightReport() -- TODO: Decide on a common TLW/Object sc
 	end
 
 	function FightReport:Clear()
+		-- A hidden panel has released its shared controls; touching its cached references would
+		-- write into controls that belong to a visible panel now. It clears itself on Recover.
 		for _, panel in pairs(ui.panels) do
-			panel:Clear()
+			if not panel.control:IsHidden() then
+				panel:Clear()
+			end
 		end
 	end
 

@@ -66,8 +66,6 @@ function CMXint.InitializeCombatStatsPanel(control)
 	function CombatStatsPanel:Recover()
 		logger:Info("CombatStatsPanel:Recover")
 
-		self.sharedControls = {}
-
 		self.xOffset = 4
 		self.yOffset = 4
 		self.maxHeight = 0
