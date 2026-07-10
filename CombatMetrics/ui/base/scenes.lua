@@ -29,7 +29,9 @@ local function CreateViewScene(key, reportFragment)
 	scene:AddFragment(reportFragment)
 	scene:RegisterCallback("StateChange", function(_, newState)
 		if newState == SCENE_SHOWN then
+			ui.sceneTransitioning = true
 			applyLayout(key)
+			ui.sceneTransitioning = false
 			CMXint.fightReport:Update()
 		end
 	end)
