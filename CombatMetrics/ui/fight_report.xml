@@ -91,11 +91,9 @@
                     <OnInitialized>CombatMetrics.internal.InitializeSkillsPanel(self)</OnInitialized>
                 </Control>
 
-                <Control name="$(parent)_ScribedSkillsPanel" hidden="true" inherits="CombatMetrics_ControlFramed"> <!--
-                    resizeToFitDescendents="true" -->
+                <Control name="$(parent)_ScribedSkillsPanel" hidden="true" inherits="CombatMetrics_ControlFramed">
                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)_SkillsPanel" offsetX="4" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)_BuffsPanel" constrains="X" />
-                    <DimensionConstraints minY="0" />
                     <OnInitialized>CombatMetrics.internal.InitializeScribedSkillsPanel(self)</OnInitialized>
                 </Control>
 

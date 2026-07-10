@@ -47,6 +47,8 @@ local SCRIBED_SCRIPT_X = SCRIBED_NAME_X + SCRIBED_NAME_WIDTH + 4
 local SCRIBED_SCRIPT_ROW2_Y = SCRIBED_ICON_SIZE + 1
 local SCRIBED_SCRIPT_ICON_SIZE = 16
 local SCRIBED_SCRIPT_NAME_WIDTH = 120
+local SCRIBED_BOTTOM = 4
+local SCRIBED_EMPTY_HEIGHT = SCRIBED_TOP + SCRIBED_ICON_SIZE + SCRIBED_BOTTOM
 
 local function GetBarName(category, barNumber)
 	local name = GetString("SI_HOTBARCATEGORY", category)
@@ -242,11 +244,6 @@ function CMXint.InitializeScribedSkillsPanel(control)
 	local ScribedSkillsPanel = CMXint.PanelObject:New(control, "scribedSkills")
 	ScribedSkillsPanel.scenes = { "info" }
 
-	---@param setHidden boolean
-	function ScribedSkillsPanel:Hide(setHidden)
-		self.control:SetHidden(setHidden)
-	end
-
 	function ScribedSkillsPanel:AcquireScriptControls(parent, x, y)
 		local icon = self:AcquireSharedControl(CT_TEXTURE)
 		icon:ApplyPosition(parent, x, y, SCRIBED_SCRIPT_ICON_SIZE, SCRIBED_SCRIPT_ICON_SIZE)
@@ -288,6 +285,27 @@ function CMXint.InitializeScribedSkillsPanel(control)
 		}
 
 		return { iconBg = iconBg, icon = icon, name = name, scripts = scripts }
+	end
+
+	-- Shown instead of the rows when the fight was fought without any scribed skill.
+	function ScribedSkillsPanel:AcquireEmptyLabel()
+		local label = self:AcquireSharedControl(CT_LABEL)
+		label:SetFont(ui.GetFont(ui.fontSize))
+		label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+		label:SetColor(0.6, 0.6, 0.6, 1)
+		label:SetText(GetString(SI_COMBAT_METRICS_NO_SCRIBED_SKILLS))
+
+		return label
+	end
+
+	local function HideRow(row)
+		row.iconBg:SetHidden(true)
+		row.icon:SetHidden(true)
+		row.name:SetHidden(true)
+		for i = 1, 3 do
+			row.scripts[i].icon:SetHidden(true)
+			row.scripts[i].name:SetHidden(true)
+		end
 	end
 
 	function ScribedSkillsPanel:Update()
@@ -332,26 +350,43 @@ function CMXint.InitializeScribedSkillsPanel(control)
 
 		-- Hide any rows left over from a previous (larger) fight.
 		for i = index + 1, #self.rows do
-			local row = self.rows[i]
-			row.iconBg:SetHidden(true)
-			row.icon:SetHidden(true)
-			row.name:SetHidden(true)
-			for j = 1, 3 do
-				row.scripts[j].icon:SetHidden(true)
-				row.scripts[j].name:SetHidden(true)
-			end
+			HideRow(self.rows[i])
 		end
 
-		self:Hide(index == 0)
+		local scale = CMXint.settings.fightReport.scale
+
+		if self.emptyLabel == nil then
+			self.emptyLabel = self:AcquireEmptyLabel()
+		end
+		self.emptyLabel:ApplyPosition(self.control, 0, SCRIBED_TOP, self.control:GetWidth() / scale, nil)
+		self.emptyLabel:SetHidden(index > 0)
+
+		-- The panel has no dimensions of its own in XML: the champion points panel anchors
+		-- below it, so its height has to track the row count.
+		local height = index > 0
+				and SCRIBED_TOP + index * SCRIBED_ROW_HEIGHT + (index - 1) * SCRIBED_ROW_GAP + SCRIBED_BOTTOM
+			or SCRIBED_EMPTY_HEIGHT
+		self.control:SetHeight(height * scale)
 	end
 
 	function ScribedSkillsPanel:Recover()
 		self.rows = {}
+		self.emptyLabel = nil
 		self:Update()
 	end
 
 	function ScribedSkillsPanel:Clear()
-		self:Hide(true)
+		if self.rows then
+			for _, row in ipairs(self.rows) do
+				HideRow(row)
+			end
+		end
+
+		if self.emptyLabel then
+			self.emptyLabel:SetHidden(true)
+		end
+
+		self.control:SetHeight(SCRIBED_EMPTY_HEIGHT * CMXint.settings.fightReport.scale)
 	end
 end
 
