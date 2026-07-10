@@ -193,7 +193,7 @@ function CMXint.InitializeEquipmentPanel(control)
 			local color2 = item:len() > 0 and { 1, 1, 1, 1 } or { 0.5, 0.5, 0.5, 1 }
 
 			label:SetText(item)
-			label.itemLink = item == "" and nil or item
+			label.data.itemLink = item == "" and nil or item
 
 			icon:SetTexture(texture)
 			icon:SetColor(unpack(color))
@@ -213,15 +213,15 @@ function CMXint.InitializeEquipmentPanel(control)
 
 			if (slot == EQUIP_SLOT_MAIN_HAND or slot == EQUIP_SLOT_OFF_HAND) and poison1:len() > 0 then
 				enchantString = poison1
-				enchant.itemLink = poison1
+				enchant.data.itemLink = poison1
 			elseif (slot == EQUIP_SLOT_BACKUP_MAIN or slot == EQUIP_SLOT_BACKUP_OFF) and poison2:len() > 0 then
 				enchantString = poison2
-				enchant.itemLink = poison2
+				enchant.data.itemLink = poison2
 			else
 				_, enchantString, enchantDescription = GetItemLinkEnchantInfo(item)
 				enchantString = enchantString:gsub(GetString(SI_COMBAT_METRICS_ENCHANTMENT_TRIM), "")
-				enchant.enchantDescription = enchantDescription
-				enchant.itemLink = ""
+				enchant.data.enchantDescription = enchantDescription
+				enchant.data.itemLink = ""
 				local quality = GetEnchantQuality(item)
 				enchantColor = { GetItemQualityColor(quality):UnpackRGBA() }
 			end
@@ -233,8 +233,8 @@ function CMXint.InitializeEquipmentPanel(control)
 end
 
 function CMXint.ItemTooltip_OnMouseEnter(control)
-	local itemLink = control.itemLink
-	local enchantDescription = control.enchantDescription
+	local itemLink = control.data.itemLink
+	local enchantDescription = control.data.enchantDescription
 
 	if itemLink ~= "" and itemLink ~= nil then
 		InitializeTooltip(ItemTooltip, control:GetParent(), TOPLEFT, 5, 0, TOPRIGHT)

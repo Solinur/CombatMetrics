@@ -142,13 +142,13 @@ function CMXint.InitializeSkillsPanel(control)
 		if abilityId and abilityId > 0 then
 			line.icon:SetTexture(GetFormattedAbilityIcon(abilityId))
 			line.label:SetText(GetFormattedAbilityName(abilityId))
-			line.icon.abilityId = abilityId
-			line.label.abilityId = abilityId
+			line.icon.data.abilityId = abilityId
+			line.label.data.abilityId = abilityId
 		else
 			line.icon:SetTexture(UNKNOWN_ICON)
 			line.label:SetText("")
-			line.icon.abilityId = nil
-			line.label.abilityId = nil
+			line.icon.data.abilityId = nil
+			line.label.data.abilityId = nil
 		end
 	end
 
@@ -331,8 +331,8 @@ function CMXint.InitializeScribedSkillsPanel(control)
 			row.icon:SetTexture(GetFormattedAbilityIcon(abilityId))
 
 			-- The tooltip handler reads these off the hovered control.
-			row.name.abilityId, row.name.scriptIds = abilityId, data
-			row.icon.abilityId, row.icon.scriptIds = abilityId, data
+			row.name.data.abilityId, row.name.data.scriptIds = abilityId, data
+			row.icon.data.abilityId, row.icon.data.scriptIds = abilityId, data
 
 			for i = 1, 3 do
 				local script = row.scripts[i]
@@ -391,7 +391,7 @@ function CMXint.InitializeScribedSkillsPanel(control)
 end
 
 function CMXint.SkillTooltip_OnMouseEnter(control)
-	local abilityId = control.abilityId
+	local abilityId = control.data.abilityId
 	if not abilityId or abilityId <= 0 then
 		return
 	end
@@ -418,11 +418,12 @@ function CMXint.SkillTooltip_Clear()
 end
 
 function CMXint.ScribedSkillTooltip_OnMouseEnter(control)
-	if control.scriptIds == nil then
+	local data = control.data
+	if data.scriptIds == nil then
 		return
 	end
-	local abilityId = control.abilityId
-	local scriptIds = control.scriptIds
+	local abilityId = data.abilityId
+	local scriptIds = data.scriptIds
 
 	InitializeTooltip(SkillTooltip, control, TOPLEFT, 0, 5, BOTTOMLEFT)
 	SetCraftedAbilityScriptSelectionOverride(

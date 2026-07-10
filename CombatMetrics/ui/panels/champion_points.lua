@@ -102,8 +102,9 @@ function CMXint.InitializeChampionPointsPanel(control)
 
 	-- The tooltip handler reads starId/points/slotted off whichever control is hovered.
 	local function SetRowTooltipData(row, starId, points, slotted)
-		row.icon.starId, row.icon.points, row.icon.slotted = starId, points, slotted
-		row.name.starId, row.name.points, row.name.slotted = starId, points, slotted
+		local iconData, nameData = row.icon.data, row.name.data
+		iconData.starId, iconData.points, iconData.slotted = starId, points, slotted
+		nameData.starId, nameData.points, nameData.slotted = starId, points, slotted
 	end
 
 	local function SetRowStar(row, starId, points, slotted, disciplineType)
@@ -253,11 +254,12 @@ function CMXint.InitializeChampionPointsPanel(control)
 end
 
 function CMXint.CPTooltip_OnMouseEnter(starControl)
-	if starControl.starId == nil then
+	local data = starControl.data
+	if data.starId == nil then
 		return
 	end
 	InitializeTooltip(ChampionSkillTooltip, starControl, TOPLEFT, 0, 5, BOTTOMLEFT)
-	ChampionSkillTooltip:SetChampionSkill(starControl.starId, starControl.points, nil, starControl.slotted)
+	ChampionSkillTooltip:SetChampionSkill(data.starId, data.points, nil, data.slotted)
 end
 
 function CMXint.CPTooltip_OnMouseExit()
