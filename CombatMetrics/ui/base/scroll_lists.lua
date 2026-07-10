@@ -52,27 +52,13 @@ SortFilterList.BuildMasterList = SortFilterList:MUST_IMPLEMENT()
 ui.SortFilterList = SortFilterList
 ui.DEFAULT_ROWHEIGHT = 20
 
--- A row owns the shared controls it acquires (via PanelObject:AcquireRowSharedControl) for its
--- entire lifetime: nothing else tracks or releases them, so this must run whenever the row is
--- rebuilt or handed back to its object pool.
+-- A row owns the shared controls it acquires (via ui.sharedControls:Acquire(rowControl, ...)) for
+-- its entire lifetime: nothing else tracks or releases them, so this must run whenever the row is
+-- rebuilt or handed back to its object pool. ReleaseAll only gives back what the row still owns,
+-- so a second call (e.g. after SortFilterList:Clear's deferred-commit fallback) is a safe no-op.
 local function ReleaseRowControls(rowControl)
-	local controls = rowControl.controls
-	if controls == nil then
-		return
-	end
-
-	for k, control in pairs(controls) do
-		if control:GetType() == CT_LABEL or control:GetType() == CT_TEXTURE then
-			control:SetColor(1, 1, 1, 1)
-		end
-		-- Only give back what the row still owns. It may have already been released once (see
-		-- SortFilterList:Clear's deferred-commit fallback), in which case another panel could own
-		-- it by now and must not be robbed of it.
-		if control.shared and control.owner == rowControl.panel then
-			control:Release()
-		end
-		controls[k] = nil
-	end
+	ui.sharedControls:ReleaseAll(rowControl)
+	rowControl.controls = nil
 end
 
 local function onRowControlReset(self, pool)

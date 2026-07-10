@@ -27,7 +27,7 @@ ui/bindings.xml
 ui/base/ui.lua
 ui/base/scroll_lists.lua
 ui/base/templates.xml
-ui/base/controls.lua
+ui/base/shared_controls.lua
 ui/base/scenes.lua
 
 ui/panels/title_bar.lua

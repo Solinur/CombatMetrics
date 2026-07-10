@@ -262,7 +262,6 @@ end
 
 ---@class PanelControl: Control
 ---@field panel Panel
----@field sharedControls table<Control, true>
 ---@field dataList SortFilterList?
 
 ---@param control PanelControl
@@ -275,7 +274,6 @@ function PanelObject:Initialize(control, name)
 
 	self.name = name
 	self.control = control
-	self.sharedControls = {}
 
 	control.panel = self
 
@@ -287,88 +285,31 @@ function PanelObject:Initialize(control, name)
 	ui.panels[name] = self
 end
 
----@param owner Panel
----@param controlType integer
----@return LabelControl|LineControl|TextureControl|SharedControl
-local function AcquireFromSharedPool(owner, controlType)
-	local control
-	if controlType == CT_LABEL then
-		---@type LabelControl
-		control, _ = ui.sharedLabels:AcquireObject()
-	elseif controlType == CT_TEXTURE then
-		---@type TextureControl
-		control, _ = ui.sharedTextures:AcquireObject()
-	elseif controlType == CT_LINE then
-		---@type LineControl
-		control, _ = ui.sharedSeparators:AcquireObject()
-	else
-		logger:Error("Attempt to acquire unsupported control type: %d", controlType)
-	end
-
-	if ui.debugSharedControls then
-		local prevOwner = control.owner
-		if prevOwner ~= nil then
-			logger:Error(
-				"Acquire: %s handed to '%s' while still owned by '%s' (positioned into %s)",
-				control:GetName(),
-				owner.name,
-				prevOwner.name,
-				tostring(control.positionedBy)
-			)
-		end
-		logger:Debug("Acquire: %s for %s", control:GetName(), owner.name)
-	end
-
-	---@diagnostic disable-next-line: inject-field
-	control.owner = owner
-	return control
-end
-
 ---@param controlType integer
 ---@return LabelControl|LineControl|TextureControl|SharedControl
 function PanelObject:AcquireSharedControl(controlType)
-	local control = AcquireFromSharedPool(self, controlType)
-	self.sharedControls[control] = true
-	return control
+	return ui.sharedControls:Acquire(self, controlType)
 end
 
--- For controls acquired while building a SortFilterList row (see scroll_lists.lua). The row
--- itself tracks and releases these via onRowControlReset whenever the scroll list recycles or
--- resets it, so the panel doesn't also need to hold and reconcile a reference to them.
----@param controlType integer
----@return LabelControl|LineControl|TextureControl|SharedControl
-function PanelObject:AcquireRowSharedControl(controlType)
-	return AcquireFromSharedPool(self, controlType)
-end
-
--- Reports live references to shared controls the panel no longer owns: the signature of two
--- panels writing to the same pooled control.
+-- Reports live references to shared controls a panel or its rows no longer own: the signature of
+-- two owners writing to the same pooled control.
 function PanelObject:VerifySharedControls()
-	for control in pairs(self.sharedControls) do
-		local owner = control.owner
-		if owner ~= self then
-			logger:Error(
-				"Verify '%s': owned set holds %s, owned by '%s', positioned into %s",
-				self.name,
-				control:GetName(),
-				owner and owner.name or "nobody",
-				tostring(control.positionedBy)
-			)
-		end
-	end
+	ui.sharedControls:Verify(self)
 
-	-- Row controls keep their own references, and a row is only rebuilt when the scroll list
-	-- resets it. A row still pointing at a control the panel has released is the actual defect.
+	-- Row controls are owned by the row, not the panel. A row is only rebuilt when the scroll
+	-- list resets it, so a row still pointing at a control it no longer owns is the actual defect.
 	local list = self.dataList and self.dataList.list
 	for _, rowControl in ipairs(list and list.activeControls or {}) do
+		ui.sharedControls:Verify(rowControl)
 		for _, control in pairs(rowControl.controls or {}) do
-			if control.shared and control.owner ~= self then
+			if control.shared and control.owner ~= rowControl then
+				local owner = control.owner
 				logger:Error(
 					"Verify '%s': active row %s references %s, owned by '%s', positioned into %s",
 					self.name,
 					rowControl:GetName(),
 					control:GetName(),
-					control.owner and control.owner.name or "nobody",
+					owner and (owner.name or owner:GetName()) or "nobody",
 					tostring(control.positionedBy)
 				)
 			end
@@ -410,21 +351,14 @@ function PanelObject:Release()
 end
 
 function PanelObject:ReleaseSharedControls()
-	-- Clearing the list first resets its rows, which releases the controls they hold and drops
-	-- the rows' references to them. Releasing them the other way round would leave rows pointing
-	-- at controls that another panel has already acquired.
+	-- Clearing the list first resets its rows, which releases the controls they hold. The rows own
+	-- those controls, the panel owns its own, and the two sets are disjoint — so order only matters
+	-- in that a cleared row must not be left pointing at a control the panel is about to reuse.
 	if self.dataList then
 		self.dataList:Clear()
 	end
 
-	-- Releasing prunes the set, so iterate it rather than a snapshot.
-	while true do
-		local control = next(self.sharedControls)
-		if control == nil then
-			break
-		end
-		control:Release()
-	end
+	ui.sharedControls:ReleaseAll(self)
 end
 
 function PanelObject:Clear()
@@ -503,7 +437,7 @@ function CMXint.InitializeUI()
 	-- 	["resource"] 	= {},
 	-- }
 
-	assert(CMXint.InitializeControlHandler(), "Initialization of control handler failed")
+	assert(CMXint.InitializeSharedControls(), "Initialization of shared controls failed")
 	assert(CMXint.InitializeScrollListHandler(), "Initialization of scroll list handler failed")
 	assert(CMXint.InitializeFightReport(), "Initialization of fight report UI failed")
 	assert(CMXint.InitializeLiveReport(), "Initialization of live report failed")

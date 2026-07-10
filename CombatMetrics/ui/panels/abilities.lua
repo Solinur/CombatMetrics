@@ -196,7 +196,6 @@ local function InitAbilitiesList(panel)
 
 	---@param rowControl RowControl
 	function dataList:RecoverRow(rowControl)
-		local panel = self.panel
 		local rowHeight = self:GetRawHeight()
 
 		--[[
@@ -207,46 +206,46 @@ local function InitAbilitiesList(panel)
 			* Show tick rate ? 
 		]]
 
-		local icon = panel:AcquireRowSharedControl(CT_TEXTURE)
+		local icon = ui.sharedControls:Acquire(rowControl, CT_TEXTURE)
 		icon:ApplyPosition(rowControl, 2, 0, rowHeight, rowHeight)
 
-		local label = panel:AcquireRowSharedControl(CT_LABEL)
+		local label = ui.sharedControls:Acquire(rowControl, CT_LABEL)
 		label:ApplyPosition(rowControl, 28, 0, 190)
 		label:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
 
-		local bar = panel:AcquireRowSharedControl(CT_TEXTURE)
+		local bar = ui.sharedControls:Acquire(rowControl, CT_TEXTURE)
 		bar:ApplyPosition(rowControl, 26, 0, 194, rowHeight)
 		bar:SetTexture("esoui/art/unitframes/progressbar_raidhealth.dds")
 
-		local fraction = panel:AcquireRowSharedControl(CT_LABEL)
+		local fraction = ui.sharedControls:Acquire(rowControl, CT_LABEL)
 		fraction:ApplyPosition(rowControl, 220, 0, 38)
 		fraction:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
-		local perSecond = panel:AcquireRowSharedControl(CT_LABEL)
+		local perSecond = ui.sharedControls:Acquire(rowControl, CT_LABEL)
 		perSecond:ApplyPosition(rowControl, 260, 0, 50)
 		perSecond:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
-		local total = panel:AcquireRowSharedControl(CT_LABEL)
+		local total = ui.sharedControls:Acquire(rowControl, CT_LABEL)
 		total:ApplyPosition(rowControl, 312, 0, 73)
 		total:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
-		local crits = panel:AcquireRowSharedControl(CT_LABEL)
+		local crits = ui.sharedControls:Acquire(rowControl, CT_LABEL)
 		crits:ApplyPosition(rowControl, 387, 0, 46)
 		crits:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
-		local hits = panel:AcquireRowSharedControl(CT_LABEL)
+		local hits = ui.sharedControls:Acquire(rowControl, CT_LABEL)
 		hits:ApplyPosition(rowControl, 433, 0, 42)
 		hits:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
 
-		local critRatio = panel:AcquireRowSharedControl(CT_LABEL)
+		local critRatio = ui.sharedControls:Acquire(rowControl, CT_LABEL)
 		critRatio:ApplyPosition(rowControl, 477, 0, 37)
 		critRatio:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
-		local averageHit = panel:AcquireRowSharedControl(CT_LABEL)
+		local averageHit = ui.sharedControls:Acquire(rowControl, CT_LABEL)
 		averageHit:ApplyPosition(rowControl, 516, 0, 50)
 		averageHit:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
-		local minMax = panel:AcquireRowSharedControl(CT_LABEL)
+		local minMax = ui.sharedControls:Acquire(rowControl, CT_LABEL)
 		minMax:ApplyPosition(rowControl, 568, 0, 50)
 		minMax:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
@@ -312,7 +311,9 @@ local function InitAbilitiesList(panel)
 
 	function dataList:BuildMasterList()
 		local fightData = panel:GetCurrentFightData()
-		if fightData == nil then error("AbilitiesPanel:BuildMasterList() called without active fight data", 2) end
+		if fightData == nil then
+			error("AbilitiesPanel:BuildMasterList() called without active fight data", 2)
+		end
 		local category = panel.settings.category
 		local unitsPanel = ui.panels["units"]
 		local unitSel = unitsPanel and unitsPanel:GetSelections()
