@@ -18,20 +18,23 @@ local em = GetEventManager()
 ---@class Control
 ---@field sizes number[]
 ---@field anchors table[]
----@field font string?
+---@field font table?
 local function ResizeControl(control, scale)
 	if control.sizes == nil and control.anchors == nil then
 		return
 	end
-	local width, height = unpack(control.sizes)
+	-- Shared controls record their base layout too (see ApplyPosition in shared_controls.lua), and
+	-- they may leave a dimension unset — a label sizes its own height from the font. So unlike the
+	-- XML controls storeOrigLayout captures, width/height are not guaranteed to be present here.
+	local width, height = control.sizes[1], control.sizes[2]
 	local maxwidth, maxheight = GuiRoot:GetDimensions()
 
-	if width < 0 or height < 0 then
+	if (width and width < 0) or (height and height < 0) then
 		logger:Error("Invalid default dimensions for %s: %s, %s", control:GetName(), width, height)
 	end
 
-	local wscale = width > 0 and maxwidth / width or math.huge
-	local hscale = height > 0 and maxheight / height or math.huge
+	local wscale = width and width > 0 and maxwidth / width or math.huge
+	local hscale = height and height > 0 and maxheight / height or math.huge
 	scale = zo_clamp(scale or 1, 0.5, zo_min(scale or 1, wscale, hscale, 3))
 
 	if width and control:GetResizeToFitDescendents() == false then
@@ -67,16 +70,24 @@ local function ResizeControl(control, scale)
 		control:SetAnchor(unpack(anchor2))
 	end
 
-	local fontcontrol = control:GetNamedChild("Font") -- TODO: replace with GetFont
-
-	if fontcontrol ~= nil then
-		---@diagnostic disable-next-line: param-type-mismatch
-		local font, size, style = unpack(fontcontrol.font)
-		if size then
-			size = tonumber(size) * (scale + 0.2) / 1.2
-		end -- Don't Scale fonts as much
+	-- Shared controls have no $(parent)Font child; they record their base size on the control itself.
+	-- ui.GetFont bakes the scale in, so the string has to be rebuilt rather than reused, and it takes
+	-- the scale explicitly because settings.scale is only updated after this pass has run.
+	if control.font ~= nil then
 		---@cast control LabelControl
-		control:SetFont(string.format("%s|%s|%s", font, size, style))
+		control:SetFont(ui.GetFont(control.font[1], control.font[2], scale))
+	else
+		local fontcontrol = control:GetNamedChild("Font")
+
+		if fontcontrol ~= nil then
+			---@diagnostic disable-next-line: param-type-mismatch
+			local font, size, style = unpack(fontcontrol.font)
+			if size then
+				size = tonumber(size) * (scale + 0.2) / 1.2
+			end -- Don't Scale fonts as much
+			---@cast control LabelControl
+			control:SetFont(string.format("%s|%s|%s", font, size, style))
+		end
 	end
 
 	for i = 1, control:GetNumChildren() do

@@ -351,7 +351,6 @@ local function InitBuffsList(panel)
 	local expandButtonPool = ZO_ObjectPool:New(CreateExpandButton, ZO_ObjectPool_DefaultResetControl)
 
 	---@class BuffRowControl: RowControl
-	---@field indent number
 	---@field expandButton ExpandButton
 
 	---@param rowControl BuffRowControl
@@ -383,7 +382,6 @@ local function InitBuffsList(panel)
 
 		rowControl.controls = { icon, label, bar, bar_group, count, uptime }
 		rowControl.recovered = true
-		rowControl.indent = 0
 	end
 
 	---@param rowControl BuffRowControl
@@ -397,9 +395,9 @@ local function InitBuffsList(panel)
 		local labelFormat = panel:ShowIds() and data.abilityId and BUFF_NAME_FORMAT_ID or BUFF_NAME_FORMAT_DEFAULT
 		local labelText = ZO_CachedStrFormat(labelFormat, data.labelText, data.abilityId)
 
-		local rowHeight = icon:GetHeight()
-		local deltaIndent = (data.indent - rowControl.indent) * rowHeight / 2
-		rowControl.indent = data.indent
+		-- SetIndent is absolute and takes unscaled units, so the raw row height is the one to use;
+		-- icon:GetHeight() is already scaled.
+		local indent = data.indent * self:GetRawHeight() / 2
 
 		local textcolor = panel.favs[data.abilityId] and BUFF_LABEL_COLOR_FAV or BUFF_LABEL_COLOR_DEFAULT
 		local font = ui.GetFont(ui.fontSize, false)
@@ -409,11 +407,12 @@ local function InitBuffsList(panel)
 		if data.hasDetails then
 			if expandButton == nil then
 				local scale = self.panel.settings.scale
+				local buttonSize = icon:GetHeight()
 				expandButton = expandButtonPool:AcquireObject()
 				expandButton:SetHidden(false)
 				expandButton:SetParent(rowControl)
 				expandButton:SetAnchor(TOPLEFT, rowControl, TOPLEFT, -2 * scale, scale)
-				expandButton:SetDimensions(rowHeight, rowHeight)
+				expandButton:SetDimensions(buttonSize, buttonSize)
 				rowControl.expandButton = expandButton
 			end
 
@@ -429,18 +428,18 @@ local function InitBuffsList(panel)
 		icon:SetTexture(GetFormattedAbilityIcon(data.abilityId))
 
 		label:SetText(labelText)
-		label:ApplyIndent(deltaIndent)
+		label:SetIndent(indent)
 		label:SetColor(unpack(textcolor))
 		label:SetFont(font)
 
 		local maxwidth = label:GetWidth()
 
 		bar:SetColor(unpack(BUFF_BAR_COLORS[data.effectType]))
-		bar:ApplyIndent(deltaIndent)
+		bar:SetIndent(indent)
 		bar:SetWidth(maxwidth * data.uptime)
 
 		bar_group:SetColor(unpack(BUFF_BAR_GROUP_COLORS[data.effectType]))
-		bar_group:ApplyIndent(deltaIndent)
+		bar_group:SetIndent(indent)
 		bar_group:SetWidth(maxwidth * data.groupUptime)
 
 		local hideGroupValues = data.count == data.groupCount and data.uptime == data.groupUptime

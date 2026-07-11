@@ -14,6 +14,27 @@ local ui = CMXint.ui
 -- Per-control helpers (bookkeeping fields + geometry)
 -- ============================================================================
 
+-- Geometry is recorded before it is applied. `layout` holds the pristine unscaled arguments, while
+-- `sizes` / `anchors` hold the effective (indent-adjusted, still unscaled) layout in exactly the
+-- shape ResizeControl in fight_report.lua consumes. That is what makes shared controls visible to
+-- the resize pass: it walks the live control tree and skips anything without those two records.
+-- applyLayout is the only place the scale factor is multiplied in.
+local function InitializeGeometry(control)
+	control.layout = {}
+	control.sizes = {}
+	control.anchors = {}
+	control.indent = 0
+	control.font = nil
+end
+
+local function ClearGeometry(control)
+	ZO_ClearTable(control.layout)
+	ZO_ClearTable(control.sizes)
+	ZO_ClearTable(control.anchors)
+	control.indent = 0
+	control.font = nil
+end
+
 local function InitializeSharedControl(control, pool, objectKey)
 	control.pool = pool
 	control.objectKey = objectKey
@@ -21,28 +42,24 @@ local function InitializeSharedControl(control, pool, objectKey)
 	-- Per-lease custom state (abilityId, itemLink, starId, …) lives here so releasing a control is
 	-- a single ZO_ClearTable rather than a list of field nils. Created once; cleared, not replaced.
 	control.data = {}
+	InitializeGeometry(control)
 end
 
-local function ApplyPosition(control, parent, offsetX, offsetY, width, height)
-	if ui.debugSharedControls then
-		if control.owner == nil then
-			logger:Error(
-				"ApplyPosition: %s is not owned by any panel; positioning into %s",
-				control:GetName(),
-				parent:GetName()
-			)
-		end
-		control.positionedBy = parent:GetName()
+local function applyLayout(control)
+	local anchors = control.anchors
+	if anchors[1] == nil then
+		return
 	end
 
 	local scale = CMXint.settings.fightReport.scale
-	control:SetParent(parent)
-	control:SetAnchor(TOPLEFT, parent, TOPLEFT, offsetX * scale, offsetY * scale)
+	local width, height = control.sizes[1], control.sizes[2]
 
-	if control:GetType() == CT_LINE then
-		local offsetX2 = offsetX + (width or 0)
-		local offsetY2 = offsetY + (height or 0)
-		control:SetAnchor(BOTTOMRIGHT, parent, TOPLEFT, offsetX2 * scale, offsetY2 * scale)
+	control:SetParent(control.layout.parent)
+	control:ClearAnchors()
+
+	for i = 1, #anchors do
+		local point, relativeTo, relativePoint, x, y = unpack(anchors[i])
+		control:SetAnchor(point, relativeTo, relativePoint, x * scale, y * scale)
 	end
 
 	if width then
@@ -54,17 +71,91 @@ local function ApplyPosition(control, parent, offsetX, offsetY, width, height)
 	end
 end
 
+local function TraceGeometry(control, parent)
+	if not ui.debugSharedControls then
+		return
+	end
+	-- A row container is owned by its panel directly rather than leased from the manager, so only a
+	-- shared control without an owner is a genuine bug here.
+	if control.shared and control.owner == nil then
+		logger:Error(
+			"ApplyPosition: %s is not owned by any panel; positioning into %s",
+			control:GetName(),
+			parent:GetName()
+		)
+	end
+	control.positionedBy = parent:GetName()
+end
+
+local function ApplyPosition(control, parent, offsetX, offsetY, width, height)
+	TraceGeometry(control, parent)
+
+	local layout = control.layout
+	layout.parent, layout.x, layout.y, layout.w, layout.h = parent, offsetX, offsetY, width, height
+	control.indent = 0
+
+	local anchors = control.anchors
+	anchors[1] = { TOPLEFT, parent, TOPLEFT, offsetX, offsetY }
+	anchors[2] = nil
+
+	if control:GetType() == CT_LINE then
+		-- A line is defined by its two end points rather than by its dimensions.
+		anchors[2] = { BOTTOMRIGHT, parent, TOPLEFT, offsetX + (width or 0), offsetY + (height or 0) }
+	end
+
+	control.sizes[1], control.sizes[2] = width, height
+
+	applyLayout(control)
+end
+
+-- Anchors the control to both sides of its parent so its width follows the parent, for a column that
+-- has to fill whatever space is left instead of taking a fixed width.
+local function ApplyStretch(control, parent, offsetX, offsetY, rightInset)
+	TraceGeometry(control, parent)
+
+	local layout = control.layout
+	layout.parent, layout.x, layout.y, layout.w, layout.h = parent, offsetX, offsetY, nil, nil
+	control.indent = 0
+
+	local anchors = control.anchors
+	anchors[1] = { TOPLEFT, parent, TOPLEFT, offsetX, offsetY }
+	anchors[2] = { TOPRIGHT, parent, TOPRIGHT, -(rightInset or 0), offsetY }
+
+	control.sizes[1], control.sizes[2] = nil, nil
+
+	applyLayout(control)
+end
+
+-- Shifts the control right and narrows it by the same amount, on top of its recorded base layout.
+-- Absolute rather than incremental: repeats are no-ops and SetIndent(0) restores the base, so no
+-- caller has to track the indent it applied last. Folding it into the effective record is also what
+-- lets ResizeControl re-apply base + indent together without knowing that indents exist.
 ---@param control Control
 ---@param indent number
-local function ApplyIndent(control, indent)
-	local scale = CMXint.settings.fightReport.scale
+local function SetIndent(control, indent)
+	local layout = control.layout
+	local anchors = control.anchors
 
-	indent = indent * scale
+	if anchors[1] == nil then
+		logger:Error("SetIndent: %s has no recorded layout; ApplyPosition must run first", control:GetName())
+		return
+	end
 
-	local _, point, relTo, relPoint, offsX, offsY, _ = control:GetAnchor(0)
-	---@diagnostic disable-next-line: missing-parameter
-	control:SetAnchor(point, relTo, relPoint, offsX + indent, offsY)
-	control:SetWidth(control:GetWidth() - indent)
+	control.indent = indent
+	anchors[1][4] = layout.x + indent
+	control.sizes[1] = layout.w and layout.w - indent or nil
+
+	applyLayout(control)
+end
+
+-- ui.GetFont bakes the current scale into the font string, so a stored string would go stale on a
+-- resize. Record the base size instead and let ResizeControl rebuild the string at the new scale.
+---@param control Control
+---@param baseSize number
+---@param bold boolean?
+local function ApplyFont(control, baseSize, bold)
+	control.font = { baseSize, bold }
+	control:SetFont(ui.GetFont(baseSize, bold))
 end
 
 local function ShowControlOnAcquire(control)
@@ -102,8 +193,12 @@ end
 local function defaultReset(control)
 	ZO_ObjectPool_DefaultResetControl(control) -- hides the control
 	ZO_ClearTable(control.data)
+	-- A released control keeps sitting in the tree (reparented to CombatMetricsReport), so its
+	-- geometry record has to go too or the resize pass would re-anchor it while it is idle.
+	ClearGeometry(control)
 end
 
+---@param control TextureControl | SharedControl
 local function resetTextureControl(control)
 	defaultReset(control)
 	control:SetTexture("")
@@ -116,6 +211,7 @@ local function resetTextureControl(control)
 	control:SetHandler("OnMouseUp", nil)
 end
 
+---@param control LabelControl | SharedControl
 local function resetLabelControl(control)
 	defaultReset(control)
 	control:SetText("")
@@ -155,11 +251,18 @@ function SharedControlManager:AddSharedControlType(controlType, template, resetF
 		---@field positionedBy string?
 		---@field shared true
 		---@field data table
+		---@field layout table
+		---@field sizes table
+		---@field anchors table
+		---@field indent number
+		---@field font table?
 		local newControl = ZO_ObjectPool_CreateControl(template, pool, CombatMetricsReport)
 		InitializeSharedControl(newControl, pool, objectKey)
 
 		newControl.ApplyPosition = ApplyPosition
-		newControl.ApplyIndent = ApplyIndent
+		newControl.ApplyStretch = ApplyStretch
+		newControl.SetIndent = SetIndent
+		newControl.ApplyFont = ApplyFont
 
 		return newControl
 	end

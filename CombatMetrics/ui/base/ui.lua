@@ -22,8 +22,13 @@ ui.dx = zo_ceil(GuiRoot:GetWidth() / tonumber(GetCVar("WindowedWidth")) * 1000) 
 ui.fontSizeSmall = tonumber(GetString(SI_COMBAT_METRICS_FONT_SIZE_SMALL))
 ui.fontSize = tonumber(GetString(SI_COMBAT_METRICS_FONT_SIZE))
 
-function ui.GetFont(base_size, bold)
-	local scale = CMXint.settings.fightReport.scale
+-- scale is only passed by the resize pass, which rebuilds font strings before settings.scale has
+-- caught up with the scale it is applying.
+---@param base_size number
+---@param bold boolean?
+---@param scale number?
+function ui.GetFont(base_size, bold, scale)
+	scale = scale or CMXint.settings.fightReport.scale
 	local size = base_size * (scale + 0.2) / 1.2
 	local base_font = bold == true and "BOLD_FONT" or "MEDIUM_FONT"
 
