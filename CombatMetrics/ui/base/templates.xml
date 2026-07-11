@@ -229,50 +229,6 @@
             </Controls>
         </Control>
 
-        <Control name="CombatMetrics_ScribedSkillScriptTemplate" virtual="true">
-            <Dimensions x="154" y="16" />
-            <Controls>
-                <Texture name="$(parent)Icon" textureFile="EsoUI/Art/crafting/gamepad/crafting_alchemy_trait_unknown.dds">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="0" offsetY="0" />
-                    <Dimensions x="16" y="16" />
-                </Texture>
-
-                <Label name="$(parent)Name" text="Script" inherits="CombatMetrics_ValueFontSmallControl">
-                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="2" offsetY="0" />
-                    <Anchor point="TOPRIGHT" />
-                </Label>
-            </Controls>
-        </Control>
-
-        <Control name="CombatMetrics_ScribedSkillTemplate" virtual="true" mouseEnabled="true">
-            <Dimensions x="330" y="35" />
-            <OnMouseEnter> CombatMetrics.internal.ScribedSkillTooltip_OnMouseEnter(self) </OnMouseEnter>
-            <OnMouseExit> CombatMetrics.internal.SkillTooltip_Clear(self) </OnMouseExit>
-            <Controls>
-                <Control name="$(parent)Icon" inherits="CombatMetrics_InfoSkillIcon">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)" relativePoint="TOPLEFT" offsetX="4" offsetY="0" />
-                    <Dimensions x="18" y="18" />
-                </Control>
-
-                <Label name="$(parent)Name" text="Scribed Skill" inherits="CombatMetrics_LabelFontControl" horizontalAlignment="LEFT">
-                    <Anchor point="LEFT" relativeTo="$(parent)Icon" relativePoint="RIGHT" offsetX="4" offsetY="0" />
-                    <Dimensions x="154" y="18" />
-                </Label>
-
-                <Control name="$(parent)Script1" inherits="CombatMetrics_ScribedSkillScriptTemplate">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="TOPRIGHT" offsetX="4" offsetY="0" />
-                </Control>
-
-                <Control name="$(parent)Script2" inherits="CombatMetrics_ScribedSkillScriptTemplate">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Name" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="1" />
-                </Control>
-
-                <Control name="$(parent)Script3" inherits="CombatMetrics_ScribedSkillScriptTemplate">
-                    <Anchor point="TOPLEFT" relativeTo="$(parent)Script1" relativePoint="BOTTOMLEFT" offsetX="0" offsetY="3" />
-                </Control>
-            </Controls>
-        </Control>
-
         <Control name="CombatMetrics_ResourceRowTemplate" virtual="true">
             <Controls>
                 <Backdrop name="$(parent)HighLight" inherits="CombatMetrics_Highlight" />
@@ -449,6 +405,9 @@
         <Texture name="CombatMetrics_SharedTexture" virtual="true" />
 
         <Line name="CombatMetrics_SharedSeparator" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin" virtual="true" />
+
+        <!-- Groups the shared controls of one row. Panels enable the mouse on it when the row carries a tooltip. -->
+        <Control name="CombatMetrics_SharedRowContainer" virtual="true" />
 
         <Control name="CombatMetrics_RowTemplate" virtual="true" mouseEnabled="true">
             <OnMouseUp>

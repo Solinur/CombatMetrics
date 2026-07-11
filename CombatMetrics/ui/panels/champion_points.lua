@@ -49,65 +49,65 @@ function CMXint.InitializeChampionPointsPanel(control)
 	local ChampionPointsPanel = CMXint.PanelObject:New(control, "championPoints")
 	ChampionPointsPanel.scenes = { "info" }
 
-	local container = control:GetNamedChild("Container")
-	local scrollChild = container:GetNamedChild("ScrollChild")
+	local scrollContainer = control:GetNamedChild("Container")
+	local scrollChild = scrollContainer:GetNamedChild("ScrollChild")
 
-	-- Leftover rows are hidden rather than released, and hidden children still count towards
-	-- the auto-computed extents, so the scroll child would never shrink. Size it explicitly.
+	-- The scroll child must not size itself from its children: its height comes from the layout below.
 	scrollChild:SetResizeToFitDescendents(false)
 
+	-- The star count varies with the fight, so rows are pooled: the ones the current fight does not
+	-- need go back to the pool, and their shared controls go back with them.
+	local starRowPool = ChampionPointsPanel:CreateRowPool(scrollChild)
+
+	-- A row's controls sit in container-local coordinates and are placed once, here. Afterwards only
+	-- the container is ever moved, and the resize pass re-applies these offsets at the new scale.
 	function ChampionPointsPanel:AcquireStarRow()
-		local ring = self:AcquireSharedControl(CT_TEXTURE)
+		local container = starRowPool:Acquire()
+		container:SetMouseEnabled(true)
+		container:SetHandler("OnMouseEnter", CMXint.CPTooltip_OnMouseEnter)
+		container:SetHandler("OnMouseExit", CMXint.CPTooltip_OnMouseExit)
 
-		local icon = self:AcquireSharedControl(CT_TEXTURE)
+		local ring = container:AcquireSharedControl(CT_TEXTURE)
+		ring:ApplyPosition(container, 0, 0, ICON_SIZE, ICON_SIZE)
+
+		local icon = container:AcquireSharedControl(CT_TEXTURE)
+		icon:ApplyPosition(container, 2, 2, ICON_SIZE - 4, ICON_SIZE - 4)
 		icon:SetTexture(STAR_ICON)
-		icon:SetMouseEnabled(true)
-		icon:SetHandler("OnMouseEnter", CMXint.CPTooltip_OnMouseEnter)
-		icon:SetHandler("OnMouseExit", CMXint.CPTooltip_OnMouseExit)
 
-		local name = self:AcquireSharedControl(CT_LABEL)
-		name:SetFont(ui.GetFont(ui.fontSize))
-		name:SetMouseEnabled(true)
-		name:SetHandler("OnMouseEnter", CMXint.CPTooltip_OnMouseEnter)
-		name:SetHandler("OnMouseExit", CMXint.CPTooltip_OnMouseExit)
+		local name = container:AcquireSharedControl(CT_LABEL)
+		name:ApplyPosition(container, ICON_SIZE + 4, 0, COLUMN_WIDTH - ICON_SIZE - VALUE_WIDTH - 12, nil)
+		name:ApplyFont(ui.fontSize)
 
-		local value = self:AcquireSharedControl(CT_LABEL)
-		value:SetFont(ui.GetFont(ui.fontSize))
+		local value = container:AcquireSharedControl(CT_LABEL)
+		value:ApplyPosition(container, COLUMN_WIDTH - VALUE_WIDTH - 4, 0, VALUE_WIDTH, nil)
+		value:ApplyFont(ui.fontSize)
 		value:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
 
-		return { ring = ring, icon = icon, name = name, value = value }
+		return { container = container, ring = ring, icon = icon, name = name, value = value }
 	end
 
 	function ChampionPointsPanel:AcquireSection()
 		local title = self:AcquireSharedControl(CT_LABEL)
-		title:SetFont(ui.GetFont(ui.fontSize, true))
+		title:ApplyFont(ui.fontSize, true)
 
 		local separator = self:AcquireSharedControl(CT_LINE)
 
 		return { title = title, separator = separator }
 	end
 
-	-- A section's origin depends on how many passive stars the previous discipline had,
-	-- so every row is repositioned on each update rather than once when it is acquired.
+	-- A section's origin depends on how many passive stars the previous discipline had, so every row
+	-- is repositioned on each update rather than once when it is acquired. Only the container moves.
 	local function PositionRow(row, starIndex, y)
 		local column = (starIndex - 1) % STARS_PER_ROW
 		local x = LEFT_MARGIN + column * COLUMN_WIDTH
-		local nameWidth = COLUMN_WIDTH - ICON_SIZE - VALUE_WIDTH - 12
 
-		row.ring:ApplyPosition(scrollChild, x, y, ICON_SIZE, ICON_SIZE)
-		row.icon:ApplyPosition(scrollChild, x + 2, y + 2, ICON_SIZE - 4, ICON_SIZE - 4)
-		row.name:ApplyPosition(scrollChild, x + ICON_SIZE + 4, y, nameWidth, nil)
-		row.value:ApplyPosition(scrollChild, x + COLUMN_WIDTH - VALUE_WIDTH - 4, y, VALUE_WIDTH, nil)
-	end
-
-	-- The tooltip handler reads starId/points/slotted off whichever control is hovered.
-	local function SetRowTooltipData(row, starId, points, slotted)
-		local iconData, nameData = row.icon.data, row.name.data
-		iconData.starId, iconData.points, iconData.slotted = starId, points, slotted
-		nameData.starId, nameData.points, nameData.slotted = starId, points, slotted
+		row.container:ApplyPosition(scrollChild, x, y, COLUMN_WIDTH, STAR_ROW_HEIGHT)
 	end
 
 	local function SetRowStar(row, starId, points, slotted, disciplineType)
+		-- The tooltip handler sits on the container and reads these off it.
+		local data = row.container.data
+
 		row.ring:SetHidden(not slotted)
 		row.icon:SetHidden(false)
 		row.name:SetHidden(false)
@@ -122,21 +122,14 @@ function CMXint.InitializeChampionPointsPanel(control)
 			row.icon:SetColor(starcolors[disciplineType]:UnpackRGB())
 			row.name:SetText(GetStarName(starId))
 			row.value:SetText(points)
-			SetRowTooltipData(row, starId, points, slotted)
+			data.starId, data.points, data.slotted = starId, points, slotted
 		else
 			-- An unused champion bar slot: keep the dim ring, drop everything else.
 			row.icon:SetHidden(true)
 			row.name:SetText("")
 			row.value:SetText("")
-			SetRowTooltipData(row, nil, nil, nil)
+			data.starId, data.points, data.slotted = nil, nil, nil
 		end
-	end
-
-	local function HideRow(row)
-		row.ring:SetHidden(true)
-		row.icon:SetHidden(true)
-		row.name:SetHidden(true)
-		row.value:SetHidden(true)
 	end
 
 	function ChampionPointsPanel:Update()
@@ -210,14 +203,16 @@ function CMXint.InitializeChampionPointsPanel(control)
 			end
 		end
 
-		-- Hide the rows left over from a previous, larger fight.
-		for i = rowIndex + 1, #self.rows do
-			HideRow(self.rows[i])
+		-- Rows left over from a previous, larger fight go back to the pool, which releases the shared
+		-- controls they hold rather than leaving them hidden but still leased.
+		for i = #self.rows, rowIndex + 1, -1 do
+			starRowPool:Release(self.rows[i].container)
+			self.rows[i] = nil
 		end
 
 		local scale = CMXint.settings.fightReport.scale
 		scrollChild:SetHeight(y * scale)
-		ZO_Scroll_UpdateScrollBar(container)
+		ZO_Scroll_UpdateScrollBar(scrollContainer)
 	end
 
 	function ChampionPointsPanel:Recover()
@@ -228,7 +223,7 @@ function CMXint.InitializeChampionPointsPanel(control)
 			self.sections[disciplineId] = self:AcquireSection()
 		end
 
-		ZO_Scroll_ResetToTop(container)
+		ZO_Scroll_ResetToTop(scrollContainer)
 		self:Update()
 	end
 
@@ -243,13 +238,12 @@ function CMXint.InitializeChampionPointsPanel(control)
 			section.separator:SetHidden(true)
 		end
 
-		for _, row in ipairs(self.rows) do
-			HideRow(row)
-		end
+		starRowPool:ReleaseAll()
+		ZO_ClearNumericallyIndexedTable(self.rows)
 
 		scrollChild:SetHeight(0)
-		ZO_Scroll_UpdateScrollBar(container)
-		ZO_Scroll_ResetToTop(container)
+		ZO_Scroll_UpdateScrollBar(scrollContainer)
+		ZO_Scroll_ResetToTop(scrollContainer)
 	end
 end
 

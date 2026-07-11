@@ -34,8 +34,8 @@ local SLOT_ORDER = { 1, 2, 3, 4, 5, 6, 7, 8 }
 
 local SCRIBED_SKILL_COUNT = 10
 
--- Scribed skill row layout (mirrors CombatMetrics_ScribedSkillTemplate in templates.xml):
--- a framed ability icon + name, with three script sub-rows (small icon + name).
+-- Scribed skill row layout: a framed ability icon + name, with three script sub-rows (small icon +
+-- name). Offsets are container-local; see AcquireScribedRow.
 local SCRIBED_ROW_HEIGHT = 35
 local SCRIBED_ROW_GAP = 4
 local SCRIBED_ROW_X = 4
@@ -49,6 +49,7 @@ local SCRIBED_SCRIPT_ICON_SIZE = 16
 local SCRIBED_SCRIPT_NAME_WIDTH = 120
 local SCRIBED_BOTTOM = 4
 local SCRIBED_EMPTY_HEIGHT = SCRIBED_TOP + SCRIBED_ICON_SIZE + SCRIBED_BOTTOM
+local SCRIBED_ROW_WIDTH = SCRIBED_SCRIPT_X + SCRIBED_SCRIPT_ICON_SIZE + 2 + SCRIBED_SCRIPT_NAME_WIDTH
 
 local function GetBarName(category, barNumber)
 	local name = GetString("SI_HOTBARCATEGORY", category)
@@ -64,64 +65,77 @@ function CMXint.InitializeSkillsPanel(control)
 	SkillsPanel.scenes = { "info" }
 	SkillsPanel.page = 1
 
-	function SkillsPanel:RecoverSkillLine(parent, x, y)
-		local iconBg = self:AcquireSharedControl(CT_TEXTURE)
-		iconBg:ApplyPosition(parent, x, y, ICON_SIZE, ICON_SIZE)
+	-- The bar layout is fixed, so a line's container is created once and kept for the panel's
+	-- lifetime. Only the shared controls inside it are released when the panel hides, which is why
+	-- they are re-acquired here on every Recover rather than only on the first one.
+	function SkillsPanel:RecoverSkillLine(line)
+		local container = line.container
+		container:SetMouseEnabled(true)
+		container:SetHandler("OnMouseEnter", CMXint.SkillTooltip_OnMouseEnter)
+		container:SetHandler("OnMouseExit", CMXint.SkillTooltip_Clear)
+
+		local iconBg = container:AcquireSharedControl(CT_TEXTURE)
+		iconBg:ApplyPosition(container, 0, 0, ICON_SIZE, ICON_SIZE)
 		iconBg:SetTexture(ABILITY_FRAME)
 
-		local icon = self:AcquireSharedControl(CT_TEXTURE)
-		icon:ApplyPosition(parent, x + 2, y + 2, ICON_SIZE - 4, ICON_SIZE - 4)
-		icon:SetMouseEnabled(true)
-		icon:SetHandler("OnMouseEnter", CMXint.SkillTooltip_OnMouseEnter)
-		icon:SetHandler("OnMouseExit", CMXint.SkillTooltip_Clear)
+		local icon = container:AcquireSharedControl(CT_TEXTURE)
+		icon:ApplyPosition(container, 2, 2, ICON_SIZE - 4, ICON_SIZE - 4)
 
-		local labelX = x + ICON_SIZE + 4
-		local label = self:AcquireSharedControl(CT_LABEL)
-		label:ApplyPosition(parent, labelX, y, COLUMN_WIDTH - ICON_SIZE - 8, nil)
-		label:SetFont(ui.GetFont(ui.fontSize))
-		label:SetMouseEnabled(true)
-		label:SetHandler("OnMouseEnter", CMXint.SkillTooltip_OnMouseEnter)
-		label:SetHandler("OnMouseExit", CMXint.SkillTooltip_Clear)
+		local label = container:AcquireSharedControl(CT_LABEL)
+		label:ApplyPosition(container, ICON_SIZE + 4, 0, COLUMN_WIDTH - ICON_SIZE - 8, nil)
+		label:ApplyFont(ui.fontSize)
 
-		return { iconBg = iconBg, icon = icon, label = label }
+		line.iconBg, line.icon, line.label = iconBg, icon, label
 	end
 
 	function SkillsPanel:RecoverColumn(columnIndex)
+		local column = self.columns[columnIndex]
+
+		if column == nil then
+			column = { lines = {} }
+			self.columns[columnIndex] = column
+
+			for _, slot in ipairs(SLOT_ORDER) do
+				local name = string.format("%sColumn%dSlot%d", control:GetName(), columnIndex, slot)
+				column.lines[slot] = { container = self:CreateRowContainer(name) }
+			end
+		end
+
 		local x = LEFT_MARGIN + (columnIndex - 1) * (COLUMN_WIDTH + COLUMN_GAP)
 		local y = TOP_MARGIN
 
-		local title = self:AcquireSharedControl(CT_LABEL)
-		title:ApplyPosition(self.control, x, y, COLUMN_WIDTH, nil)
-		title:SetFont(ui.GetFont(ui.fontSize, true))
+		column.title = self:AcquireSharedControl(CT_LABEL)
+		column.title:ApplyPosition(control, x, y, COLUMN_WIDTH, nil)
+		column.title:ApplyFont(ui.fontSize, true)
 
-		local separator = self:AcquireSharedControl(CT_LINE)
-		separator:ApplyPosition(self.control, x, y + TITLE_HEIGHT + 1, COLUMN_WIDTH, 0)
+		column.separator = self:AcquireSharedControl(CT_LINE)
+		column.separator:ApplyPosition(control, x, y + TITLE_HEIGHT + 1, COLUMN_WIDTH, 0)
 
-		local lines = {}
 		y = y + TITLE_HEIGHT + 4
 		for _, slot in ipairs(SLOT_ORDER) do
-			lines[slot] = self:RecoverSkillLine(self.control, x, y)
+			local line = column.lines[slot]
+			self:RecoverSkillLine(line)
+			line.container:ApplyPosition(control, x, y, COLUMN_WIDTH, SKILL_ROW_HEIGHT)
 			y = y + SKILL_ROW_HEIGHT
 		end
 
 		-- Divider below the skills; a stats section will go here later.
-		local bottomSeparator = self:AcquireSharedControl(CT_LINE)
-		bottomSeparator:ApplyPosition(self.control, x, y + 2, COLUMN_WIDTH, 0)
-
-		return { title = title, separator = separator, bottomSeparator = bottomSeparator, lines = lines }
+		column.bottomSeparator = self:AcquireSharedControl(CT_LINE)
+		column.bottomSeparator:ApplyPosition(control, x, y + 2, COLUMN_WIDTH, 0)
 	end
 
 	function SkillsPanel:Recover()
-		self.columns = {}
+		self.columns = self.columns or {}
+
 		for columnIndex = 1, BARS_PER_PAGE do
-			self.columns[columnIndex] = self:RecoverColumn(columnIndex)
+			self:RecoverColumn(columnIndex)
 		end
 
 		-- Vertical divider between the two bar columns.
 		local centerX = LEFT_MARGIN + COLUMN_WIDTH + COLUMN_GAP / 2
 		local contentHeight = TITLE_HEIGHT + 4 + #SLOT_ORDER * SKILL_ROW_HEIGHT
 		self.centerSeparator = self:AcquireSharedControl(CT_LINE)
-		self.centerSeparator:ApplyPosition(self.control, centerX, TOP_MARGIN, 0, contentHeight)
+		self.centerSeparator:ApplyPosition(control, centerX, TOP_MARGIN, 0, contentHeight)
 
 		self:Update()
 	end
@@ -131,10 +145,10 @@ function CMXint.InitializeSkillsPanel(control)
 		self:Update()
 	end
 
+	-- Hiding the container hides the whole row with it, so this is also safe to call on a hidden panel
+	-- whose shared controls have been released: it returns before touching any of them.
 	local function UpdateLine(line, abilityId, showRow)
-		line.iconBg:SetHidden(not showRow)
-		line.icon:SetHidden(not showRow)
-		line.label:SetHidden(not showRow)
+		line.container:SetHidden(not showRow)
 		if not showRow then
 			return
 		end
@@ -142,13 +156,11 @@ function CMXint.InitializeSkillsPanel(control)
 		if abilityId and abilityId > 0 then
 			line.icon:SetTexture(GetFormattedAbilityIcon(abilityId))
 			line.label:SetText(GetFormattedAbilityName(abilityId))
-			line.icon.data.abilityId = abilityId
-			line.label.data.abilityId = abilityId
+			line.container.data.abilityId = abilityId
 		else
 			line.icon:SetTexture(UNKNOWN_ICON)
 			line.label:SetText("")
-			line.icon.data.abilityId = nil
-			line.label.data.abilityId = nil
+			line.container.data.abilityId = nil
 		end
 	end
 
@@ -244,68 +256,58 @@ function CMXint.InitializeScribedSkillsPanel(control)
 	local ScribedSkillsPanel = CMXint.PanelObject:New(control, "scribedSkills")
 	ScribedSkillsPanel.scenes = { "info" }
 
-	function ScribedSkillsPanel:AcquireScriptControls(parent, x, y)
-		local icon = self:AcquireSharedControl(CT_TEXTURE)
-		icon:ApplyPosition(parent, x, y, SCRIBED_SCRIPT_ICON_SIZE, SCRIBED_SCRIPT_ICON_SIZE)
+	-- The number of scribed skills varies with the fight, so rows are pooled.
+	local scribedRowPool = ScribedSkillsPanel:CreateRowPool(control)
 
-		local name = self:AcquireSharedControl(CT_LABEL)
-		name:ApplyPosition(parent, x + SCRIBED_SCRIPT_ICON_SIZE + 2, y, SCRIBED_SCRIPT_NAME_WIDTH, nil)
-		name:SetFont(ui.GetFont(ui.fontSizeSmall))
+	function ScribedSkillsPanel:AcquireScriptControls(container, x, y)
+		local icon = container:AcquireSharedControl(CT_TEXTURE)
+		icon:ApplyPosition(container, x, y, SCRIBED_SCRIPT_ICON_SIZE, SCRIBED_SCRIPT_ICON_SIZE)
+
+		local name = container:AcquireSharedControl(CT_LABEL)
+		name:ApplyPosition(container, x + SCRIBED_SCRIPT_ICON_SIZE + 2, y, SCRIBED_SCRIPT_NAME_WIDTH, nil)
+		name:ApplyFont(ui.fontSizeSmall)
 
 		return { icon = icon, name = name }
 	end
 
-	-- Builds one scribed-skill row (framed icon + name + three script sub-rows) from
-	-- pooled shared controls. Rows are created lazily by Update as data requires.
-	function ScribedSkillsPanel:AcquireScribedRow(rowIndex)
-		local parent = self.control
-		local y = SCRIBED_TOP + (rowIndex - 1) * (SCRIBED_ROW_HEIGHT + SCRIBED_ROW_GAP)
+	-- Builds one scribed-skill row (framed icon + name + three script sub-rows) in container-local
+	-- coordinates. Rows are created lazily by Update as the data requires, and only the container is
+	-- moved afterwards, so the row's own layout is written just once, here.
+	function ScribedSkillsPanel:AcquireScribedRow()
+		local container = scribedRowPool:Acquire()
+		container:SetMouseEnabled(true)
+		container:SetHandler("OnMouseEnter", CMXint.ScribedSkillTooltip_OnMouseEnter)
+		container:SetHandler("OnMouseExit", CMXint.SkillTooltip_Clear)
 
-		local iconBg = self:AcquireSharedControl(CT_TEXTURE)
-		iconBg:ApplyPosition(parent, SCRIBED_ROW_X, y, SCRIBED_ICON_SIZE, SCRIBED_ICON_SIZE)
+		local iconBg = container:AcquireSharedControl(CT_TEXTURE)
+		iconBg:ApplyPosition(container, SCRIBED_ROW_X, 0, SCRIBED_ICON_SIZE, SCRIBED_ICON_SIZE)
 		iconBg:SetTexture(ABILITY_FRAME)
 
-		local icon = self:AcquireSharedControl(CT_TEXTURE)
-		icon:ApplyPosition(parent, SCRIBED_ROW_X + 2, y + 2, SCRIBED_ICON_SIZE - 4, SCRIBED_ICON_SIZE - 4)
-		icon:SetMouseEnabled(true)
-		icon:SetHandler("OnMouseEnter", CMXint.ScribedSkillTooltip_OnMouseEnter)
-		icon:SetHandler("OnMouseExit", CMXint.SkillTooltip_Clear)
+		local icon = container:AcquireSharedControl(CT_TEXTURE)
+		icon:ApplyPosition(container, SCRIBED_ROW_X + 2, 2, SCRIBED_ICON_SIZE - 4, SCRIBED_ICON_SIZE - 4)
 
-		local name = self:AcquireSharedControl(CT_LABEL)
-		name:ApplyPosition(parent, SCRIBED_NAME_X, y, SCRIBED_NAME_WIDTH, nil)
-		name:SetFont(ui.GetFont(ui.fontSize))
-		name:SetMouseEnabled(true)
-		name:SetHandler("OnMouseEnter", CMXint.ScribedSkillTooltip_OnMouseEnter)
-		name:SetHandler("OnMouseExit", CMXint.SkillTooltip_Clear)
+		local name = container:AcquireSharedControl(CT_LABEL)
+		name:ApplyPosition(container, SCRIBED_NAME_X, 0, SCRIBED_NAME_WIDTH, nil)
+		name:ApplyFont(ui.fontSize)
 
 		local scripts = {
-			self:AcquireScriptControls(parent, SCRIBED_SCRIPT_X, y),
-			self:AcquireScriptControls(parent, SCRIBED_NAME_X, y + SCRIBED_SCRIPT_ROW2_Y),
-			self:AcquireScriptControls(parent, SCRIBED_SCRIPT_X, y + SCRIBED_SCRIPT_ROW2_Y),
+			self:AcquireScriptControls(container, SCRIBED_SCRIPT_X, 0),
+			self:AcquireScriptControls(container, SCRIBED_NAME_X, SCRIBED_SCRIPT_ROW2_Y),
+			self:AcquireScriptControls(container, SCRIBED_SCRIPT_X, SCRIBED_SCRIPT_ROW2_Y),
 		}
 
-		return { iconBg = iconBg, icon = icon, name = name, scripts = scripts }
+		return { container = container, iconBg = iconBg, icon = icon, name = name, scripts = scripts }
 	end
 
 	-- Shown instead of the rows when the fight was fought without any scribed skill.
 	function ScribedSkillsPanel:AcquireEmptyLabel()
 		local label = self:AcquireSharedControl(CT_LABEL)
-		label:SetFont(ui.GetFont(ui.fontSize))
+		label:ApplyFont(ui.fontSize)
 		label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
 		label:SetColor(0.6, 0.6, 0.6, 1)
 		label:SetText(GetString(SI_COMBAT_METRICS_NO_SCRIBED_SKILLS))
 
 		return label
-	end
-
-	local function HideRow(row)
-		row.iconBg:SetHidden(true)
-		row.icon:SetHidden(true)
-		row.name:SetHidden(true)
-		for i = 1, 3 do
-			row.scripts[i].icon:SetHidden(true)
-			row.scripts[i].name:SetHidden(true)
-		end
 	end
 
 	function ScribedSkillsPanel:Update()
@@ -315,30 +317,28 @@ function CMXint.InitializeScribedSkillsPanel(control)
 		local scribedSkills = fightData and fightData.skills and fightData.skills.scribedSkills or {}
 
 		local index = 0
-		for abilityId, data in util.spairs(scribedSkills) do
+		for abilityId, scriptIds in util.spairs(scribedSkills) do
 			index = index + 1
 
 			local row = self.rows[index]
 			if row == nil then
-				row = self:AcquireScribedRow(index)
+				row = self:AcquireScribedRow()
 				self.rows[index] = row
 			end
 
-			row.iconBg:SetHidden(false)
-			row.icon:SetHidden(false)
-			row.name:SetHidden(false)
+			local y = SCRIBED_TOP + (index - 1) * (SCRIBED_ROW_HEIGHT + SCRIBED_ROW_GAP)
+			row.container:ApplyPosition(control, 0, y, SCRIBED_ROW_WIDTH, SCRIBED_ROW_HEIGHT)
+
+			-- The tooltip handler sits on the container and reads these off it.
+			local rowData = row.container.data
+			rowData.abilityId, rowData.scriptIds = abilityId, scriptIds
+
 			row.name:SetText(GetFormattedAbilityName(abilityId))
 			row.icon:SetTexture(GetFormattedAbilityIcon(abilityId))
 
-			-- The tooltip handler reads these off the hovered control.
-			row.name.data.abilityId, row.name.data.scriptIds = abilityId, data
-			row.icon.data.abilityId, row.icon.data.scriptIds = abilityId, data
-
 			for i = 1, 3 do
 				local script = row.scripts[i]
-				local scriptId = data[i]
-				script.icon:SetHidden(false)
-				script.name:SetHidden(false)
+				local scriptId = scriptIds[i]
 				script.name:SetText(GetFormattedAbilityName(scriptId, true))
 				script.icon:SetTexture(GetFormattedAbilityIcon(scriptId, true))
 			end
@@ -348,9 +348,11 @@ function CMXint.InitializeScribedSkillsPanel(control)
 			end
 		end
 
-		-- Hide any rows left over from a previous (larger) fight.
-		for i = index + 1, #self.rows do
-			HideRow(self.rows[i])
+		-- Rows left over from a previous (larger) fight go back to the pool, which releases the shared
+		-- controls they hold rather than leaving them hidden but still leased.
+		for i = #self.rows, index + 1, -1 do
+			scribedRowPool:Release(self.rows[i].container)
+			self.rows[i] = nil
 		end
 
 		local scale = CMXint.settings.fightReport.scale
@@ -358,7 +360,7 @@ function CMXint.InitializeScribedSkillsPanel(control)
 		if self.emptyLabel == nil then
 			self.emptyLabel = self:AcquireEmptyLabel()
 		end
-		self.emptyLabel:ApplyPosition(self.control, 0, SCRIBED_TOP, self.control:GetWidth() / scale, nil)
+		self.emptyLabel:ApplyPosition(control, 0, SCRIBED_TOP, control:GetWidth() / scale, nil)
 		self.emptyLabel:SetHidden(index > 0)
 
 		-- The panel has no dimensions of its own in XML: the champion points panel anchors
@@ -366,7 +368,7 @@ function CMXint.InitializeScribedSkillsPanel(control)
 		local height = index > 0
 				and SCRIBED_TOP + index * SCRIBED_ROW_HEIGHT + (index - 1) * SCRIBED_ROW_GAP + SCRIBED_BOTTOM
 			or SCRIBED_EMPTY_HEIGHT
-		self.control:SetHeight(height * scale)
+		control:SetHeight(height * scale)
 	end
 
 	function ScribedSkillsPanel:Recover()
@@ -377,16 +379,15 @@ function CMXint.InitializeScribedSkillsPanel(control)
 
 	function ScribedSkillsPanel:Clear()
 		if self.rows then
-			for _, row in ipairs(self.rows) do
-				HideRow(row)
-			end
+			scribedRowPool:ReleaseAll()
+			ZO_ClearNumericallyIndexedTable(self.rows)
 		end
 
 		if self.emptyLabel then
 			self.emptyLabel:SetHidden(true)
 		end
 
-		self.control:SetHeight(SCRIBED_EMPTY_HEIGHT * CMXint.settings.fightReport.scale)
+		control:SetHeight(SCRIBED_EMPTY_HEIGHT * CMXint.settings.fightReport.scale)
 	end
 end
 

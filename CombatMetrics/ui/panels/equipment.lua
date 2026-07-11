@@ -38,6 +38,9 @@ local armorcolors = {
 }
 
 local EQUIP_ROW_HEIGHT = 22
+local EQUIP_LEFT_MARGIN = 5
+local LABEL_WIDTH = 280
+local TRAIT_WIDTH = 100
 
 local subIdToQuality = {}
 
@@ -80,71 +83,75 @@ function CMXint.InitializeEquipmentPanel(control)
 	local EquipmentPanel = CMX.internal.PanelObject:New(control, "equipment")
 	EquipmentPanel.scenes = { "info" }
 
-	function EquipmentPanel:RecoverEquipLine(parent, x, y)
-		local icon = self:AcquireSharedControl(CT_TEXTURE)
-		icon:ApplyPosition(parent, x, y, EQUIP_ROW_HEIGHT, EQUIP_ROW_HEIGHT)
+	-- Unlike the other row panels, the container here is only an ownership and positioning parent: an
+	-- equipment row has two independent tooltip targets (the item and its enchantment or poison), so
+	-- the mouse handlers stay on those two labels rather than moving up to the row.
+	function EquipmentPanel:RecoverEquipLine(line)
+		local container = line.container
 
-		local icon2 = self:AcquireSharedControl(CT_TEXTURE)
-		icon2:ApplyPosition(parent, x, y, EQUIP_ROW_HEIGHT, EQUIP_ROW_HEIGHT)
+		line.icon = container:AcquireSharedControl(CT_TEXTURE)
+		line.icon:ApplyPosition(container, 0, 0, EQUIP_ROW_HEIGHT, EQUIP_ROW_HEIGHT)
 
-		local labelX = x + EQUIP_ROW_HEIGHT + 4
-		local label = self:AcquireSharedControl(CT_LABEL)
-		label:ApplyPosition(parent, labelX, y, 280, nil)
-		---@diagnostic disable-next-line: undefined-field
-		label:SetFont(ui.GetFont(ui.fontSize))
-		---@diagnostic disable-next-line: undefined-field
+		line.icon2 = container:AcquireSharedControl(CT_TEXTURE)
+		line.icon2:ApplyPosition(container, 0, 0, EQUIP_ROW_HEIGHT, EQUIP_ROW_HEIGHT)
+
+		local labelX = EQUIP_ROW_HEIGHT + 4
+		local label = container:AcquireSharedControl(CT_LABEL)
+		label:ApplyPosition(container, labelX, 0, LABEL_WIDTH, nil)
+		label:ApplyFont(ui.fontSize)
 		label:SetMouseEnabled(true)
-		---@diagnostic disable-next-line: undefined-field
 		label:SetLinkEnabled(true)
-		---@diagnostic disable-next-line: undefined-field, missing-parameter
 		label:SetHandler("OnMouseEnter", CMXint.ItemTooltip_OnMouseEnter)
-		---@diagnostic disable-next-line: undefined-field, missing-parameter
 		label:SetHandler("OnMouseExit", CMXint.ItemTooltip_OnMouseExit)
-		---@diagnostic disable-next-line: undefined-field, missing-parameter
 		label:SetHandler("OnLinkClicked", OnLinkClicked)
+		line.label = label
 
-		local traitX = labelX + 280 + 4
-		local trait = self:AcquireSharedControl(CT_LABEL)
-		trait:ApplyPosition(parent, traitX, y, 100, nil)
-		---@diagnostic disable-next-line: undefined-field
-		trait:SetFont(ui.GetFont(ui.fontSize))
+		local traitX = labelX + LABEL_WIDTH + 4
+		line.trait = container:AcquireSharedControl(CT_LABEL)
+		line.trait:ApplyPosition(container, traitX, 0, TRAIT_WIDTH, nil)
+		line.trait:ApplyFont(ui.fontSize)
 
-		local scale = self.settings.scale > 0 and self.settings.scale or 1
-		local enchantX = traitX + 100 + 10
-		local enchant = self:AcquireSharedControl(CT_LABEL)
-		---@diagnostic disable-next-line: undefined-field
-		enchant:SetFont(ui.GetFont(ui.fontSize))
-		---@diagnostic disable-next-line: undefined-field
-		enchant:SetParent(parent)
-		---@diagnostic disable-next-line: undefined-field
-		enchant:ClearAnchors()
-		---@diagnostic disable-next-line: undefined-field
-		enchant:SetAnchor(TOPLEFT, parent, TOPLEFT, enchantX * scale, y * scale)
-		---@diagnostic disable-next-line: undefined-field
-		enchant:SetAnchor(TOPRIGHT, parent, TOPRIGHT, -4 * scale, y * scale)
-		---@diagnostic disable-next-line: undefined-field
+		-- The enchantment column takes whatever width is left over, so it is stretched to the row
+		-- rather than given a width of its own.
+		local enchant = container:AcquireSharedControl(CT_LABEL)
+		enchant:ApplyStretch(container, traitX + TRAIT_WIDTH + 10, 0, 4)
+		enchant:ApplyFont(ui.fontSize)
 		enchant:SetMouseEnabled(true)
-		---@diagnostic disable-next-line: undefined-field
 		enchant:SetLinkEnabled(true)
-		---@diagnostic disable-next-line: undefined-field, missing-parameter
 		enchant:SetHandler("OnMouseEnter", CMXint.ItemTooltip_OnMouseEnter)
-		---@diagnostic disable-next-line: undefined-field, missing-parameter
 		enchant:SetHandler("OnMouseExit", CMXint.ItemTooltip_OnMouseExit)
-		---@diagnostic disable-next-line: undefined-field, missing-parameter
 		enchant:SetHandler("OnLinkClicked", OnLinkClicked)
-
-		return { icon = icon, icon2 = icon2, label = label, trait = trait, enchant = enchant }
+		line.enchant = enchant
 	end
 
+	-- The gear slots are fixed, so the containers are created once and kept for the panel's lifetime.
+	-- Only the shared controls inside them are released when the panel hides, which is why they are
+	-- re-acquired on every Recover rather than only on the first one.
 	function EquipmentPanel:Recover()
-		self.equipLines = {}
+		local lines = self.equipLines
+
+		if lines == nil then
+			lines = {}
+			self.equipLines = lines
+
+			for i in ipairs(equipRows) do
+				local name = string.format("%sRow%d", control:GetName(), i)
+				lines[i] = { container = self:CreateRowContainer(name) }
+			end
+		end
+
+		local scale = CMXint.settings.fightReport.scale
+		local rowWidth = control:GetWidth() / scale - EQUIP_LEFT_MARGIN
 		local yOffset = 4
 
 		for i, rowData in ipairs(equipRows) do
 			if i > 1 then
 				yOffset = yOffset + EQUIP_ROW_HEIGHT + rowData[3]
 			end
-			self.equipLines[i] = self:RecoverEquipLine(self.control, 5, yOffset)
+
+			local line = lines[i]
+			self:RecoverEquipLine(line)
+			line.container:ApplyPosition(control, EQUIP_LEFT_MARGIN, yOffset, rowWidth, EQUIP_ROW_HEIGHT)
 		end
 	end
 

@@ -166,11 +166,11 @@ end
 -- SharedControlManager — single-owner lifetime tracking
 -- ============================================================================
 
--- The owner of a shared control is whoever manages its lifetime: a Panel (for panel-level
--- controls) or a RowControl (for controls a scroll-list row builds). Ownership is unambiguous —
--- exactly one owner holds a control at a time — so a control released by anyone other than its
--- owner is a genuine bug rather than something to tolerate.
----@alias SharedControlOwner Panel|RowControl
+-- The owner of a shared control is whoever manages its lifetime: a Panel (for panel-level controls),
+-- a RowControl (for controls a scroll-list row builds) or a RowContainer (for controls a free-form
+-- panel's row builds). Ownership is unambiguous — exactly one owner holds a control at a time — so a
+-- control released by anyone other than its owner is a genuine bug rather than something to tolerate.
+---@alias SharedControlOwner Panel|RowControl|RowContainer
 
 local function ownerLabel(owner)
 	if owner == nil then
@@ -407,6 +407,116 @@ function SharedControlManager:Verify(owner)
 			)
 		end
 	end
+end
+
+-- ============================================================================
+-- Row containers
+-- ============================================================================
+
+-- A row container groups the shared controls making up one row. It owns them, so handing the whole
+-- row back is a single call, and it parents them, so their offsets are written once in container-
+-- local coordinates and only the container is repositioned afterwards. Containers are not shared
+-- controls: they belong to their panel, which is why they carry the geometry helpers but none of the
+-- pool bookkeeping.
+local ROW_CONTAINER_TEMPLATE = "CombatMetrics_SharedRowContainer"
+
+---@class RowContainer: Control
+---@field data table
+---@field layout table
+---@field sizes table
+---@field anchors table
+---@field indent number
+---@field font table?
+---@field poolKey integer?
+---@field ApplyPosition fun(self: RowContainer, parent: Control, x: number, y: number, w: number?, h: number?)
+---@field ApplyStretch fun(self: RowContainer, parent: Control, x: number, y: number, rightInset: number?)
+---@field SetIndent fun(self: RowContainer, indent: number)
+---@field ApplyFont fun(self: RowContainer, baseSize: number, bold: boolean?)
+---@field AcquireSharedControl fun(self: RowContainer, controlType: integer): LabelControl|LineControl|TextureControl|SharedControl
+---@field ReleaseSharedControls fun(self: RowContainer)
+
+local function ContainerAcquireSharedControl(container, controlType)
+	return ui.sharedControls:Acquire(container, controlType)
+end
+
+local function ContainerReleaseSharedControls(container)
+	ui.sharedControls:ReleaseAll(container)
+end
+
+---@param control Control
+---@return RowContainer
+local function InitializeRowContainer(control)
+	---@cast control RowContainer
+	control.data = {}
+	InitializeGeometry(control)
+
+	control.ApplyPosition = ApplyPosition
+	control.ApplyStretch = ApplyStretch
+	control.SetIndent = SetIndent
+	control.ApplyFont = ApplyFont
+	control.AcquireSharedControl = ContainerAcquireSharedControl
+	control.ReleaseSharedControls = ContainerReleaseSharedControls
+
+	return control
+end
+
+-- For a panel whose row count is fixed: the containers are created once on first open and kept for
+-- the panel's lifetime. Only the shared controls inside them are released when the panel hides.
+---@param name string
+---@param parent Control
+---@return RowContainer
+function ui.CreateRowContainer(name, parent)
+	return InitializeRowContainer(WINDOW_MANAGER:CreateControlFromVirtual(name, parent, ROW_CONTAINER_TEMPLATE, ""))
+end
+
+-- For a panel whose row count varies with the fight: rows the current fight does not need go back to
+-- the pool, and the reset hands their shared controls back with them.
+---@class RowContainerPool: ZO_InitializingObject
+---@field New fun(self: RowContainerPool, parent: Control): RowContainerPool
+local RowContainerPool = ZO_InitializingObject:Subclass()
+ui.RowContainerPool = RowContainerPool
+
+---@param parent Control
+function RowContainerPool:Initialize(parent)
+	local function Create(pool)
+		return InitializeRowContainer(ZO_ObjectPool_CreateControl(ROW_CONTAINER_TEMPLATE, pool, parent))
+	end
+
+	local function Reset(container)
+		ContainerReleaseSharedControls(container)
+		ZO_ClearTable(container.data)
+		ClearGeometry(container)
+		container:SetMouseEnabled(false)
+		container:SetHandler("OnMouseEnter", nil)
+		container:SetHandler("OnMouseExit", nil)
+		container:SetParent(parent)
+		ZO_ObjectPool_DefaultResetControl(container) -- hides the container
+	end
+
+	---@diagnostic disable-next-line: redundant-parameter
+	self.pool = ZO_ObjectPool:New(Create, Reset)
+	self.pool:SetCustomAcquireBehavior(ShowControlOnAcquire)
+end
+
+---@return RowContainer
+function RowContainerPool:Acquire()
+	local container, key = self.pool:AcquireObject()
+	container.poolKey = key
+	return container
+end
+
+---@param container RowContainer
+function RowContainerPool:Release(container)
+	self.pool:ReleaseObject(container.poolKey)
+end
+
+function RowContainerPool:ReleaseAll()
+	self.pool:ReleaseAllObjects()
+end
+
+---@return table<any, RowContainer>
+function RowContainerPool:GetActiveObjects()
+	return self.pool:GetActiveObjects()
 end
 
 -- ============================================================================

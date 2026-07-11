@@ -18,6 +18,8 @@ local selections = ui.selections
 local logger
 local _
 
+local empty = {}
+
 ui.dx = zo_ceil(GuiRoot:GetWidth() / tonumber(GetCVar("WindowedWidth")) * 1000) / 1000
 ui.fontSizeSmall = tonumber(GetString(SI_COMBAT_METRICS_FONT_SIZE_SMALL))
 ui.fontSize = tonumber(GetString(SI_COMBAT_METRICS_FONT_SIZE))
@@ -250,6 +252,8 @@ end
 ---@field New fun(self: Panel, control: Control, name: string): Panel
 ---@field MUST_IMPLEMENT fun()
 ---@field dataList SortFilterList?
+---@field rowContainers RowContainer[]?
+---@field rowPools RowContainerPool[]?
 local PanelObject = ZO_InitializingObject:Subclass()
 CMXint.PanelObject = PanelObject
 
@@ -296,6 +300,42 @@ function PanelObject:AcquireSharedControl(controlType)
 	return ui.sharedControls:Acquire(self, controlType)
 end
 
+-- A row container owns the shared controls of its row, so the panel only has to keep track of the
+-- containers themselves and hand their contents back when it hides.
+
+-- For a fixed row count: created once, kept for the panel's lifetime.
+---@param name string
+---@param parent Control?
+---@return RowContainer
+function PanelObject:CreateRowContainer(name, parent)
+	local containers = self.rowContainers
+	if containers == nil then
+		containers = {}
+		self.rowContainers = containers
+	end
+
+	local container = ui.CreateRowContainer(name, parent or self.control)
+	containers[#containers + 1] = container
+
+	return container
+end
+
+-- For a row count that varies with the fight: rows the fight does not need go back to the pool.
+---@param parent Control?
+---@return RowContainerPool
+function PanelObject:CreateRowPool(parent)
+	local pools = self.rowPools
+	if pools == nil then
+		pools = {}
+		self.rowPools = pools
+	end
+
+	local pool = ui.RowContainerPool:New(parent or self.control)
+	pools[#pools + 1] = pool
+
+	return pool
+end
+
 -- Reports live references to shared controls a panel or its rows no longer own: the signature of
 -- two owners writing to the same pooled control.
 function PanelObject:VerifySharedControls()
@@ -318,6 +358,17 @@ function PanelObject:VerifySharedControls()
 					tostring(control.positionedBy)
 				)
 			end
+		end
+	end
+
+	-- Same check for the free-form panels: a row container owns its row's controls.
+	for _, container in ipairs(self.rowContainers or empty) do
+		ui.sharedControls:Verify(container)
+	end
+
+	for _, pool in ipairs(self.rowPools or empty) do
+		for _, container in pairs(pool:GetActiveObjects()) do
+			ui.sharedControls:Verify(container)
 		end
 	end
 end
@@ -361,6 +412,17 @@ function PanelObject:ReleaseSharedControls()
 	-- in that a cleared row must not be left pointing at a control the panel is about to reuse.
 	if self.dataList then
 		self.dataList:Clear()
+	end
+
+	-- Row containers own their row's controls, so releasing the panel's own would not reach them.
+	-- A pooled container gives its contents back through the pool reset; a static one is kept, so
+	-- only its contents are handed back and it is reused as-is on the next Recover.
+	for _, pool in ipairs(self.rowPools or empty) do
+		pool:ReleaseAll()
+	end
+
+	for _, container in ipairs(self.rowContainers or empty) do
+		container:ReleaseSharedControls()
 	end
 
 	ui.sharedControls:ReleaseAll(self)
