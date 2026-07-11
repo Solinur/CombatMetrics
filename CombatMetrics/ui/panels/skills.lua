@@ -65,9 +65,6 @@ function CMXint.InitializeSkillsPanel(control)
 	SkillsPanel.scenes = { "info" }
 	SkillsPanel.page = 1
 
-	-- The bar layout is fixed, so a line's container is created once and kept for the panel's
-	-- lifetime. Only the shared controls inside it are released when the panel hides, which is why
-	-- they are re-acquired here on every Recover rather than only on the first one.
 	function SkillsPanel:RecoverSkillLine(line)
 		local container = line.container
 		container:SetMouseEnabled(true)
@@ -131,7 +128,6 @@ function CMXint.InitializeSkillsPanel(control)
 			self:RecoverColumn(columnIndex)
 		end
 
-		-- Vertical divider between the two bar columns.
 		local centerX = LEFT_MARGIN + COLUMN_WIDTH + COLUMN_GAP / 2
 		local contentHeight = TITLE_HEIGHT + 4 + #SLOT_ORDER * SKILL_ROW_HEIGHT
 		self.centerSeparator = self:AcquireSharedControl(CT_LINE)
@@ -173,7 +169,6 @@ function CMXint.InitializeSkillsPanel(control)
 		local skills = fightData and fightData.skills
 		local skillBars = skills and skills.skillBars
 
-		-- Ordered list of the hotbar categories actually present.
 		local bars = {}
 		if skillBars then
 			for category in pairs(skillBars) do
@@ -212,7 +207,6 @@ function CMXint.InitializeSkillsPanel(control)
 			end
 		end
 
-		-- The divider only makes sense when both columns hold a bar.
 		self.centerSeparator:SetHidden(bars[baseIndex + 2] == nil)
 	end
 
@@ -256,7 +250,6 @@ function CMXint.InitializeScribedSkillsPanel(control)
 	local ScribedSkillsPanel = CMXint.PanelObject:New(control, "scribedSkills")
 	ScribedSkillsPanel.scenes = { "info" }
 
-	-- The number of scribed skills varies with the fight, so rows are pooled.
 	local scribedRowPool = ScribedSkillsPanel:CreateRowPool(control)
 
 	function ScribedSkillsPanel:AcquireScriptControls(container, x, y)
@@ -299,7 +292,6 @@ function CMXint.InitializeScribedSkillsPanel(control)
 		return { container = container, iconBg = iconBg, icon = icon, name = name, scripts = scripts }
 	end
 
-	-- Shown instead of the rows when the fight was fought without any scribed skill.
 	function ScribedSkillsPanel:AcquireEmptyLabel()
 		local label = self:AcquireSharedControl(CT_LABEL)
 		label:ApplyFont(ui.fontSize)
@@ -329,7 +321,6 @@ function CMXint.InitializeScribedSkillsPanel(control)
 			local y = SCRIBED_TOP + (index - 1) * (SCRIBED_ROW_HEIGHT + SCRIBED_ROW_GAP)
 			row.container:ApplyPosition(control, 0, y, SCRIBED_ROW_WIDTH, SCRIBED_ROW_HEIGHT)
 
-			-- The tooltip handler sits on the container and reads these off it.
 			local rowData = row.container.data
 			rowData.abilityId, rowData.scriptIds = abilityId, scriptIds
 
@@ -348,8 +339,6 @@ function CMXint.InitializeScribedSkillsPanel(control)
 			end
 		end
 
-		-- Rows left over from a previous (larger) fight go back to the pool, which releases the shared
-		-- controls they hold rather than leaving them hidden but still leased.
 		for i = #self.rows, index + 1, -1 do
 			scribedRowPool:Release(self.rows[i].container)
 			self.rows[i] = nil

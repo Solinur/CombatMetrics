@@ -55,8 +55,6 @@ function CMXint.InitializeChampionPointsPanel(control)
 	-- The scroll child must not size itself from its children: its height comes from the layout below.
 	scrollChild:SetResizeToFitDescendents(false)
 
-	-- The star count varies with the fight, so rows are pooled: the ones the current fight does not
-	-- need go back to the pool, and their shared controls go back with them.
 	local starRowPool = ChampionPointsPanel:CreateRowPool(scrollChild)
 
 	-- A row's controls sit in container-local coordinates and are placed once, here. Afterwards only
@@ -105,7 +103,6 @@ function CMXint.InitializeChampionPointsPanel(control)
 	end
 
 	local function SetRowStar(row, starId, points, slotted, disciplineType)
-		-- The tooltip handler sits on the container and reads these off it.
 		local data = row.container.data
 
 		row.ring:SetHidden(not slotted)
@@ -124,7 +121,6 @@ function CMXint.InitializeChampionPointsPanel(control)
 			row.value:SetText(points)
 			data.starId, data.points, data.slotted = starId, points, slotted
 		else
-			-- An unused champion bar slot: keep the dim ring, drop everything else.
 			row.icon:SetHidden(true)
 			row.name:SetText("")
 			row.value:SetText("")
@@ -178,7 +174,6 @@ function CMXint.InitializeChampionPointsPanel(control)
 
 				y = y + TITLE_HEIGHT + 4
 
-				-- The champion bar slots first, then every passive star with points spent.
 				local starIndex = 0
 				for i = 1, #discipline, 2 do
 					local slotted = i < maxSlotIndex
@@ -203,8 +198,6 @@ function CMXint.InitializeChampionPointsPanel(control)
 			end
 		end
 
-		-- Rows left over from a previous, larger fight go back to the pool, which releases the shared
-		-- controls they hold rather than leaving them hidden but still leased.
 		for i = #self.rows, rowIndex + 1, -1 do
 			starRowPool:Release(self.rows[i].container)
 			self.rows[i] = nil

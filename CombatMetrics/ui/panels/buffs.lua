@@ -655,7 +655,6 @@ local function InitBuffsList(panel)
 
 		local groupList = self.groupList
 
-		-- Correct parent uptimes from group data before sorting
 		for i = 1, #scrollData do
 			local groupData = groupList[scrollData[i].data.abilityId]
 			if groupData then
@@ -665,7 +664,6 @@ local function InitBuffsList(panel)
 
 		table.sort(scrollData, self.sortFunction) -- TODO: include sorting favourites
 
-		-- Insert expanded children after sort
 		for i = #scrollData, 1, -1 do
 			local abilityId = scrollData[i].data.abilityId
 			local groupData = groupList[abilityId]

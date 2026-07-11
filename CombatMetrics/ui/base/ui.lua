@@ -300,10 +300,6 @@ function PanelObject:AcquireSharedControl(controlType)
 	return ui.sharedControls:Acquire(self, controlType)
 end
 
--- A row container owns the shared controls of its row, so the panel only has to keep track of the
--- containers themselves and hand their contents back when it hides.
-
--- For a fixed row count: created once, kept for the panel's lifetime.
 ---@param name string
 ---@param parent Control?
 ---@return RowContainer
@@ -320,7 +316,6 @@ function PanelObject:CreateRowContainer(name, parent)
 	return container
 end
 
--- For a row count that varies with the fight: rows the fight does not need go back to the pool.
 ---@param parent Control?
 ---@return RowContainerPool
 function PanelObject:CreateRowPool(parent)
@@ -336,13 +331,9 @@ function PanelObject:CreateRowPool(parent)
 	return pool
 end
 
--- Reports live references to shared controls a panel or its rows no longer own: the signature of
--- two owners writing to the same pooled control.
 function PanelObject:VerifySharedControls()
 	ui.sharedControls:Verify(self)
 
-	-- Row controls are owned by the row, not the panel. A row is only rebuilt when the scroll
-	-- list resets it, so a row still pointing at a control it no longer owns is the actual defect.
 	local list = self.dataList and self.dataList.list
 	for _, rowControl in ipairs(list and list.activeControls or {}) do
 		ui.sharedControls:Verify(rowControl)

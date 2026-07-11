@@ -111,8 +111,6 @@ function CMXint.InitializeEquipmentPanel(control)
 		line.trait:ApplyPosition(container, traitX, 0, TRAIT_WIDTH, nil)
 		line.trait:ApplyFont(ui.fontSize)
 
-		-- The enchantment column takes whatever width is left over, so it is stretched to the row
-		-- rather than given a width of its own.
 		local enchant = container:AcquireSharedControl(CT_LABEL)
 		enchant:ApplyStretch(container, traitX + TRAIT_WIDTH + 10, 0, 4)
 		enchant:ApplyFont(ui.fontSize)
@@ -124,9 +122,6 @@ function CMXint.InitializeEquipmentPanel(control)
 		line.enchant = enchant
 	end
 
-	-- The gear slots are fixed, so the containers are created once and kept for the panel's lifetime.
-	-- Only the shared controls inside them are released when the panel hides, which is why they are
-	-- re-acquired on every Recover rather than only on the first one.
 	function EquipmentPanel:Recover()
 		local lines = self.equipLines
 

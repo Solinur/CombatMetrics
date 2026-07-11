@@ -9,11 +9,7 @@ local util = CMXint.util
 local logger
 ---@class CMXui
 local ui = CMXint.ui
-
--- ============================================================================
--- Per-control helpers (bookkeeping fields + geometry)
--- ============================================================================
-
+-- TODO: review geometry saving / remove comment
 -- Geometry is recorded before it is applied. `layout` holds the pristine unscaled arguments, while
 -- `sizes` / `anchors` hold the effective (indent-adjusted, still unscaled) layout in exactly the
 -- shape ResizeControl in fight_report.lua consumes. That is what makes shared controls visible to
@@ -99,7 +95,6 @@ local function ApplyPosition(control, parent, offsetX, offsetY, width, height)
 	anchors[2] = nil
 
 	if control:GetType() == CT_LINE then
-		-- A line is defined by its two end points rather than by its dimensions.
 		anchors[2] = { BOTTOMRIGHT, parent, TOPLEFT, offsetX + (width or 0), offsetY + (height or 0) }
 	end
 
@@ -108,8 +103,6 @@ local function ApplyPosition(control, parent, offsetX, offsetY, width, height)
 	applyLayout(control)
 end
 
--- Anchors the control to both sides of its parent so its width follows the parent, for a column that
--- has to fill whatever space is left instead of taking a fixed width.
 local function ApplyStretch(control, parent, offsetX, offsetY, rightInset)
 	TraceGeometry(control, parent)
 
@@ -126,10 +119,9 @@ local function ApplyStretch(control, parent, offsetX, offsetY, rightInset)
 	applyLayout(control)
 end
 
--- Shifts the control right and narrows it by the same amount, on top of its recorded base layout.
--- Absolute rather than incremental: repeats are no-ops and SetIndent(0) restores the base, so no
--- caller has to track the indent it applied last. Folding it into the effective record is also what
--- lets ResizeControl re-apply base + indent together without knowing that indents exist.
+-- Absolute rather than incremental: repeats are no-ops and SetIndent(0) restores the base. Folding
+-- it into the effective record is what lets ResizeControl re-apply base + indent together without
+-- knowing that indents exist.
 ---@param control Control
 ---@param indent number
 local function SetIndent(control, indent)
@@ -162,10 +154,6 @@ local function ShowControlOnAcquire(control)
 	control:SetHidden(false)
 end
 
--- ============================================================================
--- SharedControlManager — single-owner lifetime tracking
--- ============================================================================
-
 -- The owner of a shared control is whoever manages its lifetime: a Panel (for panel-level controls),
 -- a RowControl (for controls a scroll-list row builds) or a RowContainer (for controls a free-form
 -- panel's row builds). Ownership is unambiguous — exactly one owner holds a control at a time — so a
@@ -185,16 +173,10 @@ local function ownerLabel(owner)
 	return tostring(owner)
 end
 
--- Pool reset callbacks. These run on pool:ReleaseObject, so Release never has to remember to reset
--- a control. Pass one to AddSharedControlType; omit it (e.g. for separators) to get defaultReset.
--- defaultReset hides the control and drops its per-lease data; the type-specific variants build on
--- it, adding the mutable ESO properties panel code changes. A released control must not inherit
--- stale texture/color/blend/alignment/interaction state, hence the neutral defaults below.
 local function defaultReset(control)
 	ZO_ObjectPool_DefaultResetControl(control) -- hides the control
 	ZO_ClearTable(control.data)
-	-- A released control keeps sitting in the tree (reparented to CombatMetricsReport), so its
-	-- geometry record has to go too or the resize pass would re-anchor it while it is idle.
+
 	ClearGeometry(control)
 end
 
@@ -235,10 +217,6 @@ function SharedControlManager:Initialize()
 	self.pools = {}
 end
 
--- Registers an object pool for one shared control template under controlType, so Acquire can hand
--- out controls of that type. Each created control is wired with its bookkeeping fields and the
--- per-control geometry helpers. resetFunction is the pool reset callback (run on release);
--- defaults to defaultReset (hide + clear data) when omitted.
 ---@param controlType integer
 ---@param template string
 ---@param resetFunction? fun(control: SharedControl)
@@ -274,8 +252,6 @@ function SharedControlManager:AddSharedControlType(controlType, template, resetF
 	self.pools[controlType] = pool
 end
 
--- Leases a pooled control of controlType to owner, recording owner as its single owner until it
--- (and only it) releases the control again.
 ---@param owner SharedControlOwner
 ---@param controlType integer
 ---@return LabelControl|LineControl|TextureControl|SharedControl
@@ -316,10 +292,6 @@ function SharedControlManager:Acquire(owner, controlType)
 	return control
 end
 
--- Releases a single control back to its pool. An owner may only give back what it owns:
---   * already free (owner == nil) -> benign no-op, returns false
---   * owned by someone else       -> hard error (the real two-owner bug)
---   * owned by the caller         -> released and reset, returns true
 ---@param owner SharedControlOwner
 ---@param control SharedControl
 ---@return boolean released
@@ -370,9 +342,6 @@ function SharedControlManager:Release(owner, control)
 	return true
 end
 
--- Releases every control owned by owner. Both the row-reset path and the panel-hide path call
--- this; because owners are disjoint (a row owns its row controls, a panel owns its own), no
--- control is ever released twice.
 ---@param owner SharedControlOwner
 function SharedControlManager:ReleaseAll(owner)
 	local set = self.owners[owner]
@@ -408,10 +377,6 @@ function SharedControlManager:Verify(owner)
 		end
 	end
 end
-
--- ============================================================================
--- Row containers
--- ============================================================================
 
 -- A row container groups the shared controls making up one row. It owns them, so handing the whole
 -- row back is a single call, and it parents them, so their offsets are written once in container-
@@ -518,10 +483,6 @@ end
 function RowContainerPool:GetActiveObjects()
 	return self.pool:GetActiveObjects()
 end
-
--- ============================================================================
--- Initialization
--- ============================================================================
 
 local isFileInitialized = false
 function CMXint.InitializeSharedControls()
