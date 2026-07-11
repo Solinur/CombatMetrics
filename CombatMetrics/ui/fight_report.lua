@@ -81,7 +81,7 @@ local function ResizeControl(control, scale)
 
 		if fontcontrol ~= nil then
 			---@diagnostic disable-next-line: param-type-mismatch
-			local font, size, style = unpack(fontcontrol.font)
+			local font, size, style = unpack(fontcontrol.fontData)
 			if size then
 				size = tonumber(size) * (scale + 0.2) / 1.2
 			end -- Don't Scale fonts as much

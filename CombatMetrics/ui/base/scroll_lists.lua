@@ -1,4 +1,4 @@
--- SortFilterList base class (ZO_SortFilterList subclass) by some data panels (units, abilities, buffs).
+-- SortFilterList base class (ZO_SortFilterList subclass) used by some data panels (units, abilities, buffs).
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint

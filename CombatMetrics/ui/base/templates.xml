@@ -6,8 +6,8 @@
                     <Anchor point="TOPLEFT" />
                     <Dimensions x="0" y="0" />
                     <OnInitialized>
-                        self.font = {GetString(SI_COMBAT_METRICS_BOLD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE), "soft-shadow-thin"}
-                        self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
+                        self.fontData = {GetString(SI_COMBAT_METRICS_BOLD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE), "soft-shadow-thin"}
+                        self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.fontData)))
                     </OnInitialized>
                 </Control>
             </Controls>
@@ -19,8 +19,8 @@
                     <Anchor point="TOPLEFT" />
                     <Dimensions x="0" y="0" />
                     <OnInitialized>
-                        self.font = {GetString(SI_COMBAT_METRICS_BOLD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE), "soft-shadow-thin"}
-                        self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
+                        self.fontData = {GetString(SI_COMBAT_METRICS_BOLD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE), "soft-shadow-thin"}
+                        self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.fontData)))
                     </OnInitialized>
                 </Control>
             </Controls>
@@ -32,8 +32,8 @@
                     <Anchor point="TOPLEFT" />
                     <Dimensions x="0" y="0" />
                     <OnInitialized>
-                        self.font = {GetString(SI_COMBAT_METRICS_STD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE), "soft-shadow-thin"}
-                        self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
+                        self.fontData = {GetString(SI_COMBAT_METRICS_STD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE), "soft-shadow-thin"}
+                        self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.fontData)))
                     </OnInitialized>
                 </Control>
             </Controls>
@@ -45,8 +45,8 @@
                     <Anchor point="TOPLEFT" />
                     <Dimensions x="0" y="0" />
                     <OnInitialized>
-                        self.font = {GetString(SI_COMBAT_METRICS_STD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE_SMALL), "soft-shadow-thin"}
-                        self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
+                        self.fontData = {GetString(SI_COMBAT_METRICS_STD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE_SMALL), "soft-shadow-thin"}
+                        self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.fontData)))
                     </OnInitialized>
                 </Control>
             </Controls>
@@ -58,8 +58,8 @@
                     <Anchor point="TOPLEFT" />
                     <Dimensions x="0" y="0" />
                     <OnInitialized>
-                        self.font = {GetString(SI_COMBAT_METRICS_STD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE_TITLE), "soft-shadow-thin"}
-                        self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
+                        self.fontData = {GetString(SI_COMBAT_METRICS_STD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE_TITLE), "soft-shadow-thin"}
+                        self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.fontData)))
                     </OnInitialized>
                 </Control>
             </Controls>
@@ -71,8 +71,8 @@
                     <Anchor point="TOPLEFT" />
                     <Dimensions x="0" y="0" />
                     <OnInitialized>
-                        self.font = {GetString(SI_COMBAT_METRICS_BOLD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE_TITLE), "soft-shadow-thin"}
-                        self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
+                        self.fontData = {GetString(SI_COMBAT_METRICS_BOLD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE_TITLE), "soft-shadow-thin"}
+                        self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.fontData)))
                     </OnInitialized>
                 </Control>
             </Controls>
@@ -369,8 +369,8 @@
                 <Control name="$(parent)Font">
                     <AnchorFill />
                     <OnInitialized>
-                        self.font = {GetString(SI_COMBAT_METRICS_STD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE_SMALL), "soft-shadow-thin"}
-                        self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.font)))
+                        self.fontData = {GetString(SI_COMBAT_METRICS_STD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE_SMALL), "soft-shadow-thin"}
+                        self:GetParent():SetFont(string.format("%s|%s|%s", unpack(self.fontData)))
                     </OnInitialized>
                 </Control>
             </Controls>

@@ -1257,7 +1257,7 @@ local function initPlotWindow(panel)
 		local editControl = CreateControlFromVirtual(editControlName, control, "CombatMetrics_GraphTickLabel_Edit")
 		editControl:SetAnchorFill(label)
 
-		local font, size, style = unpack(editControl:GetNamedChild("Font").font) -- Need to manually scale font since it's created late
+		local font, size, style = unpack(editControl:GetNamedChild("Font").fontData) -- Need to manually scale font since it's created late
 		if size then
 			size = tonumber(size) * (CMXint.settings.fightReport.scale + 0.2) / 1.2
 		end

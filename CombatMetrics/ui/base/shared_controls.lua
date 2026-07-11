@@ -202,7 +202,7 @@ end
 local function resetTextureControl(control)
 	defaultReset(control)
 	control:SetTexture("")
-	control:SetTextureCoords(0, 0, 1, 1)
+	control:SetTextureCoords(0, 1, 0, 1)
 	control:SetColor(1, 1, 1, 1)
 	control:SetBlendMode(TEX_BLEND_MODE_ALPHA)
 	control:SetMouseEnabled(false)

@@ -304,8 +304,8 @@
                             <Anchor point="TOPLEFT" />
                             <Anchor point="BOTTOMRIGHT" offsetX="-12" offsetY="0" />
                             <OnInitialized>
-                                self.font = {GetString(SI_COMBAT_METRICS_STD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE), "soft-shadow-thin"}
-                                self:SetFont(string.format("%s|%s|%s", unpack(self.font)))
+                                self.fontData = {GetString(SI_COMBAT_METRICS_STD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE), "soft-shadow-thin"}
+                                self:SetFont(string.format("%s|%s|%s", unpack(self.fontData)))
                             </OnInitialized>
                         </TextBuffer>
 
@@ -361,8 +361,8 @@
                     <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Sep" offsetX="0" offsetY="2" />
                     <Anchor point="BOTTOMRIGHT" offsetX="-4" offsetY="-4" />
                     <OnInitialized>
-                        self.font = {GetString(SI_COMBAT_METRICS_STD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE), "soft-shadow-thin"}
-                        self:SetFont(string.format("%s|%s|%s", unpack(self.font)))
+                        self.fontData = {GetString(SI_COMBAT_METRICS_STD_FONT), GetString(SI_COMBAT_METRICS_FONT_SIZE), "soft-shadow-thin"}
+                        self:SetFont(string.format("%s|%s|%s", unpack(self.fontData)))
                         self:SetText("Test 123 CopyPasteBox CopyPasteBox CopyPasteBox CopyPasteBox \n CopyPasteBox CopyPasteBox 123")
                     </OnInitialized>
                 </EditBox>
