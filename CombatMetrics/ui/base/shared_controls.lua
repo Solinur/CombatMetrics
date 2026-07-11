@@ -9,6 +9,7 @@ local util = CMXint.util
 local logger
 ---@class CMXui
 local ui = CMXint.ui
+
 -- TODO: review geometry saving / remove comment
 -- Geometry is recorded before it is applied. `layout` holds the pristine unscaled arguments, while
 -- `sizes` / `anchors` hold the effective (indent-adjusted, still unscaled) layout in exactly the
@@ -119,6 +120,7 @@ local function ApplyStretch(control, parent, offsetX, offsetY, rightInset)
 	applyLayout(control)
 end
 
+-- TODO: review indent and if it propagates adjusting bar length and label correctly
 -- Absolute rather than incremental: repeats are no-ops and SetIndent(0) restores the base. Folding
 -- it into the effective record is what lets ResizeControl re-apply base + indent together without
 -- knowing that indents exist.

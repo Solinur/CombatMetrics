@@ -791,9 +791,9 @@ CMX_TestData = {
 				["stacks"] = {
 					[1] = {
 						["count"] = 1,
-						["groupUptime"] = 17948,
+						["groupUptime"] = 9140,
 						["groupCount"] = 1,
-						["uptime"] = 17948,
+						["uptime"] = 9140,
 					},
 				},
 				["groupCount"] = 1,
@@ -829,9 +829,9 @@ CMX_TestData = {
 				["stacks"] = {
 					[1] = {
 						["count"] = 1,
-						["groupUptime"] = 17500,
+						["groupUptime"] = 9140,
 						["groupCount"] = 1,
-						["uptime"] = 17500,
+						["uptime"] = 9140,
 					},
 				},
 				["groupCount"] = 1,
@@ -848,9 +848,9 @@ CMX_TestData = {
 				["stacks"] = {
 					[1] = {
 						["count"] = 1,
-						["groupUptime"] = 17499,
+						["groupUptime"] = 9140,
 						["groupCount"] = 1,
-						["uptime"] = 17499,
+						["uptime"] = 9140,
 					},
 				},
 				["groupCount"] = 1,
@@ -867,14 +867,14 @@ CMX_TestData = {
 				["stacks"] = {
 					[1] = {
 						["count"] = 2,
-						["groupUptime"] = 10002,
+						["groupUptime"] = 4997,
 						["groupCount"] = 2,
-						["uptime"] = 10002,
+						["uptime"] = 4997,
 					},
 				},
 				["groupCount"] = 1,
 			},
-			["startTime"] = 5075868,
+			["startTime"] = 5084676,
 			[39472] = {
 				["groupUptime"] = 9140,
 				["name"] = "Noxiphilic Sanguivoria",
@@ -887,7 +887,7 @@ CMX_TestData = {
 				["stacks"] = {
 					[1] = {
 						["count"] = 0,
-						["groupUptime"] = 17948,
+						["groupUptime"] = 9140,
 						["groupCount"] = 1,
 						["uptime"] = 0,
 					},
@@ -906,9 +906,9 @@ CMX_TestData = {
 				["stacks"] = {
 					[1] = {
 						["count"] = 1,
-						["groupUptime"] = 17948,
+						["groupUptime"] = 9140,
 						["groupCount"] = 1,
-						["uptime"] = 17948,
+						["uptime"] = 9140,
 					},
 				},
 				["groupCount"] = 1,
@@ -925,9 +925,9 @@ CMX_TestData = {
 				["stacks"] = {
 					[1] = {
 						["count"] = 1,
-						["groupUptime"] = 17948,
+						["groupUptime"] = 9140,
 						["groupCount"] = 1,
-						["uptime"] = 17948,
+						["uptime"] = 9140,
 					},
 				},
 				["groupCount"] = 1,
@@ -945,9 +945,9 @@ CMX_TestData = {
 				["stacks"] = {
 					[1] = {
 						["count"] = 3,
-						["groupUptime"] = 17499,
+						["groupUptime"] = 9139,
 						["groupCount"] = 3,
-						["uptime"] = 17499,
+						["uptime"] = 9139,
 					},
 				},
 				["groupCount"] = 3,
@@ -983,9 +983,9 @@ CMX_TestData = {
 				["stacks"] = {
 					[1] = {
 						["count"] = 1,
-						["groupUptime"] = 17948,
+						["groupUptime"] = 9140,
 						["groupCount"] = 1,
-						["uptime"] = 17948,
+						["uptime"] = 9140,
 					},
 				},
 				["groupCount"] = 1,
@@ -1002,9 +1002,9 @@ CMX_TestData = {
 				["stacks"] = {
 					[1] = {
 						["count"] = 1,
-						["groupUptime"] = 17500,
+						["groupUptime"] = 9140,
 						["groupCount"] = 1,
-						["uptime"] = 17500,
+						["uptime"] = 9140,
 					},
 				},
 				["groupCount"] = 1,
@@ -1059,9 +1059,9 @@ CMX_TestData = {
 				["stacks"] = {
 					[1] = {
 						["count"] = 1,
-						["groupUptime"] = 17948,
+						["groupUptime"] = 9140,
 						["groupCount"] = 1,
-						["uptime"] = 17948,
+						["uptime"] = 9140,
 					},
 				},
 				["groupCount"] = 1,
@@ -1078,9 +1078,9 @@ CMX_TestData = {
 				["stacks"] = {
 					[1] = {
 						["count"] = 1,
-						["groupUptime"] = 17499,
+						["groupUptime"] = 9140,
 						["groupCount"] = 1,
-						["uptime"] = 17499,
+						["uptime"] = 9140,
 					},
 				},
 				["groupCount"] = 1,
@@ -1099,7 +1099,7 @@ CMX_TestData = {
 				["stacks"] = {
 					[1] = {
 						["count"] = 0,
-						["groupUptime"] = 17906,
+						["groupUptime"] = 9140,
 						["groupCount"] = 1,
 						["uptime"] = 0,
 					},
@@ -1138,7 +1138,7 @@ CMX_TestData = {
 				["stacks"] = {
 					[1] = {
 						["count"] = 0,
-						["groupUptime"] = 17906,
+						["groupUptime"] = 9140,
 						["groupCount"] = 1,
 						["uptime"] = 0,
 					},
@@ -1157,7 +1157,7 @@ CMX_TestData = {
 				["stacks"] = {
 					[1] = {
 						["count"] = 0,
-						["groupUptime"] = 17906,
+						["groupUptime"] = 9140,
 						["groupCount"] = 1,
 						["uptime"] = 0,
 					},
@@ -1176,14 +1176,14 @@ CMX_TestData = {
 				["stacks"] = {
 					[1] = {
 						["count"] = 0,
-						["groupUptime"] = 17906,
+						["groupUptime"] = 9140,
 						["groupCount"] = 1,
 						["uptime"] = 0,
 					},
 				},
 				["groupCount"] = 1,
 			},
-			["startTime"] = 5075910,
+			["startTime"] = 5084676,
 		},
 		[31142] = {
 			[263672] = {
@@ -1198,9 +1198,9 @@ CMX_TestData = {
 				["stacks"] = {
 					[1] = {
 						["count"] = 1,
-						["groupUptime"] = 17501,
+						["groupUptime"] = 9140,
 						["groupCount"] = 1,
-						["uptime"] = 17501,
+						["uptime"] = 9140,
 					},
 				},
 				["groupCount"] = 1,
@@ -1237,14 +1237,14 @@ CMX_TestData = {
 				["stacks"] = {
 					[1] = {
 						["count"] = 3,
-						["groupUptime"] = 17500,
+						["groupUptime"] = 9140,
 						["groupCount"] = 3,
-						["uptime"] = 17500,
+						["uptime"] = 9140,
 					},
 				},
 				["groupCount"] = 3,
 			},
-			["startTime"] = 5076315,
+			["startTime"] = 5084676,
 		},
 	},
 	["char"] = "Solinur",

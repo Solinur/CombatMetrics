@@ -87,7 +87,7 @@
 
                 <Control name="$(parent)_SkillsPanel" hidden="true" inherits="CombatMetrics_ControlFramed">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)_CombatStats" />
-                    <Dimensions x="626" y="270" />
+                    <Dimensions x="626" y="256" />
                     <OnInitialized>CombatMetrics.internal.InitializeSkillsPanel(self)</OnInitialized>
                 </Control>
 
