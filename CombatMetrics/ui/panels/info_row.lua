@@ -1,3 +1,4 @@
+-- Info row panel (status bar) at the bottom of the fight report.
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint
@@ -15,7 +16,8 @@ local LC = CMXint.LibCombat2
 function CMXint.InitializeInfoRowPanel(control)
 	local InfoRowPanel = CMX.internal.PanelObject:New(control, "infoRow")
 
-	function InfoRowPanel:Update(fightData)
+	function InfoRowPanel:Update()
+		local fightData = self:GetCurrentFightData()
 		logger:Debug("Updating Info Row")
 
 		local datetimecontrol = control:GetNamedChild("DateTime")
@@ -44,7 +46,8 @@ function CMXint.InitializeInfoRowPanel(control)
 		datetimecontrol:SetText(timestring)
 		versioncontrol:SetText(versionstring)
 
-		local hideBar = fightData ~= nil and control:GetParent():GetNamedChild("_FightList"):IsHidden()
+		local fightList = control:GetParent():GetNamedChild("_FightList")
+		local hideBar = fightData ~= nil and (fightList == nil or fightList:IsHidden())
 
 		barcontrol:SetHidden(hideBar)
 

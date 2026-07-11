@@ -1,3 +1,4 @@
+-- FightDataManager: fight list storage, current selection, and save/remove via SavedVariables.
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint
@@ -36,8 +37,12 @@ end
 
 ---@param fightData Fight
 function FightDataManager:AddFight(fightData)
-	-- TODO: Add logic for keeping / removing fights.
+	-- TODO: Add logic for keeping / removing fights (e.g. prioritise bossfights ... ).
 	table.insert(self.fights, fightData)
+	local max = math.max(1, CMXint.settings.fights.maxLiveFights)
+	while #self.fights > max do
+		table.remove(self.fights, 1)
+	end
 	self:SelectMostRecentFight()
 end
 
@@ -77,14 +82,36 @@ function FightDataManager:SelectPreviousFight()
 end
 
 function FightDataManager:RemoveFight(fightIndex)
+	if fightIndex == nil then
+		return
+	end
 	local currentIndex = self.currentIndex
-	if fightIndex == currentIndex then
-		self:SelectFightByIndex(currentIndex - 1)
-	elseif fightIndex < currentIndex then
-		self.currentIndex = currentIndex - 1
+	local needsPostSelect = false
+
+	if currentIndex ~= nil then
+		if fightIndex == currentIndex then
+			if currentIndex > 1 then
+				self:SelectFightByIndex(currentIndex - 1)
+			else
+				needsPostSelect = true
+			end
+		elseif fightIndex < currentIndex then
+			self.currentIndex = currentIndex - 1
+		end
 	end
 
 	table.remove(self.fights, fightIndex)
+
+	if needsPostSelect then
+		if #self.fights > 0 then
+			self:SelectFightByIndex(1)
+		else
+			self.data = nil
+			self.currentIndex = nil
+			CMXint.ClearSelections()
+			CombatMetricsReport:Update()
+		end
+	end
 end
 
 function FightDataManager:RemoveCurrentFight()

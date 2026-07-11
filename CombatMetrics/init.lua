@@ -1,4 +1,4 @@
--- This file contains the initialziation code
+-- CMX and CMX.internal namespace setup, logger initialization, and addon lifecycle hooks.
 
 ---@class CMX
 CombatMetrics = CombatMetrics or {}
@@ -37,9 +37,12 @@ else
 	function internalLogger:Debug(...)
 		df(...)
 	end
+	function internalLogger:Error(...)
+		local msg = string.format(...)
+		error(msg, 2)
+	end
 	internalLogger.Warn = internalLogger.Debug
 	internalLogger.Info = internalLogger.Debug
-	internalLogger.Error = internalLogger.Debug
 	internalLogger.Verbose = internalLogger.Debug
 	CMXint.logger.main = internalLogger
 end
@@ -99,7 +102,7 @@ function util.spairs(t, order) -- from https://stackoverflow.com/questions/15706
 end
 
 function util.searchtable(t, field, value)
-	if value == nil then
+	if t == nil or value == nil then
 		return false
 	end
 
@@ -265,7 +268,6 @@ local function Initialize(eventId, addon)
 
 	assert(CMXint.InitializeFightDataHandler(), "Initialization of fight data module failed")
 	assert(CMXint.InitializeUtils(), "Initialization of utils module failed")
-	assert(CMXint.InitializeStructs(), "Initialization of structs module failed")
 	assert(CMXint.InitializeUI(), "Initialization of ui module failed")
 	-- assert(CMXint.InitMenu(svdefaults), "Initialization of settings menu failed")
 

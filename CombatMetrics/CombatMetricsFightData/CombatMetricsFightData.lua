@@ -236,7 +236,7 @@ for key, value in pairs(CombatResultTableLoad) do
 	CombatResultTableSave[value] = key
 end
 
-CombatMechnicFlagTableLoad = {
+local CombatMechnicFlagTableLoad = {
 	[1] = COMBAT_MECHANIC_FLAGS_HEALTH,
 	[2] = COMBAT_MECHANIC_FLAGS_MAGICKA,
 	[3] = COMBAT_MECHANIC_FLAGS_STAMINA,
@@ -251,7 +251,7 @@ for key, value in pairs(CombatMechnicFlagTableLoad) do
 	CombatMechnicFlagTableSave[value] = key
 end
 
-CombatMechnicFlagTableLoadLegacy = {
+local CombatMechnicFlagTableLoadLegacy = {
 	[-2] = COMBAT_MECHANIC_FLAGS_HEALTH,
 	[0] = COMBAT_MECHANIC_FLAGS_MAGICKA,
 	[6] = COMBAT_MECHANIC_FLAGS_STAMINA,
@@ -404,7 +404,7 @@ local function decodeCombatLogLine(line, fight)
 		if logdata[3] == 0 then
 			logdata[3] = nil
 		end
-	elseif layoutId == LAYOUT_STATS or layoutId == LAYOUT_STATS_ADV then -- type, timems, statchange, newvalue, statname
+	elseif layoutId == LAYOUT_STATS then -- type, timems, statchange, newvalue, statname
 		if fight.svversion < 5 then
 			logdata[5] = statTableConvert[logdata[5]]
 		end
@@ -414,8 +414,8 @@ local function decodeCombatLogLine(line, fight)
 			logdata[4] = logdata[4] / 100
 		end
 	elseif layoutId == LAYOUT_STATS_ADV then -- type, timems, statchange, newvalue, statname
-		line[3] = (line[3] / 10) - 838860 -- avoid negative/float numbers
-		line[4] = (line[4] / 10)
+		logdata[3] = (logdata[3] / 10) - 838860 -- avoid negative/float numbers
+		logdata[4] = (logdata[4] / 10)
 	elseif layoutId == LAYOUT_POWER then -- type, timems, abilityId, powerValueChange, powerType
 		if logdata[3] == 262141 then
 			logdata[3] = nil

@@ -1,3 +1,4 @@
+-- Utilities: category constants and data query helpers.
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint
@@ -115,7 +116,7 @@ function util.SafeDivide(x, y)
 	if y == 0 then
 		return x
 	end
-	return zo_round(x / y)
+	return x / y
 end
 
 ---@param number number
@@ -161,146 +162,146 @@ end
 
 SLASH_COMMANDS["/cmx"] = slashCommandFunction
 
-local function GetSingleTargetDamage(data) -- Gets highest Single Target Damage and counts enemy units.
-	local damage, groupDamage, unittime, name = 0, 0, 0, ""
+-- local function GetSingleTargetDamage(data) -- Gets highest Single Target Damage and counts enemy units.
+-- 	local damage, groupDamage, unittime, name = 0, 0, 0, ""
 
-	for unitId, unit in pairs(data.units) do
-		local totalUnitDamage = unit.damageOutTotal
+-- 	for unitId, unit in pairs(data.units) do
+-- 		local totalUnitDamage = unit.damageOutTotal
 
-		if totalUnitDamage > 0 and unit.isFriendly == false then
-			if totalUnitDamage > damage then
-				name = unit.name
-				damage = totalUnitDamage
-				groupDamage = unit.groupDamageOut
-				unittime = (unit.dpsend or 0) - (unit.dpsstart or 0)
-			end
-		end
-	end
+-- 		if totalUnitDamage > 0 and unit.isFriendly == false then
+-- 			if totalUnitDamage > damage then
+-- 				name = unit.name
+-- 				damage = totalUnitDamage
+-- 				groupDamage = unit.groupDamageOut
+-- 				unittime = (unit.dpsend or 0) - (unit.dpsstart or 0)
+-- 			end
+-- 		end
+-- 	end
 
-	unittime = unittime > 0 and unittime / 1000 or data.dpstime
-	groupDamage = zo_max(damage, groupDamage)
+-- 	unittime = unittime > 0 and unittime / 1000 or data.dpstime
+-- 	groupDamage = zo_max(damage, groupDamage)
 
-	return damage, groupDamage, name, unittime
-end
+-- 	return damage, groupDamage, name, unittime
+-- end
 
-local function GetBossTargetDamage(data) -- Gets Damage done to bosses and counts enemy boss units.
-	if not data.bossfight then
-		return 0, 0, 0, nil, 0
-	end
+-- local function GetBossTargetDamage(data) -- Gets Damage done to bosses and counts enemy boss units.
+-- 	if not data.bossfight then
+-- 		return 0, 0, 0, nil, 0
+-- 	end
 
-	local totalBossDamage, bossDamage, bossUnits = 0, 0, 0
-	local totalBossGroupDamage = 0
-	local bossName
-	local starttime
-	local endtime
+-- 	local totalBossDamage, bossDamage, bossUnits = 0, 0, 0
+-- 	local totalBossGroupDamage = 0
+-- 	local bossName
+-- 	local starttime
+-- 	local endtime
 
-	for unitId, unit in pairs(data.units) do
-		local totalUnitDamage = unit.damageOutTotal
-		local totalUnitGroupDamage = unit.groupDamageOut
+-- 	for unitId, unit in pairs(data.units) do
+-- 		local totalUnitDamage = unit.damageOutTotal
+-- 		local totalUnitGroupDamage = unit.groupDamageOut
 
-		if unit.bossId ~= nil and totalUnitDamage > 0 then
-			totalBossDamage = totalBossDamage + totalUnitDamage
-			totalBossGroupDamage = totalBossGroupDamage + totalUnitGroupDamage
-			bossUnits = bossUnits + 1
+-- 		if unit.bossId ~= nil and totalUnitDamage > 0 then
+-- 			totalBossDamage = totalBossDamage + totalUnitDamage
+-- 			totalBossGroupDamage = totalBossGroupDamage + totalUnitGroupDamage
+-- 			bossUnits = bossUnits + 1
 
-			starttime = zo_min(starttime or unit.dpsstart or 0, unit.dpsstart or 0)
-			endtime = zo_max(endtime or unit.dpsend or 0, unit.dpsend or 0)
+-- 			starttime = zo_min(starttime or unit.dpsstart or 0, unit.dpsstart or 0)
+-- 			endtime = zo_max(endtime or unit.dpsend or 0, unit.dpsend or 0)
 
-			if totalUnitDamage > bossDamage then
-				bossName = unit.name
-				bossDamage = totalUnitDamage
-			end
-		end
-	end
+-- 			if totalUnitDamage > bossDamage then
+-- 				bossName = unit.name
+-- 				bossDamage = totalUnitDamage
+-- 			end
+-- 		end
+-- 	end
 
-	if bossUnits == 0 then
-		return 0, 0, 0, nil, 0
-	end
+-- 	if bossUnits == 0 then
+-- 		return 0, 0, 0, nil, 0
+-- 	end
 
-	local bossTime = (endtime - starttime) / 1000
-	bossTime = bossTime > 0 and bossTime or data.dpstime
+-- 	local bossTime = (endtime - starttime) / 1000
+-- 	bossTime = bossTime > 0 and bossTime or data.dpstime
 
-	return bossUnits, totalBossDamage, totalBossGroupDamage, bossName, bossTime
-end
+-- 	return bossUnits, totalBossDamage, totalBossGroupDamage, bossName, bossTime
+-- end
 
-local function GetSelectionDamage(data, selection) -- Gets highest Single Target Damage and counts enemy units.
-	local units = 0
-	local damage = 0
-	local starttime
-	local endtime
-	local bossDamage = 0
-	local bossName = ""
+-- local function GetSelectionDamage(data, selection) -- Gets highest Single Target Damage and counts enemy units.
+-- 	local units = 0
+-- 	local damage = 0
+-- 	local starttime
+-- 	local endtime
+-- 	local bossDamage = 0
+-- 	local bossName = ""
 
-	local unitdata = data.units
-	selection = selection or unitdata
+-- 	local unitdata = data.units
+-- 	selection = selection or unitdata
 
-	for unitId, _ in pairs(selection) do
-		local unit = unitdata[unitId]
-		local totalUnitDamage = unit.damageOutTotal
+-- 	for unitId, _ in pairs(selection) do
+-- 		local unit = unitdata[unitId]
+-- 		local totalUnitDamage = unit.damageOutTotal
 
-		if totalUnitDamage > 0 and unit.isFriendly == false then
-			units = units + 1
-			damage = damage + totalUnitDamage
-			starttime = unit.dpsstart and zo_min(starttime or unit.dpsstart, unit.dpsstart) or starttime
-			endtime = unit.dpsend and zo_max(endtime or unit.dpsend, unit.dpsend) or endtime
+-- 		if totalUnitDamage > 0 and unit.isFriendly == false then
+-- 			units = units + 1
+-- 			damage = damage + totalUnitDamage
+-- 			starttime = unit.dpsstart and zo_min(starttime or unit.dpsstart, unit.dpsstart) or starttime
+-- 			endtime = unit.dpsend and zo_max(endtime or unit.dpsend, unit.dpsend) or endtime
 
-			if totalUnitDamage > bossDamage then
-				bossName = unit.name
-				bossDamage = totalUnitDamage
-			end
-		end
-	end
+-- 			if totalUnitDamage > bossDamage then
+-- 				bossName = unit.name
+-- 				bossDamage = totalUnitDamage
+-- 			end
+-- 		end
+-- 	end
 
-	local damageTime = starttime and endtime and (endtime - starttime) / 1000 or 0
-	damageTime = damageTime > 0 and damageTime or data.dpstime
+-- 	local damageTime = starttime and endtime and (endtime - starttime) / 1000 or 0
+-- 	damageTime = damageTime > 0 and damageTime or data.dpstime
 
-	return units, damage, bossName, damageTime
-end
+-- 	return units, damage, bossName, damageTime
+-- end
 
-local function GetSelectionHeal(data, selection) -- Gets highest Single Target Damage and counts enemy units.
-	local units = 0
-	local healing = 0
-	local starttime
-	local endtime
+-- local function GetSelectionHeal(data, selection) -- Gets highest Single Target Damage and counts enemy units.
+-- 	local units = 0
+-- 	local healing = 0
+-- 	local starttime
+-- 	local endtime
 
-	local unitdata = data.units
-	selection = selection or unitdata
-	local calcdata = data.calculated.units
+-- 	local unitdata = data.units
+-- 	selection = selection or unitdata
+-- 	local calcdata = data.calculated.units
 
-	if not calcdata then
-		return
-	end
+-- 	if not calcdata then
+-- 		return
+-- 	end
 
-	for unitId, _ in pairs(selection) do
-		local unit = unitdata[unitId]
-		local totalUnitHeal = calcdata[unitId].healingOutTotal
+-- 	for unitId, _ in pairs(selection) do
+-- 		local unit = unitdata[unitId]
+-- 		local totalUnitHeal = calcdata[unitId].healingOutTotal
 
-		if totalUnitHeal and unit.isFriendly == true then
-			units = units + 1
-			healing = healing + totalUnitHeal
-			starttime = zo_min(starttime or unit.hpsstart or 0, unit.hpsstart or 0)
-			endtime = zo_max(endtime or unit.hpsend or 0, unit.hpsend or 0)
-		end
-	end
+-- 		if totalUnitHeal and unit.isFriendly == true then
+-- 			units = units + 1
+-- 			healing = healing + totalUnitHeal
+-- 			starttime = zo_min(starttime or unit.hpsstart or 0, unit.hpsstart or 0)
+-- 			endtime = zo_max(endtime or unit.hpsend or 0, unit.hpsend or 0)
+-- 		end
+-- 	end
 
-	local healTime = (endtime - starttime) / 1000
-	healTime = healTime > 0 and healTime or data.dpstime
+-- 	local healTime = (endtime - starttime) / 1000
+-- 	healTime = healTime > 0 and healTime or data.dpstime
 
-	return units, healing, healTime
-end
+-- 	return units, healing, healTime
+-- end
 
-local function GetUnitsByName(data, unitId) -- Gets all units that share the name with the one provided by unitId
-	local selectedUnits = {}
-	local unitName = data.units[unitId].name
+-- local function GetUnitsByName(data, unitId) -- Gets all units that share the name with the one provided by unitId
+-- 	local selectedUnits = {}
+-- 	local unitName = data.units[unitId].name
 
-	for unitId, unit in pairs(data.units) do
-		if unit.name == unitName then
-			selectedUnits[unitId] = true
-		end
-	end
+-- 	for unitId, unit in pairs(data.units) do
+-- 		if unit.name == unitName then
+-- 			selectedUnits[unitId] = true
+-- 		end
+-- 	end
 
-	return selectedUnits
-end
+-- 	return selectedUnits
+-- end
 
 local function HasUnitType(unit, unitType)
 	if unitType == "boss" and unit.bossId then
@@ -616,7 +617,7 @@ end
 -- end
 
 function util.GetSelectionData()
-	logger:Warn("util.GetSelectionData is dnot implemented yet.")
+	logger:Warn("util.GetSelectionData is not implemented yet.")
 end
 
 local isFileInitialized = false

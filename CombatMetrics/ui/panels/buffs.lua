@@ -1,3 +1,4 @@
+-- Buffs panel with scroll list.
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint
@@ -127,10 +128,10 @@ do -- Handling Buffs Context Menu
 
 		local category = settings.category
 
-		if util.IsDamageCategory() and settings.rightpanel == "buffsout" then
+		if util.IsDamageCategory() and BuffPanel.buffCategory == "Enemy" then
 			unitType = "boss"
 			AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTBUFF_BOSS), postSelectionBuffUptime)
-		elseif util.IsHealingCategory() and settings.rightpanel == "buffsout" then
+		elseif util.IsHealingCategory() and BuffPanel.buffCategory == "Group" then
 			unitType = "group"
 			AddCustomMenuItem(GetString(SI_COMBAT_METRICS_POSTBUFF_GROUP), postSelectionBuffUptime)
 		end
@@ -161,14 +162,19 @@ end
 ---@param source EffectData
 ---@param dest EffectData
 local function CombineEffects(source, dest)
-	assert(
-		dest.name == source.name,
-		debug.traceback(string.format("Name mismatch when combining buff data: %s ~= %s.", dest.name, source.name))
-	)
-	assert(
-		dest.iconId == source.iconId,
-		debug.traceback(string.format("ID mismatch when combining buff data: %d ~= %d.", dest.iconId, source.iconId))
-	)
+	if dest.name ~= source.name then
+		error(string.format("Name mismatch when combining buff data: %s ~= %s.", dest.name, source.name), 2)
+	end
+	if dest.iconId ~= source.iconId then
+		error(
+			string.format(
+				"ID mismatch when combining buff data: %s ~= %s.",
+				tostring(dest.iconId),
+				tostring(source.iconId)
+			),
+			2
+		)
+	end
 	dest.uptime = dest.uptime + source.uptime
 	dest.count = dest.count + source.count
 	dest.groupUptime = dest.groupUptime + source.groupUptime
@@ -213,7 +219,7 @@ local unitIds = {}
 ---@param category buffCategory
 ---@return EffectData
 ---@return integer
-local function GetBuffData(fightData, category)
+local function GetBuffData(fightData, category, filterIds)
 	local totalUnitTime = 0
 
 	ZO_ClearTable(unitIds)
@@ -227,13 +233,21 @@ local function GetBuffData(fightData, category)
 		unitIds[#unitIds + 1] = fightData.unitIds.player
 	elseif category == BUFF_CATEGORY_GROUP then
 		local group = fightData.unitIds.group
-		if group and #group > 0 then
-			ZO_ShallowTableCopy(fightData.unitIds, unitIds)
+		if ZO_IsTableEmpty(group) == false then
+			for unitId in pairs(group) do
+				if not filterIds or filterIds[unitId] then
+					unitIds[#unitIds + 1] = unitId
+				end
+			end
 		else
 			unitIds[#unitIds + 1] = fightData.unitIds.player
 		end
 	elseif category == BUFF_CATEGORY_ENEMY then
-		ZO_ShallowTableCopy(LC.GetEnemyUnits(fightData), unitIds)
+		for _, unitId in ipairs(LC.GetEnemyUnits(fightData)) do
+			if not filterIds or filterIds[unitId] then
+				unitIds[#unitIds + 1] = unitId
+			end
+		end
 	end
 
 	for i, unitId in ipairs(unitIds) do
@@ -318,6 +332,8 @@ function util.buffSortFunction(data, a, b)
 	return ishigher
 end
 
+local isFileInitialized = false
+
 ---@param panel BuffPanel
 ---@return BuffDataList
 local function InitBuffsList(panel)
@@ -358,6 +374,7 @@ local function InitBuffsList(panel)
 		return newControl
 	end
 
+	---@diagnostic disable-next-line: redundant-parameter
 	local expandButtonPool = ZO_ObjectPool:New(CreateExpandButton, ZO_ObjectPool_DefaultResetControl)
 
 	---@class BuffRowControl: RowControl
@@ -367,7 +384,7 @@ local function InitBuffsList(panel)
 	---@param rowControl BuffRowControl
 	function dataList:RecoverRow(rowControl)
 		local panel = self.panel
-		local rowHeight = self:GetHeight()
+		local rowHeight = self:GetRawHeight()
 
 		local icon = panel:AcquireSharedControl(CT_TEXTURE)
 		icon:ApplyPosition(rowControl, 14, 0, rowHeight, rowHeight)
@@ -403,9 +420,6 @@ local function InitBuffsList(panel)
 	function dataList:UpdateRow(rowControl, data, scrollList)
 		local panel = self.panel
 
-		if rowControl.recovered ~= true then
-			self:RecoverRow(rowControl)
-		end
 		local icon, label, bar, bar_group, count, uptime = unpack(rowControl.controls)
 
 		local labelFormat = panel:ShowIds() and data.abilityId and BUFF_NAME_FORMAT_ID or BUFF_NAME_FORMAT_DEFAULT
@@ -487,7 +501,6 @@ local function InitBuffsList(panel)
 		end
 
 		local hasStacks = data.stacks and (data.iconId == 126597 or data.maxStacks > 1)
-		local selected = false -- selectedbuffs ~= nil and (selectedbuffs[buffName] ~= nil) or false -- TODO: Selections
 
 		local name = GetFormattedAbilityName(abilityId)
 		local labelText = name
@@ -504,8 +517,8 @@ local function InitBuffsList(panel)
 
 		---@class BuffRowData
 		local rowData = {
+			id = abilityId,
 			indent = 0,
-			selected = selected,
 			hasDetails = hasStacks,
 
 			abilityId = abilityId,
@@ -567,7 +580,6 @@ local function InitBuffsList(panel)
 				---@type BuffRowData
 				local rowData = {
 					indent = 1,
-					selected = false,
 					hasDetails = false,
 
 					effectType = data.effectType,
@@ -589,8 +601,24 @@ local function InitBuffsList(panel)
 
 	function dataList:BuildMasterList()
 		local fightData = self.panel:GetCurrentFightData()
-		local category = self.panel.buffCategory
-		local effectData, totalUnitTime = GetBuffData(fightData, category)
+		if fightData == nil then
+			if not isFileInitialized then return end
+			error("BuffPanel:BuildMasterList() called without active fight data")
+		end
+		local buffCategory = self.panel.buffCategory
+		local unitsPanel = ui.panels["units"]
+		local unitSel = unitsPanel and unitsPanel:GetSelections()
+		local filterIds = nil
+
+		if unitSel and unitSel.active then
+			local isEnemyFiltered = buffCategory == BUFF_CATEGORY_ENEMY and util.IsDamageCategory()
+			local isGroupFiltered = buffCategory == BUFF_CATEGORY_GROUP and util.IsHealingCategory()
+			if isEnemyFiltered or isGroupFiltered then
+				filterIds = unitSel.selectedItems
+			end
+		end
+
+		local effectData, totalUnitTime = GetBuffData(fightData, buffCategory, filterIds)
 
 		self:UpdateAbilityNames(effectData)
 
@@ -628,13 +656,13 @@ local function InitBuffsList(panel)
 
 			-- TODO: Check if more elaborate analysis needed (parallel buffs ?)
 		elseif groupData[1].mainAbilityId then
-			for i, groupEntry in groupData do
+			for i, groupEntry in ipairs(groupData) do
 				local groupEntryData = groupEntry.data
 				if groupEntryData.uptime > entryData.uptime then
 					entryData.uptime = groupEntryData.uptime
-					entryData.groupUptime = groupEntryData.uptime
-					entryData.count = groupEntryData.uptime
-					entryData.groupCount = groupEntryData.uptime
+					entryData.groupUptime = groupEntryData.groupUptime
+					entryData.count = groupEntryData.count
+					entryData.groupCount = groupEntryData.groupCount
 				end
 			end
 		end
@@ -703,7 +731,6 @@ function CMXint.InitializeBuffsPanel(control)
 	end
 
 	BuffPanel.dataList = InitBuffsList(BuffPanel)
-	BuffPanel.selections = {}
 
 	function BuffPanel:Update()
 		logger:Debug("Updating Buff Panel")
@@ -722,7 +749,6 @@ function CMXint.InitializeBuffsPanel(control)
 	BuffPanel.radioButtons:SetClickedButton(searchBar:GetNamedChild("Player"))
 end
 
-local isFileInitialized = false
 function CMXint.InitializeBuffs()
 	if isFileInitialized == true then
 		return false

@@ -1,3 +1,4 @@
+-- Hard-coded CMX_TestData matching LibCombat2 output format for UI testing without live combat.
 CMX_TestData = {
 	["prepared"] = true,
 	["healingDone"] = {

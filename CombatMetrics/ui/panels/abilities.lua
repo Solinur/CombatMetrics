@@ -1,3 +1,4 @@
+-- Abilities panel with scroll list.
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint
@@ -196,7 +197,7 @@ local function InitAbilitiesList(panel)
 	---@param rowControl RowControl
 	function dataList:RecoverRow(rowControl)
 		local panel = self.panel
-		local rowHeight = self:GetHeight()
+		local rowHeight = self:GetRawHeight()
 
 		--[[
 		TODO: consider rearranging columns: 
@@ -260,10 +261,6 @@ local function InitAbilitiesList(panel)
 	function dataList:UpdateRow(rowControl, data, scrollList)
 		local panel = self.panel
 
-		if rowControl.recovered ~= true then
-			self:RecoverRow(rowControl)
-		end
-
 		local icon, label, bar, fraction, perSecond, total, crits, hits, critRatio, averageHit, minMax =
 			unpack(rowControl.controls)
 
@@ -315,8 +312,12 @@ local function InitAbilitiesList(panel)
 
 	function dataList:BuildMasterList()
 		local fightData = panel:GetCurrentFightData()
+		if fightData == nil then error("AbilitiesPanel:BuildMasterList() called without active fight data", 2) end
 		local category = panel.settings.category
-		local categoryData = util.GetCombinedPlayerCategoryDataByAbility(fightData, category) -- Add selected units
+		local unitsPanel = ui.panels["units"]
+		local unitSel = unitsPanel and unitsPanel:GetSelections()
+		local unitIds = (unitSel and unitSel.active) and unitSel:GetAll() or nil
+		local categoryData = util.GetCombinedPlayerCategoryDataByAbility(fightData, category, unitIds)
 		local playerId = fightData.unitIds.player
 		local playerData = util.GetUnitCategoryData(fightData, category, playerId)
 
@@ -357,11 +358,9 @@ local function InitAbilitiesList(panel)
 		end
 
 		local settings = panel.settings
-		local selected = false -- selectedunits ~= nil and (selectedunits[unitId] ~= nil) or false -- TODO: Selections
-
 		local category = settings.category
-		local isOverheal = category == cat.CMX_CATEGORY_HEALING_DONE and settings.includeOverheal
-		local amount = isOverheal and abilityData.overflowAmount or abilityData.totalAmount
+		local isOverheal = category == cat.CMX_CATEGORY_HEALING_DONE and settings.showOverHeal
+		local amount = isOverheal and (abilityData.totalAmount + abilityData.overflowAmount) or abilityData.totalAmount
 		local abilityType = util.IsHealingCategory() and abilityData.powerType or abilityData.damageType
 
 		local critLayout = panel:GetRatioLayout()
@@ -394,6 +393,7 @@ local function InitAbilitiesList(panel)
 
 		---@class AbilityRowData
 		local rowData = {
+			id = abilityId,
 			icon = GetFormattedAbilityIcon(abilityId, false),
 			name = name,
 			color = color,
@@ -405,7 +405,6 @@ local function InitAbilitiesList(panel)
 			critRatio = critRatio,
 			average = average,
 			minmax = minmax,
-			selected = selected,
 		}
 
 		table.insert(self.masterList, ZO_ScrollList_CreateDataEntry(1, rowData))
@@ -422,7 +421,6 @@ function CMXint.InitializeAbilitiesPanel(control)
 	---@class AbilityPanel: Panel
 	AbilitiesPanel = CMXint.PanelObject:New(control, "abilities")
 	AbilitiesPanel.dataList = InitAbilitiesList(AbilitiesPanel)
-	AbilitiesPanel.selections = {}
 
 	function AbilitiesPanel:GetRatioLayout()
 		local settings = self.settings

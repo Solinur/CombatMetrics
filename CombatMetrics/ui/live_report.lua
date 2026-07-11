@@ -1,3 +1,4 @@
+-- Live report panel: mini DPS/HPS meter updated in real time during combat.
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint
@@ -213,18 +214,17 @@ for i, layout in ipairs(PANEL_DATA) do
 end
 
 local function resize(control, scale)
-	if control:GetType() == CT_BACKDROP or control.sizes == nil and control.anchors == nil then
+	if control:GetType() == CT_BACKDROP or control.sizes == nil or control.anchors == nil then
 		return
 	end
 	local width, height = unpack(control.sizes)
 	local maxwidth, maxheight = GuiRoot:GetDimensions()
 
-	if width <= 0 or height <= 0 then
-		logger:Error("Invalid default dimensions for %s: %s, %s", control:GetName(), width, height)
+	if width < 0 or height < 0 then
+		error(string.format("Invalid default dimensions for %s: %s, %s", control:GetName(), width, height))
 	end
 
-	scale = zo_max(scale or 1, util.SafeDivide(maxwidth, width), util.SafeDivide(maxheight, height))
-	scale = zo_clamp(scale, 0.5, 3)
+	scale = zo_clamp(scale or 1, 0.5, zo_min(maxwidth / width, maxheight / height, 3))
 	CMXint.settings.liveReport.scale = scale
 
 	if width then
@@ -527,7 +527,7 @@ end
 
 function LiveReport:Update()
 	if not self:IsEnabled() then -- TODO: bail when not in combat
-		LiveReport:Toggle(false)
+		self:Toggle(false)
 		return
 	end
 

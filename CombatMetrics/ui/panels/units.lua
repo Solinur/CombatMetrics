@@ -1,3 +1,4 @@
+-- Units panel with scroll list.
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint
@@ -105,7 +106,7 @@ local function InitUnitsList(panel)
 	---@param rowControl RowControl
 	function dataList:RecoverRow(rowControl)
 		local panel = self.panel
-		local rowHeight = self:GetHeight()
+		local rowHeight = self:GetRawHeight()
 
 		local icon = panel:AcquireSharedControl(CT_TEXTURE)
 		icon:ApplyPosition(rowControl, 2, 0, rowHeight, rowHeight)
@@ -141,10 +142,6 @@ local function InitUnitsList(panel)
 	---@param scrollList object
 	function dataList:UpdateRow(rowControl, data, scrollList)
 		local panel = self.panel
-
-		if rowControl.recovered ~= true then
-			self:RecoverRow(rowControl)
-		end
 
 		local icon, label, bar, perSecond, total, perCent = unpack(rowControl.controls)
 
@@ -194,16 +191,14 @@ local function InitUnitsList(panel)
 			return
 		end
 
-		local selected = false -- selectedunits ~= nil and (selectedunits[unitId] ~= nil) or false -- TODO: Selections
-
 		local panelSettings = self.panel.settings
 		local category = panelSettings.category
 		local isOverheal = category == cat.CMX_CATEGORY_HEALING_DONE and panelSettings.showOverHeal
-		local playerAmount = isOverheal and playerData.overflowAmount or playerData.totalAmount
+		local playerAmount = isOverheal and (playerData.totalAmount + playerData.overflowAmount) or playerData.totalAmount
 
 		local groupAmount = playerAmount
 		if groupData then
-			groupAmount = isOverheal and groupData.overflowAmount or groupData.totalAmount
+			groupAmount = isOverheal and (groupData.totalAmount + groupData.overflowAmount) or groupData.totalAmount
 		end
 
 		local labelFormat = panel:ShowIds() and unitData.unitId and UNIT_NAME_FORMAT_ID or UNIT_NAME_FORMAT_DEFAULT
@@ -211,11 +206,11 @@ local function InitUnitsList(panel)
 
 		---@class UnitRowData
 		local rowData = {
+			id = unitData.unitId,
 			name = name,
 			icon = GetUnitIcon(unitData),
 			color = GetUnitColor(unitData),
 			perSecondValue = playerAmount / (durationMs / 1000),
-			selected = selected,
 			playerAmount = playerAmount,
 			groupAmount = groupAmount,
 		}
@@ -228,6 +223,7 @@ local function InitUnitsList(panel)
 
 	function dataList:BuildMasterList()
 		local fightData = self.panel:GetCurrentFightData()
+		if fightData == nil then error("UnitsPanel:BuildMasterList() called without active fight data", 2) end
 		local category = self.panel.settings.category
 		local playerId = fightData.unitIds.player
 		local categoryData = util.GetUnitCategoryData(fightData, category, playerId)
@@ -244,14 +240,23 @@ local function InitUnitsList(panel)
 		dataList.playerAmountSum = 0
 		dataList.groupAmountSum = 0
 
+		local abilitiesPanel = ui.panels["abilities"]
+		local abilitySel = abilitiesPanel and abilitiesPanel:GetSelections()
+		local abilityIds = (abilitySel and abilitySel.active) and abilitySel.selectedItems or nil
+
 		for unitId, playerUnitData in pairs(categoryData) do
 			if type(playerUnitData) == "table" then
-				local groupData = util.GetUnitCategoryData(fightData, oppositionCategory, unitId)
-				local unitInfo = fightData.units[unitId]
-				if unitInfo then -- TODO: check why this can be nil
-					self:AddDataEntry(unitInfo, playerUnitData, groupData, durationMs)
-				else
-					logger:Error("Unit info not found for unit ID: %s", unitId)
+				if abilityIds then
+					playerUnitData = util.GetCombinedPlayerCategoryData(fightData, category, {unitId}, abilityIds)
+				end
+				if playerUnitData ~= nil and playerUnitData.totalAmount > 0 then
+					local groupData = util.GetUnitCategoryData(fightData, oppositionCategory, unitId)
+					local unitInfo = fightData.units[unitId]
+					if unitInfo then -- TODO: check why this can be nil
+						self:AddDataEntry(unitInfo, playerUnitData, groupData, durationMs)
+					else
+						logger:Error("Unit info not found for unit ID: %s", unitId)
+					end
 				end
 			end
 		end
@@ -276,7 +281,6 @@ function CMXint.InitializeUnitsPanel(control)
 	UnitsPanel = CMXint.PanelObject:New(control, "units")
 
 	UnitsPanel.dataList = InitUnitsList(UnitsPanel)
-	UnitsPanel.selections = {}
 
 	function UnitsPanel:UpdateHeaderLabels()
 		local isDamage = util.IsDamageCategory()

@@ -310,119 +310,6 @@
             </Controls>
         </Control>
 
-        <Control name="CombatMetrics_UnitRowTemplate" resizeToFitDescendents="true" mouseEnabled="true" virtual="true">
-            <OnMouseUp> 
-                if button == MOUSE_BUTTON_INDEX_RIGHT then 
-                    CMX.UnitContextMenu( self, upInside ) 
-                else
-                    CMX.AddSelection( self, button, upInside, ctrl, alt, shift )
-                end
-            </OnMouseUp>
-
-            <Controls>
-                <Backdrop name="$(parent)HighLight" inherits="CombatMetrics_Highlight" />
-                <Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="LEFT"
-                    verticalAlignment="CENTER">
-                    <Anchor point="LEFT" relativePoint="LEFT" offsetX="2" />
-                    <Dimensions x="50" y="20" />
-                </Label>
-
-                <Backdrop name="$(parent)Bar" edgeColor="00000000" centerColor="99CC0000">
-                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Name" offsetX="-2" />
-                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Name" />
-                    <Dimensions x="50" />
-
-                    <Edge edgeSize="1" />
-                </Backdrop>
-
-                <Label name="$(parent)PerSecond" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
-                    verticalAlignment="CENTER">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="2" />
-                    <Dimensions x="50" y="20" />
-                </Label>
-
-                <Label name="$(parent)Total" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
-                    verticalAlignment="CENTER">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)PerSecond" offsetX="2" />
-                    <Dimensions x="50" y="20" />
-                </Label>
-
-                <Label name="$(parent)Fraction" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
-                    verticalAlignment="CENTER">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Total" offsetX="2" />
-                    <Dimensions x="50" y="20" />
-                </Label>
-            </Controls>
-        </Control>
-
-        <Control name="CombatMetrics_BuffRowTemplate" resizeToFitDescendents="true" mouseEnabled="true" virtual="true">
-            <OnMouseUp> 
-                if button == MOUSE_BUTTON_INDEX_RIGHT then 
-                    CMX.BuffContextMenu( self, upInside ) 
-                else
-                    CMX.AddSelection( self, button, upInside, ctrl, alt, shift )
-                end
-            </OnMouseUp>
-
-            <Controls>
-                <Backdrop name="$(parent)HighLight" inherits="CombatMetrics_Highlight" />
-
-                <Control name="$(parent)Indicator">
-                    <Anchor point="LEFT" offsetX="0" offsetY="0" />
-                    <Dimensions x="10" y="10" />
-                </Control>
-
-                <Button name="$(parent)IndicatorSwitch" hidden="true">
-                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Indicator" offsetX="-2" offsetY="0" />
-                    <Anchor point="BOTTOMRIGHT" relativePoint="BOTTOMRIGHT" relativeTo="$(parent)Indicator" offsetX="0" offsetY="0" />
-                    <OnClicked> CMX.CollapseButton( self, upInside ) </OnClicked>
-                    <Textures
-                        normal="esoui/art/buttons/dropbox_arrow_normal.dds"
-                        mouseOver="esoui/art/buttons/dropbox_arrow_mouseover.dds"
-                        pressed="esoui/art/buttons/dropbox_arrow_mousedown.dds"
-                        disabled="esoui/art/buttons/dropbox_arrow_disabled.dds"
-                    />
-                </Button>
-
-                <Texture name="$(parent)Icon">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Indicator" offsetX="2" />
-                    <Dimensions x="20" y="20" />
-                </Texture>
-
-                <Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="LEFT"
-                    verticalAlignment="CENTER">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="4" />
-                    <Dimensions x="50" y="20" />
-                </Label>
-
-                <Backdrop name="$(parent)GroupBar" edgeColor="00000000" centerColor="CC000099">
-                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Name" offsetX="-2" />
-                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Name" constrains="Y" />
-                    <Dimensions x="50" />
-                    <Edge edgeSize="1" />
-                </Backdrop>
-
-                <Backdrop name="$(parent)PlayerBar" edgeColor="00000000" centerColor="CC000099">
-                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Name" offsetX="-2" />
-                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Name" constrains="Y" />
-                    <Dimensions x="50" />
-                    <Edge edgeSize="1" />
-                </Backdrop>
-
-                <Label name="$(parent)Count" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
-                    verticalAlignment="CENTER">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="2" />
-                    <Dimensions x="50" y="20" />
-                </Label>
-
-                <Label name="$(parent)Uptime" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
-                    verticalAlignment="CENTER">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Count" offsetX="2" />
-                    <Dimensions x="50" y="20" />
-                </Label>
-            </Controls>
-        </Control>
-
         <Control name="CombatMetrics_ResourceRowTemplate" virtual="true">
             <Controls>
                 <Backdrop name="$(parent)HighLight" inherits="CombatMetrics_Highlight" />
@@ -452,97 +339,6 @@
                 </Label>
             </Controls>
 
-            <OnMouseUp> CMX.AddSelection( self, button, upInside, ctrl, alt, shift ) </OnMouseUp>
-        </Control>
-
-        <Control name="CombatMetrics_ResourceRowSeperatorTemplate" virtual="true"> <!-- TODO: Check if obsolete? -->
-            <Controls>
-                <Label name="$(parent)Label" inherits="CombatMetrics_ValueFontControl" text="SI_COMBAT_METRICS_DRAIN"
-                    horizontalAlignment="LEFT" verticalAlignment="CENTER">
-                    <Anchor point="TOPLEFT" offsetX="4" />
-                    <Anchor point="BOTTOMLEFT" />
-                    <Dimensions x="50" />
-                </Label>
-
-                <Line name="$(parent)Sep" color="FFFFFFFF" inherits="CombatMetrics_Line_Thin">
-                    <Anchor point="BOTTOMLEFT" />
-                    <Anchor point="BOTTOMRIGHT" offsetX="-2" />
-                    <Dimensions y="1" />
-                </Line>
-            </Controls>
-        </Control>
-
-        <Control name="CombatMetrics_AbilityRowTemplate" virtual="true">
-            <Controls>
-                <Backdrop name="$(parent)HighLight" inherits="CombatMetrics_Highlight" />
-                <Texture name="$(parent)Icon">
-                    <Anchor point="LEFT" relativePoint="LEFT" offsetX="2" />
-                    <Dimensions x="18" y="18" />
-                </Texture>
-
-                <Label name="$(parent)Name" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="Left"
-                    verticalAlignment="CENTER">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Icon" offsetX="4" />
-                    <Dimensions x="50" y="20" />
-                </Label>
-
-                <Backdrop name="$(parent)Bar" edgeColor="00000000" centerColor="FF806600">
-                    <Anchor point="TOPLEFT" relativePoint="TOPLEFT" relativeTo="$(parent)Name" offsetX="-2" />
-                    <Anchor point="BOTTOMLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)Name" />
-                    <Dimensions x="50" />
-                    <Edge edgeSize="1" />
-                </Backdrop>
-
-                <Label name="$(parent)Fraction" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
-                    verticalAlignment="CENTER">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Name" offsetX="2" />
-                    <Dimensions x="50" y="20" />
-                </Label>
-
-                <Label name="$(parent)PerSecond" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
-                    verticalAlignment="CENTER">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Fraction" offsetX="2" />
-                    <Dimensions x="50" y="20" />
-                </Label>
-
-                <Label name="$(parent)Total" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
-                    verticalAlignment="CENTER">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)PerSecond" offsetX="2" />
-                    <Dimensions x="50" y="20" />
-                </Label>
-
-                <Label name="$(parent)Crits" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
-                    verticalAlignment="CENTER">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Total" offsetX="2" />
-                    <Dimensions x="50" y="20" />
-                </Label>
-
-                <Label name="$(parent)Hits" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="LEFT"
-                    verticalAlignment="CENTER">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Crits" offsetX="0" />
-                    <Dimensions x="50" y="20" />
-                </Label>
-
-                <Label name="$(parent)CritRatio" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
-                    verticalAlignment="CENTER">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Hits" offsetX="2" />
-                    <Dimensions x="50" y="20" />
-                </Label>
-
-                <Label name="$(parent)Average" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
-                    verticalAlignment="CENTER">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)CritRatio" offsetX="2" />
-                    <Dimensions x="50" y="20" />
-                </Label>
-
-                <Label name="$(parent)MinMax" inherits="CombatMetrics_ValueFontControl" text="" horizontalAlignment="RIGHT"
-                    verticalAlignment="CENTER">
-                    <Anchor point="LEFT" relativePoint="RIGHT" relativeTo="$(parent)Average" offsetX="2" />
-                    <Dimensions x="50" y="20" />
-                </Label>
-            </Controls>
-
-            <OnMouseUp> CMX.AddSelection( self, button, upInside, ctrl, alt, shift ) </OnMouseUp>
         </Control>
 
         <Control name="CombatMetrics_FightlistRowTemplate" resizeToFitDescendents="true" mouseEnabled="true" virtual="true">
@@ -691,7 +487,14 @@
 
         <Line name="CombatMetrics_SharedSeparator" color="SI_COMBAT_METRICS_SEP_COLOR" inherits="CombatMetrics_Line_Thin" virtual="true" />
 
-        <Control name="CombatMetrics_RowTemplate" virtual="true" />
+        <Control name="CombatMetrics_RowTemplate" virtual="true" mouseEnabled="true">
+            <OnMouseUp>
+                CombatMetrics.internal.AddSelection( self, button, upInside, ctrl, alt, shift )
+            </OnMouseUp>
+            <Controls>
+                <Backdrop name="$(parent)HighLight" inherits="CombatMetrics_Highlight" />
+            </Controls>
+        </Control>
 
         <Control name="CombatMetrics_SortHeader" virtual="true" mouseEnabled="true">
             <Dimensions y="20" />

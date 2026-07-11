@@ -1,3 +1,4 @@
+-- Panel base class, and scene/resize management and ui utilities.
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint
@@ -158,9 +159,9 @@ end
 ---@param control Control
 ---@param setcolor any can be hex or rgba, ZO_ColorDef takes care of this
 function CMXint.SetLabelColor(control, setcolor)
+	local color = ZO_ColorDef:New(setcolor)
 	for i = 1, control:GetNumChildren() do
 		local child = control:GetChild(i)
-		local color = ZO_ColorDef:New(setcolor)
 
 		if child:GetType() == CT_LABEL and child["nocolor"] ~= true then
 			---@cast child LabelControl
@@ -307,27 +308,20 @@ function PanelObject:AcquireSharedControl(controlType)
 	return control
 end
 
----@param control PanelControl
-function PanelObject.OnShow(control)
-	logger:Info("OnShow, Panel: %s", control.panel.name)
-	return control.panel:Recover()
-end
-
----@param control PanelControl
-function PanelObject:OnHide(control)
-	return control.panel:Release()
-end
-
+---@return Fight?
 function PanelObject:GetCurrentFightData()
 	if CMXint.fightReport then
 		return CMXint.fightReport.currentFight
 	end
 end
 
----@return UnitDamageData|UnitHealData
+---@return UnitDamageData|UnitHealData|nil
 function PanelObject:GetCurrentCategoryCombatData()
 	local category = self.settings.category
 	local fightData = self:GetCurrentFightData()
+	if fightData == nil then
+		return nil
+	end
 	local categoryData = fightData[category]
 
 	if categoryData == nil then
@@ -335,6 +329,12 @@ function PanelObject:GetCurrentCategoryCombatData()
 	end
 
 	return categoryData
+end
+
+---@return SelectionHandler?
+function PanelObject:GetSelections()
+	local list = self.dataList
+	return list and list.selections or nil
 end
 
 function PanelObject:Release()
@@ -430,7 +430,7 @@ function CMXint.InitializeUI()
 	-- }
 
 	assert(CMXint.InitializeControlHandler(), "Initialization of control handler failed")
-	assert(CMXint.InitializeSelectionsHandler(), "Initialization of selections handler failed")
+	assert(CMXint.InitializeScrollListHandler(), "Initialization of scroll list handler failed")
 	assert(CMXint.InitializeFightReport(), "Initialization of fight report UI failed")
 	assert(CMXint.InitializeLiveReport(), "Initialization of live report failed")
 

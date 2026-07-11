@@ -1,4 +1,5 @@
-﻿local strings = {
+﻿-- String constants, english.
+local strings = {
 
 	-- Colors
 
@@ -85,6 +86,7 @@
 	SI_COMBAT_METRICS_PLAYER = "Player",
 
 	SI_COMBAT_METRICS_TOTALC = "Total: ",
+	SI_COMBAT_METRICS_ABSOLUTEC = "Absolute: ",
 	SI_COMBAT_METRICS_NORMAL = "Normal: ",
 	SI_COMBAT_METRICS_CRITICAL = "Critical: ",
 	SI_COMBAT_METRICS_BLOCKED = "Blocked: ",

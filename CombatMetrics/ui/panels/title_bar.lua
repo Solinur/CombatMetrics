@@ -1,3 +1,4 @@
+-- Title bar panel: fight name display.
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint
@@ -60,7 +61,8 @@ function CMXint.InitializeTitlePanel(control)
 	---@diagnostic disable-next-line: missing-parameter
 	editbox:SetHandler("OnFocusLost", OnEditTitleEnd, "CMX")
 
-	function TitlePanel:Update(fightData)
+	function TitlePanel:Update()
+		local fightData = self:GetCurrentFightData()
 		logger:Debug("Updating TitlePanel")
 
 		local charInfo = control:GetNamedChild("CharacterInfo")
@@ -81,8 +83,8 @@ function CMXint.InitializeTitlePanel(control)
 		else
 			charData = fightData.charData
 			charData.name = charData.name or fightData.char
-			fightlabel = zo_strgsub(fightData.fightlabel, ".+%:%d%d %- ([A-Z])", "%1") or ""
-			account = fightData.info.accountname
+			fightlabel = zo_strgsub(fightData.fightlabel or "", ".+%:%d%d %- ([A-Z])", "%1") or ""
+			account = fightData.info.account
 		end
 
 		label:SetText(fightlabel)
