@@ -48,6 +48,7 @@ function CMXTest.RequireCombatMetrics(...)
 	end
 
 	CMXTest.RequireLibCombat("utility.lua")
+	CMXTest.Require("CombatMetrics/lang/en.lua")
 	CMXTest.Require("CombatMetrics/init.lua")
 
 	for i = 1, select("#", ...) do
