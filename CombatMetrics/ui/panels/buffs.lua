@@ -103,7 +103,7 @@ do -- Handling Buffs Context Menu
 		CombatMetricsReport:GetNamedChild("_BuffPanel"):GetNamedChild("BuffList"):Update()
 	end
 
-	function CMX.BuffContextMenu(bufflistitem, upInside)
+	function CMXint.BuffContextMenu(bufflistitem, upInside)
 		if not upInside then
 			return
 		end
@@ -143,20 +143,6 @@ do -- Handling Buffs Context Menu
 
 		ShowMenu(bufflistitem)
 	end
-end
-
-function CMX.CollapseButton(button, upInside)
-	local buffname = button:GetParent().dataId
-
-	if buffname then
-		if uncollapsedBuffs[buffname] == true then
-			uncollapsedBuffs[buffname] = nil
-		else
-			uncollapsedBuffs[buffname] = true
-		end
-	end
-
-	CombatMetricsReport:GetNamedChild("_BuffPanel"):GetNamedChild("BuffList"):Update()
 end
 
 ---@param source EffectData
@@ -251,39 +237,26 @@ local function GetBuffData(fightData, category, filterIds)
 	end
 
 	for i, unitId in ipairs(unitIds) do
-		-- TODO: replace unit time with info stored in unit table
-		local startTime = math.huge
-		local endTime = 0
-
-		local unitData = fightData.damageDone[unitId]
-		if unitData then
-			endTime = zo_max(unitData.endTime, endTime)
-			startTime = zo_min(unitData.startTime, startTime)
-		end
-
-		local unitData2 = fightData.damageReceived[unitId]
-		if unitData2 then
-			endTime = zo_max(unitData2.endTime, endTime)
-			startTime = zo_min(unitData2.startTime, startTime)
-		end
-
-		if endTime > startTime then
-			totalUnitTime = totalUnitTime + (endTime - startTime)
-			local unitEffectData = fightData.effects[unitId]
-
-			if unitEffectData then
+		local unitEffectData = fightData.effects[unitId]
+		if unitEffectData then
+			local startTime = unitEffectData.startTime or math.huge
+			local endTime = unitEffectData.endTime or 0
+			if endTime > startTime then
+				totalUnitTime = totalUnitTime + (endTime - startTime)
 				for abilityId, data in pairs(unitEffectData) do
-					if effectData[abilityId] == nil then
-						local effectCopy = ZO_ShallowTableCopy(data) -- TODO: Review this code
-						if data.stacks then
-							effectCopy.stacks = {}
-							for stacks, stackData in pairs(data.stacks) do
-								effectCopy.stacks[stacks] = ZO_ShallowTableCopy(stackData)
+					if type(abilityId) == "number" then
+						if effectData[abilityId] == nil then
+							local effectCopy = ZO_ShallowTableCopy(data) -- TODO: Review this code
+							if data.stacks then
+								effectCopy.stacks = {}
+								for stacks, stackData in pairs(data.stacks) do
+									effectCopy.stacks[stacks] = ZO_ShallowTableCopy(stackData)
+								end
 							end
+							effectData[abilityId] = effectCopy
+						else
+							CombineEffects(data, effectData[abilityId])
 						end
-						effectData[abilityId] = effectCopy
-					else
-						CombineEffects(data, effectData[abilityId])
 					end
 				end
 			end
@@ -378,40 +351,37 @@ local function InitBuffsList(panel)
 	local expandButtonPool = ZO_ObjectPool:New(CreateExpandButton, ZO_ObjectPool_DefaultResetControl)
 
 	---@class BuffRowControl: RowControl
-	---@field indent number
 	---@field expandButton ExpandButton
 
 	---@param rowControl BuffRowControl
 	function dataList:RecoverRow(rowControl)
-		local panel = self.panel
 		local rowHeight = self:GetRawHeight()
 
-		local icon = panel:AcquireSharedControl(CT_TEXTURE)
+		local icon = ui.sharedControls:Acquire(rowControl, CT_TEXTURE)
 		icon:ApplyPosition(rowControl, 14, 0, rowHeight, rowHeight)
 
-		local label = panel:AcquireSharedControl(CT_LABEL)
+		local label = ui.sharedControls:Acquire(rowControl, CT_LABEL)
 		label:ApplyPosition(rowControl, 40, 0, 186)
 		label:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
 
-		local bar = panel:AcquireSharedControl(CT_TEXTURE)
+		local bar = ui.sharedControls:Acquire(rowControl, CT_TEXTURE)
 		bar:ApplyPosition(rowControl, 38, 0, 190, rowHeight)
 		bar:SetTexture("esoui/art/unitframes/progressbar_raidhealth.dds")
 
-		local bar_group = panel:AcquireSharedControl(CT_TEXTURE)
+		local bar_group = ui.sharedControls:Acquire(rowControl, CT_TEXTURE)
 		bar_group:ApplyPosition(rowControl, 38, 0, 190, rowHeight)
 		bar_group:SetTexture("esoui/art/unitframes/progressbar_raidhealth.dds")
 
-		local count = panel:AcquireSharedControl(CT_LABEL)
+		local count = ui.sharedControls:Acquire(rowControl, CT_LABEL)
 		count:ApplyPosition(rowControl, 230, 0, 58)
 		count:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
 
-		local uptime = panel:AcquireSharedControl(CT_LABEL)
+		local uptime = ui.sharedControls:Acquire(rowControl, CT_LABEL)
 		uptime:ApplyPosition(rowControl, 290, 0, 58)
 		uptime:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
 
 		rowControl.controls = { icon, label, bar, bar_group, count, uptime }
 		rowControl.recovered = true
-		rowControl.indent = 0
 	end
 
 	---@param rowControl BuffRowControl
@@ -425,9 +395,9 @@ local function InitBuffsList(panel)
 		local labelFormat = panel:ShowIds() and data.abilityId and BUFF_NAME_FORMAT_ID or BUFF_NAME_FORMAT_DEFAULT
 		local labelText = ZO_CachedStrFormat(labelFormat, data.labelText, data.abilityId)
 
-		local rowHeight = icon:GetHeight()
-		local deltaIndent = (data.indent - rowControl.indent) * rowHeight / 2
-		rowControl.indent = data.indent
+		-- SetIndent is absolute and takes unscaled units, so the raw row height is the one to use;
+		-- icon:GetHeight() is already scaled.
+		local indent = data.indent * self:GetRawHeight() / 2
 
 		local textcolor = panel.favs[data.abilityId] and BUFF_LABEL_COLOR_FAV or BUFF_LABEL_COLOR_DEFAULT
 		local font = ui.GetFont(ui.fontSize, false)
@@ -436,14 +406,18 @@ local function InitBuffsList(panel)
 
 		if data.hasDetails then
 			if expandButton == nil then
-				local scale = self.panel.settings.scale
 				expandButton = expandButtonPool:AcquireObject()
 				expandButton:SetHidden(false)
 				expandButton:SetParent(rowControl)
-				expandButton:SetAnchor(TOPLEFT, rowControl, TOPLEFT, -2 * scale, scale)
-				expandButton:SetDimensions(rowHeight, rowHeight)
 				rowControl.expandButton = expandButton
 			end
+
+			-- The pooled button records no layout, so the resize pass skips it: re-apply its
+			-- geometry on every update instead, from the current scale and row height.
+			local scale = panel.settings.scale
+			local buttonSize = icon:GetHeight()
+			expandButton:SetAnchor(TOPLEFT, rowControl, TOPLEFT, -2 * scale, scale)
+			expandButton:SetDimensions(buttonSize, buttonSize)
 
 			expandButton:SetExpandState(uncollapsedBuffs[data.abilityId] == true)
 		else
@@ -457,18 +431,18 @@ local function InitBuffsList(panel)
 		icon:SetTexture(GetFormattedAbilityIcon(data.abilityId))
 
 		label:SetText(labelText)
-		label:ApplyIndent(deltaIndent)
+		label:SetIndent(indent)
 		label:SetColor(unpack(textcolor))
 		label:SetFont(font)
 
 		local maxwidth = label:GetWidth()
 
 		bar:SetColor(unpack(BUFF_BAR_COLORS[data.effectType]))
-		bar:ApplyIndent(deltaIndent)
+		bar:SetIndent(indent)
 		bar:SetWidth(maxwidth * data.uptime)
 
 		bar_group:SetColor(unpack(BUFF_BAR_GROUP_COLORS[data.effectType]))
-		bar_group:ApplyIndent(deltaIndent)
+		bar_group:SetIndent(indent)
 		bar_group:SetWidth(maxwidth * data.groupUptime)
 
 		local hideGroupValues = data.count == data.groupCount and data.uptime == data.groupUptime
@@ -602,7 +576,9 @@ local function InitBuffsList(panel)
 	function dataList:BuildMasterList()
 		local fightData = self.panel:GetCurrentFightData()
 		if fightData == nil then
-			if not isFileInitialized then return end
+			if not isFileInitialized then
+				return
+			end
 			error("BuffPanel:BuildMasterList() called without active fight data")
 		end
 		local buffCategory = self.panel.buffCategory
@@ -655,7 +631,7 @@ local function InitBuffsList(panel)
 			entryData.groupUptime = sumGroupUptime / maxStacks
 
 			-- TODO: Check if more elaborate analysis needed (parallel buffs ?)
-		elseif groupData[1].mainAbilityId then
+		elseif groupData[1].data.mainAbilityId then
 			for i, groupEntry in ipairs(groupData) do
 				local groupEntryData = groupEntry.data
 				if groupEntryData.uptime > entryData.uptime then
@@ -680,23 +656,24 @@ local function InitBuffsList(panel)
 			scrollData[#scrollData + 1] = data
 		end
 
-		table.sort(scrollData, self.sortFunction) -- TODO: include sorting favourites
-
 		local groupList = self.groupList
 
-		for i = #scrollData, 1, -1 do
-			local dataEntry = scrollData[i].data
-			local abilityId = dataEntry.abilityId
-			local groupData = groupList[abilityId]
-
+		for i = 1, #scrollData do
+			local groupData = groupList[scrollData[i].data.abilityId]
 			if groupData then
-				dataList:ProcessGroupData(dataEntry, groupData)
+				dataList:ProcessGroupData(scrollData[i].data, groupData)
+			end
+		end
 
-				if uncollapsedBuffs[abilityId] then
-					table.sort(groupData, self.sortFunction)
-					for j = #groupData, 1, -1 do
-						table.insert(scrollData, i + 1, groupData[j])
-					end
+		table.sort(scrollData, self.sortFunction) -- TODO: include sorting favourites
+
+		for i = #scrollData, 1, -1 do
+			local abilityId = scrollData[i].data.abilityId
+			local groupData = groupList[abilityId]
+			if groupData and uncollapsedBuffs[abilityId] then
+				table.sort(groupData, self.sortFunction)
+				for j = #groupData, 1, -1 do
+					table.insert(scrollData, i + 1, groupData[j])
 				end
 			end
 		end
@@ -711,6 +688,7 @@ end
 function CMXint.InitializeBuffsPanel(control)
 	---@class BuffPanel: Panel
 	BuffPanel = CMXint.PanelObject:New(control, "buffs")
+	BuffPanel.scenes = { "fightStats", "combatLog" }
 
 	BuffPanel.radioButtons = ZO_RadioButtonGroup:New(false)
 

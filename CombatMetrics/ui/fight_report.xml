@@ -51,7 +51,7 @@
                 <Control name="$(parent)_PlayerStats" inherits="CombatMetrics_PlaceHolder"> <!-- CombatMetrics_PlayerStatsPanel -->
                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)_CombatStats" offsetX="4" />
                     <Dimensions x="278" y="374" />
-                    <!-- <OnInitialized>CombatMetrics.internal.InitializePlayerStatsPanel(self)</OnInitialized> -->
+                    <OnInitialized>CombatMetrics.internal.InitializePlayerStatsPanel(self)</OnInitialized>
                 </Control>
 
                 <Control name="$(parent)_BuffsPanel" inherits="CombatMetrics_BuffsPanel">
@@ -85,24 +85,22 @@
                     <!-- <OnInitialized>CombatMetrics.internal.InitializeGraphPanel(self)</OnInitialized> -->
                 </Control>
 
-                <Control name="$(parent)_SkillsPanel" hidden="true" inherits="CombatMetrics_PlaceHolder"> <!-- CombatMetrics_SkillsPanel -->
+                <Control name="$(parent)_SkillsPanel" hidden="true" inherits="CombatMetrics_ControlFramed">
                     <Anchor point="TOPLEFT" relativeTo="$(parent)_CombatStats" />
-                    <Dimensions x="626" y="270" />
-                    <!-- <OnInitialized>CombatMetrics.internal.InitializeSkillsPanel(self)</OnInitialized> -->
+                    <Dimensions x="626" y="256" />
+                    <OnInitialized>CombatMetrics.internal.InitializeSkillsPanel(self)</OnInitialized>
                 </Control>
 
-                <Control name="$(parent)_ScribedSkillsPanel" hidden="true" inherits="CombatMetrics_PlaceHolder"> <!--
-                    resizeToFitDescendents="true" -->
+                <Control name="$(parent)_ScribedSkillsPanel" hidden="true" inherits="CombatMetrics_ControlFramed">
                     <Anchor point="TOPLEFT" relativePoint="TOPRIGHT" relativeTo="$(parent)_SkillsPanel" offsetX="4" />
                     <Anchor point="TOPRIGHT" relativeTo="$(parent)_BuffsPanel" constrains="X" />
-                    <DimensionConstraints minY="0" />
-                    <!-- <OnInitialized>CombatMetrics.internal.InitializeScribedSkillsPanel(self)</OnInitialized> -->
+                    <OnInitialized>CombatMetrics.internal.InitializeScribedSkillsPanel(self)</OnInitialized>
                 </Control>
 
-                <Control name="$(parent)_ChampionPointsPanel" hidden="true" inherits="CombatMetrics_PlaceHolder"> <!-- ZO_ScrollContainer -->
+                <Control name="$(parent)_ChampionPointsPanel" hidden="true" inherits="CombatMetrics_ChampionPointsPanel">
                     <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)_ScribedSkillsPanel" offsetY="4" />
                     <Anchor point="BOTTOMRIGHT" relativeTo="$(parent)_AbilitiesPanel" offsetY="-2" />
-                    <!-- <OnInitialized>CombatMetrics.internal.InitializeChampionPointsPanel(self)</OnInitialized> -->
+                    <OnInitialized>CombatMetrics.internal.InitializeChampionPointsPanel(self)</OnInitialized>
                 </Control>
 
                 <Control name="$(parent)_ConsumablesPanel" hidden="true" inherits="CombatMetrics_PlaceHolder"> <!--
@@ -114,11 +112,10 @@
                     <!-- <OnInitialized>CombatMetrics.internal.InitializeConsumablesPanel(self)</OnInitialized> -->
                 </Control>
 
-                <Control name="$(parent)_EquipmentPanel" hidden="true" inherits="CombatMetrics_PlaceHolder"> <!--
-                    CombatMetrics_EquipmentPanel -->
+                <Control name="$(parent)_EquipmentPanel" hidden="true" inherits="CombatMetrics_ControlFramed">
                     <Anchor point="TOPLEFT" relativePoint="BOTTOMLEFT" relativeTo="$(parent)_SkillsPanel" offsetY="4" />
                     <Anchor point="BOTTOMRIGHT" relativePoint="TOPRIGHT" relativeTo="$(parent)_ConsumablesPanel" offsetY="-4" />
-                    <!-- <OnInitialized>CombatMetrics.internal.InitializeEquipmentPanel(self)</OnInitialized> -->
+                    <OnInitialized>CombatMetrics.internal.InitializeEquipmentPanel(self)</OnInitialized>
                 </Control>
 
                 <Control name="$(parent)_FightList" hidden="true" inherits="CombatMetrics_PlaceHolder"> <!-- CombatMetrics_FightListPanel -->

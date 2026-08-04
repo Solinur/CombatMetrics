@@ -27,7 +27,8 @@ ui/bindings.xml
 ui/base/ui.lua
 ui/base/scroll_lists.lua
 ui/base/templates.xml
-ui/base/controls.lua
+ui/base/shared_controls.lua
+ui/base/scenes.lua
 
 ui/panels/title_bar.lua
 ui/panels/title_bar.xml
@@ -37,7 +38,7 @@ ui/panels/info_row.xml
 
 ui/panels/combat_stats.lua
 ; ui/panels/resources.lua
-; ui/panels/player_stats.lua
+ui/panels/player_stats.lua
 ; ui/panels/player_stats.xml
 ui/panels/buffs.lua
 ui/panels/buffs.xml
@@ -45,14 +46,14 @@ ui/panels/units.lua
 ui/panels/units.xml
 ui/panels/abilities.lua
 ui/panels/abilities.xml
-; 
-; ui/panels/skills.lua
-; ui/panels/skills.xml
-; ui/panels/equipment.lua
-; ui/panels/equipment.xml
+ui/panels/skills.lua
+ui/panels/skills.xml
+ui/panels/equipment.lua
+ui/panels/equipment.xml
 ; ui/panels/consumables.lua
 ; ui/panels/consumables.xml
-; ui/panels/champion_points.lua
+ui/panels/champion_points.lua
+ui/panels/champion_points.xml
 
 ; ui/panels/combat_log.lua
 ; ui/panels/combat_log.xml

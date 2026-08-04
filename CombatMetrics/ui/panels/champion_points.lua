@@ -1,6 +1,4 @@
----@diagnostic disable
---- TODO: enable diagnostic when code is used
-
+---@diagnostic disable: inject-field, undefined-field, missing-parameter
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint
@@ -11,7 +9,6 @@ local util = CMXint.util
 local logger
 ---@class CMXui
 local ui = CMXint.ui
-local dx = ui.dx
 
 local labelcolors = {
 	[CHAMPION_DISCIPLINE_TYPE_COMBAT] = GetString(SI_COMBAT_METRICS_MAGICKA_COLOR),
@@ -25,214 +22,241 @@ local starcolors = {
 	[CHAMPION_DISCIPLINE_TYPE_WORLD] = ZO_ColorDef:New(0.8, 1, 0.7),
 }
 
----@param t table
----@param a any key1
----@param b any key2
----@return boolean isHigher
-local function starOrder(t, a, b)
-	local typeA = t[a][2]
-	local typeB = t[b][2]
+local STAR_ROW_HEIGHT = 20
+local STARS_PER_ROW = 2
+local COLUMN_WIDTH = 165
+local ICON_SIZE = 20
+local VALUE_WIDTH = 24
+local TITLE_HEIGHT = 20
+local SECTION_GAP = 8
+local LEFT_MARGIN = 4
+local TOP_MARGIN = 4
 
-	if typeA > typeB or (typeA == typeB and a < b) then
-		return true
-	end
-	return false
-end
+local RING_SLOTTED = "/esoui/art/champion/actionbar/champion_bar_slot_frame.dds"
+local RING_EMPTY = "/esoui/art/champion/actionbar/champion_bar_slot_frame_disabled.dds"
+local STAR_ICON = "/esoui/art/champion/champion_star_pulse.dds"
 
-local function SetStarControlEmpty(starControl)
-	starControl:GetNamedChild("Icon"):SetHidden(true)
-	starControl:GetNamedChild("Name"):SetHidden(true)
-	starControl:GetNamedChild("Value"):SetHidden(true)
-	starControl:GetNamedChild("Ring"):SetTexture("/esoui/art/champion/actionbar/champion_bar_slot_frame_disabled.dds")
+-- Regions of champion_star_pulse.dds: the bright glyph for a slotted star, the dim one for a passive.
+local SLOTTED_COORDS = { 0.75, 1, 0.5, 0.75 }
+local PASSIVE_COORDS = { 0.25, 0.5, 0.25, 0.5 }
 
-	starControl.slotted = nil
-	starControl.starId = nil
-	starControl.points = nil
+local function GetStarName(starId)
+	return zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionSkillName(starId))
 end
 
 function CMXint.InitializeChampionPointsPanel(control)
-	ChampionPointsPanel = CMXint.PanelObject:New(control, "championPoints")
+	---@class ChampionPointsPanel: Panel
+	local ChampionPointsPanel = CMXint.PanelObject:New(control, "championPoints")
+	ChampionPointsPanel.scenes = { "info" }
 
-	function ChampionPointsPanel:Update(fightData)
-		logger:Debug("Updating Champion Points Panel")
-		if fightData == nil then
+	local scrollContainer = control:GetNamedChild("Container")
+	local scrollChild = scrollContainer:GetNamedChild("ScrollChild")
+
+	-- The scroll child must not size itself from its children: its height comes from the layout below.
+	scrollChild:SetResizeToFitDescendents(false)
+
+	local starRowPool = ChampionPointsPanel:CreateRowPool(scrollChild)
+
+	-- A row's controls sit in container-local coordinates and are placed once, here. Afterwards only
+	-- the container is ever moved, and the resize pass re-applies these offsets at the new scale.
+	function ChampionPointsPanel:AcquireStarRow()
+		local container = starRowPool:Acquire()
+		container:SetMouseEnabled(true)
+		container:SetHandler("OnMouseEnter", CMXint.CPTooltip_OnMouseEnter)
+		container:SetHandler("OnMouseExit", CMXint.CPTooltip_OnMouseExit)
+
+		local ring = container:AcquireSharedControl(CT_TEXTURE)
+		ring:ApplyPosition(container, 0, 0, ICON_SIZE, ICON_SIZE)
+
+		local icon = container:AcquireSharedControl(CT_TEXTURE)
+		icon:ApplyPosition(container, 2, 2, ICON_SIZE - 4, ICON_SIZE - 4)
+		icon:SetTexture(STAR_ICON)
+
+		local name = container:AcquireSharedControl(CT_LABEL)
+		name:ApplyPosition(container, ICON_SIZE + 4, 0, COLUMN_WIDTH - ICON_SIZE - VALUE_WIDTH - 12, nil)
+		name:ApplyFont(ui.fontSize)
+
+		local value = container:AcquireSharedControl(CT_LABEL)
+		value:ApplyPosition(container, COLUMN_WIDTH - VALUE_WIDTH - 4, 0, VALUE_WIDTH, nil)
+		value:ApplyFont(ui.fontSize)
+		value:SetHorizontalAlignment(TEXT_ALIGN_RIGHT)
+
+		return { container = container, ring = ring, icon = icon, name = name, value = value }
+	end
+
+	function ChampionPointsPanel:AcquireSection()
+		local title = self:AcquireSharedControl(CT_LABEL)
+		title:ApplyFont(ui.fontSize, true)
+
+		local separator = self:AcquireSharedControl(CT_LINE)
+
+		return { title = title, separator = separator }
+	end
+
+	-- A section's origin depends on how many passive stars the previous discipline had, so every row
+	-- is repositioned on each update rather than once when it is acquired. Only the container moves.
+	local function PositionRow(row, starIndex, y)
+		local column = (starIndex - 1) % STARS_PER_ROW
+		local x = LEFT_MARGIN + column * COLUMN_WIDTH
+
+		row.container:ApplyPosition(scrollChild, x, y, COLUMN_WIDTH, STAR_ROW_HEIGHT)
+	end
+
+	local function SetRowStar(row, starId, points, slotted, disciplineType)
+		local data = row.container.data
+
+		row.ring:SetHidden(not slotted)
+		row.icon:SetHidden(false)
+		row.name:SetHidden(false)
+		row.value:SetHidden(false)
+
+		if slotted then
+			row.ring:SetTexture(starId > 0 and RING_SLOTTED or RING_EMPTY)
+		end
+
+		if starId > 0 then
+			row.icon:SetTextureCoords(unpack(slotted and SLOTTED_COORDS or PASSIVE_COORDS))
+			row.icon:SetColor(starcolors[disciplineType]:UnpackRGB())
+			row.name:SetText(GetStarName(starId))
+			row.value:SetText(points)
+			data.starId, data.points, data.slotted = starId, points, slotted
+		else
+			row.icon:SetHidden(true)
+			row.name:SetText("")
+			row.value:SetText("")
+			data.starId, data.points, data.slotted = nil, nil, nil
+		end
+	end
+
+	function ChampionPointsPanel:Update()
+		if not self.rows then
 			return
 		end
-		local CPData = fightData.CP
-		if CPData == nil then
+
+		local fightData = self:GetCurrentFightData()
+		local CPData = fightData and fightData.CP
+
+		if CPData == nil or CPData.maxSlotIndex == nil then
+			self:Clear()
 			return
 		end
 
-		control:SetHidden(false)
-		local scrollchild = GetControl(control, "PanelScrollChild")
+		-- Sections are allocated from the live discipline count, which has matched the recorded one
+		-- for years. If it ever stops matching, the loop below silently drops the extra disciplines.
+		if #CPData ~= #self.sections then
+			logger:Error(
+				"CP data has %d disciplines but %d sections were allocated; extra disciplines are not shown",
+				#CPData,
+				#self.sections
+			)
+		end
 
-		for disciplineId, discipline in pairs(CPData) do
-			if type(discipline) == "table" then
-				local constellationControl = scrollchild:GetNamedChild("Panel" .. disciplineId)
-				local itemNo = 1
-				local title = constellationControl:GetNamedChild("Title")
-				local top = title:GetTop()
-				local disciplineName =
+		-- Taken from the fight rather than the live game: it records the champion bar layout
+		-- the fight was fought with, which a saved fight may no longer share.
+		local maxSlotIndex = CPData.maxSlotIndex
+
+		local rowIndex = 0
+		local y = TOP_MARGIN
+
+		for disciplineId = 1, #self.sections do
+			local discipline = CPData[disciplineId]
+
+			if discipline then
+				local disciplineType = GetChampionDisciplineType(disciplineId)
+				local section = self.sections[disciplineId]
+				local color = ZO_ColorDef:New(labelcolors[disciplineType])
+
+				section.title:SetHidden(false)
+				section.title:ApplyPosition(scrollChild, LEFT_MARGIN, y, COLUMN_WIDTH * STARS_PER_ROW, nil)
+				section.title:SetColor(color:UnpackRGBA())
+				section.title:SetText(
 					zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionDisciplineName(disciplineId))
+				)
 
-				title:SetText(ZO_CachedStrFormat("<<1>> (<<2>>)", disciplineName, discipline.total))
+				section.separator:SetHidden(false)
+				section.separator:ApplyPosition(
+					scrollChild,
+					LEFT_MARGIN,
+					y + TITLE_HEIGHT + 1,
+					COLUMN_WIDTH * STARS_PER_ROW,
+					0
+				)
 
-				for starId, starData in util.spairs(discipline.stars, starOrder) do
-					local points, state = unpack(starData)
+				y = y + TITLE_HEIGHT + 4
 
-					if state == LIBCOMBAT_CPTYPE_SLOTTED then -- slotted
-						local starControl = constellationControl:GetNamedChild("StarControl" .. itemNo)
-						starControl:GetNamedChild("Icon"):SetHidden(false)
+				local starIndex = 0
+				for i = 1, #discipline, 2 do
+					local slotted = i < maxSlotIndex
 
-						local ring = starControl:GetNamedChild("Ring")
-						ring:SetTexture("/esoui/art/champion/actionbar/champion_bar_slot_frame.dds")
+					starIndex = starIndex + 1
+					rowIndex = rowIndex + 1
 
-						local nameControl = starControl:GetNamedChild("Name")
-						local valueControl = starControl:GetNamedChild("Value")
-
-						nameControl:SetHidden(false)
-						nameControl:SetText(
-							zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionSkillName(starId))
-						)
-
-						valueControl:SetHidden(false)
-						valueControl:SetText(points)
-
-						starControl.slotted = true
-						starControl.starId = starId
-						starControl.points = points
-						itemNo = itemNo + 1
-					elseif state == LIBCOMBAT_CPTYPE_PASSIVE then
-						if itemNo <= 4 then
-							for i = itemNo, 4 do
-								local starControl = constellationControl:GetNamedChild("StarControl" .. i)
-								SetStarControlEmpty(starControl)
-							end
-
-							itemNo = 5
-						end
-
-						local starControl = constellationControl:GetNamedChild("StarControl" .. itemNo)
-						if starControl == nil then
-							break
-						end
-						starControl:SetHidden(false)
-						starControl:GetNamedChild("Ring"):SetHidden(true)
-
-						local starLabel = starControl:GetNamedChild("Name")
-						starLabel:SetText(
-							zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionSkillName(starId))
-						)
-						starLabel:SetHidden(false)
-
-						local starIcon = starControl:GetNamedChild("Icon")
-						starIcon:SetTextureCoords(0.25, 0.5, 0.25, 0.5)
-						starIcon:SetHidden(false)
-
-						local starValue = starControl:GetNamedChild("Value")
-						starValue:SetText(points)
-						starValue:SetHidden(false)
-
-						starControl.slotted = false
-						starControl.starId = starId
-						starControl.points = points
-						itemNo = itemNo + 1
+					local row = self.rows[rowIndex]
+					if row == nil then
+						row = self:AcquireStarRow()
+						self.rows[rowIndex] = row
 					end
-				end
-				if itemNo <= 4 then
-					for i = itemNo, 4 do
-						local starControl = constellationControl:GetNamedChild("StarControl" .. i)
-						SetStarControlEmpty(starControl)
-					end
-					itemNo = 5
-				end
-				local bottom = constellationControl:GetNamedChild("StarControl" .. (itemNo - 1)):GetBottom()
-				constellationControl:SetHeight(bottom - top)
 
-				local starControl = constellationControl:GetNamedChild("StarControl" .. itemNo)
-				while starControl do
-					starControl:SetHidden(true)
-					SetStarControlEmpty(starControl)
-					itemNo = itemNo + 1
-					starControl = constellationControl:GetNamedChild("StarControl" .. itemNo)
+					PositionRow(row, starIndex, y + zo_floor((starIndex - 1) / STARS_PER_ROW) * STAR_ROW_HEIGHT)
+					SetRowStar(row, discipline[i], discipline[i + 1], slotted, disciplineType)
 				end
+
+				y = y + zo_ceil(starIndex / STARS_PER_ROW) * STAR_ROW_HEIGHT + SECTION_GAP
+			else
+				self.sections[disciplineId].title:SetHidden(true)
+				self.sections[disciplineId].separator:SetHidden(true)
 			end
 		end
-	end
 
-	function ChampionPointsPanel:InitRows()
-		local scrollchild = GetControl(control, "ScrollChild")
-		scrollchild:SetResizeToFitPadding(0, 20)
-		scrollchild:SetAnchor(TOPRIGHT, nil, TOPRIGHT, 0, 0)
-		local currentanchor = { TOPLEFT, scrollchild, TOPLEFT, 0, dx }
-		local currentanchor2 = { TOPRIGHT, scrollchild, TOPRIGHT, 0, dx }
-
-		for disciplineId = 1, 3 do
-			local disciplineType = GetChampionDisciplineType(disciplineId)
-			local color = labelcolors[disciplineType]
-
-			local selfName = scrollchild:GetName() .. "Panel" .. disciplineId
-			local constellationControl = _G[selfName]
-				or CreateControlFromVirtual(selfName, scrollchild, "CombatMetrics_ConstellationTemplate")
-			constellationControl:SetAnchor(unpack(currentanchor))
-			constellationControl:SetAnchor(unpack(currentanchor2))
-			constellationControl:SetHidden(false)
-
-			currentanchor = { TOPLEFT, constellationControl, BOTTOMLEFT, 0, 4 }
-			currentanchor2 = { TOPRIGHT, constellationControl, BOTTOMRIGHT, 0, 4 }
-
-			local title = constellationControl:GetNamedChild("Title")
-			local top = title:GetTop()
-			title:SetText(zo_strformat(SI_CHAMPION_CONSTELLATION_NAME_FORMAT, GetChampionDisciplineName(disciplineId)))
-
-			local nameBase = constellationControl:GetName() .. "StarControl"
-			local anchor
-
-			for i = 1, 24 do
-				local starControl =
-					CreateControlFromVirtual(nameBase, constellationControl, "CombatMetrics_StarTemplate", i)
-
-				if i == 1 then
-					starControl:SetAnchor(TOPLEFT, title, BOTTOMLEFT, 0, 4)
-				elseif i % 2 == 0 then
-					starControl:SetAnchor(TOPLEFT, anchor, TOPRIGHT, 7, 0)
-				elseif i % 2 == 1 then
-					starControl:SetAnchor(TOPRIGHT, anchor, BOTTOMLEFT, -7, 2)
-				end
-
-				anchor = starControl
-				local coords = { 0.75, 1, 0.5, 0.75 }
-
-				if i > 4 then
-					coords = { 0.25, 0.5, 0.25, 0.5 }
-					starControl:GetNamedChild("Ring"):SetHidden(true)
-					starControl:SetHidden(true)
-				else
-					starControl:GetNamedChild("Icon"):SetHidden(true)
-					starControl:GetNamedChild("Name"):SetHidden(true)
-					starControl:GetNamedChild("Value"):SetHidden(true)
-				end
-
-				local starIcon = starControl:GetNamedChild("Icon")
-				starIcon:SetTextureCoords(unpack(coords))
-				starIcon:SetColor(starcolors[disciplineType]:UnpackRGB())
-			end
-			local bottom = constellationControl:GetNamedChild("StarControl4"):GetBottom()
-			constellationControl:SetHeight(bottom - top)
-
-			CMXint.SetLabelColor(constellationControl, color)
+		for i = #self.rows, rowIndex + 1, -1 do
+			starRowPool:Release(self.rows[i].container)
+			self.rows[i] = nil
 		end
+
+		local scale = CMXint.settings.fightReport.scale
+		scrollChild:SetHeight(y * scale)
+		ZO_Scroll_UpdateScrollBar(scrollContainer)
 	end
 
-	ChampionPointsPanel:InitRows()
+	function ChampionPointsPanel:Recover()
+		self.rows = {}
+		self.sections = {}
+
+		for disciplineId = 1, GetNumChampionDisciplines() do
+			self.sections[disciplineId] = self:AcquireSection()
+		end
+
+		ZO_Scroll_ResetToTop(scrollContainer)
+		self:Update()
+	end
+
+	function ChampionPointsPanel:Clear()
+		if not self.rows then
+			return
+		end
+
+		for _, section in ipairs(self.sections) do
+			section.title:SetText("")
+			section.title:SetHidden(true)
+			section.separator:SetHidden(true)
+		end
+
+		starRowPool:ReleaseAll()
+		ZO_ClearNumericallyIndexedTable(self.rows)
+
+		scrollChild:SetHeight(0)
+		ZO_Scroll_UpdateScrollBar(scrollContainer)
+		ZO_Scroll_ResetToTop(scrollContainer)
+	end
 end
 
 function CMXint.CPTooltip_OnMouseEnter(starControl)
-	if starControl.starId == nil then
+	local data = starControl.data
+	if data.starId == nil then
 		return
 	end
 	InitializeTooltip(ChampionSkillTooltip, starControl, TOPLEFT, 0, 5, BOTTOMLEFT)
-	ChampionSkillTooltip:SetChampionSkill(starControl.starId, starControl.points, nil, starControl.slotted)
+	ChampionSkillTooltip:SetChampionSkill(data.starId, data.points, nil, data.slotted)
 end
 
 function CMXint.CPTooltip_OnMouseExit()

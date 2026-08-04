@@ -147,6 +147,10 @@ CMX_POSTTOCHAT_MODE_SELECTED_UNITNAME = 9
 local function slashCommandFunction(extra)
 	if extra == "reset" then
 		LibCombat2.ResetFight()
+	elseif extra == "debugcontrols" then
+		local ui = CMXint.ui
+		ui.debugSharedControls = not ui.debugSharedControls
+		d(string.format("CMX: shared control tracing %s", ui.debugSharedControls and "on" or "off"))
 	-- elseif extra == "dps" then
 	-- 	util.PosttoChat(CMX_POSTTOCHAT_MODE_SMART)
 	-- elseif extra == "totdps" then

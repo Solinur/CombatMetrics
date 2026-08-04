@@ -1,3 +1,4 @@
+---@diagnostic disable: inject-field, undefined-field, missing-parameter
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint
@@ -9,316 +10,397 @@ local logger
 ---@class CMXui
 local ui = CMXint.ui
 
-local SkillsPanel
-
 local GetFormattedAbilityIcon = util.GetFormattedAbilityIcon
 local GetFormattedAbilityName = util.GetFormattedAbilityName
 
-local SkillBarItems =
-	{ "LightAttack", "HeavyAttack", "Ability1", "Ability2", "Ability3", "Ability4", "Ability5", "Ultimate" }
-local DisabledColor = ZO_ColorDef:New("FF999999")
-local WerewolfColor = ZO_ColorDef:New("FFf3c86e")
-local WhiteColor = ZO_ColorDef:New("FFFFFFFF")
+local BARS_PER_PAGE = 2
+local SKILL_ROW_HEIGHT = 24
+local ICON_SIZE = 22
+local TITLE_HEIGHT = 20
+local COLUMN_WIDTH = 300
+local COLUMN_GAP = 14
+local LEFT_MARGIN = 6
+local TOP_MARGIN = 4
+
+local UNKNOWN_ICON = "EsoUI/Art/crafting/gamepad/crafting_alchemy_trait_unknown.dds"
+local ABILITY_FRAME = "EsoUI/Art/ActionBar/abilityframe64_up.dds"
+local PAGE_ARROW = "EsoUI/Art/Buttons/large_rightArrow_up.dds"
+local PAGE_ARROW_DOWN = "EsoUI/Art/Buttons/large_rightArrow_down.dds"
+local PAGE_ARROW_OVER = "EsoUI/Art/Buttons/large_rightArrow_over.dds"
+
+-- Slot render order within a bar: weapon-bound slots (1, 2), the five ability
+-- slots (3-7) and the ultimate (8). See LibCombat GetBarData in fights.lua.
+local SLOT_ORDER = { 1, 2, 3, 4, 5, 6, 7, 8 }
+
+local SCRIBED_SKILL_COUNT = 10
+
+-- Scribed skill row layout: a framed ability icon + name, with three script sub-rows (small icon +
+-- name). Offsets are container-local; see AcquireScribedRow.
+local SCRIBED_ROW_HEIGHT = 35
+local SCRIBED_ROW_GAP = 4
+local SCRIBED_ROW_X = 4
+local SCRIBED_TOP = 4
+local SCRIBED_ICON_SIZE = 18
+local SCRIBED_NAME_X = SCRIBED_ROW_X + SCRIBED_ICON_SIZE + 4
+local SCRIBED_NAME_WIDTH = 154
+local SCRIBED_SCRIPT_X = SCRIBED_NAME_X + SCRIBED_NAME_WIDTH + 4
+local SCRIBED_SCRIPT_ROW2_Y = SCRIBED_ICON_SIZE + 1
+local SCRIBED_SCRIPT_ICON_SIZE = 16
+local SCRIBED_SCRIPT_NAME_WIDTH = 120
+local SCRIBED_BOTTOM = 4
+local SCRIBED_EMPTY_HEIGHT = SCRIBED_TOP + SCRIBED_ICON_SIZE + SCRIBED_BOTTOM
+local SCRIBED_ROW_WIDTH = SCRIBED_SCRIPT_X + SCRIBED_SCRIPT_ICON_SIZE + 2 + SCRIBED_SCRIPT_NAME_WIDTH
+
+local function GetBarName(category, barNumber)
+	local name = GetString("SI_HOTBARCATEGORY", category)
+	if name == nil or name == "" then
+		return string.format("%s%d", GetString(SI_COMBAT_METRICS_BAR), barNumber)
+	end
+	return name
+end
 
 function CMXint.InitializeSkillsPanel(control)
 	---@class SkillsPanel: Panel
-	SkillsPanel = CMXint.PanelObject:New(control, "skills")
+	local SkillsPanel = CMXint.PanelObject:New(control, "skills")
+	SkillsPanel.scenes = { "info" }
+	SkillsPanel.page = 1
 
-	function SkillsPanel:Update(fightData)
-		if fightData == nil then
-			return
-		end
+	function SkillsPanel:RecoverSkillLine(line)
+		local container = line.container
+		container:SetMouseEnabled(true)
+		container:SetHandler("OnMouseEnter", CMXint.SkillTooltip_OnMouseEnter)
+		container:SetHandler("OnMouseExit", CMXint.SkillTooltip_Clear)
 
-		local charData = fightData.charData
-		if charData == nil then
-			return
-		end
+		local iconBg = container:AcquireSharedControl(CT_TEXTURE)
+		iconBg:ApplyPosition(container, 0, 0, ICON_SIZE, ICON_SIZE)
+		iconBg:SetTexture(ABILITY_FRAME)
 
-		local data = fightData.calculated
-		if data == nil then
-			return
-		end
+		local icon = container:AcquireSharedControl(CT_TEXTURE)
+		icon:ApplyPosition(container, 2, 2, ICON_SIZE - 4, ICON_SIZE - 4)
 
-		local settings = self.settings
-		local category = settings.category
-		local skillBars = charData.skillBars
-		local skilldata = data.skills
-		local barStatData = data.barStats
+		local label = container:AcquireSharedControl(CT_LABEL)
+		label:ApplyPosition(container, ICON_SIZE + 4, 0, COLUMN_WIDTH - ICON_SIZE - 8, nil)
+		label:ApplyFont(ui.fontSize)
 
-		for subPanelIndex = 1, 2 do
-			local subPanel = control:GetNamedChild("ActionBar" .. subPanelIndex)
-
-			if subPanelIndex == 2 then -- show extra option for werewolf bar
-				local hasWerewolfData = skillBars[HOTBAR_CATEGORY_WEREWOLF + 1] ~= nil
-				local titleControl = subPanel:GetNamedChild("Title")
-				local werewolfButton = subPanel:GetNamedChild("Werewolf")
-
-				werewolfButton:SetHidden(not hasWerewolfData)
-
-				local titleString
-				local titleColor = WhiteColor
-
-				if hasWerewolfData then
-					local color = DisabledColor
-
-					if settings.showWereWolf then
-						color = WerewolfColor
-						subPanelIndex = HOTBAR_CATEGORY_WEREWOLF + 1
-						titleString = GetString(SI_HOTBARCATEGORY8)
-						titleColor = WerewolfColor
-					end
-
-					werewolfButton:GetNamedChild("Texture"):SetColor(color:UnpackRGB())
-					werewolfButton:GetNamedChild("Bg"):SetEdgeColor(color:UnpackRGB())
-				end
-				titleControl:SetText(titleString or zo_strformat("<<1>> 2", GetString(SI_COMBAT_METRICS_BAR)))
-				titleControl:SetColor(titleColor:UnpackRGB())
-			end
-
-			local bardata = skillBars and skillBars[subPanelIndex] or nil
-			local barStats = barStatData and barStatData[subPanelIndex] or nil
-			local dpsratio, timeratio
-
-			if barStats and type(barStats[category]) == "number" then
-				dpsratio = (barStats[category] or 0) / data[category .. "Total"]
-				local totalTime = (category == "healingIn" or category == "healingOut") and fightData.hpstime
-					or fightData.dpstime
-					or 1
-				timeratio = (barStats.totalTime or 0) / totalTime
-			end
-
-			local ratioControl = subPanel:GetNamedChild("Value1")
-			local timeControl = subPanel:GetNamedChild("Value2")
-
-			ratioControl:SetText(string.format("%.1f%%", (timeratio or 0) * 100))
-			timeControl:SetText(string.format("%.1f%%", (dpsratio or 0) * 100))
-
-			for line, controlName in ipairs(SkillBarItems) do
-				local control = subPanel:GetNamedChild(controlName)
-				local abilityId = bardata and bardata[line] or nil
-
-				control.id = abilityId
-
-				local icon = GetControl(control, "IconTexture")
-				local texture = abilityId and abilityId > 0 and GetFormattedAbilityIcon(abilityId)
-					or "EsoUI/Art/crafting/gamepad/crafting_alchemy_trait_unknown.dds"
-				icon:SetTexture(texture)
-
-				local name = control:GetNamedChild("Label")
-				local abilityName = abilityId and abilityId > 0 and GetFormattedAbilityName(abilityId) or ""
-				name:SetText(abilityName)
-
-				local reducedslot = (subPanelIndex - 1) * 10 + line
-				local slotdata = skilldata and skilldata[reducedslot] or nil
-				local strings = { "-", "-", "-", "-" }
-				local color = WhiteColor
-
-				if slotdata and slotdata.count and slotdata.count > 0 then
-					strings[1] = string.format("%d", slotdata.count) or "-"
-
-					local weave = slotdata.weavingTimeAvg or slotdata.skillNextAvg
-					strings[2] = weave and string.format("%.2f", weave / 1000) or "-"
-
-					local errors = slotdata.weavingErrors
-					strings[3] = weave and errors and string.format("%d", errors) or "-"
-
-					local diff = slotdata.diffTimeAvg or slotdata.difftimesAvg
-					strings[4] = diff and string.format("%.2f", diff / 1000) or "-"
-
-					control.delay = slotdata.delayAvg
-					if slotdata.ignored then
-						color = DisabledColor
-					end
-					control.ignored = slotdata.ignored
-				end
-
-				name:SetColor(color:UnpackRGB())
-
-				for k = 1, 4 do
-					local label = control:GetNamedChild("Value" .. k)
-					label:SetText(strings[k])
-					label:SetColor(color:UnpackRGB())
-				end
-			end
-		end
-
-		local statrow = control:GetNamedChild("ActionBar1"):GetNamedChild("Stats2")
-		local statrow2 = control:GetNamedChild("ActionBar2"):GetNamedChild("Stats2")
-
-		local totalWeavingTimeCount = data.totalWeavingTimeCount or data.totalSkills
-		local totalWeavingTimeSum = data.totalWeavingTimeSum or data.totalSkillTime
-		local totalWeaponAttacks = data.totalWeaponAttacks
-		local totalSkillsFired = data.totalSkillsFired
-
-		local value1string = " -"
-		local value2string = " -"
-
-		if totalWeavingTimeCount and totalWeavingTimeCount > 0 and totalWeavingTimeSum then
-			value1string = (totalWeavingTimeSum and totalWeavingTimeCount)
-					and string.format("%.3f s", totalWeavingTimeSum / (1000 * totalWeavingTimeCount))
-				or " -"
-			value2string = totalWeavingTimeSum and string.format("%.3f s", totalWeavingTimeSum / 1000) or " -"
-		end
-
-		local value3string = totalWeaponAttacks or " -"
-		local value4string = totalSkillsFired or " -"
-
-		statrow
-			:GetNamedChild("Label")
-			:SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_SKILLTIME_WEAVING), value1string))
-		statrow
-			:GetNamedChild("Label2")
-			:SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALC), value2string))
-		statrow2
-			:GetNamedChild("Label")
-			:SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALWA), value3string))
-		statrow2
-			:GetNamedChild("Label2")
-			:SetText(string.format("%s  %s", GetString(SI_COMBAT_METRICS_TOTALSKILLS), value4string))
+		line.iconBg, line.icon, line.label = iconBg, icon, label
 	end
 
-	-- Init Controls
+	function SkillsPanel:RecoverColumn(columnIndex)
+		local column = self.columns[columnIndex]
 
-	local block = control:GetNamedChild("ActionBar1")
-	local title = block:GetNamedChild("Title")
-	title:SetText(GetString(SI_COMBAT_METRICS_BAR) .. 1)
+		if column == nil then
+			column = { lines = {} }
+			self.columns[columnIndex] = column
 
-	local statPanel = block:GetNamedChild("Stats2")
-	local label = statPanel:GetNamedChild("Label")
-	local label2 = statPanel:GetNamedChild("Label2")
+			for _, slot in ipairs(SLOT_ORDER) do
+				local name = string.format("%sColumn%dSlot%d", control:GetName(), columnIndex, slot)
+				column.lines[slot] = { container = self:CreateRowContainer(name) }
+			end
+		end
 
-	label.tooltip = SI_COMBAT_METRICS_SKILLAVG_TT
-	label:SetText(string.format("%s    -", GetString(SI_COMBAT_METRICS_AVERAGEC)))
-	label2.tooltip = SI_COMBAT_METRICS_SKILLTOTAL_TT
-	label2:SetText(string.format("%s    -", GetString(SI_COMBAT_METRICS_TOTALC)))
+		local x = LEFT_MARGIN + (columnIndex - 1) * (COLUMN_WIDTH + COLUMN_GAP)
+		local y = TOP_MARGIN
 
-	local block2 = control:GetNamedChild("ActionBar2")
-	local title2 = block2:GetNamedChild("Title")
-	title2:SetText(GetString(SI_COMBAT_METRICS_BAR) .. 2)
+		column.title = self:AcquireSharedControl(CT_LABEL)
+		column.title:ApplyPosition(control, x, y, COLUMN_WIDTH, nil)
+		column.title:ApplyFont(ui.fontSize, true)
 
-	local statPanel2 = block2:GetNamedChild("Stats2")
-	local label3 = statPanel2:GetNamedChild("Label")
-	local label4 = statPanel2:GetNamedChild("Label2")
+		column.separator = self:AcquireSharedControl(CT_LINE)
+		column.separator:ApplyPosition(control, x, y + TITLE_HEIGHT + 1, COLUMN_WIDTH, 0)
 
-	label3:SetText(string.format("%s    -", GetString(SI_COMBAT_METRICS_TOTALWA)))
-	label3.tooltip = SI_COMBAT_METRICS_TOTALWA_TT
+		y = y + TITLE_HEIGHT + 4
+		for _, slot in ipairs(SLOT_ORDER) do
+			local line = column.lines[slot]
+			self:RecoverSkillLine(line)
+			line.container:ApplyPosition(control, x, y, COLUMN_WIDTH, SKILL_ROW_HEIGHT)
+			y = y + SKILL_ROW_HEIGHT
+		end
 
-	label4:SetText(string.format("%s    -", GetString(SI_COMBAT_METRICS_TOTALSKILLS)))
-	label4.tooltip = SI_COMBAT_METRICS_TOTALSKILLS_TT
+		-- Divider below the skills; a stats section will go here later.
+		column.bottomSeparator = self:AcquireSharedControl(CT_LINE)
+		column.bottomSeparator:ApplyPosition(control, x, y + 2, COLUMN_WIDTH, 0)
+	end
+
+	function SkillsPanel:Recover()
+		self.columns = self.columns or {}
+
+		for columnIndex = 1, BARS_PER_PAGE do
+			self:RecoverColumn(columnIndex)
+		end
+
+		local centerX = LEFT_MARGIN + COLUMN_WIDTH + COLUMN_GAP / 2
+		local contentHeight = TITLE_HEIGHT + 4 + #SLOT_ORDER * SKILL_ROW_HEIGHT
+		self.centerSeparator = self:AcquireSharedControl(CT_LINE)
+		self.centerSeparator:ApplyPosition(control, centerX, TOP_MARGIN, 0, contentHeight)
+
+		self:Update()
+	end
+
+	function SkillsPanel:NextPage()
+		self.page = self.page + 1
+		self:Update()
+	end
+
+	-- Hiding the container hides the whole row with it, so this is also safe to call on a hidden panel
+	-- whose shared controls have been released: it returns before touching any of them.
+	local function UpdateLine(line, abilityId, showRow)
+		line.container:SetHidden(not showRow)
+		if not showRow then
+			return
+		end
+
+		if abilityId and abilityId > 0 then
+			line.icon:SetTexture(GetFormattedAbilityIcon(abilityId))
+			line.label:SetText(GetFormattedAbilityName(abilityId))
+			line.container.data.abilityId = abilityId
+		else
+			line.icon:SetTexture(UNKNOWN_ICON)
+			line.label:SetText("")
+			line.container.data.abilityId = nil
+		end
+	end
+
+	function SkillsPanel:Update()
+		if not self.columns then
+			return
+		end
+
+		local fightData = self:GetCurrentFightData()
+		local skills = fightData and fightData.skills
+		local skillBars = skills and skills.skillBars
+
+		local bars = {}
+		if skillBars then
+			for category in pairs(skillBars) do
+				bars[#bars + 1] = category
+			end
+			table.sort(bars)
+		end
+
+		local numBars = #bars
+		local numPages = math.max(1, math.ceil(numBars / BARS_PER_PAGE))
+		if self.page > numPages then
+			self.page = 1
+		elseif self.page < 1 then
+			self.page = numPages
+		end
+
+		self.pageButton:SetHidden(numPages <= 1)
+
+		local baseIndex = (self.page - 1) * BARS_PER_PAGE
+
+		for columnIndex = 1, BARS_PER_PAGE do
+			local column = self.columns[columnIndex]
+			local barListIndex = baseIndex + columnIndex
+			local category = bars[barListIndex]
+			local bar = category and skillBars[category] or nil
+
+			column.title:SetHidden(bar == nil)
+			column.separator:SetHidden(bar == nil)
+			column.bottomSeparator:SetHidden(bar == nil)
+			if bar then
+				column.title:SetText(GetBarName(category, barListIndex))
+			end
+
+			for _, slot in ipairs(SLOT_ORDER) do
+				UpdateLine(column.lines[slot], bar and bar[slot] or nil, bar ~= nil)
+			end
+		end
+
+		self.centerSeparator:SetHidden(bars[baseIndex + 2] == nil)
+	end
+
+	function SkillsPanel:Clear()
+		if not self.columns then
+			return
+		end
+		for _, column in ipairs(self.columns) do
+			column.title:SetText("")
+			column.separator:SetHidden(true)
+			column.bottomSeparator:SetHidden(true)
+			for _, slot in ipairs(SLOT_ORDER) do
+				UpdateLine(column.lines[slot], nil, false)
+			end
+		end
+		if self.centerSeparator then
+			self.centerSeparator:SetHidden(true)
+		end
+		if self.pageButton then
+			self.pageButton:SetHidden(true)
+		end
+	end
+
+	-- The page button persists across show/hide (it is not a pooled shared control),
+	-- so it is created once here and its visibility toggled in Update.
+	local pageButton = WINDOW_MANAGER:CreateControl(control:GetName() .. "PageButton", control, CT_BUTTON)
+	pageButton:SetDimensions(ICON_SIZE, ICON_SIZE)
+	pageButton:SetAnchor(TOPRIGHT, control, TOPRIGHT, -6, 6)
+	pageButton:SetNormalTexture(PAGE_ARROW)
+	pageButton:SetPressedTexture(PAGE_ARROW_DOWN)
+	pageButton:SetMouseOverTexture(PAGE_ARROW_OVER)
+	pageButton:SetHandler("OnClicked", function()
+		SkillsPanel:NextPage()
+	end)
+	pageButton:SetHidden(true)
+	SkillsPanel.pageButton = pageButton
 end
 
 function CMXint.InitializeScribedSkillsPanel(control)
 	---@class ScribedSkillsPanel:Panel
-	ScribedSkillsPanel = CMXint.PanelObject:New(control, "scribedSkills")
+	local ScribedSkillsPanel = CMXint.PanelObject:New(control, "scribedSkills")
+	ScribedSkillsPanel.scenes = { "info" }
 
-	---@param setHidden boolean
-	function ScribedSkillsPanel:Hide(setHidden)
-		local panel = self.control
-		panel:SetHidden(setHidden)
-		panel:GetParent():GetNamedChild("Sep"):SetHidden(setHidden)
+	local scribedRowPool = ScribedSkillsPanel:CreateRowPool(control)
+
+	function ScribedSkillsPanel:AcquireScriptControls(container, x, y)
+		local icon = container:AcquireSharedControl(CT_TEXTURE)
+		icon:ApplyPosition(container, x, y, SCRIBED_SCRIPT_ICON_SIZE, SCRIBED_SCRIPT_ICON_SIZE)
+
+		local name = container:AcquireSharedControl(CT_LABEL)
+		name:ApplyPosition(container, x + SCRIBED_SCRIPT_ICON_SIZE + 2, y, SCRIBED_SCRIPT_NAME_WIDTH, nil)
+		name:ApplyFont(ui.fontSizeSmall)
+
+		return { icon = icon, name = name }
 	end
 
-	function ScribedSkillsPanel:Update(fightData)
-		if fightData == nil then
-			return self:Hide(true)
-		end
-		local control = self.control
-		local scribedSkills = fightData.charData.scribedSkills or {}
+	-- Builds one scribed-skill row (framed icon + name + three script sub-rows) in container-local
+	-- coordinates. Rows are created lazily by Update as the data requires, and only the container is
+	-- moved afterwards, so the row's own layout is written just once, here.
+	function ScribedSkillsPanel:AcquireScribedRow()
+		local container = scribedRowPool:Acquire()
+		container:SetMouseEnabled(true)
+		container:SetHandler("OnMouseEnter", CMXint.ScribedSkillTooltip_OnMouseEnter)
+		container:SetHandler("OnMouseExit", CMXint.SkillTooltip_Clear)
+
+		local iconBg = container:AcquireSharedControl(CT_TEXTURE)
+		iconBg:ApplyPosition(container, SCRIBED_ROW_X, 0, SCRIBED_ICON_SIZE, SCRIBED_ICON_SIZE)
+		iconBg:SetTexture(ABILITY_FRAME)
+
+		local icon = container:AcquireSharedControl(CT_TEXTURE)
+		icon:ApplyPosition(container, SCRIBED_ROW_X + 2, 2, SCRIBED_ICON_SIZE - 4, SCRIBED_ICON_SIZE - 4)
+
+		local name = container:AcquireSharedControl(CT_LABEL)
+		name:ApplyPosition(container, SCRIBED_NAME_X, 0, SCRIBED_NAME_WIDTH, nil)
+		name:ApplyFont(ui.fontSize)
+
+		local scripts = {
+			self:AcquireScriptControls(container, SCRIBED_SCRIPT_X, 0),
+			self:AcquireScriptControls(container, SCRIBED_NAME_X, SCRIBED_SCRIPT_ROW2_Y),
+			self:AcquireScriptControls(container, SCRIBED_SCRIPT_X, SCRIBED_SCRIPT_ROW2_Y),
+		}
+
+		return { container = container, iconBg = iconBg, icon = icon, name = name, scripts = scripts }
+	end
+
+	function ScribedSkillsPanel:AcquireEmptyLabel()
+		local label = self:AcquireSharedControl(CT_LABEL)
+		label:ApplyFont(ui.fontSize)
+		label:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
+		label:SetColor(0.6, 0.6, 0.6, 1)
+		label:SetText(GetString(SI_COMBAT_METRICS_NO_SCRIBED_SKILLS))
+
+		return label
+	end
+
+	function ScribedSkillsPanel:Update()
+		self.rows = self.rows or {}
+
+		local fightData = self:GetCurrentFightData()
+		local scribedSkills = fightData and fightData.skills and fightData.skills.scribedSkills or {}
 
 		local index = 0
-		for abilityId, data in util.spairs(scribedSkills) do
+		for abilityId, scriptIds in util.spairs(scribedSkills) do
 			index = index + 1
-			local skillControl = control:GetNamedChild(tostring(index))
-			skillControl:SetHidden(false)
-			local abilityName = GetFormattedAbilityName(abilityId)
-			local iconTexture = GetFormattedAbilityIcon(abilityId)
 
-			local nameControl = skillControl:GetNamedChild("Name") --[[@as LabelControl]]
-			nameControl:SetText(abilityName)
+			local row = self.rows[index]
+			if row == nil then
+				row = self:AcquireScribedRow()
+				self.rows[index] = row
+			end
 
-			skillControl["abilityId"] = abilityId
-			skillControl["scriptIds"] = data
-			GetControl(skillControl, "IconTexture"):SetTexture(iconTexture)
+			local y = SCRIBED_TOP + (index - 1) * (SCRIBED_ROW_HEIGHT + SCRIBED_ROW_GAP)
+			row.container:ApplyPosition(control, 0, y, SCRIBED_ROW_WIDTH, SCRIBED_ROW_HEIGHT)
+
+			local rowData = row.container.data
+			rowData.abilityId, rowData.scriptIds = abilityId, scriptIds
+
+			row.name:SetText(GetFormattedAbilityName(abilityId))
+			row.icon:SetTexture(GetFormattedAbilityIcon(abilityId))
 
 			for i = 1, 3 do
-				local scriptId = data[i]
-				local scriptControl = skillControl:GetNamedChild("Script" .. i)
-				local scriptName = GetFormattedAbilityName(scriptId, true)
-				local iconTexture = GetFormattedAbilityIcon(scriptId, true)
-
-				local nameControl = scriptControl:GetNamedChild("Name") --[[@as LabelControl]]
-				nameControl:SetText(scriptName)
-				local iconControl = scriptControl:GetNamedChild("Icon") --[[@as TextureControl]]
-				iconControl:SetTexture(iconTexture)
+				local script = row.scripts[i]
+				local scriptId = scriptIds[i]
+				script.name:SetText(GetFormattedAbilityName(scriptId, true))
+				script.icon:SetTexture(GetFormattedAbilityIcon(scriptId, true))
 			end
-			if index == 10 then
+
+			if index == SCRIBED_SKILL_COUNT then
 				break
 			end
 		end
 
-		for i = index + 1, control:GetNumChildren() do
-			control:GetNamedChild(tostring(i)):SetHidden(true)
+		for i = #self.rows, index + 1, -1 do
+			scribedRowPool:Release(self.rows[i].container)
+			self.rows[i] = nil
 		end
 
-		self:Hide(index == 0)
+		local scale = CMXint.settings.fightReport.scale
+
+		if self.emptyLabel == nil then
+			self.emptyLabel = self:AcquireEmptyLabel()
+		end
+		self.emptyLabel:ApplyPosition(control, 0, SCRIBED_TOP, control:GetWidth() / scale, nil)
+		self.emptyLabel:SetHidden(index > 0)
+
+		-- The panel has no dimensions of its own in XML: the champion points panel anchors
+		-- below it, so its height has to track the row count.
+		local height = index > 0
+				and SCRIBED_TOP + index * SCRIBED_ROW_HEIGHT + (index - 1) * SCRIBED_ROW_GAP + SCRIBED_BOTTOM
+			or SCRIBED_EMPTY_HEIGHT
+		control:SetHeight(height * scale)
 	end
 
-	local nameBase = control:GetName()
-	local anchor
-	for i = 1, 10 do
-		local scribedSkillControl = CreateControlFromVirtual(nameBase, control, "CombatMetrics_ScribedSkillTemplate", i)
-		-- scribedSkillControl:SetHidden(false)
+	function ScribedSkillsPanel:Recover()
+		self.rows = {}
+		self.emptyLabel = nil
+		self:Update()
+	end
 
-		if i == 1 then
-			---@diagnostic disable-next-line: missing-parameter
-			scribedSkillControl:SetAnchor(TOPLEFT, control, TOPLEFT, 0, 4)
-		else
-			---@diagnostic disable-next-line: missing-parameter
-			scribedSkillControl:SetAnchor(TOPLEFT, anchor, BOTTOMLEFT, 0, 4)
-			scribedSkillControl:SetHidden(true)
+	function ScribedSkillsPanel:Clear()
+		if self.rows then
+			scribedRowPool:ReleaseAll()
+			ZO_ClearNumericallyIndexedTable(self.rows)
 		end
 
-		anchor = scribedSkillControl
+		if self.emptyLabel then
+			self.emptyLabel:SetHidden(true)
+		end
+
+		control:SetHeight(SCRIBED_EMPTY_HEIGHT * CMXint.settings.fightReport.scale)
 	end
-end
-
-function CMXint.SkillbarButtonMouseOver(control, isOver)
-	local bg = control:GetNamedChild("Bg")
-	local alpha = isOver and 1 or 0
-	bg:SetCenterColor(0.2, 0.2, 0.2, alpha)
-end
-
-function CMXint.SkillbarToggleWerewolf()
-	assert(SkillsPanel and SkillsPanel.settings)
-	local settings = SkillsPanel.settings
-	settings.showWereWolf = not settings.showWereWolf
-	SkillsPanel:Update()
 end
 
 function CMXint.SkillTooltip_OnMouseEnter(control)
+	local abilityId = control.data.abilityId
+	if not abilityId or abilityId <= 0 then
+		return
+	end
+
 	InitializeTooltip(SkillTooltip, control, TOPLEFT, 0, 5, BOTTOMLEFT)
 
-	local rowControl = control:GetParent()
-	local id = rowControl.id
-	local delay = rowControl.delay
 	local font = string.format("%s|%s|%s", GetString(SI_COMBAT_METRICS_STD_FONT), 16, "soft-shadow-thin")
-	local format = rowControl.ignored and "ID: %d (Off GCD)" or "ID: %d"
-
-	SkillTooltip:SetAbilityId(id)
+	SkillTooltip:SetAbilityId(abilityId)
 	SkillTooltip:AddVerticalPadding(15)
-	SkillTooltip:AddLine(string.format(format, id), font, 0.7, 0.7, 0.8, TOP, MODIFY_TEXT_TYPE_NONE, TEXT_ALIGN_CENTER)
-	if delay then
-		SkillTooltip:AddLine(
-			string.format("Average delay: %d ms", delay),
-			font,
-			0.7,
-			0.7,
-			0.8,
-			TOP,
-			MODIFY_TEXT_TYPE_NONE,
-			TEXT_ALIGN_CENTER
-		)
-	end
+	SkillTooltip:AddLine(
+		string.format("ID: %d", abilityId),
+		font,
+		0.7,
+		0.7,
+		0.8,
+		TOP,
+		MODIFY_TEXT_TYPE_NONE,
+		TEXT_ALIGN_CENTER
+	)
 end
 
 function CMXint.SkillTooltip_Clear()
@@ -326,11 +408,12 @@ function CMXint.SkillTooltip_Clear()
 end
 
 function CMXint.ScribedSkillTooltip_OnMouseEnter(control)
-	if control.scriptIds == nil then
+	local data = control.data
+	if data.scriptIds == nil then
 		return
 	end
-	local abilityId = control.abilityId
-	local scriptIds = control.scriptIds
+	local abilityId = data.abilityId
+	local scriptIds = data.scriptIds
 
 	InitializeTooltip(SkillTooltip, control, TOPLEFT, 0, 5, BOTTOMLEFT)
 	SetCraftedAbilityScriptSelectionOverride(

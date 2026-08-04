@@ -105,29 +105,28 @@ local function InitUnitsList(panel)
 
 	---@param rowControl RowControl
 	function dataList:RecoverRow(rowControl)
-		local panel = self.panel
 		local rowHeight = self:GetRawHeight()
 
-		local icon = panel:AcquireSharedControl(CT_TEXTURE)
+		local icon = ui.sharedControls:Acquire(rowControl, CT_TEXTURE)
 		icon:ApplyPosition(rowControl, 2, 0, rowHeight, rowHeight)
 
-		local label = panel:AcquireSharedControl(CT_LABEL)
+		local label = ui.sharedControls:Acquire(rowControl, CT_LABEL)
 		label:ApplyPosition(rowControl, 32, 0, 162)
 		label:SetHorizontalAlignment(TEXT_ALIGN_LEFT)
 
-		local bar = panel:AcquireSharedControl(CT_TEXTURE)
+		local bar = ui.sharedControls:Acquire(rowControl, CT_TEXTURE)
 		bar:ApplyPosition(rowControl, 30, 0, 166, rowHeight)
 		bar:SetTexture("esoui/art/unitframes/progressbar_raidhealth.dds")
 
-		local perSecond = panel:AcquireSharedControl(CT_LABEL)
+		local perSecond = ui.sharedControls:Acquire(rowControl, CT_LABEL)
 		perSecond:ApplyPosition(rowControl, 198, 0, 48)
 		perSecond:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
 
-		local total = panel:AcquireSharedControl(CT_LABEL)
+		local total = ui.sharedControls:Acquire(rowControl, CT_LABEL)
 		total:ApplyPosition(rowControl, 248, 0, 60)
 		total:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
 
-		local perCent = panel:AcquireSharedControl(CT_LABEL)
+		local perCent = ui.sharedControls:Acquire(rowControl, CT_LABEL)
 		perCent:ApplyPosition(rowControl, 310, 0, 32)
 		perCent:SetHorizontalAlignment(TEXT_ALIGN_CENTER)
 
@@ -194,7 +193,8 @@ local function InitUnitsList(panel)
 		local panelSettings = self.panel.settings
 		local category = panelSettings.category
 		local isOverheal = category == cat.CMX_CATEGORY_HEALING_DONE and panelSettings.showOverHeal
-		local playerAmount = isOverheal and (playerData.totalAmount + playerData.overflowAmount) or playerData.totalAmount
+		local playerAmount = isOverheal and (playerData.totalAmount + playerData.overflowAmount)
+			or playerData.totalAmount
 
 		local groupAmount = playerAmount
 		if groupData then
@@ -223,7 +223,9 @@ local function InitUnitsList(panel)
 
 	function dataList:BuildMasterList()
 		local fightData = self.panel:GetCurrentFightData()
-		if fightData == nil then error("UnitsPanel:BuildMasterList() called without active fight data", 2) end
+		if fightData == nil then
+			error("UnitsPanel:BuildMasterList() called without active fight data", 2)
+		end
 		local category = self.panel.settings.category
 		local playerId = fightData.unitIds.player
 		local categoryData = util.GetUnitCategoryData(fightData, category, playerId)
@@ -247,7 +249,7 @@ local function InitUnitsList(panel)
 		for unitId, playerUnitData in pairs(categoryData) do
 			if type(playerUnitData) == "table" then
 				if abilityIds then
-					playerUnitData = util.GetCombinedPlayerCategoryData(fightData, category, {unitId}, abilityIds)
+					playerUnitData = util.GetCombinedPlayerCategoryData(fightData, category, { unitId }, abilityIds)
 				end
 				if playerUnitData ~= nil and playerUnitData.totalAmount > 0 then
 					local groupData = util.GetUnitCategoryData(fightData, oppositionCategory, unitId)
@@ -279,6 +281,7 @@ end
 function CMXint.InitializeUnitsPanel(control)
 	---@class UnitsPanel: Panel
 	UnitsPanel = CMXint.PanelObject:New(control, "units")
+	UnitsPanel.scenes = { "fightStats", "combatLog" }
 
 	UnitsPanel.dataList = InitUnitsList(UnitsPanel)
 

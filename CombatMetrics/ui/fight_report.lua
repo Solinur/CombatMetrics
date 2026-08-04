@@ -18,20 +18,23 @@ local em = GetEventManager()
 ---@class Control
 ---@field sizes number[]
 ---@field anchors table[]
----@field font string?
+---@field font table?
 local function ResizeControl(control, scale)
 	if control.sizes == nil and control.anchors == nil then
 		return
 	end
-	local width, height = unpack(control.sizes)
+	-- Shared controls record their base layout too (see ApplyPosition in shared_controls.lua), and
+	-- they may leave a dimension unset — a label sizes its own height from the font. So unlike the
+	-- XML controls storeOrigLayout captures, width/height are not guaranteed to be present here.
+	local width, height = control.sizes[1], control.sizes[2]
 	local maxwidth, maxheight = GuiRoot:GetDimensions()
 
-	if width < 0 or height < 0 then
+	if (width and width < 0) or (height and height < 0) then
 		logger:Error("Invalid default dimensions for %s: %s, %s", control:GetName(), width, height)
 	end
 
-	local wscale = width > 0 and maxwidth / width or math.huge
-	local hscale = height > 0 and maxheight / height or math.huge
+	local wscale = width and width > 0 and maxwidth / width or math.huge
+	local hscale = height and height > 0 and maxheight / height or math.huge
 	scale = zo_clamp(scale or 1, 0.5, zo_min(scale or 1, wscale, hscale, 3))
 
 	if width and control:GetResizeToFitDescendents() == false then
@@ -67,16 +70,24 @@ local function ResizeControl(control, scale)
 		control:SetAnchor(unpack(anchor2))
 	end
 
-	local fontcontrol = control:GetNamedChild("Font") -- TODO: replace with GetFont
-
-	if fontcontrol ~= nil then
-		---@diagnostic disable-next-line: param-type-mismatch
-		local font, size, style = unpack(fontcontrol.font)
-		if size then
-			size = tonumber(size) * (scale + 0.2) / 1.2
-		end -- Don't Scale fonts as much
+	-- Shared controls have no $(parent)Font child; they record their base size on the control itself.
+	-- ui.GetFont bakes the scale in, so the string has to be rebuilt rather than reused, and it takes
+	-- the scale explicitly because settings.scale is only updated after this pass has run.
+	if control.font ~= nil then
 		---@cast control LabelControl
-		control:SetFont(string.format("%s|%s|%s", font, size, style))
+		control:SetFont(ui.GetFont(control.font[1], control.font[2], scale))
+	else
+		local fontcontrol = control:GetNamedChild("Font")
+
+		if fontcontrol ~= nil then
+			---@diagnostic disable-next-line: param-type-mismatch
+			local font, size, style = unpack(fontcontrol.fontData)
+			if size then
+				size = tonumber(size) * (scale + 0.2) / 1.2
+			end -- Don't Scale fonts as much
+			---@cast control LabelControl
+			control:SetFont(string.format("%s|%s|%s", font, size, style))
+		end
 	end
 
 	for i = 1, control:GetNumChildren() do
@@ -107,6 +118,25 @@ local function InitializeFightReport() -- TODO: Decide on a common TLW/Object sc
 	local scene = ZO_Scene:New("CMX_REPORT_SCENE", SCENE_MANAGER)
 	scene:AddFragment(fragment)
 	CMXint.scenes.report = scene
+	CMXint.scenes.reportFragment = fragment  -- shared with view scenes in scenes.lua
+
+	-- When CMX_REPORT_SCENE becomes visible it either pushes the saved view (opening) or
+	-- bounces straight back to HUD (Escape popped the view scene back to base).
+	local openingCMX = false
+	scene:RegisterCallback("StateChange", function(_, newState)
+		if newState == SCENE_SHOWN then
+			if openingCMX then
+				openingCMX = false
+				local key = settings.scene or "fightStats"
+				local targetName = CMXint.viewSceneNames[key] or CMXint.viewSceneNames.fightStats
+				if targetName then
+					SCENE_MANAGER:Push(targetName)
+				end
+			else
+				SCENE_MANAGER:PopScenes(1)
+			end
+		end
+	end)
 
 	local function savePos()
 		settings.pos_x, settings.pos_y = FightReport:GetCenter()
@@ -130,11 +160,16 @@ local function InitializeFightReport() -- TODO: Decide on a common TLW/Object sc
 	end
 
 	function FightReport:Toggle()
-		SCENE_MANAGER:Toggle("CMX_REPORT_SCENE")
+		if SCENE_MANAGER:IsSceneOnStack("CMX_REPORT_SCENE") then
+			SCENE_MANAGER:PopScenes(2)
+		elseif not SCENE_MANAGER:IsShowing("CMX_REPORT_SCENE") then
+			openingCMX = true
+			SCENE_MANAGER:Push("CMX_REPORT_SCENE")
+		end
 	end
 
 	function FightReport:Update()
-		if FightReport:IsHidden() then
+		if FightReport:IsHidden() or ui.sceneTransitioning then
 			return
 		end
 		logger:Info("Updating Fight Report")
@@ -147,18 +182,36 @@ local function InitializeFightReport() -- TODO: Decide on a common TLW/Object sc
 		end
 
 		for _, panel in pairs(ui.panels) do
-			panel:Update()
+			if ui.debugSharedControls then
+				panel:VerifySharedControls()
+			end
+			if not panel.control:IsHidden() then
+				panel:Update()
+			end
 		end
 	end
 
 	function FightReport:Clear()
+		-- A hidden panel has released its shared controls; touching its cached references would
+		-- write into controls that belong to a visible panel now. It clears itself on Recover.
 		for _, panel in pairs(ui.panels) do
-			panel:Clear()
+			if not panel.control:IsHidden() then
+				panel:Clear()
+			end
 		end
 	end
 
-	function FightReport:SelectScene(newScene)
-		-- TODO: implement
+	function FightReport:SelectScene(key)
+		local targetName = CMXint.viewSceneNames[key]
+		if not targetName then return end
+		settings.scene = key
+		local isOpen = false
+		for _, s in pairs(CMXint.scenes.views) do
+			if s:IsShowing() then isOpen = true; break end
+		end
+		if isOpen then
+			SCENE_MANAGER:SwapCurrentScene(targetName)
+		end
 	end
 
 	FightReport:Resize(settings.scale)

@@ -236,7 +236,7 @@ local function resize(control, scale)
 	local fontcontrol = control:GetNamedChild("Font")
 
 	if fontcontrol ~= nil then
-		local font, size, style = unpack(fontcontrol.font)
+		local font, size, style = unpack(fontcontrol.fontData)
 		if size then
 			size = tonumber(size) * (scale + 0.1) / 1.2
 		end -- Don't Scale fonts as much

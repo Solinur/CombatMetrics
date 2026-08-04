@@ -18,12 +18,19 @@ local selections = ui.selections
 local logger
 local _
 
+local empty = {}
+
 ui.dx = zo_ceil(GuiRoot:GetWidth() / tonumber(GetCVar("WindowedWidth")) * 1000) / 1000
 ui.fontSizeSmall = tonumber(GetString(SI_COMBAT_METRICS_FONT_SIZE_SMALL))
 ui.fontSize = tonumber(GetString(SI_COMBAT_METRICS_FONT_SIZE))
 
-function ui.GetFont(base_size, bold)
-	local scale = CMXint.settings.fightReport.scale
+-- scale is only passed by the resize pass, which rebuilds font strings before settings.scale has
+-- caught up with the scale it is applying.
+---@param base_size number
+---@param bold boolean?
+---@param scale number?
+function ui.GetFont(base_size, bold, scale)
+	scale = scale or CMXint.settings.fightReport.scale
 	local size = base_size * (scale + 0.2) / 1.2
 	local base_font = bold == true and "BOLD_FONT" or "MEDIUM_FONT"
 
@@ -245,6 +252,8 @@ end
 ---@field New fun(self: Panel, control: Control, name: string): Panel
 ---@field MUST_IMPLEMENT fun()
 ---@field dataList SortFilterList?
+---@field rowContainers RowContainer[]?
+---@field rowPools RowContainerPool[]?
 local PanelObject = ZO_InitializingObject:Subclass()
 CMXint.PanelObject = PanelObject
 
@@ -262,7 +271,6 @@ end
 
 ---@class PanelControl: Control
 ---@field panel Panel
----@field sharedControls Control[]
 ---@field dataList SortFilterList?
 
 ---@param control PanelControl
@@ -275,7 +283,6 @@ function PanelObject:Initialize(control, name)
 
 	self.name = name
 	self.control = control
-	self.sharedControls = {}
 
 	control.panel = self
 
@@ -290,22 +297,71 @@ end
 ---@param controlType integer
 ---@return LabelControl|LineControl|TextureControl|SharedControl
 function PanelObject:AcquireSharedControl(controlType)
-	local control
-	if controlType == CT_LABEL then
-		---@type LabelControl
-		control, _ = ui.sharedLabels:AcquireObject()
-	elseif controlType == CT_TEXTURE then
-		---@type TextureControl
-		control, _ = ui.sharedTextures:AcquireObject()
-	elseif controlType == CT_LINE then
-		---@type LineControl
-		control, _ = ui.sharedSeparators:AcquireObject()
-	else
-		logger:Error("Attempt to acquire unsupported control type: %d", controlType)
+	return ui.sharedControls:Acquire(self, controlType)
+end
+
+---@param name string
+---@param parent Control?
+---@return RowContainer
+function PanelObject:CreateRowContainer(name, parent)
+	local containers = self.rowContainers
+	if containers == nil then
+		containers = {}
+		self.rowContainers = containers
 	end
 
-	table.insert(self.sharedControls, control)
-	return control
+	local container = ui.CreateRowContainer(name, parent or self.control)
+	containers[#containers + 1] = container
+
+	return container
+end
+
+---@param parent Control?
+---@return RowContainerPool
+function PanelObject:CreateRowPool(parent)
+	local pools = self.rowPools
+	if pools == nil then
+		pools = {}
+		self.rowPools = pools
+	end
+
+	local pool = ui.RowContainerPool:New(parent or self.control)
+	pools[#pools + 1] = pool
+
+	return pool
+end
+
+function PanelObject:VerifySharedControls()
+	ui.sharedControls:Verify(self)
+
+	local list = self.dataList and self.dataList.list
+	for _, rowControl in ipairs(list and list.activeControls or empty) do
+		ui.sharedControls:Verify(rowControl)
+		for _, control in pairs(rowControl.controls or empty) do
+			if control.shared and control.owner ~= rowControl then
+				local owner = control.owner
+				logger:Error(
+					"Verify '%s': active row %s references %s, owned by '%s', positioned into %s",
+					self.name,
+					rowControl:GetName(),
+					control:GetName(),
+					owner and (owner.name or owner:GetName()) or "nobody",
+					tostring(control.positionedBy)
+				)
+			end
+		end
+	end
+
+	-- Same check for the free-form panels: a row container owns its row's controls.
+	for _, container in ipairs(self.rowContainers or empty) do
+		ui.sharedControls:Verify(container)
+	end
+
+	for _, pool in ipairs(self.rowPools or empty) do
+		for _, container in pairs(pool:GetActiveObjects()) do
+			ui.sharedControls:Verify(container)
+		end
+	end
 end
 
 ---@return Fight?
@@ -342,15 +398,25 @@ function PanelObject:Release()
 end
 
 function PanelObject:ReleaseSharedControls()
-	for _, control in pairs(self.sharedControls) do
-		control:Release()
-	end
-
-	ZO_ClearTable(self.sharedControls)
-
+	-- Clearing the list first resets its rows, which releases the controls they hold. The rows own
+	-- those controls, the panel owns its own, and the two sets are disjoint — so order only matters
+	-- in that a cleared row must not be left pointing at a control the panel is about to reuse.
 	if self.dataList then
 		self.dataList:Clear()
 	end
+
+	-- Row containers own their row's controls, so releasing the panel's own would not reach them.
+	-- A pooled container gives its contents back through the pool reset; a static one is kept, so
+	-- only its contents are handed back and it is reused as-is on the next Recover.
+	for _, pool in ipairs(self.rowPools or empty) do
+		pool:ReleaseAll()
+	end
+
+	for _, container in ipairs(self.rowContainers or empty) do
+		container:ReleaseSharedControls()
+	end
+
+	ui.sharedControls:ReleaseAll(self)
 end
 
 function PanelObject:Clear()
@@ -429,10 +495,11 @@ function CMXint.InitializeUI()
 	-- 	["resource"] 	= {},
 	-- }
 
-	assert(CMXint.InitializeControlHandler(), "Initialization of control handler failed")
+	assert(CMXint.InitializeSharedControls(), "Initialization of shared controls failed")
 	assert(CMXint.InitializeScrollListHandler(), "Initialization of scroll list handler failed")
 	assert(CMXint.InitializeFightReport(), "Initialization of fight report UI failed")
 	assert(CMXint.InitializeLiveReport(), "Initialization of live report failed")
+	assert(CMXint.InitializeViewScenes(), "Initialization of view scenes failed")
 
 	PanelObject.fightReport = CMXint.fightReport
 	PanelObject.settings = CMXint.fightReport.settings
@@ -443,15 +510,15 @@ function CMXint.InitializeUI()
 
 	assert(CMXint.InitializeCombatStats(), "Initialization of combat stats UI failed")
 	-- -- assert(CMXint.InitializeResource(), "Initialization of resource UI failed")
-	-- assert(CMXint.InitializePlayerStats(), "Initialization of player stats UI failed")
+	assert(CMXint.InitializePlayerStats(), "Initialization of player stats UI failed")
 	assert(CMXint.InitializeBuffs(), "Initialization of buffs UI failed")
 
 	assert(CMXint.InitializeUnits(), "Initialization of units UI failed")
 	assert(CMXint.InitializeAbilities(), "Initialization of abilities UI failed")
 
-	-- assert(CMXint.InitializeSkills(), "Initialization of skills UI failed")
-	-- assert(CMXint.InitializeEquipment(), "Initialization of equipment UI failed")
-	-- assert(CMXint.InitializeChampionPoints(), "Initialization of champion points UI failed")
+	assert(CMXint.InitializeSkills(), "Initialization of skills UI failed")
+	assert(CMXint.InitializeEquipment(), "Initialization of equipment UI failed")
+	assert(CMXint.InitializeChampionPoints(), "Initialization of champion points UI failed")
 	-- assert(CMXint.InitializeConsumables(), "Initialization of consumables UI failed")
 
 	-- assert(CMXint.InitializeCombatLog(), "Initialization of combat log UI failed")
