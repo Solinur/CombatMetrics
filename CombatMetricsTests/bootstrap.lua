@@ -38,3 +38,21 @@ function CMXTest.RequireLibCombat(...)
 		CMXTest.Require("LibCombat2/" .. select(i, ...))
 	end
 end
+
+--- Loads the named CombatMetrics files, plus the init chain they depend on.
+---
+--- CombatMetrics/init.lua bails out when LibCombat2 is missing and reads the formatting helpers off
+--- it at load time, so the library has to come first.
+---@param ... string file names within CombatMetrics, e.g. "util.lua"
+function CMXTest.RequireCombatMetrics(...)
+	if IN_GAME then
+		return
+	end
+
+	CMXTest.RequireLibCombat("utility.lua")
+	CMXTest.Require("CombatMetrics/init.lua")
+
+	for i = 1, select("#", ...) do
+		CMXTest.Require("CombatMetrics/" .. select(i, ...))
+	end
+end

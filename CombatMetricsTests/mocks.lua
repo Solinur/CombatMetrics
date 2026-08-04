@@ -52,6 +52,43 @@ function GetAbilityIcon(abilityId)
 	return "icon/ability" .. abilityId .. ".dds"
 end
 
+-- CombatMetrics/init.lua builds its SavedVariables defaults at load time from the UI scale and the
+-- GuiRoot dimensions, and util.lua registers a slash command. ESOLua has no UI layer at all.
+GuiRoot = {
+	GetWidth = function()
+		return 1920
+	end,
+	GetHeight = function()
+		return 1080
+	end,
+}
+
+SLASH_COMMANDS = SLASH_COMMANDS or {}
+
+-- The game returns settings as strings, including the UI scale init.lua divides by.
+function GetSetting()
+	return "1"
+end
+
+-- Splits a number the way ZO_AbbreviateNumber expects: mantissa first, suffix second, which it then
+-- concatenates. The thresholds and suffix letters are the game's, the rounding is not.
+local ABBREVIATIONS = {
+	{ 1e9, "b", "B" },
+	{ 1e6, "m", "M" },
+	{ 1e3, "k", "K" },
+}
+
+function AbbreviateNumber(amount, precision, useUppercaseSuffixes)
+	for _, abbreviation in ipairs(ABBREVIATIONS) do
+		local factor, suffix, uppercaseSuffix = abbreviation[1], abbreviation[2], abbreviation[3]
+		if zo_abs(amount) >= factor then
+			return zo_roundToNearest(amount / factor, zo_pow(10, -(precision or 0))),
+				useUppercaseSuffixes and uppercaseSuffix or suffix
+		end
+	end
+	return amount, ""
+end
+
 EsoStrings = EsoStrings or {}
 local nextCustomId = 200000
 
@@ -59,6 +96,17 @@ function ZO_CreateStringId(stringId, stringToAdd)
 	_G[stringId] = nextCustomId
 	EsoStrings[nextCustomId] = stringToAdd
 	nextCustomId = nextCustomId + 1
+end
+
+-- ESOLua's own GetString is a stub that always returns "", and its string table cannot be written to
+-- from Lua, so everything lang/en.lua registers would be invisible. Serve EsoStrings instead, which
+-- is where ZO_CreateStringId above puts it. Supports the game's second form, GetString(prefix,
+-- index), which resolves the SI_FOO<index> global.
+function GetString(stringId, index)
+	if type(stringId) == "string" then
+		stringId = _G[stringId .. tostring(index)]
+	end
+	return EsoStrings[stringId] or ""
 end
 
 function SafeAddVersion() end
