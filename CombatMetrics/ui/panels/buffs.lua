@@ -406,15 +406,18 @@ local function InitBuffsList(panel)
 
 		if data.hasDetails then
 			if expandButton == nil then
-				local scale = self.panel.settings.scale
-				local buttonSize = icon:GetHeight()
 				expandButton = expandButtonPool:AcquireObject()
 				expandButton:SetHidden(false)
 				expandButton:SetParent(rowControl)
-				expandButton:SetAnchor(TOPLEFT, rowControl, TOPLEFT, -2 * scale, scale)
-				expandButton:SetDimensions(buttonSize, buttonSize)
 				rowControl.expandButton = expandButton
 			end
+
+			-- The pooled button records no layout, so the resize pass skips it: re-apply its
+			-- geometry on every update instead, from the current scale and row height.
+			local scale = panel.settings.scale
+			local buttonSize = icon:GetHeight()
+			expandButton:SetAnchor(TOPLEFT, rowControl, TOPLEFT, -2 * scale, scale)
+			expandButton:SetDimensions(buttonSize, buttonSize)
 
 			expandButton:SetExpandState(uncollapsedBuffs[data.abilityId] == true)
 		else
