@@ -141,6 +141,16 @@ function CMXint.InitializeChampionPointsPanel(control)
 			return
 		end
 
+		-- Sections are allocated from the live discipline count, which has matched the recorded one
+		-- for years. If it ever stops matching, the loop below silently drops the extra disciplines.
+		if #CPData ~= #self.sections then
+			logger:Error(
+				"CP data has %d disciplines but %d sections were allocated; extra disciplines are not shown",
+				#CPData,
+				#self.sections
+			)
+		end
+
 		-- Taken from the fight rather than the live game: it records the champion bar layout
 		-- the fight was fought with, which a saved fight may no longer share.
 		local maxSlotIndex = CPData.maxSlotIndex
