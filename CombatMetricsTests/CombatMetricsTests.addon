@@ -5,9 +5,9 @@
 ## APIVersion: 101046
 ## DependsOn: LibCombat2
 ## OptionalDependsOn: Taneth CombatMetrics
-## Description: Unit tests for CombatMetrics and LibCombat2. Not shipped. Run via run.ps1, or in-game with /taneth.
+## Description: Unit tests for CombatMetrics. Not shipped. Run via run.ps1, or in-game with /taneth.
 
 mocks.lua
 bootstrap.lua
 
-spec_utility.lua
+; specs go here; the LibCombat2 ones live in LibCombat/LibCombatTests
