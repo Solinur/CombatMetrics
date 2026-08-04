@@ -52,8 +52,7 @@ function GetAbilityIcon(abilityId)
 	return "icon/ability" .. abilityId .. ".dds"
 end
 
--- CombatMetrics/init.lua builds its SavedVariables defaults at load time from the UI scale and the
--- GuiRoot dimensions, and util.lua registers a slash command. ESOLua has no UI layer at all.
+-- ESOLua has no UI layer; init.lua builds its SavedVariables defaults from these at load time.
 GuiRoot = {
 	GetWidth = function()
 		return 1920
@@ -65,13 +64,13 @@ GuiRoot = {
 
 SLASH_COMMANDS = SLASH_COMMANDS or {}
 
--- The game returns settings as strings, including the UI scale init.lua divides by.
+-- The game returns settings as strings.
 function GetSetting()
 	return "1"
 end
 
--- Splits a number the way ZO_AbbreviateNumber expects: mantissa first, suffix second, which it then
--- concatenates. The thresholds and suffix letters are the game's, the rounding is not.
+-- Returns mantissa and suffix, which ZO_AbbreviateNumber concatenates. The rounding is not the
+-- game's, so tests should assert on the suffix rather than the digits.
 local ABBREVIATIONS = {
 	{ 1e9, "b", "B" },
 	{ 1e6, "m", "M" },
@@ -98,10 +97,8 @@ function ZO_CreateStringId(stringId, stringToAdd)
 	nextCustomId = nextCustomId + 1
 end
 
--- ESOLua's own GetString is a stub that always returns "", and its string table cannot be written to
--- from Lua, so everything lang/en.lua registers would be invisible. Serve EsoStrings instead, which
--- is where ZO_CreateStringId above puts it. Supports the game's second form, GetString(prefix,
--- index), which resolves the SI_FOO<index> global.
+-- ESOLua's own GetString always returns "" and its string table is not writable from Lua, so
+-- everything lang/en.lua registers would be invisible.
 function GetString(stringId, index)
 	if type(stringId) == "string" then
 		stringId = _G[stringId .. tostring(index)]
