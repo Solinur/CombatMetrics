@@ -1,4 +1,7 @@
-if not Taneth then return end
+-- TODO: Check unit tests in this file (sanity check)
+if not Taneth then
+	return
+end
 
 CMXTest.RequireCombatMetrics("util.lua")
 
