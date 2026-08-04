@@ -335,9 +335,9 @@ function PanelObject:VerifySharedControls()
 	ui.sharedControls:Verify(self)
 
 	local list = self.dataList and self.dataList.list
-	for _, rowControl in ipairs(list and list.activeControls or {}) do
+	for _, rowControl in ipairs(list and list.activeControls or empty) do
 		ui.sharedControls:Verify(rowControl)
-		for _, control in pairs(rowControl.controls or {}) do
+		for _, control in pairs(rowControl.controls or empty) do
 			if control.shared and control.owner ~= rowControl then
 				local owner = control.owner
 				logger:Error(
