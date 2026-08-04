@@ -51,15 +51,11 @@ function CMXint.InitializeChampionPointsPanel(control)
 
 	local scrollContainer = control:GetNamedChild("Container")
 	local scrollChild = scrollContainer:GetNamedChild("ScrollChild")
-
-	-- The scroll child must not size itself from its children: its height comes from the layout below.
 	scrollChild:SetResizeToFitDescendents(false)
 
 	local starRowPool = ChampionPointsPanel:CreateRowPool(scrollChild)
 
-	-- A row's controls sit in container-local coordinates and are placed once, here. Afterwards only
-	-- the container is ever moved, and the resize pass re-applies these offsets at the new scale.
-	function ChampionPointsPanel:AcquireStarRow()
+	function ChampionPointsPanel:AcquireStarRowContainer()
 		local container = starRowPool:Acquire()
 		container:SetMouseEnabled(true)
 		container:SetHandler("OnMouseEnter", CMXint.CPTooltip_OnMouseEnter)
@@ -93,9 +89,7 @@ function CMXint.InitializeChampionPointsPanel(control)
 		return { title = title, separator = separator }
 	end
 
-	-- A section's origin depends on how many passive stars the previous discipline had, so every row
-	-- is repositioned on each update rather than once when it is acquired. Only the container moves.
-	local function PositionRow(row, starIndex, y)
+	local function UpdateRowPosition(row, starIndex, y)
 		local column = (starIndex - 1) % STARS_PER_ROW
 		local x = LEFT_MARGIN + column * COLUMN_WIDTH
 
@@ -141,8 +135,6 @@ function CMXint.InitializeChampionPointsPanel(control)
 			return
 		end
 
-		-- Sections are allocated from the live discipline count, which has matched the recorded one
-		-- for years. If it ever stops matching, the loop below silently drops the extra disciplines.
 		if #CPData ~= #self.sections then
 			logger:Error(
 				"CP data has %d disciplines but %d sections were allocated; extra disciplines are not shown",
@@ -151,10 +143,7 @@ function CMXint.InitializeChampionPointsPanel(control)
 			)
 		end
 
-		-- Taken from the fight rather than the live game: it records the champion bar layout
-		-- the fight was fought with, which a saved fight may no longer share.
 		local maxSlotIndex = CPData.maxSlotIndex
-
 		local rowIndex = 0
 		local y = TOP_MARGIN
 
@@ -193,11 +182,11 @@ function CMXint.InitializeChampionPointsPanel(control)
 
 					local row = self.rows[rowIndex]
 					if row == nil then
-						row = self:AcquireStarRow()
+						row = self:AcquireStarRowContainer()
 						self.rows[rowIndex] = row
 					end
 
-					PositionRow(row, starIndex, y + zo_floor((starIndex - 1) / STARS_PER_ROW) * STAR_ROW_HEIGHT)
+					UpdateRowPosition(row, starIndex, y + zo_floor((starIndex - 1) / STARS_PER_ROW) * STAR_ROW_HEIGHT)
 					SetRowStar(row, discipline[i], discipline[i + 1], slotted, disciplineType)
 				end
 
