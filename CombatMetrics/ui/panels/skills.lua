@@ -28,9 +28,7 @@ local PAGE_ARROW = "EsoUI/Art/Buttons/large_rightArrow_up.dds"
 local PAGE_ARROW_DOWN = "EsoUI/Art/Buttons/large_rightArrow_down.dds"
 local PAGE_ARROW_OVER = "EsoUI/Art/Buttons/large_rightArrow_over.dds"
 
--- Slot render order within a bar: weapon-bound slots (1, 2), the five ability
--- slots (3-7) and the ultimate (8). See LibCombat GetBarData in fights.lua.
-local SLOT_ORDER = { 1, 2, 3, 4, 5, 6, 7, 8 }
+local SKILL_SLOT_ORDER = { 1, 2, 3, 4, 5, 6, 7, 8 }
 
 local SCRIBED_SKILL_COUNT = 10
 
@@ -92,7 +90,7 @@ function CMXint.InitializeSkillsPanel(control)
 			column = { lines = {} }
 			self.columns[columnIndex] = column
 
-			for _, slot in ipairs(SLOT_ORDER) do
+			for _, slot in ipairs(SKILL_SLOT_ORDER) do
 				local name = string.format("%sColumn%dSlot%d", control:GetName(), columnIndex, slot)
 				column.lines[slot] = { container = self:CreateRowContainer(name) }
 			end
@@ -109,7 +107,7 @@ function CMXint.InitializeSkillsPanel(control)
 		column.separator:ApplyPosition(control, x, y + TITLE_HEIGHT + 1, COLUMN_WIDTH, 0)
 
 		y = y + TITLE_HEIGHT + 4
-		for _, slot in ipairs(SLOT_ORDER) do
+		for _, slot in ipairs(SKILL_SLOT_ORDER) do
 			local line = column.lines[slot]
 			self:RecoverSkillLine(line)
 			line.container:ApplyPosition(control, x, y, COLUMN_WIDTH, SKILL_ROW_HEIGHT)
@@ -129,7 +127,7 @@ function CMXint.InitializeSkillsPanel(control)
 		end
 
 		local centerX = LEFT_MARGIN + COLUMN_WIDTH + COLUMN_GAP / 2
-		local contentHeight = TITLE_HEIGHT + 4 + #SLOT_ORDER * SKILL_ROW_HEIGHT
+		local contentHeight = TITLE_HEIGHT + 4 + #SKILL_SLOT_ORDER * SKILL_ROW_HEIGHT
 		self.centerSeparator = self:AcquireSharedControl(CT_LINE)
 		self.centerSeparator:ApplyPosition(control, centerX, TOP_MARGIN, 0, contentHeight)
 
@@ -202,7 +200,7 @@ function CMXint.InitializeSkillsPanel(control)
 				column.title:SetText(GetBarName(category, barListIndex))
 			end
 
-			for _, slot in ipairs(SLOT_ORDER) do
+			for _, slot in ipairs(SKILL_SLOT_ORDER) do
 				UpdateLine(column.lines[slot], bar and bar[slot] or nil, bar ~= nil)
 			end
 		end
@@ -218,7 +216,7 @@ function CMXint.InitializeSkillsPanel(control)
 			column.title:SetText("")
 			column.separator:SetHidden(true)
 			column.bottomSeparator:SetHidden(true)
-			for _, slot in ipairs(SLOT_ORDER) do
+			for _, slot in ipairs(SKILL_SLOT_ORDER) do
 				UpdateLine(column.lines[slot], nil, false)
 			end
 		end
