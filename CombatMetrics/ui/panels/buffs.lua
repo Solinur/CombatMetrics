@@ -631,7 +631,7 @@ local function InitBuffsList(panel)
 			entryData.groupUptime = sumGroupUptime / maxStacks
 
 			-- TODO: Check if more elaborate analysis needed (parallel buffs ?)
-		elseif groupData[1].mainAbilityId then
+		elseif groupData[1].data.mainAbilityId then
 			for i, groupEntry in ipairs(groupData) do
 				local groupEntryData = groupEntry.data
 				if groupEntryData.uptime > entryData.uptime then
