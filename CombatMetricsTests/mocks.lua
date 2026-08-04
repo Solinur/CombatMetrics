@@ -14,10 +14,11 @@ end
 -- library layer, but none of the game's enum constants. Rather than hand-maintain them, merge in the
 -- generated globals dump. Only fills gaps, so ESOLua's real objects always win.
 -- Override the location with the ESO_LUA_DEFS environment variable.
-local DEFAULT_DEFS = "C:/Users/dk-mi/Documents/ESOdev/Tools/esolua/lua_defs/globals.lua"
+local DEFAULT_DEFS = "/Documents/ESOdev/Tools/esolua/lua_defs/globals.lua"
 
 local function MergeGeneratedGlobals()
-	local path = os.getenv("ESO_LUA_DEFS") or DEFAULT_DEFS
+	local home = os.getenv("USERPROFILE") or os.getenv("HOME") or "."
+	local path = os.getenv("ESO_LUA_DEFS") or (home .. DEFAULT_DEFS)
 	local chunk = loadfile(path)
 	if not chunk then
 		error(string.format("no globals dump at '%s'; set ESO_LUA_DEFS", path))
@@ -72,17 +73,17 @@ end
 -- Returns mantissa and suffix, which ZO_AbbreviateNumber concatenates. The rounding is not the
 -- game's, so tests should assert on the suffix rather than the digits.
 local ABBREVIATIONS = {
-	{ 1e9, "b", "B" },
-	{ 1e6, "m", "M" },
-	{ 1e3, "k", "K" },
+	{ 1e9, SI_NUMBER_SUFFIX_ONE_BILLION_LOWERCASE, SI_NUMBER_SUFFIX_ONE_BILLION_UPPERCASE },
+	{ 1e6, SI_NUMBER_SUFFIX_ONE_MILLION_LOWERCASE, SI_NUMBER_SUFFIX_ONE_MILLION_UPPERCASE },
+	{ 1e3, SI_NUMBER_SUFFIX_ONE_THOUSAND_LOWERCASE, SI_NUMBER_SUFFIX_ONE_THOUSAND_UPPERCASE },
 }
 
 function AbbreviateNumber(amount, precision, useUppercaseSuffixes)
 	for _, abbreviation in ipairs(ABBREVIATIONS) do
 		local factor, suffix, uppercaseSuffix = abbreviation[1], abbreviation[2], abbreviation[3]
-		if zo_abs(amount) >= factor then
+		if amount >= factor then
 			return zo_roundToNearest(amount / factor, zo_pow(10, -(precision or 0))),
-				useUppercaseSuffixes and uppercaseSuffix or suffix
+				GetString(useUppercaseSuffixes and uppercaseSuffix or suffix)
 		end
 	end
 	return amount, ""
@@ -105,6 +106,14 @@ function GetString(stringId, index)
 	end
 	return EsoStrings[stringId] or ""
 end
+
+-- The globals dump has the client's SI_* ids but not their text. English values; other locales differ.
+EsoStrings[SI_NUMBER_SUFFIX_ONE_THOUSAND_UPPERCASE] = "K"
+EsoStrings[SI_NUMBER_SUFFIX_ONE_THOUSAND_LOWERCASE] = "k"
+EsoStrings[SI_NUMBER_SUFFIX_ONE_MILLION_UPPERCASE] = "M"
+EsoStrings[SI_NUMBER_SUFFIX_ONE_MILLION_LOWERCASE] = "m"
+EsoStrings[SI_NUMBER_SUFFIX_ONE_BILLION_UPPERCASE] = "B"
+EsoStrings[SI_NUMBER_SUFFIX_ONE_BILLION_LOWERCASE] = "b"
 
 function SafeAddVersion() end
 
