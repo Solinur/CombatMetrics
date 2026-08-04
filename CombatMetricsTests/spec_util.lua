@@ -5,6 +5,11 @@ end
 
 CMXTest.RequireCombatMetrics("util.lua")
 
+-- In-game CombatMetrics is only an optional dependency, so it may not be there at all.
+if not CombatMetrics then
+	return
+end
+
 local CMXint = CombatMetrics.internal
 local util = CMXint.util
 local cat = util.MainCategories

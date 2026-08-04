@@ -2,7 +2,7 @@
 ## Author: Solinur
 ## Version: 1
 ## AddOnVersion: 1
-## APIVersion: 101046
+## APIVersion: 101050 101051
 ## DependsOn: LibCombat2
 ## OptionalDependsOn: Taneth CombatMetrics
 ## Description: Unit tests for CombatMetrics. Not shipped. Run via run.ps1, or in-game with /taneth.
