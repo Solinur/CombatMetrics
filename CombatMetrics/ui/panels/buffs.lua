@@ -412,8 +412,6 @@ local function InitBuffsList(panel)
 				rowControl.expandButton = expandButton
 			end
 
-			-- The pooled button records no layout, so the resize pass skips it: re-apply its
-			-- geometry on every update instead, from the current scale and row height.
 			local scale = panel.settings.scale
 			local buttonSize = icon:GetHeight()
 			expandButton:SetAnchor(TOPLEFT, rowControl, TOPLEFT, -2 * scale, scale)
