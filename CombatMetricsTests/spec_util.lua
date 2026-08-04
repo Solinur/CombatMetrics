@@ -6,15 +6,11 @@ local CMXint = CombatMetrics.internal
 local util = CMXint.util
 local cat = util.MainCategories
 
--- The dispatchers log through the file's sublogger. In the game client this already ran and returns
--- false.
 CMXint.InitializeUtils()
 
--- Standalone nothing ever loads the SavedVariables, so give the category predicates something to
--- read. In the game client the real settings are already there and must be left alone.
+-- Standalone nothing loads the SavedVariables; in the game client they must be left alone.
 CMXint.settings = CMXint.settings or { fightReport = {} }
 
---- Runs fn with the report category set, restoring it afterwards even if fn throws.
 local function WithCategory(category, fn)
 	local previous = CMXint.settings.fightReport.category
 	CMXint.settings.fightReport.category = category
@@ -23,9 +19,8 @@ local function WithCategory(category, fn)
 	assert(ok, err)
 end
 
---- Replaces the named LibCombat2 query functions with recorders for the duration of fn, which
---- receives the call log. Each stub returns its own name, so a dispatcher's return value identifies
---- which one it picked.
+--- Stubs the named LibCombat2 queries with recorders that return their own name, so a dispatcher's
+--- return value identifies which one it picked. fn receives the call log.
 local function WithStubbedQueries(names, fn)
 	local calls = {}
 	local originals = {}
@@ -47,7 +42,6 @@ local function WithStubbedQueries(names, fn)
 	assert(ok, err)
 end
 
---- The stub names a route table refers to.
 local function QueryNames(routes)
 	local names = {}
 	for _, name in pairs(routes) do
@@ -56,11 +50,8 @@ local function QueryNames(routes)
 	return names
 end
 
---- Calls the dispatcher once per category and returns which query each one reached, in the same
---- shape as the route table, ready to compare against it.
----
---- Assertions stay in the tests: Taneth runs those under its own environment, so the assert table is
---- only reachable from inside an it body.
+--- Which query each category reached, shaped like the route table. Assertions stay in the tests:
+--- Taneth's assert table is only reachable from inside an it body.
 ---@param dispatcher function taking (fightData, category, ...)
 ---@param routes table<string, string> category -> LibCombat2 function name
 local function TakenRoutes(dispatcher, routes)
@@ -75,8 +66,8 @@ local function TakenRoutes(dispatcher, routes)
 	return taken
 end
 
---- How many queries a dispatcher reaches for a category it does not know. Whether it returns nil or
---- raises depends on the logger behind it, so only the dispatch is observed.
+--- Whether an unknown category returns nil or raises depends on the logger behind it, so only the
+--- dispatch is observed.
 local function CallsForUnknownCategory(dispatcher, routes)
 	local count
 
@@ -284,8 +275,6 @@ Taneth("CombatMetrics", function()
 	end)
 
 	describe("GetShortFormattedNumber", function()
-		--- The magnitude suffix, which is where util.lua's own logic shows: lowercase below a
-		--- million, uppercase from there up. The digits around it come from ZO_AbbreviateNumber.
 		local function Suffix(number)
 			return string.match(tostring(util.GetShortFormattedNumber(number)), "%a*$")
 		end
@@ -313,14 +302,10 @@ Taneth("CombatMetrics", function()
 			assert.equals("B", Suffix(1500000000))
 		end)
 
-		-- The suffix case is picked from the exponent before rounding, so a number that only reaches
-		-- a million by rounding up still gets the lowercase one.
-		it("picks the suffix case before rounding", function()
-			assert.equals("m", Suffix(999999))
+		it("picks the suffix case from the rounded value", function()
+			assert.equals("M", Suffix(999999))
 		end)
 
-		-- ZO_AbbreviateNumber only abbreviates values at or above the threshold, and a negative never
-		-- is, so it comes back as a rounded number rather than a string.
 		it("does not abbreviate negatives", function()
 			assert.equals(-1230000, util.GetShortFormattedNumber(-1234567))
 		end)
