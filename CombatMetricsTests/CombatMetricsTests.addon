@@ -10,4 +10,5 @@
 mocks.lua
 bootstrap.lua
 
-; specs go here; the LibCombat2 ones live in LibCombat/LibCombatTests
+; the LibCombat2 specs live in LibCombat/LibCombatTests
+spec_util.lua
