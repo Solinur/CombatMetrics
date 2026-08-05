@@ -7167,6 +7167,7 @@ local function initLiveReport()
 			SCENE_MANAGER:GetScene("hud"):RemoveFragment(fragment)
 			SCENE_MANAGER:GetScene("hudui"):RemoveFragment(fragment)
 			SCENE_MANAGER:GetScene("siegeBar"):RemoveFragment(fragment)
+			self:SetHidden(true)
 		end
 	end
 
