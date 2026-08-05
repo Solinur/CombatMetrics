@@ -7154,28 +7154,20 @@ local function initLiveReport()
 
 	local fragment = ZO_HUDFadeSceneFragment:New(liveReport)
 
-	function liveReport.Toggle(liveReport, value)
+	function liveReport:Toggle(value)
 		if value == nil then
-			value = liveReport:IsHidden()
+			value = self:IsHidden()
 		end
 
 		if value == true and SCENE_MANAGER then
 			SCENE_MANAGER:GetScene("hud"):AddFragment(fragment)
 			SCENE_MANAGER:GetScene("hudui"):AddFragment(fragment)
 			SCENE_MANAGER:GetScene("siegeBar"):AddFragment(fragment)
-
-			local currentScene = SCENE_MANAGER.currentScene and SCENE_MANAGER.currentScene.name or ""
-			local isShownForCurrentScene = currentScene == "hud"
-				or currentScene == "hudui"
-				or currentScene == "siegeBar"
-
-			liveReport:SetHidden(not isShownForCurrentScene)
 		else
 			SCENE_MANAGER:GetScene("hud"):RemoveFragment(fragment)
 			SCENE_MANAGER:GetScene("hudui"):RemoveFragment(fragment)
 			SCENE_MANAGER:GetScene("siegeBar"):RemoveFragment(fragment)
-
-			liveReport:SetHidden(true)
+			self:SetHidden(true)
 		end
 	end
 
