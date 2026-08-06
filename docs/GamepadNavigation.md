@@ -9,16 +9,19 @@ menu-bar actions through the keybind strip.
 This document is the research result and the staged plan. It is written so panels can be
 converted one at a time; each phase leaves the addon in a working state.
 
-Everything below rests on assumptions read out of the ESO UI source, not out of a running
-client. **§0 is the list of those assumptions and how to check each one in game.** Work through
-it before writing implementation code — several answers change the design rather than just
-confirming it.
+The plan started from assumptions read out of the ESO UI source rather than a running client.
+**§0 records what checking them in game returned** — several answers changed the design rather
+than confirming it, and the sections that follow are written against those answers.
 
 ---
 
-## 0. In-game checks to run first
+## 0. Verified assumptions
 
-### 0.0 Setup, once
+Everything below rested on assumptions read out of the ESO UI source rather than a running client.
+They have all been checked in game; the throwaway probes that did it are gone. What remains is the
+record of what came back, because the rest of the plan is built on it.
+
+### 0.1 Working in gamepad mode
 
 | Need | How |
 | --- | --- |
@@ -29,195 +32,107 @@ confirming it.
 | Get a fight to look at without combat | Nothing to do — `test/test.lua` defines `CMX_TestData` and [init.lua:277](../CombatMetrics/init.lua) adds it as a fight on load. |
 | Reload after a code change | `/reloadui` |
 
-`d(...)` prints to chat. For anything longer than one statement, chain with `;` inside `/script`,
-or drop a scratch file into the addon and `/reloadui`.
+`d(...)` prints to chat. The chat input truncates a command at 350 characters and silently drops
+the rest, so anything longer belongs in a file. For a multi-step check, drop a scratch file into
+the addon behind its own slash command, and delete it once the answer is recorded here.
 
-Record the answers inline in this table as you go — several of them are load-bearing.
+### 0.2 What the checks found
 
 | # | Question | Answer |
 | --- | --- | --- |
-| A1 | Report opens in gamepad mode? | |
-| A2 | Mouse still usable there? | |
-| A3 | Mode switch while open — what happens? | |
-| A4 | Tooltips appear without mouse movement? | |
-| B1 | All required `ZO_*` functions exist? | |
-| B2 | `FRAGMENT_GROUP.GAMEPAD_DRIVEN_UI_WINDOW` exists? | |
-| B3 | QUATERNARY / QUINARY bound on gamepad? | |
-| C1 | Keybind strip shows on the CMX scene? | |
-| C2 | Hold-A delivers a clean down/up pair? | |
-| C3 | Who else consumes directional input? | |
-| C4 | Sort header focus invisible without a template? | |
-| C5 | Two row highlights distinguishable? | |
-| C6 | Gamepad dialog overlays the report? | |
-| D1 | `FightReport:Update()` cost per row? | |
+| A1 | Report opens in gamepad mode? | Yes |
+| A2 | Mouse still usable there? | Yes (but it won't be on console!) |
+| A3 | Mode switch while open — what happens? | Report closes |
+| A4 | Tooltips appear without mouse movement? | Yes |
+| B1 | All required `ZO_*` functions exist? | Yes |
+| B2 | `FRAGMENT_GROUP.GAMEPAD_DRIVEN_UI_WINDOW` exists? | Yes |
+| B3 | QUATERNARY / QUINARY bound on gamepad? | QUATERNARY = hold X (172). QUINARY = 0, unbound — assumed bound anyway |
+| C1 | Keybind strip shows on the CMX scene? | Yes. But keyboard mode also gains `Menu: Exit`, and the group is not re-evaluated on reopen → gate on gamepad mode, swap on the mode event |
+| C2 | Hold-A delivers a clean down/up pair? | Yes — one DOWN, one UP, tap and hold alike. Removing the group mid-hold fires no UP, so §7.5's `IsKeyDown` clear is required |
+| C3 | Who else consumes directional input? | HUD 1, report 2, dialog-over-report 4 — they stack, so §5.1 navigator deactivation is mandatory |
+| C4 | Sort header focus invisible without a template? | Yes. `ZO_ThinListHighlight` is good enough to ship |
+| C5 | Two row highlights distinguishable? | Yes with an outline against the selection fill — now `CombatMetrics_RowCursor`. Mouse-over had never been wired; §0.3 wires it to share that outline |
+| C6 | Gamepad dialog overlays the report? | Yes — draws above, stick-navigable, strip swapped and restored |
+| D1 | `FightReport:Update()` cost per row? | ~4 ms on a small fight (lower bound) → §5.2 item 4 is required in phase 1 |
 
-### 0.1 Group A — baseline behaviour, no code needed
+The gamepad button map, since three later sections depend on it. Note the second argument to
+`GetHighestPriorityActionBindingInfoFromName(action, preferGamepad)` — pass `true`, or it returns
+the *keyboard* binding and every action looks bound.
 
-Switch to gamepad mode, `/reloadui`, then:
+| Action | Code | Key |
+| --- | --- | --- |
+| `PRIMARY` | 133 | `GAMEPAD_BUTTON_1` — A |
+| `SECONDARY` | 135 | `GAMEPAD_BUTTON_3` — X |
+| `TERTIARY` | 136 | `GAMEPAD_BUTTON_4` — Y |
+| `QUATERNARY` | 172 | `GAMEPAD_BUTTON_3_HOLD` — **hold X** |
+| `QUINARY` | 0 | none — **unbound by default** |
+| `NEGATIVE` | 134 | `GAMEPAD_BUTTON_2` — B |
+| `LEFT_SHOULDER` / `RIGHT_SHOULDER` | 131 / 132 | LB / RB |
+| `LEFT_TRIGGER` / `RIGHT_TRIGGER` | 137 / 138 | LT / RT |
+| `LEFT_STICK` / `RIGHT_STICK` | 129 / 130 | L3 / R3 |
 
-**A1 — Does the report open at all today?**
-`/cmx`. Expected: it opens, keyboard-styled, with a mouse cursor. If it does *not* open, the
-whole plan's premise (that this is additive) is wrong and phase 0 has to fix scene setup first.
+Gamepad codes start at 133 (`KEY_GAMEPAD_BUTTON_1`); anything lower is a keyboard key and means the
+query was made with `preferGamepad = false`. Two consequences run through the rest of the plan:
 
-**A2 — Is the mouse still usable in gamepad mode?**
-With the report open, move the mouse and click a unit row, drag the title bar, hover for a
-tooltip. Expected: all work. This is what makes a panel-by-panel rollout safe — unconverted
-panels stay operable. If the cursor is suppressed, every phase must ship complete or the addon
-regresses in gamepad mode.
+- **`QUATERNARY` is not a fifth button.** It is *hold X* — the same physical button as `SECONDARY`
+  (tap X). A panel defining both puts them on one button, and the tap only resolves on release, so
+  frequency decides which gets the tap (§3.3, §7.4).
+- **`QUINARY` is unbound.** The plan proceeds as if it is bound: it is a slot the player can
+  assign, and nothing in phases 1–3 depends on it. Anything placed there must degrade to
+  unreachable-but-harmless, never to a broken panel.
 
-**A3 — What happens on an input-mode switch while the report is open?**
-Open the report, then run the `SetSetting` call for the other mode.
-Expected per `ZO_IngameSceneManager:OnGamepadPreferredModeChanged`
-(`ingame/scenes/ingamescenemanager.lua:202`): the report closes and the HUD returns. Confirm.
-If it instead stays open with stale fragments, §3.2's runtime fragment swap needs
-`SetHandleGamepadPreferredModeChangedCallback` from the start rather than as an optional extra.
+### 0.3 Decisions taken
 
-**A4 — Do tooltips work without a mouse?**
-Hover a skill icon in the `info` view, note the tooltip, then move the mouse away and run
-`/script CombatMetrics.internal.SkillTooltip_OnMouseEnter(<control>)` on the same control.
-Expected: the tooltip appears anchored to the control, not to the cursor — the handlers take a
-control and read `control.data`, so a focus-changed callback can call them directly. Confirm the
-anchoring looks right when the cursor is elsewhere.
+- **The row cursor is an outline, not a fill.** The selection mark
+  (`CombatMetrics_Highlight`) is a white fill, so a second fill for the cursor reads as a brighter
+  version of the same thing rather than a different mark. The winner of C5 is
+  `CombatMetrics_RowCursor` ([templates.xml](../CombatMetrics/ui/base/templates.xml)) — CMX's own
+  `simpleframe2.dds` with a gold edge over a transparent centre, left edge inset to clear the
+  first column. Its `offsetX` is a fixed value and does not yet follow `ui.dx`; the production
+  wiring must put it in the scaled layout record `storeOrigLayout` expects.
+- **The row mouse-over highlight is registered but never triggered.**
+  `ZO_ScrollList_EnableHighlight` is called in
+  [scroll_lists.lua:112](../CombatMetrics/ui/base/scroll_lists.lua), but no row template wires
+  `OnMouseEnter` / `OnMouseExit` and nothing calls `ZO_ScrollList_MouseEnter`, so it has never
+  drawn — this predates the gamepad work.
+  **Decided: wire it, sharing the cursor's art.** Mouse-over and gamepad focus mean the same
+  thing — "the row the pointer is on" — so one look serves both and the row still has only two
+  distinct marks: the selection fill and the gold outline.
 
-### 0.2 Group B — API presence at the live version
-
-One-liners; each should print a function/table, not `nil`. The plan cites the source tree, which
-can be ahead of or behind the live client.
-
-**B1 — required functions.**
-Every global the plan depends on, checked in one pass:
-
-```lua
-/script for _,n in ipairs({"ZO_GamepadFocus","ZO_GamepadMultiFocusArea_Base","ZO_GamepadMultiFocusArea_Manager","ZO_SortFilterList_Gamepad","ZO_MovementController","ZO_ScrollList_EnableSelection","ZO_ScrollList_AutoSelectData","ZO_ScrollList_SelectNextData","ZO_ScrollList_SelectPreviousData","ZO_ScrollList_AtTopOfList","ZO_ScrollList_AtBottomOfList","ZO_Scroll_ScrollControlIntoView","ZO_Dialogs_RegisterCustomDialog","ZO_Dialogs_ShowGamepadDialog"}) do if _G[n]==nil then d("MISSING: "..n) end end d("B1 done")
-```
-
-Expected: only `B1 done`. Anything listed as MISSING invalidates the phase that uses it.
-
-**B2 — fragment group.**
-The scene wiring in §3.2 needs all three of these:
-
-```lua
-/script d(FRAGMENT_GROUP and FRAGMENT_GROUP.GAMEPAD_DRIVEN_UI_WINDOW ~= nil, KEYBIND_STRIP_GAMEPAD_FRAGMENT ~= nil, UI_SHORTCUTS_ACTION_LAYER_FRAGMENT ~= nil)
-```
-
-Expected: `true true true`.
-
-**B3 — are QUATERNARY and QUINARY actually bound on a gamepad?**
-The plan puts expand/collapse on QUATERNARY. Source shows 29 gamepad screens using it and 6
-using QUINARY, but the *default binding* is what matters.
-
-```lua
-/script for _,a in ipairs({"UI_SHORTCUT_PRIMARY","UI_SHORTCUT_SECONDARY","UI_SHORTCUT_TERTIARY","UI_SHORTCUT_QUATERNARY","UI_SHORTCUT_QUINARY","UI_SHORTCUT_NEGATIVE","UI_SHORTCUT_LEFT_SHOULDER","UI_SHORTCUT_RIGHT_SHOULDER","UI_SHORTCUT_LEFT_TRIGGER","UI_SHORTCUT_RIGHT_TRIGGER","UI_SHORTCUT_LEFT_STICK","UI_SHORTCUT_RIGHT_STICK"}) do local k = GetHighestPriorityActionBindingInfoFromName(a, false) d(a.." = "..tostring(k)) end
-```
-
-Expected: a non-zero key code for each. A zero/nil for QUATERNARY or QUINARY means that slot is
-unusable and expand/collapse has to move — most likely swapping favourite off X.
-
-### 0.3 Group C — needs a scratch snippet
-
-These need a few lines of throwaway code. Put them in a scratch file loaded by the manifest and
-remove it afterwards; do not build them into `ui/base/gamepad.lua` yet.
-
-**C1 — does the keybind strip show on the CMX scene?**
-Add `FRAGMENT_GROUP.GAMEPAD_DRIVEN_UI_WINDOW` to `CMX_REPORT_SCENE` *and* the view scenes, and
-register one descriptor with `name = "Close"`, `keybind = "UI_SHORTCUT_NEGATIVE"`.
-Check: the strip appears at the bottom, B closes the report, Escape still pops correctly, and
-the strip does not overlap the report window. Then switch to keyboard mode and confirm the
-window still behaves exactly as before — this is the §3.2 open question about whether
-`MOUSE_UI_MODE_FRAGMENT` and `UI_SHORTCUTS_ACTION_LAYER_FRAGMENT` disturb the current keyboard
-path. If they do, keyboard mode keeps its fragments unchanged.
-
-**C2 — does holding A give a clean down/up pair?**
-ESO defines separate `KEY_GAMEPAD_BUTTON_*_HOLD` key codes, so a long press may be routed to a
-different binding. Paint-select (§7.5) depends on the plain pair.
-Register a descriptor with `handlesKeyUp = true` and
-`callback = function(up) d(up and "UP" or "DOWN") end`, then tap A and hold A for ~2 s.
-Expected both times: exactly one `DOWN`, then one `UP` on release, with no extra events during
-the hold. If the hold is swallowed, paint-select must be driven purely by the per-frame
-`IsKeyDown` poll rather than by the key-up.
-
-Also confirm the up still arrives when the descriptor is removed mid-hold: hold A, and while
-holding, remove the keybind group. Expected: no `UP`. This is the stuck-state case §7.5 guards
-against, and seeing it fail once is worth more than trusting the guard.
-
-**C3 — who else consumes directional input?**
-
-```lua
-/script d(#DIRECTIONAL_INPUT.inputObjects)
-```
-
-Run it on the HUD, then with the report open, then with a gamepad dialog open. Expected: a small
-number that grows by one per active consumer. Constraint 1 in §1 says CMX must add exactly one.
-If a dialog does *not* appear at a higher visual order than the report, §5.1's "belt-and-braces"
-navigator deactivation becomes mandatory rather than optional.
-
-**C4 — is the sort header focus invisible without a template?**
-Open the `fightStats` view so the units panel is visible, then:
-
-```lua
-/script local g = CombatMetrics.internal.ui.panels.units.dataList.sortHeaderGroup g:EnableSelection(true) g:SetSelectedIndex(2)
-```
-
-Expected: nothing visible changes, confirming §5.2 item 1 — the headers are created by
-`ZO_SortHeader_Initialize` in [units.xml](../CombatMetrics/ui/panels/units.xml) with no highlight
-template. Then supply one and repeat:
-
-```lua
-/script local g = CombatMetrics.internal.ui.panels.units.dataList.sortHeaderGroup g:EnableHighlight("ZO_ThinListHighlight") g:SetSelectedIndex(3)
-```
-
-Expected: the third column highlights. Note which template actually looks right against the CMX
-header art — `EnableHighlight` only takes effect once, so a bad choice needs a `/reloadui`.
-
-**C5 — do the two row highlights coexist and read differently?**
-CMX rows already have a `HighLight` child driven by `SelectionHandler`, and
-`ZO_ScrollList_EnableHighlight(list, "ZO_ThinListHighlight")` is already applied for mouse-over
-([scroll_lists.lua:112](../CombatMetrics/ui/base/scroll_lists.lua)). Phase 1 adds a *third*,
-the gamepad cursor via `ZO_ScrollList_EnableSelection`.
-Click two unit rows to select them, then turn on the third highlight and drive it by hand:
-
-```lua
-/script local l = CombatMetrics.internal.ui.panels.units.dataList.list ZO_ScrollList_EnableSelection(l, "ZO_ThinListHighlight") ZO_ScrollList_AutoSelectData(l, true)
-/script local l = CombatMetrics.internal.ui.panels.units.dataList.list ZO_ScrollList_SelectNextData(l)
-```
-
-Run the second line repeatedly to step the cursor down over the selected rows. Expected: cursor
-and selection are separable at a glance, and mouse-over still reads as a third state. If they are
-not distinguishable, pick different art now — cheap here, expensive once the focus areas exist.
-`ZO_ScrollList_EnableSelection` ignores a second call
-(`libraries/zo_templates/scrolltemplates.lua:1551`), so trying another template needs a
-`/reloadui`.
-
-**C6 — does a gamepad dialog overlay the report correctly?**
-Register a throwaway `GAMEPAD_DIALOGS.PARAMETRIC` dialog (§5.1) with two dummy entries and show
-it while the report is open. Check: it draws above the report, the stick navigates its list, the
-CMX strip is replaced by the dialog's and restored on close, and `AllDialogsHidden` fires.
-
-### 0.4 Group D — measurement
-
-**D1 — what does a selection change cost?**
-`SelectionHandler:HandleClick` ends with `CMXint.fightReport:Update()`. Paint-select would
-trigger that once per row at stick speed.
-Load the largest fight available, open the `fightStats` view, and time an update:
-
-```lua
-/script local t=GetGameTimeMilliseconds() CombatMetricsReport:Update() d(GetGameTimeMilliseconds()-t)
-```
-
-Run it a few times. Under ~2 ms, the deferral in §7.5 is a nicety. Over ~8 ms it is mandatory,
-and §5.2 item 4 (debouncing the `SelectionHandler` → `Update` path) is promoted from "verify" to
-"required in phase 1".
-
-### 0.5 Decisions to confirm, not test
-
+  Two mechanics to respect when implementing:
+  - They are *separate* ZO systems. `highlightTemplateOrFunction` (mouse-over) and
+    `selectionTemplate` (cursor) each create their own child on the row, so pointing both at the
+    same template yields two identical outlines if both are ever live — the mouse hovering row A
+    while the cursor sits on row B would show two "current" rows.
+  - Both `Enable*` calls latch on first use and ignore later ones
+    (`scrolltemplates.lua:1513`, `:1552`), so the template cannot be swapped at runtime. Register
+    both once with the same template and gate which one is *driven*: skip the row's
+    `OnMouseEnter` / `OnMouseExit` when `IsInGamepadPreferredMode()`, and do not move the cursor
+    outside it. This is the same mode gate §3.2 already applies to the fragments.
 - **`CMXint.BuffContextMenu`** ([buffs.lua:106](../CombatMetrics/ui/panels/buffs.lua)) is defined
-  but has no caller anywhere in the addon — it is v1 behaviour awaiting re-wire. The plan assumes
-  its four actions are still wanted and splits them (favourite → X, collapse → QUATERNARY, the
-  two post-uptime entries → the Y menu). Confirm that is still the intent before re-wiring.
+  but has no caller anywhere in the addon — it is v1 behaviour awaiting re-wire.
+  **Confirmed: split as planned** — collapse → X, favourite → QUATERNARY (hold X), the two
+  post-uptime entries → the Y menu.
+
+  Y is the right slot for that menu: it is what vanilla gamepad UI uses for "a list of further
+  actions" — `SI_GAMEPAD_CRAFTING_OPTIONS`, `SI_GAMEPAD_INVENTORY_ACTION_LIST_KEYBIND`,
+  `SI_GAMEPAD_DYEING_OPTIONS`, `SI_GAMEPAD_OPTIONS_MENU` and
+  `SI_GAMEPAD_INVENTORY_EQUIPPED_MORE_ACTIONS` all sit on `UI_SHORTCUT_TERTIARY`.
 - **`util.PostBuffUptime` exists** ([util.lua:382](../CombatMetrics/util.lua)) but
-  `util.PosttoChat` is commented out, so the units post-DPS menu has no implementation to call
-  yet. Decide whether phase 1 wires the buffs Y menu only and leaves units' Y hidden until
-  `PosttoChat` returns.
+  `util.PosttoChat` is commented out, so the units post-DPS menu has no implementation to call.
+  **Decided: build the units Y menu anyway**, with the `PosttoChat` call written out and commented
+  with a `TODO:`. The menu shape is then already correct and re-enabling it is one line, rather
+  than a hidden bind nobody remembers to add later.
+
+### 0.4 Still worth measuring
+
+Neither blocks phase 1.
+
+- **D1 on a raid-length fight.** ~4 ms came from the smallest fight available. Past ~8 ms the
+  deferral in §7.5 needs frame coalescing rather than a plain debounce.
+- **What the report's existing directional-input consumer is.** C3 counted 1 on the HUD and 2 with
+  the report open, though CMX registers none. The navigator will sit *on top of* whatever that is,
+  so a converted report should read 3 — worth confirming that is what happens.
 
 ---
 
@@ -257,10 +172,14 @@ activate + deactivate callback and its own keybind descriptor.
 2. **Switching input mode while the report is open closes it.**
    `ZO_IngameSceneManager:OnGamepadPreferredModeChanged` (`ingame/scenes/ingamescenemanager.lua:202`)
    forces the HUD when `scene:WasRequestedToShowInGamepadPreferredMode() ~= IsInGamepadPreferredMode()`.
-   That is acceptable behaviour (matches every stock screen). If we ever want to keep the window
-   open across the switch, `scene:SetHandleGamepadPreferredModeChangedCallback(fn)` is the hook —
-   returning `true` from it suppresses the forced HUD, and the callback would rebuild the
-   fragments and the navigator.
+   That is acceptable behaviour (matches every stock screen), and C1 confirmed it still holds with
+   the gamepad fragment group applied.
+   It does not make the fragments self-correcting, though: C1 showed a keyboard-mode *reopen*
+   still wearing the gamepad strip. The group has to be swapped on the mode change (§3.2); the
+   forced close just means the swap always runs against hidden scenes.
+   If we ever want to keep the window open across the switch,
+   `scene:SetHandleGamepadPreferredModeChangedCallback(fn)` is the hook — returning `true` from it
+   suppresses the forced HUD, and the callback would rebuild the fragments and the navigator.
 
 ### What we do *not* have to solve
 
@@ -370,12 +289,16 @@ actually on top, and the view scene is pushed over the report scene):
 
 Since `ZO_Scene:AddFragmentGroup` / `RemoveFragmentGroup` work at runtime, swap the group on
 `EVENT_GAMEPAD_PREFERRED_MODE_CHANGED` while the scenes are hidden, rather than duplicating five
-view scenes per input mode.
+view scenes per input mode. The mode change force-closes the report (§1 constraint 2), so the
+scenes are always hidden by the time the handler runs.
 
-Open question to settle in phase 1: whether adding `MOUSE_UI_MODE_FRAGMENT` and
-`UI_SHORTCUTS_ACTION_LAYER_FRAGMENT` changes today's keyboard behaviour (Escape handling,
-`SCENE_MANAGER:SetInUIMode(true)` in the `OnShow` handler). If it does, keep keyboard mode
-exactly as it is and add fragments **only** in gamepad mode.
+**Settled by C1** — the open question was whether the gamepad fragments disturb today's keyboard
+path. They do: with `FRAGMENT_GROUP.GAMEPAD_DRIVEN_UI_WINDOW` applied in keyboard mode the report
+gains a `Menu: Exit` prompt it never had. So keyboard mode keeps its fragments exactly as they
+are, and the gamepad group is added **only** while `IsInGamepadPreferredMode()`.
+
+C1 also showed why the swap is mandatory rather than a tidiness measure: the group is not
+re-evaluated on its own, so a report reopened in keyboard mode still carries the gamepad strip.
 
 ### 3.3 Input map
 
@@ -387,9 +310,9 @@ was assigned to one of these rows and why.
 | Left stick / d-pad ↑↓ | – | global | Move inside the focused area. At the top/bottom edge, fall through to the vertical neighbour. |
 | Left stick / d-pad ←→ | – | global | Move to the horizontal neighbour area. Inside a sort-header focus, move between columns. |
 | `UI_SHORTCUT_PRIMARY` (A) | visible | focused entry | Select / Deselect a list row; press a menu-bar button; sort by a column header. Label is dynamic. |
-| `UI_SHORTCUT_SECONDARY` (X) | visible | focused row | Panel-defined. `buffs`: Add / Remove Favourite. Absent on `units` and `abilities`. |
+| `UI_SHORTCUT_SECONDARY` (X) | visible | focused row | Panel-defined. `buffs`: Expand / Collapse, visible only when the row `hasDetails`. Absent on `units` and `abilities`. |
 | `UI_SHORTCUT_TERTIARY` (Y) | visible | focused row | **More…** — opens the row's menu dialog (§5.1). Hidden when the row has no extra actions. |
-| `UI_SHORTCUT_QUATERNARY` | visible | focused row | Panel-defined. `buffs`: Expand / Collapse, visible only when the row `hasDetails`. |
+| `UI_SHORTCUT_QUATERNARY` (hold X) | visible | focused row | Panel-defined. `buffs`: Add / Remove Favourite. Shares a button with SECONDARY — see §0.2 B3. |
 | `UI_SHORTCUT_NEGATIVE` (B) | visible | global | Clear selections if any (`CMXint.ClearSelections`), otherwise close the report. |
 | `LEFT_SHOULDER` / `RIGHT_SHOULDER` | ethereal | global | Previous / next **category** (damage done → healing done → damage received → healing received). |
 | `LEFT_TRIGGER` / `RIGHT_TRIGGER` | ethereal | global | Previous / next **fight** (`SelectPreviousFight` / `SelectNextFight`). |
@@ -399,10 +322,11 @@ was assigned to one of these rows and why.
 **Two budgets, not one.** Stock gamepad screens mark shoulders, triggers and stick clicks
 `ethereal = true` — the bind fires but draws nothing on the strip
 (`ingame/armory/gamepad/armorybuildskills_gamepad.lua:80`,
-`ingame/guildhistory/gamepad/guildhistory_gamepad.lua:58`). So there are ~5 *visible* slots
-(A / X / Y / QUATERNARY / B, and QUINARY at a push) plus 6 *free* ones. Cycling actions belong in
-the free tier — which is also what ESO does with them (`ingame/champion/champion.lua:701` cycles
-constellations on the shoulders, `guildhistory` pages on the triggers).
+`ingame/guildhistory/gamepad/guildhistory_gamepad.lua:58`). So there are 4 *visible* buttons
+(A / X / Y / B) carrying 5 slots — QUATERNARY is hold X, not a button of its own — plus 6 *free*
+ones, and QUINARY once the player binds it. Cycling actions belong in the free tier — which is
+also what ESO does with them (`ingame/champion/champion.lua:701` cycles constellations on the
+shoulders, `guildhistory` pages on the triggers).
 
 Resulting strip density: `units` and `abilities` show 3 binds, `buffs` shows 5, the menu bar
 shows 2.
@@ -466,7 +390,8 @@ The big one, and the one that unlocks most of the value.
     a third focus area stacked above the headers, giving the panel the same
     filters → headers → list chain as `ZO_GamepadInteractiveSortFilterList`. ↑ from the top of
     the list reaches the headers, ↑ again the filters. No keybind needed.
-  - A stays "select"; expand/collapse moves to `QUATERNARY` and favourite to `X`, both with
+  - A stays "select"; expand/collapse moves to `X` and favourite to `QUATERNARY` (hold X) — the
+    more frequent action gets the tap, see §0.2 B3 — both with
     dynamic labels (§3.3). `CMXint.BuffContextMenu` ([buffs.lua:106](../CombatMetrics/ui/panels/buffs.lua))
     already contains all four actions but currently has **no caller** — it is pending re-wire
     from the v1 code. Split it when re-wiring: favourite and collapse become the two binds, the
@@ -493,7 +418,8 @@ new keybinds and no new UI, because every button already has a callback and a to
 - `canFocus` per entry ← `MenuPanel:UpdateButtonStates()`, which already computes exactly this;
   a `BSTATE_DISABLED` button must not be focusable.
 - **Shortcuts for the frequent actions only:** `LEFT_TRIGGER` / `RIGHT_TRIGGER` = previous /
-  next fight, `QUATERNARY` = most recent fight. Everything else stays in the focus area.
+  next fight, `QUATERNARY` (hold X) = most recent fight. Everything else stays in the focus area.
+  No conflict with `SECONDARY` here — the menu bar defines no tap-X.
 
 The **settings and feedback buttons open context menus**, which is the only part that cannot be
 reused — see §5.1. Their A press calls `CMXint.ShowGamepadMenu(...)` instead of
@@ -585,9 +511,11 @@ CMXint.ShowGamepadMenu(titleString, entries)
 Two mechanics to respect:
 
 - Deactivate the navigator while the dialog is up and re-activate on the `AllDialogsHidden`
-  callback (`ZO_GamepadInteractiveSortFilterList` registers for exactly this). Strictly it is
-  belt-and-braces — `DIRECTIONAL_INPUT` processes objects highest-visual-order first and the
-  dialog is on a higher tier, so it would consume the sticks anyway — but explicit is safer.
+  callback (`ZO_GamepadInteractiveSortFilterList` registers for exactly this). **Required, not
+  defensive**: C3 measured the directional-input consumer count going 2 → 4 when a dialog opens
+  over the report, so the dialog *stacks* on what is already registered rather than replacing it.
+  A navigator left active underneath is exactly the two-consumer collision §1 constraint 1
+  describes.
 - The dialog pushes its own keybind state, so the CMX strip is hidden while it is open and
   restored on close. Nothing to do, just do not fight it.
 
@@ -610,9 +538,12 @@ its own confirmation in either input mode.
    control-based, so it survives a commit — this is why phase 1 uses `ZO_ScrollList_EnableSelection`
    rather than a `ZO_GamepadFocus` over row controls.
 
-4. **`FightReport:Update()` runs on every selection change.** With a gamepad cursor moving one row
-   per tick, verify this does not cost a frame on large fights; if it does, debounce the
-   `SelectionHandler` → `Update` path.
+4. **`FightReport:Update()` runs on every selection change — debounce it in phase 1.** Not a
+   "verify if": D1 measured ~4 ms on the *smallest* available fight, a quarter of a 60 fps frame
+   for one selection change, and a gamepad cursor moves a row per tick. Split the
+   `SelectionHandler` → `Update` path so mutation and update are separate, and coalesce the
+   update. Re-measure on a raid-length fight: past ~8 ms the deferral in §7.5 needs frame
+   coalescing rather than a plain debounce.
 
 ---
 
@@ -639,7 +570,7 @@ report is assigned to exactly one of four mechanisms.
 | # | Mechanism | Costs | Use when |
 | --- | --- | --- | --- |
 | 1 | **Focus area** — walk to it with the stick, press A | nothing | The thing is already a control laid out in the window. |
-| 2 | **Visible strip bind** — A / X / Y / QUATERNARY / B | one of ~5 slots | The action applies to *whatever is focused*, has at most two states, and is used more than once per fight reviewed. |
+| 2 | **Visible strip bind** — A / X / Y / B, plus hold-X (QUATERNARY) | one of ~5 slots on 4 buttons | The action applies to *whatever is focused*, has at most two states, and is used more than once per fight reviewed. |
 | 3 | **Ethereal cycle bind** — LB/RB, LT/RT, LS/RS | nothing | A *global* ordered set stepped through often. No strip space, so no justification needed beyond "ordered and frequent". |
 | 4 | **Menu dialog entry** (§5.1) | two extra presses | Everything else: more than two variants, unordered, or rare. |
 
@@ -686,8 +617,8 @@ Anything that is already a button in the window is mechanism 1 by default; a bin
 | Clear selection (was middle-click) | 2 — B | Focused-ish, binary, frequent; B falls through to "close" when nothing is selected. |
 | Sort by column | 1 — header focus area | Already controls laid out above the list; ↑ from the top row reaches them. |
 | Buff category Enemy / Group / Player | 1 — filter focus area | Already a `ZO_RadioButtonGroup` in the panel. Gives buffs the same filters → headers → list chain as `ZO_GamepadInteractiveSortFilterList`. |
-| `buffs` favourite add / remove | 2 — X | Focused, binary, and the dynamic label is how the feature becomes discoverable at all. |
-| `buffs` expand / collapse details | 2 — QUATERNARY | Focused, binary, frequent while reading a buff list. |
+| `buffs` expand / collapse details | 2 — X | Focused, binary, frequent while reading a buff list. Takes the tap because it out-frequents favourite. |
+| `buffs` favourite add / remove | 2 — QUATERNARY (hold X) | Focused, binary, and the dynamic label is how the feature becomes discoverable at all. Rarer, so it takes the hold. |
 | Post unit DPS / unit-name DPS / selection DPS / selection HPS | 4 — Y menu | Four variants, conditional on category and selection → fails "binary". |
 | Post buff uptime / on bosses / on group | 4 — Y menu | Same; conditional on category and buff category. |
 
@@ -703,6 +634,10 @@ Anything that is already a button in the window is mechanism 1 by default; a bin
 - **`X` and `QUATERNARY` are panel-defined, not global.** Their descriptors live in each panel's
   focus area, and `visible` is a function of the focused row (`hasDetails` for expand). A panel
   that defines neither simply shows fewer prompts. Do not centralise them.
+- **They are also the same physical button.** `QUATERNARY` is hold X (§0.2 B3), so a panel
+  defining both makes the tap resolve only on release. Give the tap to the more frequent action
+  and keep the pair on one row's worth of state — never bind X and hold X to actions that read
+  as unrelated.
 - **One action loses fidelity on gamepad**: ctrl-click collapses into plain A, since there is no
   modifier — every A press is additive. Range-select survives as paint-select (§7.5). The
   keyboard path is unchanged; the phase 1 refactor extracts
@@ -748,10 +683,14 @@ Mechanics:
   `paintMode` there when the key is no longer down:
 
   ```lua
-  local USE_KEYBOARD = false
-  local key = GetHighestPriorityActionBindingInfoFromName("UI_SHORTCUT_PRIMARY", USE_KEYBOARD)
+  local PREFER_GAMEPAD = true
+  local key = GetHighestPriorityActionBindingInfoFromName("UI_SHORTCUT_PRIMARY", PREFER_GAMEPAD)
   if paintMode ~= nil and not IsKeyDown(key) then self:EndPaint() end
   ```
+
+  The second argument is `preferGamepad`, not "use keyboard" — pass `true` or the call returns the
+  *keyboard* binding and `IsKeyDown` polls the wrong key, silently disabling this guard. B3 shows
+  what the wrong value looks like.
 
   This is the pattern `DirectionalInput:GetRightTriggerMagnitude` uses
   (`libraries/zo_directionalinput/zo_directionalinput.lua:332`). It makes a stuck paint state
@@ -764,10 +703,44 @@ Mechanics:
 - Movement is unaffected by the held button: directional input and the keybind strip are
   independent systems, so hold-A-and-push-down just works.
 
-To verify in game: ESO defines separate `KEY_GAMEPAD_BUTTON_*_HOLD` key codes, so a long press of
-A is a distinct bindable key. Confirm that holding A still delivers the plain
-`UI_SHORTCUT_PRIMARY` down/up pair and does not get swallowed by a hold binding.
+**Verified by C2.** A tap and a ~2 s hold both deliver exactly one `DOWN` and one `UP`, so the
+separate `KEY_GAMEPAD_BUTTON_*_HOLD` key codes do not swallow a plain `UI_SHORTCUT_PRIMARY`
+binding. C2 also confirmed the failure mode this section guards against: removing the descriptor
+mid-hold produces **no `UP` at all**. The per-frame `IsKeyDown` clear above is therefore load-
+bearing, not defensive padding — without it, closing the report mid-sweep leaves `paintMode` set
+and the next entry into a list starts already painting.
 
 Rejected alternative: an explicit range mode (X sets an anchor, move, X completes). More
 discoverable through strip labels, but it costs two extra presses and adds a mode the user can be
 stuck in. Paint-select is modeless.
+
+### 7.6 Conformance to vanilla gamepad conventions
+
+Checked against the stock screens, so a player arriving from the vanilla UI meets no new idioms
+except where noted.
+
+| Concept | Vanilla precedent |
+| --- | --- |
+| Focus areas, ↑↓ within / ←→ between | `ZO_GamepadMultiFocusArea_Manager` drives exactly this — one horizontal and one vertical `ZO_MovementController` move between areas, each area handling its own interior (`zo_gamepadmultifocusareamanager.lua:132`, `:262`). |
+| A = select / activate | Universal. |
+| A toggles rows additively in a multi-select list | `universaldeconstructionpanel_gamepad.lua:362` — A adds the focused item if absent, removes it if present. The same model, including no modifier. |
+| B = back / close | Universal. |
+| B = "Clear Selections" while a selection exists | Real pattern: alchemy, enchanting and provisioner each bind `UI_SHORTCUT_NEGATIVE` to `ClearSelections` with `visible = HasSelections()` (`alchemy_keyboard.lua:168`). Note they express it as a *second descriptor gated on `visible`*, not one callback branching internally — §3.3 should do the same so the strip label is honest about what B will do. |
+| Y = open a list of further actions | The dominant use of `UI_SHORTCUT_TERTIARY`: crafting options, inventory action list, dyeing options, `SI_GAMEPAD_OPTIONS_MENU`, equipped-item more-actions. |
+| X and QUATERNARY as panel-defined row actions | `universaldeconstructionpanel_gamepad.lua:382`/`:398` uses both for exactly this. |
+| LB / RB cycling an ordered set, ethereal | `champion.lua:699` cycles constellations on the shoulders with `ethereal = true`. |
+| LT / RT paging, ethereal | `guildhistory_gamepad.lua:58` pages the events list on the triggers. |
+| Ethereal binds drawing nothing on the strip | 126 uses across `ingame/` and `libraries/`. |
+| `handlesKeyUp` hold binds | `champion.lua:648` holds a trigger to remove points, taking `up` in the callback. |
+
+**Two deliberate divergences**, both worth keeping but worth knowing about:
+
+1. **Paint-select (§7.5) has no vanilla equivalent.** The closest thing is champion's hold-trigger,
+   which repeats one action on *one* target; nothing in the stock UI holds a button and sweeps a
+   selection across rows. The idiom is borrowed from desktop file managers instead. It is additive
+   — a plain tap still toggles one row — so a player who never discovers it loses nothing, which is
+   what makes the divergence acceptable.
+2. **RS click = jump to the menu bar** is navigation, where vanilla stick clicks are *actions*
+   (set waypoint, report guild, enter/exit preview). Keeping it is fine — it is ethereal, so it
+   costs no strip space and cannot mislead — but it will not be guessed. Treat it as a power-user
+   shortcut, never the only route to the menu bar; ← from the leftmost panel must always work.
