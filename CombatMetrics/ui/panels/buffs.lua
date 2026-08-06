@@ -727,7 +727,7 @@ end
 
 function CMXint.InitializeBuffs()
 	if isFileInitialized == true then
-		return false
+		return true
 	end
 	logger = util.initSublogger("BuffPanel")
 

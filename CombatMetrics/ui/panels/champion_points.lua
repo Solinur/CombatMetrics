@@ -255,7 +255,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeChampionPoints()
 	if isFileInitialized == true then
-		return false
+		return true
 	end
 	logger = util.initSublogger("CP")
 

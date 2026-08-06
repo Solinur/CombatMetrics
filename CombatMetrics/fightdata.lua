@@ -149,7 +149,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeFightDataHandler()
 	if isFileInitialized == true then
-		return false
+		return true
 	end
 	logger = util.initSublogger("Fights")
 

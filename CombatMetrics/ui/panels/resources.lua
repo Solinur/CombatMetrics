@@ -126,7 +126,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeResourcePanel()
 	if isFileInitialized == true then
-		return false
+		return true
 	end
 	logger = util.initSublogger("Resources")
 

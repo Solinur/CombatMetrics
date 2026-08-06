@@ -691,7 +691,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeAbilities()
 	if isFileInitialized == true then
-		return false
+		return true
 	end
 	logger = util.initSublogger("Abilities")
 

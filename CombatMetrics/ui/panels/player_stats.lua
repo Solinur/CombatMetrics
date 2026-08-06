@@ -370,7 +370,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializePlayerStats()
 	if isFileInitialized == true then
-		return false
+		return true
 	end
 	logger = util.initSublogger("PlayerStats")
 

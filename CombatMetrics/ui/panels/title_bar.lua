@@ -172,7 +172,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeTitle()
 	if isFileInitialized == true then
-		return false
+		return true
 	end
 	logger = util.initSublogger("TitlePanel")
 	isFileInitialized = true

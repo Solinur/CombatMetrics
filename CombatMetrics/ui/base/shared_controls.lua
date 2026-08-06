@@ -489,7 +489,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeSharedControls()
 	if isFileInitialized == true then
-		return false
+		return true
 	end
 	logger = util.initSublogger("Controls")
 

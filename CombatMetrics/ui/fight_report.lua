@@ -221,7 +221,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeFightReport()
 	if isFileInitialized == true then
-		return false
+		return true
 	end
 	logger = util.initSublogger("FightReport")
 

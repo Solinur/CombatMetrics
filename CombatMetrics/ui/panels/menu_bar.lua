@@ -558,7 +558,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeMenu()
 	if isFileInitialized == true then
-		return false
+		return true
 	end
 	logger = util.initSublogger("Menu")
 

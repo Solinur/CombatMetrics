@@ -462,7 +462,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeCombatLog()
 	if isFileInitialized == true then
-		return false
+		return true
 	end
 	logger = util.initSublogger("Combat Log Panel")
 

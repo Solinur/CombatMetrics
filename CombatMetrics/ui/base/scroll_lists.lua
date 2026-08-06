@@ -391,7 +391,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeScrollListHandler()
 	if isFileInitialized == true then
-		return false
+		return true
 	end
 	logger = util.initSublogger("ScrollLists")
 
