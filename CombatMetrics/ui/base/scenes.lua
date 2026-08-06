@@ -43,7 +43,7 @@ end
 local isFileInitialized = false
 function CMXint.InitializeViewScenes()
 	if isFileInitialized then
-		return false
+		return true
 	end
 
 	CMXint.scenes.views = {}
