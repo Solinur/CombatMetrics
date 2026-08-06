@@ -102,6 +102,14 @@
             <Edge file="CombatMetrics/art/simpleframe2.dds" edgeFileWidth="128" edgeFileHeight="16" edgeSize="8" />
         </Backdrop>
 
+        <!-- Note: offsetX does not follow ui.dx yet. -->
+        <Backdrop name="CombatMetrics_RowCursor" edgeColor="FFD68A2E" centerColor="00000000" layer="OVERLAY"
+            alpha="0" excludeFromResizeToFitExtents="true" virtual="true">
+            <Anchor point="TOPLEFT" offsetX="2" />
+            <Anchor point="BOTTOMRIGHT" />
+            <Edge file="CombatMetrics/art/simpleframe2.dds" edgeFileWidth="128" edgeFileHeight="16" edgeSize="8" />
+        </Backdrop>
+
         <Control name="CombatMetrics_ControlFramed" virtual="true">
             <Controls>
                 <Backdrop name="$(parent)BG" inherits="CombatMetrics_BackgroundFramed">
