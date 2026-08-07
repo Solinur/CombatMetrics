@@ -255,6 +255,7 @@ end
 ---@field rowContainers RowContainer[]?
 ---@field rowPools RowContainerPool[]?
 ---@field scenes string[]? view scenes this panel appears in; nil means always visible
+---@field focusArea CMXFocusArea?
 local PanelObject = ZO_InitializingObject:Subclass()
 CMXint.PanelObject = PanelObject
 
@@ -395,6 +396,9 @@ function PanelObject:GetSelections()
 end
 
 function PanelObject:Release()
+	if self.focusArea then
+		self.focusArea:OnPanelReleased()
+	end
 	self:ReleaseSharedControls()
 end
 

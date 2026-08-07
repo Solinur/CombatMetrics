@@ -12,6 +12,8 @@ local ui = CMXint.ui
 local logger
 local registeredLists = {}
 
+local ANIMATE_INSTANTLY = true
+
 -- https://github.com/esoui/esoui/blob/live/esoui/libraries/zo_templates/scrolltemplates.lua#L713
 -- https://github.com/esoui/esoui/blob/live/esoui/ingame/contacts/keyboard/friendslist_keyboard.lua
 -- https://github.com/esoui/esoui/blob/live/esoui/ingame/contacts/keyboard/friendslist_keyboard.xml#L99
@@ -109,7 +111,87 @@ function SortFilterList:Initialize(control, rowTemplate, rowHeight) -- TODO: is 
 	registeredLists[#registeredLists + 1] = self
 
 	ZO_ScrollList_AddDataType(listControl, 1, rowTemplate, rowHeight, UpdateRow, nil, nil, onRowControlReset)
-	ZO_ScrollList_EnableHighlight(listControl, "ZO_ThinListHighlight")
+	ZO_ScrollList_EnableHighlight(listControl, "CombatMetrics_RowCursor")
+	ZO_ScrollList_EnableSelection(listControl, "CombatMetrics_RowCursor", function(_, selectedData)
+		self:OnCursorChanged(selectedData)
+	end)
+
+	ZO_ScrollList_SetEqualityFunction(listControl, 1, function(data1, data2)
+		return self:AreDataEqual(data1, data2)
+	end)
+end
+
+--- Whether two row data tables describe the same row across a rebuild. Panels can override this.
+---@param data1 table
+---@param data2 table
+---@return boolean
+function SortFilterList:AreDataEqual(data1, data2)
+	return data1.id ~= nil and data1.id == data2.id
+end
+
+---@param selectedData table?
+function SortFilterList:OnCursorChanged(selectedData)
+	if selectedData ~= nil then
+		self.lastCursorData = selectedData
+	end
+
+	local area = self.panel and self.panel.focusArea
+	if area then
+		area:OnCursorChanged(selectedData)
+	end
+end
+
+function SortFilterList:RestoreCursor()
+	if not self:HasEntries() then
+		return
+	end
+
+	local reference = self.lastCursorData
+	if reference ~= nil then
+		for _, entry in ipairs(ZO_ScrollList_GetDataList(self.list)) do
+			if self:AreDataEqual(entry.data, reference) then
+				return ZO_ScrollList_SelectDataAndScrollIntoView(self.list, entry.data, nil, ANIMATE_INSTANTLY)
+			end
+		end
+	end
+
+	local SCROLL_INTO_VIEW = true
+	ZO_ScrollList_AutoSelectData(self.list, ANIMATE_INSTANTLY, SCROLL_INTO_VIEW)
+end
+
+function SortFilterList:CommitScrollList()
+	ZO_SortFilterList.CommitScrollList(self)
+
+	local area = self.panel and self.panel.focusArea
+	if area == nil or not area:IsFocused() then
+		return
+	end
+
+	if self:HasEntries() then
+		if ZO_ScrollList_GetSelectedData(self.list) == nil then
+			self:RestoreCursor()
+		end
+	else
+		ui.gamepad.navigator:CycleArea(1)
+	end
+end
+
+function SortFilterList:MovePrevious()
+	if ZO_ScrollList_AtTopOfList(self.list) then
+		return
+	end
+
+	PlaySound(SOUNDS.GAMEPAD_MENU_UP)
+	ZO_ScrollList_SelectPreviousData(self.list)
+end
+
+function SortFilterList:MoveNext()
+	if ZO_ScrollList_AtBottomOfList(self.list) then
+		return
+	end
+
+	PlaySound(SOUNDS.GAMEPAD_MENU_DOWN)
+	ZO_ScrollList_SelectNextData(self.list)
 end
 
 function SortFilterList:Clear()
@@ -117,8 +199,6 @@ function SortFilterList:Clear()
 	ZO_ScrollList_Clear(listControl)
 	ZO_ScrollList_Commit(listControl)
 
-	-- Commit defers when the list has no height yet, so its rows stay active and would otherwise
-	-- keep holding their shared controls. Release them and force the rows to be rebuilt.
 	for _, rowControl in ipairs(listControl.activeControls) do
 		rowControl.recovered = false
 		ReleaseRowControls(rowControl)
@@ -215,6 +295,32 @@ function CMX_SortHeader_Initialize(control, key, initialDirection, highlightTemp
 	control:SetMouseEnabled(true)
 end
 
+--- TODO: with the handlers wired this still does not draw in game, though the same template does
+--- draw as the gamepad cursor via EnableSelection. Deferred as PC-only polish; see docs §0.3.
+---@param rowControl RowControl
+local function UpdateRowHoverHighlight(rowControl, enter)
+	if IsInGamepadPreferredMode() then
+		return
+	end
+
+	local scrollListCtrl = rowControl:GetParent():GetParent()
+	if enter then
+		ZO_ScrollList_MouseEnter(scrollListCtrl, rowControl)
+	else
+		ZO_ScrollList_MouseExit(scrollListCtrl, rowControl)
+	end
+end
+
+---@param rowControl RowControl
+function CMXint.Row_OnMouseEnter(rowControl)
+	UpdateRowHoverHighlight(rowControl, true)
+end
+
+---@param rowControl RowControl
+function CMXint.Row_OnMouseExit(rowControl)
+	UpdateRowHoverHighlight(rowControl, false)
+end
+
 function CMXint.IsSelectionActive()
 	for _, list in ipairs(registeredLists) do
 		if list.selections.active then
@@ -280,14 +386,76 @@ function SelectionHandler:Initialize(sortFilterList)
 	self.active = false
 end
 
-function SelectionHandler:SelectItem(id)
-	self.selectedItems[id] = true
-	self.anchor = id
-	self.active = true
-end
-
 function SelectionHandler:IsSelected(id)
 	return self.selectedItems[id] == true
+end
+
+function SelectionHandler:OnChanged()
+	local wasActive = self.active
+	self.active = next(self.selectedItems) ~= nil
+
+	if self.sortFilterList then
+		self.sortFilterList:RefreshVisible()
+	end
+
+	if self.active ~= wasActive then
+		ui.gamepad.navigator:UpdateKeybinds()
+	end
+end
+
+---@param id any
+---@param state boolean
+function SelectionHandler:SetSelected(id, state)
+	if id == nil then
+		return
+	end
+
+	self.selectedItems[id] = state or nil
+	self.anchor = state and id or nil
+	self:OnChanged()
+end
+
+---@param id any
+---@return boolean newState
+function SelectionHandler:Toggle(id)
+	local state = not self:IsSelected(id)
+	self:SetSelected(id, state)
+	return state
+end
+
+---@param id any
+function SelectionHandler:SelectOnly(id)
+	if id == nil then
+		return
+	end
+
+	ZO_ClearTable(self.selectedItems)
+	self.selectedItems[id] = true
+	self.anchor = id
+	self:OnChanged()
+end
+
+---@param id any
+---@param keepExisting boolean?
+function SelectionHandler:SelectRange(id, keepExisting)
+	if id == nil then
+		return
+	end
+
+	if self.anchor == nil then
+		return self:SetSelected(id, true)
+	end
+
+	if not keepExisting then
+		ZO_ClearTable(self.selectedItems)
+	end
+
+	local scrollData = ZO_ScrollList_GetDataList(self.sortFilterList.list)
+	for entryId in iterRange(scrollData, self.anchor, id) do
+		self.selectedItems[entryId] = true
+	end
+
+	self:OnChanged()
 end
 
 function SelectionHandler:Count()
@@ -305,12 +473,10 @@ end
 function SelectionHandler:Clear()
 	ZO_ClearTable(self.selectedItems)
 	self.anchor = nil
-	self.active = false
-	if self.sortFilterList then
-		self.sortFilterList:RefreshVisible()
-	end
+	self:OnChanged()
+
 	if CMXint.fightReport then
-		CMXint.fightReport:Update()
+		CMXint.fightReport:RequestUpdate()
 	end
 end
 
@@ -332,38 +498,18 @@ function SelectionHandler:HandleClick(data, button, upInside, ctrl, shift)
 		return
 	end
 
-	if not ctrl and not shift then
-		if self.selectedItems[id] and self:Count() == 1 then
-			ZO_ClearTable(self.selectedItems)
-			self.anchor = nil
-		else
-			ZO_ClearTable(self.selectedItems)
-			self:SelectItem(id)
-		end
-	elseif ctrl and not shift then
-		if self.selectedItems[id] then
-			self.selectedItems[id] = nil
-			self.anchor = nil
-		else
-			self:SelectItem(id)
-		end
-	else -- shift or ctrl+shift: range selection
-		if self.anchor == nil then
-			self:SelectItem(id)
-		else
-			if not ctrl then
-				ZO_ClearTable(self.selectedItems)
-			end
-			local scrollData = ZO_ScrollList_GetDataList(self.sortFilterList.list)
-			for entryId in iterRange(scrollData, self.anchor, id) do
-				self.selectedItems[entryId] = true
-			end
-		end
+	if shift then
+		self:SelectRange(id, ctrl)
+	elseif ctrl then
+		self:Toggle(id)
+	elseif self:IsSelected(id) and self:Count() == 1 then
+		self:SetSelected(id, false)
+	else
+		self:SelectOnly(id)
 	end
 
-	self.active = next(self.selectedItems) ~= nil
 	if CMXint.fightReport then
-		CMXint.fightReport:Update()
+		CMXint.fightReport:RequestUpdate()
 	end
 end
 

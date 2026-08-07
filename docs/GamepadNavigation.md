@@ -15,10 +15,11 @@ The plan started from assumptions read out of the ESO UI source rather than a ru
 **§0 records what checking them in game returned** — several answers changed the design rather
 than confirming it, and the sections that follow are written against those answers.
 
-The input scheme in §3.3 is the second one. The first was pure vanilla — stick between areas,
-shoulders cycling the category — and it did not survive measuring the layout or discovering that
-the d-pad was reachable after all. **§7.7 records why it changed**; read it before proposing a
-return to stick-driven area movement.
+The input scheme in §3.3 is the **third** one. The first was pure vanilla and did not survive
+measuring the layout; the second moved panel switching to the shoulders and spent the d-pad on the
+view and category cycles, and did not survive a gamepad — the d-pad is also the left stick (§0.2).
+**§7.7 records both changes**; read it before proposing anything that needs a free ethereal slot,
+and §0.2 before assuming any `UI_SHORTCUT_*` action belongs to one device.
 
 ---
 
@@ -86,13 +87,32 @@ misread every d-pad binding (123–126), Start/Back (127/128) and both stick cli
 real layout is 123–126 d-pad, 127/128 Start/Back, 129/130 stick clicks, 131/132 shoulders, 133–136
 face buttons, 137/138 triggers. Three consequences run through the rest of the plan:
 
-- **`UI_SHORTCUT_INPUT_*` is the d-pad, and it is a keybind-strip action.** All four route through
-  `ZO_KeybindStrip_HandleKeybindDown` (`ingame/globals/bindings.xml:649-667`), so an addon binds
-  them exactly like `PRIMARY`. This is the *only* way an addon reaches the d-pad — the
-  `DIRECTIONAL_INPUT` route is closed (§1 constraint 1) — and the two paths are independent, so a
-  d-pad bind cannot double-fire against the navigator's analog stick read. §3.3 spends all four.
-  Do not confuse them with `UI_SHORTCUT_LEFT_STICK_UP` / `RIGHT_STICK_UP` and friends, which
-  `return false` and exist only so keyboard keys emulating stick input can be rebound.
+- **`UI_SHORTCUT_INPUT_*` is *not* a d-pad channel — it is the d-pad *and* the left stick.** All four
+  route through `ZO_KeybindStrip_HandleKeybindDown` (`ingame/globals/bindings.xml:649-667`), so an
+  addon binds them exactly like `PRIMARY`. But each carries **three** default bindings, not one.
+  Enumerated in game with `GetActionIndicesFromName` + `GetActionBindingInfo`, `UI_SHORTCUT_INPUT_UP`
+  returns `112` (`KEY_UPARROW`), `123` (`KEY_GAMEPAD_DPAD_UP`) and **`139`
+  (`KEY_GAMEPAD_LSTICK_UP`)**. The action is named `INPUT_UP`, not `DPAD_UP`, and that is the point:
+  ZOS treats the two devices as one directional input.
+
+  > An earlier draft of this bullet claimed the opposite — "the two paths are independent, so a
+  > d-pad bind cannot double-fire against the navigator's analog stick read" — and §3.3 spent all
+  > four directions on it. It is wrong, and it was found the way it had to be: pushing the stick to
+  > scroll a list also changed the category. `GetHighestPriorityActionBindingInfoFromName` returns
+  > only the *highest priority* binding, which is why the original check missed the other two.
+  > **Enumerate all `GetMaxBindingsPerAction()` slots before assuming an action is device-specific.**
+
+  Do not confuse these with `UI_SHORTCUT_LEFT_STICK_UP` / `RIGHT_STICK_UP` and friends, which
+  `return false` and exist only so keyboard keys emulating stick input can be rebound. On keyboard
+  the two *are* separate — WASD drives the emulation binds, the arrow keys drive `INPUT_*` — so a
+  keyboard test cannot detect this collision. Only a gamepad can.
+
+  **The consequence is a design rule, not a workaround:** never bind an axis of
+  `UI_SHORTCUT_INPUT_*` that the focused control already uses the stick for. ZOS follows it
+  strictly — there are **7** uses of `UI_SHORTCUT_INPUT_*` in the entire UI source, all LEFT/RIGHT
+  (`zo_gamepadutils.lua:99`, `:135`, `zo_gamepadlinks.lua:89`, `:103`, `worldmapzonestory_gamepad`,
+  `guildbrowser_guildinfo_gamepad`), every one of them on a screen whose focus is a *vertical* list
+  with a spare horizontal axis. `UI_SHORTCUT_INPUT_UP` and `_DOWN` are used **zero** times.
 - **`QUATERNARY` is not a fifth button.** It is *hold X* — the same physical button as `SECONDARY`
   (tap X). A panel defining both puts them on one button, and the tap only resolves on release, so
   frequency decides which gets the tap (§3.3, §7.4).
@@ -125,6 +145,16 @@ costs less convention than it appears to.
   thing — "the row the pointer is on" — so one look serves both and the row still has only two
   distinct marks: the selection fill and the gold outline. This is a PC-only improvement; on
   console the mouse path never runs, so it must never become the only way anything is shown.
+
+  > **Wired in phase 1, and still does not draw — deferred.** `CombatMetrics_RowTemplate` now has
+  > `OnMouseEnter` / `OnMouseExit` calling `CMXint.Row_OnMouseEnter` / `_OnMouseExit`
+  > ([scroll_lists.lua](../CombatMetrics/ui/base/scroll_lists.lua)), which forward to
+  > `ZO_ScrollList_MouseEnter` / `MouseExit` outside gamepad mode. In game only the scrollbar
+  > responds; the row outline never appears. The same template *does* draw as the gamepad cursor
+  > through `EnableSelection`, so the art and the template are fine and the fault is somewhere on
+  > the mouse path — the handler not firing, or `HighlightControl` being reached with the highlight
+  > locked. **Still PC-only polish, so it blocks nothing**; pick it up when the console-facing work
+  > is done rather than in the middle of it.
 
   Two mechanics to respect when implementing:
   - They are *separate* ZO systems. `highlightTemplateOrFunction` (mouse-over) and
@@ -208,11 +238,13 @@ activate + deactivate callback and its own keybind descriptor.
    (`zo_directionalinput.lua:332`, `:342`), so **analog trigger pressure is unavailable too** —
    though LT and RT work fine as ordinary keybind-strip actions, which is all §3.3 needs.
 
-   **This does not cost us the d-pad.** It is reachable through the *other* path:
-   `UI_SHORTCUT_INPUT_UP` / `_DOWN` / `_LEFT` / `_RIGHT` are keybind-strip actions bound to
-   `KEY_GAMEPAD_DPAD_*` (§0.2), so four ethereal binds give full d-pad navigation with no
-   `DIRECTIONAL_INPUT` involvement. The two paths are independent — the navigator polls only the
-   analog left stick, the strip handles the d-pad — so nothing double-fires. §3.3 uses all four.
+   **The d-pad is still reachable, but not as a channel of its own.**
+   `UI_SHORTCUT_INPUT_UP` / `_DOWN` / `_LEFT` / `_RIGHT` are keybind-strip actions, so four ethereal
+   binds do reach the d-pad with no `DIRECTIONAL_INPUT` involvement — but they reach the **left
+   stick** at the same time (§0.2), so anything bound there fires on a stick push as well. The two
+   paths are therefore *not* independent, and the navigator has to gate the strip binds on the stick
+   being at rest (`Navigator:IsStickActive`). Since the d-pad can only ever do what the stick does,
+   §3.3 spends it mirroring the navigator's own movement rather than on actions of its own.
    `ZO_DI_RIGHT_STICK` is likewise clean (`GetGamepadOrKeyboardRightStickX/Y`, no `IsKeyDown`) and
    remains unspent, should a second analog axis ever be wanted.
 
@@ -319,45 +351,54 @@ ui.gamepad
   sorted by the panel control's `GetLeft()` / `GetTop()` — read off the live layout rather than a
   hardcoded panel list, so the order cannot drift from it. Called from the same `SCENE_SHOWN`
   callback, i.e. once per view switch, and again after a fight change if a panel became empty.
-  **This one ordering serves both movers**: it is the stick's sideways chain and the shoulders'
-  ring, which is why neither needs a map.
-- `UpdateDirectionalInput()` (inherited) → `HandleMoveCurrentFocus(horizontal, vertical)`.
-- `CycleArea(delta)`: steps `focusAreas` by ±1 with wraparound, skipping `CanBeSelected() == false`.
-  What the shoulders call. Unlike the stick it wraps, so it reaches every area from anywhere.
+  **This one ordering is the whole of the map**: it is the chain the stick's horizontal axis walks,
+  which is why no area needs to know its surroundings.
+- `UpdateDirectionalInput()` (inherited) → `HandleMoveCurrentFocus(horizontal, vertical)`. The d-pad
+  binds call the same method directly (§3.3), so both devices go through one path.
+- `CycleArea(delta)`: steps `focusAreas` by ±1 **with wraparound**, skipping
+  `CanBeSelected() == false`. Both movers use it — the stick's horizontal axis and the recovery path
+  for when the focused panel goes empty on a fight change. It wraps because ←→ is the only way
+  between panels: dead-ending at the leftmost and rightmost would make the ring traversable one way
+  only. The base's `GetPreviousSelectableFocusArea` / `GetNextSelectableFocusArea` sibling walk is
+  therefore *not* used, though the chain `Rebuild` builds still supplies the order.
 - Owns the whole global keybind descriptor (§3.3): shoulders, triggers, d-pad, B, hold-X and Y.
   Only `A` and `X` belong to the per-panel areas.
+- `StampMovement()` / `IsMovementOnCooldown()`: the movement cooldown that keeps a held stick from
+  running through panels, described under `ui.FocusArea` below. `OnFocusChanged` (the one point both
+  `SelectFocusArea` and `ActivateFocusArea` end at) stamps it, so the focus a view swap hands out
+  starts the cooldown too and a stick held through the swap cannot carry straight on.
+- `IsStickActive()`: whether the left stick is deflected, or was within `STICK_SETTLE_MS`. The four
+  d-pad binds early-return on it, because they are also stick bindings (§0.2) and would otherwise
+  double-step every stick push. A window rather than an instantaneous read because the key event and
+  the navigator's own poll are not ordered within a frame, at either end of a push.
 - Only runs when `IsInGamepadPreferredMode()` is true (checked once at `Activate`).
 
 **`ui.FocusArea`** — one panel's worth of focus. It holds **no map of its surroundings**: the ESO
 base's `previousFocus` / `nextFocus` chain, ordered spatially by `Rebuild`, is the whole of it.
 
 An earlier draft gave the class a 2D `neighbours` table keyed up/down/left/right, on the reasoning
-that CMX's layout is a grid rather than a chain. That was written when the stick was the only way
-between panels. With the shoulders owning that job it never acquired a caller, and vertical — the
-one direction a chain genuinely cannot express — is exactly the direction the shoulders replaced.
-It was deleted rather than left as scaffolding.
+that CMX's layout is a grid rather than a chain. It never acquired a caller and was deleted rather
+than left as scaffolding: vertical is the one direction a chain cannot express, and vertical never
+leaves an area (§3.3). Left/right is a chain walk, which the ESO base already does.
 
 ```lua
 ---@class CMXFocusArea : ZO_GamepadMultiFocusArea_Base
 ---@field panel Panel
----@field canEscape boolean
 ```
 
 - Override `HandleMovementInternal(horizontal, vertical)`:
-  1. give the panel a chance to consume it (`self:HandleMovement(...)` — list scroll, row step,
-     sort column),
-  2. otherwise apply the **edge latch** (§3.3): if the stick has not returned to neutral since
-     this area last refused to move internally, consume the input and stay. One boolean per area
-     (`canEscape`), cleared on `Activate` and on any internal move, set when the stick reads
-     neutral. This lives in the base because every area can be left sideways,
+  1. give the panel a chance to consume it (`self:HandleMovement(...)` — list scroll, row step), and
+     stamp `manager:StampMovement()` when it does,
+  2. otherwise apply the **movement cooldown** (§3.3): if any focus movement happened within
+     `AREA_SWITCH_COOLDOWN_MS`, consume the input and stay. The state is one timestamp on the
+     navigator (`lastMoveMs`), stamped by an interior move here and by every focus change through
+     `Navigator:OnFocusChanged`. This lives in the base because every area can be left sideways.
 
-     Read neutrality off the movement controllers' cached `lastMagnitude`, **not**
-     `GetMagnitude()`: the latter goes through `DIRECTIONAL_INPUT:GetX` / `GetY`, which *consume*
-     the device for the frame (§1 constraint 1), so polling it would starve the `CheckMovement`
-     calls in the same tick and movement would stop entirely. Do the check *after* delegating to
-     the base `UpdateDirectionalInput`, which is where `lastMagnitude` is refreshed.
-  3. otherwise, **for horizontal moves only**, `GetPreviousSelectableFocusArea` /
-     `GetNextSelectableFocusArea` and `manager:SelectFocusArea(next)`. Vertical never leaves an
+     Stamping interior moves is the load-bearing half: `HandleMovement` swallows the horizontal
+     component only on frames where a vertical move also fires, so between two vertical repeat
+     ticks a slightly diagonal hold produces a bare horizontal result, and without the stamp it
+     would walk straight out of the list.
+  3. otherwise, **for horizontal moves only**, `manager:CycleArea(±1)`. Vertical never leaves an
      area: the chain runs left to right, so stepping it on an up/down push would jump sideways.
 - `CanBeSelected()` defaults to "panel control is not hidden **and** the panel has content".
 - `Activate` / `Deactivate` show/hide the panel's focus highlight and add/remove the panel's
@@ -399,39 +440,40 @@ the addon was assigned to one of these rows and why, and §7.7 for what the earl
 
 | Input | Strip | Scope | Action |
 | --- | --- | --- | --- |
-| Left stick ↑↓ | – | focused area | Move inside the area — list rows, menu-bar buttons, row containers. |
-| Left stick ←→ | – | focused area | The panel's horizontal axis if it has one (a list steps its **sort column**), otherwise move to the spatial neighbour area. |
-| `LEFT_SHOULDER` / `RIGHT_SHOULDER` | ethereal | global | Previous / next **panel**. The unconditional escape from any area, at any scroll position. |
+| Left stick ↑↓ | – | focused area | Move inside the area — list rows, menu-bar buttons, row containers. Never leaves the area. |
+| Left stick ←→ | – | focused area | Move to the spatial neighbour **panel**, behind the movement cooldown, so a held stick crosses one boundary per window. |
+| `INPUT_UP` / `INPUT_DOWN` (d-pad ↑↓) | ethereal | focused area | **Mirrors left stick ↑↓.** Not a channel of its own — see below. |
+| `INPUT_LEFT` / `INPUT_RIGHT` (d-pad ←→) | ethereal | focused area | **Mirrors left stick ←→.** |
+| `LEFT_SHOULDER` / `RIGHT_SHOULDER` | ethereal | global | Previous / next **view**, skipping views whose panel set is empty (§4 phase 2). |
 | `LEFT_TRIGGER` / `RIGHT_TRIGGER` | ethereal | global | Previous / next **fight** (`SelectPreviousFight` / `SelectNextFight`). |
-| `INPUT_LEFT` / `INPUT_RIGHT` (d-pad ←→) | ethereal | global | Previous / next **view**, skipping views whose panel set is empty (§4 phase 2). |
-| `INPUT_UP` / `INPUT_DOWN` (d-pad ↑↓) | ethereal | global | Previous / next **category** (damage done → healing done → damage received → healing received). |
 | `UI_SHORTCUT_PRIMARY` (A) | visible | focused entry | Select / Deselect a list row; press a menu-bar button. Label is dynamic. |
 | `UI_SHORTCUT_NEGATIVE` (B) | visible | global | Clear selections if any (`CMXint.ClearSelections`), otherwise close the report. **One** descriptor with a dynamic `name` and a branching callback — see the note below. |
 | `UI_SHORTCUT_SECONDARY` (X) | visible | focused row | Panel-defined. `buffs`: Expand / Collapse, visible only when the row `hasDetails`. Absent on `units` and `abilities`. |
 | `UI_SHORTCUT_QUATERNARY` (hold X) | visible | global | **Save Fight.** `enabled` and the label come from the same condition `MenuPanel:UpdateButtonStates()` already computes. |
-| `UI_SHORTCUT_TERTIARY` (Y) | visible | global | **Menu** (§5.1) — one sectioned dialog: row actions when a row is focused, then the buff filter, the display toggles, and feedback / donate. |
-| `RIGHT_STICK` (click) | ethereal | global | Jump straight to the menu-bar area. An alternative route, never the only one. |
+| `UI_SHORTCUT_TERTIARY` (Y) | visible | global | **Menu** (§5.1) — one sectioned dialog: row actions when a row is focused, then the **sort column**, the **category**, the buff filter, the display toggles, and feedback / donate. |
+| `RIGHT_STICK` (click) | ethereal | — | Reserved. |
 | `LEFT_STICK` (click) | ethereal | — | Reserved. |
 
-Each pair has exactly one job: **triggers pick the fight, the d-pad picks the slice of it, the
-shoulders pick where you are standing.**
+**The stick moves you around the report; the buttons change what the report is showing.**
+Directions — from either device — only ever move the focus. Triggers pick the fight, shoulders pick
+the view, and everything that is neither ordered nor frequent is a Y menu row.
 
-Three notes on the choices, because each replaces something the earlier draft had:
+Three notes on the choices, because each replaces something an earlier draft had:
 
-- **The shoulders carry panels, not categories.** The report is a 2×3 grid whose list panels show
-  12–14 rows of a 30–60 row dataset, so stick fall-through at a list edge means running the whole
-  list out to leave the panel — 3–5 screens on `abilities`, which additionally has no down-neighbour
-  and so can only be left *upward*. A button that escapes in one press is not a convenience here,
-  it is the difference between usable and not. Categories move to the d-pad, which the earlier
-  draft did not know it had.
+- **The d-pad mirrors the stick, and cannot do otherwise.** `UI_SHORTCUT_INPUT_*` carries
+  `KEY_GAMEPAD_LSTICK_*` as a default binding alongside `KEY_GAMEPAD_DPAD_*` (§0.2), so the two
+  devices are one input. An earlier draft gave them separate jobs — views on d-pad ←→, categories on
+  d-pad ↑↓ — and the result was that scrolling a list with the stick also changed the category. The
+  navigator still gates the four binds on `IsStickActive()` so a stick push does not both poll and
+  fire; with them mirroring the stick, a missed gate costs one extra row of movement rather than a
+  silent category change.
 - **Save is `QUATERNARY` because `QUATERNARY` is physically a hold.** "Long press to confirm intent"
   needs no state machine; the binding *is* the hold. It shares the X button with `buffs`' tap-X
   expand/collapse — accepted, since both are labelled on the strip and the collision exists in
   exactly one panel (§7.4).
-- **No sort-header focus area and no buff-filter focus area.** Sorting is the list's own horizontal
-  axis and the buff filter is a menu section, so every area in the navigator is now a whole panel.
-  Nothing nests, the shoulder ring is 5–6 stops, and §5.2's mandatory header highlight template is
-  no longer needed at all.
+- **No sort-header focus area and no buff-filter focus area.** Sorting, the category and the buff
+  filter are all Y menu sections, so every area in the navigator is a whole panel. Nothing nests,
+  and §5.2's mandatory header highlight template is not needed at all.
 
 **One descriptor per keybind, per group.** `ZO_KeybindStrip` stores dispatch in `self.keybinds`
 keyed by the keybind *string* (`zo_keybindstrip.lua:358`), and a second entry for the same string
@@ -447,33 +489,48 @@ every `UpdateKeybindButtonGroup`. Call `UpdateKeybinds()` after anything that fl
 for B that is clearing a selection, and for hold-X it is saving, changing fight or changing
 category.
 
-**The stick leaves an area sideways only.** ←→ that the panel does not consume steps the spatial
-chain `Rebuild` builds; ↑↓ never leaves. That asymmetry is deliberate: the chain is ordered left to
-right, so stepping it on an up/down push would move the focus sideways while the player pushed
-down — worse than doing nothing, and the shoulders are the answer to "get me out of here" anyway.
-Keeping A and B out of it still matters: A is select/deselect and B is clear/close, so neither
-could double as enter/leave without adding a mode.
+**The stick leaves an area sideways only.** ←→ steps the spatial chain `Rebuild` builds; ↑↓ never
+leaves. That asymmetry is deliberate: the chain is ordered left to right, so stepping it on an
+up/down push would move the focus sideways while the player pushed down — worse than doing nothing.
+The cost is that a list can only be left sideways, which the movement cooldown below makes cheap:
+one push crosses one boundary regardless of scroll position, so leaving `abilities` costs one press,
+not sixty. Keeping A and B out of it still matters: A is select/deselect and B is clear/close, so
+neither could double as enter/leave without adding a mode.
 
-**Edge latch — a held stick must not cross an area boundary.** Stock ESO has a wart here that CMX
-should not copy. `ZO_MovementController` accelerates a held direction
+**Movement cooldown — a held stick must not run through area boundaries.** Stock ESO has a wart here
+that CMX should not copy. `ZO_MovementController` accelerates a held direction
 (`NUM_TICKS_TO_START_ACCELERATING = 5`, `MAX_TICKS_TO_ACCEL_ACROSS = 30`), and nothing guards the
 boundary — `IsAtMaxVelocity()`, which exists to detect exactly this, is called in one place in the
 entire UI source and it is the housing editor. So a held ← in a panel with no horizontal axis
 sweeps the focus across every panel in the row at speed.
 
-The fix is one piece of state per focus area, not a mode: **escape only on a fresh push.** When a
-sideways move would leave the area, allow it only if the stick has passed through neutral since
-the edge was reached; otherwise consume the move and stay put. Hold ← and you stop at the adjoining
-panel. Release, push again, and you cross the next one. This also protects paint-select (§7.5),
-where sliding out of the list mid-sweep would be worse than startling.
+The fix is one timestamp on the navigator, not a mode: **a sideways move that would leave the area
+is refused unless `AREA_SWITCH_COOLDOWN_MS` (400) has passed since the focus last moved at all.**
+Any interior move stamps it, and so does every focus change. Hold ← and you step one panel per
+window instead of being swept across the row; scroll a list and horizontal drift cannot escape it,
+because each row step re-arms the cooldown. That second part is what makes stamping interior moves
+load-bearing rather than tidy: `HandleMovement` only swallows the horizontal component on frames
+where a vertical move also fires, so between two vertical repeat ticks a slightly diagonal hold
+produces a bare horizontal result. This also protects paint-select (§7.5), where sliding out of the
+list mid-sweep would be worse than startling. It applies to the d-pad for free, since those binds
+route through the same `HandleMovementInternal`.
+
+An earlier version required the stick to pass through neutral instead of timing it (`canEscape`, one
+boolean per area, set from the navigator's per-frame neutrality read). It gave a stricter "one panel
+per push", at the cost of a per-area flag, a `FocusArea:Activate` override to clear it and a neutral
+branch in `UpdateDirectionalInput`. The cooldown is the same guarantee within a tolerance and keeps
+the state in one place.
+
 **The budget.** `ethereal = true` means the bind fires but draws nothing on the strip
 (`ingame/armory/gamepad/armorybuildskills_gamepad.lua:80`,
 `ingame/guildhistory/gamepad/guildhistory_gamepad.lua:58`). So there are 4 *visible* buttons
-(A / X / Y / B) carrying 5 slots — QUATERNARY is hold X, not a button of its own — plus **10**
-free ones: two shoulders, two triggers, two stick clicks and four d-pad directions. The map above
-spends 8 of the 10, leaving both stick clicks. Cycling actions belong in the free tier, which is
-also what ESO does with them (`ingame/champion/champion.lua:701` cycles constellations on the
-shoulders, `guildhistory` pages on the triggers).
+(A / X / Y / B) carrying 5 slots — QUATERNARY is hold X, not a button of its own — plus **six**
+genuinely free ones: two shoulders, two triggers and two stick clicks. The four d-pad directions
+looked free in an earlier draft and are not (§0.2): they are the stick, so they can only ever mirror
+it. The map above spends the shoulders and triggers, leaving both stick clicks. Cycling actions
+belong in the free tier, which is also what ESO does with them
+(`ingame/champion/champion.lua:701` cycles constellations on the shoulders, `guildhistory` pages on
+the triggers).
 
 Resulting strip density: `units` and `abilities` show 4 binds (A, B, hold-X, Y), `buffs` shows 5,
 the menu bar 4.
@@ -514,23 +571,29 @@ Everything in §3.3 that is not panel-specific, landed before any panel gains a 
 report is navigable in the large before it is navigable in the small. All of it lives on the
 navigator's own keybind descriptor, which already exists.
 
-- Shoulders → `navigator:CycleArea(±1)` over `self.focusAreas`. With no panel converted yet the
-  ring is empty and the binds are inert, which is the correct degradation.
-- Triggers → `SelectPreviousFight` / `SelectNextFight`.
-- d-pad ←→ → previous / next view, **skipping views whose panel set is empty**. `graph` and
+- Shoulders → previous / next view, **skipping views whose panel set is empty**. `graph` and
   `fightList` instantiate no panels at all today, so a naive cycle steps through two blank screens;
   deriving "is this view non-empty" from `ui.panels` means views light up by themselves as their
   panels come online, with no list to maintain. Do not persist `settings.scene` for `fightList`
   (§4 phase 2) — it is a picker, not a place to sit.
-- d-pad ↑↓ → previous / next category over `util.MainCategories`, then `fightReport:Update()`.
+- Triggers → `SelectPreviousFight` / `SelectNextFight`.
+- d-pad → `HandleMoveCurrentFocus`, mirroring the stick (§3.3), gated on `IsStickActive()`. With no
+  panel converted yet there is nothing focused and the binds are inert, which is the correct
+  degradation.
 - hold X → Save Fight. Reuse the enabled condition from `MenuPanel:UpdateButtonStates()`
   (`menu_bar.lua:495`) rather than recomputing it, and flip the label when the fight is already
   saved.
 - B → the two-descriptor Clear Selections / Close pair (§7.6). `CMXint.IsSelectionActive()` and
   `CMXint.ClearSelections()` already exist at `scroll_lists.lua:218` / `:227`.
 
-**Done when:** with no panel converted, a gamepad can switch fight, category and view, save a
-fight, and close — the whole report shell, with the panels still inert.
+**Done when:** with no panel converted, a gamepad can switch fight and view, save a fight, and
+close — the whole report shell, with the panels still inert.
+
+**Landed, then revised.** As shipped, this phase put views on d-pad ←→ and categories on d-pad ↑↓,
+with the shoulders cycling panels. Phase 1 found that the stick fires those binds too (§0.2), so
+views moved to the shoulders, panel movement moved to the stick's horizontal axis, and the category
+moved to the Y menu. `MenuPanel:CycleCategory` (`menu_bar.lua:531`) is left without a caller until
+phase 2 decides whether the Y menu cycles or selects.
 
 ### Phase 1 — list panels: `units`, `abilities`, `buffs`
 
@@ -546,16 +609,14 @@ The big one, and the one that unlocks most of the value.
     used for filtering. They are independent; give the new one a distinct template so the two
     highlights are visually different.
 - `ui.ListFocusArea`:
-  - `HandleMovement`: vertical → `MoveNext` / `MovePrevious`; **horizontal → step the sort column**,
-    `sortHeaderGroup:OnHeaderClicked(nextHeader)`. The header's own arrow already renders which
-    column is active (`usesArrow = true`), so this needs no new art and no second focus area.
-    Skip the plain `Label` columns — `PerCent` in `units`, `Crits` and `Hits` in `abilities` are
-    not sort headers, so the chain has gaps.
-  - **Do not override `HandleMovePrevious` / `HandleMoveNext`.** Vertical no longer escapes an
-    area at all (§3.3), so `AtTopOfList` / `AtBottomOfList` never need testing — ↑ at the first row
-    and ↓ at the last simply do nothing, and the shoulders are the way out. The base class's
-    versions walk the sibling chain, so leave them shadowed by returning `true` from
-    `HandleMovement` for every vertical input the list receives.
+  - `HandleMovement`: vertical → `MoveNext` / `MovePrevious`, returning `true`; **horizontal →
+    return `false`** so the base steps to the adjoining panel behind the cooldown. Sorting is a Y
+    menu section (§3.3), not the list's horizontal axis — an earlier draft had it there, which is
+    what forced panel switching onto the shoulders and, from there, the category onto the d-pad.
+  - **Do not override `HandleMovePrevious` / `HandleMoveNext`.** Vertical never escapes an area
+    (§3.3), so `AtTopOfList` / `AtBottomOfList` never need testing — ↑ at the first row and ↓ at the
+    last simply do nothing. The base class's versions walk the sibling chain, so leave them
+    shadowed by returning `true` from `HandleMovement` for every vertical input the list receives.
   - `CanBeSelected`: `self.panel.dataList:HasEntries()`.
   - `Activate`: `ZO_ScrollList_AutoSelectData(list, ANIMATE_INSTANTLY)`; `Deactivate`:
     `ZO_ScrollList_SelectData(list, nil)`.
@@ -571,9 +632,13 @@ The big one, and the one that unlocks most of the value.
     navigator cannot poll for it — `name` is only re-read on `UpdateKeybindButtonGroup`. Have the
     new primitives call `ui.gamepad.navigator:UpdateKeybinds()` when the selection count crosses
     zero, which is the only transition the label cares about.
-- ~~Column headers as a second focus area~~ — **dropped.** Sorting is the list's horizontal axis
-  (above), so there is no header area, no `sortHeaderGroup:EnableSelection`, and **no highlight
-  template needed** — which retires §5.2 item 1 and check C4 entirely.
+- ~~Column headers as a second focus area~~ — **dropped.** Sorting is a Y menu section (§3.3), so
+  there is no header area, no `sortHeaderGroup:EnableSelection`, and **no highlight template
+  needed** — which retires §5.2 item 1 and check C4 entirely. Until phase 2 builds that menu,
+  sorting is mouse-only; `sortHeaderGroup.sortHeaders` is exactly the set the menu should list,
+  since `ZO_SortHeaderGroup:AddHeader` (`zo_sortheadergroup.lua:33`) already refuses any child
+  without a `key` — the plain `Label` columns (`PerCent` in `units`, `Crits` / `Hits` in
+  `abilities`) are never in it.
 - ~~`buffs` `SearchBar` as a third focus area~~ — **dropped.** Player / Group / Enemy becomes a
   section of the `Y` menu (§5.1). The `ZO_RadioButtonGroup` stays exactly as it is for the mouse;
   the menu entries drive the same callbacks. Note the visual order is Player, Group, Enemy — the
@@ -586,17 +651,16 @@ The big one, and the one that unlocks most of the value.
   the `X` bind, favourite and the two "post uptime" entries become `Y` menu rows.
 - Tooltips: on focus change call the existing handler with the focused row control.
 
-**Done when:** the three list panels can be entered with the shoulders, scrolled, sorted with ←→
-and (multi-)selected with a gamepad, and the numbers in the other panels react to the selection as
-they do with a mouse.
+**Done when:** the three list panels can be entered with the stick's horizontal axis, scrolled, and
+(multi-)selected with a gamepad, and the numbers in the other panels react to the selection as they
+do with a mouse. Sorting and the category wait for phase 2's Y menu.
 
 ### Phase 2 — the `Y` menu, and the menu bar as an alternative route
 
-**Every menu-bar action already has a bind or a menu entry by the end of phase 0.5.** Category is
-the d-pad, views are the d-pad, fight nav is the triggers, save is hold-X, settings and feedback
-are `Y` menu sections. So the menu bar is no longer a route anything depends on — it becomes a
-focus area because it is cheap and some players will prefer pointing at a button, not because the
-console build needs it. Build the `Y` menu first; the focus area is the smaller half.
+**The `Y` menu is now load-bearing, not a convenience.** Views are the shoulders, fight nav is the
+triggers, save is hold-X — but **the category and the sort column have no bind at all** (§3.3), so
+until this menu exists a gamepad cannot change either. That makes it the first thing to build here,
+ahead of the menu-bar focus area.
 
 **The `Y` menu** (`CMXint.ShowGamepadMenu`, §5.1) — one registered dialog, list rebuilt per
 invocation, `header` starting each section:
@@ -604,9 +668,15 @@ invocation, `header` starting each section:
 | Section | Entries |
 | --- | --- |
 | *(row actions — only when a list row is focused)* | Post DPS / unit-name DPS / selection DPS / selection HPS, or the buff-uptime variants |
+| **Sort** *(only when a list panel is focused)* | one row per `sortHeaderGroup.sortHeaders` entry; re-selecting the active column flips the direction, which is what `OnHeaderClicked` already does |
+| **Category** | Damage Done · Healing Done · Damage Received · Healing Received, from `util.MainCategories`, calling `MenuPanel:SelectCategory` |
 | **Panel** | `buffs`: Show Player / Group / Enemy · Add / Remove Favourite |
 | **Options** | Show IDs · Show Overheal · Show Pets |
 | **About** | Feedback ▸ · Donate ▸ |
+
+Sort and Category both change what the focused list shows, so they want
+`blockDialogReleaseOnPress = true` and a rebuild in place like the Options toggles — a player
+comparing columns should not have to reopen the menu for each one.
 
 The Options rows are toggles, so they need `blockDialogReleaseOnPress = true` and a rebuild in
 place (§5.1). The About rows are one-shot and release.
@@ -802,13 +872,17 @@ report is assigned to exactly one of four mechanisms.
 | --- | --- | --- | --- |
 | 1 | **Focus area** — walk to it with the stick, press A | nothing | The thing is already a control laid out in the window. |
 | 2 | **Visible strip bind** — A / X / Y / B, plus hold-X (QUATERNARY) | one of ~5 slots on 4 buttons | The action applies to *whatever is focused*, has at most two states, and is used more than once per fight reviewed. |
-| 3 | **Ethereal cycle bind** — LB/RB, LT/RT, d-pad ↑↓ and ←→, LS/RS | nothing | A *global* ordered set stepped through often. No strip space, so no justification needed beyond "ordered and frequent". |
+| 3 | **Ethereal cycle bind** — LB/RB, LT/RT, LS/RS | nothing | A *global* ordered set stepped through often. No strip space, so no justification needed beyond "ordered and frequent". |
 | 4 | **Menu dialog entry** (§5.1) | two extra presses | Everything else: more than two variants, unordered, or rare. |
 
 Mechanism 1 is weaker than it looks on console. A focus area is only cheap to *reach* if it is near
 where you already are, and in a 2×3 grid of panels holding 30–60 row lists it frequently is not
-(§7.7). Where mechanism 1 and mechanism 3 both fit, prefer 3 — ethereal slots cost nothing, and
-after the d-pad was found there are ten of them.
+(§7.7). Where mechanism 1 and mechanism 3 both fit, prefer 3 — ethereal slots cost nothing.
+
+But there are only **six** of them, not the ten an earlier draft counted. The d-pad is not a fifth
+and sixth pair: `UI_SHORTCUT_INPUT_*` is bound to the left stick as well (§0.2), so it can only
+mirror what the stick already does. Mechanism 4 therefore carries more than it was meant to —
+the category and the sort column both land there for want of a slot.
 
 ### 7.2 The test
 
@@ -834,14 +908,15 @@ Anything that is already a button in the window is mechanism 1 by default; a bin
 | Action | Mechanism | Reasoning |
 | --- | --- | --- |
 | Close report | 2 — B | Universal, and B already means "back". |
-| **Leave the focused panel** | 3 — LB / RB | The highest-priority requirement of the whole scheme. Must not depend on scroll position; see §7.7. |
-| Previous / next panel | 3 — LB / RB | Same bind. Shoulders are the pane-switching idiom, and they are rarer in stock code than R3, so repurposing them costs little. |
+| **Leave the focused panel** | 1 — left stick ← → | The highest-priority requirement of the whole scheme. Must not depend on scroll position — the movement cooldown is what delivers that: one push crosses one boundary wherever the list is scrolled to. |
+| Previous / next panel | 1 — left stick ← → | Same motion. The list has no other use for its horizontal axis once sorting moved to the Y menu. |
 | Previous / next fight | 3 — LT / RT | Global, ordered, arbitrary length, very frequent. Matches `guildhistory` paging. |
-| Previous / next view | 3 — d-pad ← → | Ordered and wanted quickly. Skips views with no panels, so `graph` and `fightList` stay out of the cycle until they exist. |
-| Previous / next category (4) | 3 — d-pad ↑ ↓ | Global, ordered. Fails "binary" so not a visible bind; ordered so not a menu. |
+| Previous / next view | 3 — LB / RB | Ordered and wanted quickly. Shoulders are the pane-switching idiom. Skips views with no panels, so `graph` and `fightList` stay out of the cycle until they exist. |
+| Previous / next category (4) | 4 — Y menu | Fails "binary" so not a visible bind, and there is no ethereal slot left that is not the stick (§0.2). Changed rarely enough per fight reviewed to survive the extra two presses. |
+| Sort by column | 4 — Y menu | Same: 4–9 columns fails "binary", and the axis it used to live on is now how you leave the panel. |
 | **Save fight** | 2 — hold X | Wanted visible and fast, and `QUATERNARY` *is* physically a hold, so "confirm intent" is the binding rather than a state machine. `MenuPanel:UpdateButtonStates()` already computes `enabled`. |
 | Most recent fight, load, delete | 1 — menu bar | Buttons already exist; load is also the `fightList` view. |
-| Jump to menu bar | 3 — RS click | Shortcut only. ← from the leftmost panel and the LB/RB ring both reach it. |
+| Jump to menu bar | 1 — left stick ← | It is the leftmost area, so ← from the leftmost panel lands on it. RS click was an earlier shortcut for this; with the shoulders no longer cycling panels there was no ring to shortcut past, and both stick clicks stay reserved. |
 | Show IDs / overheal / pets | 4 — Y menu | Global, not focused → fails test 1. Rare → fails test 3. |
 | Feedback / donate (6) | 4 — Y menu | Rare, and two nesting levels flatten into headed sections. |
 | Move / resize window | 4 — Y menu | Dragging and the resize grip are mouse-only, so on console they simply do not exist. Phase 4. |
@@ -855,7 +930,7 @@ Anything that is already a button in the window is mechanism 1 by default; a bin
 | Additive toggle (was ctrl+click) | 2 — A | Same bind: on a gamepad every A press is additive, since there is no modifier. Deselect-all stays on B. |
 | Range select (was shift+click) | 2 — **hold A and move** | Paint-select, §7.5. Recovers range selection without a modifier and without a mode. |
 | Clear selection (was middle-click) | 2 — B | Focused-ish, binary, frequent; B falls through to "close" when nothing is selected. |
-| Sort by column | – — left stick ←→ inside the list | The list has no other use for its horizontal axis, and the header arrow already shows the active column. Costs no bind, no focus area and no highlight art. |
+| Sort by column | 4 — Y menu | Listed once at report level above. It lived on left stick ←→ inside the list until that axis became the way out of the panel (§7.7). |
 | Buff category Enemy / Group / Player | 4 — Y menu | Three variants → fails "binary". A focus area for it would be a third nested stop reachable only by scrolling a list to its top. |
 | `buffs` expand / collapse details | 2 — X | Focused, binary, frequent while reading a buff list. |
 | `buffs` favourite add / remove | 4 — Y menu | Displaced from hold-X by Save Fight. Rare enough to pass the test as a menu entry, though it loses the self-documenting label. |
@@ -890,13 +965,17 @@ Anything that is already a button in the window is mechanism 1 by default; a bin
   behaviour awaiting re-wire, and it is the single place where the buffs split above has to be
   applied. Do not re-wire it as a context menu and convert it later — split it once, at re-wire
   time, into one bind (`X` collapse) plus three menu entries (favourite, two post-uptime).
-- **The category and view cycles change global state while a list is focused**, so the focused row
-  may vanish. `ZO_ScrollList`'s selection is data-based and survives a commit, but if the datum is
-  gone the area must re-run `ZO_ScrollList_AutoSelectData` rather than leave a stale cursor. The
-  view cycle goes further — it changes which panels exist, so it must `navigator:Rebuild(key)`.
-- **Nothing nests.** Every focus area is a whole panel, so the LB/RB ring is 5–6 stops and there is
-  no "which sub-area am I in" state. Keep it that way: the moment a panel wants a second area, the
-  ring grows and the reason the shoulders work starts to erode.
+- **Changing the fight, category or view while a list is focused can make the focused row vanish.**
+  `ZO_ScrollList`'s selection does **not** survive this on its own, contrary to §5.2 item 3:
+  `ZO_ScrollList_Clear` drops both the selection and the auto-select index when selections are
+  enabled (`scrolltemplates.lua:1260`), and every CMX panel clears while rebuilding, so by commit
+  time there is nothing left to reselect. The list has to remember the row itself and look it up
+  again by an equality function — `SortFilterList.lastCursorData` / `RestoreCursor` / `AreDataEqual`.
+  The view cycle goes further still: it changes which panels exist, so it must
+  `navigator:Rebuild(key)`.
+- **Nothing nests.** Every focus area is a whole panel, so the left/right chain is 5–6 stops and
+  there is no "which sub-area am I in" state. Keep it that way: the moment a panel wants a second
+  area, ←→ stops being a plain walk between panels.
 
 ### 7.5 Paint-select — hold A and sweep
 
@@ -990,14 +1069,12 @@ except where noted.
 | Ethereal binds drawing nothing on the strip | 126 uses across `ingame/` and `libraries/`. |
 | `handlesKeyUp` hold binds | `champion.lua:648` holds a trigger to remove points, taking `up` in the callback. |
 
-**Four deliberate divergences**, all worth keeping but worth knowing about:
+**Three deliberate divergences**, all worth keeping but worth knowing about:
 
-1. **Buttons, not the stick, move between areas.** Vanilla moves between focus areas with the
-   stick and reserves the shoulders for tabs. CMX inverts it because its panels are large scrolling
-   lists rather than the short chains stock screens use — see §7.7. The stick still falls through
-   *sideways*, so the vanilla motion half works; but ↑ at the first row and ↓ at the last do
-   nothing, where vanilla would hop to the adjoining area. That is the visible cost of the
-   inversion, and it is paid so that holding ↓ through a 60-row list cannot end somewhere else.
+1. **Vertical never leaves an area.** Vanilla falls through to the adjoining area at a list edge;
+   CMX makes ↑ at the first row and ↓ at the last do nothing, so that holding ↓ through a 60-row
+   list cannot end somewhere else. ←→ is a plain chain walk exactly as vanilla does it, so the
+   motion is only half-changed. See §7.7.
 2. **`QUATERNARY` is global, not a row action.** Stock uses hold-X for a second action on the
    focused item; CMX spends it on Save Fight, because a hold is the natural shape for a
    confirm-intent action and there is no other visible slot left.
@@ -1006,10 +1083,9 @@ except where noted.
    selection across rows. The idiom is borrowed from desktop file managers instead. It is additive
    — a plain tap still toggles one row — so a player who never discovers it loses nothing, which is
    what makes the divergence acceptable.
-4. **RS click = jump to the menu bar** is navigation, where vanilla stick clicks are *actions*
-   (set waypoint, report guild, enter/exit preview). Keeping it is fine — it is ethereal, so it
-   costs no strip space and cannot mislead — but it will not be guessed. Treat it as a power-user
-   shortcut, never the only route to the menu bar; ← from the leftmost panel must always work.
+
+A fourth divergence, RS click as a jump to the menu bar, was dropped: it only existed to shortcut
+past a shoulder ring that no longer exists.
 
 ### 7.7 Why the stick stopped moving between panels
 
@@ -1027,21 +1103,33 @@ showing a fraction of their data:
 | `abilities` | 404..1040 × 434..738 | 12 | 30–60 |
 
 Fall-through means leaving a panel costs one stick push per row. On `abilities` that is 3–5 full
-screens of held stick, ending in a deliberate release-and-repush at the edge latch — and
+screens of held stick, ending in a deliberate release-and-repush at the boundary — and
 `abilities` has no down-neighbour at all, so its only exit is *upward* through the whole list.
 Stock screens get away with fall-through because they show one list at a time in a short chain;
 CMX does not have that shape.
 
-So the shoulders took panel switching, which is what they mean in stock UI anyway, and the freed
-pair went to the d-pad along with the view cycle — the d-pad having turned out to be reachable
-after all (§0.2). Three things fell out of that, all simplifications:
+Only *vertical* fall-through is the problem, though, and the fix for it turned out to be smaller
+than the second draft thought. That draft moved panel switching to the shoulders wholesale, freed
+the stick's horizontal axis for sorting, and pushed the category and view cycles onto the d-pad —
+which §0.2 then showed is not a channel at all.
 
-- **The stick's horizontal axis became free inside a panel**, which is where sorting went. No
-  header focus area, no `EnableHighlight`, no template.
-- **Sub-areas stopped being necessary.** The buff filter chain existed so ↑ out of a list had
-  somewhere to land; with the shoulders escaping in one press it is just a menu section.
-- **Every area is now a whole panel**, so the ring is 5–6 stops with no nesting.
+**The third and current scheme keeps only the part that was load-bearing.** Vertical does not fall
+through; horizontal does, as a plain chain walk, with the movement cooldown making it one panel per
+push regardless of scroll position. That was always the real requirement — "leaving a 60-row list
+must cost one press, not sixty" — and the cooldown delivers it without spending a button. So:
 
-The general lesson, if a later panel tempts a return to fall-through: *mechanism 1 is only cheap
-when the thing is close.* In a grid of long lists, "walk to it" is not a free operation, and the
-test in §7.2 has to weigh reachability, not just frequency.
+- **The shoulders came free** and took the view cycle, which is closer to what shoulders mean in
+  stock UI (tabs / panes) than panel-to-panel movement was.
+- **The stick's horizontal axis went back to leaving the panel**, which cost sorting its home. It is
+  a Y menu section now, along with the category the d-pad was carrying.
+- **Sub-areas stayed unnecessary** and **every area is still a whole panel**, so the chain is 5–6
+  stops with no nesting. Those two survived all three drafts.
+
+Two general lessons, if a later panel tempts a change:
+
+- *Mechanism 1 is only cheap when the thing is close.* In a grid of long lists, "walk to it" is not
+  a free operation, and the test in §7.2 has to weigh reachability, not just frequency.
+- *Count the slots before designing around them.* Two of the three drafts died on an input budget
+  that was wrong — first by not knowing the d-pad was reachable, then by believing it was separate
+  from the stick. `GetHighestPriorityActionBindingInfoFromName` answers a narrower question than it
+  appears to; enumerate every binding of an action before planning around it.

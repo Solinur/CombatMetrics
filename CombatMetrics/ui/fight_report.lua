@@ -101,6 +101,7 @@ end
 local function InitializeFightReport() -- TODO: Decide on a common TLW/Object scheme
 	---@class FightReport: TopLevelWindow
 	---@field currentFight Fight?
+	---@field updatePending boolean?
 	local FightReport = CombatMetricsReport
 	CMXint.fightReport = FightReport
 	util.storeOrigLayout(FightReport)
@@ -188,6 +189,21 @@ local function InitializeFightReport() -- TODO: Decide on a common TLW/Object sc
 				panel:Update()
 			end
 		end
+	end
+
+	local UPDATE_COALESCE_NAME = "CMX_ReportUpdate"
+
+	function FightReport:RequestUpdate()
+		if self.updatePending then
+			return
+		end
+		self.updatePending = true
+
+		em:RegisterForUpdate(UPDATE_COALESCE_NAME, 0, function()
+			em:UnregisterForUpdate(UPDATE_COALESCE_NAME)
+			self.updatePending = false
+			self:Update()
+		end)
 	end
 
 	function FightReport:Clear()

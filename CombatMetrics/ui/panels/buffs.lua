@@ -317,21 +317,21 @@ local function InitBuffsList(panel)
 	dataList.groupList = {}
 	dataList.masterList = {}
 
-	local function ToggleBuffDetails(self, mouseButton, upInside, shift, ctrl, alt, command)
-		local rowControl = self:GetParent()
-		local abilityId = rowControl.dataEntry.data.abilityId
-
-		if abilityId then
-			self:Toggle()
-
-			if self.state then
-				uncollapsedBuffs[abilityId] = true
-			else
-				uncollapsedBuffs[abilityId] = nil
-			end
+	--- Shared by the expand button and the gamepad's X bind. The button's own state is re-applied
+	--- from uncollapsedBuffs in UpdateRow, so neither caller has to set it.
+	---@param abilityId integer?
+	function dataList:ToggleDetails(abilityId)
+		if abilityId == nil then
+			return
 		end
 
-		dataList:RefreshFilters()
+		uncollapsedBuffs[abilityId] = not uncollapsedBuffs[abilityId] and true or nil
+		self:RefreshFilters()
+	end
+
+	local function ToggleBuffDetails(self, mouseButton, upInside, shift, ctrl, alt, command)
+		local rowControl = self:GetParent()
+		dataList:ToggleDetails(rowControl.dataEntry.data.abilityId)
 	end
 
 	local function CreateExpandButton(pool, objectKey)
@@ -646,6 +646,15 @@ local function InitBuffsList(panel)
 		-- TODO: Add searchbar filter.
 	end
 
+	--- Stack sub-rows carry no id of their own, so the base's id comparison would drop the cursor
+	--- onto them and lose it on the next rebuild.
+	function dataList:AreDataEqual(data1, data2)
+		if data1.id ~= nil or data2.id ~= nil then
+			return data1.id == data2.id
+		end
+		return data1.abilityId == data2.abilityId and data1.stacks == data2.stacks
+	end
+
 	function dataList:SortScrollList()
 		local scrollData = ZO_ScrollList_GetDataList(self.list)
 		ZO_ScrollList_Clear(self.list)
@@ -721,6 +730,31 @@ function CMXint.InitializeBuffsPanel(control)
 	end
 
 	function BuffPanel:Recover() end
+
+	function BuffPanel:CreateFocusArea()
+		local area = ui.ListFocusArea:New(self)
+
+		area:AppendKeybind({
+			name = function()
+				local data = area:GetFocusedData()
+				local isExpanded = data ~= nil and uncollapsedBuffs[data.abilityId] == true
+				return GetString(isExpanded and SI_COMBAT_METRICS_COLLAPSE or SI_COMBAT_METRICS_UNCOLLAPSE)
+			end,
+			keybind = "UI_SHORTCUT_SECONDARY",
+			visible = function()
+				local data = area:GetFocusedData()
+				return data ~= nil and data.hasDetails == true
+			end,
+			callback = function()
+				local data = area:GetFocusedData()
+				if data then
+					self.dataList:ToggleDetails(data.abilityId)
+				end
+			end,
+		})
+
+		return area
+	end
 
 	BuffPanel.radioButtons:SetClickedButton(searchBar:GetNamedChild("Player"))
 end

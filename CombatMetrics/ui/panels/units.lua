@@ -316,6 +316,10 @@ function CMXint.InitializeUnitsPanel(control)
 	end
 
 	function UnitsPanel:Recover() end
+
+	function UnitsPanel:CreateFocusArea()
+		return ui.ListFocusArea:New(self)
+	end
 end
 
 local isFileInitialized = false

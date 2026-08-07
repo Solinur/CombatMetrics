@@ -421,6 +421,14 @@
             <OnMouseUp>
                 CombatMetrics.internal.AddSelection( self, button, upInside, ctrl, alt, shift )
             </OnMouseUp>
+
+            <OnMouseEnter>
+                CombatMetrics.internal.Row_OnMouseEnter(self)
+            </OnMouseEnter>
+
+            <OnMouseExit>
+                CombatMetrics.internal.Row_OnMouseExit(self)
+            </OnMouseExit>
             <Controls>
                 <Backdrop name="$(parent)HighLight" inherits="CombatMetrics_Highlight" />
             </Controls>

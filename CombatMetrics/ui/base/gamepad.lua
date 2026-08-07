@@ -18,62 +18,174 @@ ui.gamepad = gamepad
 --- shoulders' job, so an area needs no map of its surroundings beyond the manager's chain.
 ---@class CMXFocusArea : ZO_GamepadMultiFocusArea_Base
 ---@field panel Panel
----@field canEscape boolean whether a boundary crossing is allowed, see HandleMovementInternal
 local FocusArea = ZO_GamepadMultiFocusArea_Base:Subclass()
 ui.FocusArea = FocusArea
 
----@param manager CMXNavigator
 ---@param panel Panel
----@param activateCallback function?
----@param deactivateCallback function?
-function FocusArea:Initialize(manager, panel, activateCallback, deactivateCallback)
-	ZO_GamepadMultiFocusArea_Base.Initialize(self, manager, activateCallback, deactivateCallback)
+function FocusArea:Initialize(panel)
+	-- The navigator is a singleton, so an area is never told which manager it belongs to.
+	ZO_GamepadMultiFocusArea_Base.Initialize(self, gamepad.navigator)
 	self.panel = panel
 end
 
-function FocusArea:Activate()
-	self.canEscape = false -- A stick still held from the previous area must not carry on through this one.
-	ZO_GamepadMultiFocusArea_Base.Activate(self)
-end
-
---- Offers the move to the panel first, then sideways to the adjoining area. Vertical never leaves:
---- the manager's chain is ordered left to right, so stepping it on an up/down push would jump
---- sideways, and the shoulders already leave a panel in one press from any scroll position.
----
---- A held stick stops at the boundary and only a fresh push crosses it; without that, the movement
---- controller's acceleration flings the focus out of a long list and into the next panel at speed.
 ---@param horizontal integer
 ---@param vertical integer
 ---@return boolean consumed
 function FocusArea:HandleMovementInternal(horizontal, vertical)
+	local manager = self.manager
+
 	if self:HandleMovement(horizontal, vertical) then
-		-- The hold belongs to the interior now, so it may no longer leave.
-		self.canEscape = false
+		manager:StampMovement()
 		return true
 	end
 
-	local neighbour
+	local delta
 	if horizontal == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
-		neighbour = self.manager:GetPreviousSelectableFocusArea(self)
+		delta = -1
 	elseif horizontal == MOVEMENT_CONTROLLER_MOVE_NEXT then
-		neighbour = self.manager:GetNextSelectableFocusArea(self)
-	end
-
-	if neighbour == nil then
+		delta = 1
+	else
 		return false
 	end
 
-	if not self.canEscape then
+	if manager:IsMovementOnCooldown() then
 		return true
 	end
 
-	self.manager:SelectFocusArea(neighbour)
+	manager:CycleArea(delta)
 	return true
 end
 
 ---@return boolean
 function FocusArea:CanBeSelected()
 	return not self.panel.control:IsHidden()
+end
+
+--- Called when the panel hides while this area holds the focus.
+function FocusArea:OnPanelReleased() end
+
+--- A scroll list panel's focus area: the ZO_ScrollList cursor is the focus, the stick's vertical
+--- axis walks it and the horizontal axis steps the sort column.
+---@class CMXListFocusArea : CMXFocusArea
+---@field New fun(self: CMXListFocusArea, panel: Panel): CMXListFocusArea
+---@field paintMode boolean? nil = not painting, true = the sweep selects, false = it deselects
+local ListFocusArea = FocusArea:Subclass()
+ui.ListFocusArea = ListFocusArea
+
+---@param panel Panel
+function ListFocusArea:Initialize(panel)
+	FocusArea.Initialize(self, panel)
+	self:SetKeybindDescriptor(self:BuildKeybindDescriptor())
+end
+
+---@return SortFilterList
+function ListFocusArea:GetList()
+	return self.panel.dataList
+end
+
+---@return table? the row data under the cursor
+function ListFocusArea:GetFocusedData()
+	return ZO_ScrollList_GetSelectedData(self:GetList().list)
+end
+
+function ListFocusArea:BuildKeybindDescriptor()
+	return {
+		alignment = KEYBIND_STRIP_ALIGN_LEFT,
+
+		{
+			name = function()
+				local data = self:GetFocusedData()
+				local isSelected = data ~= nil and self:GetList().selections:IsSelected(data.id)
+				return GetString(isSelected and SI_COMBAT_METRICS_DESELECT_ROW or SI_COMBAT_METRICS_SELECT_ROW)
+			end,
+			keybind = "UI_SHORTCUT_PRIMARY",
+			handlesKeyUp = true, -- Holding this and moving paints a range.
+			enabled = function()
+				local data = self:GetFocusedData()
+				return data ~= nil and data.id ~= nil
+			end,
+			callback = function(up)
+				if up then
+					self:EndPaint()
+				else
+					self:BeginPaint()
+				end
+			end,
+		},
+	}
+end
+
+function ListFocusArea:BeginPaint()
+	local data = self:GetFocusedData()
+	if data == nil or data.id == nil then
+		return
+	end
+
+	local selections = self:GetList().selections
+	self.paintMode = not selections:IsSelected(data.id)
+	selections:SetSelected(data.id, self.paintMode)
+	self:UpdateKeybinds()
+end
+
+function ListFocusArea:EndPaint()
+	if self.paintMode == nil then
+		return
+	end
+
+	self.paintMode = nil
+	CMXint.fightReport:RequestUpdate()
+end
+
+function ListFocusArea:OnPanelReleased()
+	self:EndPaint()
+end
+
+---@param selectedData table?
+function ListFocusArea:OnCursorChanged(selectedData)
+	if self.paintMode ~= nil and selectedData ~= nil and selectedData.id ~= nil then
+		self:GetList().selections:SetSelected(selectedData.id, self.paintMode)
+	end
+
+	self:UpdateKeybinds()
+end
+
+---@param _ integer horizontal, unused
+---@param vertical integer
+---@return boolean consumed
+function ListFocusArea:HandleMovement(_, vertical)
+	if vertical == MOVEMENT_CONTROLLER_MOVE_PREVIOUS then
+		self:GetList():MovePrevious()
+		return true
+	elseif vertical == MOVEMENT_CONTROLLER_MOVE_NEXT then
+		self:GetList():MoveNext()
+		return true
+	end
+
+	return false
+end
+
+---@return boolean
+function ListFocusArea:CanBeSelected()
+	return FocusArea.CanBeSelected(self) and self:GetList():HasEntries()
+end
+
+function ListFocusArea:Activate()
+	if self.active then
+		return
+	end
+
+	FocusArea.Activate(self)
+	self:GetList():RestoreCursor()
+end
+
+function ListFocusArea:Deactivate()
+	if not self.active then
+		return
+	end
+
+	self:EndPaint()
+	FocusArea.Deactivate(self)
+	ZO_ScrollList_SelectData(self:GetList().list, nil)
 end
 
 ---@param direction integer
@@ -90,6 +202,8 @@ end
 ---@class CMXNavigator : ZO_GamepadMultiFocusArea_Manager
 ---@field isActive boolean
 ---@field sceneKey string? the view scene the current focus areas were built for
+---@field lastStickInputMs integer?
+---@field lastMoveMs integer?
 local Navigator = ZO_GamepadMultiFocusArea_Manager:Subclass()
 
 function Navigator:Initialize()
@@ -105,8 +219,7 @@ function Navigator:Initialize()
 	self:InitializeKeybinds()
 end
 
---- Everything that is not panel-specific. It lives on the navigator rather than a focus area so it
---- stays available with nothing focused -- only A and X belong to the panels.
+--- General keybinds that are not panel-specific
 function Navigator:InitializeKeybinds()
 	---@return MenuPanel
 	local function menuPanel()
@@ -122,13 +235,22 @@ function Navigator:InitializeKeybinds()
 		return { name = name, keybind = keybind, ethereal = true, callback = callback }
 	end
 
+	--- Wrapper to create keybinds that only fire on a real d-pad press but not on stick movement
+	---@param name string
+	---@param keybind string
+	---@param callback function
+	local function dpadOnly(name, keybind, callback)
+		return ethereal(name, keybind, function()
+			if self:IsStickActive() then
+				return
+			end
+			callback()
+		end)
+	end
+
 	self.keybindDescriptor = {
 		alignment = KEYBIND_STRIP_ALIGN_LEFT,
 
-		-- B falls through to "close" only while nothing is selected. This has to be one descriptor
-		-- with a dynamic label: ZO_KeybindStrip keys self.keybinds by the keybind string, so a
-		-- second UI_SHORTCUT_NEGATIVE entry in the same group collides with the first however its
-		-- `visible` is set (zo_keybindstrip.lua:358, :378).
 		{
 			name = function()
 				return GetString(
@@ -164,15 +286,13 @@ function Navigator:InitializeKeybinds()
 			end,
 		},
 
-		ethereal("CMX Previous Panel", "UI_SHORTCUT_LEFT_SHOULDER", function()
-			self:CycleArea(-1)
+		ethereal("CMX Previous View", "UI_SHORTCUT_LEFT_SHOULDER", function()
+			menuPanel():CycleView(-1)
 		end),
-		ethereal("CMX Next Panel", "UI_SHORTCUT_RIGHT_SHOULDER", function()
-			self:CycleArea(1)
+		ethereal("CMX Next View", "UI_SHORTCUT_RIGHT_SHOULDER", function()
+			menuPanel():CycleView(1)
 		end),
 
-		-- Both refresh the strip: the fight change decides whether Save is available, and
-		-- SelectFightByIndex clears selections, which is what B's label keys off.
 		ethereal("CMX Previous Fight", "UI_SHORTCUT_LEFT_TRIGGER", function()
 			CMXint.FightData:SelectPreviousFight()
 			self:UpdateKeybinds()
@@ -182,32 +302,40 @@ function Navigator:InitializeKeybinds()
 			self:UpdateKeybinds()
 		end),
 
-		-- UI_SHORTCUT_INPUT_* is the d-pad (KEY_GAMEPAD_DPAD_*, codes 123-126). It reaches us through
-		-- the keybind strip rather than DIRECTIONAL_INPUT, whose d-pad branch calls the private
-		-- IsKeyDown -- so this cannot collide with the navigator's analog stick read.
-		ethereal("CMX Previous View", "UI_SHORTCUT_INPUT_LEFT", function()
-			menuPanel():CycleView(-1)
+		dpadOnly("CMX Focus Up", "UI_SHORTCUT_INPUT_UP", function()
+			self:HandleMoveCurrentFocus(MOVEMENT_CONTROLLER_NO_CHANGE, MOVEMENT_CONTROLLER_MOVE_PREVIOUS)
 		end),
-		ethereal("CMX Next View", "UI_SHORTCUT_INPUT_RIGHT", function()
-			menuPanel():CycleView(1)
+		dpadOnly("CMX Focus Down", "UI_SHORTCUT_INPUT_DOWN", function()
+			self:HandleMoveCurrentFocus(MOVEMENT_CONTROLLER_NO_CHANGE, MOVEMENT_CONTROLLER_MOVE_NEXT)
 		end),
-		ethereal("CMX Previous Category", "UI_SHORTCUT_INPUT_UP", function()
-			menuPanel():CycleCategory(-1)
+		dpadOnly("CMX Focus Left", "UI_SHORTCUT_INPUT_LEFT", function()
+			self:HandleMoveCurrentFocus(MOVEMENT_CONTROLLER_MOVE_PREVIOUS, MOVEMENT_CONTROLLER_NO_CHANGE)
 		end),
-		ethereal("CMX Next Category", "UI_SHORTCUT_INPUT_DOWN", function()
-			menuPanel():CycleCategory(1)
+		dpadOnly("CMX Focus Right", "UI_SHORTCUT_INPUT_RIGHT", function()
+			self:HandleMoveCurrentFocus(MOVEMENT_CONTROLLER_MOVE_NEXT, MOVEMENT_CONTROLLER_NO_CHANGE)
 		end),
 	}
 end
 
---- Steps the focus ring, wrapping. Unlike the stick this never depends on scroll position, which is
---- the whole reason it exists: leaving a 60 row list must cost one press, not sixty.
+---@return CMXFocusArea?
+function Navigator:GetFirstSelectableArea()
+	for _, area in ipairs(self.focusAreas) do
+		if area:CanBeSelected() then
+			return area
+		end
+	end
+end
+
 ---@param delta integer
 function Navigator:CycleArea(delta)
 	local areas = self.focusAreas
 	local count = #areas
 	if count == 0 then
 		return
+	end
+
+	if self.currentFocalArea == nil then
+		return self:ActivateFocusArea(self:GetFirstSelectableArea())
 	end
 
 	local index = 1
@@ -231,19 +359,38 @@ function Navigator:UpdateKeybinds()
 	KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindDescriptor)
 end
 
+local AREA_SWITCH_COOLDOWN_MS = 400
+
+function Navigator:RegisterMovement()
+	self.lastMoveMs = GetFrameTimeMilliseconds()
+end
+
+---@return boolean
+function Navigator:IsMovementOnCooldown()
+	local lastMs = self.lastMoveMs
+	return lastMs ~= nil and (GetFrameTimeMilliseconds() - lastMs) < AREA_SWITCH_COOLDOWN_MS
+end
+
+function Navigator:OnFocusChanged()
+	self:RegisterMovement()
+end
+
+local STICK_SETTLE_MS = 50
+
+---@return boolean isActive
+function Navigator:IsStickActive()
+	local lastMs = self.lastStickInputMs
+	return lastMs ~= nil and (GetFrameTimeMilliseconds() - lastMs) < STICK_SETTLE_MS
+end
+
 function Navigator:UpdateDirectionalInput()
 	ZO_GamepadMultiFocusArea_Manager.UpdateDirectionalInput(self)
 
-	-- Neutral is read off the cached lastMagnitude, not GetMagnitude(): that goes through
-	-- DIRECTIONAL_INPUT:GetX/GetY, which consume the device for the frame and would starve the
-	-- CheckMovement calls above.
-	local area = self.currentFocalArea
-	if
-		area
-		and self.horizontalFocusAreaMovementController.lastMagnitude == 0
-		and self.verticalFocusAreaMovementController.lastMagnitude == 0
-	then
-		area.canEscape = true
+	local isDeflected = self.horizontalFocusAreaMovementController.lastMagnitude ~= 0
+		or self.verticalFocusAreaMovementController.lastMagnitude ~= 0
+
+	if isDeflected then
+		self.lastStickInputMs = GetFrameTimeMilliseconds()
 	end
 end
 
@@ -265,8 +412,6 @@ function Navigator:Rebuild(sceneKey)
 		end
 	end
 
-	-- Left to right, then top to bottom, read off the live layout rather than hardcoded, so the
-	-- order cannot drift from it. This is both the stick's sideways chain and the shoulders' ring.
 	table.sort(areas, function(a, b)
 		local aLeft, bLeft = a.panel.control:GetLeft(), b.panel.control:GetLeft()
 		if aLeft ~= bLeft then
@@ -279,10 +424,8 @@ function Navigator:Rebuild(sceneKey)
 		self:AddNextFocusArea(area)
 	end
 
-	-- A view swap rebuilds while already active and the Activate() that follows early-returns, so
-	-- the new first area has to be focused here.
 	if self.isActive then
-		self:ActivateFocusArea(self.focusAreas[1])
+		self:ActivateFocusArea(self:GetFirstSelectableArea())
 	end
 end
 
@@ -292,11 +435,9 @@ function Navigator:Activate()
 	end
 	self.isActive = true
 
-	-- Exactly one consumer for the whole report: DIRECTIONAL_INPUT hands the stick to every
-	-- registered object in turn, and the first to read a non-zero value eats it.
 	DIRECTIONAL_INPUT:Activate(self, CMXint.fightReport)
 	KEYBIND_STRIP:AddKeybindButtonGroup(self.keybindDescriptor)
-	self:ActivateFocusArea(self.focusAreas[1])
+	self:ActivateFocusArea(self:GetFirstSelectableArea())
 
 	logger:Debug("Navigator activated with %d focus area(s)", #self.focusAreas)
 end
@@ -321,10 +462,6 @@ local function forEachReportScene(callback)
 	end
 end
 
---- Brings the report and view scenes in line with the current input mode. Only the gamepad group is
---- toggled: adding MOUSE_DRIVEN_UI_WINDOW_NO_COMBAT_OVERLAY in keyboard mode gives the report a
---- "Menu: Exit" prompt it never had. The group is not re-evaluated on its own, so without this a
---- report reopened after a mode switch still wears the strip it opened with.
 function gamepad.ApplyFragmentGroups()
 	local useGamepad = IsInGamepadPreferredMode()
 
@@ -346,8 +483,6 @@ local function onGamepadPreferredModeChanged()
 	gamepad.ApplyFragmentGroups()
 end
 
---- Ties navigator activation to scene visibility. Only the view scenes are hooked: the view is
---- pushed over the report scene, so both would fire for one open.
 local function registerViewSceneCallbacks()
 	for key, scene in pairs(CMXint.scenes.views) do
 		scene:RegisterCallback("StateChange", function(_, newState)
@@ -373,7 +508,6 @@ function CMXint.InitializeGamepad()
 	registerViewSceneCallbacks()
 
 	EVENT_MANAGER:RegisterForEvent("CMX_Gamepad", EVENT_GAMEPAD_PREFERRED_MODE_CHANGED, onGamepadPreferredModeChanged)
-	-- The event does not fire on load.
 	gamepad.ApplyFragmentGroups()
 
 	isFileInitialized = true

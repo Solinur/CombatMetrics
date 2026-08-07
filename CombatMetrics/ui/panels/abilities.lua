@@ -501,6 +501,10 @@ function CMXint.InitializeAbilitiesPanel(control)
 
 	function AbilitiesPanel:Recover() end
 
+	function AbilitiesPanel:CreateFocusArea()
+		return ui.ListFocusArea:New(self)
+	end
+
 	-- self:ResetBars()
 
 	-- local settings = self.settings
