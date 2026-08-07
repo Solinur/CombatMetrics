@@ -1,4 +1,4 @@
--- Menu bar panel: Buttons baron the left for switching between fights and different data views (scenes).
+-- Menu bar panel: Buttons bar on the left for switching between fights and different data views (scenes).
 ---@class CMX
 local CMX = CombatMetrics
 ---@class CMXint
@@ -11,21 +11,17 @@ local logger
 local ui = CMXint.ui
 local cat = util.MainCategories
 
-local ValidRaids = {}
-
 local function initCategoryButtons(MenuPanel)
+	local buttons = {}
 	local categoryButtons = {}
-	-- Filled in creation order, so the gamepad cycle cannot drift from the visual order.
 	local categoryOrder = {}
-	local i = 1
-	---@type any
-	local anchorControl = MenuPanel.control
 
 	local function onMouseUp(button)
-		MenuPanel:SelectCategory(button)
+		MenuPanel:SelectCategory(button.category)
 	end
 
 	local function initCategoryButton(category, texture, color, tooltip)
+		local i = #buttons + 1
 		local button = CreateControlFromVirtual(
 			"CombatMetricsReport_MenuCategoryButton",
 			MenuPanel.control,
@@ -35,20 +31,20 @@ local function initCategoryButtons(MenuPanel)
 		---@cast button TextureControl
 
 		button:SetTexture(texture)
-		button:SetColor(ZO_ColorDef.HexToFloats(color))
-		local anchorSide = i == 1 and TOP or BOTTOM
-		local offset = i == 1 and 0 or 4
-		---@diagnostic disable-next-line: missing-parameter
-		button:SetAnchor(TOP, anchorControl, anchorSide, nil, offset)
+		local r, g, b = ZO_ColorDef.HexToFloats(color)
+		button["baseColor"] = { r, g, b }
+		button:SetColor(r, g, b, 1)
 		button["tooltip"] = tooltip
 		button["category"] = category
+		button["action"] = function()
+			MenuPanel:SelectCategory(category)
+		end
 		---@diagnostic disable-next-line: missing-parameter
 		button:SetHandler("OnMouseUp", onMouseUp, "CMX")
-		anchorControl = button
+
+		buttons[i] = button
 		categoryButtons[category] = button
 		categoryOrder[i] = category
-
-		i = i + 1
 	end
 
 	-- initCategoryButton("damageOut", "/esoui/art/icons/heraldrycrests_weapon_axe_02.dds", "FFFFCCCC",
@@ -78,20 +74,22 @@ local function initCategoryButtons(MenuPanel)
 		SI_COMBAT_METRICS_HEALING_RECEIVED
 	)
 
-	return categoryButtons, categoryOrder
+	MenuPanel.categoryButtons = categoryButtons
+	MenuPanel.categoryOrder = categoryOrder
+	return buttons
 end
 
 local function initSceneButtons(MenuPanel)
+	local buttons = {}
 	local sceneButtons = {}
 	local sceneOrder = {}
-	local i = 1
-	local anchorControl = MenuPanel.categoryButtons.healingReceived
 
 	local function onMouseUp(button)
-		MenuPanel:SelectScene(button)
+		MenuPanel:SelectScene(button.scene)
 	end
 
 	local function initSceneButton(scene, texture, tooltip)
+		local i = #buttons + 1
 		local button = CreateControlFromVirtual(
 			"CombatMetricsReport_MenuSceneButton",
 			MenuPanel.control,
@@ -101,18 +99,17 @@ local function initSceneButtons(MenuPanel)
 		---@cast button TextureControl
 
 		button:SetTexture(texture)
-		local offset = i == 1 and 26 or 4
-		---@diagnostic disable-next-line: missing-parameter
-		button:SetAnchor(TOP, anchorControl, BOTTOM, nil, offset)
 		button["tooltip"] = tooltip
-		button["category"] = scene
+		button["scene"] = scene
+		button["action"] = function()
+			MenuPanel:SelectScene(scene)
+		end
 		---@diagnostic disable-next-line: missing-parameter
 		button:SetHandler("OnMouseUp", onMouseUp, "CMX")
-		anchorControl = button
+
+		buttons[i] = button
 		sceneButtons[scene] = button
 		sceneOrder[i] = scene
-
-		i = i + 1
 	end
 
 	initSceneButton(
@@ -132,7 +129,9 @@ local function initSceneButtons(MenuPanel)
 	)
 	initSceneButton("info", "esoui/art/menubar/gamepad/gp_playermenu_icon_tutorial.dds", SI_COMBAT_METRICS_TOGGLE_INFO)
 
-	return sceneButtons, sceneOrder
+	MenuPanel.sceneButtons = sceneButtons
+	MenuPanel.sceneOrder = sceneOrder
+	return buttons
 end
 
 local function initSettingsButton(MenuPanel)
@@ -186,11 +185,7 @@ local function initSettingsButton(MenuPanel)
 	-- 	CMX.PosttoChat(CMX_POSTTOCHAT_MODE_SELECTION_HEALING, currentFight)
 	-- end
 
-	local function onMouseUp(button, _, upInside)
-		if not upInside then
-			return
-		end
-		local selections = ui.selections
+	local function openMenu(button)
 		local settings = CMXint.settings.fightReport
 
 		local showIdString = settings.showDebugIds and SI_COMBAT_METRICS_HIDEIDS or SI_COMBAT_METRICS_SHOWIDS
@@ -236,15 +231,22 @@ local function initSettingsButton(MenuPanel)
 		AnchorMenu(button)
 	end
 
+	local function onMouseUp(button, _, upInside)
+		if upInside then
+			openMenu(button)
+		end
+	end
+
 	button:SetTexture("esoui/art/tutorial/gamepad/gp_playermenu_icon_settings.dds")
 	button:SetColor(ZO_ColorDef.HexToFloats("FFFFFFFF"))
-	---@diagnostic disable-next-line: missing-parameter
-	button:SetAnchor(TOP, MenuPanel.sceneButtons.info, BOTTOM, nil, 26)
 	button["tooltip"] = SI_COMBAT_METRICS_TOGGLE_SETTINGS
+	button["action"] = function()
+		openMenu(button)
+	end
 	---@diagnostic disable-next-line: missing-parameter
 	button:SetHandler("OnMouseUp", onMouseUp, "CMX")
 
-	return button
+	return { button }
 end
 
 local function initFeedbackButton(MenuPanel)
@@ -302,10 +304,7 @@ local function initFeedbackButton(MenuPanel)
 		RequestOpenUnsafeURL(GetString(SI_COMBAT_METRICS_DONATE_ESOUIURL))
 	end
 
-	local function onMouseUp(button, _, upInside)
-		if not upInside then
-			return
-		end
+	local function openMenu(button)
 		ClearMenu()
 
 		local isEUServer = GetWorldName() == "EU Megaserver"
@@ -338,71 +337,28 @@ local function initFeedbackButton(MenuPanel)
 		AnchorMenu(button)
 	end
 
+	-- TODO: point action at the Y menu in phase 2; ZO_Menu has no gamepad path.
+	local function onMouseUp(button, _, upInside)
+		if upInside then
+			openMenu(button)
+		end
+	end
+
 	button:SetTexture("CombatMetrics/icons/addonlogo.dds")
 	button:SetColor(ZO_ColorDef.HexToFloats("FFFFC52A"))
-	---@diagnostic disable-next-line: missing-parameter
-	button:SetAnchor(TOP, MenuPanel.settingsButton, BOTTOM, nil, 8)
 	button["tooltip"] = SI_COMBAT_METRICS_FEEDBACK
+	button["action"] = function()
+		openMenu(button)
+	end
 	---@diagnostic disable-next-line: missing-parameter
 	button:SetHandler("OnMouseUp", onMouseUp, "CMX")
 
-	return button
-end
-
-local function initNotificationButton(MenuPanel)
-	local button = CreateControlFromVirtual(
-		"CombatMetricsReport_MenuNotificationButton",
-		MenuPanel.control,
-		"CombatMetrics_MenuButton"
-	)
-	button:SetHidden(true)
-	-- ---@cast button TextureControl
-
-	-- local function ShowGuildInfo()
-	-- 	GUILD_BROWSER_GUILD_INFO_KEYBOARD:SetGuildToShow(64745)
-	-- 	MAIN_MENU_KEYBOARD:ShowSceneGroup("guildsSceneGroup", "linkGuildInfoKeyboard")
-	-- 	GUILD_BROWSER_GUILD_INFO_KEYBOARD.closeCallback = CombatMetricsReport.Toggle
-	-- end
-
-	-- local function NotificationRead()
-	-- 	CMXint.settings.notificationRead = CMXint.settings.currentNotificationVersion
-	-- 	CombatMetricsReport:Update()
-	-- end
-
-	-- local function DisableNotifications()
-	-- 	CMXint.settings.notificationRead = CMXint.settings.currentNotificationVersion
-	-- 	CMXint.settings.notificationAllowed = false
-	-- 	CombatMetricsReport:Update()
-	-- end
-
-	-- local function onMouseUp(button, _, upInside)
-	-- 	if not upInside then
-	-- 		return
-	-- 	end
-	-- 	ClearMenu()
-
-	-- 	AddCustomMenuItem(GetString(SI_COMBAT_METRICS_NOTIFICATION_GUILD), ShowGuildInfo)
-	-- 	AddCustomMenuItem(GetString(SI_COMBAT_METRICS_NOTIFICATION_ACCEPT), NotificationRead)
-	-- 	AddCustomMenuItem(GetString(SI_COMBAT_METRICS_NOTIFICATION_DISCARD), DisableNotifications)
-
-	-- 	ShowMenu(button)
-	-- 	AnchorMenu(button)
-	-- end
-
-	-- button:SetTexture("esoui/art/mainmenu/menubar_notifications_down.dds")
-	-- button:SetColor(ZO_ColorDef.HexToFloats("FFFFFFFF"))
-	button:SetAnchor(TOP, MenuPanel.feedbackButton, BOTTOM, nil, 8)
-	-- button.tooltip = SI_COMBAT_METRICS_NOTIFICATION
-	-- button:SetHandler("OnMouseUp", onMouseUp, "CMX")
-
-	return button
+	return { button }
 end
 
 local function initFightNavButtons(MenuPanel)
+	local buttons = {}
 	local navButtons = {}
-	local i = 1
-	---@type Control
-	local anchorControl = MenuPanel.notificationButton
 
 	local function SelectPreviousFight()
 		CMXint.FightData:SelectPreviousFight()
@@ -417,18 +373,28 @@ local function initFightNavButtons(MenuPanel)
 	end
 
 	local function LoadFight()
-		MenuPanel.fightReport:SelectScene("fightList")
+		MenuPanel:SelectScene("fightList")
 	end
 
-	local function SaveFight(_, _, _, _, _, shiftkey)
-		CMXint.FightData:SaveFight(shiftkey)
+	local function SaveFight(withLog)
+		CMXint.FightData:SaveFight(withLog)
+	end
+
+	local function onSaveMouseUp(_, _, _, _, _, shiftkey)
+		SaveFight(shiftkey)
+	end
+
+	local function SaveFightPlain()
+		SaveFight(false)
 	end
 
 	local function DeleteFight()
 		CMXint.FightData:RemoveCurrentFight()
 	end
 
-	local function initNavButton(name, texture, tooltip, func)
+	---@param onMouseUp function? defaults to `action`
+	local function initNavButton(name, texture, tooltip, action, onMouseUp)
+		local i = #buttons + 1
 		local button = CreateControlFromVirtual(
 			"CombatMetricsReport_MenuFightNavigationButton",
 			MenuPanel.control,
@@ -441,18 +407,14 @@ local function initFightNavButtons(MenuPanel)
 		button:SetPressedTexture(texture .. "down.dds")
 		button:SetMouseOverTexture(texture .. "over.dds")
 		button:SetDisabledTexture(texture .. "disabled.dds")
-		local offset = i == 1 and 26 or 4
-		---@diagnostic disable-next-line: missing-parameter
-		button:SetAnchor(TOP, anchorControl, BOTTOM, nil, offset)
 		button["tooltip"] = tooltip
-		button["name"] = name
+		button["action"] = action
 		---@diagnostic disable-next-line: missing-parameter
-		button:SetHandler("OnMouseUp", func, "CMX")
+		button:SetHandler("OnMouseUp", onMouseUp or action, "CMX")
 		button:SetState(BSTATE_NORMAL, false)
-		anchorControl = button
 
+		buttons[i] = button
 		navButtons[name] = button
-		i = i + 1
 	end
 
 	initNavButton("previous", "CombatMetrics/icons/leftarrow", SI_COMBAT_METRICS_PREVIOUS_FIGHT, SelectPreviousFight)
@@ -462,43 +424,62 @@ local function initFightNavButtons(MenuPanel)
 	initNavButton(
 		"save",
 		"CombatMetrics/icons/saveicon",
+		-- TODO: phrased for the mouse ("Click:" / "Shift+Click:"); the phase 2 focus area needs a
+		-- gamepad wording, and the combat log variant does not exist there at all.
 		{ SI_COMBAT_METRICS_SAVE_FIGHT, SI_COMBAT_METRICS_SAVE_FIGHT2 },
-		SaveFight
+		SaveFightPlain,
+		onSaveMouseUp
 	)
 	initNavButton("delete", "CombatMetrics/icons/deleteicon2", SI_COMBAT_METRICS_DELETE_FIGHT, DeleteFight)
 
-	return navButtons
+	MenuPanel.navButtons = navButtons
+	return buttons
+end
+
+local BUTTON_GAP = 4
+local MENU_GROUPS = {
+	{ gap = 0, build = initCategoryButtons },
+	{ gap = 26, build = initSceneButtons },
+	{ gap = 26, build = initSettingsButton },
+	{ gap = 8, build = initFeedbackButton },
+	{ gap = 26, build = initFightNavButtons },
+}
+
+---@param MenuPanel MenuPanel
+local function buildMenuBar(MenuPanel)
+	---@type any, integer
+	local anchorControl, anchorPoint = MenuPanel.control, TOP
+	local order = {}
+
+	for _, group in ipairs(MENU_GROUPS) do
+		for i, button in ipairs(group.build(MenuPanel)) do
+			---@diagnostic disable-next-line: missing-parameter
+			button:SetAnchor(TOP, anchorControl, anchorPoint, nil, i == 1 and group.gap or BUTTON_GAP)
+			anchorControl, anchorPoint = button, BOTTOM
+			order[#order + 1] = button
+		end
+	end
+
+	MenuPanel.buttonOrder = order
 end
 
 function CMXint.InitializeMenuPanel(control)
 	---@class MenuPanel: Panel
+	---@field categoryButtons table<string, TextureControl>
+	---@field categoryOrder string[]
+	---@field sceneButtons table<string, TextureControl>
+	---@field sceneOrder string[]
+	---@field navButtons table<string, ButtonControl>
+	---@field buttonOrder Control[]
 	local MenuPanel = CMX.internal.PanelObject:New(control, "menu")
-	local SVHandler = CMXint.SVHandler
 
 	function MenuPanel:Update()
-		local notificationSettings = CMXint.settings.notification
-		notificationSettings.version = 1
-
-		local date = GetDate()
-
-		local isMe = GetDisplayName() == "@Solinur"
-		local isGerman = GetCVar("Language.2") == "de"
-		local isEUServer = GetWorldName() == "EU Megaserver"
-		local isNotificationAllowed = notificationSettings.enabled
-			and notificationSettings.version > notificationSettings.versionSeen
-		local isVeteranRaid = ValidRaids[GetCurrentParticipatingRaidId()] == true
-		local isWithinAllowedTime = date >= 20200417 and date <= 20200423
-
-		-- NOTE: Leave for now, even if unused
-		local show = notificationSettings.force
-			or isMe
-			or (isGerman and isEUServer and isNotificationAllowed and isVeteranRaid and isWithinAllowedTime)
-
 		self:UpdateButtonStates()
 	end
 
 	function MenuPanel:UpdateButtonStates()
 		local fightData = CMXint.FightData
+		local SVHandler = CMXint.SVHandler
 		local currentIndex = fightData.currentIndex or 0
 		local maxIndex = fightData:GetNumFights()
 		local navButtons = MenuPanel.navButtons
@@ -521,18 +502,15 @@ function CMXint.InitializeMenuPanel(control)
 		navButtons.delete:SetState(delete and BSTATE_NORMAL or BSTATE_DISABLED, not delete)
 	end
 
-	function MenuPanel:SelectCategory(selectedButton)
-		for _, button in pairs(self.categoryButtons) do
-			local r, g, b, _ = button:GetColor()
-			local a = button == selectedButton and 1 or 0.2
-			button:SetColor(r, g, b, a)
+	---@param key string one of util.MainCategories
+	function MenuPanel:SelectCategory(key)
+		for category, button in pairs(self.categoryButtons) do
+			local r, g, b = unpack(button["baseColor"])
+			button:SetColor(r, g, b, category == key and 1 or 0.2)
 		end
 
-		local oldCategory = self.settings.category
-		local newCategory = selectedButton.category
-
-		if oldCategory ~= newCategory then
-			self.settings.category = newCategory
+		if self.settings.category ~= key then
+			self.settings.category = key
 			self.fightReport:Update()
 		end
 	end
@@ -553,7 +531,7 @@ function CMXint.InitializeMenuPanel(control)
 	function MenuPanel:CycleCategory(delta)
 		local order = self.categoryOrder
 		local index = (indexOf(order, self.settings.category) - 1 + delta) % #order + 1
-		self:SelectCategory(self.categoryButtons[order[index]])
+		self:SelectCategory(order[index])
 	end
 
 	--- Skips views no panel is registered for, so the cycle never lands on a blank screen. Views
@@ -567,31 +545,26 @@ function CMXint.InitializeMenuPanel(control)
 		for step = 1, count - 1 do
 			local key = order[(index - 1 + delta * step) % count + 1]
 			if ui.ViewHasPanels(key) then
-				self:SelectScene(self.sceneButtons[key])
+				self:SelectScene(key)
 				return
 			end
 		end
 	end
 
-	function MenuPanel:SelectScene(selectedButton)
-		local newScene
-		for sceneName, button in pairs(self.sceneButtons) do
-			local a = 0.2
-			if button == selectedButton then
-				a = 1
-				newScene = sceneName
-			end
-			button:SetColor(1, 1, 1, a)
-		end
-		self.fightReport:SelectScene(newScene)
+	---@param key string
+	function MenuPanel:SelectScene(key)
+		self.fightReport:SelectScene(key)
 	end
 
-	MenuPanel.categoryButtons, MenuPanel.categoryOrder = initCategoryButtons(MenuPanel)
-	MenuPanel.sceneButtons, MenuPanel.sceneOrder = initSceneButtons(MenuPanel)
-	MenuPanel.settingsButton = initSettingsButton(MenuPanel)
-	MenuPanel.feedbackButton = initFeedbackButton(MenuPanel)
-	MenuPanel.notificationButton = initNotificationButton(MenuPanel)
-	MenuPanel.navButtons = initFightNavButtons(MenuPanel)
+	---@param key string
+	function MenuPanel:SetActiveView(key)
+		for scene, button in pairs(self.sceneButtons) do
+			button:SetColor(1, 1, 1, scene == key and 1 or 0.2)
+		end
+		self.settings.scene = key
+	end
+
+	buildMenuBar(MenuPanel)
 end
 
 local isFileInitialized = false
@@ -603,8 +576,8 @@ function CMXint.InitializeMenu()
 
 	local MenuPanel = ui:GetPanel("menu") --[[@as MenuPanel]]
 
-	MenuPanel:SelectScene(MenuPanel.sceneButtons.fightStats)
-	MenuPanel:SelectCategory(MenuPanel.categoryButtons[cat.CMX_CATEGORY_DAMAGE_DONE])
+	MenuPanel:SelectCategory(MenuPanel.settings.category or cat.CMX_CATEGORY_DAMAGE_DONE)
+	MenuPanel:SetActiveView("fightStats")
 
 	isFileInitialized = true
 	return true

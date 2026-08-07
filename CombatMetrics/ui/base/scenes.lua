@@ -54,15 +54,23 @@ function ui.IsAnyViewShowing()
 	return false
 end
 
+---@param key string
+function ui.ApplyView(key)
+	ui.sceneTransitioning = true
+	applyLayout(key)
+	ui.sceneTransitioning = false
+
+	local menuPanel = ui:GetPanel("menu") --[[@as MenuPanel]]
+	menuPanel:SetActiveView(key)
+end
+
 local function CreateViewScene(key, reportFragment)
 	local sceneName = "CMX_VIEW_" .. key:upper() .. "_SCENE"
 	local scene = ZO_Scene:New(sceneName, SCENE_MANAGER)
 	scene:AddFragment(reportFragment)
 	scene:RegisterCallback("StateChange", function(_, newState)
 		if newState == SCENE_SHOWN then
-			ui.sceneTransitioning = true
-			applyLayout(key)
-			ui.sceneTransitioning = false
+			ui.ApplyView(key)
 			CMXint.fightReport:Update()
 		end
 	end)
