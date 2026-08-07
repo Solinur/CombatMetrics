@@ -34,6 +34,7 @@ local strings = {
 
 	-- Main UI
 
+	SI_COMBAT_METRICS_CLOSE = "Close",
 	SI_COMBAT_METRICS_CALC = "Calculating...",
 	SI_COMBAT_METRICS_LOADING = "Loading...",
 	SI_COMBAT_METRICS_FINALIZING = "Finalizing...",

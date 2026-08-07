@@ -205,11 +205,7 @@ local function InitializeFightReport() -- TODO: Decide on a common TLW/Object sc
 		local targetName = CMXint.viewSceneNames[key]
 		if not targetName then return end
 		settings.scene = key
-		local isOpen = false
-		for _, s in pairs(CMXint.scenes.views) do
-			if s:IsShowing() then isOpen = true; break end
-		end
-		if isOpen then
+		if ui.IsAnyViewShowing() then
 			SCENE_MANAGER:SwapCurrentScene(targetName)
 		end
 	end

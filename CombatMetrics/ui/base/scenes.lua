@@ -23,6 +23,16 @@ local function applyLayout(key)
 	end
 end
 
+---@return boolean
+function ui.IsAnyViewShowing()
+	for _, scene in pairs(CMXint.scenes.views) do
+		if scene:IsShowing() then
+			return true
+		end
+	end
+	return false
+end
+
 local function CreateViewScene(key, reportFragment)
 	local sceneName = "CMX_VIEW_" .. key:upper() .. "_SCENE"
 	local scene = ZO_Scene:New(sceneName, SCENE_MANAGER)

@@ -450,6 +450,19 @@ function PanelObject:SetHidden(hide)
 	return self.control:SetHidden(hide)
 end
 
+---@return CMXFocusArea?
+function PanelObject:CreateFocusArea()
+	return nil
+end
+
+---@return CMXFocusArea?
+function PanelObject:GetFocusArea()
+	if self.focusArea == nil then
+		self.focusArea = self:CreateFocusArea()
+	end
+	return self.focusArea
+end
+
 function PanelObject:ShowIds()
 	local settings = self.settings
 
@@ -500,6 +513,7 @@ function CMXint.InitializeUI()
 	assert(CMXint.InitializeFightReport(), "Initialization of fight report UI failed")
 	assert(CMXint.InitializeLiveReport(), "Initialization of live report failed")
 	assert(CMXint.InitializeViewScenes(), "Initialization of view scenes failed")
+	assert(CMXint.InitializeGamepad(), "Initialization of gamepad navigation failed")
 
 	PanelObject.fightReport = CMXint.fightReport
 	PanelObject.settings = CMXint.fightReport.settings
