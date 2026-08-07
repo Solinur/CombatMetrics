@@ -15,6 +15,8 @@ local ValidRaids = {}
 
 local function initCategoryButtons(MenuPanel)
 	local categoryButtons = {}
+	-- Filled in creation order, so the gamepad cycle cannot drift from the visual order.
+	local categoryOrder = {}
 	local i = 1
 	---@type any
 	local anchorControl = MenuPanel.control
@@ -44,6 +46,7 @@ local function initCategoryButtons(MenuPanel)
 		button:SetHandler("OnMouseUp", onMouseUp, "CMX")
 		anchorControl = button
 		categoryButtons[category] = button
+		categoryOrder[i] = category
 
 		i = i + 1
 	end
@@ -75,11 +78,12 @@ local function initCategoryButtons(MenuPanel)
 		SI_COMBAT_METRICS_HEALING_RECEIVED
 	)
 
-	return categoryButtons
+	return categoryButtons, categoryOrder
 end
 
 local function initSceneButtons(MenuPanel)
 	local sceneButtons = {}
+	local sceneOrder = {}
 	local i = 1
 	local anchorControl = MenuPanel.categoryButtons.healingReceived
 
@@ -106,6 +110,7 @@ local function initSceneButtons(MenuPanel)
 		button:SetHandler("OnMouseUp", onMouseUp, "CMX")
 		anchorControl = button
 		sceneButtons[scene] = button
+		sceneOrder[i] = scene
 
 		i = i + 1
 	end
@@ -127,7 +132,7 @@ local function initSceneButtons(MenuPanel)
 	)
 	initSceneButton("info", "esoui/art/menubar/gamepad/gp_playermenu_icon_tutorial.dds", SI_COMBAT_METRICS_TOGGLE_INFO)
 
-	return sceneButtons
+	return sceneButtons, sceneOrder
 end
 
 local function initSettingsButton(MenuPanel)
@@ -509,9 +514,7 @@ function CMXint.InitializeMenuPanel(control)
 		local load = SVHandler ~= nil and SVHandler.GetNumFights() > 0
 		navButtons.load:SetState(load and BSTATE_NORMAL or BSTATE_DISABLED, not load)
 
-		local save = fight ~= nil
-			and SVHandler ~= nil
-			and not util.searchtable(SVHandler.GetFights(), "date", fight.info.date) -- TODO: Make function of SVHandler to check for already saved fights
+		local save = fightData:CanSaveFight()
 		navButtons.save:SetState(save and BSTATE_NORMAL or BSTATE_DISABLED, not save)
 
 		local delete = fight ~= nil
@@ -534,6 +537,42 @@ function CMXint.InitializeMenuPanel(control)
 		end
 	end
 
+	---@param order string[]
+	---@param current string?
+	---@return integer
+	local function indexOf(order, current)
+		for i, key in ipairs(order) do
+			if key == current then
+				return i
+			end
+		end
+		return 1
+	end
+
+	---@param delta integer
+	function MenuPanel:CycleCategory(delta)
+		local order = self.categoryOrder
+		local index = (indexOf(order, self.settings.category) - 1 + delta) % #order + 1
+		self:SelectCategory(self.categoryButtons[order[index]])
+	end
+
+	--- Skips views no panel is registered for, so the cycle never lands on a blank screen. Views
+	--- rejoin it on their own as their panels come online.
+	---@param delta integer
+	function MenuPanel:CycleView(delta)
+		local order = self.sceneOrder
+		local count = #order
+		local index = indexOf(order, self.settings.scene)
+
+		for step = 1, count - 1 do
+			local key = order[(index - 1 + delta * step) % count + 1]
+			if ui.ViewHasPanels(key) then
+				self:SelectScene(self.sceneButtons[key])
+				return
+			end
+		end
+	end
+
 	function MenuPanel:SelectScene(selectedButton)
 		local newScene
 		for sceneName, button in pairs(self.sceneButtons) do
@@ -547,8 +586,8 @@ function CMXint.InitializeMenuPanel(control)
 		self.fightReport:SelectScene(newScene)
 	end
 
-	MenuPanel.categoryButtons = initCategoryButtons(MenuPanel)
-	MenuPanel.sceneButtons = initSceneButtons(MenuPanel)
+	MenuPanel.categoryButtons, MenuPanel.categoryOrder = initCategoryButtons(MenuPanel)
+	MenuPanel.sceneButtons, MenuPanel.sceneOrder = initSceneButtons(MenuPanel)
 	MenuPanel.settingsButton = initSettingsButton(MenuPanel)
 	MenuPanel.feedbackButton = initFeedbackButton(MenuPanel)
 	MenuPanel.notificationButton = initNotificationButton(MenuPanel)

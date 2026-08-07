@@ -8,19 +8,40 @@ local ui = CMXint.ui
 
 local VIEW_SCENE_KEYS = { "fightStats", "info", "combatLog", "graph", "fightList" }
 
+---@param panel Panel
+---@param key string
+---@return boolean
+local function panelInScene(panel, key)
+	if panel.scenes == nil then
+		return false
+	end
+	for _, s in ipairs(panel.scenes) do
+		if s == key then
+			return true
+		end
+	end
+	return false
+end
+
 local function applyLayout(key)
 	for _, panel in pairs(ui.panels) do
 		if panel.scenes then
-			local inScene = false
-			for _, s in ipairs(panel.scenes) do
-				if s == key then
-					inScene = true
-					break
-				end
-			end
-			panel:SetHidden(not inScene)
+			panel:SetHidden(not panelInScene(panel, key))
 		end
 	end
+end
+
+--- Whether any panel is registered for this view. `graph` and `fightList` have none yet, so their
+--- scenes render nothing but the title, menu and info row -- the view cycle skips those.
+---@param key string
+---@return boolean
+function ui.ViewHasPanels(key)
+	for _, panel in pairs(ui.panels) do
+		if panelInScene(panel, key) then
+			return true
+		end
+	end
+	return false
 end
 
 ---@return boolean

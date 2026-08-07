@@ -118,27 +118,38 @@ function FightDataManager:RemoveCurrentFight()
 	self:RemoveFight(self.currentIndex)
 end
 
-function FightDataManager:SaveFight(saveLog)
+--- Whether SaveFight would do anything: drives both the menu bar's save button state and the
+--- gamepad bind's enabled flag and label.
+---@return boolean
+function FightDataManager:CanSaveFight()
 	local fightData = self.data
+	local SVHandler = CMXint.SVHandler
 
-	if fightData == nil then
+	if fightData == nil or SVHandler == nil then
+		return false
+	end
+
+	-- TODO: Make function of SVHandler to check for already saved fights
+	return not util.searchtable(SVHandler.GetFights(), "date", fightData.info.date)
+end
+
+function FightDataManager:SaveFight(saveLog)
+	-- The already-saved test used to be SVHandler.GetFight(GetNumFights()), which throws before the
+	-- first save has ever happened: getNumFights guards a nil sv and returns 0, GetFight does not.
+	-- CanSaveFight goes through GetFights instead, and also catches a fight saved earlier in the
+	-- list rather than only the most recent one.
+	if not self:CanSaveFight() then
 		return
 	end
 
-	local saveLog = saveLog or false
 	local SVHandler = CMXint.SVHandler
-	local numFights = SVHandler.GetNumFights()
-	local lastsaved = SVHandler.GetFight(numFights)
-
-	--TODO: Update timestamp location in data structure
-	if lastsaved ~= nil and lastsaved.date == fightData.info.date then
-		return
-	end -- bail out if fight is already saved
-
-	local spaceLeft = CMXint.settings.fights.maxSavedFights - numFights
+	local spaceLeft = CMXint.settings.fights.maxSavedFights - SVHandler.GetNumFights()
 	assert(spaceLeft > 0, zo_strformat(SI_COMBAT_METRICS_SAVEDFIGHTS_FULL, 1 - spaceLeft))
 
-	SVHandler.Save(fightData, saveLog)
+	-- TODO: Re-enable once CombatMetricsFightData is ported to the v2 fight shape. saveFight ->
+	-- reduceUnitIds reads fight.calculated, which a v2 fight does not have, so this throws.
+	-- SVHandler.Save(self.data, saveLog or false)
+	logger:Warn("Saving is not implemented for v2 fight data yet.")
 end
 
 ---@param fight Fight

@@ -406,7 +406,7 @@ the addon was assigned to one of these rows and why, and §7.7 for what the earl
 | `INPUT_LEFT` / `INPUT_RIGHT` (d-pad ←→) | ethereal | global | Previous / next **view**, skipping views whose panel set is empty (§4 phase 2). |
 | `INPUT_UP` / `INPUT_DOWN` (d-pad ↑↓) | ethereal | global | Previous / next **category** (damage done → healing done → damage received → healing received). |
 | `UI_SHORTCUT_PRIMARY` (A) | visible | focused entry | Select / Deselect a list row; press a menu-bar button. Label is dynamic. |
-| `UI_SHORTCUT_NEGATIVE` (B) | visible | global | Clear selections if any (`CMXint.ClearSelections`), otherwise close the report. Two descriptors gated on `visible`, so the label is honest — see §7.6. |
+| `UI_SHORTCUT_NEGATIVE` (B) | visible | global | Clear selections if any (`CMXint.ClearSelections`), otherwise close the report. **One** descriptor with a dynamic `name` and a branching callback — see the note below. |
 | `UI_SHORTCUT_SECONDARY` (X) | visible | focused row | Panel-defined. `buffs`: Expand / Collapse, visible only when the row `hasDetails`. Absent on `units` and `abilities`. |
 | `UI_SHORTCUT_QUATERNARY` (hold X) | visible | global | **Save Fight.** `enabled` and the label come from the same condition `MenuPanel:UpdateButtonStates()` already computes. |
 | `UI_SHORTCUT_TERTIARY` (Y) | visible | global | **Menu** (§5.1) — one sectioned dialog: row actions when a row is focused, then the buff filter, the display toggles, and feedback / donate. |
@@ -432,6 +432,20 @@ Three notes on the choices, because each replaces something the earlier draft ha
   axis and the buff filter is a menu section, so every area in the navigator is now a whole panel.
   Nothing nests, the shoulder ring is 5–6 stops, and §5.2's mandatory header highlight template is
   no longer needed at all.
+
+**One descriptor per keybind, per group.** `ZO_KeybindStrip` stores dispatch in `self.keybinds`
+keyed by the keybind *string* (`zo_keybindstrip.lua:358`), and a second entry for the same string
+in the same group is routed to `HandleDuplicateAddKeybind` (`:378`) rather than coexisting. An
+earlier draft of this section had B as two descriptors gated on `visible` — one "Clear Selections",
+one "Close" — on the grounds that a `visible`-gated pair keeps the strip label honest. **It does
+not work**: found in game, where B removed the prompt but neither cleared nor closed. Where stock
+screens do this they are separate groups on separate panels.
+
+The working shape is one descriptor whose `name` is a function, branching in the callback on the
+same condition the label reads. The label stays just as honest, because `name` is re-evaluated on
+every `UpdateKeybindButtonGroup`. Call `UpdateKeybinds()` after anything that flips the condition —
+for B that is clearing a selection, and for hold-X it is saving, changing fight or changing
+category.
 
 **The stick leaves an area sideways only.** ←→ that the panel does not consume steps the spatial
 chain `Rebuild` builds; ↑↓ never leaves. That asymmetry is deliberate: the chain is ordered left to
@@ -551,6 +565,12 @@ The big one, and the one that unlocks most of the value.
     mouse button: extract `Toggle(id)` / `SetSelected(id, state)` / `SelectRange(id)` as
     primitives that do **not** call `fightReport:Update()`, and let each caller decide when to
     update. `HandleClick` keeps the mouse-button/modifier decoding and calls them.
+  - **The same refactor fixes a phase 0.5 leftover.** B's label switches between "Clear Selections"
+    and "Close" on `CMXint.IsSelectionActive()`, but nothing tells the strip when that flips, so a
+    selection made with the mouse leaves a stale prompt until some other bind forces an update. The
+    navigator cannot poll for it — `name` is only re-read on `UpdateKeybindButtonGroup`. Have the
+    new primitives call `ui.gamepad.navigator:UpdateKeybinds()` when the selection count crosses
+    zero, which is the only transition the label cares about.
 - ~~Column headers as a second focus area~~ — **dropped.** Sorting is the list's horizontal axis
   (above), so there is no header area, no `sortHeaderGroup:EnableSelection`, and **no highlight
   template needed** — which retires §5.2 item 1 and check C4 entirely.
@@ -961,7 +981,7 @@ except where noted.
 | A = select / activate | Universal, 242 descriptors. |
 | A toggles rows additively in a multi-select list | `universaldeconstructionpanel_gamepad.lua:362` — A adds the focused item if absent, removes it if present. The same model, including no modifier. |
 | B = back / close | Universal, 81 descriptors. |
-| B = "Clear Selections" while a selection exists | Real pattern: alchemy, enchanting and provisioner each bind `UI_SHORTCUT_NEGATIVE` to `ClearSelections` with `visible = HasSelections()` (`alchemy_keyboard.lua:168`). Note they express it as a *second descriptor gated on `visible`*, not one callback branching internally — §3.3 does the same so the strip label is honest about what B will do. |
+| B = "Clear Selections" while a selection exists | Real pattern: alchemy, enchanting and provisioner each bind `UI_SHORTCUT_NEGATIVE` to `ClearSelections` with `visible = HasSelections()` (`alchemy_keyboard.lua:168`). **But not as a second descriptor in the same group** — see the correction below. |
 | Y = open a list of further actions | The dominant use of `UI_SHORTCUT_TERTIARY`: crafting options, inventory action list, dyeing options, `SI_GAMEPAD_OPTIONS_MENU`, equipped-item more-actions. |
 | X as a panel-defined row action | `universaldeconstructionpanel_gamepad.lua:382`/`:398`. |
 | LB / RB cycling an ordered set, ethereal | `champion.lua:699` cycles constellations on the shoulders with `ethereal = true`. |

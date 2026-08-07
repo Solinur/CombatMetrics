@@ -254,6 +254,7 @@ end
 ---@field dataList SortFilterList?
 ---@field rowContainers RowContainer[]?
 ---@field rowPools RowContainerPool[]?
+---@field scenes string[]? view scenes this panel appears in; nil means always visible
 local PanelObject = ZO_InitializingObject:Subclass()
 CMXint.PanelObject = PanelObject
 

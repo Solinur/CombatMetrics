@@ -34,7 +34,13 @@ local strings = {
 
 	-- Main UI
 
+	-- Gamepad keybind strip labels. Kept apart from the mouse tooltips, which are phrased as
+	-- instructions ("Click: Save fight") and read wrongly on a button prompt.
 	SI_COMBAT_METRICS_CLOSE = "Close",
+	SI_COMBAT_METRICS_CLEAR_SELECTIONS = "Clear Selections",
+	SI_COMBAT_METRICS_SAVE_FIGHT_BIND = "Save Fight",
+	SI_COMBAT_METRICS_FIGHT_SAVED = "Fight Saved",
+
 	SI_COMBAT_METRICS_CALC = "Calculating...",
 	SI_COMBAT_METRICS_LOADING = "Loading...",
 	SI_COMBAT_METRICS_FINALIZING = "Finalizing...",

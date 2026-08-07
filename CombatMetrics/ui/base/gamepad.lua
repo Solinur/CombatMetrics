@@ -102,18 +102,133 @@ function Navigator:Initialize()
 		ZO_MovementController:New(MOVEMENT_CONTROLLER_DIRECTION_VERTICAL, DEFAULT_ACCUMULATION, GetLeftStickMagnitude)
 
 	self.isActive = false
+	self:InitializeKeybinds()
+end
 
-	-- On the navigator rather than a focus area, so these stay available with nothing focused.
+--- Everything that is not panel-specific. It lives on the navigator rather than a focus area so it
+--- stays available with nothing focused -- only A and X belong to the panels.
+function Navigator:InitializeKeybinds()
+	---@return MenuPanel
+	local function menuPanel()
+		local panel = ui:GetPanel("menu")
+		---@cast panel MenuPanel
+		return panel
+	end
+
+	---@param name string for the debug log only; ethereal binds draw nothing
+	---@param keybind string
+	---@param callback function
+	local function ethereal(name, keybind, callback)
+		return { name = name, keybind = keybind, ethereal = true, callback = callback }
+	end
+
 	self.keybindDescriptor = {
 		alignment = KEYBIND_STRIP_ALIGN_LEFT,
+
+		-- B falls through to "close" only while nothing is selected. This has to be one descriptor
+		-- with a dynamic label: ZO_KeybindStrip keys self.keybinds by the keybind string, so a
+		-- second UI_SHORTCUT_NEGATIVE entry in the same group collides with the first however its
+		-- `visible` is set (zo_keybindstrip.lua:358, :378).
 		{
-			name = GetString(SI_COMBAT_METRICS_CLOSE),
+			name = function()
+				return GetString(
+					CMXint.IsSelectionActive() and SI_COMBAT_METRICS_CLEAR_SELECTIONS or SI_COMBAT_METRICS_CLOSE
+				)
+			end,
 			keybind = "UI_SHORTCUT_NEGATIVE",
 			callback = function()
-				CMXint.fightReport:Toggle()
+				if CMXint.IsSelectionActive() then
+					CMXint.ClearSelections()
+					self:UpdateKeybinds()
+				else
+					CMXint.fightReport:Toggle()
+				end
 			end,
 		},
+
+		-- QUATERNARY is physically a hold, so the confirm-intent gesture is the binding itself.
+		{
+			name = function()
+				local fightData = CMXint.FightData
+				local alreadySaved = fightData.data ~= nil and not fightData:CanSaveFight()
+				return GetString(alreadySaved and SI_COMBAT_METRICS_FIGHT_SAVED or SI_COMBAT_METRICS_SAVE_FIGHT_BIND)
+			end,
+			keybind = "UI_SHORTCUT_QUATERNARY",
+			enabled = function()
+				return CMXint.FightData:CanSaveFight()
+			end,
+			callback = function()
+				local SAVE_LOG = false
+				CMXint.FightData:SaveFight(SAVE_LOG)
+				self:UpdateKeybinds()
+			end,
+		},
+
+		ethereal("CMX Previous Panel", "UI_SHORTCUT_LEFT_SHOULDER", function()
+			self:CycleArea(-1)
+		end),
+		ethereal("CMX Next Panel", "UI_SHORTCUT_RIGHT_SHOULDER", function()
+			self:CycleArea(1)
+		end),
+
+		-- Both refresh the strip: the fight change decides whether Save is available, and
+		-- SelectFightByIndex clears selections, which is what B's label keys off.
+		ethereal("CMX Previous Fight", "UI_SHORTCUT_LEFT_TRIGGER", function()
+			CMXint.FightData:SelectPreviousFight()
+			self:UpdateKeybinds()
+		end),
+		ethereal("CMX Next Fight", "UI_SHORTCUT_RIGHT_TRIGGER", function()
+			CMXint.FightData:SelectNextFight()
+			self:UpdateKeybinds()
+		end),
+
+		-- UI_SHORTCUT_INPUT_* is the d-pad (KEY_GAMEPAD_DPAD_*, codes 123-126). It reaches us through
+		-- the keybind strip rather than DIRECTIONAL_INPUT, whose d-pad branch calls the private
+		-- IsKeyDown -- so this cannot collide with the navigator's analog stick read.
+		ethereal("CMX Previous View", "UI_SHORTCUT_INPUT_LEFT", function()
+			menuPanel():CycleView(-1)
+		end),
+		ethereal("CMX Next View", "UI_SHORTCUT_INPUT_RIGHT", function()
+			menuPanel():CycleView(1)
+		end),
+		ethereal("CMX Previous Category", "UI_SHORTCUT_INPUT_UP", function()
+			menuPanel():CycleCategory(-1)
+		end),
+		ethereal("CMX Next Category", "UI_SHORTCUT_INPUT_DOWN", function()
+			menuPanel():CycleCategory(1)
+		end),
 	}
+end
+
+--- Steps the focus ring, wrapping. Unlike the stick this never depends on scroll position, which is
+--- the whole reason it exists: leaving a 60 row list must cost one press, not sixty.
+---@param delta integer
+function Navigator:CycleArea(delta)
+	local areas = self.focusAreas
+	local count = #areas
+	if count == 0 then
+		return
+	end
+
+	local index = 1
+	for i, area in ipairs(areas) do
+		if area == self.currentFocalArea then
+			index = i
+			break
+		end
+	end
+
+	for step = 1, count do
+		local area = areas[(index - 1 + delta * step) % count + 1]
+		if area:CanBeSelected() then
+			self:SelectFocusArea(area)
+			return
+		end
+	end
+end
+
+function Navigator:UpdateKeybinds()
+	KEYBIND_STRIP:UpdateKeybindButtonGroup(self.keybindDescriptor)
 end
 
 function Navigator:UpdateDirectionalInput()
