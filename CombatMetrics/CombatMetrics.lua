@@ -2204,7 +2204,7 @@ local function CheckNumberOfFights()
 end
 
 local function GetFightName(fight)
-	local bigunitname = "Unkown"
+	local bigunitname = "Unknown"
 	local dmgmax = 0
 
 	for k, unitData in pairs(fight.units) do
